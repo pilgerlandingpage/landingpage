@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
 
             case 'gemini': {
                 const apiKey = config.gemini_api_key || process.env.GEMINI_API_KEY
+                const model = config.gemini_model || 'gemini-2.0-flash'
 
                 if (!apiKey) {
                     return NextResponse.json({
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
                 }
 
                 const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

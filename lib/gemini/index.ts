@@ -1,13 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
+const DEFAULT_MODEL = 'gemini-2.0-flash'
 
-async function getGeminiApiKey(): Promise<string | null> {
+function getSupabase() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+}
+
+export async function getGeminiApiKey(): Promise<string | null> {
     try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
+        const supabase = getSupabase()
         const { data } = await supabase
             .from('app_config')
             .select('value')
@@ -18,6 +23,53 @@ async function getGeminiApiKey(): Promise<string | null> {
     return process.env.GEMINI_API_KEY || null
 }
 
+export async function getGeminiModel(): Promise<string> {
+    try {
+        const supabase = getSupabase()
+        const { data } = await supabase
+            .from('app_config')
+            .select('value')
+            .eq('key', 'gemini_model')
+            .single()
+        if (data?.value) return data.value
+    } catch { /* fallback to default */ }
+    return DEFAULT_MODEL
+}
+
+export interface GeminiModel {
+    name: string
+    displayName: string
+    description: string
+    version: string
+    inputTokenLimit: number
+    outputTokenLimit: number
+    supportedGenerationMethods: string[]
+}
+
+export async function listAvailableModels(): Promise<GeminiModel[]> {
+    const apiKey = await getGeminiApiKey()
+    if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
+
+    const response = await fetch(
+        `${GEMINI_API_BASE}/models?key=${apiKey}&pageSize=100`
+    )
+
+    if (!response.ok) {
+        const err = await response.text()
+        throw new Error(`Gemini API error listing models: ${err}`)
+    }
+
+    const data = await response.json()
+    return (data.models || []).map((m: Record<string, unknown>) => ({
+        name: m.name || '',
+        displayName: m.displayName || '',
+        description: m.description || '',
+        version: m.version || '',
+        inputTokenLimit: m.inputTokenLimit || 0,
+        outputTokenLimit: m.outputTokenLimit || 0,
+        supportedGenerationMethods: m.supportedGenerationMethods || [],
+    }))
+}
 
 interface GeminiMessage {
     role: 'user' | 'model'
@@ -43,7 +95,7 @@ export async function chatWithGemini({
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
 
     const response = await fetch(
-        `${GEMINI_API_BASE}/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        `${GEMINI_API_BASE}/models/${await getGeminiModel()}:generateContent?key=${apiKey}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -97,7 +149,7 @@ Conversa:
 ${conversationText}`
 
     const response = await fetch(
-        `${GEMINI_API_BASE}/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        `${GEMINI_API_BASE}/models/${await getGeminiModel()}:generateContent?key=${apiKey}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

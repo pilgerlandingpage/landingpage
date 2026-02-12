@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope } from 'lucide-react'
+import Link from 'next/link'
 
 interface IntegrationCard {
     id: string
@@ -14,6 +14,7 @@ interface IntegrationCard {
         label: string
         placeholder: string
         isSecret: boolean
+        type?: 'text' | 'password' | 'select'
     }[]
 }
 
@@ -36,6 +37,7 @@ const INTEGRATIONS: IntegrationCard[] = [
         icon: 'gemini',
         fields: [
             { key: 'gemini_api_key', label: 'API Key', placeholder: 'AIzaSy...', isSecret: true },
+            { key: 'gemini_model', label: 'Modelo', placeholder: 'Selecione o modelo', isSecret: false, type: 'select' },
         ],
     },
     {
@@ -65,17 +67,52 @@ export default function MaintenancePage() {
     const [saved, setSaved] = useState(false)
     const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({})
     const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
+    const [geminiModels, setGeminiModels] = useState<{ id: string; name: string }[]>([])
+    const [loadingModels, setLoadingModels] = useState(false)
 
-    const supabase = createClient()
+    useEffect(() => {
+        const apiKey = configs['gemini_api_key']
+        if (!apiKey) return
+
+        const fetchModels = async () => {
+            setLoadingModels(true)
+            try {
+                const res = await fetch('/api/admin/gemini-models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey }),
+                })
+                const data = await res.json()
+                if (data.success) {
+                    setGeminiModels(data.models)
+                    // Auto-select first model if none selected
+                    if (!configs['gemini_model'] && data.models.length > 0) {
+                        setConfigs(prev => ({ ...prev, gemini_model: data.models[0].name }))
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch models', error)
+            } finally {
+                setLoadingModels(false)
+            }
+        }
+
+        const timer = setTimeout(fetchModels, 1000)
+        return () => clearTimeout(timer)
+    }, [configs['gemini_api_key']])
 
     const fetchConfigs = useCallback(async () => {
-        const { data } = await supabase.from('app_config').select('key, value')
-        const configMap: Record<string, string> = {}
-        data?.forEach((item: { key: string; value: string }) => {
-            configMap[item.key] = item.value
-        })
-        setConfigs(configMap)
-        setLoading(false)
+        try {
+            const res = await fetch('/api/admin/configs')
+            const json = await res.json()
+            if (json.success) {
+                setConfigs(json.configs)
+            }
+        } catch (err) {
+            console.error('Error loading configs:', err)
+        } finally {
+            setLoading(false)
+        }
     }, [])
 
     useEffect(() => {
@@ -84,16 +121,25 @@ export default function MaintenancePage() {
 
     const handleSave = async () => {
         setSaving(true)
-        const allKeys = INTEGRATIONS.flatMap(i => i.fields.map(f => f.key))
-        for (const key of allKeys) {
-            if (configs[key] !== undefined) {
-                const label = INTEGRATIONS
-                    .flatMap(i => i.fields)
-                    .find(f => f.key === key)?.label || key
-                await supabase
-                    .from('app_config')
-                    .upsert({ key, value: configs[key], description: label })
+        try {
+            const allKeys = INTEGRATIONS.flatMap(i => i.fields.map(f => f.key))
+            const configsToSave: Record<string, string> = {}
+            for (const key of allKeys) {
+                if (configs[key] !== undefined && configs[key] !== '') {
+                    configsToSave[key] = configs[key]
+                }
             }
+            const res = await fetch('/api/admin/configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ configs: configsToSave }),
+            })
+            const json = await res.json()
+            if (!json.success) {
+                console.error('Save error:', json.message)
+            }
+        } catch (err) {
+            console.error('Error saving configs:', err)
         }
         setSaving(false)
         setSaved(true)
@@ -276,18 +322,52 @@ export default function MaintenancePage() {
                                         {field.label}
                                     </label>
                                     <div style={{ position: 'relative' }}>
-                                        <input
-                                            className="form-input"
-                                            type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
-                                            value={configs[field.key] || ''}
-                                            onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
-                                            placeholder={field.placeholder}
-                                            style={{
-                                                paddingRight: field.isSecret ? '44px' : undefined,
-                                                fontFamily: field.isSecret && !visibleFields[field.key] ? 'inherit' : 'monospace',
-                                                fontSize: '0.9rem',
-                                            }}
-                                        />
+                                        {field.type !== 'select' ? (
+                                            <input
+                                                className="form-input"
+                                                type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
+                                                value={configs[field.key] || ''}
+                                                onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                placeholder={field.placeholder}
+                                                style={{
+                                                    paddingRight: field.isSecret ? '44px' : undefined,
+                                                    fontFamily: field.isSecret && !visibleFields[field.key] ? 'inherit' : 'monospace',
+                                                    fontSize: '0.9rem',
+                                                }}
+                                            />
+                                        ) : (
+                                            <div style={{ position: 'relative' }}>
+                                                <select
+                                                    className="form-input"
+                                                    value={configs[field.key] || ''}
+                                                    onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                    style={{
+                                                        appearance: 'none',
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'right 12px center',
+                                                        paddingRight: '32px',
+                                                    }}
+                                                >
+                                                    <option value="">Selecione um modelo...</option>
+                                                    {geminiModels.map(model => (
+                                                        <option key={model.id} value={model.id}>
+                                                            {model.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {loadingModels && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        right: '30px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                    }}>
+                                                        <RefreshCw size={14} className="spin" style={{ color: 'var(--text-muted)' }} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                         {field.isSecret && (
                                             <button
                                                 type="button"
@@ -352,6 +432,34 @@ export default function MaintenancePage() {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Diagnostic Tools */}
+            <div className="chart-card" style={{ marginTop: '24px' }}>
+                <div className="chart-title" style={{ marginBottom: '12px' }}>🔬 Ferramentas de Diagnóstico</div>
+                <Link
+                    href="/admin/gemini-diagnostic"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '14px 16px',
+                        borderRadius: '10px',
+                        background: 'var(--bg-primary)',
+                        border: '1px solid var(--border-color)',
+                        textDecoration: 'none',
+                        color: 'var(--text-primary)',
+                        transition: 'border-color 0.2s',
+                    }}
+                >
+                    <Microscope size={20} style={{ color: 'var(--gold)' }} />
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Diagnóstico Gemini API</div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            Verificar modelos disponíveis para sua API Key
+                        </div>
+                    </div>
+                </Link>
             </div>
 
             {/* Info Card */}

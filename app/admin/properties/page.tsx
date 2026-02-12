@@ -17,6 +17,8 @@ interface Property {
     area_m2: number | null
     status: string
     featured_image: string | null
+    images: string[] | null
+    amenities: string[] | null
     created_at: string
 }
 
@@ -28,6 +30,7 @@ export default function PropertiesPage() {
     const [form, setForm] = useState({
         title: '', description: '', city: '', state: '', price: '', property_type: '',
         bedrooms: '', bathrooms: '', area_m2: '', featured_image: '', status: 'active',
+        images: '', amenities: '',
     })
 
     const supabase = createClient()
@@ -52,6 +55,8 @@ export default function PropertiesPage() {
             bathrooms: form.bathrooms ? parseInt(form.bathrooms) : null,
             area_m2: form.area_m2 ? parseFloat(form.area_m2) : null,
             featured_image: form.featured_image || null,
+            images: form.images ? form.images.split('\n').filter(s => s.trim()) : [],
+            amenities: form.amenities ? form.amenities.split(',').map(s => s.trim()).filter(Boolean) : [],
             status: form.status,
         }
 
@@ -62,7 +67,11 @@ export default function PropertiesPage() {
         }
         setShowForm(false)
         setEditingProp(null)
-        setForm({ title: '', description: '', city: '', state: '', price: '', property_type: '', bedrooms: '', bathrooms: '', area_m2: '', featured_image: '', status: 'active' })
+        setForm({
+            title: '', description: '', city: '', state: '', price: '', property_type: '',
+            bedrooms: '', bathrooms: '', area_m2: '', featured_image: '', status: 'active',
+            images: '', amenities: '',
+        })
         fetchProps()
     }
 
@@ -79,6 +88,8 @@ export default function PropertiesPage() {
             bathrooms: prop.bathrooms?.toString() || '',
             area_m2: prop.area_m2?.toString() || '',
             featured_image: prop.featured_image || '',
+            images: prop.images?.join('\n') || '',
+            amenities: prop.amenities?.join(', ') || '',
             status: prop.status,
         })
         setShowForm(true)
@@ -147,9 +158,29 @@ export default function PropertiesPage() {
                             <label className="form-label">Área (m²)</label>
                             <input className="form-input" type="number" value={form.area_m2} onChange={e => setForm({ ...form, area_m2: e.target.value })} />
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">URL da Imagem</label>
+                        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            <label className="form-label">URL da Imagem Principal</label>
                             <input className="form-input" value={form.featured_image} onChange={e => setForm({ ...form, featured_image: e.target.value })} placeholder="https://..." />
+                        </div>
+                        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            <label className="form-label">Galeria de Imagens (uma URL por linha)</label>
+                            <textarea
+                                className="form-textarea"
+                                value={form.images}
+                                onChange={e => setForm({ ...form, images: e.target.value })}
+                                placeholder="https://...\nhttps://..."
+                                rows={4}
+                            />
+                        </div>
+                        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            <label className="form-label">Comodidades (separadas por vírgula)</label>
+                            <textarea
+                                className="form-textarea"
+                                value={form.amenities}
+                                onChange={e => setForm({ ...form, amenities: e.target.value })}
+                                placeholder="Piscina, Academia, Vista Mar,..."
+                                rows={2}
+                            />
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
