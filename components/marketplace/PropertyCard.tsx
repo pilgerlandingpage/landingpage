@@ -46,7 +46,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
         ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(property.price)
         : 'Sob Consulta'
 
-    const href = landingPageSlug ? `/${landingPageSlug}` : '#'
+    const href = landingPageSlug ? `/${landingPageSlug}` : `/imovel/${property.id}`
 
     return (
         <div
@@ -147,13 +147,13 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     aspect-ratio: 20 / 19;
                     border-radius: 14px;
                     overflow: hidden;
-                    background: #1a1a1a;
+                    background: #e8e5e0;
                     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
                 }
 
                 .property-card:hover .card-image-container {
                     transform: scale(1.02);
-                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
                 }
 
                 .image-link {
@@ -297,14 +297,14 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     align-items: center;
                     gap: 3px;
                     font-size: 0.75rem;
-                    color: var(--text-secondary, #a0a0a0);
+                    color: var(--text-secondary, #5a5a5a);
                     font-weight: 400;
                 }
 
                 .location-text {
                     font-size: 0.88rem;
                     font-weight: 600;
-                    color: var(--text-primary, #f5f5f5);
+                    color: var(--text-primary, #1a1a1a);
                     margin: 0;
                     line-height: 1.3;
                     white-space: nowrap;
@@ -318,7 +318,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
 
                 .info-text {
                     font-size: 0.8rem;
-                    color: var(--text-secondary, #a0a0a0);
+                    color: var(--text-secondary, #5a5a5a);
                     margin: 0;
                     line-height: 1.35;
                     font-weight: 400;
@@ -336,7 +336,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                 .price-bold {
                     font-size: 0.88rem;
                     font-weight: 700;
-                    color: var(--gold, #c9a96e);
+                    color: var(--gold, #b8945f);
                 }
 
                 /* === RESPONSIVE ADJUSTMENTS === */
@@ -360,6 +360,14 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     .card-image-container {
                         border-radius: 10px;
                     }
+                }
+
+                /* Desktop enhancements */
+                @media (min-width: 1024px) {
+                    .location-text { font-size: 0.88rem; }
+                    .info-text { font-size: 0.85rem; }
+                    .price-bold { font-size: 0.95rem; }
+                    .card-image-container { border-radius: 16px; }
                 }
             `}</style>
         </div>

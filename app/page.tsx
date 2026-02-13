@@ -39,6 +39,14 @@ export default async function MarketplaceHome() {
 
       {/* === COMPACT HERO STRIP (scrolls away) === */}
       <div className="hero-strip">
+        <div className="hero-video-bg">
+          <iframe
+            src="https://www.youtube.com/embed/rKzkb0onX1Q?autoplay=1&mute=1&controls=0&loop=1&playlist=rKzkb0onX1Q&showinfo=0&rel=0&iv_load_policy=3&disablekb=1&modestbranding=1"
+            allow="autoplay; encrypted-media"
+            className="hero-video-frame"
+          />
+        </div>
+        <div className="hero-photo-glow" />
         <img
           className="hero-bg-image"
           src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png"
@@ -118,21 +126,34 @@ export default async function MarketplaceHome() {
         /* ====== BASE ====== */
         .marketplace-container {
           min-height: 100vh;
-          background-color: var(--bg-primary, #0a0a0a);
+          background-color: var(--bg-secondary, #f7f7f5);
           padding-bottom: 80px;
-          color: var(--text-primary, #f5f5f5);
+          color: var(--text-primary, #1a1a1a);
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .hero-strip {
           position: relative;
-          height: 240px;
+          height: 260px;
           overflow: hidden;
           display: flex;
           align-items: flex-end;
           justify-content: center;
           padding-bottom: 16px;
-          background: #0a0a0a;
+          background: linear-gradient(180deg, #f0ede8 0%, #f7f7f5 100%);
+        }
+        .hero-photo-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -48%);
+          width: 220px;
+          height: 220px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(184, 148, 95, 0.35) 0%, rgba(184, 148, 95, 0.15) 40%, rgba(184, 148, 95, 0) 70%);
+          filter: blur(8px);
+          z-index: 0;
+          pointer-events: none;
         }
         .hero-bg-image {
           position: absolute;
@@ -143,31 +164,34 @@ export default async function MarketplaceHome() {
           width: auto;
           max-width: none;
           object-fit: contain;
-          filter: brightness(0.65);
+          filter: none;
+          z-index: 1;
+          drop-shadow: 0 0 40px rgba(184, 148, 95, 0.3);
         }
         .hero-overlay {
           position: absolute;
           inset: 0;
           background: linear-gradient(
             to top,
-            rgba(10, 10, 10, 0.85) 0%,
-            rgba(10, 10, 10, 0.2) 50%,
-            rgba(10, 10, 10, 0.05) 100%
+            rgba(247, 247, 245, 0.95) 0%,
+            rgba(247, 247, 245, 0.3) 35%,
+            rgba(247, 247, 245, 0) 60%
           );
+          z-index: 2;
         }
         .hero-content {
           position: relative;
-          z-index: 2;
+          z-index: 3;
           text-align: center;
         }
         .hero-welcome {
           font-family: 'Inter', sans-serif;
           font-size: 0.7rem;
-          color: var(--gold, #c9a96e);
+          color: #b8945f;
           letter-spacing: 3px;
           text-transform: uppercase;
           margin: 0 0 2px 0;
-          font-weight: 500;
+          font-weight: 600;
         }
         .hero-title {
           font-family: 'Playfair Display', Georgia, serif;
@@ -175,18 +199,43 @@ export default async function MarketplaceHome() {
           font-weight: 600;
           margin: 0;
           line-height: 1.1;
-          background: linear-gradient(135deg, #fff 0%, #e8d5a8 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #1a1a1a;
+          -webkit-text-fill-color: #1a1a1a;
         }
         .hero-subtitle {
           font-family: 'Inter', sans-serif;
           font-size: 0.78rem;
-          color: rgba(255,255,255,0.6);
+          color: #5a5a5a;
           margin: 4px 0 0 0;
           letter-spacing: 1px;
           font-weight: 400;
+        }
+
+        /* Video Background */
+        .hero-video-bg {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden;
+        }
+        .hero-video-frame {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          aspect-ratio: 16/9;
+          pointer-events: none;
+          opacity: 0.8;
+          filter: grayscale(20%);
+        }
+        @media (max-width: 500px) {
+          .hero-video-frame {
+            width: auto;
+            height: 100%;
+            min-width: 178%;
+          }
         }
 
         /* ====== STICKY SEARCH + CATEGORIES ====== */
@@ -194,8 +243,9 @@ export default async function MarketplaceHome() {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: var(--bg-primary, #0a0a0a);
-          border-bottom: 1px solid rgba(201, 169, 110, 0.08);
+          background: var(--bg-primary, #ffffff);
+          border-bottom: 1px solid var(--border, #e8e5e0);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .search-container {
@@ -204,25 +254,25 @@ export default async function MarketplaceHome() {
           padding: 10px 20px 0 20px;
         }
         .search-pill {
-          background: var(--bg-card, #1a1a1a);
-          border: 1px solid var(--border, #2a2a2a);
+          background: var(--bg-secondary, #f7f7f5);
+          border: 1px solid var(--border, #e8e5e0);
           border-radius: 100px;
           padding: 8px 14px 8px 18px;
           display: flex;
           align-items: center;
           gap: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
           cursor: pointer;
           transition: box-shadow 0.3s, border-color 0.3s;
         }
         .search-pill:hover {
-          box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-          border-color: rgba(201, 169, 110, 0.25);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+          border-color: var(--gold, #b8945f);
         }
         .search-icon-wrapper {
           display: flex;
           align-items: center;
-          color: var(--gold, #c9a96e);
+          color: var(--gold, #b8945f);
         }
         .search-text {
           flex: 1;
@@ -239,7 +289,7 @@ export default async function MarketplaceHome() {
           color: var(--text-muted, #666);
         }
         .filter-button {
-          border: 1px solid var(--border, #2a2a2a);
+          border: 1px solid var(--border, #e8e5e0);
           border-radius: 50%;
           width: 34px;
           height: 34px;
@@ -247,13 +297,13 @@ export default async function MarketplaceHome() {
           align-items: center;
           justify-content: center;
           background: transparent;
-          color: var(--text-secondary, #a0a0a0);
+          color: var(--text-secondary, #5a5a5a);
           cursor: pointer;
           transition: border-color 0.2s, color 0.2s;
         }
         .filter-button:hover {
-          border-color: var(--gold, #c9a96e);
-          color: var(--gold, #c9a96e);
+          border-color: var(--gold, #b8945f);
+          color: var(--gold, #b8945f);
         }
 
         /* Categories */
@@ -276,19 +326,19 @@ export default async function MarketplaceHome() {
           gap: 4px;
           min-width: 52px;
           cursor: pointer;
-          color: var(--text-muted, #666);
+          color: var(--text-muted, #999);
           padding-bottom: 10px;
           border-bottom: 2px solid transparent;
           transition: all 0.2s ease;
           opacity: 0.6;
         }
         .category-item:hover, .category-item.active {
-          color: var(--text-primary, #f5f5f5);
-          border-bottom-color: var(--gold, #c9a96e);
+          color: var(--text-primary, #1a1a1a);
+          border-bottom-color: var(--gold, #b8945f);
           opacity: 1;
         }
         .category-item.active .category-icon {
-          color: var(--gold, #c9a96e);
+          color: var(--gold, #b8945f);
         }
         .category-label {
           font-size: 0.68rem;
@@ -319,6 +369,7 @@ export default async function MarketplaceHome() {
           }
         }
         @media (min-width: 768px) {
+          .marketplace-container { padding-bottom: 0; }
           .hero-strip { height: 320px; }
           .hero-title { font-size: 2.4rem; }
           .hero-welcome { font-size: 0.75rem; }
@@ -328,6 +379,7 @@ export default async function MarketplaceHome() {
             gap: 22px;
             row-gap: 32px;
           }
+          .mobile-nav { display: none; }
         }
         @media (min-width: 1024px) {
           .hero-strip { height: 400px; }
@@ -365,10 +417,10 @@ export default async function MarketplaceHome() {
           left: 0;
           right: 0;
           height: 58px;
-          background: rgba(26, 26, 26, 0.95);
+          background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border-top: 1px solid var(--border, #2a2a2a);
+          border-top: 1px solid var(--border, #e8e5e0);
           display: flex;
           justify-content: center;
           gap: 48px;
@@ -381,21 +433,21 @@ export default async function MarketplaceHome() {
           flex-direction: column;
           align-items: center;
           gap: 2px;
-          color: var(--text-muted, #666);
+          color: var(--text-muted, #999);
           font-size: 0.65rem;
           cursor: pointer;
           width: 54px;
           font-weight: 500;
           transition: color 0.2s;
         }
-        .nav-item:hover { color: var(--text-secondary, #a0a0a0); }
-        .nav-item.active { color: var(--gold, #c9a96e); }
+        .nav-item:hover { color: var(--text-secondary, #5a5a5a); }
+        .nav-item.active { color: var(--gold, #b8945f); }
         .nav-icon { margin-bottom: 1px; }
         
         .empty-state { 
           text-align: center; 
           padding: 60px 24px; 
-          color: var(--text-muted, #666);
+          color: var(--text-muted, #999);
           font-size: 0.95rem;
         }
       `}</style>
