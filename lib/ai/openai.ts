@@ -63,7 +63,7 @@ export async function extractOpenAILeadInfo(conversation: string) {
             model: modelName,
             messages: [
                 { role: 'system', content: 'You are a JSON extraction engine.' },
-                { role: 'user', content: prompt }
+                { role: 'user', content: fullPrompt }
             ],
             response_format: { type: 'json_object' },
             temperature: 0.1,

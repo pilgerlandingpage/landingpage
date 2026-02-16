@@ -100,7 +100,7 @@ export async function saveSubscription(
 
         const { error: insertError } = await supabase.from('leads').insert({
             visitor_id: visitorId,
-            funnel_stage: 'lead',
+            funnel_stage: 'engaged',
             name: 'Inscrito Push', // Placeholder
             push_subscribed: true,
             created_at: new Date().toISOString(),

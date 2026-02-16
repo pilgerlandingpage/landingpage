@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createPortal } from 'react-dom'
 import { MessageSquare, X, Send, User, Loader2 } from 'lucide-react'
 
 // Helper to read cookie value (Tracker sets pilger_visitor_id as cookie, NOT localStorage)
@@ -98,6 +99,7 @@ export default function ConciergeChat() {
     const [broker, setBroker] = useState<{ name: string; creci: string; photo_url?: string } | null>(null)
     const [pageContent, setPageContent] = useState('')
     const [timing, setTiming] = useState({ delayBeforeTyping: 2000, typingMinDuration: 5000, typingMaxDuration: 7000 })
+    const [mounted, setMounted] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     // Detect Context (Home, Property, Landing Page, Cloned LP)
@@ -127,6 +129,8 @@ export default function ConciergeChat() {
             const content = scrapePageContent()
             setPageContent(content)
         }, 1500) // Wait for page to fully render
+
+        setMounted(true)
 
         return () => clearTimeout(timer)
     }, [pathname])
@@ -291,14 +295,15 @@ export default function ConciergeChat() {
         }
     }
 
-    // Don't render on admin/login pages
-    if (isExcludedPage) return null
+    // Don't render on admin/login pages or server side
+    if (isExcludedPage || !mounted) return null
 
-    return (
-        <div style={{ position: 'fixed', bottom: '100px', right: '24px', zIndex: 9999, fontFamily: 'sans-serif' }}>
+    return createPortal(
+        <div id="pilger-chat-widget" style={{ position: 'fixed', bottom: '90px', right: '24px', zIndex: 9999, fontFamily: 'sans-serif' }}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
+                        className="chat-window"
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -445,20 +450,7 @@ export default function ConciergeChat() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        style={{
-                            position: 'absolute',
-                            right: '80px',
-                            bottom: '12px',
-                            backgroundColor: 'white',
-                            padding: '10px 20px',
-                            borderRadius: '20px',
-                            boxShadow: '0 5px 20px rgba(0,0,0,0.1)',
-                            whiteSpace: 'nowrap',
-                            fontSize: '0.9rem',
-                            fontWeight: '500',
-                            color: '#333',
-                            border: '1px solid #e8e5e0'
-                        }}
+                        className="chat-bubble"
                     >
                         Fale com o corretor de plantão agora
                         <div style={{
@@ -498,10 +490,11 @@ export default function ConciergeChat() {
                         )}
                     </motion.div>
                 </div>
-            )}
+            )
+            }
 
-            <style jsx>{`
-                .status-indicator {
+            <style>{`
+                #pilger-chat-widget .status-indicator {
                     display: inline-block;
                     width: 8px;
                     height: 8px;
@@ -510,7 +503,7 @@ export default function ConciergeChat() {
                     box-shadow: 0 0 5px #22c55e;
                     position: relative;
                 }
-                .status-indicator::after {
+                #pilger-chat-widget .status-indicator::after {
                     content: '';
                     position: absolute;
                     inset: -2px;
@@ -522,21 +515,21 @@ export default function ConciergeChat() {
                     0% { transform: scale(1); opacity: 1; }
                     100% { transform: scale(2.5); opacity: 0; }
                 }
-                .typing span {
+                #pilger-chat-widget .typing span {
                     animation: blink 1.4s infinite both;
                     font-size: 1.5rem;
                     line-height: 10px;
                     margin: 0 1px;
                 }
-                .typing span:nth-child(2) { animation-delay: 0.2s; }
-                .typing span:nth-child(3) { animation-delay: 0.4s; }
-                .typing-dots span {
+                #pilger-chat-widget .typing span:nth-child(2) { animation-delay: 0.2s; }
+                #pilger-chat-widget .typing span:nth-child(3) { animation-delay: 0.4s; }
+                #pilger-chat-widget .typing-dots span {
                     animation: blink 1.4s infinite both;
                     font-size: 1.1rem;
                     font-weight: bold;
                 }
-                .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-                .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+                #pilger-chat-widget .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+                #pilger-chat-widget .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
                 @keyframes blink {
                     0% { opacity: 0.2; }
                     20% { opacity: 1; }
@@ -549,20 +542,58 @@ export default function ConciergeChat() {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
-                @media (max-width: 480px) {
-                    .chat-window {
+                
+                /* Default Desktop Styles (forced by inline, but good to have backup) */
+                
+                #pilger-chat-widget .chat-bubble {
+                    position: absolute;
+                    right: 80px;
+                    bottom: 12px;
+                    background-color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                    white-space: nowrap;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    color: #333;
+                    border: 1px solid #e8e5e0;
+                    z-index: 10001;
+                }
+
+                @media (max-width: 768px) {
+                    #pilger-chat-widget {
+                        bottom: 85px !important;
+                        right: 16px !important;
+                        left: auto !important;
+                        width: auto !important;
+                        z-index: 2147483647 !important;
+                    }
+                    #pilger-chat-widget .chat-window {
                         position: fixed;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                        width: 100% !important;
-                        height: 100% !important;
-                        border-radius: 0 !important;
+                        top: 10px;
+                        left: 10px;
+                        right: 10px;
+                        bottom: 10px;
+                        width: auto !important;
+                        height: auto !important;
+                        border-radius: 20px !important;
                         z-index: 10000;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+                    }
+                    #pilger-chat-widget .chat-bubble {
+                        white-space: normal;
+                        right: 70px;
+                        bottom: 15px;
+                        width: max-content;
+                        max-width: calc(100vw - 120px);
+                        font-size: 0.85rem;
+                        padding: 8px 12px;
+                        text-align: right;
                     }
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     )
 }

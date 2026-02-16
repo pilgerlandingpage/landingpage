@@ -62,6 +62,7 @@ IMPORTANT:
 - If a field is not found, return null (do not return the string "null" or "not provided").
 - If the user provides name and phone in the same message (e.g., "Carlos 4799999999"), extract both.
 - Ignore the AI's greeting or questions, focus on User's answers.
+- OUTPUT LANGUAGE: All text fields ("summary", "interest", etc.) MUST be in BRAZILIAN PORTUGUESE.
 
 Return ONLY JSON:
 {
@@ -71,7 +72,7 @@ Return ONLY JSON:
     "budget": "String or null",
     "timeframe": "String or null",
     "interest": "String or null",
-    "summary": "Brief summary of client interaction and needs"
+    "summary": "Resumo breve da interação e necessidades do cliente (EM PORTUGUÊS)"
 }
 `
 

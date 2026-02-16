@@ -46,6 +46,22 @@ const stageBadge: Record<string, string> = {
     'lost': 'badge-error'
 }
 
+const deviceLabel: Record<string, string> = {
+    'mobile': '📱 Celular',
+    'desktop': '💻 Computador',
+    'tablet': 'ipad Tablet',
+}
+
+const sourceLabel: Record<string, string> = {
+    'direct': 'Acesso Direto',
+    'google': 'Google',
+    'facebook': 'Facebook',
+    'instagram': 'Instagram',
+    'linkedin': 'LinkedIn',
+    'organic': 'Orgânico',
+    'referral': 'Referência',
+}
+
 export default function LeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([])
     const [loading, setLoading] = useState(true)
@@ -324,7 +340,7 @@ export default function LeadsPage() {
                         <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-[#0a0a0a]">
 
                             {/* Left Sidebar: Summary & Info */}
-                            <div className="w-full md:w-[320px] border-r border-[#2a2a2a] bg-[#1a1a1a] p-6 space-y-8 overflow-y-auto">
+                            <div className="w-full md:w-[380px] border-r border-[#2a2a2a] bg-[#1a1a1a] p-8 space-y-8 overflow-y-auto">
 
                                 {/* AI Summary */}
                                 <div>
@@ -356,15 +372,19 @@ export default function LeadsPage() {
                                         <div className="flex justify-between items-center group">
                                             <span className="text-[#666] text-sm group-hover:text-[#888] transition-colors">Origem</span>
                                             <span className="text-[#f5f5f5] text-sm font-medium bg-[#2a2a2a] px-3 py-1 rounded border border-[#333]">
-                                                {selectedLead.visitor?.detected_source || 'Desconhecido'}
+                                                {sourceLabel[selectedLead.visitor?.detected_source?.toLowerCase() || ''] || selectedLead.visitor?.detected_source || 'Desconhecido'}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center group">
                                             <span className="text-[#666] text-sm group-hover:text-[#888] transition-colors">Dispositivo</span>
                                             <span className="text-[#f5f5f5] text-sm">
-                                                {selectedLead.visitor?.device_type === 'mobile' ? '📱 Mobile' :
-                                                    selectedLead.visitor?.device_type === 'desktop' ? '💻 Desktop' :
-                                                        selectedLead.visitor?.device_type || '—'}
+                                                {deviceLabel[selectedLead.visitor?.device_type?.toLowerCase() || ''] || selectedLead.visitor?.device_type || '—'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-[#666] text-sm group-hover:text-[#888] transition-colors">Sistema / Nav.</span>
+                                            <span className="text-[#f5f5f5] text-sm truncate max-w-[150px]" title={`${selectedLead.visitor?.os || ''} / ${selectedLead.visitor?.browser || ''}`}>
+                                                {selectedLead.visitor?.os || '?'} / {selectedLead.visitor?.browser || '?'}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center group">

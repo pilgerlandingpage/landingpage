@@ -27,6 +27,7 @@ export default function FunnelPage() {
                     { label: '👁️ Visitaram a Página', count: data.pageViews || 0, percentage: 100 },
                     { label: '💬 Abriram o Chat', count: data.chatOpened || 0, percentage: ((data.chatOpened || 0) / total) * 100 },
                     { label: '📝 Enviaram Mensagem', count: data.messageSent || 0, percentage: ((data.messageSent || 0) / total) * 100 },
+                    { label: '🔔 Aceitaram Push', count: data.pushSubscribed || 0, percentage: ((data.pushSubscribed || 0) / total) * 100 },
                     { label: '📞 Lead Capturado', count: data.leadCaptured || 0, percentage: ((data.leadCaptured || 0) / total) * 100 },
                     { label: '⭐ Qualificado', count: data.qualified || 0, percentage: ((data.qualified || 0) / total) * 100 },
                     { label: '✅ Convertido', count: data.converted || 0, percentage: ((data.converted || 0) / total) * 100 },
@@ -68,15 +69,16 @@ export default function FunnelPage() {
                     {funnelData.map((step, index) => {
                         // Schematic width: reduces by step to preserve funnel shape
                         // e.g. 100%, 85%, 70%, 55%, 40%, 25%
-                        const maxSteps = 6
-                        const topWidthPercent = 100 - (index * 15)
-                        const bottomWidthPercent = 100 - ((index + 1) * 15)
+                        const maxSteps = 7
+                        const topWidthPercent = 100 - (index * 12)
+                        const bottomWidthPercent = 100 - ((index + 1) * 12)
 
                         // Vivid colors for high impact on dark background
                         const colors = [
                             '#0066FF', // Electric Blue (Awareness)
                             '#9933FF', // Electric Purple (Interest)
                             '#FF0099', // Hot Pink (Desire)
+                            '#FFAA00', // Amber (Push Notification)
                             '#FF6600', // Vivid Orange (Action)
                             '#FFD700', // Gold (Qualification)
                             '#00CC44'  // Vivid Green (Conversion)

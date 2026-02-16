@@ -291,7 +291,7 @@ export async function POST(req: NextRequest) {
                     if (leadData.phone) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata')
+                            .select('id, metadata, funnel_stage, visitor_id')
                             .eq('phone', leadData.phone)
                             .maybeSingle()
                         existingLead = data
@@ -300,7 +300,7 @@ export async function POST(req: NextRequest) {
                     if (!existingLead && leadData.email) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata')
+                            .select('id, metadata, funnel_stage, visitor_id')
                             .eq('email', leadData.email)
                             .maybeSingle()
                         existingLead = data
@@ -310,7 +310,7 @@ export async function POST(req: NextRequest) {
                     if (!existingLead && visitorId) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata')
+                            .select('id, metadata, funnel_stage, visitor_id')
                             .eq('visitor_id', visitorId)
                             .maybeSingle()
                         existingLead = data
@@ -322,7 +322,9 @@ export async function POST(req: NextRequest) {
                         const updateData: any = {
                             updated_at: new Date().toISOString(),
                             conversation_log: leadData.conversation_log, // Current session history
-                            metadata: { ...existingLead.metadata, ...leadData.metadata } // Merge metadata
+                            metadata: { ...existingLead.metadata, ...leadData.metadata }, // Merge metadata
+                            // Promote funnel_stage to 'lead' when contact data is provided (e.g., from 'engaged' push subscriber)
+                            ...((leadData.name || leadData.phone) && existingLead.funnel_stage === 'engaged' ? { funnel_stage: 'lead' } : {})
                         }
 
                         // Only update text fields if new value is present
