@@ -284,7 +284,7 @@ export async function POST(req: NextRequest) {
                     if (leadData.phone) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id')
+                            .select('id, metadata')
                             .eq('phone', leadData.phone)
                             .maybeSingle()
                         existingLead = data
@@ -293,11 +293,22 @@ export async function POST(req: NextRequest) {
                     if (!existingLead && leadData.email) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id')
+                            .select('id, metadata')
                             .eq('email', leadData.email)
                             .maybeSingle()
                         existingLead = data
                     }
+
+                    // NEW: Check by Visitor ID (to catch "Inscrito Push" leads)
+                    if (!existingLead && visitorId) {
+                        const { data } = await supabase
+                            .from('leads')
+                            .select('id, metadata')
+                            .eq('visitor_id', visitorId)
+                            .maybeSingle()
+                        existingLead = data
+                    }
+
 
                     if (existingLead) {
                         // Prepare update data
