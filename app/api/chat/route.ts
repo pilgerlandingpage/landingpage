@@ -8,12 +8,19 @@ export const maxDuration = 60 // Allow longer timeout for AI processing
 
 export async function POST(req: NextRequest) {
     try {
-        const { message, history, broker, propertyId, page_context, page_content, landing_page_id, visitor_cookie_id } = await req.json()
+        const { message, history, broker, propertyId, page_context, page_content, landing_page_id, visitor_cookie_id, visitor_id: bodyVisitorId } = await req.json()
         const supabase = createAdminClient()
 
         // 0. Resolve Visitor ID & Save User Message
         let visitorId: string | null = null
-        if (visitor_cookie_id) {
+
+        // Priority 1: Use visitor_id sent by client (if valid UUID)
+        if (bodyVisitorId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bodyVisitorId)) {
+            visitorId = bodyVisitorId
+        }
+
+        // Priority 2: Resolve via cookie_id if no visitor_id provided
+        else if (visitor_cookie_id) {
             const { data: vis } = await supabase.from('visitors').select('id').eq('visitor_cookie_id', visitor_cookie_id).maybeSingle()
             if (vis) {
                 visitorId = vis.id
@@ -35,18 +42,18 @@ export async function POST(req: NextRequest) {
                     console.error('[Chat] Failed to create visitor:', createError)
                 }
             }
-
-            if (visitorId) {
-                // Save User Message
-                await supabase.from('chat_history').insert({
-                    visitor_id: visitorId,
-                    role: 'user',
-                    content: message,
-                    landing_page_id: landing_page_id || null
-                })
-            }
         } else {
-            console.warn('[Chat] No visitor_cookie_id provided in request body')
+            console.warn('[Chat] No visitor_id or visitor_cookie_id provided in request body')
+        }
+
+        if (visitorId) {
+            // Save User Message
+            await supabase.from('chat_history').insert({
+                visitor_id: visitorId,
+                role: 'user',
+                content: message,
+                landing_page_id: landing_page_id || null
+            })
         }
 
         // 1. Get Base Agent Configuration
@@ -340,23 +347,14 @@ export async function POST(req: NextRequest) {
                         else {
                             console.log('[Chat] New lead saved!')
 
-                            // Log 'lead_captured' event to funnel if visitor_cookie_id is present
-                            if (visitor_cookie_id) {
-                                // 1. Find visitor_id
-                                const { data: visitor } = await supabase
-                                    .from('visitors')
-                                    .select('id')
-                                    .eq('visitor_cookie_id', visitor_cookie_id)
-                                    .maybeSingle()
-
-                                if (visitor) {
-                                    await supabase.from('funnel_events').insert({
-                                        visitor_id: visitor.id,
-                                        landing_page_id: landing_page_id || null, // Might be null if not passed
-                                        event_type: 'lead_captured',
-                                        metadata: { lead_phone: leadData.phone }
-                                    })
-                                }
+                            // Log 'lead_captured' event to funnel if visitorId is present
+                            if (visitorId) {
+                                await supabase.from('funnel_events').insert({
+                                    visitor_id: visitorId,
+                                    landing_page_id: landing_page_id || null, // Might be null if not passed
+                                    event_type: 'lead_captured',
+                                    metadata: { lead_phone: leadData.phone }
+                                })
                             }
                         }
                     }
