@@ -1,4 +1,5 @@
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import AdminAssistant from '@/components/admin/AdminAssistant'
 
 export default function AdminLayout({
     children,
@@ -11,6 +12,7 @@ export default function AdminLayout({
             <main className="admin-content">
                 {children}
             </main>
+            <AdminAssistant />
         </div>
     )
 }

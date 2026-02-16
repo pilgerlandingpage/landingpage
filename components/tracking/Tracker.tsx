@@ -18,7 +18,7 @@ function setCookie(name: string, value: string, days: number) {
 
 interface TrackerProps {
     landingPageSlug?: string
-    onVisitorReady?: (visitorId: string) => void
+    onVisitorReady?: (visitorId: string, vapidPublicKey?: string) => void
 }
 
 export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProps) {
@@ -49,7 +49,7 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
 
                 const data = await response.json()
                 if (data.visitor_id && onVisitorReady) {
-                    onVisitorReady(data.visitor_id)
+                    onVisitorReady(data.visitor_id, data.vapid_public_key)
                 }
             } catch (error) {
                 console.error('Tracking error:', error)

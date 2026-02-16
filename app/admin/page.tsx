@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star } from 'lucide-react'
+
+import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Wand2, ShieldCheck } from 'lucide-react'
+import Link from 'next/link'
 import {
     BarChart,
     Bar,
@@ -26,6 +27,7 @@ interface DashboardStats {
     vipLeads: number
     chatSessions: number
     whatsappSent: number
+    pushSubscribers: number
 }
 
 interface SourceData {
@@ -49,6 +51,7 @@ export default function AdminDashboard() {
         vipLeads: 0,
         chatSessions: 0,
         whatsappSent: 0,
+        pushSubscribers: 0,
     })
     const [sourceData, setSourceData] = useState<SourceData[]>([])
     const [dailyData, setDailyData] = useState<DailyData[]>([])
@@ -56,92 +59,37 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const supabase = createClient()
+            try {
+                const res = await fetch('/api/admin/analytics')
+                const data = await res.json()
 
-            // Fetch visitors count
-            const { count: visitorsCount } = await supabase
-                .from('visitors')
-                .select('*', { count: 'exact', head: true })
+                if (data.error) throw new Error(data.error)
 
-            // Fetch leads count
-            const { count: leadsCount } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
+                setStats(data.stats)
+                setSourceData(data.sourceData)
 
-            // Fetch VIP leads
-            const { count: vipCount } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .eq('is_vip', true)
+                // Ensure dates are formatted correctly if needed, broadly simpler than client-side calc
+                setDailyData(data.dailyData.map((d: any) => ({
+                    ...d,
+                    // Format date if API sends ISO string or ensure consistent format
+                    date: d.date
+                })).reverse()) // API returns last 7 days descending (loop 6 to 0), but chart commonly likes ascending. 
+                // Wait, my API loop was: for (let i = 6; i >= 0; i--) -> 6 days ago, 5 days ago... today.
+                // So the array order is [T-6, T-5, ..., Today]. This is Ascending order.
+                // Recharts expects Ascending for X-Axis (Left to Right).
+                // My API code:
+                // for (let i = 6; i >= 0; i--) { push(...) }
+                // i=6 (6 days ago) -> push
+                // i=0 (today) -> push
+                // So API returns Ascending. 
+                // No need to reverse.
+                setDailyData(data.dailyData)
 
-            // Fetch WhatsApp sent count
-            const { count: whatsappCount } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .eq('whatsapp_sent', true)
-
-            // Fetch chat sessions
-            const { data: chatData } = await supabase
-                .from('chat_history')
-                .select('visitor_id')
-
-            const uniqueChatSessions = new Set(chatData?.map(c => c.visitor_id)).size
-
-            // Source distribution
-            const { data: sourceRaw } = await supabase
-                .from('visitors')
-                .select('detected_source')
-
-            const sourceCounts: Record<string, number> = {}
-            sourceRaw?.forEach(v => {
-                const source = v.detected_source || 'Direct'
-                sourceCounts[source] = (sourceCounts[source] || 0) + 1
-            })
-
-            const sourceChartData = Object.entries(sourceCounts)
-                .map(([name, value]) => ({ name, value }))
-                .sort((a, b) => b.value - a.value)
-
-            // Daily visitors/leads (last 7 days)
-            const last7Days: DailyData[] = []
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date()
-                date.setDate(date.getDate() - i)
-                const dateStr = date.toISOString().split('T')[0]
-
-                const { count: dayVisitors } = await supabase
-                    .from('visitors')
-                    .select('*', { count: 'exact', head: true })
-                    .gte('first_visit_at', `${dateStr}T00:00:00`)
-                    .lt('first_visit_at', `${dateStr}T23:59:59`)
-
-                const { count: dayLeads } = await supabase
-                    .from('leads')
-                    .select('*', { count: 'exact', head: true })
-                    .gte('created_at', `${dateStr}T00:00:00`)
-                    .lt('created_at', `${dateStr}T23:59:59`)
-
-                last7Days.push({
-                    date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-                    visitors: dayVisitors || 0,
-                    leads: dayLeads || 0,
-                })
+            } catch (error) {
+                console.error('Error loading dashboard:', error)
+            } finally {
+                setLoading(false)
             }
-
-            const total = visitorsCount || 0
-            const leads = leadsCount || 0
-
-            setStats({
-                totalVisitors: total,
-                totalLeads: leads,
-                conversionRate: total > 0 ? parseFloat(((leads / total) * 100).toFixed(1)) : 0,
-                vipLeads: vipCount || 0,
-                chatSessions: uniqueChatSessions,
-                whatsappSent: whatsappCount || 0,
-            })
-            setSourceData(sourceChartData)
-            setDailyData(last7Days)
-            setLoading(false)
         }
 
         fetchData()
@@ -162,6 +110,75 @@ export default function AdminDashboard() {
         <div>
             <div className="admin-header">
                 <h1>Dashboard</h1>
+            </div>
+
+            {/* Quick Actions */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                <Link href="/admin/cloner" style={{ textDecoration: 'none' }}>
+                    <div className="chart-card" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '24px',
+                        background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.1) 0%, rgba(201, 169, 110, 0.05) 100%)',
+                        border: '1px solid var(--gold)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                        height: '100%'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '50%',
+                                background: 'var(--gold)',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Wand2 size={24} />
+                            </div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Clonador de Páginas AI</h3>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Crie landing pages em segundos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
+
+                <Link href="/admin/brokers" style={{ textDecoration: 'none' }}>
+                    <div className="chart-card" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '24px',
+                        background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.1) 0%, rgba(201, 169, 110, 0.05) 100%)',
+                        border: '1px solid var(--gold)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                        height: '100%'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '50%',
+                                background: 'var(--gold)',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <ShieldCheck size={24} />
+                            </div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Corretores de Plantão</h3>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gerencie perfis e fotos do chat público.</p>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
             </div>
 
             {/* KPI Cards */}
@@ -195,6 +212,11 @@ export default function AdminDashboard() {
                     <UserCheck size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
                     <div className="kpi-label">WhatsApp Enviados</div>
                     <div className="kpi-value">{stats.whatsappSent}</div>
+                </div>
+                <div className="kpi-card">
+                    <div style={{ marginBottom: 8 }}>🔔</div>
+                    <div className="kpi-label">Inscritos Push</div>
+                    <div className="kpi-value">{stats.pushSubscribers || 0}</div>
                 </div>
             </div>
 

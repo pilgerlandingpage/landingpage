@@ -9,13 +9,15 @@ interface LandingPageLogicProps {
     agentName?: string
     greetingMessage?: string
     landingPageId?: string
+    pageContext?: string
 }
 
 export default function LandingPageLogic({
     slug,
     agentName,
     greetingMessage,
-    landingPageId
+    landingPageId,
+    pageContext
 }: LandingPageLogicProps) {
     const [visitorId, setVisitorId] = useState<string>('')
 
@@ -33,6 +35,7 @@ export default function LandingPageLogic({
                     agentName={agentName}
                     greetingMessage={greetingMessage}
                     landingPageId={landingPageId}
+                    pageContext={pageContext}
                 />
             )}
         </>

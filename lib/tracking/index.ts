@@ -17,6 +17,9 @@ export interface VisitorData {
     fbclid?: string
     gclid?: string
     detected_source?: string
+    country?: string
+    city?: string
+    region?: string
 }
 
 export function parseUserAgent(ua: string): { browser: string; os: string; device_type: string } {
@@ -98,7 +101,14 @@ export function extractTrackingData(
     const fbclid = searchParams.get('fbclid') || undefined
     const gclid = searchParams.get('gclid') || undefined
 
+
+
     const detected_source = detectSource(referrer || '', utm_source, fbclid, gclid)
+
+    // Vercel / Cloudflare Geolocation Headers
+    const country = headers.get('x-vercel-ip-country') || headers.get('cf-ipcountry') || 'BR'
+    const city = headers.get('x-vercel-ip-city') || headers.get('cf-ipcity') || undefined
+    const region = headers.get('x-vercel-ip-country-region') || undefined
 
     return {
         visitor_cookie_id: '', // will be set by the caller
@@ -116,5 +126,8 @@ export function extractTrackingData(
         fbclid,
         gclid,
         detected_source,
+        country,
+        city,
+        region
     }
 }

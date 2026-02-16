@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+
 
 interface FunnelStep {
     label: string
@@ -15,52 +15,29 @@ export default function FunnelPage() {
 
     useEffect(() => {
         const fetchFunnel = async () => {
-            const supabase = createClient()
+            try {
+                const res = await fetch('/api/admin/funnel')
+                const data = await res.json()
 
-            // Count each funnel event type
-            const { count: pageViews } = await supabase
-                .from('funnel_events')
-                .select('*', { count: 'exact', head: true })
-                .eq('event_type', 'page_view')
+                if (data.error) throw new Error(data.error)
 
-            const { count: chatOpened } = await supabase
-                .from('funnel_events')
-                .select('*', { count: 'exact', head: true })
-                .eq('event_type', 'chat_opened')
+                const total = data.pageViews || 1
 
-            const { count: messageSent } = await supabase
-                .from('funnel_events')
-                .select('*', { count: 'exact', head: true })
-                .eq('event_type', 'message_sent')
+                const steps: FunnelStep[] = [
+                    { label: '👁️ Visitaram a Página', count: data.pageViews || 0, percentage: 100 },
+                    { label: '💬 Abriram o Chat', count: data.chatOpened || 0, percentage: ((data.chatOpened || 0) / total) * 100 },
+                    { label: '📝 Enviaram Mensagem', count: data.messageSent || 0, percentage: ((data.messageSent || 0) / total) * 100 },
+                    { label: '📞 Lead Capturado', count: data.leadCaptured || 0, percentage: ((data.leadCaptured || 0) / total) * 100 },
+                    { label: '⭐ Qualificado', count: data.qualified || 0, percentage: ((data.qualified || 0) / total) * 100 },
+                    { label: '✅ Convertido', count: data.converted || 0, percentage: ((data.converted || 0) / total) * 100 },
+                ]
 
-            const { count: leadCaptured } = await supabase
-                .from('funnel_events')
-                .select('*', { count: 'exact', head: true })
-                .eq('event_type', 'lead_captured')
-
-            const { count: qualified } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .eq('funnel_stage', 'qualified')
-
-            const { count: converted } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .eq('funnel_stage', 'converted')
-
-            const total = pageViews || 1
-
-            const steps: FunnelStep[] = [
-                { label: '👁️ Visitaram a Página', count: pageViews || 0, percentage: 100 },
-                { label: '💬 Abriram o Chat', count: chatOpened || 0, percentage: ((chatOpened || 0) / total) * 100 },
-                { label: '📝 Enviaram Mensagem', count: messageSent || 0, percentage: ((messageSent || 0) / total) * 100 },
-                { label: '📞 Lead Capturado', count: leadCaptured || 0, percentage: ((leadCaptured || 0) / total) * 100 },
-                { label: '⭐ Qualificado', count: qualified || 0, percentage: ((qualified || 0) / total) * 100 },
-                { label: '✅ Convertido', count: converted || 0, percentage: ((converted || 0) / total) * 100 },
-            ]
-
-            setFunnelData(steps)
-            setLoading(false)
+                setFunnelData(steps)
+            } catch (error) {
+                console.error('Error loading funnel:', error)
+            } finally {
+                setLoading(false)
+            }
         }
 
         fetchFunnel()
@@ -81,22 +58,151 @@ export default function FunnelPage() {
             </div>
 
             <div className="chart-card">
-                <div className="funnel-container">
-                    {funnelData.map((step, index) => (
-                        <div key={index} className="funnel-step">
-                            <div className="funnel-label">{step.label}</div>
-                            <div style={{ flex: 1 }}>
-                                <div
-                                    className="funnel-bar"
-                                    style={{ width: `${Math.max(step.percentage, 3)}%` }}
-                                />
+                <div className="funnel-container" style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '2px', // Tighter gap for connected feel
+                    padding: '40px 0'
+                }}>
+                    {funnelData.map((step, index) => {
+                        // Schematic width: reduces by step to preserve funnel shape
+                        // e.g. 100%, 85%, 70%, 55%, 40%, 25%
+                        const maxSteps = 6
+                        const topWidthPercent = 100 - (index * 15)
+                        const bottomWidthPercent = 100 - ((index + 1) * 15)
+
+                        // Vivid colors for high impact on dark background
+                        const colors = [
+                            '#0066FF', // Electric Blue (Awareness)
+                            '#9933FF', // Electric Purple (Interest)
+                            '#FF0099', // Hot Pink (Desire)
+                            '#FF6600', // Vivid Orange (Action)
+                            '#FFD700', // Gold (Qualification)
+                            '#00CC44'  // Vivid Green (Conversion)
+                        ]
+
+                        // Overriding with custom hex for "Vivid" request
+                        const vividColors = [
+                            '#0ea5e9', // Sky 500 (Cyan-Blue)
+                            '#d946ef', // Fuchsia 500 (Magenta)
+                            '#f43f5e', // Rose 500 (Red-Pink)
+                            '#f97316', // Orange 500
+                            '#fbbf24', // Amber 400
+                            '#10b981'  // Emerald 500
+                        ]
+
+                        // Let's use the vivid set
+                        const activeColors = [
+                            '#0088FE', // Strong Blue
+                            '#8884d8', // Purple
+                            '#FF8042', // Orange (Wait, let's stick to the spectrum requested: Blue -> Purple -> Pink -> Orange -> Yellow -> Green)
+
+                            // Blue -> Purple -> Pink -> Orange -> Yellow -> Green
+                            '#2563EB', // Blue 600 (Stronger) -> Let's try #3b82f6 again but maybe the issue is opacity?
+                            // User said "more vivid".
+                            '#0066FF', // Electric Blue
+                            '#9933FF', // Electric Purple
+                            '#FF0099', // Hot Pink
+                            '#FF6600', // Vivid Orange
+                            '#FFD700', // Gold
+                            '#00CC44'  // Vivid Green
+                        ]
+
+                        return (
+                            <div key={index} style={{
+                                width: '100%',
+                                maxWidth: '1000px', // Wider container
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 500px 1fr', // Grid layout: Label | Funnel | Stats
+                                alignItems: 'center',
+                                gap: '20px',
+                                position: 'relative',
+                                height: '50px'
+                            }}>
+                                {/* Label Left */}
+                                <div style={{
+                                    textAlign: 'right',
+                                    fontSize: '0.9rem',
+                                    color: '#ccc',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-end',
+                                    whiteSpace: 'nowrap' // Prevent wrapping
+                                }}>
+                                    <span style={{ color: colors[index], marginRight: '8px', fontSize: '1.2em' }}>●</span>
+                                    {step.label.replace(/^[^\s]+\s/, '')}
+                                    <div style={{ width: '60px', height: '1px', background: `linear-gradient(to right, transparent, ${colors[index]})`, marginLeft: '10px', opacity: 0.5 }}></div>
+                                </div>
+
+                                {/* Funnel Trapezoid Shape (Centered) */}
+                                <div style={{
+                                    width: '100%', // Fills the 500px column
+                                    height: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    position: 'relative',
+                                    zIndex: 10 - index
+                                }}>
+                                    <div style={{
+                                        width: `${topWidthPercent}%`,
+                                        height: '100%',
+                                        background: `linear-gradient(to bottom, ${colors[index]}ee, ${colors[index]}99)`,
+                                        clipPath: `polygon(0 0, 100% 0, ${100 - (7.5)}% 100%, ${7.5}% 100%)`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                                        backdropFilter: 'blur(4px)',
+                                        borderTop: '1px solid rgba(255,255,255,0.2)',
+                                        transition: 'transform 0.3s ease',
+                                    }}
+                                        className="funnel-segment hover:scale-105 hover:brightness-110"
+                                    >
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            lineHeight: 1,
+                                            transform: 'translateY(-1px)'
+                                        }}>
+                                            <span style={{
+                                                color: '#fff',
+                                                fontWeight: '800',
+                                                fontSize: '1.2rem',
+                                                textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                                            }}>
+                                                {step.count}
+                                            </span>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                color: 'rgba(255,255,255,0.9)',
+                                                marginTop: '2px'
+                                            }}>
+                                                {step.percentage.toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Conversion Rate Right */}
+                                <div style={{
+                                    fontSize: '0.8rem',
+                                    color: '#888',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-start'
+                                }}>
+                                    {index > 0 && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ width: '40px', height: '1px', background: 'rgba(255,255,255,0.1)', marginRight: '10px' }}></div>
+                                            {/* Optional dropoff info */}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="funnel-count">{step.count}</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', minWidth: '50px', textAlign: 'right' }}>
-                                {step.percentage.toFixed(1)}%
-                            </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
 

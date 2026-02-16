@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Save, ArrowLeft, Settings, Layout, Variable } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Save, ArrowLeft, Settings, Layout, Wand2, Monitor, Star, MousePointerClick, Edit3, Image as ImageIcon, Type, ChevronDown, ChevronUp, Flame, Award, Crown } from 'lucide-react'
 import Link from 'next/link'
 
 interface Property {
@@ -16,13 +16,15 @@ interface Agent {
     name: string
 }
 
-export default function NewLandingPage() {
+function NewLandingPageContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const supabase = createClient()
 
     const [loading, setLoading] = useState(false)
     const [properties, setProperties] = useState<Property[]>([])
     const [agents, setAgents] = useState<Agent[]>([])
+    const [showCustom, setShowCustom] = useState(false)
 
     const [form, setForm] = useState({
         title: '',
@@ -33,7 +35,53 @@ export default function NewLandingPage() {
         google_ads_id: '',
         status: 'draft',
         primary_color: '#c9a96e',
+        template: searchParams.get('template') || 'classic',
+        // Manual Content Fields
+        custom_title: '',
+        custom_description: '',
+        custom_cta: 'Agendar Visita',
+        custom_hero_image: '',
+        custom_features: '' // comma separated
     })
+
+    const templates = [
+        {
+            id: 'urgency',
+            name: '🔥 Urgência',
+            description: 'Countdown timer, escassez, 1 tela mobile.',
+            icon: <Flame size={24} />
+        },
+        {
+            id: 'social-proof',
+            name: '⭐ Prova Social',
+            description: 'Depoimentos, estrelas, contador de views.',
+            icon: <Award size={24} />
+        },
+        {
+            id: 'vip',
+            name: '👑 VIP Exclusivo',
+            description: 'Preto+dourado, lista VIP, exclusividade.',
+            icon: <Crown size={24} />
+        },
+        {
+            id: 'classic',
+            name: 'Clássico',
+            description: 'Layout tradicional com foco e detalhes e sidebar.',
+            icon: <Monitor size={24} />
+        },
+        {
+            id: 'modern',
+            name: 'Modern Luxury',
+            description: 'Visual expansivo, fontes grandes e design premium.',
+            icon: <Star size={24} />
+        },
+        {
+            id: 'lead-capture',
+            name: 'Captura de Leads',
+            description: 'Foco total em conversão com formulário no topo.',
+            icon: <MousePointerClick size={24} />
+        }
+    ]
 
     useEffect(() => {
         const loadData = async () => {
@@ -64,8 +112,8 @@ export default function NewLandingPage() {
     }
 
     const handleSave = async () => {
-        if (!form.title || !form.slug || !form.property_id) {
-            alert('Preencha os campos obrigatórios: Título, Slug e Imóvel')
+        if (!form.title || !form.slug) {
+            alert('Preencha os campos obrigatórios: Título da Campanha e Slug')
             return
         }
 
@@ -74,12 +122,21 @@ export default function NewLandingPage() {
             const { error } = await supabase.from('landing_pages').insert({
                 title: form.title,
                 slug: form.slug,
-                property_id: form.property_id,
+                property_id: form.property_id || null, // Optional now
                 ai_agent_id: form.ai_agent_id || null,
                 meta_pixel_id: form.meta_pixel_id || null,
                 google_ads_id: form.google_ads_id || null,
                 status: form.status,
                 primary_color: form.primary_color,
+                content: {
+                    template: form.template,
+                    // Store manual content overrides
+                    custom_title: form.custom_title,
+                    custom_description: form.custom_description,
+                    custom_cta: form.custom_cta,
+                    custom_hero_image: form.custom_hero_image,
+                    custom_features: form.custom_features ? form.custom_features.split(',').map(f => f.trim()) : []
+                }
             })
 
             if (error) throw error
@@ -93,7 +150,7 @@ export default function NewLandingPage() {
     }
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="max-w-5xl mx-auto p-8">
             <div className="admin-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <Link href="/admin/pages">
@@ -103,81 +160,199 @@ export default function NewLandingPage() {
                     </Link>
                     <div>
                         <h1>Nova Landing Page</h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
-                            Configure a campanha e vincule ao imóvel.
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
+                            Configure a campanha de vendas para seu imóvel.
                         </p>
                     </div>
                 </div>
-                <button className="btn btn-gold" onClick={handleSave} disabled={loading}>
-                    <Save size={18} /> {loading ? 'Salvando...' : 'Criar Página'}
+                <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+                    <Save size={18} /> {loading ? 'Salvando...' : 'Publicar Página'}
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
 
-                {/* Basic Info Card */}
-                <div className="chart-card">
-                    <div className="chart-title">
-                        <Layout size={18} style={{ display: 'inline', marginRight: '8px' }} />
-                        Configurações Principais
-                    </div>
+                {/* Main Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                    <div style={{ display: 'grid', gap: '16px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Título da Campanha (Interno)</label>
-                            <input
-                                className="form-input"
-                                value={form.title}
-                                onChange={handleTitleChange}
-                                placeholder="Ex: Lançamento Praia Brava - Verão 2026"
-                            />
+                    {/* Basic Config */}
+                    <div className="chart-card">
+                        <div className="chart-title flex items-center gap-2">
+                            <Layout size={18} className="text-gold" />
+                            Configurações Principais
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">URL da Página (Slug)</label>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span style={{
-                                    background: 'rgba(255,255,255,0.05)',
-                                    padding: '10px 12px',
-                                    border: '1px solid var(--border)',
-                                    borderRight: 'none',
-                                    borderRadius: '8px 0 0 8px',
-                                    color: 'var(--text-muted)',
-                                    fontSize: '0.9rem'
-                                }}>
-                                    pilger.com.br/
-                                </span>
+                        <div style={{ display: 'grid', gap: '20px' }}>
+                            <div className="form-group">
+                                <label className="form-label">Título da Campanha (Interno)</label>
                                 <input
                                     className="form-input"
-                                    value={form.slug}
-                                    onChange={e => setForm({ ...form, slug: e.target.value })}
-                                    style={{ borderRadius: '0 8px 8px 0' }}
-                                    placeholder="lancamento-praia-brava"
+                                    value={form.title}
+                                    onChange={handleTitleChange}
+                                    placeholder="Ex: Lançamento Praia Brava - Verão 2026"
                                 />
                             </div>
+
+                            <div className="form-group">
+                                <label className="form-label">URL da Página (Slug)</label>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span style={{
+                                        background: 'var(--bg-secondary)',
+                                        padding: '12px 16px',
+                                        border: '1px solid var(--border)',
+                                        borderRight: 'none',
+                                        borderRadius: '8px 0 0 8px',
+                                        color: 'var(--text-muted)',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        pilger.com.br/
+                                    </span>
+                                    <input
+                                        className="form-input"
+                                        value={form.slug}
+                                        onChange={e => setForm({ ...form, slug: e.target.value })}
+                                        style={{ borderRadius: '0 8px 8px 0' }}
+                                        placeholder="lancamento-praia-brava"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Modelo Visual (Template)</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                                    {templates.map(t => (
+                                        <div
+                                            key={t.id}
+                                            onClick={() => setForm({ ...form, template: t.id })}
+                                            style={{
+                                                border: `2px solid ${form.template === t.id ? 'var(--gold)' : 'var(--border)'}`,
+                                                background: form.template === t.id ? 'rgba(201, 169, 110, 0.1)' : 'transparent',
+                                                borderRadius: '8px',
+                                                padding: '12px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                textAlign: 'center',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                        >
+                                            <div style={{ color: form.template === t.id ? 'var(--gold)' : 'var(--text-secondary)' }}>
+                                                {t.icon}
+                                            </div>
+                                            <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>{t.name}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content Source Selection */}
+                    <div className="chart-card">
+                        <div className="chart-title flex items-center justify-between pointer" onClick={() => setShowCustom(!showCustom)}>
+                            <div className="flex items-center gap-2">
+                                <Edit3 size={18} className="text-gold" />
+                                Conteúdo da Página
+                            </div>
+                            {/* Toggle could go here */}
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Imóvel Vinculado</label>
+                            <label className="form-label">Imóvel Vinculado (Opcional)</label>
                             <select
                                 className="form-select"
                                 value={form.property_id}
                                 onChange={e => setForm({ ...form, property_id: e.target.value })}
                             >
-                                <option value="">Selecione um imóvel...</option>
+                                <option value="">Não vincular imóvel (Usar conteúdo manual)</option>
                                 {properties.map(p => (
                                     <option key={p.id} value={p.id}>{p.title}</option>
                                 ))}
                             </select>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                O conteúdo da página (fotos, preço, descrição) será puxado deste imóvel.
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                Se selecionado, preenchemos automaticamente fotos e textos. Você pode sobrescrever abaixo.
                             </p>
                         </div>
 
+                        {/* Manual Overrides */}
+                        <div className="mt-6 border-t border-zinc-800 pt-6">
+                            <button
+                                className="flex items-center gap-2 text-sm font-medium text-gold hover:text-white transition-colors mb-4"
+                                onClick={() => setShowCustom(!showCustom)}
+                            >
+                                {showCustom ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                {showCustom ? 'Ocultar Edição Manual' : 'Personalizar Texto e Imagens Manualmente'}
+                            </button>
+
+                            {showCustom && (
+                                <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                                    <div className="form-group">
+                                        <label className="form-label flex items-center gap-2"><Type size={14} /> Título Principal (H1)</label>
+                                        <input
+                                            className="form-input"
+                                            placeholder="Ex: Viva o Extraordinário"
+                                            value={form.custom_title}
+                                            onChange={e => setForm({ ...form, custom_title: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label flex items-center gap-2"><ImageIcon size={14} /> URL da Imagem de Capa</label>
+                                        <input
+                                            className="form-input"
+                                            placeholder="https://..."
+                                            value={form.custom_hero_image}
+                                            onChange={e => setForm({ ...form, custom_hero_image: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Texto de Apresentação</label>
+                                        <textarea
+                                            className="form-input"
+                                            rows={4}
+                                            placeholder="Detalhes sobre a oportunidade..."
+                                            value={form.custom_description}
+                                            onChange={e => setForm({ ...form, custom_description: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Texto do Botão (CTA)</label>
+                                        <input
+                                            className="form-input"
+                                            placeholder="Ex: Quero saber mais"
+                                            value={form.custom_cta}
+                                            onChange={e => setForm({ ...form, custom_cta: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Diferenciais (separados por vírgula)</label>
+                                        <input
+                                            className="form-input"
+                                            placeholder="Vista Mar, Acabamento Premium, 4 Suítes"
+                                            value={form.custom_features}
+                                            onChange={e => setForm({ ...form, custom_features: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                    {/* Status Card */}
+                    <div className="chart-card">
+                        <div className="chart-title flex items-center gap-2">
+                            <Settings size={18} className="text-gold" />
+                            Publicação
+                        </div>
                         <div className="form-group">
                             <label className="form-label">Status</label>
-                            <div style={{ display: 'flex', gap: '16px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', border: '1px solid var(--border)', borderRadius: '8px', background: form.status === 'draft' ? 'rgba(255,255,255,0.05)' : 'transparent' }}>
                                     <input
                                         type="radio"
                                         name="status"
@@ -185,9 +360,12 @@ export default function NewLandingPage() {
                                         checked={form.status === 'draft'}
                                         onChange={e => setForm({ ...form, status: e.target.value })}
                                     />
-                                    Rascunho
+                                    <div>
+                                        <div style={{ fontWeight: '500' }}>Rascunho</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Visível apenas para admins</div>
+                                    </div>
                                 </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', border: '1px solid var(--border)', borderRadius: '8px', background: form.status === 'published' ? 'rgba(255,255,255,0.05)' : 'transparent' }}>
                                     <input
                                         type="radio"
                                         name="status"
@@ -195,21 +373,22 @@ export default function NewLandingPage() {
                                         checked={form.status === 'published'}
                                         onChange={e => setForm({ ...form, status: e.target.value })}
                                     />
-                                    Publicado
+                                    <div>
+                                        <div style={{ fontWeight: '500' }}>Publicado</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Visível para todos</div>
+                                    </div>
                                 </label>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Intelligence & Tracking Card */}
-                <div className="chart-card">
-                    <div className="chart-title">
-                        <Settings size={18} style={{ display: 'inline', marginRight: '8px' }} />
-                        Inteligência e Rastreamento
-                    </div>
+                    {/* Intelligence Card */}
+                    <div className="chart-card">
+                        <div className="chart-title flex items-center gap-2">
+                            <Wand2 size={18} className="text-gold" />
+                            Inteligência & Marketing
+                        </div>
 
-                    <div style={{ display: 'grid', gap: '16px' }}>
                         <div className="form-group">
                             <label className="form-label">Agente de IA (Funil)</label>
                             <select
@@ -217,58 +396,44 @@ export default function NewLandingPage() {
                                 value={form.ai_agent_id}
                                 onChange={e => setForm({ ...form, ai_agent_id: e.target.value })}
                             >
-                                <option value="">Selecione o agente...</option>
+                                <option value="">Sem agente (Padrão)</option>
                                 {agents.map(a => (
                                     <option key={a.id} value={a.id}>{a.name}</option>
                                 ))}
                             </select>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                Define a personalidade da IA que atenderá no chat desta página.
-                            </p>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div className="form-group">
-                                <label className="form-label">Meta Pixel ID</label>
-                                <input
-                                    className="form-input"
-                                    value={form.meta_pixel_id}
-                                    onChange={e => setForm({ ...form, meta_pixel_id: e.target.value })}
-                                    placeholder="Ex: 1234567890"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Google Ads ID</label>
-                                <input
-                                    className="form-input"
-                                    value={form.google_ads_id}
-                                    onChange={e => setForm({ ...form, google_ads_id: e.target.value })}
-                                    placeholder="Ex: AW-123456789"
-                                />
-                            </div>
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Cor Principal (Botões e Destaques)</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <input
-                                    type="color"
-                                    value={form.primary_color}
-                                    onChange={e => setForm({ ...form, primary_color: e.target.value })}
-                                    style={{ border: 'none', width: '40px', height: '40px', cursor: 'pointer', background: 'none' }}
-                                />
-                                <input
-                                    className="form-input"
-                                    value={form.primary_color}
-                                    onChange={e => setForm({ ...form, primary_color: e.target.value })}
-                                    style={{ width: '120px' }}
-                                />
-                            </div>
+                            <label className="form-label">Meta Pixel ID</label>
+                            <input
+                                className="form-input"
+                                value={form.meta_pixel_id}
+                                onChange={e => setForm({ ...form, meta_pixel_id: e.target.value })}
+                                placeholder="1234567890"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Google Ads ID</label>
+                            <input
+                                className="form-input"
+                                value={form.google_ads_id}
+                                onChange={e => setForm({ ...form, google_ads_id: e.target.value })}
+                                placeholder="AW-123456789"
+                            />
                         </div>
                     </div>
                 </div>
 
             </div>
         </div>
+    )
+}
+
+export default function NewLandingPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <NewLandingPageContent />
+        </Suspense>
     )
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Eye, Edit, Trash2, Globe } from 'lucide-react'
+import { Plus, Eye, Edit, Trash2, Globe, Wand2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
 interface LandingPage {
@@ -13,6 +13,8 @@ interface LandingPage {
     page_views: number
     created_at: string
 }
+
+import TemplatesGrid from '@/components/admin/TemplatesGrid'
 
 export default function PagesList() {
     const [pages, setPages] = useState<LandingPage[]>([])
@@ -28,7 +30,16 @@ export default function PagesList() {
         setLoading(false)
     }
 
-    useEffect(() => { fetchPages() }, [])
+    useEffect(() => {
+        fetchPages()
+
+        const subscription = supabase
+            .channel('landing-pages-list')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'landing_pages' }, fetchPages)
+            .subscribe()
+
+        return () => { subscription.unsubscribe() }
+    }, [])
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja excluir esta página?')) {
@@ -38,101 +49,122 @@ export default function PagesList() {
     }
 
     return (
-        <div>
+        <div className="max-w-7xl mx-auto p-8">
             <div className="admin-header">
                 <div>
-                    <h1>Market Pages</h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
-                        Crie páginas de alta conversão para seus imóveis.
+                    <h1 className="flex items-center gap-3">
+                        <Globe className="text-gold" size={28} /> Minhas Landing Pages
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
+                        Gerencie suas páginas de alta conversão.
                     </p>
                 </div>
-                <Link href="/admin/pages/new">
-                    <button className="btn btn-gold">
-                        <Plus size={18} /> Nova Página
-                    </button>
-                </Link>
-            </div>
-
-            {loading ? (
-                <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Carregando páginas...</div>
-            ) : pages.length === 0 ? (
-                <div className="chart-card" style={{ padding: '60px', textAlign: 'center' }}>
-                    <Globe size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px', opacity: 0.5 }} />
-                    <h3 style={{ marginBottom: '8px' }}>Nenhuma página criada</h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-                        Crie sua primeira Landing Page para começar a rodar tráfego.
-                    </p>
-                    <Link href="/admin/pages/new">
-                        <button className="btn btn-gold">Criar Página</button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <Link href="/admin/pages/new" style={{ textDecoration: 'none' }}>
+                        <button className="btn btn-outline" style={{ padding: '12px 24px' }}>
+                            <Plus size={20} /> Nova Página
+                        </button>
+                    </Link>
+                    <Link href="/admin/cloner" style={{ textDecoration: 'none' }}>
+                        <button className="btn btn-primary" style={{ padding: '12px 24px' }}>
+                            <Wand2 size={20} /> Clonar com IA
+                        </button>
                     </Link>
                 </div>
-            ) : (
-                <div className="chart-card" style={{ padding: 0, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left', background: 'rgba(255,255,255,0.02)' }}>
-                                <th style={{ padding: '16px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>TÍTULO / SLUG</th>
-                                <th style={{ padding: '16px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>STATUS</th>
-                                <th style={{ padding: '16px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>VISITAS</th>
-                                <th style={{ padding: '16px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'right' }}>AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pages.map(page => (
-                                <tr key={page.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '16px' }}>
-                                        <div style={{ fontWeight: 600 }}>{page.title}</div>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <span style={{ color: 'var(--gold)' }}>/</span>{page.slug}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '16px' }}>
-                                        <span style={{
-                                            padding: '4px 10px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.75rem',
-                                            background: page.status === 'published' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                            color: page.status === 'published' ? '#22c55e' : '#ef4444',
-                                            border: `1px solid ${page.status === 'published' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
-                                        }}>
-                                            {page.status === 'published' ? 'Publicado' : 'Rascunho'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '16px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <Eye size={14} style={{ color: 'var(--text-muted)' }} />
-                                            {page.page_views}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '16px', textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                            <Link href={`/${page.slug}`} target="_blank">
-                                                <button className="btn btn-outline btn-sm" title="Ver Página">
-                                                    <Globe size={14} />
-                                                </button>
-                                            </Link>
-                                            {/* Edit not implemented yet, just link to new for consistency */}
-                                            {/* <Link href={`/admin/pages/${page.id}`}> */}
-                                            <button className="btn btn-outline btn-sm" title="Editar">
-                                                <Edit size={14} />
-                                            </button>
-                                            {/* </Link> */}
-                                            <button
-                                                className="btn btn-outline btn-sm"
-                                                onClick={() => handleDelete(page.id)}
-                                                style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-                                                title="Excluir"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            </div>
+
+            <div style={{ display: 'grid', gap: '16px', marginBottom: '64px' }}>
+                {loading ? (
+                    <div className="chart-card" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div className="animate-spin" style={{ fontSize: '2rem', marginBottom: '16px', display: 'inline-block' }}>⏳</div>
+                        <p>Carregando suas páginas...</p>
+                    </div>
+                ) : pages.length === 0 ? (
+                    <div className="chart-card" style={{ padding: '40px', textAlign: 'center' }}>
+                        <div style={{
+                            width: '60px', height: '60px',
+                            background: 'rgba(201, 169, 110, 0.1)',
+                            borderRadius: '50%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 16px auto',
+                            color: 'var(--gold)'
+                        }}>
+                            <Globe size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Comece sua primeira campanha</h3>
+                        <p className="text-zinc-400 mb-8 max-w-md mx-auto">Escolha um dos modelos abaixo para criar uma Landing Page de alta conversão em segundos.</p>
+
+                        <TemplatesGrid />
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
+                        {pages.map(page => (
+                            <div key={page.id} className="chart-card group" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                    <div style={{
+                                        width: '48px', height: '48px',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.2), rgba(201, 169, 110, 0.05))',
+                                        border: '1px solid rgba(201, 169, 110, 0.2)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: 'var(--gold)'
+                                    }}>
+                                        <Globe size={24} />
+                                    </div>
+                                    <span className={`badge ${page.status === 'published' ? 'badge-success' : 'badge-gold'}`}>
+                                        {page.status === 'published' ? 'Publicada' : 'Rascunho'}
+                                    </span>
+                                </div>
+
+                                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: '600' }}>
+                                    {page.title || 'Página sem título'}
+                                </h3>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', flex: 1 }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                        <Globe size={14} /> /{page.slug}
+                                    </span>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                        <Eye size={14} /> {page.page_views || 0} visitas
+                                    </span>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                                    <Link href={`/${page.slug}`} target="_blank" style={{ flex: 1, textDecoration: 'none' }}>
+                                        <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center' }}>
+                                            <ExternalLink size={16} /> Ver
+                                        </button>
+                                    </Link>
+                                    <button
+                                        className="btn btn-outline btn-sm"
+                                        onClick={() => handleDelete(page.id)}
+                                        style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.05)' }}
+                                        title="Excluir"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Always show templates suggestion at bottom if not empty */}
+            {pages.length > 0 && !loading && (
+                <div className="mt-12 pt-12 border-t border-zinc-800">
+                    <h2 className="text-2xl font-playfair font-bold mb-6 flex items-center gap-2">
+                        <Wand2 size={24} className="text-gold" />
+                        Criar Nova Página a partir de um Modelo
+                    </h2>
+                    <TemplatesGrid />
                 </div>
             )}
+
+            <style jsx>{`
+                .animate-spin { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            `}</style>
         </div>
     )
 }

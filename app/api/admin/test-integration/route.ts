@@ -117,6 +117,44 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            case 'openai': {
+                const apiKey = config.openai_api_key
+                const model = config.openai_model || 'gpt-3.5-turbo'
+
+                if (!apiKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'API Key da OpenAI não configurada',
+                    })
+                }
+
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: 'user', content: 'Say OK' }],
+                        max_tokens: 5
+                    })
+                })
+
+                if (!res.ok) {
+                    const error = await res.json()
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro OpenAI: ${error.error?.message || res.statusText}`,
+                    })
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    message: `OpenAI Conectada! Modelo: ${model}`,
+                })
+            }
+
             default:
                 return NextResponse.json({
                     success: false,

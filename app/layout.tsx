@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ConciergeChat from '@/components/ai/ConciergeChat'
+import MainTracker from '@/components/tracking/MainTracker'
 
 export const metadata: Metadata = {
   title: 'Pilger Imóveis de Luxo',
@@ -13,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <MainTracker />
+        {children}
+        <ConciergeChat />
+      </body>
     </html>
   )
 }

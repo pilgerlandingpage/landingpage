@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { MASTER_LANDING_PAGE_PROMPT, LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai'
     fields: {
         key: string
         label: string
@@ -30,16 +31,7 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'connectyhub_instance', label: 'Instance', placeholder: 'ID da instância', isSecret: false },
         ],
     },
-    {
-        id: 'gemini',
-        title: 'Gemini AI — Google',
-        description: 'API de inteligência artificial para chat, extração de dados e resumo de leads.',
-        icon: 'gemini',
-        fields: [
-            { key: 'gemini_api_key', label: 'API Key', placeholder: 'AIzaSy...', isSecret: true },
-            { key: 'gemini_model', label: 'Modelo', placeholder: 'Selecione o modelo', isSecret: false, type: 'select' },
-        ],
-    },
+
     {
         id: 'vapid',
         title: 'VAPID — Push Notifications',
@@ -67,15 +59,19 @@ export default function MaintenancePage() {
     const [saved, setSaved] = useState(false)
     const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({})
     const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
-    const [geminiModels, setGeminiModels] = useState<{ id: string; name: string }[]>([])
-    const [loadingModels, setLoadingModels] = useState(false)
 
+    const [geminiModels, setGeminiModels] = useState<{ id: string; name: string }[]>([])
+    const [openaiModels, setOpenaiModels] = useState<{ id: string; name: string }[]>([])
+    const [loadingGeminiModels, setLoadingGeminiModels] = useState(false)
+    const [loadingOpenAIModels, setLoadingOpenAIModels] = useState(false)
+
+    // Fetch Gemini Models
     useEffect(() => {
         const apiKey = configs['gemini_api_key']
         if (!apiKey) return
 
-        const fetchModels = async () => {
-            setLoadingModels(true)
+        const fetchGemini = async () => {
+            setLoadingGeminiModels(true)
             try {
                 const res = await fetch('/api/admin/gemini-models', {
                     method: 'POST',
@@ -85,21 +81,60 @@ export default function MaintenancePage() {
                 const data = await res.json()
                 if (data.success) {
                     setGeminiModels(data.models)
-                    // Auto-select first model if none selected
-                    if (!configs['gemini_model'] && data.models.length > 0) {
-                        setConfigs(prev => ({ ...prev, gemini_model: data.models[0].name }))
-                    }
+                    // Set defaults if empty
+                    setConfigs(prev => {
+                        const next = { ...prev }
+                        if (!next['gemini_concierge_model'] && data.models.length > 0) next['gemini_concierge_model'] = 'gemini-1.5-flash'
+                        if (!next['gemini_cloner_model'] && data.models.length > 0) next['gemini_cloner_model'] = 'gemini-1.5-flash'
+                        if (!next['gemini_pilger_model'] && data.models.length > 0) next['gemini_pilger_model'] = 'gemini-1.5-flash'
+                        return next
+                    })
                 }
-            } catch (error) {
-                console.error('Failed to fetch models', error)
+            } catch (e) {
+                console.error(e)
             } finally {
-                setLoadingModels(false)
+                setLoadingGeminiModels(false)
             }
         }
-
-        const timer = setTimeout(fetchModels, 1000)
+        const timer = setTimeout(fetchGemini, 1000)
         return () => clearTimeout(timer)
     }, [configs['gemini_api_key']])
+
+    // Fetch OpenAI Models
+    useEffect(() => {
+        const apiKey = configs['openai_api_key']
+        if (!apiKey) return
+
+        const fetchOpenAI = async () => {
+            setLoadingOpenAIModels(true)
+            try {
+                const res = await fetch('/api/admin/openai-models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey }),
+                })
+                const data = await res.json()
+                if (data.success) {
+                    setOpenaiModels(data.models)
+                    // Set defaults if empty
+                    setConfigs(prev => {
+                        const next = { ...prev }
+                        if (!next['openai_concierge_model'] && data.models.length > 0) next['openai_concierge_model'] = 'gpt-3.5-turbo'
+                        if (!next['openai_cloner_model'] && data.models.length > 0) next['openai_cloner_model'] = 'gpt-3.5-turbo'
+                        if (!next['openai_pilger_model'] && data.models.length > 0) next['openai_pilger_model'] = 'gpt-3.5-turbo'
+                        return next
+                    })
+                }
+            } catch (e) {
+                console.error(e)
+            } finally {
+                setLoadingOpenAIModels(false)
+            }
+        }
+        const timer = setTimeout(fetchOpenAI, 1000)
+        return () => clearTimeout(timer)
+    }, [configs['openai_api_key']])
+
 
     const fetchConfigs = useCallback(async () => {
         try {
@@ -122,7 +157,32 @@ export default function MaintenancePage() {
     const handleSave = async () => {
         setSaving(true)
         try {
-            const allKeys = INTEGRATIONS.flatMap(i => i.fields.map(f => f.key))
+            const allKeys = [
+                ...INTEGRATIONS.flatMap(i => i.fields.map(f => f.key)),
+                'ai_provider',
+                'gemini_api_key',
+                'openai_api_key',
+                'concierge_system_prompt',
+                'concierge_rules_prompt',
+                'pilger_ai_system_prompt',
+                'pilger_ai_rules_prompt',
+                'chat_delay_before_typing',
+                'chat_typing_min_duration',
+                'chat_typing_max_duration',
+                'chat_max_response_length',
+                'chat_max_response_length',
+                'gemini_concierge_model',
+                'gemini_cloner_model',
+                'gemini_pilger_model',
+                'openai_concierge_model',
+                'openai_cloner_model',
+                'openai_pilger_model',
+                'concierge_provider',
+                'cloner_provider',
+                'pilger_provider',
+                'cloner_system_prompt',
+                'lead_extraction_prompt'
+            ]
             const configsToSave: Record<string, string> = {}
             for (const key of allKeys) {
                 if (configs[key] !== undefined && configs[key] !== '') {
@@ -185,6 +245,7 @@ export default function MaintenancePage() {
         switch (icon) {
             case 'whatsapp': return <MessageSquare size={22} />
             case 'gemini': return <Brain size={22} />
+            case 'openai': return <Bot size={22} />
             case 'vapid': return <Bell size={22} />
             default: return null
         }
@@ -335,38 +396,32 @@ export default function MaintenancePage() {
                                                     fontSize: '0.9rem',
                                                 }}
                                             />
-                                        ) : (
+                                        ) : field.key === 'openai_model' ? (
                                             <div style={{ position: 'relative' }}>
                                                 <select
                                                     className="form-input"
-                                                    value={configs[field.key] || ''}
+                                                    value={configs[field.key] || 'gpt-3.5-turbo'}
                                                     onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
-                                                    style={{
-                                                        appearance: 'none',
-                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                                                        backgroundRepeat: 'no-repeat',
-                                                        backgroundPosition: 'right 12px center',
-                                                        paddingRight: '32px',
-                                                    }}
+                                                    style={{ appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: '32px' }}
                                                 >
-                                                    <option value="">Selecione um modelo...</option>
-                                                    {geminiModels.map(model => (
-                                                        <option key={model.id} value={model.id}>
-                                                            {model.name}
-                                                        </option>
-                                                    ))}
+                                                    <option value="gpt-4o">GPT-4o (Mais inteligente e rápido)</option>
+                                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Mais rápido e barato)</option>
                                                 </select>
-                                                {loadingModels && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        right: '30px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                    }}>
-                                                        <RefreshCw size={14} className="spin" style={{ color: 'var(--text-muted)' }} />
-                                                    </div>
-                                                )}
                                             </div>
+                                        ) : (
+                                            <input
+                                                className="form-input"
+                                                type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
+                                                value={configs[field.key] || ''}
+                                                onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                placeholder={field.placeholder}
+                                                style={{
+                                                    paddingRight: field.isSecret ? '44px' : undefined,
+                                                    fontFamily: field.isSecret && !visibleFields[field.key] ? 'inherit' : 'monospace',
+                                                    fontSize: '0.9rem',
+                                                }}
+                                            />
                                         )}
                                         {field.isSecret && (
                                             <button
@@ -432,6 +487,412 @@ export default function MaintenancePage() {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* ═══════════════════════════════════════════════ */}
+            {/* CENTRAL DE CONTROLE AI                         */}
+            {/* ═══════════════════════════════════════════════ */}
+            <div className="chart-card" style={{ marginTop: '32px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                    <div style={{
+                        width: '48px', height: '48px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, var(--gold), #b8860b)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '1.4rem'
+                    }}>
+                        🤖
+                    </div>
+                    <div>
+                        <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.1rem' }}>Central de Controle AI (Multi-Provedor)</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            Gerencie provedores e modelos específicos para cada função (Concierge, Pilger AI, Clonador).
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Global Default Provider ── */}
+                <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                        <Zap size={18} style={{ color: 'var(--gold)' }} />
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Provedor Padrão (Global)</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Usado quando uma função não tem provedor específico selecionado.</div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px 16px', borderRadius: '8px', border: configs['ai_provider'] === 'gemini' ? '1px solid var(--gold)' : '1px solid var(--border-color)', background: configs['ai_provider'] === 'gemini' ? 'rgba(201, 169, 110, 0.1)' : 'transparent' }}>
+                            <input
+                                type="radio"
+                                name="ai_provider"
+                                value="gemini"
+                                checked={(!configs['ai_provider'] || configs['ai_provider'] === 'gemini')}
+                                onChange={() => setConfigs({ ...configs, ai_provider: 'gemini' })}
+                                style={{ accentColor: 'var(--gold)' }}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Brain size={16} /> <span>Google Gemini</span>
+                            </div>
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px 16px', borderRadius: '8px', border: configs['ai_provider'] === 'openai' ? '1px solid var(--gold)' : '1px solid var(--border-color)', background: configs['ai_provider'] === 'openai' ? 'rgba(201, 169, 110, 0.1)' : 'transparent' }}>
+                            <input
+                                type="radio"
+                                name="ai_provider"
+                                value="openai"
+                                checked={configs['ai_provider'] === 'openai'}
+                                onChange={() => setConfigs({ ...configs, ai_provider: 'openai' })}
+                                style={{ accentColor: 'var(--gold)' }}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Bot size={16} /> <span>OpenAI</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    {/* API Keys (Conditional) */}
+                    {/* API Keys (Conditional) */}
+                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
+                        {/* Gemini Key */}
+                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('gemini')) && (
+                            <div className="form-group" style={{ marginBottom: (configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('openai')) ? '20px' : '0' }}>
+                                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Brain size={16} style={{ color: 'var(--gold)' }} />
+                                    Google Gemini API Key
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        className="form-input"
+                                        type={!visibleFields['gemini_api_key'] ? 'password' : 'text'}
+                                        value={configs['gemini_api_key'] || ''}
+                                        onChange={e => setConfigs({ ...configs, gemini_api_key: e.target.value })}
+                                        placeholder="AIzaSy..."
+                                        style={{ fontFamily: 'monospace', paddingRight: '40px', fontSize: '0.9rem' }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleVisibility('gemini_api_key')}
+                                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                    >
+                                        {visibleFields['gemini_api_key'] ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => testConnection('gemini')}
+                                        disabled={testResults['gemini']?.status === 'testing'}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            background: 'var(--bg-secondary)',
+                                            border: '1px solid var(--border-color)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '6px'
+                                        }}
+                                    >
+                                        {testResults['gemini']?.status === 'testing' ? <RefreshCw size={12} className="spin" /> : <Wifi size={12} />}
+                                        Testar Conexão
+                                    </button>
+                                    {testResults['gemini']?.message && (
+                                        <span style={{ fontSize: '0.8rem', color: testResults['gemini']?.status === 'success' ? '#22c55e' : '#ef4444' }}>
+                                            {testResults['gemini'].message}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* OpenAI Key */}
+                        {(configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('openai')) && (
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Bot size={16} style={{ color: 'var(--gold)' }} />
+                                    OpenAI API Key
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        className="form-input"
+                                        type={!visibleFields['openai_api_key'] ? 'password' : 'text'}
+                                        value={configs['openai_api_key'] || ''}
+                                        onChange={e => setConfigs({ ...configs, openai_api_key: e.target.value })}
+                                        placeholder="sk-..."
+                                        style={{ fontFamily: 'monospace', paddingRight: '40px', fontSize: '0.9rem' }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleVisibility('openai_api_key')}
+                                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                    >
+                                        {visibleFields['openai_api_key'] ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => testConnection('openai')}
+                                        disabled={testResults['openai']?.status === 'testing'}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            background: 'var(--bg-secondary)',
+                                            border: '1px solid var(--border-color)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '6px'
+                                        }}
+                                    >
+                                        {testResults['openai']?.status === 'testing' ? <RefreshCw size={12} className="spin" /> : <Wifi size={12} />}
+                                        Testar Conexão
+                                    </button>
+                                    {testResults['openai']?.message && (
+                                        <span style={{ fontSize: '0.8rem', color: testResults['openai']?.status === 'success' ? '#22c55e' : '#ef4444' }}>
+                                            {testResults['openai'].message}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── 1. CONCIERGE (CHAT) ── */}
+                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>💬</span> 1. Concierge (Chat do Site)
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        {/* Provider Select */}
+                        <div className="form-group">
+                            <label className="form-label">Provedor do Concierge</label>
+                            <select
+                                className="form-input"
+                                value={configs['concierge_provider'] || ''}
+                                onChange={e => setConfigs({ ...configs, concierge_provider: e.target.value })}
+                            >
+                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+
+                        {/* Model Select */}
+                        <div className="form-group">
+                            <label className="form-label">Modelo do Concierge</label>
+                            {(configs['concierge_provider'] === 'openai' || (!configs['concierge_provider'] && configs['ai_provider'] === 'openai')) ? (
+                                <div style={{ position: 'relative' }}>
+                                    <select
+                                        className="form-input"
+                                        value={configs['openai_concierge_model'] || ''}
+                                        onChange={e => setConfigs({ ...configs, openai_concierge_model: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                    {loadingOpenAIModels && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}><RefreshCw size={14} className="spin" /></div>}
+                                </div>
+                            ) : (
+                                <div style={{ position: 'relative' }}>
+                                    <select
+                                        className="form-input"
+                                        value={configs['gemini_concierge_model'] || ''}
+                                        onChange={e => setConfigs({ ...configs, gemini_concierge_model: e.target.value })}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                    {loadingGeminiModels && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}><RefreshCw size={14} className="spin" /></div>}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Prompts for Concierge */}
+                    <div className="form-group">
+                        <label className="form-label">Prompt do Sistema (Personalidade)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={6}
+                            value={configs['concierge_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, concierge_system_prompt: e.target.value })}
+                            placeholder={CONCIERGE_BASE_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Personalidade base do agente. Deixe em branco para usar o padrão (exibido acima).
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Regras de Segurança (Concierge)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={8}
+                            value={configs['concierge_rules_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, concierge_rules_prompt: e.target.value })}
+                            placeholder={CONCIERGE_SAFEGUARD_RULES}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Regras invioláveis que o agente deve seguir. Deixe em branco para usar as regras de segurança padrão.
+                        </div>
+                    </div>
+
+                    {/* Chat Behaviour (Humanization + Length) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Tempo Espera (s)</label>
+                            <input className="form-input" type="number" step="0.5" value={configs['chat_delay_before_typing'] || '2'} onChange={e => setConfigs({ ...configs, chat_delay_before_typing: e.target.value })} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Digitando Min (s)</label>
+                            <input className="form-input" type="number" step="0.5" value={configs['chat_typing_min_duration'] || '5'} onChange={e => setConfigs({ ...configs, chat_typing_min_duration: e.target.value })} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Tamanho Resposta</label>
+                            <select className="form-input" value={configs['chat_max_response_length'] || 'Curta (2-3 frases)'} onChange={e => setConfigs({ ...configs, chat_max_response_length: e.target.value })}>
+                                <option value="Muito curta (1 frase, máximo 20 palavras)">Muito Curta</option>
+                                <option value="Curta (2-3 frases, máximo 50 palavras)">Curta (Padrão)</option>
+                                <option value="Média (3-5 frases, máximo 100 palavras)">Média</option>
+                                <option value="Longa (parágrafos completos sem limite)">Longa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 2. PILGER AI (ADMIN) ── */}
+                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#818cf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>🧠</span> 2. Pilger AI (Assistente Admin)
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Provedor do Pilger AI</label>
+                            <select
+                                className="form-input"
+                                value={configs['pilger_provider'] || ''}
+                                onChange={e => setConfigs({ ...configs, pilger_provider: e.target.value })}
+                            >
+                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Modelo do Pilger AI</label>
+                            {(configs['pilger_provider'] === 'openai' || (!configs['pilger_provider'] && configs['ai_provider'] === 'openai')) ? (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['openai_pilger_model'] || ''} onChange={e => setConfigs({ ...configs, openai_pilger_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['gemini_pilger_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_pilger_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt do Sistema (Pilger AI)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={10}
+                            value={configs['pilger_ai_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, pilger_ai_system_prompt: e.target.value })}
+                            placeholder={PILGER_AI_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(129, 140, 248, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Prompt principal do assistente administrativo. Deixe em branco para usar o padrão.
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 3. CLONADOR DE LANDING PAGES ── */}
+                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#f472b6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>🧬</span> 3. Clonador de Landing Pages
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Provedor do Clonador</label>
+                            <select
+                                className="form-input"
+                                value={configs['cloner_provider'] || ''}
+                                onChange={e => setConfigs({ ...configs, cloner_provider: e.target.value })}
+                            >
+                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Modelo do Clonador</label>
+                            {(configs['cloner_provider'] === 'openai' || (!configs['cloner_provider'] && configs['ai_provider'] === 'openai')) ? (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['openai_cloner_model'] || ''} onChange={e => setConfigs({ ...configs, openai_cloner_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['gemini_cloner_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_cloner_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt Mestre de Clonagem (Avançado)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={12}
+                            value={configs['cloner_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, cloner_system_prompt: e.target.value })}
+                            placeholder={MASTER_LANDING_PAGE_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(244, 114, 182, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Deixe em branco para usar o prompt padrão do sistema (exibido acima como placeholder).
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 4. EXTRAÇÃO DE LEADS (OCULTO ANTES) ── */}
+                <div style={{ paddingBottom: '30px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>🕵️</span> 4. Extração de Leads (Chat)
+                    </h3>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt de Extração de Dados</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={6}
+                            value={configs['lead_extraction_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, lead_extraction_prompt: e.target.value })}
+                            placeholder={LEAD_EXTRACTION_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(52, 211, 153, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Controla como a IA identifica e extrai leads da conversa. Deixe em branco para usar o padrão (exibido acima como placeholder).
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Diagnostic Tools */}

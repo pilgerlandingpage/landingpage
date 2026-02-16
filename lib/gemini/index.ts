@@ -17,23 +17,37 @@ export async function getGeminiApiKey(): Promise<string | null> {
             .from('app_config')
             .select('value')
             .eq('key', 'gemini_api_key')
-            .single()
+            .maybeSingle()
         if (data?.value) return data.value
     } catch { /* fallback to env */ }
     return process.env.GEMINI_API_KEY || null
 }
 
-export async function getGeminiModel(): Promise<string> {
+export async function getGeminiModel(type: 'concierge' | 'cloner' = 'concierge'): Promise<string> {
+    const key = type === 'cloner' ? 'gemini_cloner_model' : 'gemini_concierge_model'
     try {
         const supabase = getSupabase()
         const { data } = await supabase
             .from('app_config')
             .select('value')
-            .eq('key', 'gemini_model')
-            .single()
+            .eq('key', key)
+            .maybeSingle()
+
         if (data?.value) return data.value
+
+        // Fallback for legacy key
+        if (type === 'concierge') {
+            const { data: legacy } = await supabase
+                .from('app_config')
+                .select('value')
+                .eq('key', 'gemini_model')
+                .maybeSingle()
+            if (legacy?.value) return legacy.value
+        }
     } catch { /* fallback to default */ }
-    return DEFAULT_MODEL
+
+    // Default optimized for each task
+    return type === 'cloner' ? 'gemini-1.5-pro' : 'gemini-2.0-flash'
 }
 
 export interface GeminiModel {

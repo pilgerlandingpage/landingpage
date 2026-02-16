@@ -26,6 +26,9 @@ export async function createServerSupabase() {
     )
 }
 
+// Alias for compatibility
+export const createClient = createServerSupabase
+
 export function createAdminClient() {
     const { createClient } = require('@supabase/supabase-js')
     return createClient(

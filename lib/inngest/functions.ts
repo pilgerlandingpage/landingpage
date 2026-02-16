@@ -1,6 +1,10 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage, interpolateTemplate } from '../connectyhub'
+import { scrapePage } from '../scraper'
+import { generateLandingPageContent } from '../ai/generation'
+import { uploadImageToR2 } from '../storage/r2'
+import { v4 as uuidv4 } from 'uuid'
 
 function getSupabase() {
     return createClient(
@@ -9,7 +13,95 @@ function getSupabase() {
     )
 }
 
-// Send immediate welcome message when a new lead is captured
+// Helper to slugify text
+function slugify(text: string) {
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-')
+}
+
+export const processCloningJob = inngest.createFunction(
+    { id: 'process-cloning-job', name: 'Process Cloning Job', concurrency: 5 },
+    { event: 'cloner/process-url' },
+    async ({ event, step }) => {
+        const { pageId, url, customPrompt, userId } = event.data
+        const supabase = getSupabase()
+
+        // 1. Update Status to Processing
+        await step.run('update-status-processing', async () => {
+            await supabase.from('landing_pages').update({ status: 'processing' }).eq('id', pageId)
+        })
+
+        // 2. Scrape Page
+        const scrapedData = await step.run('scrape-url', async () => {
+            return await scrapePage(url)
+        })
+
+        // 3. Generate Content with Gemini
+        const aiContent = await step.run('generate-content', async () => {
+            return await generateLandingPageContent(scrapedData.html, customPrompt)
+        })
+
+        // 4. Process Images (Upload to R2)
+        const processedContent = await step.run('process-images', async () => {
+            const newContent = { ...aiContent }
+            if (newContent.gallery_images && Array.isArray(newContent.gallery_images)) {
+                const newGallery = []
+                for (const imgUrl of newContent.gallery_images) {
+                    if (imgUrl.startsWith('http')) {
+                        const key = `cloned/${pageId}/${uuidv4()}.jpg`
+                        const r2Url = await uploadImageToR2(imgUrl, key)
+                        newGallery.push(r2Url)
+                    }
+                }
+                newContent.gallery_images = newGallery
+            }
+            return newContent
+        })
+
+        // 5. Save Result & Update SEO/Agent
+        await step.run('save-result', async () => {
+            const title = processedContent.title || 'Nova Landing Page'
+            const baseSlug = slugify(title)
+            const finalSlug = `${baseSlug}-${uuidv4().substring(0, 4)}`
+
+            // Try to find a default agent if none assigned
+            const { data: pageNow } = await supabase.from('landing_pages').select('ai_agent_id').eq('id', pageId).single()
+            let agentId = pageNow?.ai_agent_id
+
+            if (!agentId) {
+                const { data: agents } = await supabase.from('ai_agents').select('id').limit(1)
+                if (agents && agents.length > 0) agentId = agents[0].id
+            }
+
+            const { error } = await supabase.from('landing_pages').update({
+                status: 'completed',
+                content: processedContent,
+                title: title,
+                slug: finalSlug,
+                description: processedContent.seo_description || '',
+                ai_agent_id: agentId,
+                updated_at: new Date().toISOString()
+            }).eq('id', pageId)
+
+            if (error) throw new Error(error.message)
+        })
+
+        return { success: true, pageId }
+    }
+)
+
+// ------------------------------------------------------------------
+// EXISTING FUNCTIONS (Welcome, FollowUp, VIP, Automation)
+// ------------------------------------------------------------------
+
+// Send immediate welcome message
 export const sendWelcome = inngest.createFunction(
     { id: 'send-welcome-message', name: 'Send Welcome WhatsApp Message' },
     { event: 'lead/created' },
@@ -19,8 +111,6 @@ export const sendWelcome = inngest.createFunction(
         if (!phone) return { skipped: true, reason: 'no phone' }
 
         const supabase = getSupabase()
-
-        // Get welcome template from app_config
         const { data: config } = await supabase
             .from('app_config')
             .select('value')
@@ -37,10 +127,7 @@ export const sendWelcome = inngest.createFunction(
 
         try {
             await sendWhatsAppMessage({ phone, message })
-            await supabase
-                .from('leads')
-                .update({ whatsapp_sent: true })
-                .eq('id', lead_id)
+            await supabase.from('leads').update({ whatsapp_sent: true }).eq('id', lead_id)
             return { success: true }
         } catch (error) {
             console.error('Failed to send welcome message:', error)
@@ -49,45 +136,32 @@ export const sendWelcome = inngest.createFunction(
     }
 )
 
-// Send follow-up message after delay
 export const sendFollowUp = inngest.createFunction(
     { id: 'send-followup-message', name: 'Send Follow-up Message' },
     { event: 'lead/schedule-followup' },
     async ({ event, step }) => {
-        const { lead_id, phone, name, delay_minutes, message_template, property_title } = event.data
-
-        // Wait for the specified delay
+        const { phone, name, delay_minutes, message_template, property_title } = event.data
         await step.sleep('wait-before-followup', `${delay_minutes}m`)
-
         const message = interpolateTemplate(message_template, {
             name: name || 'visitante',
             property: property_title || 'nossos imóveis',
         })
-
         try {
             await sendWhatsAppMessage({ phone, message })
             return { success: true }
         } catch (error) {
-            console.error('Failed to send follow-up:', error)
             return { success: false, error: String(error) }
         }
     }
 )
 
-// Alert realtor about VIP lead
 export const vipAlert = inngest.createFunction(
     { id: 'vip-lead-alert', name: 'VIP Lead Alert to Realtor' },
     { event: 'lead/vip-detected' },
     async ({ event }) => {
         const { name, phone, property_title, ai_summary } = event.data
         const supabase = getSupabase()
-
-        // Get realtor phone from app_config
-        const { data: config } = await supabase
-            .from('app_config')
-            .select('value')
-            .eq('key', 'realtor_phone')
-            .single()
+        const { data: config } = await supabase.from('app_config').select('value').eq('key', 'realtor_phone').single()
 
         if (!config?.value) return { skipped: true, reason: 'no realtor phone configured' }
 
@@ -102,44 +176,32 @@ export const vipAlert = inngest.createFunction(
     }
 )
 
-// Process automation rules for scheduled messages
 export const processAutomationRule = inngest.createFunction(
     { id: 'process-automation-rule', name: 'Process Automation Rule' },
     { event: 'automation/execute-rule' },
     async ({ event, step }) => {
         const { rule_id, lead_id, phone, name, delay_minutes, message_template, property_title } = event.data
+        if (delay_minutes > 0) await step.sleep('wait-for-rule', `${delay_minutes}m`)
 
-        if (delay_minutes > 0) {
-            await step.sleep('wait-for-rule', `${delay_minutes}m`)
-        }
-
-        const message = interpolateTemplate(message_template, {
-            name: name || 'visitante',
-            property: property_title || 'nossos imóveis',
-        })
-
+        const message = interpolateTemplate(message_template, { name: name || 'visitante', property: property_title || 'nossos imóveis' })
         const supabase = getSupabase()
 
         try {
             await sendWhatsAppMessage({ phone, message })
-            // Update message_queue status
-            await supabase
-                .from('lp_message_queue')
-                .update({ status: 'sent', sent_at: new Date().toISOString() })
-                .eq('lead_id', lead_id)
-                .eq('rule_id', rule_id)
-                .eq('status', 'pending')
+            await supabase.from('lp_message_queue').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('lead_id', lead_id).eq('rule_id', rule_id).eq('status', 'pending')
             return { success: true }
         } catch (error) {
-            await supabase
-                .from('lp_message_queue')
-                .update({ status: 'failed' })
-                .eq('lead_id', lead_id)
-                .eq('rule_id', rule_id)
-                .eq('status', 'pending')
+            await supabase.from('lp_message_queue').update({ status: 'failed' }).eq('lead_id', lead_id).eq('rule_id', rule_id).eq('status', 'pending')
             return { success: false, error: String(error) }
         }
     }
 )
 
-export const functions = [sendWelcome, sendFollowUp, vipAlert, processAutomationRule]
+// EXPORT ALL FUNCTIONS
+export const functions = [
+    sendWelcome,
+    sendFollowUp,
+    vipAlert,
+    processAutomationRule,
+    processCloningJob // New function added
+]

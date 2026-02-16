@@ -2,10 +2,14 @@ import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
 
 function getSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!url || !key) {
+        throw new Error(`Supabase configuration missing. URL: ${!!url}, Key: ${!!key}`)
+    }
+
+    return createClient(url, key)
 }
 
 async function configureVapid() {
@@ -57,40 +61,59 @@ export async function saveSubscription(
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = getSupabase()
 
-    // Check if subscription already exists
-    const { data: existing } = await supabase
-        .from('push_subscriptions')
+    const { error: subError } = await supabase.from('push_subscriptions').upsert({
+        visitor_id: visitorId,
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+        active: true
+    }, { onConflict: 'endpoint' })
+
+    if (subError) return { success: false, error: subError.message }
+
+    // Check if lead exists
+    const { data: existingLead } = await supabase
+        .from('leads')
         .select('id')
-        .eq('endpoint', subscription.endpoint)
+        .eq('visitor_id', visitorId)
         .single()
 
-    if (existing) {
-        // Update existing
+    if (existingLead) {
+        // Update existing lead
         await supabase
-            .from('push_subscriptions')
-            .update({
-                p256dh: subscription.keys.p256dh,
-                auth: subscription.keys.auth,
-                active: true,
-            })
-            .eq('id', existing.id)
+            .from('leads')
+            .update({ push_subscribed: true })
+            .eq('id', existingLead.id)
     } else {
-        // Create new
-        const { error } = await supabase.from('push_subscriptions').insert({
+        // Create new lead (Lead Push Over)
+        // Fetch visitor data to populate lead
+        const { data: visitor } = await supabase
+            .from('visitors')
+            .select('*')
+            .eq('id', visitorId)
+            .single()
+
+        if (!visitor) {
+            console.error('[Push] Visitor not found for ID:', visitorId)
+            return { success: false, error: 'Visitor ID not found in database. Clear cookies?' }
+        }
+
+        const { error: insertError } = await supabase.from('leads').insert({
             visitor_id: visitorId,
-            endpoint: subscription.endpoint,
-            p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth,
+            funnel_stage: 'lead',
+            name: 'Inscrito Push', // Placeholder
+            push_subscribed: true,
+            created_at: new Date().toISOString(),
+            country: visitor?.country,
+            city: visitor?.city,
+            state: visitor?.region
         })
 
-        if (error) return { success: false, error: error.message }
+        if (insertError) {
+            console.error('[Push] Failed to create lead:', insertError)
+            return { success: false, error: 'Failed to create lead record: ' + insertError.message }
+        }
     }
-
-    // Mark lead as push_subscribed
-    await supabase
-        .from('leads')
-        .update({ push_subscribed: true })
-        .eq('visitor_id', visitorId)
 
     return { success: true }
 }
@@ -113,6 +136,7 @@ export async function sendPushNotification(
         )
         return { success: true }
     } catch (error: unknown) {
+        console.error('[WebPush] Send error:', error)
         const statusCode = (error as { statusCode?: number }).statusCode
         // If subscription expired or invalid, mark as inactive
         if (statusCode === 404 || statusCode === 410) {
