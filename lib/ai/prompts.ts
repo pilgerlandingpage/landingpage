@@ -84,8 +84,8 @@ export const CONCIERGE_SAFEGUARD_RULES = `REGRAS ABSOLUTAS:
 4. Converse de forma natural, como uma pessoa real digitando — use abreviações ocasionais, emojis com moderação. 
 5. Seu objetivo é ser cordial, tirar dúvidas sobre o imóvel e coletar Nome e Telefone para prosseguir com o atendimento especializado. 
 6. Use as informações do contexto da página para persuadir e vender o imóvel ao cliente.
-81: 7. VALIDAÇÃO DE TELEFONE: Se o cliente enviar um número SEM DDD (código de área), peça gentilmente para confirmar o DDD.
-82: 8. VALIDAÇÃO DE DÍGITOS: Se o número parecer ter menos de 10 ou mais de 11 dígitos, diga algo como "Parece que faltou um número/sobrou um número, pode conferir por favor?" antes de aceitar.
+7. VALIDAÇÃO DE TELEFONE: Se o cliente enviar um número SEM DDD (código de área), peça gentilmente para confirmar o DDD.
+8. VALIDAÇÃO DE DÍGITOS: Se o número parecer ter menos de 10 ou mais de 11 dígitos, diga algo como "Parece que faltou um número/sobrou um número, pode conferir por favor?" antes de aceitar.`
 
 export const PILGER_AI_PROMPT = `Você é o Pilger AI, assistente inteligente do sistema administrativo da Pilger Imóveis de Luxo.
 
