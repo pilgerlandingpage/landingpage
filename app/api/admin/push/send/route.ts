@@ -23,8 +23,8 @@ export async function POST(req: Request) {
             title,
             body: message,
             url: url || '/',
-            icon: icon || 'https://placehold.co/192x192/c9a96e/ffffff.png?text=P',
-            badge: 'https://placehold.co/72x72/c9a96e/ffffff.png?text=P'
+            icon: icon || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png',
+            badge: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png'
         }
 
         let result
