@@ -1,20 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-
-const COOKIE_NAME = 'pilger_visitor_id'
-const COOKIE_DAYS = 30
-
-function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
-    return match ? decodeURIComponent(match[2]) : null
-}
-
-function setCookie(name: string, value: string, days: number) {
-    const expires = new Date(Date.now() + days * 864e5).toUTCString()
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`
-}
+import { useEffect, useRef } from 'react'
+import { getVisitorId } from '@/lib/tracking/client'
 
 interface TrackerProps {
     landingPageSlug?: string
@@ -29,11 +16,7 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
         tracked.current = true
 
         const track = async () => {
-            let cookieId = getCookie(COOKIE_NAME)
-            if (!cookieId) {
-                cookieId = uuidv4()
-                setCookie(COOKIE_NAME, cookieId, COOKIE_DAYS)
-            }
+            const cookieId = getVisitorId()
 
             try {
                 const response = await fetch('/api/track', {

@@ -1,27 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Tracker from '@/components/tracking/Tracker'
-import PushConsent from '@/components/push/PushConsent'
+import UnifiedConsentBanner from '@/components/tracking/UnifiedConsentBanner'
+import { hasConsent } from '@/lib/tracking/client'
 
 interface MainTrackerProps {
     landingPageSlug?: string
 }
 
 export default function MainTracker({ landingPageSlug }: MainTrackerProps) {
+    const [consent, setConsent] = useState(false)
     const [visitorId, setVisitorId] = useState<string | undefined>()
-    const [vapidKey, setVapidKey] = useState<string | undefined>()
+
+    useEffect(() => {
+        setConsent(hasConsent())
+
+        const handleConsent = () => setConsent(true)
+        if (typeof window !== 'undefined') {
+            window.addEventListener('pilger_consent_granted', handleConsent)
+            return () => window.removeEventListener('pilger_consent_granted', handleConsent)
+        }
+    }, [])
 
     return (
         <>
-            <Tracker
-                landingPageSlug={landingPageSlug}
-                onVisitorReady={(id, key) => {
-                    setVisitorId(id)
-                    setVapidKey(key)
-                }}
-            />
-            {visitorId && <PushConsent visitorId={visitorId} vapidPublicKey={vapidKey} />}
+            {consent && (
+                <Tracker
+                    landingPageSlug={landingPageSlug}
+                    onVisitorReady={(id) => setVisitorId(id)}
+                />
+            )}
+            <UnifiedConsentBanner />
         </>
     )
 }
