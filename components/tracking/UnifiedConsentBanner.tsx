@@ -28,6 +28,7 @@ export default function UnifiedConsentBanner() {
             console.log('[Consent] Cookie visitor ID:', cookieId)
 
             let dbVisitorId: string | null = null
+            let vapidPublicKey: string | null = null
 
             try {
                 const trackRes = await fetch('/api/track', {
@@ -43,22 +44,26 @@ export default function UnifiedConsentBanner() {
                 })
                 const trackData = await trackRes.json()
                 dbVisitorId = trackData.visitor_id
+                vapidPublicKey = trackData.vapid_public_key || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null
                 console.log('[Consent] Database visitor ID:', dbVisitorId)
+                console.log('[Consent] VAPID key available:', !!vapidPublicKey)
             } catch (err) {
                 console.error('[Consent] Failed to register visitor:', err)
             }
 
-            // 3. Request Push Permission + Subscribe (only if we have a DB visitor ID)
-            if (dbVisitorId && 'Notification' in window && 'serviceWorker' in navigator) {
+            // 3. Request Push Permission + Subscribe (only if we have a DB visitor ID AND a VAPID key)
+            if (dbVisitorId && vapidPublicKey && 'Notification' in window && 'serviceWorker' in navigator) {
                 try {
                     const permission = await Notification.requestPermission()
                     console.log('[Consent] Push permission:', permission)
                     if (permission === 'granted') {
-                        await subscribeToPush(dbVisitorId)
+                        await subscribeToPush(dbVisitorId, vapidPublicKey)
                     }
                 } catch (pushErr) {
                     console.error('[Consent] Push permission error:', pushErr)
                 }
+            } else if (!vapidPublicKey) {
+                console.warn('[Consent] No VAPID key available, push subscription skipped')
             }
         } catch (error) {
             console.error('[Consent] Error:', error)
@@ -68,18 +73,14 @@ export default function UnifiedConsentBanner() {
         }
     }
 
-    const subscribeToPush = async (dbVisitorId: string) => {
+    const subscribeToPush = async (dbVisitorId: string, vapidKey: string) => {
         try {
             console.log('[Consent] Registering service worker...')
             const registration = await navigator.serviceWorker.register('/sw.js')
             await navigator.serviceWorker.ready
             console.log('[Consent] Service worker ready')
 
-            const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-            if (!vapidKey) {
-                console.warn('[Consent] No VAPID key configured, skipping push')
-                return
-            }
+            console.log('[Consent] Subscribing with VAPID key (length:', vapidKey.length, ')')
 
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
