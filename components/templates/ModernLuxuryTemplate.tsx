@@ -4,6 +4,7 @@ import React from 'react'
 import { Bed, Bath, Move, MapPin, MessageCircle, ArrowRight } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { trackEvent } from '@/lib/tracking/client'
 
 export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const {
@@ -71,7 +72,7 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
             <section className="modern-gallery-section">
                 <div className="modern-gallery-grid">
                     {gallery.slice(0, 6).map((img, i) => (
-                        <div key={i} className="modern-gallery-item">
+                        <div key={i} className="modern-gallery-item" onClick={() => trackEvent('gallery_image_clicked', { image_index: i, image_url: img })}>
                             <img src={img} alt={`Galeria ${i}`} />
                         </div>
                     ))}
@@ -101,7 +102,17 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
                             <div className="modern-form-box">
                                 <h3>Fale com nosso Agente IA</h3>
                                 <p>Tire suas dúvidas agora mesmo.</p>
-                                <button className="modern-cta-secondary full-width">
+                                <button className="modern-cta-secondary full-width" onClick={() => {
+                                    trackEvent('chat_cta_clicked', { location: 'amenities_section' })
+                                    // Trigger chat open event global logic if possible, or just let user click the widget
+                                    // ideally dispatch event
+                                    const widget = document.getElementById('pilger-chat-widget')
+                                    if (widget) {
+                                        // This is a hack, better to use a Global Context or Event
+                                        // But for now, just tracking the intent
+                                        alert('Clique no ícone de chat no canto inferior direito para iniciar.')
+                                    }
+                                }}>
                                     <MessageCircle size={20} />
                                     Iniciar Chat
                                 </button>

@@ -9,9 +9,37 @@ interface FunnelStep {
     percentage: number
 }
 
+interface Visitor {
+    id: string
+    ip_address: string
+    detected_source: string
+    city: string
+    region: string
+    country: string
+    browser: string
+    os: string
+    device_type: string
+    first_visit_at: string
+    last_visit_at: string
+    page_views: number
+    is_lead: boolean
+    funnel_stage: string
+    push_subscribed?: boolean
+}
+
 export default function FunnelPage() {
     const [funnelData, setFunnelData] = useState<FunnelStep[]>([])
+    const [visitors, setVisitors] = useState<Visitor[]>([])
     const [loading, setLoading] = useState(true)
+
+    const safeDecode = (str?: string) => {
+        if (!str) return ''
+        try {
+            return decodeURIComponent(str)
+        } catch (e) {
+            return str
+        }
+    }
 
     useEffect(() => {
         const fetchFunnel = async () => {
@@ -25,6 +53,7 @@ export default function FunnelPage() {
 
                 const steps: FunnelStep[] = [
                     { label: '👁️ Visitaram a Página', count: data.pageViews || 0, percentage: 100 },
+                    { label: '🍪 Aceite de Cookies', count: data.cookieConsent || 0, percentage: ((data.cookieConsent || 0) / total) * 100 },
                     { label: '💬 Abriram o Chat', count: data.chatOpened || 0, percentage: ((data.chatOpened || 0) / total) * 100 },
                     { label: '📝 Enviaram Mensagem', count: data.messageSent || 0, percentage: ((data.messageSent || 0) / total) * 100 },
                     { label: '🔔 Aceitaram Push', count: data.pushSubscribed || 0, percentage: ((data.pushSubscribed || 0) / total) * 100 },
@@ -42,6 +71,19 @@ export default function FunnelPage() {
         }
 
         fetchFunnel()
+
+        const fetchVisitors = async () => {
+            try {
+                const res = await fetch('/api/admin/visitors')
+                const data = await res.json()
+                if (Array.isArray(data)) {
+                    setVisitors(data.slice(0, 50)) // Show top 50 recent
+                }
+            } catch (error) {
+                console.error('Error fetching visitors:', error)
+            }
+        }
+        fetchVisitors()
     }, [])
 
     if (loading) {
@@ -69,13 +111,14 @@ export default function FunnelPage() {
                     {funnelData.map((step, index) => {
                         // Schematic width: reduces by step to preserve funnel shape
                         // e.g. 100%, 85%, 70%, 55%, 40%, 25%
-                        const maxSteps = 7
+                        const maxSteps = 8
                         const topWidthPercent = 100 - (index * 12)
                         const bottomWidthPercent = 100 - ((index + 1) * 12)
 
                         // Vivid colors for high impact on dark background
                         const colors = [
                             '#0066FF', // Electric Blue (Awareness)
+                            '#4ade80', // Green (Cookie Consent) - Add a distinctive color
                             '#9933FF', // Electric Purple (Interest)
                             '#FF0099', // Hot Pink (Desire)
                             '#FFAA00', // Amber (Push Notification)
@@ -97,6 +140,7 @@ export default function FunnelPage() {
                         // Let's use the vivid set
                         const activeColors = [
                             '#0088FE', // Strong Blue
+                            '#4ade80', // Green (Consent)
                             '#8884d8', // Purple
                             '#FF8042', // Orange (Wait, let's stick to the spectrum requested: Blue -> Purple -> Pink -> Orange -> Yellow -> Green)
 
@@ -104,6 +148,7 @@ export default function FunnelPage() {
                             '#2563EB', // Blue 600 (Stronger) -> Let's try #3b82f6 again but maybe the issue is opacity?
                             // User said "more vivid".
                             '#0066FF', // Electric Blue
+                            '#4ade80', // Cookie Green
                             '#9933FF', // Electric Purple
                             '#FF0099', // Hot Pink
                             '#FF6600', // Vivid Orange
@@ -207,31 +252,67 @@ export default function FunnelPage() {
                     })}
                 </div>
             </div>
-
-            {/* Conversion tips */}
+            {/* Visitor Table (Top of Funnel Detail) */}
             <div className="chart-card" style={{ marginTop: '24px' }}>
-                <div className="chart-title">💡 Dicas de Otimização</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                    <div style={{ padding: '16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
-                        <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--gold)' }}>Chat → Lead</div>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            Otimize o prompt do agente IA para coletar dados de forma mais natural. Peça um dado por vez.
-                        </p>
-                    </div>
-                    <div style={{ padding: '16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
-                        <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--gold)' }}>Visitante → Chat</div>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            Considere abrir o chat automaticamente após 10 segundos. Melhora a taxa de engajamento.
-                        </p>
-                    </div>
-                    <div style={{ padding: '16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
-                        <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--gold)' }}>Exit Intent</div>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            Ative o popup de saída para capturar visitantes que estão saindo sem converter.
-                        </p>
-                    </div>
+                <div className="chart-title flex justify-between items-center" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <span>Detalhamento de Tráfego (Topo de Funil)</span>
+                    <a href="/admin/leads" style={{ fontSize: '0.8rem', color: '#c9a96e', textDecoration: 'none' }}>Ver Todos</a>
+                </div>
+                <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead style={{ position: 'sticky', top: 0, background: '#1a1a1a', zIndex: 10 }}>
+                            <tr style={{ borderBottom: '1px solid #2a2a2a', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Status</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Última Visita</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Localização</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Origem</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Páginas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {visitors.map((v, i) => (
+                                <tr key={v.id || i} style={{ borderBottom: '1px solid #2a2a2a', fontSize: '0.85rem' }}>
+                                    <td style={{ padding: '12px 8px' }}>
+                                        {v.is_lead ? (
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
+                                                Lead ({v.funnel_stage})
+                                            </span>
+                                        ) : (
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(201, 169, 110, 0.1)', color: '#c9a96e', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
+                                                Visitante
+                                            </span>
+                                        )}
+                                        {v.push_subscribed && (
+                                            <span style={{ marginLeft: '8px', fontSize: '0.9rem' }} title="Assinante Push">🔔</span>
+                                        )}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', color: '#f5f5f5' }}>
+                                        {new Date(v.last_visit_at).toLocaleString('pt-BR')}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', color: '#888' }}>
+                                        {[safeDecode(v.city), safeDecode(v.region), v.country].filter(Boolean).join(', ') || '—'}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', fontWeight: 500, color: '#f5f5f5' }}>
+                                        {v.detected_source}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', textAlign: 'center', color: '#f5f5f5' }}>
+                                        <span style={{ background: '#2a2a2a', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                                            {v.page_views}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                            {visitors.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#666' }}>Nenhum acesso recente</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+
         </div>
     )
 }

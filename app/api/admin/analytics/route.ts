@@ -19,7 +19,9 @@ export async function GET() {
             { data: sourceRaw },
             { data: dailyVisitors },
             { data: dailyLeads },
-            { count: pushCount }
+            { count: pushCount },
+            { data: recentVisitorsRaw },
+            { count: cookieConsentCount }
         ] = await Promise.all([
             // 1. Total Visitors
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
@@ -50,7 +52,13 @@ export async function GET() {
                 .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
 
             // 9. Push Subscribers
-            supabase.from('push_subscriptions').select('*', { count: 'exact', head: true }).eq('active', true)
+            supabase.from('push_subscriptions').select('*', { count: 'exact', head: true }).eq('active', true),
+
+            // 10. Recent Visitors
+            supabase.from('visitors').select('*').order('last_visit_at', { ascending: false }).limit(6),
+
+            // 11. Cookie Consent
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'cookie_consent')
         ])
 
         // Process Chat Sessions
@@ -86,6 +94,23 @@ export async function GET() {
 
         // ... (keep existing processing)
 
+        // Process Recent Visitors
+        const recentVisitorIds = recentVisitorsRaw?.map(v => v.id) || []
+        const { data: recentLeads } = await supabase
+            .from('leads')
+            .select('visitor_id, funnel_stage, push_subscribed')
+            .in('visitor_id', recentVisitorIds)
+
+        const recentVisitors = recentVisitorsRaw?.map(visitor => {
+            const lead = recentLeads?.find(l => l.visitor_id === visitor.id)
+            return {
+                ...visitor,
+                is_lead: !!lead,
+                funnel_stage: lead?.funnel_stage || 'visitor',
+                push_subscribed: lead?.push_subscribed || false
+            }
+        }) || []
+
         const stats = {
             totalVisitors: visitorsCount || 0,
             totalLeads: leadsCount || 0,
@@ -94,12 +119,14 @@ export async function GET() {
             chatSessions: uniqueChatSessions,
             whatsappSent: whatsappCount || 0,
             pushSubscribers: pushCount || 0,
+            cookieConsent: cookieConsentCount || 0,
         }
 
         return NextResponse.json({
             stats,
             sourceData: sourceChartData,
-            dailyData
+            dailyData,
+            recentVisitors
         })
 
     } catch (error) {

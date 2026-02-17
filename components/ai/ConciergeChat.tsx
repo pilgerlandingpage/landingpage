@@ -7,11 +7,7 @@ import { createPortal } from 'react-dom'
 import { MessageSquare, X, Send, User, Loader2 } from 'lucide-react'
 
 // Helper to read cookie value (Tracker sets pilger_visitor_id as cookie, NOT localStorage)
-function getCookieValue(name: string): string | null {
-    if (typeof document === 'undefined') return null
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
-    return match ? decodeURIComponent(match[2]) : null
-}
+import { trackEvent, getVisitorId } from '@/lib/tracking/client'
 
 interface Message {
     id: string
@@ -198,27 +194,7 @@ export default function ConciergeChat() {
         }
     }, [isOpen, hasGreeted, pageContext, pageContent])
 
-    const trackEvent = async (eventType: string, metadata: any = {}) => {
-        try {
-            // Get visitor_cookie_id from cookie (set by Tracker component)
-            const visitorCookieId = getCookieValue('pilger_visitor_id')
 
-            await fetch('/api/track', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    visitor_cookie_id: visitorCookieId,
-                    landing_page_slug: pageContext.slug,
-                    event_type: eventType,
-                    metadata,
-                    search_params: window.location.search,
-                    referrer: document.referrer
-                })
-            })
-        } catch (e) {
-            console.error('Tracking error:', e)
-        }
-    }
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return
@@ -250,7 +226,7 @@ export default function ConciergeChat() {
                     page_context: currentContext,
                     page_content: pageContent,
                     propertyId: pageContext.type === 'property' ? pageContext.id : null,
-                    visitor_cookie_id: getCookieValue('pilger_visitor_id') // Pass cookie ID for backend tracking
+                    visitor_cookie_id: getVisitorId() // Use shared client logic
                 })
             }).then(res => res.json())
 

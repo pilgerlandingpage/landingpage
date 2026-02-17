@@ -102,13 +102,13 @@ export async function POST(request: NextRequest) {
             })
         }
 
-        // Create new visitor
+        // Create new visitor (upsert to handle race conditions safely)
         const { data: visitor, error } = await supabase
             .from('visitors')
-            .insert({
+            .upsert({
                 ...trackingData,
                 landing_page_id: landingPageId,
-            })
+            }, { onConflict: 'visitor_cookie_id' })
             .select('id')
             .single()
 

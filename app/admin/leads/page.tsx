@@ -28,6 +28,24 @@ interface Lead {
     }
 }
 
+interface Visitor {
+    id: string
+    ip_address: string
+    detected_source: string
+    city: string
+    region: string
+    country: string
+    browser: string
+    os: string
+    device_type: string
+    first_visit_at: string
+    last_visit_at: string
+    page_views: number
+    is_lead: boolean
+    funnel_stage: string
+    push_subscribed?: boolean
+}
+
 const stageLabel: Record<string, string> = {
     'lead': 'Novo Lead',
     'contacted': 'Contatado',
@@ -78,8 +96,21 @@ export default function LeadsPage() {
         lost: 0
     })
 
+    const [activeTab, setActiveTab] = useState<'leads' | 'visitors'>('leads')
+    const [visitors, setVisitors] = useState<Visitor[]>([])
+    const [loadingVisitors, setLoadingVisitors] = useState(false)
+
     const openLeadDetails = (lead: Lead) => setSelectedLead(lead)
     const closeLeadDetails = () => setSelectedLead(null)
+
+    const safeDecode = (str?: string) => {
+        if (!str) return ''
+        try {
+            return decodeURIComponent(str)
+        } catch (e) {
+            return str
+        }
+    }
 
     useEffect(() => {
         const fetchLeads = async () => {
@@ -116,6 +147,26 @@ export default function LeadsPage() {
         fetchLeads()
     }, [])
 
+    useEffect(() => {
+        if (activeTab === 'visitors' && visitors.length === 0) {
+            fetchVisitors()
+        }
+    }, [activeTab])
+
+    const fetchVisitors = async () => {
+        setLoadingVisitors(true)
+        try {
+            const res = await fetch('/api/admin/visitors')
+            if (!res.ok) throw new Error('Failed to fetch visitors')
+            const data: Visitor[] = await res.json()
+            setVisitors(data)
+        } catch (error) {
+            console.error('Error fetching visitors:', error)
+        } finally {
+            setLoadingVisitors(false)
+        }
+    }
+
     const filteredLeads = leads.filter(lead => {
         if (stageFilter && lead.funnel_stage !== stageFilter) return false
 
@@ -137,7 +188,7 @@ export default function LeadsPage() {
             stageLabel[l.funnel_stage] || l.funnel_stage,
             l.is_vip ? 'Sim' : 'Não',
             l.visitor?.detected_source || '',
-            [l.visitor?.city, l.visitor?.region, l.visitor?.country].filter(Boolean).join(', ') || '',
+            [safeDecode(l.visitor?.city), safeDecode(l.visitor?.region), l.visitor?.country].filter(Boolean).join(', ') || '',
             l.visitor?.browser || '',
             l.visitor?.device_type || '',
             l.visitor?.ip_address || '',
@@ -180,103 +231,184 @@ export default function LeadsPage() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-4 mb-4 custom-scrollbar">
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6 p-1 bg-[#1a1a1a] rounded-xl inline-flex border border-[#333]">
                 <button
-                    onClick={() => setStageFilter('')}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${!stageFilter
-                        ? 'bg-[#c9a96e] text-black border-[#c9a96e]'
-                        : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#666]'
-                        }`}
+                    onClick={() => setActiveTab('leads')}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'leads' ? 'bg-[#c9a96e] text-black shadow-lg' : 'text-[#888] hover:text-[#f5f5f5] hover:bg-[#222]'}`}
                 >
-                    Todos ({counts.total})
+                    Leads ({counts.total})
                 </button>
-                {Object.entries(stageLabel).map(([key, label]) => (
+                <button
+                    onClick={() => setActiveTab('visitors')}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'visitors' ? 'bg-[#c9a96e] text-black shadow-lg' : 'text-[#888] hover:text-[#f5f5f5] hover:bg-[#222]'}`}
+                >
+                    Visitantes (Topo de Funil)
+                </button>
+            </div>
+
+            {/* Filters (Only for Leads tab) */}
+            {activeTab === 'leads' && (
+                <div className="flex gap-2 overflow-x-auto pb-4 mb-4 custom-scrollbar">
                     <button
-                        key={key}
-                        onClick={() => setStageFilter(key)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${stageFilter === key
+                        onClick={() => setStageFilter('')}
+                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${!stageFilter
                             ? 'bg-[#c9a96e] text-black border-[#c9a96e]'
                             : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#666]'
                             }`}
                     >
-                        {label} ({counts[key as keyof typeof counts] || 0})
+                        Todos ({counts.total})
                     </button>
-                ))}
-            </div>
+                    {Object.entries(stageLabel).map(([key, label]) => (
+                        <button
+                            key={key}
+                            onClick={() => setStageFilter(key)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${stageFilter === key
+                                ? 'bg-[#c9a96e] text-black border-[#c9a96e]'
+                                : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#666]'
+                                }`}
+                        >
+                            {label} ({counts[key as keyof typeof counts] || 0})
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* Table */}
             <div className="chart-card" style={{ padding: 0, overflow: 'auto' }}>
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Contato</th>
-                            <th>Estágio</th>
-                            <th>Origem / Local</th>
-                            <th>Dispositivo</th>
-                            <th>IP / Data</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
+                {activeTab === 'leads' ? (
+                    <table className="data-table">
+                        <thead>
                             <tr>
-                                <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                                    Carregando...
-                                </td>
+                                <th>Nome</th>
+                                <th>Contato</th>
+                                <th>Estágio</th>
+                                <th>Origem / Local</th>
+                                <th>Dispositivo</th>
+                                <th>IP / Data</th>
+                                <th>Ações</th>
                             </tr>
-                        ) : filteredLeads.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                                    Nenhum lead encontrado
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredLeads.map(lead => (
-                                <tr key={lead.id}>
-                                    <td style={{ fontWeight: 500 }}>
-                                        {lead.name || <span style={{ color: 'var(--text-muted)' }}>Anônimo</span>}
-                                        {lead.is_vip && <span className="badge badge-gold" style={{ marginLeft: '8px', fontSize: '0.7em' }}>VIP</span>}
-                                    </td>
-                                    <td>
-                                        {lead.phone && <div style={{ fontSize: '0.85rem' }}>📱 {lead.phone}</div>}
-                                        {lead.email && <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>✉️ {lead.email}</div>}
-                                    </td>
-                                    <td>
-                                        <span className={`badge ${stageBadge[lead.funnel_stage] || 'badge-gold'}`}>
-                                            {stageLabel[lead.funnel_stage] || lead.funnel_stage}
-                                        </span>
-                                    </td>
-                                    <td style={{ fontSize: '0.85rem' }}>
-                                        <div style={{ fontWeight: 500 }}>{lead.visitor?.detected_source || '—'}</div>
-                                        {(lead.visitor?.city || lead.visitor?.region || lead.visitor?.country) && (
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                📍 {[lead.visitor?.city, lead.visitor?.region, lead.visitor?.country].filter(Boolean).join(', ')}
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td style={{ fontSize: '0.85rem' }}>
-                                        {lead.visitor?.browser || '—'} / {lead.visitor?.device_type || '—'}
-                                    </td>
-                                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                        <div style={{ fontFamily: 'monospace' }}>{lead.visitor?.ip_address || '—'}</div>
-                                        <div>{new Date(lead.created_at).toLocaleDateString('pt-BR')}</div>
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="btn btn-sm btn-outline"
-                                            onClick={() => openLeadDetails(lead)}
-                                            style={{ fontSize: '0.8rem', padding: '4px 10px' }}
-                                        >
-                                            Ver Detalhes
-                                        </button>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                        Carregando...
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : filteredLeads.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                        Nenhum lead encontrado
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredLeads.map(lead => (
+                                    <tr key={lead.id}>
+                                        <td style={{ fontWeight: 500 }}>
+                                            {lead.name || <span style={{ color: 'var(--text-muted)' }}>Anônimo</span>}
+                                            {lead.is_vip && <span className="badge badge-gold" style={{ marginLeft: '8px', fontSize: '0.7em' }}>VIP</span>}
+                                        </td>
+                                        <td>
+                                            {lead.phone && <div style={{ fontSize: '0.85rem' }}>📱 {lead.phone}</div>}
+                                            {lead.email && <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>✉️ {lead.email}</div>}
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${stageBadge[lead.funnel_stage] || 'badge-gold'}`}>
+                                                {stageLabel[lead.funnel_stage] || lead.funnel_stage}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem' }}>
+                                            <div style={{ fontWeight: 500 }}>{lead.visitor?.detected_source || '—'}</div>
+                                            {(lead.visitor?.city || lead.visitor?.region || lead.visitor?.country) && (
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                                    📍 {[safeDecode(lead.visitor?.city), safeDecode(lead.visitor?.region), lead.visitor?.country].filter(Boolean).join(', ')}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem' }}>
+                                            {lead.visitor?.browser || '—'} / {lead.visitor?.device_type || '—'}
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                            <div style={{ fontFamily: 'monospace' }}>{lead.visitor?.ip_address || '—'}</div>
+                                            <div>{new Date(lead.created_at).toLocaleDateString('pt-BR')}</div>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="btn btn-sm btn-outline"
+                                                onClick={() => openLeadDetails(lead)}
+                                                style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                                            >
+                                                Ver Detalhes
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                ) : (
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Última Visita</th>
+                                <th>Origem / Local</th>
+                                <th>Dispositivo</th>
+                                <th>Páginas</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loadingVisitors ? (
+                                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Carregando visitantes...</td></tr>
+                            ) : visitors.length === 0 ? (
+                                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum visitante recente</td></tr>
+                            ) : (
+                                visitors.map(visitor => (
+                                    <tr key={visitor.id}>
+                                        <td>
+                                            {visitor.is_lead ? (
+                                                <span className="badge badge-success">Lead ({stageLabel[visitor.funnel_stage || ''] || visitor.funnel_stage})</span>
+                                            ) : (
+                                                <span className="badge badge-gold opacity-50">Visitante</span>
+                                            )}
+                                            {visitor.push_subscribed && (
+                                                <span title="Assinante Push notification" style={{ marginLeft: '8px', cursor: 'help' }}>🔔</span>
+                                            )}
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem' }}>
+                                            {new Date(visitor.last_visit_at).toLocaleString('pt-BR')}
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                1ª: {new Date(visitor.first_visit_at).toLocaleDateString('pt-BR')}
+                                            </div>
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem' }}>
+                                            <div style={{ fontWeight: 500 }}>{visitor.detected_source || '—'}</div>
+                                            {(visitor.city || visitor.region || visitor.country) && (
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                                    📍 {[safeDecode(visitor.city), safeDecode(visitor.region), visitor.country].filter(Boolean).join(', ')}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td style={{ fontSize: '0.85rem' }}>
+                                            {visitor.browser || '—'} <br />
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75em' }}>{visitor.os} • {visitor.device_type}</span>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <span className="text-[#f5f5f5] font-mono bg-[#2a2a2a] px-2 py-1 rounded text-xs">
+                                                {visitor.page_views || 1}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                            {visitor.ip_address}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             {/* Details Modal */}
@@ -390,7 +522,7 @@ export default function LeadsPage() {
                                         <div className="flex justify-between items-center group">
                                             <span className="text-[#666] text-sm group-hover:text-[#888] transition-colors">Localização</span>
                                             <span className="text-[#f5f5f5] text-sm">
-                                                {[selectedLead.visitor?.city, selectedLead.visitor?.region, selectedLead.visitor?.country].filter(Boolean).join(', ') || '—'}
+                                                {[safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', ') || '—'}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center group">
@@ -407,6 +539,28 @@ export default function LeadsPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Location Map */}
+                                {(selectedLead.visitor?.city || selectedLead.visitor?.region) && (
+                                    <div className="rounded-xl overflow-hidden border border-[#2a2a2a] h-40 relative group cursor-pointer"
+                                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', '))}`, '_blank')}
+                                    >
+                                        <iframe
+                                            width="100%"
+                                            height="100%"
+                                            title="Mapa de Localização do Lead"
+                                            style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(85%)' }}
+                                            loading="lazy"
+                                            referrerPolicy="no-referrer-when-downgrade"
+                                            src={`https://maps.google.com/maps?q=${encodeURIComponent([safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', '))}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                                        ></iframe>
+                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-all flex items-center justify-center pointer-events-none">
+                                            <div className="bg-[#1a1a1a]/80 backdrop-blur px-3 py-1.5 rounded-full border border-[#2a2a2a] text-xs text-[#c9a96e] font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                                                Abrir no Google Maps
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Action */}
                                 <button

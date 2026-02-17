@@ -51,61 +51,100 @@ export default function UnifiedConsentBanner() {
                 console.error('[Consent] Failed to register visitor:', err)
             }
 
-            // 3. Request Push Permission + Subscribe (only if we have a DB visitor ID AND a VAPID key)
-            if (dbVisitorId && vapidPublicKey && 'Notification' in window && 'serviceWorker' in navigator) {
+            // 3. Push Notification Flow
+            if (dbVisitorId && vapidPublicKey && 'serviceWorker' in navigator) {
                 try {
-                    const permission = await Notification.requestPermission()
-                    console.log('[Consent] Push permission:', permission)
-                    if (permission === 'granted') {
-                        await subscribeToPush(dbVisitorId, vapidPublicKey)
+                    // 3a. Register service worker FIRST (before permission request)
+                    console.log('[Consent] Pre-registering service worker...')
+                    const swRegistration = await navigator.serviceWorker.register('/sw.js')
+                    await navigator.serviceWorker.ready
+                    console.log('[Consent] Service worker ready')
+
+                    // 3b. Check current permission state
+                    const currentPermission = 'Notification' in window ? Notification.permission : 'unsupported'
+                    console.log('[Consent] Current notification permission:', currentPermission)
+
+                    let finalPermission = currentPermission
+
+                    if (currentPermission === 'default') {
+                        // Never asked — request permission now
+                        console.log('[Consent] Requesting notification permission...')
+                        finalPermission = await Notification.requestPermission()
+                        console.log('[Consent] Permission result:', finalPermission)
+                    } else if (currentPermission === 'denied') {
+                        console.warn('[Consent] Push notifications are BLOCKED in this browser. User must manually reset permissions in browser settings.')
+                    }
+
+                    if (finalPermission === 'granted') {
+                        // Subscribe to push
+                        console.log('[Consent] Subscribing to push with VAPID key (length:', vapidPublicKey.length, ')')
+                        const subscription = await swRegistration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+                        })
+                        console.log('[Consent] Push subscription created:', subscription.endpoint.substring(0, 60) + '...')
+
+                        // Save to backend
+                        const res = await fetch('/api/push/subscribe', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                visitor_id: dbVisitorId,
+                                subscription: subscription.toJSON(),
+                            }),
+                        })
+
+                        const data = await res.json()
+                        if (res.ok) {
+                            console.log('[Consent] ✅ Push subscription saved successfully!')
+                        } else {
+                            console.error('[Consent] ❌ Push subscription save failed:', data)
+                        }
+
+                        // Log push_consent funnel event
+                        try {
+                            await fetch('/api/track', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    visitor_cookie_id: cookieId,
+                                    event_type: 'push_consent',
+                                    metadata: { granted: true }
+                                }),
+                            })
+                        } catch (e) {
+                            console.warn('[Consent] Failed to log push_consent event:', e)
+                        }
+                    } else {
+                        console.log('[Consent] Push permission not granted:', finalPermission)
+                        // Log push_denied funnel event
+                        try {
+                            await fetch('/api/track', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    visitor_cookie_id: cookieId,
+                                    event_type: 'push_denied',
+                                    metadata: { permission: finalPermission }
+                                }),
+                            })
+                        } catch (e) {
+                            console.warn('[Consent] Failed to log push_denied event:', e)
+                        }
                     }
                 } catch (pushErr) {
-                    console.error('[Consent] Push permission error:', pushErr)
+                    console.error('[Consent] Push flow error:', pushErr)
                 }
-            } else if (!vapidPublicKey) {
-                console.warn('[Consent] No VAPID key available, push subscription skipped')
+            } else {
+                if (!dbVisitorId) console.error('[Consent] ❌ No DB visitor ID — push cannot proceed!')
+                if (!vapidPublicKey) console.warn('[Consent] No VAPID key available')
+                if (!('serviceWorker' in navigator)) console.warn('[Consent] Service Worker not supported')
             }
         } catch (error) {
             console.error('[Consent] Error:', error)
         } finally {
             setIsProcessing(false)
             setShow(false)
-        }
-    }
-
-    const subscribeToPush = async (dbVisitorId: string, vapidKey: string) => {
-        try {
-            console.log('[Consent] Registering service worker...')
-            const registration = await navigator.serviceWorker.register('/sw.js')
-            await navigator.serviceWorker.ready
-            console.log('[Consent] Service worker ready')
-
-            console.log('[Consent] Subscribing with VAPID key (length:', vapidKey.length, ')')
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidKey),
-            })
-            console.log('[Consent] Push subscription created')
-
-            // Use the DATABASE visitor ID (not the cookie ID)
-            const res = await fetch('/api/push/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    visitor_id: dbVisitorId,
-                    subscription: subscription.toJSON(),
-                }),
-            })
-
-            const data = await res.json()
-            if (res.ok) {
-                console.log('[Consent] Push subscription saved successfully!')
-            } else {
-                console.error('[Consent] Push subscription save failed:', data)
-            }
-        } catch (e) {
-            console.error('[Consent] Push subscription failed:', e)
         }
     }
 

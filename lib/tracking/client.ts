@@ -47,8 +47,11 @@ export function grantConsent() {
         window.dispatchEvent(new Event('pilger_consent_granted'))
     }
 
-    // Log consent event
-    trackEvent('cookie_consent', { granted: true })
+    // NOTE: Do NOT call trackEvent here — the UnifiedConsentBanner
+    // already calls /api/track with event_type: 'cookie_consent'.
+    // Calling it here too caused a race condition (duplicate INSERT 
+    // on visitors table with UNIQUE constraint on visitor_cookie_id),
+    // which silently broke push subscription registration.
 }
 
 export async function trackEvent(eventType: string, metadata: any = {}) {

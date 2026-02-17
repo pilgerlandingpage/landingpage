@@ -138,34 +138,68 @@ export default function PushAdminPage() {
                     </form>
                 </div>
 
-                {/* Preview */}
-                <div className="chart-card bg-[#111] border-dashed border-[#333]">
-                    <h2 className="text-lg font-bold text-[#f5f5f5] mb-6 flex items-center gap-2">
+                {/* Preview Section */}
+                <div className="chart-card bg-[#0a0a0a] border border-[#333] flex flex-col">
+                    <h2 className="text-lg font-bold text-[#f5f5f5] mb-8 flex items-center gap-2">
                         <Bell size={20} className="text-[#c9a96e]" />
                         Pré-visualização
                     </h2>
 
-                    <div className="flex items-center justify-center h-64">
-                        <div className="bg-[#222] p-4 rounded-xl shadow-2xl max-w-sm w-full border border-[#333] relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
-                            <div className="flex gap-4">
-                                <div className="h-10 w-10 rounded bg-[#333] flex-shrink-0 flex items-center justify-center">
-                                    <span className="text-lg">Logo</span>
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[url('/grid.svg')] bg-center bg-opacity-5">
+
+                        {/* Windows 11 Style Notification Toast */}
+                        <div className="w-full max-w-[360px] bg-[#1f1f1f] rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-[#333] overflow-hidden transform transition-all hover:scale-[1.02] duration-300">
+                            {/* Header */}
+                            <div className="px-4 py-3 flex items-center justify-between border-b border-[#333/50]">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-[#c9a96e] flex items-center justify-center">
+                                        <Bell size={10} className="text-black" />
+                                    </div>
+                                    <span className="text-xs font-medium text-[#ccc]">Pilger Landing Page</span>
+                                    <span className="text-[10px] text-[#666]">• Agora</span>
                                 </div>
+                                <button className="text-[#666] hover:text-[#f5f5f5]">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="p-4 flex gap-4">
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="text-[#f5f5f5] font-bold text-sm truncate">{form.title || 'Título da Notificação'}</h4>
-                                    <p className="text-[#888] text-xs mt-1 line-clamp-2">{form.message || 'Sua mensagem aparecerá aqui...'}</p>
-                                    <p className="text-[#666] text-[10px] mt-2">
-                                        {(() => {
-                                            try {
-                                                return new URL(form.url).hostname
-                                            } catch {
-                                                return ''
-                                            }
-                                        })()}
+                                    <h4 className="text-[#f5f5f5] font-semibold text-sm leading-tight mb-1">
+                                        {form.title || 'Título da Notificação'}
+                                    </h4>
+                                    <p className="text-[#999] text-xs leading-relaxed line-clamp-3">
+                                        {form.message || 'Sua mensagem aparecerá aqui. Digite algo no formulário ao lado para ver como ficará para o usuário.'}
                                     </p>
+
+                                    {/* Action / Domain */}
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <div className="px-2 py-1 rounded bg-[#333] text-[10px] text-[#888] flex items-center gap-1 max-w-full truncate">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[#c9a96e]"></div>
+                                            {(() => {
+                                                try {
+                                                    return new URL(form.url).hostname.replace('www.', '')
+                                                } catch {
+                                                    return 'pilger.com.br'
+                                                }
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Image Placeholder (if we had one, but we use Logo for now) */}
+                                <div className="w-16 h-16 bg-[#2a2a2a] rounded-md flex items-center justify-center border border-[#333] flex-shrink-0">
+                                    <div className="text-[#c9a96e] opacity-50">
+                                        <Users size={24} />
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Mobile Android Style Preview (Optional secondary or just stick to one good one) */}
+                        <div className="mt-8 opacity-40 text-xs text-[#444] text-center w-full px-8">
+                            * A aparência pode variar dependendo do sistema operacional (Windows, macOS, Android, iOS).
                         </div>
                     </div>
                 </div>

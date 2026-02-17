@@ -28,6 +28,7 @@ interface DashboardStats {
     chatSessions: number
     whatsappSent: number
     pushSubscribers: number
+    cookieConsent: number
 }
 
 interface SourceData {
@@ -41,6 +42,18 @@ interface DailyData {
     leads: number
 }
 
+interface RecentVisitor {
+    id: string
+    detected_source: string
+    city: string
+    region: string
+    country: string
+    last_visit_at: string
+    is_lead: boolean
+    funnel_stage: string
+    push_subscribed?: boolean
+}
+
 const PIE_COLORS = ['#c9a96e', '#dfc18e', '#a88b4a', '#8B7355', '#D4AF37', '#FFD700', '#B8860B', '#CD853F']
 
 export default function AdminDashboard() {
@@ -52,10 +65,21 @@ export default function AdminDashboard() {
         chatSessions: 0,
         whatsappSent: 0,
         pushSubscribers: 0,
+        cookieConsent: 0,
     })
     const [sourceData, setSourceData] = useState<SourceData[]>([])
     const [dailyData, setDailyData] = useState<DailyData[]>([])
+    const [recentVisitors, setRecentVisitors] = useState<RecentVisitor[]>([])
     const [loading, setLoading] = useState(true)
+
+    const safeDecode = (str?: string) => {
+        if (!str) return ''
+        try {
+            return decodeURIComponent(str)
+        } catch (e) {
+            return str
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +91,7 @@ export default function AdminDashboard() {
 
                 setStats(data.stats)
                 setSourceData(data.sourceData)
+                setRecentVisitors(data.recentVisitors || [])
 
                 // Ensure dates are formatted correctly if needed, broadly simpler than client-side calc
                 setDailyData(data.dailyData.map((d: any) => ({
@@ -218,6 +243,11 @@ export default function AdminDashboard() {
                     <div className="kpi-label">Inscritos Push</div>
                     <div className="kpi-value">{stats.pushSubscribers || 0}</div>
                 </div>
+                <div className="kpi-card">
+                    <div style={{ marginBottom: 8 }}>🍪</div>
+                    <div className="kpi-label">Aceite de Cookies</div>
+                    <div className="kpi-value">{stats.cookieConsent || 0}</div>
+                </div>
             </div>
 
             {/* Charts Row */}
@@ -288,6 +318,60 @@ export default function AdminDashboard() {
                         <Bar dataKey="value" fill="#c9a96e" radius={[4, 4, 0, 0]} name="Visitantes" />
                     </BarChart>
                 </ResponsiveContainer>
+            </div>
+
+            {/* Recent Traffic */}
+            <div className="chart-card" style={{ marginBottom: '24px' }}>
+                <div className="chart-title flex justify-between items-center" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <span>Tráfego em Tempo Real (Últimos Acessos)</span>
+                    <Link href="/admin/leads" style={{ fontSize: '0.8rem', color: '#c9a96e', textDecoration: 'none' }}>Ver Todos</Link>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid #2a2a2a', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Status</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Tempo</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Localização</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Origem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentVisitors.map((v, i) => (
+                                <tr key={v.id || i} style={{ borderBottom: '1px solid #2a2a2a', fontSize: '0.85rem' }}>
+                                    <td style={{ padding: '12px 8px' }}>
+                                        {v.is_lead ? (
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
+                                                Lead ({v.funnel_stage})
+                                            </span>
+                                        ) : (
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(201, 169, 110, 0.1)', color: '#c9a96e', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
+                                                Visitante
+                                            </span>
+                                        )}
+                                        {v.push_subscribed && (
+                                            <span style={{ marginLeft: '8px', fontSize: '0.9rem' }} title="Assinante Push">🔔</span>
+                                        )}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', color: '#f5f5f5' }}>
+                                        {new Date(v.last_visit_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', color: '#888' }}>
+                                        {[safeDecode(v.city), safeDecode(v.region), v.country].filter(Boolean).join(', ') || '—'}
+                                    </td>
+                                    <td style={{ padding: '12px 8px', fontWeight: 500, color: '#f5f5f5' }}>
+                                        {v.detected_source}
+                                    </td>
+                                </tr>
+                            ))}
+                            {recentVisitors.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: '#666' }}>Nenhum acesso recente</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     )
