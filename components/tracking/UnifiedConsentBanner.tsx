@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { grantConsent, hasConsent } from '@/lib/tracking/client'
-import { ShieldCheck } from 'lucide-react'
 
 export default function UnifiedConsentBanner() {
     const [show, setShow] = useState(false)
@@ -84,40 +83,133 @@ export default function UnifiedConsentBanner() {
     if (!show) return null
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/10 backdrop-blur-none animate-in fade-in duration-300">
-            <div
-                className="bg-white rounded-2xl p-8 sm:p-10 max-w-lg w-full relative shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col items-center text-center"
-                style={{
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
-                }}
-            >
-                <div className="w-16 h-16 rounded-full bg-[#c9a96e] flex items-center justify-center mb-6 shadow-lg shadow-[#c9a96e]/30">
-                    <ShieldCheck size={32} className="text-[#1a1a1a]" strokeWidth={1.5} />
+        <>
+            {/* Backdrop overlay */}
+            <div style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9998,
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+            }} />
+
+            {/* Centered modal */}
+            <div style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '16px',
+                animation: 'consentFadeIn 0.4s ease-out',
+            }}>
+                <div style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '20px',
+                    padding: '40px 36px 32px',
+                    maxWidth: '420px',
+                    width: '100%',
+                    position: 'relative',
+                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    animation: 'consentScaleIn 0.4s ease-out',
+                }}>
+                    {/* Shield icon */}
+                    <div style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #c9a96e, #b8944f)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '24px',
+                        boxShadow: '0 8px 20px rgba(201, 169, 110, 0.35)',
+                    }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </div>
+
+                    {/* Title */}
+                    <h3 style={{
+                        fontSize: '1.4rem',
+                        fontWeight: 700,
+                        color: '#111827',
+                        marginBottom: '12px',
+                        fontFamily: 'Georgia, "Times New Roman", serif',
+                        letterSpacing: '-0.01em',
+                    }}>
+                        Termos e Privacidade
+                    </h3>
+
+                    {/* Description */}
+                    <p style={{
+                        fontSize: '0.92rem',
+                        color: '#6b7280',
+                        lineHeight: 1.65,
+                        marginBottom: '28px',
+                        maxWidth: '320px',
+                    }}>
+                        Para garantir sua exclusividade e segurança, aceite nossos termos de uso e política de privacidade para continuar.
+                    </p>
+
+                    {/* Accept button */}
+                    <button
+                        onClick={handleAccept}
+                        disabled={isProcessing}
+                        style={{
+                            width: '100%',
+                            padding: '15px 24px',
+                            borderRadius: '12px',
+                            border: 'none',
+                            background: isProcessing ? '#d1d5db' : 'linear-gradient(135deg, #c9a96e, #b08a45)',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            cursor: isProcessing ? 'not-allowed' : 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 4px 14px rgba(201, 169, 110, 0.3)',
+                            marginBottom: '12px',
+                            letterSpacing: '0.01em',
+                        }}
+                    >
+                        {isProcessing ? 'Processando...' : 'Aceitar e Continuar'}
+                    </button>
+
+                    {/* Decline link */}
+                    <button
+                        onClick={() => setShow(false)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#9ca3af',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            padding: '4px',
+                            transition: 'color 0.2s',
+                        }}
+                    >
+                        Ler Termos ou Recusar
+                    </button>
                 </div>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 font-serif">
-                    Termos e Privacidade
-                </h3>
-
-                <p className="text-gray-600 mb-8 leading-relaxed text-[0.95rem]">
-                    Para garantir sua exclusividade e segurança, aceite nossos termos de uso e política de privacidade para continuar.
-                </p>
-
-                <button
-                    onClick={handleAccept}
-                    disabled={isProcessing}
-                    className="w-full py-3.5 px-6 bg-[#c9a96e] hover:bg-[#b0935d] text-[#1a1a1a] font-bold text-lg rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-[#c9a96e]/20 disabled:opacity-70 disabled:cursor-wait mb-4"
-                >
-                    {isProcessing ? 'Processando...' : 'Aceitar e Continuar'}
-                </button>
-
-                <button
-                    onClick={() => setShow(false)}
-                    className="text-sm text-gray-400 hover:text-gray-600 underline transition-colors"
-                >
-                    Ler Termos ou Recusar
-                </button>
             </div>
-        </div>
+
+            <style>{`
+                @keyframes consentFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes consentScaleIn {
+                    from { transform: scale(0.95); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            `}</style>
+        </>
     )
 }
