@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { grantConsent, hasConsent } from '@/lib/tracking/client'
+import { grantConsent, hasConsent, getVisitorId } from '@/lib/tracking/client'
 
 export default function UnifiedConsentBanner() {
     const [show, setShow] = useState(false)
@@ -20,52 +20,91 @@ export default function UnifiedConsentBanner() {
         setIsProcessing(true)
 
         try {
-            // 1. Grant Cookie Consent
+            // 1. Grant Cookie Consent (sets cookies + dispatches event)
             grantConsent()
 
-            // 2. Request Push Permission (if supported)
-            if ('Notification' in window && 'serviceWorker' in navigator) {
-                const permission = await Notification.requestPermission()
-                if (permission === 'granted') {
-                    // Subscribe logic
-                    await subscribeToPush()
+            // 2. Register visitor in the database FIRST (so we get the DB visitor ID)
+            const cookieId = getVisitorId()
+            console.log('[Consent] Cookie visitor ID:', cookieId)
+
+            let dbVisitorId: string | null = null
+
+            try {
+                const trackRes = await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitor_cookie_id: cookieId,
+                        referrer: document.referrer,
+                        search_params: window.location.search,
+                        event_type: 'cookie_consent',
+                        metadata: { granted: true }
+                    }),
+                })
+                const trackData = await trackRes.json()
+                dbVisitorId = trackData.visitor_id
+                console.log('[Consent] Database visitor ID:', dbVisitorId)
+            } catch (err) {
+                console.error('[Consent] Failed to register visitor:', err)
+            }
+
+            // 3. Request Push Permission + Subscribe (only if we have a DB visitor ID)
+            if (dbVisitorId && 'Notification' in window && 'serviceWorker' in navigator) {
+                try {
+                    const permission = await Notification.requestPermission()
+                    console.log('[Consent] Push permission:', permission)
+                    if (permission === 'granted') {
+                        await subscribeToPush(dbVisitorId)
+                    }
+                } catch (pushErr) {
+                    console.error('[Consent] Push permission error:', pushErr)
                 }
             }
         } catch (error) {
-            console.error('Consent error:', error)
+            console.error('[Consent] Error:', error)
         } finally {
             setIsProcessing(false)
             setShow(false)
         }
     }
 
-    const subscribeToPush = async () => {
+    const subscribeToPush = async (dbVisitorId: string) => {
         try {
+            console.log('[Consent] Registering service worker...')
             const registration = await navigator.serviceWorker.register('/sw.js')
             await navigator.serviceWorker.ready
+            console.log('[Consent] Service worker ready')
 
             const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-            if (!vapidKey) return
+            if (!vapidKey) {
+                console.warn('[Consent] No VAPID key configured, skipping push')
+                return
+            }
 
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(vapidKey),
             })
+            console.log('[Consent] Push subscription created')
 
-            // Initial visitor ID might be freshly created by grantConsent
-            const { getVisitorId } = await import('@/lib/tracking/client')
-            const visitorId = getVisitorId()
-
-            await fetch('/api/push/subscribe', {
+            // Use the DATABASE visitor ID (not the cookie ID)
+            const res = await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visitor_id: visitorId,
+                    visitor_id: dbVisitorId,
                     subscription: subscription.toJSON(),
                 }),
             })
+
+            const data = await res.json()
+            if (res.ok) {
+                console.log('[Consent] Push subscription saved successfully!')
+            } else {
+                console.error('[Consent] Push subscription save failed:', data)
+            }
         } catch (e) {
-            console.error('Push subscription failed:', e)
+            console.error('[Consent] Push subscription failed:', e)
         }
     }
 
