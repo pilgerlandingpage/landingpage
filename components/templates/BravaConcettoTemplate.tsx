@@ -68,9 +68,10 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('brava-visible')
-                        entry.target.style.opacity = '1'
-                        entry.target.style.transform = 'translateY(0)'
+                        const target = entry.target as HTMLElement
+                        target.classList.add('brava-visible')
+                        target.style.opacity = '1'
+                        target.style.transform = 'translateY(0)'
                     }
                 })
             },
