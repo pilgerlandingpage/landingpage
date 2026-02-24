@@ -15,8 +15,7 @@ export default function SocialProofTemplate({ data, slug, landingPageId, agentNa
     const { title, heroImage, price, cta, stats, primaryColor } = data
 
     const openChat = useCallback(() => {
-        const btn = document.querySelector('.chat-toggle') as HTMLElement
-        if (btn) btn.click()
+        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
     }, [])
 
     return (

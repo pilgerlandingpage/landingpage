@@ -14,8 +14,7 @@ export default function VipExclusiveTemplate({ data, slug, landingPageId, agentN
     }, [])
 
     const openChat = useCallback(() => {
-        const btn = document.querySelector('.chat-toggle') as HTMLElement
-        if (btn) btn.click()
+        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
     }, [])
 
     const filledSpots = 20 - spotsLeft

@@ -10,33 +10,29 @@ Brand Identity:
 
 Output Format (JSON):
 {
-  "title": "String (Campaign Title)",
-  "seo_title": "String (SEO Meta Title)",
-  "seo_description": "String (SEO Meta Description)",
-  "hero": {
-    "headline": "String",
-    "subheadline": "String (Compelling value prop)",
-    "cta_text": "String"
+  "custom_title": "String (Main Headline/Title)",
+  "custom_description": "String (Compelling Subtitle/Description for Hero)",
+  "custom_seo_title": "String (SEO Meta Title)",
+  "custom_seo_description": "String (SEO Meta Description)",
+  "custom_cta": "String (Call to Action Button Text)",
+  "custom_hero_image": "String (URL of the best high-res hero image)",
+  "custom_price": "String (Formatted Price e.g. 'R$ 5.000.000' or 'Consulte')",
+  "custom_stats": {
+    "bedrooms": "Number (or 0)",
+    "bathrooms": "Number (or 0)",
+    "area": "Number (m2, or 0)",
+    "location": "String (Address or Neighborhood)"
   },
-  "stats": {
-    "bedrooms": "Number (or null)",
-    "bathrooms": "Number (or null)",
-    "area_m2": "Number (or null)",
-    "price": "Number (or null)",
-    "location": "String"
-  },
-  "features": [
-    { "title": "String", "description": "String", "icon": "String (Lucide icon name, e.g. 'Wifi', 'Pool')" }
+  "custom_features": [
+    "String (Feature 1)",
+    "String (Feature 2)",
+    "String (Feature 3)"
   ],
-  "about": {
-    "title": "String",
-    "content": "String (Markdown supported)"
+  "custom_about": {
+    "title": "String (Section Title e.g. 'Sobre o Imóvel')",
+    "content": "String (Detailed description, Markdown supported)"
   },
-  "gallery_images": ["String (URL)"], 
-  "contact": {
-    "title": "String",
-    "subtitle": "String"
-  }
+  "custom_gallery": ["String (URL array of property images)"]
 }
 
 Instructions:

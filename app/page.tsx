@@ -1,5 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
+import Link from 'next/link'
 import PropertyCard from '@/components/marketplace/PropertyCard'
+import HomeSearchBar from '@/components/marketplace/HomeSearchBar'
 import { Search, Filter, Warehouse, Building2, Palmtree, Mountain, Gem } from 'lucide-react'
 
 // This is a Server Component
@@ -62,20 +64,7 @@ export default async function MarketplaceHome() {
 
       {/* === STICKY SEARCH + CATEGORIES === */}
       <div className="sticky-bar">
-        <div className="search-container">
-          <div className="search-pill">
-            <div className="search-icon-wrapper">
-              <Search size={18} strokeWidth={3} />
-            </div>
-            <div className="search-text">
-              <span className="search-title">Encontre seu imóvel</span>
-              <span className="search-subtitle">Localização • Tipo • Faixa de preço</span>
-            </div>
-            <div className="filter-button">
-              <Filter size={16} />
-            </div>
-          </div>
-        </div>
+        <HomeSearchBar />
 
         <div className="categories-bar">
           {categories.map((cat, idx) => (

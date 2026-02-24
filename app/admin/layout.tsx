@@ -1,5 +1,6 @@
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminAssistant from '@/components/admin/AdminAssistant'
+import AdminLayoutWrapper from '@/components/admin/AdminLayoutWrapper'
 
 export default function AdminLayout({
     children,
@@ -7,12 +8,12 @@ export default function AdminLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="admin-layout">
+        <AdminLayoutWrapper>
             <AdminSidebar />
             <main className="admin-content">
                 {children}
             </main>
             <AdminAssistant />
-        </div>
+        </AdminLayoutWrapper>
     )
 }

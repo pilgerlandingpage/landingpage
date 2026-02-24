@@ -31,8 +31,7 @@ export default function UrgencyTemplate({ data, slug, landingPageId, agentName, 
 
     // Open chat programmatically
     const openChat = useCallback(() => {
-        const btn = document.querySelector('.chat-toggle') as HTMLElement
-        if (btn) btn.click()
+        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
     }, [])
 
     return (

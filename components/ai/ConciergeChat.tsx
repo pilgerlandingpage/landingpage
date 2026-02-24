@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createPortal } from 'react-dom'
-import { MessageSquare, X, Send, User, Loader2 } from 'lucide-react'
+import { Send, X, Loader2, User, Search } from 'lucide-react'
 
 // Helper to read cookie value (Tracker sets pilger_visitor_id as cookie, NOT localStorage)
 import { trackEvent, getVisitorId } from '@/lib/tracking/client'
@@ -90,11 +90,11 @@ export default function ConciergeChat() {
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [isTyping, setIsTyping] = useState(false) // "digitando..." state
-    const [isConnecting, setIsConnecting] = useState(false)
+    const [connectionStep, setConnectionStep] = useState<0 | 1 | 2 | 3>(0) // 0=idle, 1=searching, 2=found, 3=connecting
     const [hasGreeted, setHasGreeted] = useState(false)
     const [broker, setBroker] = useState<{ name: string; creci: string; photo_url?: string } | null>(null)
     const [pageContent, setPageContent] = useState('')
-    const [timing, setTiming] = useState({ delayBeforeTyping: 2000, typingMinDuration: 5000, typingMaxDuration: 7000 })
+    const [timing, setTiming] = useState({ delayBeforeTyping: 2000, typingMinDuration: 5000, typingMaxDuration: 7000, connectionSearchDelay: 1500, connectionFoundDelay: 1000, connectionConnectingDelay: 1200 })
     const [mounted, setMounted] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -131,15 +131,50 @@ export default function ConciergeChat() {
         return () => clearTimeout(timer)
     }, [pathname])
 
-    // Auto-open after delay
+    // Auto-open after admin-configured delay per page type
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!isOpen && !hasGreeted) {
-                setIsOpen(true)
-            }
-        }, 15000)
-        return () => clearTimeout(timer)
-    }, [isOpen, hasGreeted])
+        if (isOpen || hasGreeted || isExcludedPage || !pathname) return
+
+        let timerId: ReturnType<typeof setTimeout> | null = null
+        let cancelled = false
+
+        // Determine page type for the delay config
+        let pageType = 'home'
+        if (pathname.startsWith('/imovel/')) pageType = 'property'
+        else if (pathname !== '/' && pathname !== '/favicon.ico') pageType = 'landing_page'
+
+        // Fetch the configured delay for this page type
+        fetch(`/api/chat/init?type=${pageType}&delayOnly=true`)
+            .then(res => res.json())
+            .then(data => {
+                if (cancelled) return
+                const delay = data.autoOpenDelay || 15000
+                timerId = setTimeout(() => {
+                    setIsOpen(true)
+                }, delay)
+            })
+            .catch(() => {
+                if (cancelled) return
+                timerId = setTimeout(() => {
+                    setIsOpen(true)
+                }, 15000)
+            })
+
+        return () => {
+            cancelled = true
+            if (timerId) clearTimeout(timerId)
+        }
+    }, [pathname, isExcludedPage])
+
+    // Listen for external CTA buttons opening the chat
+    useEffect(() => {
+        const handleOpenChat = () => {
+            setIsOpen(true)
+            trackEvent('chat_opened_via_cta')
+        }
+        window.addEventListener('open-concierge-chat', handleOpenChat)
+        return () => window.removeEventListener('open-concierge-chat', handleOpenChat)
+    }, [])
 
     // Scroll to bottom
     const scrollToBottom = useCallback(() => {
@@ -148,13 +183,12 @@ export default function ConciergeChat() {
 
     useEffect(() => {
         scrollToBottom()
-    }, [messages, isOpen, isConnecting, isTyping, scrollToBottom])
+    }, [messages, isOpen, connectionStep, isTyping, scrollToBottom])
 
-    // Initial Greeting
     useEffect(() => {
         if (isOpen && !hasGreeted && messages.length === 0) {
             setHasGreeted(true)
-            setIsConnecting(true)
+            setConnectionStep(1) // Step 1: Procurando corretor
 
             const params = new URLSearchParams()
             params.set('type', pageContext.type)
@@ -168,23 +202,33 @@ export default function ConciergeChat() {
                     setBroker(data.broker)
                     if (data.timing) setTiming(data.timing)
                     const initTiming = data.timing || timing
-                    // Simulate human connecting delay
+
+                    // Step 2: Corretor encontrado!
                     setTimeout(() => {
-                        setIsConnecting(false)
-                        setIsTyping(true)
-                        // Show typing then show greeting
+                        setConnectionStep(2)
+
+                        // Step 3: Conectando...
                         setTimeout(() => {
-                            setIsTyping(false)
-                            setMessages([{
-                                id: 'init',
-                                role: 'assistant',
-                                content: data.greeting || 'Olá! Como posso te ajudar hoje?'
-                            }])
-                        }, initTiming.delayBeforeTyping)
-                    }, initTiming.delayBeforeTyping)
+                            setConnectionStep(3)
+
+                            // Done: show typing then greeting
+                            setTimeout(() => {
+                                setConnectionStep(0)
+                                setIsTyping(true)
+                                setTimeout(() => {
+                                    setIsTyping(false)
+                                    setMessages([{
+                                        id: 'init',
+                                        role: 'assistant',
+                                        content: data.greeting || 'Olá! Como posso te ajudar hoje?'
+                                    }])
+                                }, initTiming.delayBeforeTyping)
+                            }, initTiming.connectionConnectingDelay || 1200)
+                        }, initTiming.connectionFoundDelay || 1000)
+                    }, initTiming.connectionSearchDelay || 1500)
                 })
                 .catch(() => {
-                    setIsConnecting(false)
+                    setConnectionStep(0)
                     setMessages([{
                         id: 'init',
                         role: 'assistant',
@@ -298,18 +342,22 @@ export default function ConciergeChat() {
                         {/* Header */}
                         <div style={{ padding: '20px', backgroundColor: '#1a1a1a', color: 'white', display: 'flex', alignItems: 'center', gap: '14px' }}>
                             <div style={{ width: '44px', height: '44px', backgroundColor: '#333', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b8945f', border: '2px solid #b8945f', overflow: 'hidden' }}>
-                                {broker?.photo_url ? (
+                                {(connectionStep === 0 || connectionStep >= 2) && broker?.photo_url ? (
                                     <img src={broker.photo_url} alt={broker.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
                                     <User size={20} />
                                 )}
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{broker?.name || 'Corretor Online'}</h3>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span className="status-indicator"></span>
-                                    <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Online agora</span>
-                                </div>
+                                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                                    {(connectionStep === 1) ? 'Central de Atendimento' : (broker?.name || 'Corretor Online')}
+                                </h3>
+                                {(connectionStep === 0 || connectionStep >= 2) && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span className="status-indicator"></span>
+                                        <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Online agora</span>
+                                    </div>
+                                )}
                             </div>
                             <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
                                 <X size={20} />
@@ -318,10 +366,26 @@ export default function ConciergeChat() {
 
                         {/* Messages */}
                         <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: '#f9f9f9' }}>
-                            {isConnecting && (
+                            {connectionStep > 0 && (
                                 <div style={{ textAlign: 'center', padding: '20px', color: '#666', fontSize: '0.85rem' }}>
-                                    <Loader2 className="animate-spin" style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-                                    Conectando...
+                                    {connectionStep === 1 && (
+                                        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                                            <Search style={{ margin: '0 auto 10px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+                                            <div>Procurando corretor de plantão...</div>
+                                        </div>
+                                    )}
+                                    {connectionStep === 2 && (
+                                        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', color: 'white', fontSize: '1.2rem' }}>✓</div>
+                                            <div style={{ color: '#22c55e', fontWeight: 600 }}>Corretor de plantão encontrado!</div>
+                                        </div>
+                                    )}
+                                    {connectionStep === 3 && (
+                                        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                                            <Loader2 className="animate-spin" style={{ margin: '0 auto 10px', opacity: 0.5 }} />
+                                            <div>Conectando...</div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {messages.map(msg => (
@@ -416,7 +480,7 @@ export default function ConciergeChat() {
             </AnimatePresence>
 
             {/* Toggle Button with Speech Bubble */}
-            {!isOpen && !isConnecting && (
+            {!isOpen && connectionStep === 0 && (
                 <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => {
                     setIsOpen(true)
                     trackEvent('chat_opened')
@@ -518,6 +582,17 @@ export default function ConciergeChat() {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(5px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 0.5; }
+                    50% { transform: scale(1.1); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.5; }
+                }
                 
                 /* Default Desktop Styles (forced by inline, but good to have backup) */
                 
@@ -535,6 +610,7 @@ export default function ConciergeChat() {
                     color: #333;
                     border: 1px solid #e8e5e0;
                     z-index: 10001;
+                    max-width: max-content;
                 }
 
                 @media (max-width: 768px) {

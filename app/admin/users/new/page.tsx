@@ -91,19 +91,19 @@ export default function NewUserPage() {
     return (
         <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
-                <Link href="/admin" className="p-2 hover:bg-[#1a1a1a] rounded-full transition-colors text-gray-400 hover:text-white">
+                <Link href="/admin" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900">
                     <ArrowLeft size={20} />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-2 font-display">
-                        <UserPlus className="text-[#b8945f]" />
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-display">
+                        <UserPlus className="text-[#c9a96e]" />
                         Novo Usuário
                     </h1>
-                    <p className="text-gray-400 text-sm">Adicione um novo administrador ao sistema</p>
+                    <p className="text-gray-500 text-sm">Adicione um novo administrador ao sistema</p>
                 </div>
             </div>
 
-            <div className="login-card">
+            <div className="chart-card">
                 {status && (
                     <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${status.type === 'success'
                         ? 'bg-green-500/10 border border-green-500/20 text-green-500'
@@ -116,61 +116,61 @@ export default function NewUserPage() {
 
                 <form onSubmit={handleSubmit}>
                     {/* Name Field */}
-                    <div className="login-form-group">
-                        <label className="login-label">Nome Completo</label>
-                        <div className="login-input-wrapper">
+                    <div className="mb-5">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">Nome Completo</label>
+                        <div className="relative">
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="login-input"
+                                className="form-input pl-12 w-full"
                                 placeholder="Ex: Ana Silva"
                                 required
                             />
-                            <User className="login-input-icon" size={20} />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         </div>
                     </div>
 
                     {/* Email Field */}
-                    <div className="login-form-group">
-                        <label className="login-label">Login / Email</label>
-                        <div className="login-input-wrapper">
+                    <div className="mb-5">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">Login / Email</label>
+                        <div className="relative">
                             <input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="login-input"
+                                className="form-input pl-12 w-full"
                                 placeholder="Ex: admin@pilger.com.br"
                                 required
                             />
-                            <Mail className="login-input-icon" size={20} />
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Phone Field */}
-                        <div className="login-form-group">
-                            <label className="login-label">Telefone</label>
-                            <div className="login-input-wrapper">
+                        <div className="mb-5">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Telefone</label>
+                            <div className="relative">
                                 <input
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className="login-input"
+                                    className="form-input pl-12 w-full"
                                     placeholder="(11) 99999-9999"
                                     maxLength={15}
                                 />
-                                <Phone className="login-input-icon" size={20} />
+                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
 
                         {/* Role Field */}
-                        <div className="login-form-group">
-                            <label className="login-label">Função</label>
-                            <div className="login-input-wrapper">
+                        <div className="mb-5">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Função</label>
+                            <div className="relative">
                                 <select
                                     name="role"
                                     value={formData.role}
@@ -182,7 +182,7 @@ export default function NewUserPage() {
                                     <option value="admin">Admin</option>
                                     <option value="super_admin">Super Admin</option>
                                 </select>
-                                <Briefcase className="login-input-icon" size={20} />
+                                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
                     </div>
@@ -190,56 +190,56 @@ export default function NewUserPage() {
                     {/* Conditional CRECI Field */}
                     {formData.role === 'broker' && (
                         <div className="login-form-group animate-fade-in">
-                            <label className="login-label">CRECI</label>
-                            <div className="login-input-wrapper">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">CRECI</label>
+                            <div className="relative">
                                 <input
                                     type="text"
                                     name="creci"
                                     value={formData.creci}
                                     onChange={handleChange}
-                                    className="login-input"
+                                    className="form-input pl-12 w-full"
                                     placeholder="Ex: 12345-F"
                                     required={formData.role === 'broker'}
                                 />
-                                <BadgeCheck className="login-input-icon" size={20} />
+                                <BadgeCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Password Field */}
-                        <div className="login-form-group">
-                            <label className="login-label">Senha</label>
-                            <div className="login-input-wrapper">
+                        <div className="mb-5">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Senha</label>
+                            <div className="relative">
                                 <input
                                     type="password"
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="login-input"
+                                    className="form-input pl-12 w-full"
                                     placeholder="••••••••"
                                     required
                                     minLength={6}
                                 />
-                                <Lock className="login-input-icon" size={20} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
 
                         {/* Confirm Password Field */}
-                        <div className="login-form-group">
-                            <label className="login-label">Confirmar Senha</label>
-                            <div className="login-input-wrapper">
+                        <div className="mb-5">
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Confirmar Senha</label>
+                            <div className="relative">
                                 <input
                                     type="password"
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
-                                    className="login-input"
+                                    className="form-input pl-12 w-full"
                                     placeholder="••••••••"
                                     required
                                     minLength={6}
                                 />
-                                <Lock className="login-input-icon" size={20} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             </div>
                         </div>
                     </div>
@@ -262,7 +262,7 @@ export default function NewUserPage() {
                                 </>
                             )}
                         </button>
-                        <p className="text-center text-gray-400 text-xs mt-4">
+                        <p className="text-center text-gray-500 text-xs mt-4">
                             O novo usuário terá acesso completo ao painel administrativo imediatamente.
                         </p>
                     </div>

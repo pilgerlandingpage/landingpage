@@ -13,14 +13,29 @@ export async function GET(request: NextRequest) {
 
         const supabase = createAdminClient()
 
-        // 1. Randomly select a Virtual Broker
-        const { data: brokers } = await supabase
+        // 1. Select a Virtual Broker based on Duty Schedule
+        const today = new Date()
+        const todayDateStr = today.toISOString().split('T')[0] // YYYY-MM-DD
+        const todayWeekday = today.getDay() // 0-6 (Sun-Sat)
+
+        // Try to find brokers scheduled for today (either specific date or weekday)
+        let { data: priorityBrokers } = await supabase
             .from('virtual_brokers')
             .select('*')
             .eq('is_active', true)
+            .or(`duty_dates.cs.[{"${todayDateStr}"}],duty_weekdays.cs.[${todayWeekday}]`)
 
-        const broker = brokers && brokers.length > 0
-            ? brokers[Math.floor(Math.random() * brokers.length)]
+        // Fallback: If no priority broker, get all active brokers
+        if (!priorityBrokers || priorityBrokers.length === 0) {
+            const { data } = await supabase
+                .from('virtual_brokers')
+                .select('*')
+                .eq('is_active', true)
+            priorityBrokers = data
+        }
+
+        const broker = priorityBrokers && priorityBrokers.length > 0
+            ? priorityBrokers[Math.floor(Math.random() * priorityBrokers.length)]
             : { name: 'Guilherme Pilger', creci: 'CRECI 5555' }
 
         // 2. Generate Greeting based on Context
@@ -51,11 +66,15 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // 3. Fetch timing configs for humanization
+        // 3. Fetch timing configs for humanization + auto-open delays
         const { data: timingConfigs } = await supabase
             .from('app_config')
             .select('key, value')
-            .in('key', ['chat_delay_before_typing', 'chat_typing_min_duration', 'chat_typing_max_duration'])
+            .in('key', [
+                'chat_delay_before_typing', 'chat_typing_min_duration', 'chat_typing_max_duration',
+                'concierge_delay_home', 'concierge_delay_property', 'concierge_delay_landing_page',
+                'concierge_connection_search_delay', 'concierge_connection_found_delay', 'concierge_connection_connecting_delay'
+            ])
 
         const configMap: Record<string, string> = {}
         timingConfigs?.forEach((c: { key: string; value: string }) => { configMap[c.key] = c.value })
@@ -64,7 +83,17 @@ export async function GET(request: NextRequest) {
             delayBeforeTyping: parseInt(configMap['chat_delay_before_typing'] || '2') * 1000,
             typingMinDuration: parseInt(configMap['chat_typing_min_duration'] || '5') * 1000,
             typingMaxDuration: parseInt(configMap['chat_typing_max_duration'] || '7') * 1000,
+            connectionSearchDelay: parseFloat(configMap['concierge_connection_search_delay'] || '1.5') * 1000,
+            connectionFoundDelay: parseFloat(configMap['concierge_connection_found_delay'] || '1') * 1000,
+            connectionConnectingDelay: parseFloat(configMap['concierge_connection_connecting_delay'] || '1.2') * 1000,
         }
+
+        // Auto-open delay per page type (in milliseconds)
+        const pageType = type || 'home'
+        const delayKey = pageType === 'property' ? 'concierge_delay_property'
+            : (pageType === 'landing_page' || pageType === 'cloned_landing_page') ? 'concierge_delay_landing_page'
+                : 'concierge_delay_home'
+        const autoOpenDelay = parseInt(configMap[delayKey] || (pageType === 'property' ? '5' : pageType === 'home' ? '15' : '10')) * 1000
 
         return NextResponse.json({
             greeting,
@@ -73,7 +102,8 @@ export async function GET(request: NextRequest) {
                 creci: broker.creci,
                 photo_url: broker.photo_url
             },
-            timing
+            timing,
+            autoOpenDelay
         })
     } catch (error) {
         console.error('Chat Init Error:', error)

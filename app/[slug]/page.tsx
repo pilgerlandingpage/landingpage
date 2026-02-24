@@ -7,6 +7,7 @@ import LeadCaptureTemplate from '@/components/templates/LeadCaptureTemplate'
 import UrgencyTemplate from '@/components/templates/UrgencyTemplate'
 import SocialProofTemplate from '@/components/templates/SocialProofTemplate'
 import VipExclusiveTemplate from '@/components/templates/VipExclusiveTemplate'
+import BravaConcettoTemplate from '@/components/templates/BravaConcettoTemplate'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 
@@ -60,11 +61,15 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
 
     // Helper to get array of images
     const getGallery = () => {
-        // If custom hero provided, it's the first image. 
-        // We don't have a full custom gallery editor yet, so we mix or fallback.
+        // 1. Custom Gallery from Cloner
+        if (content.custom_gallery && Array.isArray(content.custom_gallery) && content.custom_gallery.length > 0) {
+            return content.custom_gallery
+        }
+
+        // 2. Property Images
         const propImages = property.images || []
 
-        // If there are no property images, we try to use custom hero as a single gallery item
+        // 3. Fallback: Custom Hero as single gallery item
         if (propImages.length === 0 && content.custom_hero_image) {
             return [content.custom_hero_image]
         }
@@ -76,13 +81,13 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         title: content.custom_title || property.title || lp.title,
         description: content.custom_description || property.description || 'Descrição não disponível.',
         heroImage: content.custom_hero_image || (property.images && property.images[0]) || '/placeholder-house.jpg',
-        price: property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte',
+        price: content.custom_price || (property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte'),
         cta: content.custom_cta || 'Agendar Visita',
         stats: {
-            bedrooms: property.bedrooms || 0,
-            bathrooms: property.bathrooms || 0,
-            area: property.area || 0,
-            location: property.location || 'Localização Privilegiada'
+            bedrooms: (content.custom_stats?.bedrooms) ?? (property.bedrooms || 0),
+            bathrooms: (content.custom_stats?.bathrooms) ?? (property.bathrooms || 0),
+            area: (content.custom_stats?.area) ?? (property.area || 0),
+            location: (content.custom_stats?.location) ?? (property.location || 'Localização Privilegiada')
         },
         amenities: (content.custom_features && content.custom_features.length > 0)
             ? content.custom_features
@@ -105,6 +110,8 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
 
     // 5. Render Selected Template
     switch (templateId) {
+        case 'brava-concetto':
+            return <BravaConcettoTemplate {...commonProps} />
         case 'modern':
             return <ModernLuxuryTemplate {...commonProps} />
         case 'lead-capture':

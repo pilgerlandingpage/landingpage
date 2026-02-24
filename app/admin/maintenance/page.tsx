@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap } from 'lucide-react'
 import Link from 'next/link'
-import { MASTER_LANDING_PAGE_PROMPT, LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT } from '@/lib/ai/prompts'
+import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
@@ -170,17 +170,18 @@ export default function MaintenancePage() {
                 'chat_typing_min_duration',
                 'chat_typing_max_duration',
                 'chat_max_response_length',
-                'chat_max_response_length',
+                'concierge_delay_home',
+                'concierge_delay_property',
+                'concierge_delay_landing_page',
+                'concierge_connection_search_delay',
+                'concierge_connection_found_delay',
+                'concierge_connection_connecting_delay',
                 'gemini_concierge_model',
-                'gemini_cloner_model',
                 'gemini_pilger_model',
                 'openai_concierge_model',
-                'openai_cloner_model',
                 'openai_pilger_model',
                 'concierge_provider',
-                'cloner_provider',
                 'pilger_provider',
-                'cloner_system_prompt',
                 'lead_extraction_prompt'
             ]
             const configsToSave: Record<string, string> = {}
@@ -745,10 +746,12 @@ export default function MaintenancePage() {
                         <div className="form-group" style={{ marginBottom: 0 }}>
                             <label className="form-label">Tempo Espera (s)</label>
                             <input className="form-input" type="number" step="0.5" value={configs['chat_delay_before_typing'] || '2'} onChange={e => setConfigs({ ...configs, chat_delay_before_typing: e.target.value })} />
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo que o agente espera antes de mostrar "digitando..." após receber uma mensagem.</div>
                         </div>
                         <div className="form-group" style={{ marginBottom: 0 }}>
                             <label className="form-label">Digitando Min (s)</label>
                             <input className="form-input" type="number" step="0.5" value={configs['chat_typing_min_duration'] || '5'} onChange={e => setConfigs({ ...configs, chat_typing_min_duration: e.target.value })} />
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Duração mínima do indicador "digitando..." para simular uma resposta humana natural.</div>
                         </div>
                         <div className="form-group" style={{ marginBottom: 0 }}>
                             <label className="form-label">Tamanho Resposta</label>
@@ -758,6 +761,60 @@ export default function MaintenancePage() {
                                 <option value="Média (3-5 frases, máximo 100 palavras)">Média</option>
                                 <option value="Longa (parágrafos completos sem limite)">Longa</option>
                             </select>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Controla o tamanho máximo das respostas do agente. Respostas curtas parecem mais naturais.</div>
+                        </div>
+                    </div>
+
+                    {/* Auto-Open Delay per Page Type */}
+                    <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                            <Clock size={16} style={{ color: 'var(--gold)' }} />
+                            <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Tempo para Abrir Chat Automaticamente</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Defina em segundos quanto tempo o agente espera antes de chamar o visitante em cada tipo de página.</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>🏠 Home (s)</label>
+                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_home'] || '15'} onChange={e => setConfigs({ ...configs, concierge_delay_home: e.target.value })} />
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo na página inicial antes do chat aparecer. Ideal dar mais tempo pois o visitante está explorando.</div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>🏢 Página Imóvel (s)</label>
+                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_property'] || '5'} onChange={e => setConfigs({ ...configs, concierge_delay_property: e.target.value })} />
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo na página de um imóvel específico. O visitante já demonstrou interesse, aborde rapidamente.</div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>📄 Landing Page (s)</label>
+                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_landing_page'] || '10'} onChange={e => setConfigs({ ...configs, concierge_delay_landing_page: e.target.value })} />
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo nas landing pages personalizadas. Espere o visitante absorver o conteúdo antes de abordar.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Configuração do Pipeline de Conexão (Novo) */}
+                <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                        <Zap size={16} style={{ color: 'var(--gold)' }} />
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Velocidade da Animação de Conexão</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Defina em segundos o tempo que cada etapa da animação de conexão leva.</div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>1. Procurando Corretor (s)</label>
+                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_search_delay'] || '1.5'} onChange={e => setConfigs({ ...configs, concierge_connection_search_delay: e.target.value })} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>2. Corretor Encontrado (s)</label>
+                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_found_delay'] || '1'} onChange={e => setConfigs({ ...configs, concierge_connection_found_delay: e.target.value })} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>3. Conectando (s)</label>
+                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_connecting_delay'] || '1.2'} onChange={e => setConfigs({ ...configs, concierge_connection_connecting_delay: e.target.value })} />
                         </div>
                     </div>
                 </div>
@@ -817,65 +874,10 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 3. CLONADOR DE LANDING PAGES ── */}
-                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#f472b6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🧬</span> 3. Clonador de Landing Pages
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Provedor do Clonador</label>
-                            <select
-                                className="form-input"
-                                value={configs['cloner_provider'] || ''}
-                                onChange={e => setConfigs({ ...configs, cloner_provider: e.target.value })}
-                            >
-                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo do Clonador</label>
-                            {(configs['cloner_provider'] === 'openai' || (!configs['cloner_provider'] && configs['ai_provider'] === 'openai')) ? (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['openai_cloner_model'] || ''} onChange={e => setConfigs({ ...configs, openai_cloner_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            ) : (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['gemini_cloner_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_cloner_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt Mestre de Clonagem (Avançado)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={12}
-                            value={configs['cloner_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, cloner_system_prompt: e.target.value })}
-                            placeholder={MASTER_LANDING_PAGE_PROMPT}
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(244, 114, 182, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Deixe em branco para usar o prompt padrão do sistema (exibido acima como placeholder).
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 4. EXTRAÇÃO DE LEADS (OCULTO ANTES) ── */}
+                {/* ── 3. EXTRAÇÃO DE LEADS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🕵️</span> 4. Extração de Leads (Chat)
+                        <span>🕵️</span> 3. Extração de Leads (Chat)
                     </h3>
 
                     <div className="form-group">
@@ -946,6 +948,6 @@ export default function MaintenancePage() {
                     animation: spin 1s linear infinite;
                 }
             `}</style>
-        </div>
+        </div >
     )
 }

@@ -144,8 +144,8 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                 .card-image-container {
                     position: relative;
                     width: 100%;
-                    aspect-ratio: 20 / 19;
-                    border-radius: 14px;
+                    aspect-ratio: 4 / 3;
+                    border-radius: 12px;
                     overflow: hidden;
                     background: #e8e5e0;
                     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
@@ -359,6 +359,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     }
                     .card-image-container {
                         border-radius: 10px;
+                        aspect-ratio: 4 / 3;
                     }
                 }
 
@@ -367,7 +368,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     .location-text { font-size: 0.88rem; }
                     .info-text { font-size: 0.85rem; }
                     .price-bold { font-size: 0.95rem; }
-                    .card-image-container { border-radius: 16px; }
+                    .card-image-container { border-radius: 12px; }
                 }
             `}</style>
         </div>

@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import Tracker from '@/components/tracking/Tracker'
-import ChatWidget from '@/components/chat/ChatWidget'
 
 interface LandingPageLogicProps {
     slug: string
@@ -28,16 +27,6 @@ export default function LandingPageLogic({
     return (
         <>
             <Tracker landingPageSlug={slug} onVisitorReady={handleVisitorReady} />
-
-            {visitorId && (
-                <ChatWidget
-                    visitorId={visitorId}
-                    agentName={agentName}
-                    greetingMessage={greetingMessage}
-                    landingPageId={landingPageId}
-                    pageContext={pageContext}
-                />
-            )}
         </>
     )
 }

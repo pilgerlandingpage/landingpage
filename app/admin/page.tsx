@@ -139,7 +139,7 @@ export default function AdminDashboard() {
 
             {/* Quick Actions */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
-                <Link href="/admin/cloner" style={{ textDecoration: 'none' }}>
+                <Link href="/admin/landing-pages" style={{ textDecoration: 'none' }}>
                     <div className="chart-card" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -165,8 +165,8 @@ export default function AdminDashboard() {
                                 <Wand2 size={24} />
                             </div>
                             <div>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Clonador de Páginas AI</h3>
-                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Crie landing pages em segundos.</p>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Landing Pages</h3>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gerencie suas páginas personalizadas.</p>
                             </div>
                         </div>
                     </div>

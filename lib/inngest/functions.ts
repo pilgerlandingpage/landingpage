@@ -51,23 +51,34 @@ export const processCloningJob = inngest.createFunction(
         // 4. Process Images (Upload to R2)
         const processedContent = await step.run('process-images', async () => {
             const newContent = { ...aiContent }
-            if (newContent.gallery_images && Array.isArray(newContent.gallery_images)) {
+
+            // Process Gallery
+            if (newContent.custom_gallery && Array.isArray(newContent.custom_gallery)) {
                 const newGallery = []
-                for (const imgUrl of newContent.gallery_images) {
-                    if (imgUrl.startsWith('http')) {
+                for (const imgUrl of newContent.custom_gallery) {
+                    if (imgUrl && imgUrl.startsWith('http')) {
                         const key = `cloned/${pageId}/${uuidv4()}.jpg`
                         const r2Url = await uploadImageToR2(imgUrl, key)
                         newGallery.push(r2Url)
                     }
                 }
-                newContent.gallery_images = newGallery
+                newContent.custom_gallery = newGallery
             }
+
+            // Process Hero Image
+            if (newContent.custom_hero_image && newContent.custom_hero_image.startsWith('http')) {
+                const key = `cloned/${pageId}/hero-${uuidv4()}.jpg`
+                const r2Url = await uploadImageToR2(newContent.custom_hero_image, key)
+                newContent.custom_hero_image = r2Url
+            }
+
             return newContent
         })
 
         // 5. Save Result & Update SEO/Agent
         await step.run('save-result', async () => {
-            const title = processedContent.title || 'Nova Landing Page'
+            // Use custom_title from AI or fallback
+            const title = processedContent.custom_title || processedContent.title || 'Nova Landing Page'
             const baseSlug = slugify(title)
             const finalSlug = `${baseSlug}-${uuidv4().substring(0, 4)}`
 
@@ -85,7 +96,7 @@ export const processCloningJob = inngest.createFunction(
                 content: processedContent,
                 title: title,
                 slug: finalSlug,
-                description: processedContent.seo_description || '',
+                description: processedContent.custom_description || processedContent.custom_seo_description || '',
                 ai_agent_id: agentId,
                 updated_at: new Date().toISOString()
             }).eq('id', pageId)

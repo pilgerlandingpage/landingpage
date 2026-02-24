@@ -10,6 +10,8 @@ interface Broker {
     creci: string
     photo_url: string
     is_active: boolean
+    duty_weekdays: number[]
+    duty_dates: string[]
 }
 
 export default function BrokersAdmin() {
@@ -26,7 +28,9 @@ export default function BrokersAdmin() {
         name: '',
         creci: '',
         photo_url: '',
-        is_active: true
+        is_active: true,
+        duty_weekdays: [] as number[],
+        duty_dates: [] as string[]
     })
 
     useEffect(() => {
@@ -71,25 +75,44 @@ export default function BrokersAdmin() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        if (editingBroker) {
-            const { error } = await supabase
-                .from('virtual_brokers')
-                .update(formData)
-                .eq('id', editingBroker.id)
-            if (!error) {
-                setEditingBroker(null)
-                fetchBrokers()
-            }
-        } else {
-            const { error } = await supabase
-                .from('virtual_brokers')
-                .insert([formData])
-            if (!error) {
-                setIsAdding(false)
-                fetchBrokers()
-            }
+
+        const payload = {
+            ...formData,
+            // Certifique-se que o Supabase receba arrays de JSON convertidos ou os tipos literais corretos
+            duty_weekdays: formData.duty_weekdays,
+            duty_dates: formData.duty_dates
         }
-        setFormData({ name: '', creci: '', photo_url: '', is_active: true })
+
+        try {
+            if (editingBroker) {
+                const { error, data } = await supabase
+                    .from('virtual_brokers')
+                    .update(payload)
+                    .eq('id', editingBroker.id)
+                if (error) {
+                    console.error('Update Form Error:', error)
+                    alert('Erro ao atualizar. Veja console.')
+                } else {
+                    setEditingBroker(null)
+                    fetchBrokers()
+                    setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
+                }
+            } else {
+                const { error, data } = await supabase
+                    .from('virtual_brokers')
+                    .insert([payload])
+                if (error) {
+                    console.error('Insert Form Error:', error)
+                    alert('Erro ao inserir. Veja o console.')
+                } else {
+                    setIsAdding(false)
+                    fetchBrokers()
+                    setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
+                }
+            }
+        } catch (err) {
+            console.error('Submit Failed:', err)
+        }
     }
 
     async function deleteBroker(id: string) {
@@ -114,7 +137,7 @@ export default function BrokersAdmin() {
                         onClick={() => {
                             setIsAdding(true)
                             setEditingBroker(null)
-                            setFormData({ name: '', creci: '', photo_url: '', is_active: true })
+                            setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
                         }}
                         className="btn-primary"
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
@@ -224,8 +247,104 @@ export default function BrokersAdmin() {
                                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                 />
                                 <label htmlFor="is_active" style={{ fontSize: '1rem', color: 'white', cursor: 'pointer' }}>
-                                    Ativar no Plantão (Aparecerá aleatoriamente no chat)
+                                    Ativar Corretor (Aparece aleatoriamente caso não haja ninguém escalado e é listado nas escalas)
                                 </label>
+                            </div>
+
+                            {/* Escala de Plantão */}
+                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Shield size={18} className="text-gold" />
+                                    Escala de Plantão / Chat
+                                </h3>
+
+                                <div className="form-group">
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        Dias da Semana (Recorrente)
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {[
+                                            { id: 0, label: 'Dom' },
+                                            { id: 1, label: 'Seg' },
+                                            { id: 2, label: 'Ter' },
+                                            { id: 3, label: 'Qua' },
+                                            { id: 4, label: 'Qui' },
+                                            { id: 5, label: 'Sex' },
+                                            { id: 6, label: 'Sáb' }
+                                        ].map(day => (
+                                            <label key={day.id} style={{
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                padding: '6px 12px', background: formData.duty_weekdays.includes(day.id) ? 'rgba(201, 169, 110, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                border: `1px solid ${formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : 'transparent'}`,
+                                                borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem', color: formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : '#ccc'
+                                            }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.duty_weekdays.includes(day.id)}
+                                                    onChange={(e) => {
+                                                        const newDays = e.target.checked
+                                                            ? [...formData.duty_weekdays, day.id]
+                                                            : formData.duty_weekdays.filter(d => d !== day.id);
+                                                        setFormData({ ...formData, duty_weekdays: newDays })
+                                                    }}
+                                                    style={{ display: 'none' }}
+                                                />
+                                                {day.label}
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '8px' }}>
+                                        Este corretor assumirá os atendimentos via IA em todos os dias marcados acima.
+                                    </p>
+                                </div>
+
+                                <div className="form-group" style={{ marginTop: '20px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        Adicionar Datas Específicas / Feriados (Avulso)
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="date"
+                                            className="admin-input"
+                                            style={{ flex: 1 }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    const dateVal = (e.target as HTMLInputElement).value;
+                                                    if (dateVal && !formData.duty_dates.includes(dateVal)) {
+                                                        setFormData({ ...formData, duty_dates: [...formData.duty_dates, dateVal] });
+                                                        (e.target as HTMLInputElement).value = '';
+                                                    }
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                const dateVal = e.target.value;
+                                                if (dateVal && !formData.duty_dates.includes(dateVal)) {
+                                                    setFormData({ ...formData, duty_dates: [...formData.duty_dates, dateVal] });
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {formData.duty_dates.map(date => (
+                                            <span key={date} style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', fontSize: '0.8rem', color: '#eee'
+                                            }}>
+                                                {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                                                <button type="button" onClick={() => {
+                                                    setFormData({ ...formData, duty_dates: formData.duty_dates.filter(d => d !== date) })
+                                                }} style={{ color: '#ff6b6b', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+                                                    &times;
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '8px' }}>
+                                        Digite a data e aperte Enter ou clique fora para adicionar.
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="flex gap-4 mt-4">
@@ -282,9 +401,28 @@ export default function BrokersAdmin() {
                                     textTransform: 'uppercase',
                                     color: broker.is_active ? '#22c55e' : 'var(--text-muted)'
                                 }}>
-                                    {broker.is_active ? 'Online no Site' : 'Inativo'}
+                                    {broker.is_active ? 'Ativo' : 'Inativo'}
                                 </span>
                             </div>
+
+                            {/* Badge de Escala Fixa */}
+                            {(broker.duty_weekdays?.length > 0 || broker.duty_dates?.length > 0) && (
+                                <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                    {broker.duty_weekdays?.map(d => {
+                                        const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                                        return (
+                                            <span key={`wd-${d}`} style={{ padding: '2px 8px', background: 'rgba(201, 169, 110, 0.1)', border: '1px solid rgba(201, 169, 110, 0.3)', borderRadius: '12px', fontSize: '0.7rem', color: 'var(--gold)' }}>
+                                                {labels[d]}
+                                            </span>
+                                        )
+                                    })}
+                                    {broker.duty_dates?.length > 0 && (
+                                        <span style={{ padding: '2px 8px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '12px', fontSize: '0.7rem', color: '#eee' }}>
+                                            +{broker.duty_dates.length} data(s)
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Ações separadas e sempre visíveis dentro do card */}
@@ -296,7 +434,9 @@ export default function BrokersAdmin() {
                                         name: broker.name,
                                         creci: broker.creci,
                                         photo_url: broker.photo_url,
-                                        is_active: broker.is_active
+                                        is_active: broker.is_active,
+                                        duty_weekdays: broker.duty_weekdays || [],
+                                        duty_dates: broker.duty_dates || []
                                     })
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}
