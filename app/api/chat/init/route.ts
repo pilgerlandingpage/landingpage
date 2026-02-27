@@ -13,28 +13,61 @@ export async function GET(request: NextRequest) {
 
         const supabase = createAdminClient()
 
-        // 1. Select a Virtual Broker based on Duty Schedule
+        // 1. Select a Virtual Broker based on Duty Schedule + Page Assignment
         const today = new Date()
         const todayDateStr = today.toISOString().split('T')[0] // YYYY-MM-DD
         const todayWeekday = today.getDay() // 0-6 (Sun-Sat)
+        const isLandingPage = type === 'landing_page' || type === 'cloned_landing_page'
 
         // Try to find brokers scheduled for today (either specific date or weekday)
-        let { data: priorityBrokers } = await supabase
+        let { data: allDutyBrokers } = await supabase
             .from('virtual_brokers')
             .select('*')
             .eq('is_active', true)
             .or(`duty_dates.cs.[{"${todayDateStr}"}],duty_weekdays.cs.[${todayWeekday}]`)
 
         // Fallback: If no priority broker, get all active brokers
-        if (!priorityBrokers || priorityBrokers.length === 0) {
+        if (!allDutyBrokers || allDutyBrokers.length === 0) {
             const { data } = await supabase
                 .from('virtual_brokers')
                 .select('*')
                 .eq('is_active', true)
-            priorityBrokers = data
+            allDutyBrokers = data
         }
 
-        const broker = priorityBrokers && priorityBrokers.length > 0
+        // Filter brokers based on page assignment
+        let priorityBrokers = allDutyBrokers || []
+
+        if (isLandingPage && slug) {
+            // For landing pages: first try brokers specifically assigned to this LP
+            const lpSpecificBrokers = priorityBrokers.filter(
+                (b: any) => b.assignment_type === 'landing_pages' &&
+                    Array.isArray(b.assigned_page_slugs) &&
+                    b.assigned_page_slugs.includes(slug)
+            )
+
+            if (lpSpecificBrokers.length > 0) {
+                priorityBrokers = lpSpecificBrokers
+            } else {
+                // Fallback to "all" type brokers (general rotation)
+                const generalBrokers = priorityBrokers.filter(
+                    (b: any) => !b.assignment_type || b.assignment_type === 'all'
+                )
+                if (generalBrokers.length > 0) {
+                    priorityBrokers = generalBrokers
+                }
+            }
+        } else {
+            // For home/property pages: only use "all" type brokers
+            const generalBrokers = priorityBrokers.filter(
+                (b: any) => !b.assignment_type || b.assignment_type === 'all'
+            )
+            if (generalBrokers.length > 0) {
+                priorityBrokers = generalBrokers
+            }
+        }
+
+        const broker = priorityBrokers.length > 0
             ? priorityBrokers[Math.floor(Math.random() * priorityBrokers.length)]
             : { name: 'Guilherme Pilger', creci: 'CRECI 5555' }
 

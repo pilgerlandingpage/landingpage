@@ -1,8 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2 } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+
+interface LandingPage {
+    id: string
+    slug: string
+    title: string
+}
 
 interface Broker {
     id: string
@@ -12,6 +18,8 @@ interface Broker {
     is_active: boolean
     duty_weekdays: number[]
     duty_dates: string[]
+    assignment_type: string
+    assigned_page_slugs: string[]
 }
 
 export default function BrokersAdmin() {
@@ -22,6 +30,7 @@ export default function BrokersAdmin() {
     const [editingBroker, setEditingBroker] = useState<Broker | null>(null)
     const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [landingPages, setLandingPages] = useState<LandingPage[]>([])
 
     // Form State
     const [formData, setFormData] = useState({
@@ -30,12 +39,36 @@ export default function BrokersAdmin() {
         photo_url: '',
         is_active: true,
         duty_weekdays: [] as number[],
-        duty_dates: [] as string[]
+        duty_dates: [] as string[],
+        assignment_type: 'all',
+        assigned_page_slugs: [] as string[]
     })
+
+    const defaultFormData = {
+        name: '',
+        creci: '',
+        photo_url: '',
+        is_active: true,
+        duty_weekdays: [] as number[],
+        duty_dates: [] as string[],
+        assignment_type: 'all',
+        assigned_page_slugs: [] as string[]
+    }
 
     useEffect(() => {
         fetchBrokers()
+        fetchLandingPages()
+        // Run migration for new columns
+        fetch('/api/admin/migrate-broker-assignment', { method: 'POST' }).catch(() => { })
     }, [])
+
+    async function fetchLandingPages() {
+        const { data } = await supabase
+            .from('landing_pages')
+            .select('id, slug, title')
+            .order('title')
+        if (data) setLandingPages(data)
+    }
 
     async function fetchBrokers() {
         setLoading(true)
@@ -78,36 +111,42 @@ export default function BrokersAdmin() {
 
         const payload = {
             ...formData,
-            // Certifique-se que o Supabase receba arrays de JSON convertidos ou os tipos literais corretos
             duty_weekdays: formData.duty_weekdays,
-            duty_dates: formData.duty_dates
+            duty_dates: formData.duty_dates,
+            assignment_type: formData.assignment_type,
+            assigned_page_slugs: formData.assigned_page_slugs
         }
 
         try {
             if (editingBroker) {
-                const { error, data } = await supabase
-                    .from('virtual_brokers')
-                    .update(payload)
-                    .eq('id', editingBroker.id)
-                if (error) {
-                    console.error('Update Form Error:', error)
+                const res = await fetch('/api/admin/brokers', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: editingBroker.id, ...payload })
+                })
+                const result = await res.json()
+                if (!res.ok || result.error) {
+                    console.error('Update Form Error:', result.error)
                     alert('Erro ao atualizar. Veja console.')
                 } else {
                     setEditingBroker(null)
                     fetchBrokers()
-                    setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
+                    setFormData({ ...defaultFormData })
                 }
             } else {
-                const { error, data } = await supabase
-                    .from('virtual_brokers')
-                    .insert([payload])
-                if (error) {
-                    console.error('Insert Form Error:', error)
+                const res = await fetch('/api/admin/brokers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                const result = await res.json()
+                if (!res.ok || result.error) {
+                    console.error('Insert Form Error:', result.error)
                     alert('Erro ao inserir. Veja o console.')
                 } else {
                     setIsAdding(false)
                     fetchBrokers()
-                    setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
+                    setFormData({ ...defaultFormData })
                 }
             }
         } catch (err) {
@@ -137,7 +176,7 @@ export default function BrokersAdmin() {
                         onClick={() => {
                             setIsAdding(true)
                             setEditingBroker(null)
-                            setFormData({ name: '', creci: '', photo_url: '', is_active: true, duty_weekdays: [], duty_dates: [] })
+                            setFormData({ ...defaultFormData })
                         }}
                         className="btn-primary"
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
@@ -249,6 +288,120 @@ export default function BrokersAdmin() {
                                 <label htmlFor="is_active" style={{ fontSize: '1rem', color: 'white', cursor: 'pointer' }}>
                                     Ativar Corretor (Aparece aleatoriamente caso não haja ninguém escalado e é listado nas escalas)
                                 </label>
+                            </div>
+
+                            {/* Tipo de Atendimento / Page Assignment */}
+                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Globe size={18} className="text-gold" />
+                                    Tipo de Atendimento
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
+                                    Defina em quais páginas este corretor irá atender os leads.
+                                </p>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <label style={{
+                                        display: 'flex', alignItems: 'center', gap: '12px',
+                                        padding: '14px 16px',
+                                        background: formData.assignment_type === 'all' ? 'rgba(201, 169, 110, 0.1)' : 'rgba(255,255,255,0.03)',
+                                        border: `1px solid ${formData.assignment_type === 'all' ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+                                        borderRadius: '10px', cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                        <input
+                                            type="radio"
+                                            name="assignment_type"
+                                            value="all"
+                                            checked={formData.assignment_type === 'all'}
+                                            onChange={() => setFormData({ ...formData, assignment_type: 'all', assigned_page_slugs: [] })}
+                                            style={{ accentColor: 'var(--gold)', width: '18px', height: '18px' }}
+                                        />
+                                        <div>
+                                            <div style={{ color: formData.assignment_type === 'all' ? 'var(--gold)' : 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                                Rodízio Geral
+                                            </div>
+                                            <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '2px' }}>
+                                                Atende todas as páginas — Home, Imóveis e Landing Pages
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label style={{
+                                        display: 'flex', alignItems: 'center', gap: '12px',
+                                        padding: '14px 16px',
+                                        background: formData.assignment_type === 'landing_pages' ? 'rgba(201, 169, 110, 0.1)' : 'rgba(255,255,255,0.03)',
+                                        border: `1px solid ${formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+                                        borderRadius: '10px', cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                        <input
+                                            type="radio"
+                                            name="assignment_type"
+                                            value="landing_pages"
+                                            checked={formData.assignment_type === 'landing_pages'}
+                                            onChange={() => setFormData({ ...formData, assignment_type: 'landing_pages' })}
+                                            style={{ accentColor: 'var(--gold)', width: '18px', height: '18px' }}
+                                        />
+                                        <div>
+                                            <div style={{ color: formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                                Landing Pages Específicas
+                                            </div>
+                                            <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '2px' }}>
+                                                Atende apenas as landing pages selecionadas abaixo
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {/* Landing Pages Selection */}
+                                {formData.assignment_type === 'landing_pages' && (
+                                    <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                        <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                                            <FileText size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                                            Selecione as Landing Pages
+                                        </label>
+                                        {landingPages.length === 0 ? (
+                                            <p style={{ color: '#666', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                                                Nenhuma landing page cadastrada. Crie uma primeiro.
+                                            </p>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {landingPages.map(lp => {
+                                                    const isSelected = formData.assigned_page_slugs.includes(lp.slug);
+                                                    return (
+                                                        <label key={lp.id} style={{
+                                                            display: 'flex', alignItems: 'center', gap: '10px',
+                                                            padding: '10px 14px',
+                                                            background: isSelected ? 'rgba(201, 169, 110, 0.08)' : 'transparent',
+                                                            border: `1px solid ${isSelected ? 'rgba(201, 169, 110, 0.3)' : 'rgba(255,255,255,0.05)'}`,
+                                                            borderRadius: '8px', cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={(e) => {
+                                                                    const newSlugs = e.target.checked
+                                                                        ? [...formData.assigned_page_slugs, lp.slug]
+                                                                        : formData.assigned_page_slugs.filter(s => s !== lp.slug);
+                                                                    setFormData({ ...formData, assigned_page_slugs: newSlugs })
+                                                                }}
+                                                                style={{ accentColor: 'var(--gold)', width: '16px', height: '16px' }}
+                                                            />
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ color: isSelected ? 'var(--gold)' : '#ddd', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                                    {lp.title || 'Sem título'}
+                                                                </div>
+                                                                <div style={{ color: '#666', fontSize: '0.75rem' }}>/{lp.slug}</div>
+                                                            </div>
+                                                        </label>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Escala de Plantão */}
@@ -405,9 +558,29 @@ export default function BrokersAdmin() {
                                 </span>
                             </div>
 
+                            {/* Badge de Tipo de Atendimento */}
+                            <div style={{ marginTop: '8px' }}>
+                                {broker.assignment_type === 'landing_pages' ? (
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                        <span style={{ padding: '2px 8px', background: 'rgba(147, 130, 220, 0.1)', border: '1px solid rgba(147, 130, 220, 0.3)', borderRadius: '12px', fontSize: '0.7rem', color: '#9382dc', fontWeight: 600 }}>
+                                            LPs Específicas
+                                        </span>
+                                        {broker.assigned_page_slugs?.map(slug => (
+                                            <span key={slug} style={{ padding: '2px 8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '0.65rem', color: '#aaa' }}>
+                                                /{slug}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <span style={{ padding: '2px 8px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '12px', fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>
+                                        Rodízio Geral
+                                    </span>
+                                )}
+                            </div>
+
                             {/* Badge de Escala Fixa */}
                             {(broker.duty_weekdays?.length > 0 || broker.duty_dates?.length > 0) && (
-                                <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                                     {broker.duty_weekdays?.map(d => {
                                         const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
                                         return (
@@ -436,7 +609,9 @@ export default function BrokersAdmin() {
                                         photo_url: broker.photo_url,
                                         is_active: broker.is_active,
                                         duty_weekdays: broker.duty_weekdays || [],
-                                        duty_dates: broker.duty_dates || []
+                                        duty_dates: broker.duty_dates || [],
+                                        assignment_type: broker.assignment_type || 'all',
+                                        assigned_page_slugs: broker.assigned_page_slugs || []
                                     })
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}
