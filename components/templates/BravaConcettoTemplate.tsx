@@ -1,548 +1,580 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
-    Menu, X, ChevronDown, MapPin, Sparkles, Building2, Wind,
-    Shield, Check, MessageCircle, ArrowRight, Download, Droplet, Maximize
+    X, ChevronLeft, ChevronRight, ChevronDown, MapPin, Building2,
+    Leaf, Trees, AlertCircle, Check, MessageSquare, Phone, User,
+    ArrowRight, Mail, Navigation, Minus, Plus, Star
 } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
 
-// ─── Design Tokens (Quiet Luxury) ────────────────────────────────────────────────
-const COLORS = {
-    bg: '#FCFBF9',         // Areia super claro
-    bgDark: '#0A0A0A',     // Preto quase absoluto
-    bgSoft: '#F2F0EA',     // Off-white acinzentado
-    headings: '#111111',   // Grafite ultra escuro
-    text: '#4A4A4A',       // Cinza médio
-    textMuted: '#8A8A8A',  // Cinza claro
-    primary: '#B69A6E',    // Dourado suave/Champagne
-    primaryHover: '#CDB48B',
+// ─── Design Tokens (Dark Green Luxury — inspired by AI Studio) ───────────
+const C = {
+    bgDark: '#0C0C0C',
+    bgCard: '#111111',
+    bgSoft: 'rgba(255,255,255,0.05)',
+    bgInput: 'rgba(12,12,12,0.5)',
+    primary: '#C5A059',
+    primaryHover: '#b8934e',
+    primaryGlow: 'rgba(197,160,89,0.35)',
+    primaryMuted: 'rgba(197,160,89,0.12)',
+    accentGold: '#C5A059',
+    accentGoldMuted: 'rgba(197,160,89,0.1)',
+    accentGoldBorder: 'rgba(197,160,89,0.2)',
     white: '#FFFFFF',
-    border: 'rgba(182, 154, 110, 0.15)', // Bordas douradas sutis
+    textLight: '#e2e8f0',
+    textMuted: '#94a3b8',
+    textDim: '#64748b',
+    textFaint: '#475569',
+    border: 'rgba(255,255,255,0.1)',
+    charcoal: '#1A1A1A',
 }
 
 export default function BravaConcettoTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
-    const { title, description, price, cta, stats, amenities, primaryColor } = data
-    const heroImage = '/images/01.png'
-
-    // Array original das 25 imagens espelhadas do diretório "image/"
     const gallery = [
-        '/images/brava-concetto/brava_concetto_pagina_3.png',
-        '/images/brava-concetto/brava_concetto_pagina_7.png',
-        '/images/brava-concetto/brava_concetto_pagina_9.png',
-        '/images/brava-concetto/brava_concetto_pagina_10.png',
-        '/images/brava-concetto/brava_concetto_pagina_11.png',
-        '/images/brava-concetto/brava_concetto_pagina_12.png',
-        '/images/brava-concetto/brava_concetto_pagina_13.png',
-        '/images/brava-concetto/brava_concetto_pagina_14.png',
-        '/images/brava-concetto/brava_concetto_pagina_15.png',
-        '/images/brava-concetto/brava_concetto_pagina_16.png',
-        '/images/brava-concetto/brava_concetto_pagina_17.png',
-        '/images/brava-concetto/brava_concetto_pagina_18.png',
-        '/images/brava-concetto/brava_concetto_pagina_19.png',
-        '/images/brava-concetto/brava_concetto_pagina_20.png',
-        '/images/brava-concetto/brava_concetto_pagina_21.png',
-        '/images/brava-concetto/brava_concetto_pagina_22.png',
-        '/images/brava-concetto/brava_concetto_pagina_23.png',
-        '/images/brava-concetto/brava_concetto_pagina_24.png',
-        '/images/brava-concetto/brava_concetto_pagina_25.png',
-        '/images/brava-concetto/brava_concetto_pagina_26.png',
-        '/images/brava-concetto/brava_concetto_pagina_27.png',
-        '/images/brava-concetto/brava_concetto_pagina_28.png',
-        '/images/brava-concetto/brava_concetto_pagina_29.png',
-        '/images/brava-concetto/brava_concetto_pagina_30.png',
-        '/images/brava-concetto/brava_concetto_pagina_31.png'
+        '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
+        '/images/brava-concetto/2_CL_BC_FACHADA_NOTURNA_R01.jpg',
+        '/images/brava-concetto/5_CL_BC_VOO_PASSARO_R01.jpg',
+        '/images/brava-concetto/3_CL_BC_EMBASAMENTO_R01.jpg',
+        '/images/brava-concetto/6_CL_BC_DETALHE_FACHADA_ANG_01_EF.jpg',
+        '/images/brava-concetto/7_CL_BC_DETALHE_FACHADA_ANG_02_EF.jpg',
+        '/images/brava-concetto/3_CL_BC_PRACA_ACESSO_R02_web.jpg',
+        '/images/brava-concetto/4.jpg',
+        '/images/brava-concetto/8_CL_BC_HALL_DE_ENTRADA_EF_web.jpg',
+        '/images/brava-concetto/9_CL_BC_HALL_DE_ENTRADA_ANG_02_EF.jpg',
+        '/images/brava-concetto/10_CL_BC_SALAO_DE_FESTAS_EF_web.jpg',
+        '/images/brava-concetto/11_CL_BC_SALAO_DE_FESTAS_ANG_02_EF_web.jpg',
+        '/images/brava-concetto/12_CL_BC_FITNESS_EF_web.jpg',
+        '/images/brava-concetto/13_CL_BC_FITNESS_ANG_02_EF_web.jpg',
+        '/images/brava-concetto/14_CL_BC_PISCINA_EF_web.jpg',
+        '/images/brava-concetto/15_CL_BC_PISCINA_EF_web.jpg',
+        '/images/brava-concetto/16_CL_BC_PISCINA_PRIVATIVA_EF_web.jpg',
+        '/images/brava-concetto/17_CL_BC_QUIOSQUE_ANG_01_EF_web.jpg',
+        '/images/brava-concetto/18_CL_BC_QUIOSQUE_ANG_02_EF_web.jpg',
+        '/images/brava-concetto/19_CL_BC_LIVING_FINAL_01_EF_web.jpg',
+        '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg',
+        '/images/brava-concetto/21_CL_BC_LIVING_FINAL_01_DETALHE_EF_web.jpg',
+        '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg',
+        '/images/brava-concetto/23_CL_BC_SUITE_MASTER_FINAL_01_EF_web.jpg',
+        '/images/brava-concetto/24_CL_BC_SUITE_MASTER_FINAL_02_EF_web.jpg',
+        '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg',
     ]
 
-    const [isScrolled, setIsScrolled] = useState(false)
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const [activeGalleryIndex, setActiveGalleryIndex] = useState(0)
+    const [formData, setFormData] = useState({ name: '', phone: '', email: '' })
+    const [formSent, setFormSent] = useState(false)
+    const [lightboxOpen, setLightboxOpen] = useState(false)
+    const [lightboxIdx, setLightboxIdx] = useState(0)
+    const [faqOpen, setFaqOpen] = useState<number | null>(null)
+    const [galleryIdx, setGalleryIdx] = useState(0)
+    const touchStartX = useRef(0)
 
-    // Scroll & Intersection Observer para Animações Reveal
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 50)
-        window.addEventListener('scroll', handleScroll)
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        const target = entry.target as HTMLElement
-                        target.classList.add('brava-visible')
-                        target.style.opacity = '1'
-                        target.style.transform = 'translateY(0)'
-                    }
-                })
-            },
-            { threshold: 0.15 }
-        )
-
-        document.querySelectorAll('.brava-animate').forEach((el) => {
-            ; (el as HTMLElement).style.opacity = '0'
-                ; (el as HTMLElement).style.transform = 'translateY(40px)'
-                ; (el as HTMLElement).style.transition = 'all 1.2s cubic-bezier(0.25, 0.8, 0.25, 1)'
-            observer.observe(el)
+        // Intersection observer for reveal animations
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const el = e.target as HTMLElement
+                    el.style.opacity = '1'
+                    el.style.transform = 'translateY(0)'
+                }
+            })
+        }, { threshold: 0.1 })
+        document.querySelectorAll('.bc-reveal').forEach(el => {
+            const h = el as HTMLElement
+            h.style.opacity = '0'
+            h.style.transform = 'translateY(24px)'
+            h.style.transition = 'opacity 0.7s ease, transform 0.7s ease'
+            obs.observe(el)
         })
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll)
-            observer.disconnect()
-        }
+        return () => obs.disconnect()
     }, [])
-
-    // Carrossel Automático Lifestyle
-    useEffect(() => {
-        if (gallery.length <= 1) return
-        const timer = setInterval(() => {
-            setActiveGalleryIndex((prev) => (prev + 1) % 6) // Rotacionar primeiras 6 imagens
-        }, 5000)
-        return () => clearInterval(timer)
-    }, [gallery.length])
 
     const openChat = useCallback(() => {
         window.dispatchEvent(new CustomEvent('open-concierge-chat'))
     }, [])
 
+    const openLightbox = (idx: number) => { setLightboxIdx(idx); setLightboxOpen(true) }
+    const closeLightbox = () => setLightboxOpen(false)
+    const nextLB = () => setLightboxIdx((p) => (p + 1) % gallery.length)
+    const prevLB = () => setLightboxIdx((p) => (p - 1 + gallery.length) % gallery.length)
+
+    const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const diff = touchStartX.current - e.changedTouches[0].clientX
+        if (Math.abs(diff) > 50) {
+            setGalleryIdx(p => diff > 0 ? Math.min(p + 1, gallery.length - 1) : Math.max(p - 1, 0))
+        }
+    }
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        setFormSent(true)
+        setTimeout(() => openChat(), 600)
+    }
+
+    const features = [
+        { icon: Building2, title: 'Design Assinado', desc: 'Arquitetura atemporal com elevador privativo, esquadrias piso-teto e acabamento de altíssimo padrão.' },
+        { icon: Leaf, title: 'Certificação GBC', desc: 'Selo de excelência do Green Building Council em sustentabilidade e eficiência energética.' },
+        { icon: Trees, title: 'Integração com a Natureza', desc: 'Design biofílico que preserva e valoriza a essência da Praia Brava.' },
+    ]
+
+    const units = [
+        { title: 'Apartamentos Garden', size: '340m²', desc: 'Ampla área privativa com jardim exclusivo e pé-direito duplo.', img: '/images/brava-concetto/19_CL_BC_LIVING_FINAL_01_EF_web.jpg' },
+        { title: 'Apartamentos Tipo', size: '280m²', desc: 'Suítes amplas e living integrado com vista mar definitiva.', img: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg' },
+        { title: 'Coberturas Duplex', size: '590m²', desc: 'O ápice do luxo com piscina privativa e 360° de exclusividade.', img: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg' },
+    ]
+
+    const faqs = [
+        { q: 'Qual a previsão de entrega?', a: 'Previsão para 2027. Consulte nosso especialista para datas atualizadas e condições de reserva antecipada.' },
+        { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos personalização total do layout interno com equipe de arquitetura dedicada.' },
+        { q: 'Quais as condições de pagamento?', a: 'Entrada facilitada, parcelas durante obra e financiamento bancário na entrega. Fale com nosso especialista para simulação.' },
+        { q: 'Onde fica exatamente?', a: 'Na Praia Brava, Itajaí/SC — a 200m da orla, entre o agito de Balneário Camboriú e a natureza preservada.' },
+        { q: 'Possui certificação sustentável?', a: 'Sim, certificação Green Building Council (GBC) garantindo eficiência energética e menor impacto ambiental.' },
+        { q: 'Quantas unidades por andar?', a: 'Apenas 2 unidades por andar, garantindo máxima privacidade e exclusividade.' },
+    ]
+
+    // Shared styles
+    const inputStyle: React.CSSProperties = {
+        width: '100%', background: C.bgInput, border: `1px solid ${C.border}`,
+        borderRadius: 12, padding: '14px 14px 14px 42px', color: C.white,
+        fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const,
+        transition: 'border-color 0.2s',
+    }
+
+    const btnPrimary: React.CSSProperties = {
+        width: '100%', background: C.primary, color: C.bgDark, fontWeight: 800,
+        padding: '16px', borderRadius: 12, border: 'none', cursor: 'pointer',
+        fontSize: '0.9rem', letterSpacing: '0.02em', transition: 'all 0.2s',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    }
+
     return (
-        <div className="brava-concetto-template" style={{
-            fontFamily: '"Inter", sans-serif',
-            color: COLORS.text,
-            background: COLORS.bg,
-            overflowX: 'hidden',
-            position: 'relative',
+        <div style={{
+            fontFamily: '"Manrope", "Inter", sans-serif',
+            color: C.textLight, background: C.bgDark,
+            overflowX: 'hidden', minHeight: '100vh',
+            WebkitFontSmoothing: 'antialiased',
         }}>
-            {/* Inject Google Fonts for Serif (Playfair Display) + Sans (Inter/Work Sans) */}
             <style dangerouslySetInnerHTML={{
                 __html: `
-                @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Work+Sans:wght@300;400;500;600&display=swap');
-                
-                .font-serif { font-family: 'Cormorant Garamond', serif; }
-                .font-sans { font-family: 'Work Sans', sans-serif; }
-                .font-inter { font-family: 'Inter', sans-serif; }
-
+                @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
                 html { scroll-behavior: smooth; }
+                .font-serif { font-family: 'Playfair Display', serif; }
+                .font-sans { font-family: 'Manrope', sans-serif; }
+                ::selection { background: ${C.primary}; color: ${C.bgDark}; }
+                @keyframes ping { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+                @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes slideDown { from { max-height: 0; opacity: 0; padding-top: 0; } to { max-height: 200px; opacity: 1; padding-top: 12px; } }
+                @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 ${C.primaryGlow}; } 50% { box-shadow: 0 0 0 12px rgba(22,223,102,0); } }
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                .gallery-track { display: flex; transition: transform 0.5s cubic-bezier(0.25,0.8,0.25,1); }
+                input::placeholder { color: ${C.textDim}; }
+                input:focus { border-color: ${C.primary} !important; box-shadow: 0 0 0 2px ${C.primaryMuted}; }
+                
+                @media (max-width: 640px) {
+                    .desktop-gallery { display: none !important; }
+                    .mobile-gallery { display: block !important; }
+                    .units-scroll { padding-left: 20px !important; padding-right: 20px !important; }
+                }
+                @media (min-width: 641px) {
+                    .mobile-gallery { display: none !important; }
+                    .desktop-gallery { display: grid !important; }
+                }
             `}} />
 
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
 
-            {/* ═══════════════════ NAVBAR (MINIMALISTA) ═══════════════════ */}
-            <nav style={{
-                position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-                transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                padding: isScrolled ? '12px 24px' : '20px 24px',
-                background: isScrolled ? 'rgba(252,251,249,0.95)' : 'transparent',
-                backdropFilter: isScrolled ? 'blur(20px)' : 'none',
-                borderBottom: isScrolled ? `1px solid ${COLORS.border}` : '1px solid transparent',
+            {/* ═══════ HEADER ═══════ */}
+            <header style={{
+                position: 'sticky', top: 0, zIndex: 50,
+                background: 'rgba(12,12,12,0.9)', backdropFilter: 'blur(12px)',
+                borderBottom: `1px solid ${C.border}`,
             }}>
-                <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-
-                    <div style={{
-                        fontFamily: '"Work Sans", sans-serif', fontSize: '1.25rem', fontWeight: 300,
-                        letterSpacing: '0.15em', textTransform: 'uppercase',
-                        color: isScrolled ? COLORS.headings : COLORS.white,
-                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                        lineHeight: 1.1
-                    }}>
-                        <span style={{ fontSize: '0.6rem', letterSpacing: '0.4em' }}>BRAVA</span>
-                        <span>CONCETTO</span>
-                    </div>
-
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            color: isScrolled ? COLORS.headings : COLORS.white,
-                            padding: '8px',
-                        }}
-                    >
-                        {mobileMenuOpen ? <X size={28} strokeWidth={1.5} /> : <Menu size={28} strokeWidth={1.5} />}
-                    </button>
-                </div>
-            </nav>
-
-            {/* OVERLAY DE MENU */}
-            {mobileMenuOpen && (
                 <div style={{
-                    position: 'fixed', inset: 0, zIndex: 49,
-                    background: COLORS.bg,
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center',
-                    gap: 32, opacity: 0, animation: 'fadeIn 0.4s forwards'
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '14px 20px', maxWidth: 640, margin: '0 auto',
                 }}>
-                    <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
-                    {['Início', 'Conceito', 'Diferenciais', 'Lifestyle', 'Tipologias'].map((item) => (
-                        <a
-                            key={item}
-                            href={`#${item.toLowerCase()}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="font-serif"
-                            style={{
-                                fontSize: '2rem', fontWeight: 300,
-                                color: COLORS.headings, textDecoration: 'none',
-                                transition: 'color 0.4s',
-                            }}
-                        >
-                            {item}
-                        </a>
-                    ))}
-                    <button onClick={openChat} style={{
-                        background: 'transparent', border: `1px solid ${COLORS.primary}`, color: COLORS.primary,
-                        padding: '12px 32px', fontSize: '0.8rem', letterSpacing: '0.2em', textTransform: 'uppercase',
-                        marginTop: 24, cursor: 'pointer'
-                    }}>
-                        Falar com Especialista
-                    </button>
+                    <img src="/images/brava-concetto/brava-concetto.svg" alt="Brava Concetto" style={{ height: 32, filter: 'brightness(0) invert(1)' }} />
                 </div>
-            )}
+            </header>
 
-            {/* ═══════════════════ 1. HERO SECTION (IMPACTO IMEDIATO) ═══════════════════ */}
-            <section id="início" style={{
-                position: 'relative', height: '100vh', minHeight: 800, width: '100%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden',
-            }}>
-                <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-                    <img
-                        src={heroImage}
-                        alt="Brava Concetto"
-                        style={{
-                            width: '100%', height: '100%', objectFit: 'cover',
-                            objectPosition: 'center 40%',
-                            transition: 'transform 25s ease-out',
-                        }}
-                    />
+            <main style={{ maxWidth: 640, margin: '0 auto', paddingBottom: 100 }}>
+
+                {/* ═══════ 1. HERO + LEAD FORM ═══════ */}
+                <section style={{ position: 'relative' }}>
                     <div style={{
-                        position: 'absolute', inset: 0,
-                        background: `linear-gradient(to bottom, rgba(10,10,10,0.6) 0%, rgba(10,10,10,0.3) 40%, rgba(10,10,10,0.85) 100%)`,
-                    }} />
-                </div>
-
-                <div style={{
-                    position: 'relative', zIndex: 10,
-                    textAlign: 'center', padding: '0 24px',
-                    maxWidth: 1000, marginTop: 80,
-                }}>
-                    <h1 className="font-serif brava-animate" style={{
-                        fontSize: 'clamp(3rem, 7vw, 5.5rem)',
-                        fontWeight: 300, color: COLORS.white,
-                        lineHeight: 1.1, marginBottom: 24,
-                        letterSpacing: '-0.02em',
-                        textShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                        position: 'relative', minHeight: 620, display: 'flex', flexDirection: 'column',
+                        justifyContent: 'flex-start', padding: '100px 24px 32px',
+                        backgroundImage: `linear-gradient(to bottom, ${C.bgDark} 0%, rgba(12,12,12,0.75) 40%, rgba(12,12,12,0.2) 65%, rgba(12,12,12,0.0) 100%), url("/images/brava-concetto/4.jpg")`,
+                        backgroundSize: 'cover', backgroundPosition: 'center bottom',
                     }}>
-                        O privilégio de viver entre o mar<br />
-                        <span style={{ fontStyle: 'italic', color: COLORS.primary, textShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>e o extraordinário.</span>
-                    </h1>
-
-                    <p className="font-sans brava-animate" style={{
-                        fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                        color: 'rgba(255,255,255,0.95)',
-                        fontWeight: 300, letterSpacing: '0.05em',
-                        maxWidth: 600, margin: '0 auto 48px',
-                        lineHeight: 1.6,
-                        textShadow: '0 2px 12px rgba(0,0,0,0.8)',
-                    }}>
-                        Uma obra-prima atemporal na Praia Brava. Arquitetura em harmonia com a natureza e o design conceitual.
-                    </p>
-
-                    <div className="brava-animate" style={{
-                        display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center'
-                    }}>
-                        <button
-                            onClick={openChat}
-                            className="font-sans"
-                            style={{
-                                background: COLORS.primary, border: `1px solid ${COLORS.primary}`,
-                                color: COLORS.white, padding: '16px 40px',
-                                fontSize: '0.75rem', letterSpacing: '0.15em',
-                                textTransform: 'uppercase', cursor: 'pointer',
-                                fontWeight: 500, transition: 'all 0.4s',
-                            }}
-                        >
-                            Agendar Apresentação Privativa
-                        </button>
-
-                        <button
-                            onClick={openChat}
-                            className="font-sans"
-                            style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 10,
-                                background: 'transparent', border: `1px solid rgba(255,255,255,0.4)`,
-                                color: COLORS.white, padding: '16px 40px',
-                                fontSize: '0.75rem', letterSpacing: '0.15em',
-                                textTransform: 'uppercase', cursor: 'pointer',
-                                fontWeight: 500, transition: 'all 0.4s',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                        >
-                            <Download size={16} /> Receber Catálogo Exclusivo
-                        </button>
-                    </div>
-                </div>
-
-                <div className="font-sans" style={{
-                    position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
-                    color: 'rgba(255,255,255,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                    fontSize: '0.65rem', letterSpacing: '0.3em', textTransform: 'uppercase'
-                }}>
-                    Role para descobrir
-                    <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.3)' }} />
-                </div>
-            </section>
-
-            {/* ═══════════════════ 2. CONCEITO (STORYTELLING) ═══════════════════ */}
-            <section id="conceito" style={{
-                padding: 'clamp(100px, 15vw, 180px) 24px', background: COLORS.bg,
-                position: 'relative'
-            }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-                    <div style={{
-                        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
-                        gap: 'clamp(60px, 10vw, 120px)', alignItems: 'center',
-                    }}>
-                        <div className="brava-animate">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-                                <div style={{ width: 40, height: 1, background: COLORS.primary }} />
-                                <span className="font-sans" style={{
-                                    fontSize: '0.7rem', letterSpacing: '0.3em',
-                                    textTransform: 'uppercase', color: COLORS.primary,
-                                }}>Identidade & Status</span>
-                            </div>
+                        <div style={{ animation: 'fadeUp 0.8s ease' }}>
+                            <span style={{
+                                display: 'inline-block', padding: '5px 14px',
+                                background: C.primaryMuted, color: C.primary,
+                                fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.2em',
+                                textTransform: 'uppercase', borderRadius: 50,
+                                border: `1px solid rgba(197,160,89,0.3)`, marginBottom: 16,
+                            }}>
+                                Lançamento Exclusivo
+                            </span>
 
                             <h2 className="font-serif" style={{
-                                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                                fontWeight: 300, color: COLORS.headings,
-                                lineHeight: 1.1, marginBottom: 32,
+                                fontSize: 'clamp(1.8rem, 6vw, 2.4rem)', lineHeight: 1.15,
+                                color: C.white, fontStyle: 'italic', marginBottom: 12,
                             }}>
-                                O Luxo <span style={{ fontStyle: 'italic' }}>Silencioso</span><br /> encontra a Natureza.
+                                Onde o Mar Encontra o Design Extraordinário
                             </h2>
 
-                            <p className="font-sans" style={{
-                                fontSize: '1.05rem', lineHeight: 1.8, color: COLORS.text,
-                                fontWeight: 300, marginBottom: 32,
+                            <p style={{
+                                color: C.textLight, fontSize: '1rem', lineHeight: 1.65,
+                                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                             }}>
-                                O Brava Concetto nasce da união entre arquitetura atemporal e design biofílico.
-                                Não construímos apenas espaços, moldamos refúgios onde a integração com a natureza e o mar
-                                transformam definitivamente o seu estilo de vida.
+                                Experiência inigualável na Praia Brava. O equilíbrio perfeito entre o luxo silencioso e a natureza.
                             </p>
-                            <p className="font-sans" style={{
-                                fontSize: '1.05rem', lineHeight: 1.8, color: COLORS.text,
-                                fontWeight: 300,
-                            }}>
-                                Um projeto desenhado para quem não precisa provar nada.
-                                Apenas viver a essência do luxo autêntico.
-                            </p>
-
-                            <div style={{ marginTop: 48, display: 'flex', gap: 40 }}>
-                                <div>
-                                    <div className="font-serif" style={{ fontSize: '3rem', lineHeight: 1, color: COLORS.primary }}>280m²</div>
-                                    <div className="font-sans" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', marginTop: 8, color: COLORS.textMuted, textTransform: 'uppercase' }}>A partir de (Área Priv.)</div>
-                                </div>
-                                <div>
-                                    <div className="font-serif" style={{ fontSize: '3rem', lineHeight: 1, color: COLORS.primary }}>4</div>
-                                    <div className="font-sans" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', marginTop: 8, color: COLORS.textMuted, textTransform: 'uppercase' }}>Vagas Individuais</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="brava-animate">
-                            <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4' }}>
-                                <img
-                                    src={gallery[3] || heroImage}
-                                    alt="Fachada ou Conceito"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                                <div style={{
-                                    position: 'absolute', bottom: -30, left: -30,
-                                    width: '60%', aspectRatio: '1', zIndex: 1,
-                                    border: `8px solid ${COLORS.bg}`
-                                }}>
-                                    <img
-                                        src={gallery[2] || heroImage}
-                                        alt="Detalhe Arquitetônico"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* ═══════════════════ 3. DIFERENCIAIS DE ALTO PADRÃO ═══════════════════ */}
-            <section id="diferenciais" style={{
-                padding: 'clamp(80px, 12vw, 160px) 24px', background: COLORS.bgSoft,
-                borderTop: `1px solid ${COLORS.border}`, borderBottom: `1px solid ${COLORS.border}`,
-            }}>
-                <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-                    <div className="brava-animate" style={{ textAlign: 'center', marginBottom: 80 }}>
-                        <h2 className="font-serif" style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 300, color: COLORS.headings,
-                        }}>Exclusividade em Detalhes</h2>
-                    </div>
-
-                    <div style={{
-                        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: 2, background: COLORS.border, border: `1px solid ${COLORS.border}`
+                {/* ═══════ 2. SCARCITY BANNER ═══════ */}
+                <section style={{
+                    background: C.accentGoldMuted, borderTop: `1px solid ${C.accentGoldBorder}`,
+                    borderBottom: `1px solid ${C.accentGoldBorder}`, padding: '14px 24px',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                    <AlertCircle size={18} color={C.accentGold} style={{ flexShrink: 0 }} />
+                    <p style={{
+                        color: C.accentGold, fontWeight: 700, fontSize: '0.75rem',
+                        letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0,
                     }}>
-                        {[
-                            { icon: Building2, title: 'Elevador Privativo', desc: 'Acesso direto e exclusivo ao seu apartamento com biometria.' },
-                            { icon: Check, title: '4 Vagas Individuais', desc: 'Espaço e comodidade para sua frota e visitantes.' },
-                            { icon: Wind, title: 'Piso Aquecido', desc: 'Conforto térmico absoluto nos banheiros das suítes.' },
-                            { icon: Sparkles, title: 'Automação Full', desc: 'Infraestrutura completa para smart home de altíssimo padrão.' },
-                            { icon: Maximize, title: 'Esquadrias Panorâmicas', desc: 'Piso ao teto, maximizando a entrada de luz natural e a vista.' },
-                            { icon: Droplet, title: 'Sustentabilidade', desc: 'Projeto projetado seguindo normas Green Building Council (GBC).' },
-                        ].map((diff, i) => (
-                            <div key={i} className="brava-animate" style={{
-                                background: COLORS.bgSoft, padding: '60px 40px',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                                transition: 'background 0.3s',
-                            }} onMouseEnter={(e) => e.currentTarget.style.background = COLORS.white}
-                                onMouseLeave={(e) => e.currentTarget.style.background = COLORS.bgSoft}>
-                                <diff.icon size={32} color={COLORS.primary} strokeWidth={1} style={{ marginBottom: 24 }} />
-                                <h3 className="font-sans" style={{
-                                    fontSize: '1.1rem', fontWeight: 500, color: COLORS.headings,
-                                    letterSpacing: '0.05em', marginBottom: 12
-                                }}>{diff.title}</h3>
-                                <p className="font-sans" style={{
-                                    fontSize: '0.9rem', color: COLORS.text, lineHeight: 1.6, fontWeight: 300
-                                }}>{diff.desc}</p>
+                        Apenas 25 Unidades Exclusivas — Alto Potencial de Valorização
+                    </p>
+                </section>
+
+                {/* ═══════ 3. QUIET LUXURY CONCEPT ═══════ */}
+                <section style={{ padding: '72px 24px' }}>
+                    <div className="bc-reveal" style={{ marginBottom: 40 }}>
+                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 8 }}>Quiet Luxury</h3>
+                        <div style={{ width: 48, height: 4, background: C.primary, borderRadius: 4 }} />
+                    </div>
+
+                    <p className="bc-reveal font-serif" style={{
+                        color: C.textMuted, fontSize: '1.15rem', lineHeight: 1.7,
+                        fontStyle: 'italic', marginBottom: 32,
+                    }}>
+                        "A sofisticação não precisa gritar. Ela se revela no detalhe, na escolha da textura e na harmonia com o horizonte."
+                    </p>
+
+                    <div className="bc-reveal" style={{
+                        aspectRatio: '4/5', borderRadius: 16, overflow: 'hidden',
+                        border: `1px solid ${C.border}`, marginBottom: 40,
+                    }}>
+                        <img src={gallery[2]} alt="Conceito Brava Concetto" style={{
+                            width: '100%', height: '100%', objectFit: 'cover',
+                        }} />
+                    </div>
+
+                    {/* Feature Cards */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        {features.map((f, i) => (
+                            <div key={i} className="bc-reveal" style={{
+                                padding: 22, borderRadius: 16, background: C.bgSoft,
+                                border: `1px solid ${C.border}`, display: 'flex', gap: 16, alignItems: 'flex-start',
+                            }}>
+                                <div style={{
+                                    width: 48, height: 48, borderRadius: 12,
+                                    background: C.primaryMuted, display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                }}>
+                                    <f.icon size={22} color={C.primary} />
+                                </div>
+                                <div>
+                                    <h4 style={{ color: C.white, fontWeight: 700, marginBottom: 4, fontSize: '0.95rem' }}>{f.title}</h4>
+                                    <p style={{ color: C.textDim, fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>{f.desc}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
 
-            {/* ═══════════════════ 4. LIFESTYLE (VENDA EMOCIONAL) ═══════════════════ */}
-            <section id="lifestyle" style={{ padding: '120px 24px', background: COLORS.bgDark, color: COLORS.white }}>
-                <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-                    <div className="brava-animate" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 60, flexWrap: 'wrap', gap: 32 }}>
+                </section>
+
+                {/* ═══════ 4. UNITS CAROUSEL ═══════ */}
+                <section style={{
+                    padding: '56px 0', background: C.bgSoft,
+                    borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`,
+                }}>
+                    <div style={{ padding: '0 24px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
-                            <span className="font-sans" style={{ fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: COLORS.primary, display: 'block', marginBottom: 16 }}>
-                                A Experiência
-                            </span>
-                            <h2 className="font-serif" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 300, lineHeight: 1.1 }}>
-                                Contemplação &<br /><span style={{ fontStyle: 'italic', color: COLORS.primary }}>Silêncio.</span>
-                            </h2>
+                            <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white }}>Unidades</h3>
+                            <p style={{ color: C.textDim, fontSize: '0.85rem', marginTop: 4 }}>Plantas inteligentes e exclusivas</p>
                         </div>
-                        <p className="font-sans" style={{ maxWidth: 400, fontSize: '1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.7)', fontWeight: 300 }}>
-                            Espaços desenhados para acolher a sua melhor versão.
-                            Piscina com vista panorâmica, living perfeitamente integrado e um design feito para perdurar.
-                        </p>
                     </div>
 
-                    <div style={{ position: 'relative', width: '100%', aspectRatio: '21/9', overflow: 'hidden' }}>
-                        {gallery.slice(4, 10).map((img, i) => (
-                            <img
-                                key={i} src={img} alt={`Lifestyle ${i}`}
-                                style={{
-                                    position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-                                    opacity: i === activeGalleryIndex ? 1 : 0,
-                                    transition: 'opacity 1.5s ease-in-out',
+                    <div className="hide-scrollbar units-scroll" style={{
+                        display: 'flex', overflowX: 'auto', gap: 20, padding: '0 24px 16px',
+                    }}>
+                        {units.map((u, i) => (
+                            <div key={i} style={{
+                                minWidth: 280, background: C.bgDark, borderRadius: 16,
+                                border: `1px solid ${C.border}`, overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                                transition: 'transform 0.3s',
+                            }}>
+                                <div style={{ position: 'relative' }}>
+                                    <img src={u.img} alt={u.title} style={{
+                                        width: '100%', height: 200, objectFit: 'cover',
+                                        transition: 'transform 0.7s',
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                    <div style={{
+                                        position: 'absolute', top: 12, right: 12,
+                                        background: C.primary, color: C.bgDark, fontWeight: 800,
+                                        fontSize: '0.75rem', padding: '4px 10px', borderRadius: 6,
+                                    }}>{u.size}</div>
+                                </div>
+                                <div style={{ padding: 20 }}>
+                                    <h5 style={{ color: C.white, fontWeight: 700, fontSize: '1.05rem', marginBottom: 6 }}>{u.title}</h5>
+                                    <p style={{ color: C.textDim, fontSize: '0.85rem', lineHeight: 1.5, marginBottom: 16 }}>{u.desc}</p>
+                                    <button onClick={openChat} style={{
+                                        width: '100%', padding: '13px', border: `1px solid rgba(197,160,89,0.4)`,
+                                        color: C.primary, fontWeight: 700, borderRadius: 10,
+                                        background: 'transparent', cursor: 'pointer', fontSize: '0.85rem',
+                                        transition: 'all 0.2s',
+                                    }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = C.primaryMuted }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                                        Ver Planta
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* ═══════ 5. GALLERY ═══════ */}
+                <section style={{ padding: '72px 24px' }}>
+                    <div className="bc-reveal" style={{ marginBottom: 32 }}>
+                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 4 }}>Galeria</h3>
+                        <p style={{ color: C.textDim, fontSize: '0.85rem' }}>{gallery.length} imagens do empreendimento</p>
+                    </div>
+
+                    {/* Mobile Gallery */}
+                    <div className="mobile-gallery"
+                        onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}
+                        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, border: `1px solid ${C.border}` }}>
+                        <div className="gallery-track" style={{ transform: `translateX(-${galleryIdx * 100}%)` }}>
+                            {gallery.map((img, i) => (
+                                <div key={i} onClick={() => openLightbox(i)} style={{ minWidth: '100%', cursor: 'pointer' }}>
+                                    <img src={img} alt={`Imagem ${i + 1}`} style={{ width: '100%', aspectRatio: '16/10', objectFit: 'cover' }} />
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ textAlign: 'center', padding: '12px 0 8px', fontSize: '0.8rem', color: C.textDim }}>
+                            {galleryIdx + 1} / {gallery.length} — Deslize para navegar
+                        </div>
+                    </div>
+
+                    {/* Desktop Gallery */}
+                    <div className="desktop-gallery" style={{
+                        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
+                    }}>
+                        {gallery.slice(0, 9).map((img, i) => (
+                            <div key={i} onClick={() => openLightbox(i)} style={{
+                                cursor: 'pointer', overflow: 'hidden', borderRadius: 12,
+                                border: `1px solid ${C.border}`,
+                                gridColumn: i === 0 ? 'span 2' : undefined,
+                                gridRow: i === 0 ? 'span 2' : undefined,
+                            }}>
+                                <img src={img} alt={`Imagem ${i + 1}`} style={{
+                                    width: '100%', height: '100%', objectFit: 'cover',
+                                    aspectRatio: i === 0 ? '1' : '16/10',
+                                    transition: 'transform 0.5s',
                                 }}
-                            />
-                        ))}
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)' }} />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 40, borderTop: `1px solid rgba(255,255,255,0.1)`, paddingTop: 40 }}>
-                        {['Piscina Aquecida', 'Espaço Gourmet Climatizado', 'Living Integrado', 'Vista Panorâmica do Mar'].map((item, i) => (
-                            <div key={i} className="font-sans" style={{
-                                fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.8)'
-                            }}>
-                                0{i + 1}. <span style={{ color: COLORS.primary }}>{item}</span>
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
+                    {gallery.length > 9 && (
+                        <button onClick={() => openLightbox(0)} style={{
+                            marginTop: 16, width: '100%', padding: 14,
+                            border: `1px solid ${C.border}`, borderRadius: 12,
+                            background: 'transparent', color: C.textMuted, cursor: 'pointer',
+                            fontSize: '0.85rem', transition: 'all 0.2s',
+                        }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.color = C.primary }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted }}>
+                            Ver todas as {gallery.length} imagens
+                        </button>
+                    )}
+                </section>
 
-            {/* ═══════════════════ 5. PLANTAS E TIPOLOGIAS ═══════════════════ */}
-            <section id="tipologias" style={{ padding: 'clamp(80px, 12vw, 160px) 24px', background: COLORS.bg }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-                    <h2 className="font-serif brava-animate" style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontWeight: 300, color: COLORS.headings, marginBottom: 64 }}>
-                        A Medida do seu Desejo.
-                    </h2>
+                {/* ═══════ LIGHTBOX ═══════ */}
+                {lightboxOpen && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 200,
+                        background: 'rgba(0,0,0,0.95)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }} onClick={closeLightbox}>
+                        <button onClick={closeLightbox} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', zIndex: 210 }}>
+                            <X size={28} color={C.white} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); prevLB() }} style={{
+                            position: 'absolute', left: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronLeft size={24} color={C.white} />
+                        </button>
+                        <img src={gallery[lightboxIdx]} alt="" onClick={e => e.stopPropagation()}
+                            style={{ maxWidth: '92vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8 }} />
+                        <button onClick={(e) => { e.stopPropagation(); nextLB() }} style={{
+                            position: 'absolute', right: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronRight size={24} color={C.white} />
+                        </button>
+                        <div style={{ position: 'absolute', bottom: 20, color: C.textDim, fontSize: '0.85rem' }}>
+                            {lightboxIdx + 1} / {gallery.length}
+                        </div>
+                    </div>
+                )}
 
-                    <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
-                        {[
-                            { name: 'Apartamento Tipo', size: '280m²', desc: 'Espaços fluídos e perfeitamente dimensionados.' },
-                            { name: 'Apartamento Garden', size: '340m²', desc: 'A amplitude de uma casa com a segurança de um apartamento.' },
-                            { name: 'Cobertura Duplex', size: '590m²', desc: 'O ápice da exclusividade, com piscina privativa nos céus da Brava.' }
-                        ].map((tipo, i) => (
-                            <div key={i} className="brava-animate" style={{
-                                flex: '1 1 300px', background: COLORS.white, border: `1px solid ${COLORS.border}`,
-                                padding: '48px 32px', textAlign: 'center'
-                            }}>
-                                <h3 className="font-serif" style={{ fontSize: '1.8rem', color: COLORS.headings, marginBottom: 8 }}>{tipo.name}</h3>
-                                <div className="font-sans" style={{ fontSize: '1.1rem', color: COLORS.primary, fontWeight: 500, marginBottom: 24 }}>{tipo.size}</div>
-                                <p className="font-sans" style={{ fontSize: '0.95rem', color: COLORS.text, lineHeight: 1.6, fontWeight: 300, marginBottom: 32 }}>{tipo.desc}</p>
+                {/* ═══════ 6. LOCATION ═══════ */}
+                <section style={{ padding: '72px 24px' }}>
+                    <div className="bc-reveal" style={{ marginBottom: 24 }}>
+                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, fontStyle: 'italic' }}>A Localização</h3>
+                        <p style={{ color: C.textDim, fontSize: '0.9rem', marginTop: 6 }}>Entre o agito e a calma, no coração da Praia Brava.</p>
+                    </div>
+
+                    {/* Stylized dark map with pin overlay — AI Studio style */}
+                    <div className="bc-reveal" style={{
+                        position: 'relative', borderRadius: 16, overflow: 'hidden',
+                        border: `1px solid ${C.border}`, height: 320,
+                    }}>
+                        {/* Dark overlay for map interaction */}
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(17,33,23,0.2)', zIndex: 10, pointerEvents: 'none' }} />
+                        {/* Embedded map with dark filters */}
+                        <iframe
+                            title="Localização Brava Concetto"
+                            src="https://maps.google.com/maps?q=-26.9485,-48.6187&z=14&output=embed&hl=pt-BR"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0, filter: 'grayscale(1) brightness(0.35) contrast(1.3) invert(1) hue-rotate(180deg)', pointerEvents: 'none' }}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        />
+                        {/* Green pin with ping animation */}
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 20 }}>
+                            <div style={{ position: 'relative' }}>
+                                <div style={{
+                                    position: 'absolute', inset: -6, background: 'rgba(22,223,102,0.3)',
+                                    borderRadius: '50%', animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite',
+                                }} />
+                                <div style={{
+                                    position: 'relative', width: 48, height: 48, background: C.primary,
+                                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    border: `4px solid ${C.bgDark}`, boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                                }}>
+                                    <MapPin size={22} color={C.bgDark} />
+                                </div>
                             </div>
-                        ))}
+                        </div>
+                        {/* Address card overlay */}
+                        <div style={{
+                            position: 'absolute', bottom: 14, left: 14, right: 14, zIndex: 20,
+                            background: 'rgba(17,33,23,0.85)', backdropFilter: 'blur(12px)',
+                            padding: '14px 16px', borderRadius: 12,
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        }}>
+                            <div>
+                                <p style={{ color: C.white, fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>Av. Carlos Drummond de Andrade, 111</p>
+                                <p style={{ color: C.textDim, fontSize: '0.75rem', margin: 0, marginTop: 2 }}>200m da orla da Praia Brava</p>
+                            </div>
+                            <a href="https://www.google.com/maps/search/Brava+Concetto+Praia+Brava+Itajai" target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
+                                <Navigation size={18} color={C.primary} />
+                            </a>
+                        </div>
                     </div>
+                </section>
 
-                    <button
-                        onClick={openChat}
-                        className="font-sans brava-animate"
-                        style={{
-                            marginTop: 64, background: 'transparent', border: `1px solid ${COLORS.headings}`,
-                            color: COLORS.headings, padding: '16px 48px', fontSize: '0.75rem', letterSpacing: '0.2em',
-                            textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.4s'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = COLORS.headings; e.currentTarget.style.color = COLORS.white }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLORS.headings }}
-                    >
-                        Solicitar Plantas Humanizadas
-                    </button>
-                    <div className="font-sans brava-animate" style={{ fontSize: '0.7rem', color: COLORS.textMuted, marginTop: 16 }}>*Possibilidade de personalização total do layout.</div>
-                </div>
-            </section>
+                {/* ═══════ 7. FAQ ═══════ */}
+                <section style={{ padding: '56px 24px', borderTop: `1px solid ${C.border}` }}>
+                    <h3 className="font-serif bc-reveal" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 32 }}>
+                        Dúvidas Frequentes
+                    </h3>
+                    {faqs.map((f, i) => (
+                        <div key={i} className="bc-reveal" style={{
+                            borderBottom: `1px solid ${C.border}`, cursor: 'pointer',
+                            padding: '18px 0', transition: 'background 0.2s',
+                        }} onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <h4 style={{ color: C.white, fontWeight: 600, fontSize: '0.95rem', margin: 0, paddingRight: 16 }}>{f.q}</h4>
+                                {faqOpen === i
+                                    ? <Minus size={18} color={C.primary} style={{ flexShrink: 0 }} />
+                                    : <Plus size={18} color={C.textDim} style={{ flexShrink: 0 }} />}
+                            </div>
+                            {faqOpen === i && (
+                                <p style={{
+                                    marginTop: 12, marginBottom: 0, fontSize: '0.88rem',
+                                    color: C.textMuted, lineHeight: 1.65,
+                                    animation: 'slideDown 0.3s ease',
+                                }}>{f.a}</p>
+                            )}
+                        </div>
+                    ))}
+                </section>
 
-            {/* ═══════════════════ 6 & 7. AUTORIDADE E ESCASSEZ ═══════════════════ */}
-            <section style={{ padding: '80px 24px', background: COLORS.bgSoft, borderTop: `1px solid ${COLORS.border}` }}>
-                <div className="brava-animate" style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', gap: 40, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <Shield color={COLORS.primary} size={32} style={{ marginBottom: 24 }} />
-                        <h3 className="font-serif" style={{ fontSize: '2rem', color: COLORS.headings, marginBottom: 16 }}>Segurança & Excelência</h3>
-                        <p className="font-sans" style={{ fontSize: '0.95rem', color: COLORS.text, lineHeight: 1.8, fontWeight: 300 }}>
-                            Com anos de mercado e um portfólio de sucesso, garantimos não apenas uma construção de classe mundial, mas também a certificação internacional pelo Green Building Council. Patrimônio sólido garantido.
+
+            </main>
+
+            {/* ═══════ FOOTER ═══════ */}
+            <footer style={{
+                padding: '56px 24px 120px', background: C.charcoal,
+                borderTop: `1px solid ${C.border}`,
+            }}>
+                <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+                    <h4 className="font-serif" style={{ fontSize: '1.3rem', color: C.white, marginBottom: 20 }}>BRAVA CONCETTO</h4>
+                    <p style={{
+                        fontSize: '0.6rem', color: C.textFaint, lineHeight: 1.8,
+                        textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 24,
+                    }}>
+                        Imagens meramente ilustrativas. O projeto pode sofrer alterações sem aviso prévio.
+                        Registro de incorporação conforme Lei 4.591/64.
+                    </p>
+                    <div style={{ paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                        <p style={{ fontSize: '0.7rem', color: C.textFaint }}>
+                            © {new Date().getFullYear()} Brava Concetto. Todos os direitos reservados.
                         </p>
                     </div>
-                    <div style={{ flex: '1 1 300px', textAlign: 'right' }}>
-                        <div className="font-serif" style={{ fontSize: '3rem', color: COLORS.primary, lineHeight: 1 }}>Unidades<br />Limitadas.</div>
-                        <p className="font-sans" style={{ fontSize: '1rem', color: COLORS.text, marginTop: 16, fontStyle: 'italic' }}>
-                            Um projeto feito para poucos.
-                        </p>
-                    </div>
                 </div>
-            </section>
+            </footer>
 
-            {/* ═══════════════════ 8. CTA FINAL FORTE ═══════════════════ */}
-            <section style={{ padding: '160px 24px', background: COLORS.bgDark, textAlign: 'center' }}>
-                <div className="brava-animate" style={{ maxWidth: 800, margin: '0 auto' }}>
-                    <h2 className="font-serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', color: COLORS.white, fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
-                        Você não está comprando um imóvel. <br />
-                        <span style={{ fontStyle: 'italic', color: COLORS.primary }}>Está escolhendo um novo nível.</span>
-                    </h2>
-
-                    <button
-                        onClick={openChat}
-                        className="font-sans"
-                        style={{
-                            background: COLORS.primary, border: 'none', color: COLORS.white,
-                            padding: '24px 60px', fontSize: '0.85rem', letterSpacing: '0.25em',
-                            textTransform: 'uppercase', cursor: 'pointer', fontWeight: 500,
-                            transition: 'all 0.4s', boxShadow: '0 20px 40px rgba(182, 154, 110, 0.2)'
-                        }}
-                    >
-                        Falar com Especialista Agora
+            {/* ═══════ STICKY CTA (Bottom Bar) ═══════ */}
+            <div style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+                padding: 16,
+                background: `linear-gradient(to top, ${C.bgDark} 60%, transparent)`,
+            }}>
+                <div style={{ maxWidth: 640, margin: '0 auto', display: 'flex', gap: 12 }}>
+                    <button onClick={openChat} style={{
+                        flex: 1, background: C.primary, color: C.bgDark,
+                        fontWeight: 900, padding: '16px 20px', borderRadius: 14,
+                        border: 'none', cursor: 'pointer', fontSize: '0.85rem',
+                        boxShadow: `0 10px 30px ${C.primaryGlow}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                        transition: 'transform 0.15s',
+                        letterSpacing: '0.02em',
+                    }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                        <MessageSquare size={20} style={{ fill: 'currentColor' }} />
+                        FALAR COM ESPECIALISTA
                     </button>
                 </div>
-            </section>
-
-
-
+            </div>
         </div>
     )
 }
