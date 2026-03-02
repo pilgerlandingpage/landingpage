@@ -202,13 +202,37 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
 
             <main style={{ maxWidth: 640, margin: '0 auto', paddingBottom: 100 }}>
 
-                {/* ═══════ 1. HERO + LEAD FORM ═══════ */}
-                <section style={{ position: 'relative' }}>
+                {/* ═══════ 1. HERO + VIDEO BACKGROUND ═══════ */}
+                <section style={{ position: 'relative', overflow: 'hidden' }}>
+                    {/* Video Background */}
                     <div style={{
-                        position: 'relative', minHeight: 620, display: 'flex', flexDirection: 'column',
+                        position: 'absolute', inset: 0, zIndex: 0,
+                    }}>
+                        <video
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            poster="/images/brava-concetto/4.jpg"
+                            style={{
+                                width: '100%', height: '100%',
+                                objectFit: 'cover', objectPosition: 'center bottom',
+                            }}
+                        >
+                            <source src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/video%202.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+
+                    {/* Gradient Overlay */}
+                    <div style={{
+                        position: 'absolute', inset: 0, zIndex: 1,
+                        background: `linear-gradient(to bottom, ${C.bgDark} 0%, rgba(12,12,12,0.65) 35%, rgba(12,12,12,0.3) 60%, rgba(12,12,12,0.0) 100%)`,
+                    }} />
+
+                    {/* Hero Content */}
+                    <div style={{
+                        position: 'relative', zIndex: 2, minHeight: 620, display: 'flex', flexDirection: 'column',
                         justifyContent: 'flex-start', padding: '100px 24px 32px',
-                        backgroundImage: `linear-gradient(to bottom, ${C.bgDark} 0%, rgba(12,12,12,0.75) 40%, rgba(12,12,12,0.2) 65%, rgba(12,12,12,0.0) 100%), url("/images/brava-concetto/4.jpg")`,
-                        backgroundSize: 'cover', backgroundPosition: 'center bottom',
                     }}>
                         <div style={{ animation: 'fadeUp 0.8s ease' }}>
                             <span style={{
