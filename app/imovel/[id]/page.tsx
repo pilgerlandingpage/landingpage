@@ -4,6 +4,7 @@ import { Bed, Bath, Move, MapPin, Phone, ArrowLeft, Gem, Ruler } from 'lucide-re
 import Link from 'next/link'
 import HeroCarousel from '@/components/property/HeroCarousel'
 import PropertyGallery from '@/components/property/PropertyGallery'
+import MobileNav from '@/components/marketplace/MobileNav'
 
 export const dynamic = 'force-dynamic'
 
@@ -149,6 +150,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             <footer className="pd-footer">
                 <p>© {new Date().getFullYear()} Pilger Imóveis. Todos os direitos reservados.</p>
             </footer>
+
+            <MobileNav />
 
             <style>{`
                 .pd-page {
@@ -573,6 +576,47 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         grid-template-columns: repeat(4, 1fr);
                     }
                     .pd-cta-card { max-width: 800px; padding: 64px 48px; }
+                }
+
+                /* ====== BOTTOM NAV ====== */
+                .mobile-nav {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 58px;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border-top: 1px solid var(--border, #e8e5e0);
+                    display: flex;
+                    justify-content: center;
+                    gap: 48px;
+                    align-items: center;
+                    z-index: 1000;
+                    padding-bottom: env(safe-area-inset-bottom);
+                }
+                .nav-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                    color: var(--text-muted, #999);
+                    font-size: 0.65rem;
+                    cursor: pointer;
+                    width: 54px;
+                    font-weight: 500;
+                    transition: color 0.2s;
+                }
+                .nav-item:hover { color: var(--text-secondary, #5a5a5a); }
+                .nav-item.active { color: var(--gold, #b8945f); }
+                .nav-icon { margin-bottom: 1px; }
+
+                @media (min-width: 768px) {
+                    .mobile-nav { display: none; }
+                }
+                @media (max-width: 768px) {
+                    .pd-page { padding-bottom: 70px; }
                 }
             `}</style>
         </div>

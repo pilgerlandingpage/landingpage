@@ -3,6 +3,7 @@ import Link from 'next/link'
 import PropertyCard from '@/components/marketplace/PropertyCard'
 import HomeSearchBar from '@/components/marketplace/HomeSearchBar'
 import { Search, Filter, Warehouse, Building2, Palmtree, Mountain, Gem } from 'lucide-react'
+import MobileNav from '@/components/marketplace/MobileNav'
 
 // This is a Server Component
 export default async function MarketplaceHome() {
@@ -95,21 +96,7 @@ export default async function MarketplaceHome() {
         )}
       </main>
 
-      {/* Mobile Bottom Nav */}
-      <div className="mobile-nav">
-        <div className="nav-item active">
-          <div className="nav-icon"><Search size={24} /></div>
-          <span>Explorar</span>
-        </div>
-        <div className="nav-item">
-          <div className="nav-icon"><HeartIcon /></div>
-          <span>Favoritos</span>
-        </div>
-        <div className="nav-item">
-          <div className="nav-icon"><UserIcon /></div>
-          <span>Contato</span>
-        </div>
-      </div>
+      <MobileNav />
 
       <style>{`
         /* ====== BASE ====== */

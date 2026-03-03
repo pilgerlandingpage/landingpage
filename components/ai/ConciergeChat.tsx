@@ -108,7 +108,7 @@ export default function ConciergeChat() {
     useEffect(() => {
         if (!pathname || isExcludedPage) return
 
-        if (pathname === '/') {
+        if (pathname === '/' || pathname.startsWith('/busca')) {
             setPageContext({ type: 'home' })
         } else if (pathname.startsWith('/imovel/')) {
             const id = pathname.split('/')[2]
@@ -141,7 +141,7 @@ export default function ConciergeChat() {
         // Determine page type for the delay config
         let pageType = 'home'
         if (pathname.startsWith('/imovel/')) pageType = 'property'
-        else if (pathname !== '/' && pathname !== '/favicon.ico') pageType = 'landing_page'
+        else if (pathname !== '/' && pathname !== '/favicon.ico' && !pathname.startsWith('/busca')) pageType = 'landing_page'
 
         // Fetch the configured delay for this page type
         fetch(`/api/chat/init?type=${pageType}&delayOnly=true`)
@@ -479,59 +479,7 @@ export default function ConciergeChat() {
                 )}
             </AnimatePresence>
 
-            {/* Toggle Button with Speech Bubble */}
-            {!isOpen && connectionStep === 0 && (
-                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => {
-                    setIsOpen(true)
-                    trackEvent('chat_opened')
-                }}>
-                    {/* Speech Bubble */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="chat-bubble"
-                    >
-                        Fale com o corretor de plantão agora
-                        <div style={{
-                            position: 'absolute',
-                            right: '-8px',
-                            bottom: '15px',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor: 'white',
-                            transform: 'rotate(45deg)',
-                            borderRight: '1px solid #e8e5e0',
-                            borderTop: '1px solid #e8e5e0'
-                        }} />
-                    </motion.div>
-
-                    {/* Avatar Toggle */}
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        style={{
-                            width: '64px',
-                            height: '64px',
-                            backgroundColor: '#1a1a1a',
-                            border: '2px solid #b8945f',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 10px 30px rgba(184,148,95,0.3)',
-                            overflow: 'hidden'
-                        }}
-                    >
-                        {broker?.photo_url ? (
-                            <img src={broker.photo_url} alt="Corretor de Plantão" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                            <User size={28} color="#b8945f" />
-                        )}
-                    </motion.div>
-                </div>
-            )
-            }
+            {/* Toggle Button removed as requested */}
 
             <style>{`
                 #pilger-chat-widget .status-indicator {

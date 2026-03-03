@@ -13,6 +13,29 @@ export async function GET(request: NextRequest) {
 
         const supabase = createAdminClient()
 
+        // Fast-path: If only checking autoOpenDelay, skip all the heavy DB checks for brokers/greetings
+        const delayOnly = searchParams.get('delayOnly') === 'true'
+
+        if (delayOnly) {
+            const { data: timingConfigs } = await supabase
+                .from('app_config')
+                .select('key, value')
+                .in('key', [
+                    'concierge_delay_home', 'concierge_delay_property', 'concierge_delay_landing_page'
+                ])
+
+            const configMap: Record<string, string> = {}
+            timingConfigs?.forEach((c: { key: string; value: string }) => { configMap[c.key] = c.value })
+
+            const pageType = type || 'home'
+            const delayKey = pageType === 'property' ? 'concierge_delay_property'
+                : (pageType === 'landing_page' || pageType === 'cloned_landing_page') ? 'concierge_delay_landing_page'
+                    : 'concierge_delay_home'
+            const autoOpenDelay = parseInt(configMap[delayKey] || (pageType === 'property' ? '5' : pageType === 'home' ? '15' : '10')) * 1000
+
+            return NextResponse.json({ autoOpenDelay })
+        }
+
         // 1. Select a Virtual Broker based on Duty Schedule + Page Assignment
         const today = new Date()
         const todayDateStr = today.toISOString().split('T')[0] // YYYY-MM-DD

@@ -4,17 +4,17 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
     X, ChevronLeft, ChevronRight, ChevronDown, MapPin, Building2,
     Leaf, Trees, AlertCircle, Check, MessageSquare, Phone, User,
-    ArrowRight, Mail, Navigation, Minus, Plus, Star
+    ArrowRight, Mail, Navigation, Minus, Plus, Star, Maximize, MoveRight
 } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
 
 // ─── Design Tokens (Dark Green Luxury — inspired by AI Studio) ───────────
 const C = {
-    bgDark: '#0C0C0C',
-    bgCard: '#111111',
-    bgSoft: 'rgba(255,255,255,0.05)',
-    bgInput: 'rgba(12,12,12,0.5)',
+    bgDark: '#FAFAFA',
+    bgCard: '#FFFFFF',
+    bgSoft: 'rgba(0,0,0,0.03)',
+    bgInput: 'rgba(0,0,0,0.05)',
     primary: '#C5A059',
     primaryHover: '#b8934e',
     primaryGlow: 'rgba(197,160,89,0.35)',
@@ -22,13 +22,13 @@ const C = {
     accentGold: '#C5A059',
     accentGoldMuted: 'rgba(197,160,89,0.1)',
     accentGoldBorder: 'rgba(197,160,89,0.2)',
-    white: '#FFFFFF',
-    textLight: '#e2e8f0',
-    textMuted: '#94a3b8',
+    white: '#1A1A1A',
+    textLight: '#334155',
+    textMuted: '#475569',
     textDim: '#64748b',
-    textFaint: '#475569',
-    border: 'rgba(255,255,255,0.1)',
-    charcoal: '#1A1A1A',
+    textFaint: '#94a3b8',
+    border: 'rgba(0,0,0,0.08)',
+    charcoal: '#F1F5F9',
 }
 
 export default function BravaConcettoTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
@@ -65,8 +65,12 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
     const [formSent, setFormSent] = useState(false)
     const [lightboxOpen, setLightboxOpen] = useState(false)
     const [lightboxIdx, setLightboxIdx] = useState(0)
+    const [planLightboxIdx, setPlanLightboxIdx] = useState<number | null>(null)
+    const [unitLightboxIdx, setUnitLightboxIdx] = useState<number | null>(null)
     const [faqOpen, setFaqOpen] = useState<number | null>(null)
     const [galleryIdx, setGalleryIdx] = useState(0)
+    const [selectedPlan, setSelectedPlan] = useState(0)
+    const [selectedSubPlan, setSelectedSubPlan] = useState(0)
     const touchStartX = useRef(0)
 
     useEffect(() => {
@@ -119,31 +123,136 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
         { icon: Trees, title: 'Integração com a Natureza', desc: 'Design biofílico que preserva e valoriza a essência da Praia Brava.' },
     ]
 
+    const floorPlans = [
+        {
+            id: 'garden102',
+            title: 'apto. garden 102',
+            plans: [
+                {
+                    name: 'Planta Padrão',
+                    area: '367,61 m²',
+                    suites: '4 Suítes',
+                    vagas: '3 Vagas',
+                    image: "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Apt%20gardem%20102.webp"
+                }
+            ]
+        },
+        {
+            id: 'apto-final-1',
+            title: 'apto. final 1',
+            plans: [
+                {
+                    name: 'Planta 1',
+                    area: '307,64 m²',
+                    suites: '4 Suítes',
+                    vagas: '4 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/apt%20final%201%20planta%2001.webp'
+                },
+                {
+                    name: 'Planta 2',
+                    area: '307,64 m²',
+                    suites: '3 Suítes',
+                    vagas: '4 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Apt%20gardem%20102.webp'
+                }
+            ]
+        },
+        {
+            id: 'apto-final-2',
+            title: 'apto. final 2',
+            plans: [
+                {
+                    name: 'Planta 1',
+                    area: '280,26 m²',
+                    suites: '4 Suítes',
+                    vagas: '3 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/apt%20final%2002%20planta%2001.webp'
+                },
+                {
+                    name: 'Planta 2',
+                    area: '280,26 m²',
+                    suites: '3 Suítes',
+                    vagas: '3 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/apt%20final%2002%20planta%2002.webp'
+                }
+            ]
+        },
+        {
+            id: 'cobertura-1',
+            title: 'cobert. duplex final 1',
+            plans: [
+                {
+                    name: 'Planta Inferior',
+                    area: '591,70 m²',
+                    suites: '4 Suítes',
+                    vagas: '5 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/cobertura%20duplex%20final%2001%20planta%20inferior.webp'
+                },
+                {
+                    name: 'Planta Superior',
+                    area: '591,70 m²',
+                    suites: '4 Suítes',
+                    vagas: '5 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/cobertura%20duplex%20final%2001%20planta%20superior.webp'
+                }
+            ]
+        },
+        {
+            id: 'cobertura-2',
+            title: 'cobert. duplex final 2',
+            plans: [
+                {
+                    name: 'Planta Inferior',
+                    area: '549,74 m²',
+                    suites: '4 Suítes',
+                    vagas: '5 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/cobertura%20duplex%20final%2002%20%20planta%20inferior.webp'
+                },
+                {
+                    name: 'Planta Superior',
+                    area: '549,74 m²',
+                    suites: '4 Suítes',
+                    vagas: '5 Vagas',
+                    image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/cobertura%20duplex%20final%2002%20%20planta%20superior.webp'
+                }
+            ]
+        }
+    ]
+
+
+    const flatPlans = floorPlans.flatMap(g => g.plans.map(p => ({ ...p, groupTitle: g.title }))).filter(p => p.image);
+    const nextPlanLB = () => setPlanLightboxIdx((p) => (p !== null ? (p + 1) % flatPlans.length : null));
+    const prevPlanLB = () => setPlanLightboxIdx((p) => (p !== null ? (p - 1 + flatPlans.length) % flatPlans.length : null));
+
     const units = [
         { title: 'Apartamentos Garden', size: '340m²', desc: 'Ampla área privativa com jardim exclusivo e pé-direito duplo.', img: '/images/brava-concetto/19_CL_BC_LIVING_FINAL_01_EF_web.jpg' },
         { title: 'Apartamentos Tipo', size: '280m²', desc: 'Suítes amplas e living integrado com vista mar definitiva.', img: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg' },
         { title: 'Coberturas Duplex', size: '590m²', desc: 'O ápice do luxo com piscina privativa e 360° de exclusividade.', img: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg' },
     ]
 
+    const nextUnitLB = () => setUnitLightboxIdx((p) => (p !== null ? (p + 1) % units.length : null));
+    const prevUnitLB = () => setUnitLightboxIdx((p) => (p !== null ? (p - 1 + units.length) % units.length : null));
+
     const faqs = [
-        { q: 'Qual a previsão de entrega?', a: 'Previsão para 2027. Consulte nosso especialista para datas atualizadas e condições de reserva antecipada.' },
-        { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos personalização total do layout interno com equipe de arquitetura dedicada.' },
-        { q: 'Quais as condições de pagamento?', a: 'Entrada facilitada, parcelas durante obra e financiamento bancário na entrega. Fale com nosso especialista para simulação.' },
-        { q: 'Onde fica exatamente?', a: 'Na Praia Brava, Itajaí/SC — a 200m da orla, entre o agito de Balneário Camboriú e a natureza preservada.' },
-        { q: 'Possui certificação sustentável?', a: 'Sim, certificação Green Building Council (GBC) garantindo eficiência energética e menor impacto ambiental.' },
-        { q: 'Quantas unidades por andar?', a: 'Apenas 2 unidades por andar, garantindo máxima privacidade e exclusividade.' },
+        { q: 'Qual a previsão de entrega?', a: 'Previsão para 2027. Consulte nossa equipe de vendas para obter o cronograma atualizado e as condições do empreendimento.' },
+        { q: 'Quais as condições de pagamento?', a: 'Oferecemos condições exclusivas e flexíveis. Fale com um especialista para conhecer o plano perfeito para o seu momento.' },
+        { q: 'Quais as informações técnicas do projeto?', a: '• Unidades: 32\n• Apartamentos por andar: 2\n• Pavimentos: 12\n• Tamanho do terreno: 1.600m²\n• Área da obra: 7.000m²\n• Altura: 40m' },
+        { q: 'Onde fica exatamente?', a: 'Na Avenida Carlos Drummond de Andrade, 111, no coração da Praia Brava, Itajaí, a apenas 200m da orla.' },
+        { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos a possibilidade de personalizar o layout interno.' },
+        { q: 'O empreendimento possui certificação?', a: 'Sim. Entre em contato com nossa equipe para mais informações sobre as nossas certificações e padrões.' },
+        { q: 'Quem assina a arquitetura do projeto?', a: 'O projeto arquitetônico é assinado por Antonio José Gonçalves e Frederico Cartens (realiza arquitetura).' },
     ]
 
     // Shared styles
     const inputStyle: React.CSSProperties = {
-        width: '100%', background: C.bgInput, border: `1px solid ${C.border}`,
+        width: '100%', background: C.bgCard, border: `1px solid ${C.border}`,
         borderRadius: 12, padding: '14px 14px 14px 42px', color: C.white,
         fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const,
         transition: 'border-color 0.2s',
     }
 
     const btnPrimary: React.CSSProperties = {
-        width: '100%', background: C.primary, color: C.bgDark, fontWeight: 800,
+        width: '100%', background: C.primary, color: '#1A1A1A', fontWeight: 800,
         padding: '16px', borderRadius: 12, border: 'none', cursor: 'pointer',
         fontSize: '0.9rem', letterSpacing: '0.02em', transition: 'all 0.2s',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -167,8 +276,11 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                 @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes slideDown { from { max-height: 0; opacity: 0; padding-top: 0; } to { max-height: 200px; opacity: 1; padding-top: 12px; } }
                 @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 ${C.primaryGlow}; } 50% { box-shadow: 0 0 0 12px rgba(22,223,102,0); } }
+                @keyframes swipeHint { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
                 .hide-scrollbar::-webkit-scrollbar { display: none; }
                 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                .gallery-card .gallery-overlay { opacity: 0; transition: opacity 0.3s ease; }
+                .gallery-card:hover .gallery-overlay { opacity: 1; }
                 .gallery-track { display: flex; transition: transform 0.5s cubic-bezier(0.25,0.8,0.25,1); }
                 input::placeholder { color: ${C.textDim}; }
                 input:focus { border-color: ${C.primary} !important; box-shadow: 0 0 0 2px ${C.primaryMuted}; }
@@ -182,6 +294,11 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     .mobile-gallery { display: none !important; }
                     .desktop-gallery { display: grid !important; }
                 }
+                @media (min-width: 1024px) {
+                    .plan-container { flex-direction: row !important; align-items: center !important; }
+                    .plan-image-area { flex: 1 1 65% !important; padding-right: 40px !important; }
+                    .plan-info-card { flex: 0 0 400px !important; margin-left: -80px !important; z-index: 10 !important; }
+                }
             `}} />
 
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
@@ -189,8 +306,8 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
             {/* ═══════ HEADER ═══════ */}
             <header style={{
                 position: 'sticky', top: 0, zIndex: 50,
-                background: 'rgba(12,12,12,0.9)', backdropFilter: 'blur(12px)',
-                borderBottom: `1px solid ${C.border}`,
+                background: 'linear-gradient(to bottom, rgba(12,12,12,0.92) 0%, rgba(12,12,12,0.7) 50%, rgba(12,12,12,0) 100%)',
+                paddingBottom: 20,
             }}>
                 <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -203,7 +320,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
             <main style={{ maxWidth: 640, margin: '0 auto', paddingBottom: 100 }}>
 
                 {/* ═══════ 1. HERO + VIDEO BACKGROUND ═══════ */}
-                <section style={{ position: 'relative', overflow: 'hidden' }}>
+                <section style={{ position: 'relative', overflow: 'hidden', marginTop: -80 }}>
                     {/* Video Background */}
                     <div style={{
                         position: 'absolute', inset: 0, zIndex: 0,
@@ -223,16 +340,22 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                         </video>
                     </div>
 
-                    {/* Gradient Overlay */}
+                    {/* Gradient Overlay — dark at the top for seamless header blend */}
                     <div style={{
                         position: 'absolute', inset: 0, zIndex: 1,
-                        background: `linear-gradient(to bottom, ${C.bgDark} 0%, rgba(12,12,12,0.65) 35%, rgba(12,12,12,0.3) 60%, rgba(12,12,12,0.0) 100%)`,
+                        background: `linear-gradient(to bottom, rgba(12,12,12,0.9) 0%, rgba(12,12,12,0.5) 12%, rgba(12,12,12,0.15) 25%, transparent 40%)`,
+                    }} />
+
+                    {/* Watermark Concealer Shadow (Full Bottom Width) */}
+                    <div style={{
+                        position: 'absolute', bottom: -5, left: 0, right: 0, height: 120, zIndex: 1,
+                        background: `linear-gradient(to bottom, transparent 0%, ${C.bgDark} 100%)`,
                     }} />
 
                     {/* Hero Content */}
                     <div style={{
-                        position: 'relative', zIndex: 2, minHeight: 620, display: 'flex', flexDirection: 'column',
-                        justifyContent: 'flex-start', padding: '100px 24px 32px',
+                        position: 'relative', zIndex: 2, minHeight: 700, display: 'flex', flexDirection: 'column',
+                        justifyContent: 'flex-start', padding: '160px 24px 32px',
                     }}>
                         <div style={{ animation: 'fadeUp 0.8s ease' }}>
                             <span style={{
@@ -247,14 +370,15 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
 
                             <h2 className="font-serif" style={{
                                 fontSize: 'clamp(1.8rem, 6vw, 2.4rem)', lineHeight: 1.15,
-                                color: C.white, fontStyle: 'italic', marginBottom: 12,
+                                color: '#FFFFFF', fontStyle: 'italic', marginBottom: 12,
+                                textShadow: '0 2px 12px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)',
                             }}>
                                 Onde o Mar Encontra o Design Extraordinário
                             </h2>
 
                             <p style={{
-                                color: C.textLight, fontSize: '1rem', lineHeight: 1.65,
-                                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                color: 'rgba(255,255,255,0.9)', fontSize: '1rem', lineHeight: 1.65,
+                                textShadow: '0 2px 8px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
                             }}>
                                 Experiência inigualável na Praia Brava. O equilíbrio perfeito entre o luxo silencioso e a natureza.
                             </p>
@@ -262,69 +386,9 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     </div>
                 </section>
 
-                {/* ═══════ 2. SCARCITY BANNER ═══════ */}
-                <section style={{
-                    background: C.accentGoldMuted, borderTop: `1px solid ${C.accentGoldBorder}`,
-                    borderBottom: `1px solid ${C.accentGoldBorder}`, padding: '14px 24px',
-                    display: 'flex', alignItems: 'center', gap: 12,
-                }}>
-                    <AlertCircle size={18} color={C.accentGold} style={{ flexShrink: 0 }} />
-                    <p style={{
-                        color: C.accentGold, fontWeight: 700, fontSize: '0.75rem',
-                        letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0,
-                    }}>
-                        Apenas 25 Unidades Exclusivas — Alto Potencial de Valorização
-                    </p>
-                </section>
 
-                {/* ═══════ 3. QUIET LUXURY CONCEPT ═══════ */}
-                <section style={{ padding: '72px 24px' }}>
-                    <div className="bc-reveal" style={{ marginBottom: 40 }}>
-                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 8 }}>Quiet Luxury</h3>
-                        <div style={{ width: 48, height: 4, background: C.primary, borderRadius: 4 }} />
-                    </div>
 
-                    <p className="bc-reveal font-serif" style={{
-                        color: C.textMuted, fontSize: '1.15rem', lineHeight: 1.7,
-                        fontStyle: 'italic', marginBottom: 32,
-                    }}>
-                        "A sofisticação não precisa gritar. Ela se revela no detalhe, na escolha da textura e na harmonia com o horizonte."
-                    </p>
-
-                    <div className="bc-reveal" style={{
-                        aspectRatio: '4/5', borderRadius: 16, overflow: 'hidden',
-                        border: `1px solid ${C.border}`, marginBottom: 40,
-                    }}>
-                        <img src={gallery[2]} alt="Conceito Brava Concetto" style={{
-                            width: '100%', height: '100%', objectFit: 'cover',
-                        }} />
-                    </div>
-
-                    {/* Feature Cards */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                        {features.map((f, i) => (
-                            <div key={i} className="bc-reveal" style={{
-                                padding: 22, borderRadius: 16, background: C.bgSoft,
-                                border: `1px solid ${C.border}`, display: 'flex', gap: 16, alignItems: 'flex-start',
-                            }}>
-                                <div style={{
-                                    width: 48, height: 48, borderRadius: 12,
-                                    background: C.primaryMuted, display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                }}>
-                                    <f.icon size={22} color={C.primary} />
-                                </div>
-                                <div>
-                                    <h4 style={{ color: C.white, fontWeight: 700, marginBottom: 4, fontSize: '0.95rem' }}>{f.title}</h4>
-                                    <p style={{ color: C.textDim, fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>{f.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                </section>
-
-                {/* ═══════ 4. UNITS CAROUSEL ═══════ */}
+                {/* ═══════ 3. UNITS CAROUSEL ═══════ */}
                 <section style={{
                     padding: '56px 0', background: C.bgSoft,
                     borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`,
@@ -332,7 +396,29 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     <div style={{ padding: '0 24px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
                             <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white }}>Unidades</h3>
-                            <p style={{ color: C.textDim, fontSize: '0.85rem', marginTop: 4 }}>Plantas inteligentes e exclusivas</p>
+                            <p style={{ color: C.textLight, fontSize: '0.85rem', marginTop: 4 }}>Plantas inteligentes e exclusivas</p>
+                        </div>
+                    </div>
+
+                    {/* ═══════ INFO STRIP (MOVED) ═══════ */}
+                    <div style={{
+                        background: C.accentGoldMuted, borderTop: `1px solid ${C.accentGoldBorder}`,
+                        borderBottom: `1px solid ${C.accentGoldBorder}`, padding: '16px 24px',
+                        marginBottom: 32,
+                    }}>
+                        <div style={{
+                            maxWidth: 1200, margin: '0 auto', display: 'flex',
+                            flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <AlertCircle size={18} color={C.accentGold} style={{ flexShrink: 0 }} />
+                                <p style={{
+                                    color: C.accentGold, fontWeight: 700, fontSize: '0.75rem',
+                                    letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0,
+                                }}>
+                                    Apenas 25 Unidades Exclusivas — Alto Potencial de Valorização
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -347,12 +433,23 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                 transition: 'transform 0.3s',
                             }}>
                                 <div style={{ position: 'relative' }}>
-                                    <img src={u.img} alt={u.title} style={{
-                                        width: '100%', height: 200, objectFit: 'cover',
-                                        transition: 'transform 0.7s',
-                                    }}
-                                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                    <div className="gallery-card" onClick={() => setUnitLightboxIdx(i)} style={{ cursor: 'pointer', position: 'relative' }}>
+                                        <img src={u.img} alt={u.title} style={{
+                                            width: '100%', height: 200, objectFit: 'cover',
+                                            transition: 'transform 0.7s',
+                                        }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                        <div className="gallery-overlay" style={{
+                                            position: 'absolute', inset: 0,
+                                            background: 'rgba(0,0,0,0.4)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <div style={{ background: 'rgba(0,0,0,0.6)', padding: 12, borderRadius: '50%' }}>
+                                                <Maximize size={24} color={C.white} />
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div style={{
                                         position: 'absolute', top: 12, right: 12,
                                         background: C.primary, color: C.bgDark, fontWeight: 800,
@@ -362,7 +459,10 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                 <div style={{ padding: 20 }}>
                                     <h5 style={{ color: C.white, fontWeight: 700, fontSize: '1.05rem', marginBottom: 6 }}>{u.title}</h5>
                                     <p style={{ color: C.textDim, fontSize: '0.85rem', lineHeight: 1.5, marginBottom: 16 }}>{u.desc}</p>
-                                    <button onClick={openChat} style={{
+                                    <button onClick={() => {
+                                        const el = document.getElementById('plantas')
+                                        if (el) el.scrollIntoView({ behavior: 'smooth' })
+                                    }} style={{
                                         width: '100%', padding: '13px', border: `1px solid rgba(197,160,89,0.4)`,
                                         color: C.primary, fontWeight: 700, borderRadius: 10,
                                         background: 'transparent', cursor: 'pointer', fontSize: '0.85rem',
@@ -378,62 +478,139 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     </div>
                 </section>
 
+                {/* ═══════ 4. FLOOR PLANS (PLANTAS) ═══════ */}
+                <section id="plantas" style={{ padding: '72px 24px' }}>
+                    <div className="bc-reveal" style={{ marginBottom: 40 }}>
+                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 8 }}>Plantas</h3>
+                        <div style={{ width: 48, height: 4, background: C.primary, borderRadius: 4, marginBottom: 12 }} />
+                        <p style={{ color: C.textLight, fontSize: '0.85rem' }}>Conheça as opções de plantas do Brava Concetto.</p>
+                    </div>
+
+                    <div className="hide-scrollbar units-scroll" style={{
+                        display: 'flex', overflowX: 'auto', gap: 20, padding: '0 0px 16px',
+                    }}>
+                        {floorPlans.flatMap(planGrp => planGrp.plans.map((subPlan, i) => (
+                            <div key={`${planGrp.id}-${i}`} style={{
+                                minWidth: 280, background: C.bgDark, borderRadius: 16,
+                                border: `1px solid ${C.border}`, overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                            }}>
+                                <div style={{ position: 'relative' }}>
+                                    {subPlan.image ? (
+                                        <div className="gallery-card" onClick={() => {
+                                            const fwIdx = flatPlans.findIndex(p => p.image === subPlan.image)
+                                            if (fwIdx !== -1) setPlanLightboxIdx(fwIdx)
+                                        }} style={{ cursor: 'pointer', position: 'relative' }}>
+                                            <img src={subPlan.image} alt={`${planGrp.title} - ${subPlan.name}`} style={{
+                                                width: '100%', height: 200, objectFit: 'cover',
+                                                transition: 'transform 0.7s',
+                                            }}
+                                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                            <div className="gallery-overlay" style={{
+                                                position: 'absolute', inset: 0,
+                                                background: 'rgba(0,0,0,0.4)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <div style={{ background: 'rgba(0,0,0,0.6)', padding: 12, borderRadius: '50%' }}>
+                                                    <Maximize size={24} color={C.white} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bgSoft }}>
+                                            <p style={{ color: C.textDim }}>[Imagem da Planta em Breve]</p>
+                                        </div>
+                                    )}
+                                    <div style={{
+                                        position: 'absolute', top: 12, right: 12,
+                                        background: C.primary, color: C.bgDark, fontWeight: 800,
+                                        fontSize: '0.75rem', padding: '4px 10px', borderRadius: 6,
+                                    }}>{subPlan.area}</div>
+                                </div>
+                                <div style={{ padding: 20 }}>
+                                    <h5 style={{ color: C.white, fontWeight: 700, fontSize: '1.05rem', marginBottom: 2, textTransform: 'capitalize' }}>
+                                        {planGrp.title} {planGrp.plans.length > 1 ? `- ${subPlan.name}` : ''}
+                                    </h5>
+                                    <p style={{ color: C.textMuted, fontSize: '0.7rem', display: 'flex', gap: 4, alignItems: 'center', marginTop: 4, marginBottom: 16 }}>
+                                        <span>Projeto: Antonio J. Gonçalves e Frederico Cartens</span>
+                                        <span style={{ fontStyle: 'italic' }}>(realiza arquitetura)</span>
+                                    </p>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Área Privativa</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{subPlan.area}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Dormitórios</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{subPlan.suites}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Garagem</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{subPlan.vagas}</span>
+                                        </div>
+                                    </div>
+
+                                    <button onClick={openChat} style={{
+                                        width: '100%', padding: '13px', border: `1px solid rgba(197,160,89,0.4)`,
+                                        color: C.primary, fontWeight: 700, borderRadius: 10,
+                                        background: 'transparent', cursor: 'pointer', fontSize: '0.85rem',
+                                        transition: 'all 0.2s',
+                                    }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = C.primaryMuted }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                                        Falar com Especialista
+                                    </button>
+                                </div>
+                            </div>
+                        )))}
+                    </div>
+                </section>
+
                 {/* ═══════ 5. GALLERY ═══════ */}
                 <section style={{ padding: '72px 24px' }}>
                     <div className="bc-reveal" style={{ marginBottom: 32 }}>
                         <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 4 }}>Galeria</h3>
-                        <p style={{ color: C.textDim, fontSize: '0.85rem' }}>{gallery.length} imagens do empreendimento</p>
+                        <p style={{ color: C.textLight, fontSize: '0.85rem' }}>{gallery.length} imagens do empreendimento</p>
                     </div>
 
-                    {/* Mobile Gallery */}
-                    <div className="mobile-gallery"
-                        onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}
-                        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, border: `1px solid ${C.border}` }}>
-                        <div className="gallery-track" style={{ transform: `translateX(-${galleryIdx * 100}%)` }}>
-                            {gallery.map((img, i) => (
-                                <div key={i} onClick={() => openLightbox(i)} style={{ minWidth: '100%', cursor: 'pointer' }}>
-                                    <img src={img} alt={`Imagem ${i + 1}`} style={{ width: '100%', aspectRatio: '16/10', objectFit: 'cover' }} />
-                                </div>
-                            ))}
-                        </div>
-                        <div style={{ textAlign: 'center', padding: '12px 0 8px', fontSize: '0.8rem', color: C.textDim }}>
-                            {galleryIdx + 1} / {gallery.length} — Deslize para navegar
-                        </div>
-                    </div>
-
-                    {/* Desktop Gallery */}
-                    <div className="desktop-gallery" style={{
-                        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
+                    {/* Unified Horizontal Gallery */}
+                    <div className="hide-scrollbar" style={{
+                        display: 'flex', overflowX: 'auto', gap: 16, padding: '0 0px 16px',
                     }}>
-                        {gallery.slice(0, 9).map((img, i) => (
-                            <div key={i} onClick={() => openLightbox(i)} style={{
-                                cursor: 'pointer', overflow: 'hidden', borderRadius: 12,
+                        {gallery.map((img, i) => (
+                            <div key={i} className="gallery-card" onClick={() => openLightbox(i)} style={{
+                                minWidth: 320, maxWidth: 400, flex: '0 0 auto',
+                                borderRadius: 12, overflow: 'hidden',
                                 border: `1px solid ${C.border}`,
-                                gridColumn: i === 0 ? 'span 2' : undefined,
-                                gridRow: i === 0 ? 'span 2' : undefined,
+                                cursor: 'pointer', position: 'relative'
                             }}>
                                 <img src={img} alt={`Imagem ${i + 1}`} style={{
-                                    width: '100%', height: '100%', objectFit: 'cover',
-                                    aspectRatio: i === 0 ? '1' : '16/10',
+                                    width: '100%', height: 280, objectFit: 'cover',
                                     transition: 'transform 0.5s',
                                 }}
                                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                                <div className="gallery-overlay" style={{
+                                    position: 'absolute', inset: 0,
+                                    background: 'rgba(0,0,0,0.4)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <div style={{ background: 'rgba(0,0,0,0.6)', padding: 12, borderRadius: '50%' }}>
+                                        <Maximize size={24} color={C.white} />
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
-                    {gallery.length > 9 && (
-                        <button onClick={() => openLightbox(0)} style={{
-                            marginTop: 16, width: '100%', padding: 14,
-                            border: `1px solid ${C.border}`, borderRadius: 12,
-                            background: 'transparent', color: C.textMuted, cursor: 'pointer',
-                            fontSize: '0.85rem', transition: 'all 0.2s',
-                        }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.color = C.primary }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted }}>
-                            Ver todas as {gallery.length} imagens
-                        </button>
-                    )}
+                    <div style={{
+                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                        gap: 8, color: C.textDim, fontSize: '0.85rem', marginTop: 12
+                    }}>
+                        Deslize para ver mais
+                        <MoveRight size={16} style={{ animation: 'swipeHint 2s infinite ease-in-out' }} />
+                    </div>
                 </section>
 
                 {/* ═══════ LIGHTBOX ═══════ */}
@@ -466,27 +643,89 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     </div>
                 )}
 
+                {/* ═══════ PLAN LIGHTBOX ═══════ */}
+                {planLightboxIdx !== null && flatPlans[planLightboxIdx] && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 200,
+                        background: 'rgba(0,0,0,0.95)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }} onClick={() => setPlanLightboxIdx(null)}>
+                        <button onClick={() => setPlanLightboxIdx(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', zIndex: 210 }}>
+                            <X size={28} color={C.white} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); prevPlanLB() }} style={{
+                            position: 'absolute', left: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronLeft size={24} color={C.white} />
+                        </button>
+                        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                            <img src={flatPlans[planLightboxIdx].image} alt="Planta"
+                                style={{ maxWidth: '92vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8 }} />
+                            <div style={{ color: C.white, fontSize: '1.05rem', marginTop: 16, textTransform: 'capitalize', fontWeight: 600 }}>
+                                {flatPlans[planLightboxIdx].groupTitle} - {flatPlans[planLightboxIdx].name}
+                            </div>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); nextPlanLB() }} style={{
+                            position: 'absolute', right: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronRight size={24} color={C.white} />
+                        </button>
+                    </div>
+                )}
+
+                {/* ═══════ UNIT LIGHTBOX ═══════ */}
+                {unitLightboxIdx !== null && units[unitLightboxIdx] && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 200,
+                        background: 'rgba(0,0,0,0.95)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }} onClick={() => setUnitLightboxIdx(null)}>
+                        <button onClick={() => setUnitLightboxIdx(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', zIndex: 210 }}>
+                            <X size={28} color={C.white} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); prevUnitLB() }} style={{
+                            position: 'absolute', left: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronLeft size={24} color={C.white} />
+                        </button>
+                        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                            <img src={units[unitLightboxIdx].img} alt="Unidade"
+                                style={{ maxWidth: '92vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8 }} />
+                            <div style={{ color: C.white, fontSize: '1.05rem', marginTop: 16, textTransform: 'capitalize', fontWeight: 600 }}>
+                                {units[unitLightboxIdx].title}
+                            </div>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); nextUnitLB() }} style={{
+                            position: 'absolute', right: 12, background: 'rgba(255,255,255,0.1)',
+                            border: 'none', borderRadius: '50%', padding: 10, cursor: 'pointer', zIndex: 210,
+                        }}>
+                            <ChevronRight size={24} color={C.white} />
+                        </button>
+                    </div>
+                )}
+
                 {/* ═══════ 6. LOCATION ═══════ */}
                 <section style={{ padding: '72px 24px' }}>
                     <div className="bc-reveal" style={{ marginBottom: 24 }}>
                         <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white, fontStyle: 'italic' }}>A Localização</h3>
-                        <p style={{ color: C.textDim, fontSize: '0.9rem', marginTop: 6 }}>Entre o agito e a calma, no coração da Praia Brava.</p>
+                        <p style={{ color: C.textLight, fontSize: '0.9rem', marginTop: 6 }}>Entre o agito e a calma, no coração da Praia Brava.</p>
                     </div>
 
-                    {/* Stylized dark map with pin overlay — AI Studio style */}
+                    {/* Map with custom pin overlay */}
                     <div className="bc-reveal" style={{
                         position: 'relative', borderRadius: 16, overflow: 'hidden',
                         border: `1px solid ${C.border}`, height: 320,
                     }}>
-                        {/* Dark overlay for map interaction */}
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(17,33,23,0.2)', zIndex: 10, pointerEvents: 'none' }} />
-                        {/* Embedded map with dark filters */}
+                        {/* Embedded map */}
                         <iframe
                             title="Localização Brava Concetto"
-                            src="https://maps.google.com/maps?q=-26.9485,-48.6187&z=14&output=embed&hl=pt-BR"
+                            src="https://maps.google.com/maps?q=Av.+Carlos+Drummond+de+Andrade,+111,+Praia+Brava,+Itajaí&z=15&output=embed&hl=pt-BR"
                             width="100%"
                             height="100%"
-                            style={{ border: 0, filter: 'grayscale(1) brightness(0.35) contrast(1.3) invert(1) hue-rotate(180deg)', pointerEvents: 'none' }}
+                            style={{ border: 0, pointerEvents: 'none' }}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
                         />
@@ -494,33 +733,35 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 20 }}>
                             <div style={{ position: 'relative' }}>
                                 <div style={{
-                                    position: 'absolute', inset: -6, background: 'rgba(22,223,102,0.3)',
+                                    position: 'absolute', inset: -6, background: C.primaryGlow,
                                     borderRadius: '50%', animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite',
                                 }} />
                                 <div style={{
                                     position: 'relative', width: 48, height: 48, background: C.primary,
                                     borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    border: `4px solid ${C.bgDark}`, boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                                    border: `4px solid ${C.bgCard}`, boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
                                 }}>
-                                    <MapPin size={22} color={C.bgDark} />
+                                    <Building2 size={22} color={C.white} strokeWidth={2.5} />
                                 </div>
                             </div>
                         </div>
-                        {/* Address card overlay */}
-                        <div style={{
-                            position: 'absolute', bottom: 14, left: 14, right: 14, zIndex: 20,
-                            background: 'rgba(17,33,23,0.85)', backdropFilter: 'blur(12px)',
-                            padding: '14px 16px', borderRadius: 12,
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        }}>
-                            <div>
-                                <p style={{ color: C.white, fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>Av. Carlos Drummond de Andrade, 111</p>
-                                <p style={{ color: C.textDim, fontSize: '0.75rem', margin: 0, marginTop: 2 }}>200m da orla da Praia Brava</p>
-                            </div>
-                            <a href="https://www.google.com/maps/search/Brava+Concetto+Praia+Brava+Itajai" target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
-                                <Navigation size={18} color={C.primary} />
-                            </a>
+                    </div>
+                    {/* Address card below map */}
+                    <div className="bc-reveal" style={{
+                        marginTop: 16, background: C.bgCard,
+                        padding: '16px 20px', borderRadius: 12,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        border: `1px solid ${C.border}`, boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                    }}>
+                        <div>
+                            <p style={{ color: C.white, fontWeight: 700, fontSize: '0.95rem', margin: 0 }}>Av. Carlos Drummond de Andrade, 111</p>
+                            <p style={{ color: C.textLight, fontSize: '0.8rem', margin: 0, marginTop: 4 }}>200m da orla da Praia Brava</p>
                         </div>
+                        <a href="https://www.google.com/maps/search/Brava+Concetto+Praia+Brava+Itajai" target="_blank" rel="noopener noreferrer" style={{
+                            flexShrink: 0, background: C.primaryMuted, padding: 12, borderRadius: '50%'
+                        }}>
+                            <Navigation size={20} color={C.primary} />
+                        </a>
                     </div>
                 </section>
 
@@ -538,13 +779,14 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                 <h4 style={{ color: C.white, fontWeight: 600, fontSize: '0.95rem', margin: 0, paddingRight: 16 }}>{f.q}</h4>
                                 {faqOpen === i
                                     ? <Minus size={18} color={C.primary} style={{ flexShrink: 0 }} />
-                                    : <Plus size={18} color={C.textDim} style={{ flexShrink: 0 }} />}
+                                    : <Plus size={18} color={C.textLight} style={{ flexShrink: 0 }} />}
                             </div>
                             {faqOpen === i && (
                                 <p style={{
                                     marginTop: 12, marginBottom: 0, fontSize: '0.88rem',
                                     color: C.textMuted, lineHeight: 1.65,
                                     animation: 'slideDown 0.3s ease',
+                                    whiteSpace: 'pre-line'
                                 }}>{f.a}</p>
                             )}
                         </div>
@@ -556,20 +798,19 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
 
             {/* ═══════ FOOTER ═══════ */}
             <footer style={{
-                padding: '56px 24px 120px', background: C.charcoal,
-                borderTop: `1px solid ${C.border}`,
+                padding: '56px 24px 120px', background: '#0C0C0C', // Explicitly dark for logo contrast
             }}>
-                <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-                    <h4 className="font-serif" style={{ fontSize: '1.3rem', color: C.white, marginBottom: 20 }}>BRAVA CONCETTO</h4>
+                <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <img src="/images/brava-concetto/brava-concetto.svg" alt="Brava Concetto" style={{ height: 40, filter: 'brightness(0) invert(1)', marginBottom: 24 }} />
                     <p style={{
-                        fontSize: '0.6rem', color: C.textFaint, lineHeight: 1.8,
+                        fontSize: '0.6rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8,
                         textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 24,
                     }}>
                         Imagens meramente ilustrativas. O projeto pode sofrer alterações sem aviso prévio.
                         Registro de incorporação conforme Lei 4.591/64.
                     </p>
-                    <div style={{ paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
-                        <p style={{ fontSize: '0.7rem', color: C.textFaint }}>
+                    <div style={{ paddingTop: 20, borderTop: `1px solid rgba(255,255,255,0.1)`, width: '100%' }}>
+                        <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>
                             © {new Date().getFullYear()} Brava Concetto. Todos os direitos reservados.
                         </p>
                     </div>
@@ -584,7 +825,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
             }}>
                 <div style={{ maxWidth: 640, margin: '0 auto', display: 'flex', gap: 12 }}>
                     <button onClick={openChat} style={{
-                        flex: 1, background: C.primary, color: C.bgDark,
+                        flex: 1, background: C.primary, color: '#1A1A1A',
                         fontWeight: 900, padding: '16px 20px', borderRadius: 14,
                         border: 'none', cursor: 'pointer', fontSize: '0.85rem',
                         boxShadow: `0 10px 30px ${C.primaryGlow}`,
