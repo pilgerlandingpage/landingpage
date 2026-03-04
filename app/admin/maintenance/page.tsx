@@ -26,7 +26,7 @@ const INTEGRATIONS: IntegrationCard[] = [
         description: 'Integração com a API ConnectyHub para envio de mensagens WhatsApp automáticas.',
         icon: 'whatsapp',
         fields: [
-            { key: 'connectyhub_api_url', label: 'API URL', placeholder: 'https://api.connectyhub.com', isSecret: false },
+            { key: 'connectyhub_api_url', label: 'API URL', placeholder: 'https://api.connectyhub.com.br', isSecret: false },
             { key: 'connectyhub_api_key', label: 'API Key', placeholder: 'Sua API Key', isSecret: true },
             { key: 'connectyhub_instance', label: 'Instance', placeholder: 'ID da instância', isSecret: false },
         ],

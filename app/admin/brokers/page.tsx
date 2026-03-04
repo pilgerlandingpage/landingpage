@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -36,6 +36,8 @@ export default function BrokersAdmin() {
     const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [landingPages, setLandingPages] = useState<LandingPage[]>([])
+    const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle')
+    const [testMessage, setTestMessage] = useState('')
 
     // Form State
     const [formData, setFormData] = useState({
@@ -175,6 +177,31 @@ export default function BrokersAdmin() {
         fetchBrokers()
     }
 
+    async function testConnectyHubConnection() {
+        setTestStatus('testing')
+        setTestMessage('Testando conexão...')
+        try {
+            const res = await fetch('/api/admin/test-integration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    service: 'connectyhub',
+                    config: {
+                        connectyhub_api_url: formData.connectyhub_api_url,
+                        connectyhub_api_key: formData.connectyhub_api_key,
+                        connectyhub_instance: formData.connectyhub_instance_id
+                    },
+                }),
+            })
+            const data = await res.json()
+            setTestStatus(data.success ? 'success' : 'error')
+            setTestMessage(data.message)
+        } catch {
+            setTestStatus('error')
+            setTestMessage('Erro ao testar conexão')
+        }
+    }
+
     return (
         <div className="admin-page-container">
             <div className="admin-header" style={{ marginBottom: '32px' }}>
@@ -192,6 +219,8 @@ export default function BrokersAdmin() {
                             setIsAdding(true)
                             setEditingBroker(null)
                             setFormData({ ...defaultFormData })
+                            setTestStatus('idle')
+                            setTestMessage('')
                         }}
                         className="btn-primary"
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
@@ -207,7 +236,7 @@ export default function BrokersAdmin() {
                         <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--gold)' }}>
                             {editingBroker ? 'Editar Perfil' : 'Novo Perfil de Corretor'}
                         </h2>
-                        <button onClick={() => { setIsAdding(false); setEditingBroker(null); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        <button onClick={() => { setIsAdding(false); setEditingBroker(null); setTestStatus('idle'); setTestMessage(''); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                             <X size={24} />
                         </button>
                     </div>
@@ -333,7 +362,7 @@ export default function BrokersAdmin() {
                                     <div className="form-group">
                                         <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>API URL</label>
                                         <input
-                                            placeholder="https://api.connectyhub.com"
+                                            placeholder="https://api.connectyhub.com.br"
                                             className="admin-input"
                                             value={formData.connectyhub_api_url}
                                             onChange={(e) => setFormData({ ...formData, connectyhub_api_url: e.target.value })}
@@ -374,6 +403,35 @@ export default function BrokersAdmin() {
                                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                         Variáveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
                                     </span>
+                                </div>
+
+                                {/* Test Connection Button */}
+                                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={testConnectyHubConnection}
+                                        disabled={testStatus === 'testing'}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            padding: '10px 16px', borderRadius: '8px',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            color: 'white', fontSize: '0.9rem', cursor: testStatus === 'testing' ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
+                                        <RefreshCw size={16} className={testStatus === 'testing' ? "animate-spin" : ""} />
+                                        {testStatus === 'testing' ? 'Testando...' : 'Testar Conexão'}
+                                    </button>
+                                    {testStatus !== 'idle' && (
+                                        <div style={{
+                                            fontSize: '0.85rem',
+                                            color: testStatus === 'success' ? '#22c55e' : '#ef4444',
+                                            display: 'flex', alignItems: 'center', gap: '6px'
+                                        }}>
+                                            {testStatus === 'success' ? <Check size={14} /> : <X size={14} />}
+                                            {testMessage}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -690,6 +748,8 @@ export default function BrokersAdmin() {
                             <button
                                 onClick={() => {
                                     setEditingBroker(broker)
+                                    setTestStatus('idle')
+                                    setTestMessage('')
                                     setFormData({
                                         name: broker.name,
                                         creci: broker.creci,

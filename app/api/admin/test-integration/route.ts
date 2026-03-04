@@ -17,24 +17,34 @@ export async function POST(request: NextRequest) {
                     })
                 }
 
-                const res = await fetch(`${apiUrl}/instance/connectionState/${instance}`, {
-                    headers: { apikey: apiKey },
-                })
+                const targetUrl = `${apiUrl}/instance/connectionState/${instance}`;
+                console.log('Testing ConnectyHub:', targetUrl);
 
-                if (!res.ok) {
-                    const text = await res.text()
+                try {
+                    const res = await fetch(targetUrl, {
+                        headers: { apikey: apiKey },
+                    })
+
+                    if (!res.ok) {
+                        const text = await res.text()
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro ${res.status}: ${text.slice(0, 100)}`,
+                        })
+                    }
+
+                    const data = await res.json()
+                    const state = data?.instance?.state || data?.state || 'unknown'
+                    return NextResponse.json({
+                        success: true,
+                        message: `Conectado! Estado: ${state}`,
+                    })
+                } catch (e) {
                     return NextResponse.json({
                         success: false,
-                        message: `Erro ${res.status}: ${text.slice(0, 100)}`,
+                        message: `Erro ao conectar em ${targetUrl}: ${e instanceof Error ? e.message : String(e)}`,
                     })
                 }
-
-                const data = await res.json()
-                const state = data?.instance?.state || data?.state || 'unknown'
-                return NextResponse.json({
-                    success: true,
-                    message: `Conectado! Estado: ${state}`,
-                })
             }
 
             case 'gemini': {
@@ -165,7 +175,7 @@ export async function POST(request: NextRequest) {
         console.error('Test integration error:', error)
         return NextResponse.json({
             success: false,
-            message: 'Erro interno ao testar conexão',
+            message: `Erro interno ao testar conexão: ${error instanceof Error ? error.message : String(error)}`,
         }, { status: 500 })
     }
 }
