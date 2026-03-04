@@ -141,7 +141,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         className="pd-cta-button"
                     >
                         <Phone size={20} />
-                        Falar pelo WhatsApp
+                        Falar com Especialista
                     </a>
                 </div>
             </section>

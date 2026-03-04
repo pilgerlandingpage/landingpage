@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { MessageSquare, Send, X, Loader2 } from 'lucide-react'
+import { playSentSound, playReceivedSound } from '@/lib/sounds'
 
 interface ChatMessage {
     role: 'user' | 'assistant'
@@ -100,6 +101,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
                 }
 
                 const greeting = data.greeting || greetingMessage || `Olá! Sou o corretor ${data.broker?.name || agentName || 'Pilger'}. Como posso te ajudar?`
+                playReceivedSound()
                 setMessages([{ role: 'assistant', content: greeting }])
             } catch {
                 setMessages([{
@@ -121,6 +123,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
         setInput('')
 
         const newMessages: ChatMessage[] = [...messages, { role: 'user', content: userMessage }]
+        playSentSound()
         setMessages(newMessages)
         setLoading(true)
 
@@ -157,6 +160,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
             // Stage 3: Show the response
             setIsTyping(false)
             if (data.response) {
+                playReceivedSound()
                 setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
             }
         } catch {

@@ -14,11 +14,24 @@ export async function generateLandingPageContent(htmlContent: string, customProm
 
 export async function extractLeadInfo(conversation: string) {
     const provider = await getConciergeProvider()
-    // Use the concierge provider since lead extraction is from chat conversations
+
     if (provider === 'openai') {
-        return extractOpenAILeadInfo(conversation)
+        try {
+            return await extractOpenAILeadInfo(conversation)
+        } catch (error: any) {
+            console.error('[OpenAI Lead Extraction] Failed:', error.message)
+            console.log('[AI Generation] Falling back to Gemini for lead extraction...')
+            return await extractGeminiLeadInfo(conversation)
+        }
+    } else {
+        try {
+            return await extractGeminiLeadInfo(conversation)
+        } catch (error: any) {
+            console.error('[Gemini Lead Extraction] Failed:', error.message)
+            console.log('[AI Generation] Falling back to OpenAI for lead extraction...')
+            return await extractOpenAILeadInfo(conversation)
+        }
     }
-    return extractGeminiLeadInfo(conversation)
 }
 
 export async function generateChatResponse(history: { role: string; content: string }[], message: string, systemPrompt: string, context: 'concierge' | 'pilger' = 'concierge') {
@@ -31,11 +44,16 @@ export async function generateChatResponse(history: { role: string; content: str
             return await generateOpenAIChat(history, message, systemPrompt)
         } catch (error: any) {
             console.error('[OpenAI Generation] Failed:', error.message)
-            // Optional: fallback to Gemini? For now, just throw to let the chat route handle it.
-            throw error
+            console.log('[AI Generation] Falling back to Gemini...')
+            return await generateGeminiChat(history, message, systemPrompt)
+        }
+    } else {
+        try {
+            return await generateGeminiChat(history, message, systemPrompt)
+        } catch (error: any) {
+            console.error('[Gemini Generation] Failed:', error.message)
+            console.log('[AI Generation] Falling back to OpenAI...')
+            return await generateOpenAIChat(history, message, systemPrompt)
         }
     }
-
-    // Default to Gemini
-    return generateGeminiChat(history, message, systemPrompt)
 }

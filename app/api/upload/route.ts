@@ -11,20 +11,26 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File is required' }, { status: 400 })
         }
 
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
-        if (!allowedTypes.includes(file.type)) {
+        // Validate file type (use startsWith to handle codec suffixes like audio/webm;codecs=opus)
+        const allowedPrefixes = [
+            'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+            'audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/mpeg',
+            'video/mp4', 'video/webm',
+        ]
+        const fileType = file.type.split(';')[0].trim() // Strip codec info e.g. audio/webm;codecs=opus -> audio/webm
+        if (!allowedPrefixes.includes(fileType)) {
+            console.error('[Upload] Rejected file type:', file.type, '| Stripped:', fileType)
             return NextResponse.json(
-                { error: 'Invalid file type. Allowed: JPEG, PNG, WebP, GIF, SVG' },
+                { error: `Invalid file type: ${file.type}. Allowed: images, audio, video` },
                 { status: 400 }
             )
         }
 
-        // Validate file size (max 10MB)
-        const MAX_SIZE = 10 * 1024 * 1024
+        // Validate file size (max 25MB)
+        const MAX_SIZE = 25 * 1024 * 1024
         if (file.size > MAX_SIZE) {
             return NextResponse.json(
-                { error: 'File too large. Maximum 10MB' },
+                { error: 'File too large. Maximum 25MB' },
                 { status: 400 }
             )
         }
@@ -33,8 +39,10 @@ export async function POST(request: NextRequest) {
         const result = await uploadFile(buffer, file.name, folder, file.type)
 
         return NextResponse.json(result)
-    } catch (error) {
-        console.error('Upload error:', error)
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    } catch (error: any) {
+        console.error('Upload error:', error?.message || error)
+        console.error('Upload error name:', error?.name)
+        console.error('Upload error code:', error?.Code || error?.$metadata)
+        return NextResponse.json({ error: 'Upload failed', details: error?.message || String(error) }, { status: 500 })
     }
 }
