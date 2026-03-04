@@ -2,6 +2,8 @@ interface SendMessageOptions {
     phone: string
     message: string
     instanceName?: string
+    apiKey?: string
+    apiUrl?: string
 }
 
 interface ConnectyHubConfig {
@@ -34,17 +36,18 @@ export async function getConnectyHubConfig(): Promise<ConnectyHubConfig> {
     }
 }
 
-export async function sendWhatsAppMessage({ phone, message, instanceName }: SendMessageOptions) {
+export async function sendWhatsAppMessage({ phone, message, instanceName, apiKey, apiUrl }: SendMessageOptions) {
     const config = await getConnectyHubConfig()
     const instance = instanceName || config.instance
+    const baseUrl = apiUrl || config.apiUrl
 
     const cleanPhone = phone.replace(/\D/g, '')
 
-    const response = await fetch(`${config.apiUrl}/message/sendText/${instance}`, {
+    const response = await fetch(`${baseUrl}/message/sendText/${instance}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'apikey': config.apiKey,
+            'apikey': apiKey || config.apiKey,
         },
         body: JSON.stringify({
             number: cleanPhone,

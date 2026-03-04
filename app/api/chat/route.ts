@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { extractLeadInfo } from '@/lib/ai/generation'
 import { generateChatResponse } from '@/lib/ai/generation'
 import { CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES } from '@/lib/ai/prompts'
+import { sendWhatsAppMessage } from '@/lib/connectyhub'
 
 export const maxDuration = 60 // Allow longer timeout for AI processing
 
@@ -151,6 +152,11 @@ export async function POST(req: NextRequest) {
 
         const brokerName = broker?.name || 'Guilherme Pilger'
         const brokerCreci = broker?.creci || 'CRECI 5555'
+        const brokerPhone = broker?.phone
+        const brokerConnectyhubApiUrl = broker?.connectyhub_api_url
+        const brokerConnectyhubInstance = broker?.connectyhub_instance_id
+        const brokerConnectyhubApiKey = broker?.connectyhub_api_key
+        const brokerConnectyhubChatMessage = broker?.connectyhub_chat_message
 
         // Priority: admin maintenance prompt > ai_agents prompt > fallback
         const basePrompt = promptConfig || agent?.system_prompt || CONCIERGE_BASE_PROMPT
@@ -357,6 +363,61 @@ export async function POST(req: NextRequest) {
                                     event_type: 'lead_captured',
                                     metadata: { lead_phone: leadData.phone }
                                 })
+                            }
+                        }
+
+                        // WhatsApp Notifications Flow
+                        if (!existingLead && leadData.phone) {
+                            const urlContext = page_context?.url || 'Site / LP'
+
+                            // Build conversation transcript for broker context
+                            const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
+                            const conversationTranscript = fullHistory
+                                .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'}:  ${msg.content}`)
+                                .join('\n')
+
+                            // 1. Notify Broker with FULL conversation summary (via system default instance)
+                            // So the broker knows exactly what was discussed before continuing
+                            if (brokerPhone) {
+                                const brokerMsg = `🚀 *Novo Lead Captado no Site*\n\n` +
+                                    `*Nome:* ${leadData.name || 'Não informado'}\n` +
+                                    `*Telefone:* ${leadData.phone}\n` +
+                                    `*Página:* ${urlContext}\n\n` +
+                                    `📋 *Resumo:*\n${leadData.ai_summary || 'Sem resumo'}\n\n` +
+                                    `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
+                                    `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
+
+                                sendWhatsAppMessage({
+                                    phone: brokerPhone,
+                                    message: brokerMsg
+                                }).catch(e => console.error('[Chat] Failed to send WA to broker:', e))
+                            }
+
+                            // 2. Message to Lead FROM broker's phone (via broker's instance)
+                            // Must feel like a CONTINUATION of the site chat — the lead should
+                            // believe the same person who was chatting on the site is now on WhatsApp
+                            if (brokerConnectyhubInstance) {
+                                const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
+
+                                // Default message feels like natural continuation, NOT a new introduction
+                                const defaultMsg = leadNameSafe
+                                    ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                    : 'Oi! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+
+                                const baseMsgTemplate = brokerConnectyhubChatMessage || defaultMsg
+
+                                const leadMsg = baseMsgTemplate
+                                    .replace(/\{\{lead_name\}\}/g, leadNameSafe)
+                                    .replace(/\{\{broker_name\}\}/g, brokerName)
+                                    .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
+
+                                sendWhatsAppMessage({
+                                    phone: leadData.phone,
+                                    message: leadMsg,
+                                    instanceName: brokerConnectyhubInstance,
+                                    apiKey: brokerConnectyhubApiKey,
+                                    apiUrl: brokerConnectyhubApiUrl
+                                }).catch(e => console.error('[Chat] Failed to send WA to lead:', e))
                             }
                         }
                     }

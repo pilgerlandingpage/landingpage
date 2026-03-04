@@ -156,7 +156,12 @@ export async function GET(request: NextRequest) {
             broker: {
                 name: broker.name,
                 creci: broker.creci,
-                photo_url: broker.photo_url
+                photo_url: broker.photo_url,
+                phone: broker.phone,
+                connectyhub_api_url: broker.connectyhub_api_url,
+                connectyhub_instance_id: broker.connectyhub_instance_id,
+                connectyhub_api_key: broker.connectyhub_api_key,
+                connectyhub_chat_message: broker.connectyhub_chat_message
             },
             timing,
             autoOpenDelay

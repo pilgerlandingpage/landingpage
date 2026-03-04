@@ -20,6 +20,11 @@ interface Broker {
     duty_dates: string[]
     assignment_type: string
     assigned_page_slugs: string[]
+    phone?: string
+    connectyhub_api_url?: string
+    connectyhub_instance_id?: string
+    connectyhub_api_key?: string
+    connectyhub_chat_message?: string
 }
 
 export default function BrokersAdmin() {
@@ -41,7 +46,12 @@ export default function BrokersAdmin() {
         duty_weekdays: [] as number[],
         duty_dates: [] as string[],
         assignment_type: 'all',
-        assigned_page_slugs: [] as string[]
+        assigned_page_slugs: [] as string[],
+        phone: '',
+        connectyhub_api_url: '',
+        connectyhub_instance_id: '',
+        connectyhub_api_key: '',
+        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
     })
 
     const defaultFormData = {
@@ -52,7 +62,12 @@ export default function BrokersAdmin() {
         duty_weekdays: [] as number[],
         duty_dates: [] as string[],
         assignment_type: 'all',
-        assigned_page_slugs: [] as string[]
+        assigned_page_slugs: [] as string[],
+        phone: '',
+        connectyhub_api_url: '',
+        connectyhub_instance_id: '',
+        connectyhub_api_key: '',
+        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
     }
 
     useEffect(() => {
@@ -267,27 +282,99 @@ export default function BrokersAdmin() {
                                 </div>
                             </div>
 
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>URL da Foto (Opcional se fez upload)</label>
-                                <input
-                                    placeholder="https://exemplo.com/foto.jpg"
-                                    className="admin-input"
-                                    value={formData.photo_url}
-                                    onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-3">
+                            {/* Active toggle - right after name/CRECI */}
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '12px',
+                                padding: '12px 16px',
+                                background: formData.is_active ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${formData.is_active ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.08)'}`,
+                                borderRadius: '10px',
+                                transition: 'all 0.2s'
+                            }}>
                                 <input
                                     type="checkbox"
                                     id="is_active"
                                     checked={formData.is_active}
-                                    style={{ width: '20px', height: '20px', accentColor: 'var(--gold)' }}
+                                    style={{ width: '20px', height: '20px', accentColor: '#22c55e' }}
                                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                 />
-                                <label htmlFor="is_active" style={{ fontSize: '1rem', color: 'white', cursor: 'pointer' }}>
-                                    Ativar Corretor (Aparece aleatoriamente caso não haja ninguém escalado e é listado nas escalas)
+                                <label htmlFor="is_active" style={{ cursor: 'pointer' }}>
+                                    <div style={{ color: formData.is_active ? '#22c55e' : '#888', fontWeight: 600, fontSize: '0.95rem' }}>
+                                        {formData.is_active ? '✅ Corretor Ativo' : '⏸️ Corretor Inativo'}
+                                    </div>
+                                    <div style={{ color: '#888', fontSize: '0.75rem', marginTop: '2px' }}>
+                                        Quando ativo, a IA poderá se passar por este corretor no chat do site e ele entrará no rodízio de atendimento.
+                                    </div>
                                 </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone Whatsapp (com DDD)</label>
+                                <input
+                                    placeholder="Ex: 5547999887766"
+                                    className="admin-input"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Para receber avisos do sistema quando capta lead (via instância padrão da Sala de Manutenção).</span>
+                            </div>
+
+                            {/* ConnectyHub Section - mirrors Maintenance Panel */}
+                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    📱 ConnectyHub — Instância do Corretor
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
+                                    Configure a instância ConnectyHub deste corretor. A mensagem para o lead sairá do celular conectado a esta instância.
+                                    Deixe em branco para usar a configuração global da Sala de Manutenção.
+                                </p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>API URL</label>
+                                        <input
+                                            placeholder="https://api.connectyhub.com"
+                                            className="admin-input"
+                                            value={formData.connectyhub_api_url}
+                                            onChange={(e) => setFormData({ ...formData, connectyhub_api_url: e.target.value })}
+                                        />
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>URL da API. Em branco = usa a global.</span>
+                                    </div>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>API Key</label>
+                                        <input
+                                            placeholder="Sua API Key"
+                                            className="admin-input"
+                                            value={formData.connectyhub_api_key}
+                                            onChange={(e) => setFormData({ ...formData, connectyhub_api_key: e.target.value })}
+                                        />
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Key da instância. Em branco = usa a global.</span>
+                                    </div>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Instance</label>
+                                        <input
+                                            placeholder="ID da instância"
+                                            className="admin-input"
+                                            value={formData.connectyhub_instance_id}
+                                            onChange={(e) => setFormData({ ...formData, connectyhub_instance_id: e.target.value })}
+                                        />
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID da instância conectada ao celular do corretor.</span>
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ marginTop: '16px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mensagem Inicial para o Lead</label>
+                                    <textarea
+                                        className="admin-input"
+                                        style={{ minHeight: '100px', resize: 'vertical' }}
+                                        value={formData.connectyhub_chat_message}
+                                        onChange={(e) => setFormData({ ...formData, connectyhub_chat_message: e.target.value })}
+                                        placeholder="Mensagem que o corretor enviará automaticamente..."
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        Variáveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Tipo de Atendimento / Page Assignment */}
@@ -611,7 +698,12 @@ export default function BrokersAdmin() {
                                         duty_weekdays: broker.duty_weekdays || [],
                                         duty_dates: broker.duty_dates || [],
                                         assignment_type: broker.assignment_type || 'all',
-                                        assigned_page_slugs: broker.assigned_page_slugs || []
+                                        assigned_page_slugs: broker.assigned_page_slugs || [],
+                                        phone: broker.phone || '',
+                                        connectyhub_api_url: broker.connectyhub_api_url || '',
+                                        connectyhub_instance_id: broker.connectyhub_instance_id || '',
+                                        connectyhub_api_key: broker.connectyhub_api_key || '',
+                                        connectyhub_chat_message: broker.connectyhub_chat_message || 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
                                     })
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}
