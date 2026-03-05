@@ -214,6 +214,7 @@ export const processChatHandover = inngest.createFunction(
     async ({ event }) => {
         const {
             leadPhone,
+            leadId,
             brokerPhone,
             brokerMsg,
             leadMsg,
@@ -252,6 +253,13 @@ export const processChatHandover = inngest.createFunction(
                 })
                 results.lead = true
                 console.log(`[Inngest Handover] ✅ WA successfully sent to lead: ${leadPhone}`)
+
+                // NEW: Mark lead as having received a WhatsApp message for Dashboard Tracking
+                if (leadId) {
+                    const supabase = getSupabase()
+                    await supabase.from('leads').update({ whatsapp_sent: true }).eq('id', leadId)
+                    console.log(`[Inngest Handover] ✅ Marked lead ${leadId} as whatsapp_sent: true`)
+                }
             } catch (error) {
                 console.error(`[Inngest Handover] ❌ Failed to send WA to lead: ${leadPhone}`, error)
                 // If the lead message fails, we throw to trigger Inngest auto-retry

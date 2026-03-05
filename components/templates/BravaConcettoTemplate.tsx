@@ -118,8 +118,8 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
     }
 
     const features = [
-        { icon: Building2, title: 'Design Assinado', desc: 'Arquitetura atemporal com elevador privativo, esquadrias piso-teto e acabamento de altíssimo padrão.' },
-        { icon: Leaf, title: 'Certificação GBC', desc: 'Selo de excelência do Green Building Council em sustentabilidade e eficiência energética.' },
+        { icon: Building2, title: 'Design Assinado', desc: 'Arquitetura atemporal assinada por Débora Aguiar e Ana Holzer, com elevador privativo, esquadrias piso-teto e acabamento de altíssimo padrão.' },
+        { icon: Leaf, title: 'Selo Internacional GBC', desc: 'Certificação de excelência do Green Building Council em sustentabilidade e eficiência energética.' },
         { icon: Trees, title: 'Integração com a Natureza', desc: 'Design biofílico que preserva e valoriza a essência da Praia Brava.' },
     ]
 
@@ -234,13 +234,13 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
     const prevUnitLB = () => setUnitLightboxIdx((p) => (p !== null ? (p - 1 + units.length) % units.length : null));
 
     const faqs = [
-        { q: 'Qual a previsão de entrega?', a: 'Previsão para 2027. Consulte nossa equipe de vendas para obter o cronograma atualizado e as condições do empreendimento.' },
-        { q: 'Quais as condições de pagamento?', a: 'Oferecemos condições exclusivas e flexíveis. Fale com um especialista para conhecer o plano perfeito para o seu momento.' },
-        { q: 'Quais as informações técnicas do projeto?', a: '• Unidades: 32\n• Apartamentos por andar: 2\n• Pavimentos: 12\n• Tamanho do terreno: 1.600m²\n• Área da obra: 7.000m²\n• Altura: 40m' },
+        { q: 'Qual a previsão de entrega?', a: 'Previsão para Março 2030. Consulte nossa equipe de vendas para obter o cronograma atualizado e as condições do empreendimento.' },
+        { q: 'Quais as condições de pagamento?', a: 'Condição: 20% de entrada e saldo em 78x. Consulte um especialista e saiba mais sobre condições diferenciadas.' },
+        { q: 'Quais as informações técnicas do projeto?', a: '• Unidades: 22 apartamentos, 1 garden e 2 coberturas duplex (Total 25 unidades)\n• Apartamentos por andar: 2\n• Pavimentos: 16\n• Tamanho do terreno: 1.600m²\n• Área da obra: 7.000m²\n• Altura: 52m' },
         { q: 'Onde fica exatamente?', a: 'Na Avenida Carlos Drummond de Andrade, 111, no coração da Praia Brava, Itajaí, a apenas 200m da orla.' },
         { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos a possibilidade de personalizar o layout interno.' },
-        { q: 'O empreendimento possui certificação?', a: 'Sim. Entre em contato com nossa equipe para mais informações sobre as nossas certificações e padrões.' },
-        { q: 'Quem assina a arquitetura do projeto?', a: 'O projeto arquitetônico é assinado por Antonio José Gonçalves e Frederico Cartens (realiza arquitetura).' },
+        { q: 'O empreendimento possui certificação?', a: 'Sim, o Brava Concetto possui o Selo Internacional GBC (Green Building Council).' },
+        { q: 'Quem assina a arquitetura do projeto?', a: 'O projeto arquitetônico é assinado por Antonio José Gonçalves e Frederico Cartens (realiza arquitetura), com interiores por Débora Aguiar e paisagismo por Ana Holzer.' },
     ]
 
     // Shared styles
@@ -385,6 +385,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                         </div>
                     </div>
                 </section>
+
 
 
 
@@ -785,7 +786,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                     : <Plus size={18} color={C.textLight} style={{ flexShrink: 0 }} />}
                             </div>
                             {faqOpen === i && (
-                                <p style={{
+                                <p data-description="true" style={{
                                     marginTop: 12, marginBottom: 0, fontSize: '0.88rem',
                                     color: C.textMuted, lineHeight: 1.65,
                                     animation: 'slideDown 0.3s ease',
@@ -794,6 +795,34 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                             )}
                         </div>
                     ))}
+                </section>
+
+                {/* ═══════ 7.5 DIFERENCIAIS (MOVED) ═══════ */}
+                <section style={{ padding: '56px 24px', borderTop: `1px solid ${C.border}` }}>
+                    <div className="bc-reveal" style={{ marginBottom: 32 }}>
+                        <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white }}>Diferenciais</h3>
+                        <p style={{ color: C.textLight, fontSize: '0.85rem' }}>O que torna o Brava Concetto único</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+                        {features.map((f, i) => (
+                            <div key={i} data-feature="true" className="bc-reveal" style={{
+                                background: C.bgCard, border: `1px solid ${C.border}`,
+                                borderRadius: 16, padding: 24,
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                            }}>
+                                <div style={{
+                                    width: 42, height: 42, borderRadius: 10,
+                                    background: C.primaryMuted, display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center',
+                                    marginBottom: 16,
+                                }}>
+                                    <f.icon size={20} color={C.primary} />
+                                </div>
+                                <h4 style={{ color: C.white, fontWeight: 800, fontSize: '1rem', marginBottom: 8 }}>{f.title}</h4>
+                                <p style={{ color: C.textMuted, fontSize: '0.85rem', lineHeight: 1.5 }}>{f.desc}</p>
+                            </div>
+                        ))}
+                    </div>
                 </section>
 
 

@@ -12,10 +12,16 @@ interface Lead {
     phone: string | null
     funnel_stage: string
     is_vip: boolean
+    lead_classification?: string | null
     whatsapp_sent: boolean
     ai_summary: string | null
     conversation_log: any[] | null
     created_at: string
+    lead_purpose?: string | null
+    lead_budget?: string | null
+    lead_timeframe?: string | null
+    is_partner?: boolean
+    push_subscribed_lead?: boolean
     visitor?: {
         detected_source: string
         browser: string
@@ -93,7 +99,12 @@ export default function LeadsPage() {
         scheduled: 0,
         proposal: 0,
         closed: 0,
-        lost: 0
+        lost: 0,
+        purpose_invest: 0,
+        purpose_housing: 0,
+        timeframe_now: 0,
+        has_push: 0,
+        partners: 0
     })
 
     const [activeTab, setActiveTab] = useState<'leads' | 'visitors'>('leads')
@@ -129,13 +140,23 @@ export default function LeadsPage() {
                     scheduled: 0,
                     proposal: 0,
                     closed: 0,
-                    lost: 0
+                    lost: 0,
+                    purpose_invest: 0,
+                    purpose_housing: 0,
+                    timeframe_now: 0,
+                    has_push: 0,
+                    partners: 0
                 }
 
                 leadsData.forEach(lead => {
                     if (newCounts.hasOwnProperty(lead.funnel_stage)) {
                         newCounts[lead.funnel_stage as keyof typeof newCounts]++
                     }
+                    if (lead.lead_purpose?.toLowerCase().includes('investimento')) newCounts.purpose_invest++
+                    if (lead.lead_purpose?.toLowerCase().includes('moradia')) newCounts.purpose_housing++
+                    if (lead.lead_timeframe?.toLowerCase().includes('imediato')) newCounts.timeframe_now++
+                    if (lead.push_subscribed_lead) newCounts.has_push++
+                    if (lead.is_partner) newCounts.partners++
                 })
                 setCounts(newCounts)
             } catch (error) {
@@ -231,48 +252,51 @@ export default function LeadsPage() {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6 p-1 bg-[#1a1a1a] rounded-xl inline-flex border border-[#333]">
-                <button
-                    onClick={() => setActiveTab('leads')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'leads' ? 'bg-[#c9a96e] text-black shadow-lg' : 'text-[#888] hover:text-[#f5f5f5] hover:bg-[#222]'}`}
-                >
-                    Leads ({counts.total})
-                </button>
-                <button
-                    onClick={() => setActiveTab('visitors')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'visitors' ? 'bg-[#c9a96e] text-black shadow-lg' : 'text-[#888] hover:text-[#f5f5f5] hover:bg-[#222]'}`}
-                >
-                    Visitantes (Topo de Funil)
-                </button>
-            </div>
-
-            {/* Filters (Only for Leads tab) */}
-            {activeTab === 'leads' && (
-                <div className="flex gap-2 overflow-x-auto pb-4 mb-4 custom-scrollbar">
+            {/* Navigation & Filters Toolbar */}
+            <div className="flex flex-wrap items-center gap-4 mb-10">
+                {/* Tabs */}
+                <div className="flex gap-1 p-1 bg-[#f5f5f5] backdrop-blur-md border border-[#eee] rounded-2xl shadow-sm">
                     <button
-                        onClick={() => setStageFilter('')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${!stageFilter
-                            ? 'bg-[#c9a96e] text-black border-[#c9a96e]'
-                            : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#666]'
-                            }`}
+                        onClick={() => setActiveTab('leads')}
+                        className={`px-8 py-2.5 rounded-xl text-sm font-black transition-all duration-300 ${activeTab === 'leads' ? 'bg-[#c9a96e] text-black shadow-lg scale-105' : 'text-[#888] hover:text-black hover:bg-white/50'}`}
                     >
-                        Todos ({counts.total})
+                        Leads <span className={`ml-1 font-bold ${activeTab === 'leads' ? 'opacity-40' : 'opacity-30'}`}>({counts.total})</span>
                     </button>
-                    {Object.entries(stageLabel).map(([key, label]) => (
+                    <button
+                        onClick={() => setActiveTab('visitors')}
+                        className={`px-10 py-3 rounded-xl text-sm font-black transition-all duration-300 ${activeTab === 'visitors' ? 'bg-[#c9a96e] text-black shadow-lg scale-105' : 'text-[#888] hover:text-black hover:bg-white/50'}`}
+                    >
+                        Visitantes <span className={`ml-1 font-bold ${activeTab === 'visitors' ? 'opacity-40' : 'opacity-30'}`}>({visitors.length})</span>
+                    </button>
+                </div>
+
+                {/* Filters (Only for Leads tab) */}
+                {activeTab === 'leads' && (
+                    <div className="bg-[#f5f5f5] backdrop-blur-md p-1 rounded-2xl border border-[#eee] shadow-sm flex flex-wrap gap-1">
                         <button
-                            key={key}
-                            onClick={() => setStageFilter(key)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${stageFilter === key
-                                ? 'bg-[#c9a96e] text-black border-[#c9a96e]'
-                                : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#666]'
+                            onClick={() => setStageFilter('')}
+                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-300 ${!stageFilter
+                                ? 'bg-[#c9a96e] text-black shadow-lg scale-105'
+                                : 'text-[#999] hover:text-black hover:bg-white/50'
                                 }`}
                         >
-                            {label} ({counts[key as keyof typeof counts] || 0})
+                            Todos <span className={`ml-1 ${!stageFilter ? 'opacity-40' : 'opacity-30'}`}>({counts.total})</span>
                         </button>
-                    ))}
-                </div>
-            )}
+                        {Object.entries(stageLabel).map(([key, label]) => (
+                            <button
+                                key={key}
+                                onClick={() => setStageFilter(key)}
+                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-300 ${stageFilter === key
+                                    ? 'bg-[#c9a96e] text-black shadow-lg scale-105'
+                                    : 'text-[#999] hover:text-black hover:bg-white/50'
+                                    }`}
+                            >
+                                {label} <span className={`ml-1 ${stageFilter === key ? 'opacity-40' : 'opacity-30'}`}>({counts[key as keyof typeof counts] || 0})</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {/* Table */}
             <div className="chart-card" style={{ padding: 0, overflow: 'auto' }}>
@@ -282,10 +306,10 @@ export default function LeadsPage() {
                             <tr>
                                 <th>Nome</th>
                                 <th>Contato</th>
+                                <th>Perfil / Persona</th>
+                                <th>Push</th>
                                 <th>Estágio</th>
                                 <th>Origem / Local</th>
-                                <th>Dispositivo</th>
-                                <th>IP / Data</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -306,12 +330,59 @@ export default function LeadsPage() {
                                 filteredLeads.map(lead => (
                                     <tr key={lead.id}>
                                         <td style={{ fontWeight: 500 }}>
-                                            {lead.name || <span style={{ color: 'var(--text-muted)' }}>Anônimo</span>}
-                                            {lead.is_vip && <span className="badge badge-gold" style={{ marginLeft: '8px', fontSize: '0.7em' }}>VIP</span>}
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-semibold text-white">
+                                                        {lead.name || <span className="text-[#444] italic">Anônimo</span>}
+                                                    </span>
+                                                    {lead.lead_classification === 'vip' ? (
+                                                        <span className="bg-gradient-to-r from-[#b8945f] to-[#e8c691] text-black text-[9px] px-2 py-0.5 rounded-full font-black shadow-[0_0_10px_rgba(184,148,95,0.4)] animate-pulse uppercase tracking-tighter">
+                                                            VIP
+                                                        </span>
+                                                    ) : lead.lead_classification === 'hot' ? (
+                                                        <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                                                            QUENTE
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter opacity-60">
+                                                            FRIO
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-[10px] text-[#555] mt-1 font-medium flex items-center gap-1">
+                                                    <span className="w-1 h-1 bg-[#333] rounded-full"></span>
+                                                    {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             {lead.phone && <div style={{ fontSize: '0.85rem' }}>📱 {lead.phone}</div>}
                                             {lead.email && <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>✉️ {lead.email}</div>}
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col gap-1">
+                                                {lead.is_partner ? (
+                                                    <span className="badge badge-info text-[9px] w-fit">🤝 PARCERIA</span>
+                                                ) : (
+                                                    <>
+                                                        {lead.lead_purpose && (
+                                                            <span className={`badge ${lead.lead_purpose.toLowerCase().includes('investimento') ? 'badge-primary' : 'badge-gold'} text-[9px] w-fit`}>
+                                                                {lead.lead_purpose.toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                        {lead.lead_timeframe && lead.lead_timeframe.toLowerCase().includes('imediato') && (
+                                                            <span className="badge badge-success text-[9px] w-fit ml-auto">⚡ AGORA</span>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            {lead.push_subscribed_lead ? (
+                                                <span title="Inscrito no Push" className="text-xl">🔔</span>
+                                            ) : (
+                                                <span title="Não inscrito" className="text-xl opacity-10 grayscale">🔕</span>
+                                            )}
                                         </td>
                                         <td>
                                             <span className={`badge ${stageBadge[lead.funnel_stage] || 'badge-gold'}`}>
@@ -320,11 +391,9 @@ export default function LeadsPage() {
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
                                             <div style={{ fontWeight: 500 }}>{lead.visitor?.detected_source || '—'}</div>
-                                            {(lead.visitor?.city || lead.visitor?.region || lead.visitor?.country) && (
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                    📍 {[safeDecode(lead.visitor?.city), safeDecode(lead.visitor?.region), lead.visitor?.country].filter(Boolean).join(', ')}
-                                                </div>
-                                            )}
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                                📍 {[safeDecode(lead.visitor?.city), lead.visitor?.country].filter(Boolean).join(', ')}
+                                            </div>
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
                                             {lead.visitor?.browser || '—'} / {lead.visitor?.device_type || '—'}
@@ -493,6 +562,62 @@ export default function LeadsPage() {
                                             <p className="text-[#666] text-sm italic">Ainda sem resumo da IA.</p>
                                         </div>
                                     )}
+                                </div>
+
+                                {/* Persona Details (The Panorama) */}
+                                <div>
+                                    <h3 className="text-[#c9a96e] text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+                                        <span className="text-lg">🎯</span> Panorama de Qualificação
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {selectedLead.lead_classification === 'vip' ? (
+                                            <span className="bg-gradient-to-r from-[#b8945f] to-[#e8c691] text-black text-[10px] px-3 py-1 rounded-full font-black shadow-[0_0_15px_rgba(184,148,95,0.3)] animate-pulse uppercase tracking-tighter">
+                                                💎 Lead VIP
+                                            </span>
+                                        ) : selectedLead.lead_classification === 'hot' ? (
+                                            <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tighter">
+                                                🔥 Lead Quente
+                                            </span>
+                                        ) : (
+                                            <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tighter opacity-60">
+                                                ❄️ Lead Frio
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div className="bg-[#111] p-4 rounded-xl border border-[#222]">
+                                            <span className="text-[#666] text-[10px] uppercase font-bold block mb-1">Finalidade</span>
+                                            <span className="text-[#f5f5f5] text-sm font-medium">
+                                                {selectedLead.lead_purpose || 'Não informada'}
+                                            </span>
+                                        </div>
+                                        <div className="bg-[#111] p-4 rounded-xl border border-[#222]">
+                                            <span className="text-[#666] text-[10px] uppercase font-bold block mb-1">Investimento Estimado</span>
+                                            <span className="text-[#f5f5f5] text-sm font-medium">
+                                                {selectedLead.lead_budget || 'Não informado'}
+                                            </span>
+                                        </div>
+                                        <div className="bg-[#111] p-4 rounded-xl border border-[#222]">
+                                            <span className="text-[#666] text-[10px] uppercase font-bold block mb-1">Prazo de Compra</span>
+                                            <span className="text-[#f5f5f5] text-sm font-medium">
+                                                {selectedLead.lead_timeframe || 'Não informado'}
+                                            </span>
+                                        </div>
+                                        <div className="bg-[#111] p-4 rounded-xl border border-[#222] flex items-center justify-between">
+                                            <div>
+                                                <span className="text-[#666] text-[10px] uppercase font-bold block mb-1">Inscrito no Push</span>
+                                                <span className="text-[#f5f5f5] text-sm font-medium">
+                                                    {selectedLead.push_subscribed_lead ? 'Sim, Ativo' : 'Não'}
+                                                </span>
+                                            </div>
+                                            <span className="text-2xl">{selectedLead.push_subscribed_lead ? '🔔' : '🔕'}</span>
+                                        </div>
+                                        {selectedLead.is_partner && (
+                                            <div className="bg-[#c9a96e]/10 p-4 rounded-xl border border-[#c9a96e]/20 text-center">
+                                                <span className="text-[#c9a96e] text-xs font-bold font-serif uppercase tracking-widest italic">🤝 Solicitou Parceria</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Details Grid */}

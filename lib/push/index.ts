@@ -82,7 +82,10 @@ export async function saveSubscription(
         // Update existing lead
         await supabase
             .from('leads')
-            .update({ push_subscribed: true })
+            .update({
+                push_subscribed: true,
+                push_subscribed_lead: true
+            })
             .eq('id', existingLead.id)
     } else {
         // Create new lead (Lead Push Over)
@@ -103,6 +106,7 @@ export async function saveSubscription(
             funnel_stage: 'engaged',
             name: 'Inscrito Push', // Placeholder
             push_subscribed: true,
+            push_subscribed_lead: true,
             created_at: new Date().toISOString(),
             country: visitor?.country,
             city: visitor?.city,

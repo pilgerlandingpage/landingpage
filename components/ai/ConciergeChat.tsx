@@ -58,7 +58,7 @@ function scrapePageContent(): string {
         const descEl = document.querySelector('[data-description], .description, .property-description, meta[name="description"]')
         if (descEl) {
             const text = descEl instanceof HTMLMetaElement ? descEl.content : descEl.textContent
-            if (text?.trim()) parts.push(`Descrição: ${text.trim().substring(0, 300)}`)
+            if (text?.trim()) parts.push(`Descrição: ${text.trim().substring(0, 2000)}`)
         }
 
         // Features/amenities
@@ -212,7 +212,7 @@ export default function ConciergeChat() {
             params.set('type', pageContext.type)
             if (pageContext.id) params.set('id', pageContext.id)
             if (pageContext.slug) params.set('slug', pageContext.slug)
-            if (pageContent) params.set('page_content', pageContent.substring(0, 500))
+            if (pageContent) params.set('page_content', pageContent.substring(0, 1500))
 
             fetch(`/api/chat/init?${params.toString()}`)
                 .then(res => res.json())

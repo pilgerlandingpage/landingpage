@@ -292,10 +292,17 @@ export async function POST(req: NextRequest) {
                         country: (locationData as any).country || null,
                         city: (locationData as any).city || null,
                         state: (locationData as any).state || null,
+                        lead_purpose: extracted?.interest || null,
+                        lead_budget: extracted?.budget || null,
+                        lead_timeframe: extracted?.timeframe || null,
+                        is_partner: extracted?.is_partner || false,
+                        is_vip: extracted?.classification === 'vip',
+                        lead_classification: extracted?.classification || 'cold',
                         metadata: {
                             budget: extracted?.budget || null,
                             timeframe: extracted?.timeframe || null,
                             interest: extracted?.interest || null,
+                            is_partner: extracted?.is_partner || false,
                             property_id: propertyId || null,
                             page_url: page_context?.url || null
                         }
@@ -355,6 +362,8 @@ export async function POST(req: NextRequest) {
                         if (leadData.phone) updateData.phone = leadData.phone
                         if (leadData.email) updateData.email = leadData.email
                         if (leadData.ai_summary) updateData.ai_summary = leadData.ai_summary
+                        if (leadData.lead_classification) updateData.lead_classification = leadData.lead_classification
+                        if (leadData.is_vip) updateData.is_vip = true
                         if (leadData.push_subscribed) updateData.push_subscribed = true
                         if (visitorId && !existingLead.visitor_id) updateData.visitor_id = visitorId
 
@@ -394,10 +403,17 @@ export async function POST(req: NextRequest) {
                                     .replace(/\{\{broker_name\}\}/g, brokerName)
                                     .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
 
-                                const brokerMsg = `🚀 *Novo Lead Captado no Site*\n\n` +
+                                const tempEmoji = leadData.lead_classification === 'vip' ? '💎 VIP' : (leadData.lead_classification === 'hot' ? '🔥 QUENTE' : '❄️ FRIO')
+                                const brokerMsg = `🚀 *Novo Lead [${tempEmoji}] Captado*\n\n` +
                                     `*Nome:* ${leadData.name || 'Não informado'}\n` +
                                     `*Telefone:* ${leadData.phone}\n` +
+                                    `*Qualificação:* ${tempEmoji}\n` +
                                     `*Página:* ${urlContext}\n\n` +
+                                    `🎯 *Detalhes:*\n` +
+                                    `• Finalidade: ${leadData.metadata.interest || 'Não informada'}\n` +
+                                    `• Investimento: ${leadData.metadata.budget || 'Não informado'}\n` +
+                                    `• Prazo: ${leadData.metadata.timeframe || 'Não informado'}\n` +
+                                    `${leadData.metadata.is_partner ? '🤝 *SOLICITAÇÃO DE PARCERIA*\n' : ''}\n` +
                                     `📋 *Resumo:*\n${leadData.ai_summary || 'Sem resumo'}\n\n` +
                                     `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
                                     `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
@@ -412,19 +428,34 @@ export async function POST(req: NextRequest) {
                                         brokerName: brokerName,
                                         brokerMsg: brokerMsg,
                                         leadMsg: leadMsg,
+                                        leadId: existingLead.id,
                                         brokerConnectyhubInstance: brokerConnectyhubInstance,
                                         brokerConnectyhubApiKey: brokerConnectyhubApiKey,
                                         brokerConnectyhubApiUrl: brokerConnectyhubApiUrl
                                     }
                                 })
                             }
+
+                            // 2. NEW: VIP Lead Alert
+                            if (leadData.lead_classification === 'vip') {
+                                console.log('[Chat Debug] Triggering VIP alert for existing lead update')
+                                await inngest.send({
+                                    name: 'lead/vip-detected',
+                                    data: {
+                                        name: leadData.name || 'Não informado',
+                                        phone: leadData.phone,
+                                        property_title: configMap['site_title'] || 'Pilger Luxury',
+                                        ai_summary: leadData.ai_summary
+                                    }
+                                })
+                            }
                         }
                     } else {
-                        // Insert new lead
-                        const { error } = await supabase.from('leads').insert(leadData)
+                        // Insert new lead - return it to get ID
+                        const { data: newLead, error } = await supabase.from('leads').insert(leadData).select().single()
                         if (error) console.error('[Chat] Lead insert error:', error.message)
                         else {
-                            console.log('[Chat] New lead saved!')
+                            console.log('[Chat] New lead saved!', newLead?.id)
 
                             // Log 'lead_captured' event to funnel if visitorId is present
                             if (visitorId) {
@@ -439,55 +470,78 @@ export async function POST(req: NextRequest) {
                                     console.error('[Chat] Failed to log lead_captured event:', funnelError)
                                 }
                             }
-                        }
 
-                        // WhatsApp Notifications Flow for NEW leads
-                        if (leadData.phone) {
-                            const urlContext = page_context?.url || 'Site / LP'
+                            // WhatsApp Notifications Flow for NEW leads
+                            if (leadData.phone) {
+                                const urlContext = page_context?.url || 'Site / LP'
 
-                            // Build conversation transcript for broker context
-                            const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
-                            const conversationTranscript = fullHistory
-                                .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'}:  ${msg.content}`)
-                                .join('\n')
+                                // Build conversation transcript for broker context
+                                const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
+                                const conversationTranscript = fullHistory
+                                    .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'
+                                        }:  ${msg.content} `)
+                                    .join('\n')
 
-                            // 1. Notify Broker with FULL conversation summary (via system default instance)
-                            // So the broker knows exactly what was discussed before continuing
-                            // Fire Inngest Event instead of blocking the chat response
-                            if (brokerPhone || brokerConnectyhubInstance) {
-                                const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
-                                const defaultMsg = leadNameSafe
-                                    ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
-                                    : 'Oi! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
-                                const baseMsgTemplate = brokerConnectyhubChatMessage || defaultMsg
-                                const leadMsg = baseMsgTemplate
-                                    .replace(/\{\{lead_name\}\}/g, leadNameSafe)
-                                    .replace(/\{\{broker_name\}\}/g, brokerName)
-                                    .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
+                                // 1. Notify Broker with FULL conversation summary (via system default instance)
+                                // So the broker knows exactly what was discussed before continuing
+                                // Fire Inngest Event instead of blocking the chat response
+                                if (brokerPhone || brokerConnectyhubInstance) {
+                                    const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
+                                    const defaultMsg = leadNameSafe
+                                        ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                        : 'Oi! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                    const baseMsgTemplate = brokerConnectyhubChatMessage || defaultMsg
+                                    const leadMsg = baseMsgTemplate
+                                        .replace(/\{\{lead_name\}\}/g, leadNameSafe)
+                                        .replace(/\{\{broker_name\}\}/g, brokerName)
+                                        .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
 
-                                const brokerMsg = `🚀 *Novo Lead Captado no Site*\n\n` +
-                                    `*Nome:* ${leadData.name || 'Não informado'}\n` +
-                                    `*Telefone:* ${leadData.phone}\n` +
-                                    `*Página:* ${urlContext}\n\n` +
-                                    `📋 *Resumo:*\n${leadData.ai_summary || 'Sem resumo'}\n\n` +
-                                    `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
-                                    `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
+                                    const tempEmoji = leadData.lead_classification === 'vip' ? '💎 VIP' : (leadData.lead_classification === 'hot' ? '🔥 QUENTE' : '❄️ FRIO')
+                                    const brokerMsg = `🚀 *Novo Lead [${tempEmoji}] Captado*\n\n` +
+                                        `*Nome:* ${leadData.name || 'Não informado'}\n` +
+                                        `*Telefone:* ${leadData.phone}\n` +
+                                        `*Qualificação:* ${tempEmoji}\n` +
+                                        `*Página:* ${urlContext}\n\n` +
+                                        `🎯 *Detalhes:*\n` +
+                                        `• Finalidade: ${leadData.metadata.interest || 'Não informada'}\n` +
+                                        `• Investimento: ${leadData.metadata.budget || 'Não informado'}\n` +
+                                        `• Prazo: ${leadData.metadata.timeframe || 'Não informado'}\n` +
+                                        `${leadData.metadata.is_partner ? '🤝 *SOLICITAÇÃO DE PARCERIA*\n' : ''}\n` +
+                                        `📋 *Resumo:*\n${leadData.ai_summary || 'Sem resumo'}\n\n` +
+                                        `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
+                                        `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
 
-                                console.log('[Chat Debug] Queuing chat/handover event to Inngest (new lead)')
-                                await inngest.send({
-                                    name: 'chat/handover',
-                                    data: {
-                                        leadPhone: leadData.phone,
-                                        leadName: leadData.name || 'Não informado',
-                                        brokerPhone: brokerPhone,
-                                        brokerName: brokerName,
-                                        brokerMsg: brokerMsg,
-                                        leadMsg: leadMsg,
-                                        brokerConnectyhubInstance: brokerConnectyhubInstance,
-                                        brokerConnectyhubApiKey: brokerConnectyhubApiKey,
-                                        brokerConnectyhubApiUrl: brokerConnectyhubApiUrl
-                                    }
-                                })
+                                    console.log('[Chat Debug] Queuing chat/handover event to Inngest (new lead)')
+                                    await inngest.send({
+                                        name: 'chat/handover',
+                                        data: {
+                                            leadPhone: leadData.phone,
+                                            leadName: leadData.name || 'Não informado',
+                                            leadId: newLead?.id,
+                                            brokerPhone: brokerPhone,
+                                            brokerName: brokerName,
+                                            brokerMsg: brokerMsg,
+                                            leadMsg: leadMsg,
+                                            brokerConnectyhubInstance: brokerConnectyhubInstance,
+                                            brokerConnectyhubApiKey: brokerConnectyhubApiKey,
+                                            brokerConnectyhubApiUrl: brokerConnectyhubApiUrl
+                                        }
+                                    })
+                                }
+
+                                // 2. NEW: VIP Lead Alert
+                                if (leadData.lead_classification === 'vip') {
+                                    console.log('[Chat Debug] Triggering VIP alert for NEW lead')
+                                    await inngest.send({
+                                        name: 'lead/vip-detected',
+                                        data: {
+                                            name: leadData.name || 'Não informado',
+                                            phone: leadData.phone,
+                                            property_title: configMap['site_title'] || 'Pilger Luxury',
+                                            ai_summary: leadData.ai_summary
+                                        }
+                                    })
+                                }
                             }
                         }
                     }

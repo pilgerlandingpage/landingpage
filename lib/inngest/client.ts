@@ -15,6 +15,7 @@ export const inngest = new Inngest({
             data: {
                 leadPhone: string
                 leadName: string
+                leadId?: string
                 brokerPhone?: string
                 brokerName: string
                 brokerMsg: string // The message for the broker (with transcript)

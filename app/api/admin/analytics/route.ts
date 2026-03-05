@@ -21,7 +21,9 @@ export async function GET() {
             { data: dailyLeads },
             { count: pushCount },
             { data: recentVisitorsRaw },
-            { count: cookieConsentCount }
+            { count: cookieConsentCount },
+            { count: investCount },
+            { count: housingCount }
         ] = await Promise.all([
             // 1. Total Visitors
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
@@ -58,7 +60,13 @@ export async function GET() {
             supabase.from('visitors').select('*').order('last_visit_at', { ascending: false }).limit(6),
 
             // 11. Cookie Consent
-            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'cookie_consent')
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'cookie_consent'),
+
+            // 12. Investors
+            supabase.from('leads').select('*', { count: 'exact', head: true }).ilike('lead_purpose', '%investimento%'),
+
+            // 13. Housing
+            supabase.from('leads').select('*', { count: 'exact', head: true }).ilike('lead_purpose', '%moradia%')
         ])
 
         // Process Chat Sessions
@@ -98,7 +106,7 @@ export async function GET() {
         const recentVisitorIds = recentVisitorsRaw?.map(v => v.id) || []
         const { data: recentLeads } = await supabase
             .from('leads')
-            .select('visitor_id, funnel_stage, push_subscribed')
+            .select('visitor_id, funnel_stage, push_subscribed_lead')
             .in('visitor_id', recentVisitorIds)
 
         const recentVisitors = recentVisitorsRaw?.map(visitor => {
@@ -107,7 +115,7 @@ export async function GET() {
                 ...visitor,
                 is_lead: !!lead,
                 funnel_stage: lead?.funnel_stage || 'visitor',
-                push_subscribed: lead?.push_subscribed || false
+                push_subscribed: lead?.push_subscribed_lead || false
             }
         }) || []
 
@@ -120,6 +128,8 @@ export async function GET() {
             whatsappSent: whatsappCount || 0,
             pushSubscribers: pushCount || 0,
             cookieConsent: cookieConsentCount || 0,
+            investors: investCount || 0,
+            housingLeads: housingCount || 0,
         }
 
         return NextResponse.json({

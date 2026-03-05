@@ -12,6 +12,11 @@ export async function GET() {
             .from('leads')
             .select(`
                 *,
+                lead_purpose,
+                lead_budget,
+                lead_timeframe,
+                is_partner,
+                push_subscribed_lead,
                 visitor:visitors (
                     detected_source,
                     browser,

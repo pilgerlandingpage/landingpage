@@ -29,6 +29,8 @@ interface DashboardStats {
     whatsappSent: number
     pushSubscribers: number
     cookieConsent: number
+    investors: number
+    housingLeads: number
 }
 
 interface SourceData {
@@ -66,6 +68,8 @@ export default function AdminDashboard() {
         whatsappSent: 0,
         pushSubscribers: 0,
         cookieConsent: 0,
+        investors: 0,
+        housingLeads: 0,
     })
     const [sourceData, setSourceData] = useState<SourceData[]>([])
     const [dailyData, setDailyData] = useState<DailyData[]>([])
@@ -247,6 +251,16 @@ export default function AdminDashboard() {
                     <div style={{ marginBottom: 8 }}>🍪</div>
                     <div className="kpi-label">Aceite de Cookies</div>
                     <div className="kpi-value">{stats.cookieConsent || 0}</div>
+                </div>
+                <div className="kpi-card">
+                    <div style={{ marginBottom: 8 }}>📊</div>
+                    <div className="kpi-label">% Investidores</div>
+                    <div className="kpi-value">{stats.totalLeads > 0 ? Math.round((stats.investors / stats.totalLeads) * 100) : 0}%</div>
+                </div>
+                <div className="kpi-card">
+                    <div style={{ marginBottom: 8 }}>🏠</div>
+                    <div className="kpi-label">% Moradia</div>
+                    <div className="kpi-value">{stats.totalLeads > 0 ? Math.round((stats.housingLeads / stats.totalLeads) * 100) : 0}%</div>
                 </div>
             </div>
 
