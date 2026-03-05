@@ -264,18 +264,18 @@ export default function LandingPagesAdmin() {
                         overflow: 'hidden', display: 'flex', flexDirection: 'column',
                         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
                     }}>
-                        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.1rem' }}>
-                                <MessageSquare className="text-gold" size={20} />
+                        <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1a1a1a' }}>
+                            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.1rem', color: '#fff' }}>
+                                <MessageSquare style={{ color: '#c9a96e' }} size={20} />
                                 Instruções para a Inteligência Artificial
                             </h3>
-                            <button onClick={() => setEditingContextId(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                            <button onClick={() => setEditingContextId(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <div style={{ padding: 24, flex: 1 }}>
-                            <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <div style={{ padding: 24, flex: 1, backgroundColor: '#111' }}>
+                            <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: '#ddd', lineHeight: '1.6' }}>
                                 Cole aqui o texto com gatilhos mentais, diferenciais, FAQ e regras de ouro deste empreendimento exclusivo.
                                 Quando o cliente conversar com o chat desta Landing Page, a IA lerá essas instruções para atender melhor.
                             </p>
@@ -286,19 +286,21 @@ export default function LandingPagesAdmin() {
                                 placeholder="Ex: O valor de entrada é 20%. Foque na vista para o mar e no design neoclássico. Se perguntarem sobre permuta, diga que analisamos caso a caso..."
                                 style={{
                                     width: '100%', height: 250, resize: 'none',
-                                    backgroundColor: '#0a0a0a', border: '1px solid var(--border)',
-                                    borderRadius: 8, padding: 16, color: 'var(--text-primary)',
-                                    fontFamily: 'inherit', fontSize: '0.95rem', lineHeight: '1.5',
-                                    outline: 'none'
+                                    backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: 12, padding: 20, color: '#fff',
+                                    fontFamily: 'inherit', fontSize: '1rem', lineHeight: '1.6',
+                                    outline: 'none',
+                                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
                                 }}
                             />
                         </div>
 
-                        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 12, backgroundColor: '#0a0a0a' }}>
+                        <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'flex-end', gap: 12, backgroundColor: '#1a1a1a' }}>
                             <button
                                 className="btn btn-outline"
                                 onClick={() => setEditingContextId(null)}
                                 disabled={savingContext}
+                                style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}
                             >
                                 Cancelar
                             </button>
