@@ -386,10 +386,16 @@ export async function POST(req: NextRequest) {
                                     `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
                                     `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
 
-                                sendWhatsAppMessage({
-                                    phone: brokerPhone,
-                                    message: brokerMsg
-                                }).catch(e => console.error('[Chat] Failed to send WA to broker:', e))
+                                console.log(`[Chat Debug] Attempting to send WA to broker (existing lead): ${brokerPhone}`)
+                                try {
+                                    await sendWhatsAppMessage({
+                                        phone: brokerPhone,
+                                        message: brokerMsg
+                                    })
+                                    console.log('[Chat Debug] ✅ WA successfully sent to broker (existing lead)')
+                                } catch (e: any) {
+                                    console.error('[Chat Debug] ❌ Failed to send WA to broker:', e?.message || e)
+                                }
                             }
 
                             if (brokerConnectyhubInstance) {
@@ -403,13 +409,19 @@ export async function POST(req: NextRequest) {
                                     .replace(/\{\{broker_name\}\}/g, brokerName)
                                     .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
 
-                                sendWhatsAppMessage({
-                                    phone: leadData.phone,
-                                    message: leadMsg,
-                                    instanceName: brokerConnectyhubInstance,
-                                    apiKey: brokerConnectyhubApiKey,
-                                    apiUrl: brokerConnectyhubApiUrl
-                                }).catch(e => console.error('[Chat] Failed to send WA to lead:', e))
+                                console.log(`[Chat Debug] Attempting to send WA to lead (existing lead): ${leadData.phone} from instance: ${brokerConnectyhubInstance}`)
+                                try {
+                                    await sendWhatsAppMessage({
+                                        phone: leadData.phone,
+                                        message: leadMsg,
+                                        instanceName: brokerConnectyhubInstance,
+                                        apiKey: brokerConnectyhubApiKey,
+                                        apiUrl: brokerConnectyhubApiUrl
+                                    })
+                                    console.log('[Chat Debug] ✅ WA successfully sent to lead (existing lead)')
+                                } catch (e: any) {
+                                    console.error('[Chat Debug] ❌ Failed to send WA to lead:', e?.message || e)
+                                }
                             }
                         }
                     } else {
@@ -455,12 +467,16 @@ export async function POST(req: NextRequest) {
                                     `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
                                     `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
 
-                                console.log(`[Chat Debug] Attempting to send WA to broker: ${brokerPhone}`)
-                                sendWhatsAppMessage({
-                                    phone: brokerPhone,
-                                    message: brokerMsg
-                                }).then(() => console.log('[Chat Debug] WA successfully sent to broker'))
-                                    .catch(e => console.error('[Chat Debug] Failed to send WA to broker. Error details:', e, e.message))
+                                console.log(`[Chat Debug] Attempting to send WA to broker (new lead): ${brokerPhone}`)
+                                try {
+                                    await sendWhatsAppMessage({
+                                        phone: brokerPhone,
+                                        message: brokerMsg
+                                    })
+                                    console.log('[Chat Debug] ✅ WA successfully sent to broker (new lead)')
+                                } catch (e: any) {
+                                    console.error('[Chat Debug] ❌ Failed to send WA to broker (new lead):', e?.message || e)
+                                }
                             } else {
                                 console.log('[Chat Debug] No brokerPhone available to send notification to broker')
                             }
@@ -483,15 +499,19 @@ export async function POST(req: NextRequest) {
                                     .replace(/\{\{broker_name\}\}/g, brokerName)
                                     .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
 
-                                console.log(`[Chat Debug] Attempting to send WA to lead: ${leadData.phone} from instance: ${brokerConnectyhubInstance}`)
-                                sendWhatsAppMessage({
-                                    phone: leadData.phone,
-                                    message: leadMsg,
-                                    instanceName: brokerConnectyhubInstance,
-                                    apiKey: brokerConnectyhubApiKey,
-                                    apiUrl: brokerConnectyhubApiUrl
-                                }).then(() => console.log('[Chat Debug] WA successfully sent to lead'))
-                                    .catch(e => console.error('[Chat Debug] Failed to send WA to lead. Error:', e, e.message))
+                                console.log(`[Chat Debug] Attempting to send WA to lead (new lead): ${leadData.phone} from instance: ${brokerConnectyhubInstance}`)
+                                try {
+                                    await sendWhatsAppMessage({
+                                        phone: leadData.phone,
+                                        message: leadMsg,
+                                        instanceName: brokerConnectyhubInstance,
+                                        apiKey: brokerConnectyhubApiKey,
+                                        apiUrl: brokerConnectyhubApiUrl
+                                    })
+                                    console.log('[Chat Debug] ✅ WA successfully sent to lead (new lead)')
+                                } catch (e: any) {
+                                    console.error('[Chat Debug] ❌ Failed to send WA to lead (new lead):', e?.message || e)
+                                }
                             } else {
                                 console.log('[Chat Debug] No brokerConnectyhubInstance available to send message to lead')
                             }
