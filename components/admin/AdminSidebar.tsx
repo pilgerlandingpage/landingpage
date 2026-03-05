@@ -38,7 +38,6 @@ const navItems = [
             { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages' },
             { href: '/admin/properties', icon: Building2, label: 'Imóveis' },
             { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores' },
-            { href: '/admin/agents', icon: UserCog, label: 'Config. AI' },
         ]
     },
     {
