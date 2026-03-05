@@ -17,6 +17,9 @@ export async function GET() {
                 lead_timeframe,
                 is_partner,
                 push_subscribed_lead,
+                landing_page:landing_pages (
+                    title
+                ),
                 visitor:visitors (
                     detected_source,
                     browser,

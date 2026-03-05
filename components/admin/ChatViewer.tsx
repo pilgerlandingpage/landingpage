@@ -10,9 +10,10 @@ interface Message {
 interface ChatViewerProps {
     messages: Message[] | null
     leadName?: string
+    brokerName?: string
 }
 
-export function ChatViewer({ messages, leadName }: ChatViewerProps) {
+export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) {
     const scrollRef = useRef<HTMLDivElement>(null)
 
     // Auto-scroll to bottom
@@ -75,7 +76,7 @@ export function ChatViewer({ messages, leadName }: ChatViewerProps) {
                         {/* Fallback icon handled by css/display none logic above roughly, or better: */}
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold m-0 leading-tight">Guilherme Pilger</h3>
+                        <h3 className="text-sm font-bold m-0 leading-tight">{brokerName || 'Corretor'}</h3>
                         <div className="flex items-center gap-1.5 opacity-80">
                             <span className="w-2 h-2 rounded-full bg-green-500 block"></span>
                             <span className="text-[10px]">Online agora</span>

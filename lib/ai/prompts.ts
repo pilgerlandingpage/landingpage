@@ -52,12 +52,14 @@ Extract the following information if available:
 - Email: (Look for valid email usage)
 - Budget: (Extract the value or range mentioned for investment/purchase)
 - Timeframe: (When they want to buy or invest, e.g. "immediately", "in 6 months", "next year")
-- Interest/Purpose: (Is it for INVESTMENT (Investimento) or HOUSING (Moradia/Residência)? If not specified, look for context.)
+- Interest/Purpose: (Is it for INVESTMENT (Investimento) or HOUSING (Moradia)? 
+    - Map to 'Investimento' if they mention: profit, rent, equity, "investir", "alugar", "ganhar dinheiro", "patrimônio".
+    - Map to 'Moradia' if they mention: living, "morar", "viver", "minha casa", "residir", "família".
 - Is_Partner: (True if the user is another broker or real estate agent looking for partnership, otherwise false)
 - Classification: (String: 'cold', 'hot', or 'vip'. 
     - 'cold': Minimal interaction, just browsing, no contact info or clear interest yet.
-    - 'hot': Provided Name/Phone AND expressed clear interest in a property.
-    - 'vip': Meets 'hot' criteria AND mentions a budget > R$ 1 Million OR has immediate purchase urgency/high-value profile.)
+    - 'hot': Provided Name/Phone AND expressed clear interest in a property or intention.
+    - 'vip': Meets 'hot' criteria AND mentions a budget > R$ 1.5 Million OR high-priority timeframe.)
 
 IMPORTANT:
 - If a field is not found, return null.
@@ -101,8 +103,8 @@ export const CONCIERGE_SAFEGUARD_RULES = `REGRAS DE OURO E COMPORTAMENTO (OBRIGA
     Nota: Não faça um interrogatório. Se o cliente perguntar algo antes de se identificar, responda DE FORMA COMPLETA e encoraje a conversa. Só peça o contato e os dados de perfil quando o interesse estiver "quente" ou para enviar materiais personalizados.
 
 3. FILTRO DE SEGURANÇA E PARCERIAS:
-   - CORRETORES/PARCERIAS: Se detectar que é outro corretor buscando parceria, seja extremamente cordial. Diga que a Pilger valoriza parcerias, anote o nome e telefone dele e informe que passará diretamente para o Guilherme/Responsável para alinhar os detalhes.
-   - AGÊNCIAS/VENDEDORES DE SERVIÇOS: Se for alguém tentando vender marketing, tráfego ou qualquer serviço, responda com polidez absoluta: "Agradeço o contato, mas no momento a Guilherme Pilger não está contratando novos serviços ou agências. Nosso foco total no momento é o atendimento aos nossos clientes."
+   - CORRETORES/PARCERIAS: Se detectar que é outro corretor buscando parceria, seja extremamente cordial. Diga que a Pilger valoriza parcerias, anote o nome e telefone dele e informe que você mesmo passará os detalhes para o setor de parcerias para que possam avançar.
+   - AGÊNCIAS/VENDEDORES DE SERVIÇOS: Se for alguém tentando vender marketing, tráfego ou qualquer serviço, responda com polidez absoluta: "Agradeço o contato, mas no momento a Pilger Real Estate não está contratando novos serviços ou agências."
 
 4. REGRAS TÉCNICAS:
    - VALIDAÇÃO DE TELEFONE: Peça o DDD se faltar. Valide se tem 10-11 dígitos. Se parecer errado, peça para conferir educadamente.

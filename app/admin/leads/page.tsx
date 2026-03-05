@@ -22,6 +22,9 @@ interface Lead {
     lead_timeframe?: string | null
     is_partner?: boolean
     push_subscribed_lead?: boolean
+    landing_page?: {
+        title: string
+    }
     visitor?: {
         detected_source: string
         browser: string
@@ -717,6 +720,7 @@ export default function LeadsPage() {
                                 <ChatViewer
                                     messages={selectedLead.conversation_log}
                                     leadName={selectedLead.name || 'Cliente'}
+                                    brokerName={selectedLead.landing_page?.title}
                                 />
                             </div>
                         </div>
