@@ -297,7 +297,7 @@ export async function POST(req: NextRequest) {
                     if (leadData.phone) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata, funnel_stage, visitor_id')
+                            .select('id, phone, metadata, funnel_stage, visitor_id')
                             .eq('phone', leadData.phone)
                             .maybeSingle()
                         existingLead = data
@@ -306,7 +306,7 @@ export async function POST(req: NextRequest) {
                     if (!existingLead && leadData.email) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata, funnel_stage, visitor_id')
+                            .select('id, phone, metadata, funnel_stage, visitor_id')
                             .eq('email', leadData.email)
                             .maybeSingle()
                         existingLead = data
@@ -316,7 +316,7 @@ export async function POST(req: NextRequest) {
                     if (!existingLead && visitorId) {
                         const { data } = await supabase
                             .from('leads')
-                            .select('id, metadata, funnel_stage, visitor_id')
+                            .select('id, phone, metadata, funnel_stage, visitor_id')
                             .eq('visitor_id', visitorId)
                             .maybeSingle()
                         existingLead = data
@@ -348,6 +348,56 @@ export async function POST(req: NextRequest) {
                             .eq('id', existingLead.id)
                         if (error) console.error('[Chat] Lead update error:', error.message)
                         else console.log('[Chat] Lead updated:', existingLead.id)
+
+                        // Check if phone was just added (existing lead had no phone before)
+                        const isPhoneNewlyAdded = leadData.phone && !existingLead.phone
+                        if (isPhoneNewlyAdded) {
+                            console.log('[Chat] Phone newly added to existing lead — triggering WhatsApp flow')
+                        }
+
+                        // WhatsApp Notifications: fire if phone was just added to an existing lead
+                        if (isPhoneNewlyAdded) {
+                            const urlContext = page_context?.url || 'Site / LP'
+                            const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
+                            const conversationTranscript = fullHistory
+                                .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'}:  ${msg.content}`)
+                                .join('\n')
+
+                            if (brokerPhone) {
+                                const brokerMsg = `🚀 *Novo Lead Captado no Site*\n\n` +
+                                    `*Nome:* ${leadData.name || 'Não informado'}\n` +
+                                    `*Telefone:* ${leadData.phone}\n` +
+                                    `*Página:* ${urlContext}\n\n` +
+                                    `📋 *Resumo:*\n${leadData.ai_summary || 'Sem resumo'}\n\n` +
+                                    `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
+                                    `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
+
+                                sendWhatsAppMessage({
+                                    phone: brokerPhone,
+                                    message: brokerMsg
+                                }).catch(e => console.error('[Chat] Failed to send WA to broker:', e))
+                            }
+
+                            if (brokerConnectyhubInstance) {
+                                const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
+                                const defaultMsg = leadNameSafe
+                                    ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                    : 'Oi! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                const baseMsgTemplate = brokerConnectyhubChatMessage || defaultMsg
+                                const leadMsg = baseMsgTemplate
+                                    .replace(/\{\{lead_name\}\}/g, leadNameSafe)
+                                    .replace(/\{\{broker_name\}\}/g, brokerName)
+                                    .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
+
+                                sendWhatsAppMessage({
+                                    phone: leadData.phone,
+                                    message: leadMsg,
+                                    instanceName: brokerConnectyhubInstance,
+                                    apiKey: brokerConnectyhubApiKey,
+                                    apiUrl: brokerConnectyhubApiUrl
+                                }).catch(e => console.error('[Chat] Failed to send WA to lead:', e))
+                            }
+                        }
                     } else {
                         // Insert new lead
                         const { error } = await supabase.from('leads').insert(leadData)
@@ -366,8 +416,8 @@ export async function POST(req: NextRequest) {
                             }
                         }
 
-                        // WhatsApp Notifications Flow
-                        if (!existingLead && leadData.phone) {
+                        // WhatsApp Notifications Flow for NEW leads
+                        if (leadData.phone) {
                             const urlContext = page_context?.url || 'Site / LP'
 
                             // Build conversation transcript for broker context
