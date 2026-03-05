@@ -72,6 +72,7 @@ export default function AdminDashboard() {
         housingLeads: 0,
     })
     const [sourceData, setSourceData] = useState<SourceData[]>([])
+    const [topPages, setTopPages] = useState<any[]>([])
     const [dailyData, setDailyData] = useState<DailyData[]>([])
     const [recentVisitors, setRecentVisitors] = useState<RecentVisitor[]>([])
     const [loading, setLoading] = useState(true)
@@ -95,6 +96,7 @@ export default function AdminDashboard() {
 
                 setStats(data.stats)
                 setSourceData(data.sourceData)
+                setTopPages(data.topPages || [])
                 setRecentVisitors(data.recentVisitors || [])
 
                 // Ensure dates are formatted correctly if needed, broadly simpler than client-side calc
@@ -317,21 +319,39 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Source Bar Chart */}
-            <div className="chart-card">
-                <div className="chart-title">Visitantes por Fonte</div>
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={sourceData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                        <XAxis dataKey="name" stroke="#666" fontSize={12} />
-                        <YAxis stroke="#666" fontSize={12} />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
-                            labelStyle={{ color: '#f5f5f5' }}
-                        />
-                        <Bar dataKey="value" fill="#c9a96e" radius={[4, 4, 0, 0]} name="Visitantes" />
-                    </BarChart>
-                </ResponsiveContainer>
+            {/* Source Bar Chart & Top Pages Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                <div className="chart-card">
+                    <div className="chart-title">Visitantes por Fonte</div>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={sourceData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                            <XAxis dataKey="name" stroke="#666" fontSize={12} />
+                            <YAxis stroke="#666" fontSize={12} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
+                                labelStyle={{ color: '#f5f5f5' }}
+                            />
+                            <Bar dataKey="value" fill="#c9a96e" radius={[4, 4, 0, 0]} name="Visitantes" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="chart-card">
+                    <div className="chart-title">Páginas Mais Visitadas (Top 10)</div>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topPages} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                            <XAxis type="number" stroke="#666" fontSize={12} />
+                            <YAxis dataKey="name" type="category" stroke="#666" fontSize={10} width={120} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
+                                labelStyle={{ color: '#f5f5f5' }}
+                            />
+                            <Bar dataKey="value" fill="#4ade80" radius={[0, 4, 4, 0]} name="Acessos" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
             {/* Recent Traffic */}

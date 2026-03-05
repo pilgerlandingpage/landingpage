@@ -23,7 +23,9 @@ export async function GET() {
             { data: recentVisitorsRaw },
             { count: cookieConsentCount },
             { count: investCount },
-            { count: housingCount }
+            { count: housingCount },
+            { data: topPagesRaw },
+            { data: lpTitlesRaw }
         ] = await Promise.all([
             // 1. Total Visitors
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
@@ -66,7 +68,13 @@ export async function GET() {
             supabase.from('leads').select('*', { count: 'exact', head: true }).ilike('lead_purpose', '%investimento%'),
 
             // 13. Housing
-            supabase.from('leads').select('*', { count: 'exact', head: true }).ilike('lead_purpose', '%moradia%')
+            supabase.from('leads').select('*', { count: 'exact', head: true }).ilike('lead_purpose', '%moradia%'),
+
+            // 14. Top Pages
+            supabase.from('visitors').select('landing_page_id'),
+
+            // 15. Titles
+            supabase.from('landing_pages').select('id, title, slug')
         ])
 
         // Process Chat Sessions
@@ -75,7 +83,7 @@ export async function GET() {
         // Process Source Distribution
         const sourceCounts: Record<string, number> = {}
         sourceRaw?.forEach(v => {
-            const source = v.detected_source || 'Direct'
+            const source = v.detected_source || 'Direto'
             sourceCounts[source] = (sourceCounts[source] || 0) + 1
         })
         const sourceChartData = Object.entries(sourceCounts)
@@ -100,7 +108,22 @@ export async function GET() {
             })
         }
 
-        // ... (keep existing processing)
+        // Process Top Pages Ranking
+        const lpCounts: Record<string, number> = {}
+        topPagesRaw?.forEach(v => {
+            const id = v.landing_page_id || 'home'
+            lpCounts[id] = (lpCounts[id] || 0) + 1
+        })
+
+        const topPages = Object.entries(lpCounts).map(([id, value]) => {
+            const lp = lpTitlesRaw?.find(l => l.id === id)
+            return {
+                id,
+                name: lp?.title || (id === 'home' ? 'Home / Geral' : 'Página Excluída'),
+                slug: lp?.slug || '',
+                value
+            }
+        }).sort((a, b) => b.value - a.value).slice(0, 10)
 
         // Process Recent Visitors
         const recentVisitorIds = recentVisitorsRaw?.map(v => v.id) || []
@@ -136,7 +159,8 @@ export async function GET() {
             stats,
             sourceData: sourceChartData,
             dailyData,
-            recentVisitors
+            recentVisitors,
+            topPages
         })
 
     } catch (error) {
