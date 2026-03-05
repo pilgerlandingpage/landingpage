@@ -47,7 +47,7 @@ Instructions:
 export const LEAD_EXTRACTION_PROMPT = `
 Analyze the following conversation between a Real Estate Concierge and a Lead.
 Extract the following information if available:
-- Name: (Look for self-introductions like "Meu nome é...", "Sou o...", or just the name provided.)
+- Name: (Look for self-introductions like "Meu nome é...", "Sou o...", or just the name provided. CRITICAL: Use ONLY the EXACT name the user typed. NEVER invent, guess, or expand names. If user said "Macedo", return "Macedo" — do NOT create a full name like "Carlos Macedo". Return ONLY what the user explicitly wrote.)
 - Phone: (Look for ANY sequence of 10-11 digits. Standardize to digits only.)
 - Email: (Look for valid email usage)
 - Budget: (Extract the value or range mentioned for investment/purchase - always in Brazilian Portuguese)

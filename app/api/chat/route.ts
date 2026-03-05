@@ -358,7 +358,8 @@ export async function POST(req: NextRequest) {
                         }
 
                         // Only update text fields if new value is present
-                        if (leadData.name) updateData.name = leadData.name
+                        // IMPORTANT: Don't overwrite name if lead already has one (AI extraction can hallucinate names)
+                        if (leadData.name && !existingLead.name) updateData.name = leadData.name
                         if (leadData.phone) updateData.phone = leadData.phone
                         if (leadData.email) updateData.email = leadData.email
                         if (leadData.ai_summary) updateData.ai_summary = leadData.ai_summary
@@ -419,9 +420,11 @@ export async function POST(req: NextRequest) {
                                 .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'}:  ${msg.content}`)
                                 .join('\n')
 
+                            // CRITICAL: Use the stored name (already confirmed) over freshly extracted name (can hallucinate)
+                            const confirmedName = existingLead.name || updateData.name || leadData.name || null
 
                             if (brokerPhone || brokerConnectyhubInstance) {
-                                const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
+                                const leadNameSafe = confirmedName ? confirmedName.split(' ')[0] : ''
                                 const defaultMsg = leadNameSafe
                                     ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
                                     : 'Oi! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
@@ -433,7 +436,7 @@ export async function POST(req: NextRequest) {
 
                                 const tempEmoji = leadData.lead_classification === 'vip' ? '💎 VIP' : (leadData.lead_classification === 'hot' ? '🔥 QUENTE' : '❄️ FRIO')
                                 const brokerMsg = `🚀 *Novo Lead [${tempEmoji}] Captado*\n\n` +
-                                    `*Nome:* ${leadData.name || 'Não informado'}\n` +
+                                    `*Nome:* ${confirmedName || 'Não informado'}\n` +
                                     `*Telefone:* ${leadData.phone}\n` +
                                     `*Qualificação:* ${tempEmoji}\n` +
                                     `*Página:* ${urlContext}\n\n` +
@@ -451,7 +454,7 @@ export async function POST(req: NextRequest) {
                                     name: 'chat/handover',
                                     data: {
                                         leadPhone: leadData.phone,
-                                        leadName: leadData.name || 'Não informado',
+                                        leadName: confirmedName || 'Não informado',
                                         brokerPhone: brokerPhone,
                                         brokerName: brokerName,
                                         brokerMsg: brokerMsg,
