@@ -20,6 +20,29 @@ export default function UnifiedConsentBanner() {
         setIsProcessing(true)
 
         try {
+            // 0. Request Notification permission FIRST to preserve user gesture context on mobile/Safari
+            let finalPermission: string | NotificationPermission = 'unsupported'
+            if (typeof window !== 'undefined' && 'Notification' in window) {
+                finalPermission = Notification.permission
+                if (finalPermission === 'default') {
+                    console.log('[Consent] Requesting notification permission immediately...')
+                    try {
+                        const p = Notification.requestPermission()
+                        if (p && typeof p.then === 'function') {
+                            finalPermission = await p
+                        } else {
+                            finalPermission = await new Promise((resolve) => Notification.requestPermission(resolve))
+                        }
+                    } catch (e) {
+                        console.warn('[Consent] Error requesting permission', e)
+                        finalPermission = Notification.permission
+                    }
+                    console.log('[Consent] Permission result:', finalPermission)
+                } else if (finalPermission === 'denied') {
+                    console.warn('[Consent] Push notifications are BLOCKED in this browser.')
+                }
+            }
+
             // 1. Grant Cookie Consent (sets cookies + dispatches event)
             grantConsent()
 
@@ -54,35 +77,20 @@ export default function UnifiedConsentBanner() {
             // 3. Push Notification Flow
             if (dbVisitorId && vapidPublicKey && 'serviceWorker' in navigator) {
                 try {
-                    // 3a. Register service worker FIRST (before permission request)
-                    console.log('[Consent] Pre-registering service worker...')
-                    const swRegistration = await navigator.serviceWorker.register('/sw.js')
-                    await navigator.serviceWorker.ready
-                    console.log('[Consent] Service worker ready')
-
-                    // 3b. Check current permission state
-                    const currentPermission = 'Notification' in window ? Notification.permission : 'unsupported'
-                    console.log('[Consent] Current notification permission:', currentPermission)
-
-                    let finalPermission = currentPermission
-
-                    if (currentPermission === 'default') {
-                        // Never asked — request permission now
-                        console.log('[Consent] Requesting notification permission...')
-                        finalPermission = await Notification.requestPermission()
-                        console.log('[Consent] Permission result:', finalPermission)
-                    } else if (currentPermission === 'denied') {
-                        console.warn('[Consent] Push notifications are BLOCKED in this browser. User must manually reset permissions in browser settings.')
-                    }
-
                     if (finalPermission === 'granted') {
+                        // 3a. Register service worker
+                        console.log('[Consent] Registering service worker...')
+                        const swRegistration = await navigator.serviceWorker.register('/sw.js')
+                        await navigator.serviceWorker.ready
+                        console.log('[Consent] Service worker ready')
+
                         // Subscribe to push
-                        console.log('[Consent] Subscribing to push with VAPID key (length:', vapidPublicKey.length, ')')
+                        console.log('[Consent] Subscribing to push with VAPID key')
                         const subscription = await swRegistration.pushManager.subscribe({
                             userVisibleOnly: true,
                             applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
                         })
-                        console.log('[Consent] Push subscription created:', subscription.endpoint.substring(0, 60) + '...')
+                        console.log('[Consent] Push subscription created')
 
                         // Save to backend
                         const res = await fetch('/api/push/subscribe', {
@@ -94,11 +102,10 @@ export default function UnifiedConsentBanner() {
                             }),
                         })
 
-                        const data = await res.json()
                         if (res.ok) {
                             console.log('[Consent] ✅ Push subscription saved successfully!')
                         } else {
-                            console.error('[Consent] ❌ Push subscription save failed:', data)
+                            console.error('[Consent] ❌ Push subscription save failed')
                         }
 
                         // Log push_consent funnel event
@@ -115,7 +122,7 @@ export default function UnifiedConsentBanner() {
                         } catch (e) {
                             console.warn('[Consent] Failed to log push_consent event:', e)
                         }
-                    } else {
+                    } else if (finalPermission === 'denied' || finalPermission === 'default') {
                         console.log('[Consent] Push permission not granted:', finalPermission)
                         // Log push_denied funnel event
                         try {

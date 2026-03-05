@@ -315,8 +315,8 @@ export default function BrokersAdmin() {
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: '12px',
                                 padding: '12px 16px',
-                                background: formData.is_active ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${formData.is_active ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.08)'}`,
+                                background: formData.is_active ? 'rgba(34, 197, 94, 0.08)' : 'var(--bg-secondary)',
+                                border: `1px solid ${formData.is_active ? 'rgba(34, 197, 94, 0.3)' : 'var(--border)'}`,
                                 borderRadius: '10px',
                                 transition: 'all 0.2s'
                             }}>
@@ -349,8 +349,8 @@ export default function BrokersAdmin() {
                             </div>
 
                             {/* ConnectyHub Section - mirrors Maintenance Panel */}
-                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     📱 ConnectyHub — Instância do Corretor
                                 </h3>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
@@ -411,12 +411,11 @@ export default function BrokersAdmin() {
                                         type="button"
                                         onClick={testConnectyHubConnection}
                                         disabled={testStatus === 'testing'}
+                                        className="btn-secondary"
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: '8px',
                                             padding: '10px 16px', borderRadius: '8px',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            color: 'white', fontSize: '0.9rem', cursor: testStatus === 'testing' ? 'not-allowed' : 'pointer'
+                                            fontSize: '0.9rem', cursor: testStatus === 'testing' ? 'not-allowed' : 'pointer'
                                         }}
                                     >
                                         <RefreshCw size={16} className={testStatus === 'testing' ? "animate-spin" : ""} />
@@ -436,8 +435,8 @@ export default function BrokersAdmin() {
                             </div>
 
                             {/* Tipo de Atendimento / Page Assignment */}
-                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Globe size={18} className="text-gold" />
                                     Tipo de Atendimento
                                 </h3>
@@ -449,8 +448,8 @@ export default function BrokersAdmin() {
                                     <label style={{
                                         display: 'flex', alignItems: 'center', gap: '12px',
                                         padding: '14px 16px',
-                                        background: formData.assignment_type === 'all' ? 'rgba(201, 169, 110, 0.1)' : 'rgba(255,255,255,0.03)',
-                                        border: `1px solid ${formData.assignment_type === 'all' ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+                                        background: formData.assignment_type === 'all' ? 'rgba(201, 169, 110, 0.1)' : 'var(--bg-primary)',
+                                        border: `1px solid ${formData.assignment_type === 'all' ? 'var(--gold)' : 'var(--border)'}`,
                                         borderRadius: '10px', cursor: 'pointer',
                                         transition: 'all 0.2s'
                                     }}>
@@ -463,7 +462,7 @@ export default function BrokersAdmin() {
                                             style={{ accentColor: 'var(--gold)', width: '18px', height: '18px' }}
                                         />
                                         <div>
-                                            <div style={{ color: formData.assignment_type === 'all' ? 'var(--gold)' : 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                            <div style={{ color: formData.assignment_type === 'all' ? 'var(--gold)' : 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
                                                 Rodízio Geral
                                             </div>
                                             <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '2px' }}>
@@ -475,8 +474,8 @@ export default function BrokersAdmin() {
                                     <label style={{
                                         display: 'flex', alignItems: 'center', gap: '12px',
                                         padding: '14px 16px',
-                                        background: formData.assignment_type === 'landing_pages' ? 'rgba(201, 169, 110, 0.1)' : 'rgba(255,255,255,0.03)',
-                                        border: `1px solid ${formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+                                        background: formData.assignment_type === 'landing_pages' ? 'rgba(201, 169, 110, 0.1)' : 'var(--bg-primary)',
+                                        border: `1px solid ${formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'var(--border)'}`,
                                         borderRadius: '10px', cursor: 'pointer',
                                         transition: 'all 0.2s'
                                     }}>
@@ -489,7 +488,7 @@ export default function BrokersAdmin() {
                                             style={{ accentColor: 'var(--gold)', width: '18px', height: '18px' }}
                                         />
                                         <div>
-                                            <div style={{ color: formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                            <div style={{ color: formData.assignment_type === 'landing_pages' ? 'var(--gold)' : 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
                                                 Landing Pages Específicas
                                             </div>
                                             <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '2px' }}>
@@ -501,7 +500,7 @@ export default function BrokersAdmin() {
 
                                 {/* Landing Pages Selection */}
                                 {formData.assignment_type === 'landing_pages' && (
-                                    <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                                         <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                             <FileText size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
                                             Selecione as Landing Pages
@@ -519,7 +518,7 @@ export default function BrokersAdmin() {
                                                             display: 'flex', alignItems: 'center', gap: '10px',
                                                             padding: '10px 14px',
                                                             background: isSelected ? 'rgba(201, 169, 110, 0.08)' : 'transparent',
-                                                            border: `1px solid ${isSelected ? 'rgba(201, 169, 110, 0.3)' : 'rgba(255,255,255,0.05)'}`,
+                                                            border: `1px solid ${isSelected ? 'rgba(201, 169, 110, 0.3)' : 'var(--border)'}`,
                                                             borderRadius: '8px', cursor: 'pointer',
                                                             transition: 'all 0.2s'
                                                         }}>
@@ -535,7 +534,7 @@ export default function BrokersAdmin() {
                                                                 style={{ accentColor: 'var(--gold)', width: '16px', height: '16px' }}
                                                             />
                                                             <div style={{ flex: 1 }}>
-                                                                <div style={{ color: isSelected ? 'var(--gold)' : '#ddd', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                                <div style={{ color: isSelected ? 'var(--gold)' : 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 500 }}>
                                                                     {lp.title || 'Sem título'}
                                                                 </div>
                                                                 <div style={{ color: '#666', fontSize: '0.75rem' }}>/{lp.slug}</div>
@@ -550,8 +549,8 @@ export default function BrokersAdmin() {
                             </div>
 
                             {/* Escala de Plantão */}
-                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h3 style={{ fontSize: '1rem', color: 'white', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Shield size={18} className="text-gold" />
                                     Escala de Plantão / Chat
                                 </h3>
@@ -572,9 +571,9 @@ export default function BrokersAdmin() {
                                         ].map(day => (
                                             <label key={day.id} style={{
                                                 display: 'flex', alignItems: 'center', gap: '6px',
-                                                padding: '6px 12px', background: formData.duty_weekdays.includes(day.id) ? 'rgba(201, 169, 110, 0.2)' : 'rgba(255,255,255,0.05)',
-                                                border: `1px solid ${formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : 'transparent'}`,
-                                                borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem', color: formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : '#ccc'
+                                                padding: '6px 12px', background: formData.duty_weekdays.includes(day.id) ? 'rgba(201, 169, 110, 0.2)' : 'var(--bg-primary)',
+                                                border: `1px solid ${formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : 'var(--border)'}`,
+                                                borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem', color: formData.duty_weekdays.includes(day.id) ? 'var(--gold)' : 'var(--text-secondary)'
                                             }}>
                                                 <input
                                                     type="checkbox"
@@ -628,7 +627,7 @@ export default function BrokersAdmin() {
                                         {formData.duty_dates.map(date => (
                                             <span key={date} style={{
                                                 display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                                padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', fontSize: '0.8rem', color: '#eee'
+                                                padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.8rem', color: 'var(--text-primary)'
                                             }}>
                                                 {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
                                                 <button type="button" onClick={() => {
@@ -684,7 +683,7 @@ export default function BrokersAdmin() {
                             )}
                         </div>
                         <div style={{ flex: 1 }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'white' }}>{broker.name}</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{broker.name}</h3>
                             <p style={{ margin: '4px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{broker.creci}</p>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
                                 <div style={{
@@ -711,7 +710,7 @@ export default function BrokersAdmin() {
                                             LPs Específicas
                                         </span>
                                         {broker.assigned_page_slugs?.map(slug => (
-                                            <span key={slug} style={{ padding: '2px 8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '0.65rem', color: '#aaa' }}>
+                                            <span key={slug} style={{ padding: '2px 8px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
                                                 /{slug}
                                             </span>
                                         ))}
@@ -735,7 +734,7 @@ export default function BrokersAdmin() {
                                         )
                                     })}
                                     {broker.duty_dates?.length > 0 && (
-                                        <span style={{ padding: '2px 8px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '12px', fontSize: '0.7rem', color: '#eee' }}>
+                                        <span style={{ padding: '2px 8px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
                                             +{broker.duty_dates.length} data(s)
                                         </span>
                                     )}
