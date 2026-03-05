@@ -10,36 +10,79 @@ interface TrackerProps {
 
 export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProps) {
     const tracked = useRef(false)
+    const scrollMilestones = useRef(new Set<number>())
 
     useEffect(() => {
-        if (tracked.current) return
-        tracked.current = true
+        const cookieId = getVisitorId()
 
-        const track = async () => {
-            const cookieId = getVisitorId()
-
+        const trackEvent = async (eventType: string, metadata: any = {}) => {
             try {
-                const response = await fetch('/api/track', {
+                await fetch('/api/track', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         visitor_cookie_id: cookieId,
                         landing_page_slug: landingPageSlug,
-                        referrer: document.referrer,
-                        search_params: window.location.search,
+                        event_type: eventType,
+                        metadata
                     }),
                 })
-
-                const data = await response.json()
-                if (data.visitor_id && onVisitorReady) {
-                    onVisitorReady(data.visitor_id, data.vapid_public_key)
-                }
-            } catch (error) {
-                console.error('Tracking error:', error)
+            } catch (e) {
+                console.error('[Tracker] Event error:', e)
             }
         }
 
-        track()
+        if (!tracked.current) {
+            tracked.current = true
+            const trackInit = async () => {
+                try {
+                    const response = await fetch('/api/track', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            visitor_cookie_id: cookieId,
+                            landing_page_slug: landingPageSlug,
+                            referrer: document.referrer,
+                            search_params: window.location.search,
+                        }),
+                    })
+
+                    const data = await response.json()
+                    if (data.visitor_id && onVisitorReady) {
+                        onVisitorReady(data.visitor_id, data.vapid_public_key)
+                    }
+                } catch (error) {
+                    console.error('Tracking error:', error)
+                }
+            }
+            trackInit()
+        }
+
+        // Scroll Depth Tracking
+        let timeout: NodeJS.Timeout
+        const handleScroll = () => {
+            clearTimeout(timeout)
+            timeout = setTimeout(() => {
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+                if (scrollHeight <= 0) return
+
+                const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100)
+                const milestones = [25, 50, 75, 90]
+
+                milestones.forEach(m => {
+                    if (scrollPercent >= m && !scrollMilestones.current.has(m)) {
+                        scrollMilestones.current.add(m)
+                        trackEvent('scroll_depth', { percentage: m, page: landingPageSlug || 'home' })
+                    }
+                })
+            }, 500) // Debounce 500ms
+        }
+
+        window.addEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+            clearTimeout(timeout)
+        }
     }, [landingPageSlug, onVisitorReady])
 
     return null

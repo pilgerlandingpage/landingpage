@@ -25,6 +25,7 @@ interface Visitor {
     is_lead: boolean
     funnel_stage: string
     push_subscribed?: boolean
+    max_scroll?: number
 }
 
 export default function FunnelPage() {
@@ -260,6 +261,20 @@ export default function FunnelPage() {
                 </div>
                 <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        {/* Assuming a Visitor interface exists somewhere above this component or in a separate file */}
+                        {/* interface Visitor {
+                            id: string
+                            last_visit_at: string
+                            city: string
+                            region: string
+                            country: string
+                            detected_source: string
+                            page_views: number
+                            is_lead: boolean
+                            funnel_stage: string
+                            push_subscribed?: boolean
+                            max_scroll?: number
+                        } */}
                         <thead style={{ position: 'sticky', top: 0, background: '#1a1a1a', zIndex: 10 }}>
                             <tr style={{ borderBottom: '1px solid #2a2a2a', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Status</th>
@@ -267,6 +282,7 @@ export default function FunnelPage() {
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Localização</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Origem</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Páginas</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Leitura</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -300,11 +316,21 @@ export default function FunnelPage() {
                                             {v.page_views}
                                         </span>
                                     </td>
+                                    <td style={{ padding: '12px 8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ flex: 1, height: '4px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden', minWidth: '40px' }}>
+                                                <div style={{ width: `${v.max_scroll || 0}%`, height: '100%', background: (v.max_scroll || 0) > 70 ? '#4ade80' : '#c9a96e' }}></div>
+                                            </div>
+                                            <span style={{ fontSize: '0.75rem', color: (v.max_scroll || 0) > 0 ? '#f5f5f5' : '#444' }}>
+                                                {v.max_scroll || 0}%
+                                            </span>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                             {visitors.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#666' }}>Nenhum acesso recente</td>
+                                    <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#666' }}>Nenhum acesso recente</td>
                                 </tr>
                             )}
                         </tbody>
