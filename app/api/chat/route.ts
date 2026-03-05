@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         const systemPrompt = basePrompt +
             ` SEU NOME É ${brokerName} (${brokerCreci}). ` +
             rulesPrompt + ' ' +
-            `TAMANHO DAS RESPOSTAS: ${maxResponseLength}. Responda de forma concisa e direta, como se estivesse digitando no celular. Evite parágrafos longos.` +
+            `TAMANHO DAS RESPOSTAS MÁXIMO (OBRIGATÓRIO): ${maxResponseLength}. JAMAIS crie listas em tópicos (bullets). Responda com no máximo duas frases curtas (max 20 a 30 palavras no total). Seja muito conciso, focado no chat como se fosse um SMS. Além disso, SE o cliente lhe fornecer o Whatsapp dizendo que você pode contatá-lo lá, NUNCA diga que vai "repassar o contato para outro gestor ou corretor". Você DEVE DIZER QUE VOCÊ MESMO ("eu mesmo", "irei te chamar", "te chamo agora") vai entrar em contato com ele.` +
             dynamicContext
 
         // 3. Generate AI Response
@@ -292,7 +292,7 @@ export async function POST(req: NextRequest) {
                         country: (locationData as any).country || null,
                         city: (locationData as any).city || null,
                         state: (locationData as any).state || null,
-                        lead_purpose: extracted?.interest || null,
+                        lead_purpose: typeof extracted?.interest === 'string' ? extracted.interest.toLowerCase().trim() : null,
                         lead_budget: extracted?.budget || null,
                         lead_timeframe: extracted?.timeframe || null,
                         is_partner: extracted?.is_partner || false,

@@ -190,7 +190,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
         <>
             {/* Chat Window */}
             {isOpen && (
-                <div className="cw-window">
+                <div className="cw-window" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="cw-header">
                         <div className="cw-header-info">
@@ -266,7 +266,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
             )}
 
             {/* Toggle Button */}
-            <button className="cw-toggle chat-toggle" onClick={() => setIsOpen(!isOpen)}>
+            <button className="cw-toggle chat-toggle" onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen) }}>
                 {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
             </button>
 
@@ -276,7 +276,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
                     position: fixed;
                     bottom: 20px;
                     right: 20px;
-                    z-index: 1000;
+                    z-index: 99999;
                     width: 56px; height: 56px;
                     border-radius: 50%;
                     background: linear-gradient(135deg, #c9a96e, #8a6d3b);
@@ -299,7 +299,7 @@ export default function ChatWidget({ visitorId, agentName, greetingMessage, land
                     position: fixed;
                     bottom: 88px;
                     right: 20px;
-                    z-index: 999;
+                    z-index: 99999;
                     width: 380px;
                     max-height: 520px;
                     background: white;
