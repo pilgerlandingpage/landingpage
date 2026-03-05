@@ -235,6 +235,20 @@ export const processChatHandover = inngest.createFunction(
                 console.log(`[Inngest Handover] ✅ WA successfully sent to broker: ${brokerPhone}`)
             } catch (error) {
                 console.error(`[Inngest Handover] ❌ Failed to send WA to broker: ${brokerPhone}`, error)
+
+                // Diagnostic logging to DB since Vercel logs are locked
+                try {
+                    const supabase = getSupabase()
+                    await supabase.from('funnel_events').insert({
+                        event_type: 'system_error',
+                        metadata: {
+                            error_source: 'inngest_broker_wa_send',
+                            error_message: String(error),
+                            phone: brokerPhone
+                        }
+                    })
+                } catch (e) { /* ignore db log errors */ }
+
                 // Continue to try sending to lead even if broker fails
             }
         }
