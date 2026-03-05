@@ -366,6 +366,12 @@ export async function POST(req: NextRequest) {
                         if (leadData.is_vip) updateData.is_vip = true
                         if (leadData.push_subscribed) updateData.push_subscribed = true
                         if (visitorId && !existingLead.visitor_id) updateData.visitor_id = visitorId
+                        // Update qualification fields when new data is extracted
+                        if (leadData.lead_purpose) updateData.lead_purpose = leadData.lead_purpose
+                        if (leadData.lead_budget) updateData.lead_budget = leadData.lead_budget
+                        if (leadData.lead_timeframe) updateData.lead_timeframe = leadData.lead_timeframe
+                        if (leadData.is_partner) updateData.is_partner = leadData.is_partner
+
 
                         // Update
                         const { error } = await supabase
