@@ -51,7 +51,6 @@ const navItems = [
         label: 'SISTEMA', items: [
             { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback' },
             { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutenção' },
-            { href: '/admin/settings', icon: Settings, label: 'Configurações' },
             { href: '/admin/users/new', icon: UserPlus, label: 'Novo Usuário' },
         ]
     },
