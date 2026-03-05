@@ -382,21 +382,43 @@ export async function POST(req: NextRequest) {
                         else console.log('[Chat] Lead updated:', existingLead.id)
 
                         // Check if phone was just added (existing lead had no phone before)
+                        // OR if this is a re-engagement from a different session/visitor
                         const isPhoneNewlyAdded = leadData.phone && !existingLead.phone
-                        console.log(`[Chat Debug] Lead Phone: ${leadData.phone}, Existing Phone: ${existingLead.phone}, isPhoneNewlyAdded: ${isPhoneNewlyAdded}`)
+                        const isReEngagement = leadData.phone && existingLead.phone && visitorId && existingLead.visitor_id !== visitorId
+                        const shouldTriggerWhatsApp = isPhoneNewlyAdded || isReEngagement
+                        console.log(`[Chat Debug] Lead Phone: ${leadData.phone}, Existing Phone: ${existingLead.phone}, isPhoneNewlyAdded: ${isPhoneNewlyAdded}, isReEngagement: ${isReEngagement}, shouldTriggerWhatsApp: ${shouldTriggerWhatsApp}`)
 
                         if (isPhoneNewlyAdded) {
                             console.log('[Chat] Phone newly added to existing lead — triggering WhatsApp flow')
                         }
+                        if (isReEngagement) {
+                            console.log('[Chat] Lead re-engaged from new session — triggering WhatsApp flow')
+                            // Clean up duplicate lead created by visitor_id match
+                            if (visitorId) {
+                                const { data: duplicateLead } = await supabase
+                                    .from('leads')
+                                    .select('id')
+                                    .eq('visitor_id', visitorId)
+                                    .neq('id', existingLead.id)
+                                    .maybeSingle()
+                                if (duplicateLead) {
+                                    await supabase.from('leads').delete().eq('id', duplicateLead.id)
+                                    console.log('[Chat] Cleaned up duplicate visitor-based lead:', duplicateLead.id)
+                                }
+                            }
+                            // Update visitor_id to current session
+                            await supabase.from('leads').update({ visitor_id: visitorId }).eq('id', existingLead.id)
+                        }
 
-                        // WhatsApp Notifications: fire if phone was just added to an existing lead
-                        if (isPhoneNewlyAdded) {
+                        // WhatsApp Notifications: fire if phone was just added OR re-engagement from new session
+                        if (shouldTriggerWhatsApp) {
                             console.log(`[Chat Debug] brokerPhone: ${brokerPhone}, brokerConnectyhubInstance: ${brokerConnectyhubInstance}`)
                             const urlContext = page_context?.url || 'Site / LP'
                             const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
                             const conversationTranscript = fullHistory
                                 .map((msg: any) => `${msg.role === 'user' ? '👤 Lead' : '🤖 Você (IA)'}:  ${msg.content}`)
                                 .join('\n')
+
 
                             if (brokerPhone || brokerConnectyhubInstance) {
                                 const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
