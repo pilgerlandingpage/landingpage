@@ -208,11 +208,66 @@ export const processAutomationRule = inngest.createFunction(
     }
 )
 
+export const processChatHandover = inngest.createFunction(
+    { id: 'process-chat-handover', name: 'Send Chat WhatsApp Handover', retries: 3 },
+    { event: 'chat/handover' },
+    async ({ event }) => {
+        const {
+            leadPhone,
+            brokerPhone,
+            brokerMsg,
+            leadMsg,
+            brokerConnectyhubInstance,
+            brokerConnectyhubApiKey,
+            brokerConnectyhubApiUrl
+        } = event.data
+
+        const results = { broker: false, lead: false }
+
+        // 1. Send to Broker (using default system instance)
+        if (brokerPhone) {
+            try {
+                await sendWhatsAppMessage({
+                    phone: brokerPhone,
+                    message: brokerMsg
+                })
+                results.broker = true
+                console.log(`[Inngest Handover] ✅ WA successfully sent to broker: ${brokerPhone}`)
+            } catch (error) {
+                console.error(`[Inngest Handover] ❌ Failed to send WA to broker: ${brokerPhone}`, error)
+                // Continue to try sending to lead even if broker fails
+            }
+        }
+
+        // 2. Send to Lead (using broker's custom instance)
+        if (brokerConnectyhubInstance) {
+            try {
+                await sendWhatsAppMessage({
+                    phone: leadPhone,
+                    message: leadMsg,
+                    instanceName: brokerConnectyhubInstance,
+                    apiKey: brokerConnectyhubApiKey,
+                    apiUrl: brokerConnectyhubApiUrl
+                })
+                results.lead = true
+                console.log(`[Inngest Handover] ✅ WA successfully sent to lead: ${leadPhone}`)
+            } catch (error) {
+                console.error(`[Inngest Handover] ❌ Failed to send WA to lead: ${leadPhone}`, error)
+                // If the lead message fails, we throw to trigger Inngest auto-retry
+                throw new Error(`Failed to send WhatsApp to lead: ${error}`)
+            }
+        }
+
+        return { success: true, results }
+    }
+)
+
 // EXPORT ALL FUNCTIONS
 export const functions = [
     sendWelcome,
     sendFollowUp,
     vipAlert,
     processAutomationRule,
-    processCloningJob // New function added
+    processCloningJob, // Existing function
+    processChatHandover // New function for chat
 ]
