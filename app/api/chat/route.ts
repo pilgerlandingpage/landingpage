@@ -158,6 +158,17 @@ export async function POST(req: NextRequest) {
         const brokerConnectyhubApiKey = broker?.connectyhub_api_key
         const brokerConnectyhubChatMessage = broker?.connectyhub_chat_message
 
+        // ===== DIAGNOSTIC: Log everything received from frontend =====
+        console.log('[Chat Debug] ═══ BROKER DATA RECEIVED FROM FRONTEND ═══')
+        console.log('[Chat Debug] broker object keys:', broker ? Object.keys(broker) : 'NULL')
+        console.log('[Chat Debug] brokerName:', brokerName)
+        console.log('[Chat Debug] brokerPhone:', brokerPhone)
+        console.log('[Chat Debug] brokerConnectyhubApiUrl:', brokerConnectyhubApiUrl)
+        console.log('[Chat Debug] brokerConnectyhubInstance:', brokerConnectyhubInstance)
+        console.log('[Chat Debug] brokerConnectyhubApiKey:', brokerConnectyhubApiKey ? '***SET***' : 'UNDEFINED')
+        console.log('[Chat Debug] brokerConnectyhubChatMessage:', brokerConnectyhubChatMessage ? 'SET' : 'UNDEFINED')
+        console.log('[Chat Debug] ════════════════════════════════════════════')
+
         // Priority: admin maintenance prompt > ai_agents prompt > fallback
         const basePrompt = promptConfig || agent?.system_prompt || CONCIERGE_BASE_PROMPT
 
@@ -410,12 +421,16 @@ export async function POST(req: NextRequest) {
 
                             // Log 'lead_captured' event to funnel if visitorId is present
                             if (visitorId) {
-                                await supabase.from('funnel_events').insert({
-                                    visitor_id: visitorId,
-                                    landing_page_id: landing_page_id || null, // Might be null if not passed
-                                    event_type: 'lead_captured',
-                                    metadata: { lead_phone: leadData.phone }
-                                })
+                                try {
+                                    await supabase.from('funnel_events').insert({
+                                        visitor_id: visitorId,
+                                        landing_page_id: landing_page_id || null, // Might be null if not passed
+                                        event_type: 'lead_captured',
+                                        metadata: { lead_phone: leadData.phone }
+                                    })
+                                } catch (funnelError) {
+                                    console.error('[Chat] Failed to log lead_captured event:', funnelError)
+                                }
                             }
                         }
 
@@ -440,10 +455,14 @@ export async function POST(req: NextRequest) {
                                     `💬 *Conversa Completa:*\n${conversationTranscript}\n\n` +
                                     `⚡ _Uma mensagem já foi enviada do seu celular para o lead. Continue a conversa pelo WhatsApp!_`
 
+                                console.log(`[Chat Debug] Attempting to send WA to broker: ${brokerPhone}`)
                                 sendWhatsAppMessage({
                                     phone: brokerPhone,
                                     message: brokerMsg
-                                }).catch(e => console.error('[Chat] Failed to send WA to broker:', e))
+                                }).then(() => console.log('[Chat Debug] WA successfully sent to broker'))
+                                    .catch(e => console.error('[Chat Debug] Failed to send WA to broker. Error details:', e, e.message))
+                            } else {
+                                console.log('[Chat Debug] No brokerPhone available to send notification to broker')
                             }
 
                             // 2. Message to Lead FROM broker's phone (via broker's instance)
@@ -464,13 +483,17 @@ export async function POST(req: NextRequest) {
                                     .replace(/\{\{broker_name\}\}/g, brokerName)
                                     .replace(/\{\{conversation_summary\}\}/g, leadData.ai_summary || '');
 
+                                console.log(`[Chat Debug] Attempting to send WA to lead: ${leadData.phone} from instance: ${brokerConnectyhubInstance}`)
                                 sendWhatsAppMessage({
                                     phone: leadData.phone,
                                     message: leadMsg,
                                     instanceName: brokerConnectyhubInstance,
                                     apiKey: brokerConnectyhubApiKey,
                                     apiUrl: brokerConnectyhubApiUrl
-                                }).catch(e => console.error('[Chat] Failed to send WA to lead:', e))
+                                }).then(() => console.log('[Chat Debug] WA successfully sent to lead'))
+                                    .catch(e => console.error('[Chat Debug] Failed to send WA to lead. Error:', e, e.message))
+                            } else {
+                                console.log('[Chat Debug] No brokerConnectyhubInstance available to send message to lead')
                             }
                         }
                     }
