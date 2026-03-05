@@ -95,7 +95,16 @@ export default function ConciergeChat() {
     const [isTyping, setIsTyping] = useState(false) // "digitando..." state
     const [connectionStep, setConnectionStep] = useState<0 | 1 | 2 | 3>(0) // 0=idle, 1=searching, 2=found, 3=connecting
     const [hasGreeted, setHasGreeted] = useState(false)
-    const [broker, setBroker] = useState<{ name: string; creci: string; photo_url?: string } | null>(null)
+    const [broker, setBroker] = useState<{
+        name: string;
+        creci: string;
+        photo_url?: string;
+        phone?: string;
+        connectyhub_api_url?: string;
+        connectyhub_instance_id?: string;
+        connectyhub_api_key?: string;
+        connectyhub_chat_message?: string;
+    } | null>(null)
     const [pageContent, setPageContent] = useState('')
     const [timing, setTiming] = useState({ delayBeforeTyping: 2000, typingMinDuration: 5000, typingMaxDuration: 7000, connectionSearchDelay: 1500, connectionFoundDelay: 1000, connectionConnectingDelay: 1200 })
     const [mounted, setMounted] = useState(false)

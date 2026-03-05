@@ -37,6 +37,11 @@ interface Broker {
     name: string
     creci: string
     photo_url?: string
+    phone?: string
+    connectyhub_api_url?: string
+    connectyhub_instance_id?: string
+    connectyhub_api_key?: string
+    connectyhub_chat_message?: string
 }
 
 interface ChatWidgetProps {
