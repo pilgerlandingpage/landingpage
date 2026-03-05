@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, ExternalLink, Copy, Trash2, Loader2, Check } from 'lucide-react'
+import { FileText, ExternalLink, Copy, Trash2, Loader2, Check, MessageSquare, X, Save } from 'lucide-react'
 import Link from 'next/link'
 
 interface LandingPage {
@@ -14,6 +14,7 @@ interface LandingPage {
     content: any
     primary_color: string
     created_at: string
+    ai_context?: string | null
     property?: { title: string } | null
 }
 
@@ -31,6 +32,11 @@ export default function LandingPagesAdmin() {
     const [pages, setPages] = useState<LandingPage[]>([])
     const [loading, setLoading] = useState(true)
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+
+    // AI Context Modal State
+    const [editingContextId, setEditingContextId] = useState<string | null>(null)
+    const [contextText, setContextText] = useState('')
+    const [savingContext, setSavingContext] = useState(false)
 
     const supabase = createClient()
 
@@ -67,6 +73,30 @@ export default function LandingPagesAdmin() {
         navigator.clipboard.writeText(url)
         setCopiedSlug(slug)
         setTimeout(() => setCopiedSlug(null), 2000)
+    }
+
+    const openContextModal = (page: LandingPage) => {
+        setContextText(page.ai_context || '')
+        setEditingContextId(page.id)
+    }
+
+    const saveContext = async () => {
+        if (!editingContextId) return
+        setSavingContext(true)
+        try {
+            await supabase
+                .from('landing_pages')
+                .update({ ai_context: contextText })
+                .eq('id', editingContextId)
+
+            setEditingContextId(null)
+            fetchPages() // Refresh to get updated data
+        } catch (error) {
+            console.error('Error saving context:', error)
+            alert('Erro ao salvar as instruções.')
+        } finally {
+            setSavingContext(false)
+        }
     }
 
     const getTemplateInfo = (content: any) => {
@@ -173,6 +203,15 @@ export default function LandingPagesAdmin() {
 
                                     {/* Actions */}
                                     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                                        <button
+                                            className="btn btn-outline btn-sm"
+                                            title="Instruções e Treinamento da IA"
+                                            onClick={() => openContextModal(page)}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 6, borderColor: page.ai_context ? 'var(--gold)' : 'var(--border)', color: page.ai_context ? 'var(--gold)' : 'inherit' }}
+                                        >
+                                            <MessageSquare size={15} /> IA
+                                        </button>
+
                                         <Link href={`/${page.slug}`} target="_blank">
                                             <button className="btn btn-outline btn-sm" title="Ver ao Vivo" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                 <ExternalLink size={15} /> Ver
@@ -210,6 +249,72 @@ export default function LandingPagesAdmin() {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Instruções da IA */}
+            {editingContextId && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 99999,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 20
+                }}>
+                    <div style={{
+                        backgroundColor: '#111', width: '100%', maxWidth: 600,
+                        borderRadius: 16, border: '1px solid var(--border)',
+                        overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.1rem' }}>
+                                <MessageSquare className="text-gold" size={20} />
+                                Instruções para a Inteligência Artificial
+                            </h3>
+                            <button onClick={() => setEditingContextId(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ padding: 24, flex: 1 }}>
+                            <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                Cole aqui o texto com gatilhos mentais, diferenciais, FAQ e regras de ouro deste empreendimento exclusivo.
+                                Quando o cliente conversar com o chat desta Landing Page, a IA lerá essas instruções para atender melhor.
+                            </p>
+
+                            <textarea
+                                value={contextText}
+                                onChange={(e) => setContextText(e.target.value)}
+                                placeholder="Ex: O valor de entrada é 20%. Foque na vista para o mar e no design neoclássico. Se perguntarem sobre permuta, diga que analisamos caso a caso..."
+                                style={{
+                                    width: '100%', height: 250, resize: 'none',
+                                    backgroundColor: '#0a0a0a', border: '1px solid var(--border)',
+                                    borderRadius: 8, padding: 16, color: 'var(--text-primary)',
+                                    fontFamily: 'inherit', fontSize: '0.95rem', lineHeight: '1.5',
+                                    outline: 'none'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 12, backgroundColor: '#0a0a0a' }}>
+                            <button
+                                className="btn btn-outline"
+                                onClick={() => setEditingContextId(null)}
+                                disabled={savingContext}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={saveContext}
+                                disabled={savingContext}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                            >
+                                {savingContext ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Salvar Instruções
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .animate-spin { animation: spin 1s linear infinite; }

@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
         else if ((page_context?.type === 'landing_page' || page_context?.type === 'cloned_landing_page') && page_context.slug) {
             const { data: lp } = await supabase
                 .from('landing_pages')
-                .select('title, content, property:properties(title, price, city, description)')
+                .select('title, content, ai_context, property:properties(title, price, city, description)')
                 .eq('slug', page_context.slug)
                 .maybeSingle()
 
@@ -126,6 +126,11 @@ export async function POST(req: NextRequest) {
                 const content: any = lp.content || {}
                 if (content.seo_description) dynamicContext += `\nFoco da Venda: ${content.seo_description}`
                 if (content.custom_cta) dynamicContext += `\nChamada para Ação: ${content.custom_cta}`
+
+                // Injetar treinamento específico se houver
+                if ((lp as any).ai_context) {
+                    dynamicContext += `\n\nREGRAS E TREINAMENTO ESPECÍFICO PARA ESTA PÁGINA (OBRIGATÓRIO SEGUIR):\n${(lp as any).ai_context}`
+                }
             }
         }
 

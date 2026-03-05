@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
         const supabase = createAdminClient()
         const body = await req.json()
 
-        const { title, slug, template, description, heroImage, price, location, bedrooms, bathrooms, area, amenities, gallery } = body
+        const { title, slug, template, description, heroImage, price, location, bedrooms, bathrooms, area, amenities, gallery, ai_context } = body
 
         if (!title || !slug || !template) {
             return NextResponse.json({ error: 'Título, slug e template são obrigatórios.' }, { status: 400 })
@@ -42,7 +42,14 @@ export async function POST(req: NextRequest) {
 
         const { data, error } = await supabase
             .from('landing_pages')
-            .insert({ title, slug, content, status: 'published', primary_color: '#948369' })
+            .insert({
+                title,
+                slug,
+                content,
+                ai_context: ai_context || null,
+                status: 'published',
+                primary_color: '#948369'
+            })
             .select()
             .single()
 
