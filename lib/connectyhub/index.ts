@@ -41,7 +41,12 @@ export async function sendWhatsAppMessage({ phone, message, instanceName, apiKey
     const instance = instanceName || config.instance
     const baseUrl = apiUrl || config.apiUrl
 
-    const cleanPhone = phone.replace(/\D/g, '')
+    let cleanPhone = phone.replace(/\D/g, '')
+
+    // Auto-prepend Brazil country code '55' if it's missing (10 or 11 digits)
+    if (cleanPhone.length === 10 || cleanPhone.length === 11) {
+        cleanPhone = `55${cleanPhone}`
+    }
 
     const response = await fetch(`${baseUrl}/message/sendText/${instance}`, {
         method: 'POST',

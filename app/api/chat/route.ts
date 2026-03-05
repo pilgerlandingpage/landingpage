@@ -351,12 +351,15 @@ export async function POST(req: NextRequest) {
 
                         // Check if phone was just added (existing lead had no phone before)
                         const isPhoneNewlyAdded = leadData.phone && !existingLead.phone
+                        console.log(`[Chat Debug] Lead Phone: ${leadData.phone}, Existing Phone: ${existingLead.phone}, isPhoneNewlyAdded: ${isPhoneNewlyAdded}`)
+
                         if (isPhoneNewlyAdded) {
                             console.log('[Chat] Phone newly added to existing lead — triggering WhatsApp flow')
                         }
 
                         // WhatsApp Notifications: fire if phone was just added to an existing lead
                         if (isPhoneNewlyAdded) {
+                            console.log(`[Chat Debug] brokerPhone: ${brokerPhone}, brokerConnectyhubInstance: ${brokerConnectyhubInstance}`)
                             const urlContext = page_context?.url || 'Site / LP'
                             const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
                             const conversationTranscript = fullHistory
