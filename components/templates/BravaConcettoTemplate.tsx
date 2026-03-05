@@ -225,9 +225,9 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
     const prevPlanLB = () => setPlanLightboxIdx((p) => (p !== null ? (p - 1 + flatPlans.length) % flatPlans.length : null));
 
     const units = [
-        { title: 'Apartamentos Garden', size: '340m²', desc: 'Ampla área privativa com jardim exclusivo e pé-direito duplo.', img: '/images/brava-concetto/19_CL_BC_LIVING_FINAL_01_EF_web.jpg' },
-        { title: 'Apartamentos Tipo', size: '280m²', desc: 'Suítes amplas e living integrado com vista mar definitiva.', img: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg' },
-        { title: 'Coberturas Duplex', size: '590m²', desc: 'O ápice do luxo com piscina privativa e 360° de exclusividade.', img: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg' },
+        { title: 'Apartamentos Garden', size: '367m²', area: '367,61m²', suites: '4 Suítes', vagas: '3 Vagas', desc: 'Ampla área privativa com jardim exclusivo e pé-direito duplo.', img: '/images/brava-concetto/19_CL_BC_LIVING_FINAL_01_EF_web.jpg' },
+        { title: 'Apartamentos Tipo', size: '280m²', area: '280,26m²', suites: '4 Suítes', vagas: '3 Vagas', desc: 'Suítes amplas e living integrado com vista mar definitiva.', img: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg' },
+        { title: 'Coberturas Duplex', size: '591m²', area: '591,70m²', suites: '4 Suítes', vagas: '5 Vagas', desc: 'O ápice do luxo com piscina privativa e 360° de exclusividade.', img: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg' },
     ]
 
     const nextUnitLB = () => setUnitLightboxIdx((p) => (p !== null ? (p + 1) % units.length : null));
@@ -458,20 +458,39 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                     }}>{u.size}</div>
                                 </div>
                                 <div style={{ padding: 20 }}>
-                                    <h5 style={{ color: C.white, fontWeight: 700, fontSize: '1.05rem', marginBottom: 6 }}>{u.title}</h5>
-                                    <p style={{ color: C.textDim, fontSize: '0.85rem', lineHeight: 1.5, marginBottom: 16 }}>{u.desc}</p>
-                                    <button onClick={() => {
-                                        const el = document.getElementById('plantas')
-                                        if (el) el.scrollIntoView({ behavior: 'smooth' })
-                                    }} style={{
-                                        width: '100%', padding: '13px', border: `1px solid rgba(197,160,89,0.4)`,
-                                        color: C.primary, fontWeight: 700, borderRadius: 10,
-                                        background: 'transparent', cursor: 'pointer', fontSize: '0.85rem',
+                                    <h5 style={{ color: C.white, fontWeight: 700, fontSize: '1.05rem', marginBottom: 2 }}>{u.title}</h5>
+                                    <p style={{ color: C.textMuted, fontSize: '0.7rem', display: 'flex', gap: 4, alignItems: 'center', marginTop: 4, marginBottom: 16 }}>
+                                        <span>Projeto: Antonio J. Gonçalves e Frederico Cartens</span>
+                                        <span style={{ fontStyle: 'italic' }}>(realiza arquitetura)</span>
+                                    </p>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Área Privativa</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{u.area}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Dormitórios</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{u.suites}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: 6 }}>
+                                            <span style={{ color: C.textDim, fontSize: '0.85rem' }}>Garagem</span>
+                                            <span style={{ color: C.white, fontWeight: 600, fontSize: '0.9rem' }}>{u.vagas}</span>
+                                        </div>
+                                    </div>
+
+                                    <button onClick={openChat} style={{
+                                        width: '100%', padding: '13px', border: 'none',
+                                        color: '#FFFFFF', fontWeight: 700, borderRadius: 10,
+                                        background: '#25D366', cursor: 'pointer', fontSize: '0.85rem',
                                         transition: 'all 0.2s',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                        boxShadow: '0 4px 14px rgba(37,211,102,0.3)',
                                     }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = C.primaryMuted }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
-                                        Ver Planta
+                                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)' }}
+                                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                                        Falar com Especialista
                                     </button>
                                 </div>
                             </div>
@@ -769,35 +788,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                     </div>
                 </section>
 
-                {/* ═══════ 7. FAQ ═══════ */}
-                <section style={{ padding: '56px 24px', borderTop: `1px solid ${C.border}` }}>
-                    <h3 className="font-serif bc-reveal" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 32 }}>
-                        Dúvidas Frequentes
-                    </h3>
-                    {faqs.map((f, i) => (
-                        <div key={i} className="bc-reveal" style={{
-                            borderBottom: `1px solid ${C.border}`, cursor: 'pointer',
-                            padding: '18px 0', transition: 'background 0.2s',
-                        }} onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h4 style={{ color: C.white, fontWeight: 600, fontSize: '0.95rem', margin: 0, paddingRight: 16 }}>{f.q}</h4>
-                                {faqOpen === i
-                                    ? <Minus size={18} color={C.primary} style={{ flexShrink: 0 }} />
-                                    : <Plus size={18} color={C.textLight} style={{ flexShrink: 0 }} />}
-                            </div>
-                            {faqOpen === i && (
-                                <p data-description="true" style={{
-                                    marginTop: 12, marginBottom: 0, fontSize: '0.88rem',
-                                    color: C.textMuted, lineHeight: 1.65,
-                                    animation: 'slideDown 0.3s ease',
-                                    whiteSpace: 'pre-line'
-                                }}>{f.a}</p>
-                            )}
-                        </div>
-                    ))}
-                </section>
-
-                {/* ═══════ 7.5 DIFERENCIAIS (MOVED) ═══════ */}
+                {/* ═══════ 7. DIFERENCIAIS (MOVED) ═══════ */}
                 <section style={{ padding: '56px 24px', borderTop: `1px solid ${C.border}` }}>
                     <div className="bc-reveal" style={{ marginBottom: 32 }}>
                         <h3 className="font-serif" style={{ fontSize: '1.8rem', color: C.white }}>Diferenciais</h3>
@@ -823,6 +814,34 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                             </div>
                         ))}
                     </div>
+                </section>
+
+                {/* ═══════ 8. FAQ ═══════ */}
+                <section style={{ padding: '56px 24px', borderTop: `1px solid ${C.border}` }}>
+                    <h3 className="font-serif bc-reveal" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 32 }}>
+                        Dúvidas Frequentes
+                    </h3>
+                    {faqs.map((f, i) => (
+                        <div key={i} className="bc-reveal" style={{
+                            borderBottom: `1px solid ${C.border}`, cursor: 'pointer',
+                            padding: '18px 0', transition: 'background 0.2s',
+                        }} onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <h4 style={{ color: C.white, fontWeight: 600, fontSize: '0.95rem', margin: 0, paddingRight: 16 }}>{f.q}</h4>
+                                {faqOpen === i
+                                    ? <Minus size={18} color={C.primary} style={{ flexShrink: 0 }} />
+                                    : <Plus size={18} color={C.textLight} style={{ flexShrink: 0 }} />}
+                            </div>
+                            {faqOpen === i && (
+                                <p data-description="true" style={{
+                                    marginTop: 12, marginBottom: 0, fontSize: '0.88rem',
+                                    color: C.textMuted, lineHeight: 1.65,
+                                    animation: 'slideDown 0.3s ease',
+                                    whiteSpace: 'pre-line'
+                                }}>{f.a}</p>
+                            )}
+                        </div>
+                    ))}
                 </section>
 
 
