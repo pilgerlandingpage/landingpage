@@ -279,6 +279,7 @@ export default function AdminDashboard() {
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
                                 labelStyle={{ color: '#f5f5f5' }}
+                                itemStyle={{ color: '#f5f5f5' }}
                             />
                             <Legend />
                             <Line type="monotone" dataKey="visitors" stroke="#c9a96e" strokeWidth={2} name="Visitantes" dot={{ r: 4 }} />
@@ -308,6 +309,7 @@ export default function AdminDashboard() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#f5f5f5' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -331,6 +333,7 @@ export default function AdminDashboard() {
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
                                 labelStyle={{ color: '#f5f5f5' }}
+                                itemStyle={{ color: '#f5f5f5' }}
                             />
                             <Bar dataKey="value" fill="#c9a96e" radius={[4, 4, 0, 0]} name="Visitantes" />
                         </BarChart>
@@ -347,6 +350,7 @@ export default function AdminDashboard() {
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}
                                 labelStyle={{ color: '#f5f5f5' }}
+                                itemStyle={{ color: '#f5f5f5' }}
                             />
                             <Bar dataKey="value" fill="#4ade80" radius={[0, 4, 4, 0]} name="Acessos" />
                         </BarChart>
