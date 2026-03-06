@@ -24,43 +24,23 @@ export function getVisitorId(): string {
     let id = getCookie(COOKIE_NAME)
     if (!id) {
         id = uuidv4()
-        // Only set cookie if consent is granted or strictly necessary?
-        // For persistent tracking ID, we usually need consent or at least a notice.
-        // But if we want to track anonymous users before consent (without PI), we can use session storage.
-        // However, the requirement is "Aceite ... executa ... o aceite dos Cookies".
-        // So we should only persist if consent is true.
-        if (hasConsent()) {
-            setCookie(COOKIE_NAME, id, COOKIE_DAYS)
-        }
+        setCookie(COOKIE_NAME, id, COOKIE_DAYS)
     }
     return id
 }
 
 export function grantConsent() {
     setCookie(CONSENT_COOKIE_NAME, 'true', 365)
-    // Ensure visitor ID is persisted now
     const id = getVisitorId()
     setCookie(COOKIE_NAME, id, COOKIE_DAYS)
 
-    // Dispatch event for listeners
     if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event('pilger_consent_granted'))
     }
-
-    // NOTE: Do NOT call trackEvent here — the UnifiedConsentBanner
-    // already calls /api/track with event_type: 'cookie_consent'.
-    // Calling it here too caused a race condition (duplicate INSERT 
-    // on visitors table with UNIQUE constraint on visitor_cookie_id),
-    // which silently broke push subscription registration.
 }
 
 export async function trackEvent(eventType: string, metadata: any = {}) {
-    // If no consent, do not track? Or track anonymously?
-    // User requirement: "Aceite dos Cookies... Rastreamento de Retenção".
-    // We will assume tracking only happens AFTER consent OR if it's strictly necessary functionality.
-    // 'cookie_consent' event is obviously allowed to be tracked as it happens ON consent.
-
-    if (!hasConsent() && eventType !== 'cookie_consent') return
+    // Auto-consent: always track (consent is granted automatically on page load)
 
     const visitorId = getVisitorId()
     const landingPageSlug = window.location.pathname.split('/')[1] || 'home' // Crude, but works for now. MainTracker passes it better.

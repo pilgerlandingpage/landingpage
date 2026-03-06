@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Tracker from '@/components/tracking/Tracker'
 import UnifiedConsentBanner from '@/components/tracking/UnifiedConsentBanner'
+import PushConsent from '@/components/push/PushConsent'
 import { hasConsent } from '@/lib/tracking/client'
 
 interface MainTrackerProps {
@@ -32,6 +33,8 @@ export default function MainTracker({ landingPageSlug }: MainTrackerProps) {
                 />
             )}
             <UnifiedConsentBanner />
+            <PushConsent />
         </>
     )
 }
+
