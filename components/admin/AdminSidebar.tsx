@@ -2,91 +2,209 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
     LayoutDashboard,
     Users,
     FileText,
-    Bot,
     Zap,
     Building2,
-    Settings,
     BarChart3,
     Filter,
     Wrench,
-    Wand2,
     ShieldCheck,
-    UserCircle,
-    UserCog,
     MessageSquareHeart,
     LogOut,
-    UserPlus,
     Bell,
+    Megaphone,
+    Settings,
+    Shield,
+    UserCog,
+    Loader2,
+    Crown,
+    Radar
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const navItems = [
-    {
-        label: 'PRINCIPAL', items: [
-            { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-            { href: '/admin/funnel', icon: Filter, label: 'Funil de Conversão' },
-            { href: '/admin/leads', icon: Users, label: 'Leads' },
+// Map module_key to sidebar items
+const MODULE_NAV: Record<string, { href: string; icon: any; label: string; section: string; subItems?: { href: string; label: string; icon?: any }[] }> = {
+    dashboard: { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', section: 'PRINCIPAL' },
+    funnel: { href: '/admin/funnel', icon: Filter, label: 'Funil de Conversão', section: 'PRINCIPAL' },
+    leads: { href: '/admin/leads', icon: Users, label: 'Leads', section: 'PRINCIPAL' },
+    landing_pages: { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages', section: 'CONTEÚDO' },
+    properties: { href: '/admin/properties', icon: Building2, label: 'Imóveis', section: 'CONTEÚDO' },
+    brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores', section: 'CONTEÚDO' },
+    automation: { href: '/admin/automation', icon: Zap, label: 'Automações', section: 'AUTOMAÇÃO' },
+    push: { href: '/admin/push', icon: Bell, label: 'Notificações', section: 'AUTOMAÇÃO' },
+    ads: { 
+        href: '/admin/ads', 
+        icon: Megaphone, 
+        label: 'Tráfego IA', 
+        section: 'AUTOMAÇÃO',
+        subItems: [
+            { href: '/admin/ads', label: 'Meta Ads' },
+            { href: '/admin/ads/google', label: 'Google Ads' }
         ]
     },
-    {
-        label: 'CONTEÚDO', items: [
-            { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages' },
-            { href: '/admin/properties', icon: Building2, label: 'Imóveis' },
-            { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores' },
-        ]
-    },
-    {
-        label: 'AUTOMAÇÃO', items: [
-            { href: '/admin/automation', icon: Zap, label: 'Automações' },
-            { href: '/admin/push', icon: Bell, label: 'Notificações' },
-        ]
-    },
-    {
-        label: 'SISTEMA', items: [
-            { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback' },
-            { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutenção' },
-            { href: '/admin/users/new', icon: UserPlus, label: 'Novo Usuário' },
-        ]
-    },
-]
+    radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'SISTEMA' },
+    feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
+    maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutenção', section: 'SISTEMA' },
+}
+
+// Section order
+const SECTION_ORDER = ['PRINCIPAL', 'CONTEÚDO', 'AUTOMAÇÃO', 'SISTEMA', 'CONFIGURAÇÕES']
 
 export default function AdminSidebar() {
     const pathname = usePathname()
     const router = useRouter()
     const supabase = createClient()
+    const [permissions, setPermissions] = useState<string[]>([])
+    const [isMaster, setIsMaster] = useState(false)
+    const [userName, setUserName] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+        '/admin/ads': true // default open if on ads route
+    })
+
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            try {
+                const res = await fetch('/api/admin/permissions')
+                if (res.ok) {
+                    const data = await res.json()
+                    setPermissions(data.permissions || [])
+                    setIsMaster(data.is_master || false)
+                    setUserName(data.user_name || '')
+                }
+            } catch (err) {
+                console.error('Failed to fetch permissions:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchPermissions()
+    }, [])
+    
+    // Ensure submenu is open if we navigate directly to a child route
+    useEffect(() => {
+        if (pathname.startsWith('/admin/ads')) {
+            setExpandedMenus(prev => ({ ...prev, '/admin/ads': true }))
+        }
+    }, [pathname])
+    
+    const toggleSubmenu = (href: string) => {
+        setExpandedMenus(prev => ({ ...prev, [href]: !prev[href] }))
+    }
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
         router.push('/login')
     }
 
+    // Build navigation items based on permissions
+    const buildNavSections = () => {
+        const sections: Record<string, { href: string; icon: any; label: string; subItems?: { href: string; label: string; icon?: any }[] }[]> = {}
+
+        // If master or permissions loaded: filter by permissions
+        const allowedModules = isMaster
+            ? Object.keys(MODULE_NAV)
+            : permissions
+
+        for (const key of allowedModules) {
+            const nav = MODULE_NAV[key]
+            if (!nav) continue
+            if (!sections[nav.section]) sections[nav.section] = []
+            sections[nav.section].push({ href: nav.href, icon: nav.icon, label: nav.label, subItems: nav.subItems })
+        }
+
+        // Add settings section for master
+        if (isMaster) {
+            sections['CONFIGURAÇÕES'] = [
+                { href: '/admin/settings/sectors', icon: Shield, label: 'Setores' },
+                { href: '/admin/settings/users', icon: UserCog, label: 'Usuários' },
+            ]
+        }
+
+        return SECTION_ORDER
+            .filter(s => sections[s] && sections[s].length > 0)
+            .map(s => ({ label: s, items: sections[s] }))
+    }
+
+    const navSections = buildNavSections()
+
     return (
         <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <div className="admin-sidebar-logo">
                 <h2>Pilger Admin</h2>
-                <span>Painel de Controle</span>
+                {userName ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        {isMaster && <Crown size={12} style={{ color: '#f59e0b' }} />}
+                        {userName}
+                    </span>
+                ) : (
+                    <span>Painel de Controle</span>
+                )}
             </div>
+
             <nav className="admin-nav">
-                {navItems.map((section) => (
-                    <div key={section.label}>
-                        <div className="admin-nav-section">{section.label}</div>
-                        {section.items.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`admin-nav-item ${pathname === item.href ? 'active' : ''}`}
-                            >
-                                <item.icon size={18} />
-                                {item.label}
-                            </Link>
-                        ))}
+                {loading ? (
+                    <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <Loader2 size={20} className="spin" style={{ margin: '0 auto' }} />
                     </div>
-                ))}
+                ) : (
+                    navSections.map((section) => (
+                        <div key={section.label}>
+                            <div className="admin-nav-section">{section.label}</div>
+                            {section.items.map((item) => {
+                                const isExpanded = expandedMenus[item.href] || false;
+                                return (
+                                <div key={item.href}>
+                                    <Link
+                                        href={item.subItems ? '#' : item.href}
+                                        onClick={(e) => {
+                                            if (item.subItems) {
+                                                e.preventDefault();
+                                                toggleSubmenu(item.href);
+                                            }
+                                        }}
+                                        className={`admin-nav-item ${(pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href) && !item.subItems)) ? 'active' : ''}`}
+                                    >
+                                        <item.icon size={18} />
+                                        <span style={{ flex: 1 }}>{item.label}</span>
+                                        {item.subItems && (
+                                            <span style={{ fontSize: '0.6rem', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+                                                ▼
+                                            </span>
+                                        )}
+                                    </Link>
+                                    
+                                    {/* Sub Items Render */}
+                                    {item.subItems && isExpanded && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '28px', marginTop: '4px', marginBottom: '8px', gap: '4px' }}>
+                                            {item.subItems.map(subItem => (
+                                                <Link
+                                                    key={subItem.href}
+                                                    href={subItem.href}
+                                                    className={`admin-nav-item ${pathname === subItem.href ? 'active text-gold' : ''}`}
+                                                    style={{ 
+                                                        fontSize: '0.85rem', 
+                                                        padding: '6px 12px',
+                                                        background: pathname === subItem.href ? 'var(--bg-card)' : 'transparent',
+                                                        color: pathname === subItem.href ? 'var(--gold)' : 'var(--text-muted)',
+                                                        borderLeft: pathname === subItem.href ? '2px solid var(--gold)' : '2px solid transparent'
+                                                    }}
+                                                >
+                                                    {subItem.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )})}
+                        </div>
+                    ))
+                )}
             </nav>
 
             <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid var(--border-color)' }}>

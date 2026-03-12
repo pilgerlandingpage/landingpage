@@ -1,15 +1,15 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database } from 'lucide-react'
 import Link from 'next/link'
-import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT } from '@/lib/ai/prompts'
+import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT, MASTER_LANDING_PAGE_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2'
     fields: {
         key: string
         label: string
@@ -41,6 +41,30 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'vapid_subject', label: 'Subject (mailto:)', placeholder: 'mailto:email@exemplo.com', isSecret: false },
             { key: 'vapid_public_key', label: 'Public Key', placeholder: 'BJDt...', isSecret: false },
             { key: 'vapid_private_key', label: 'Private Key', placeholder: 'am19...', isSecret: true },
+        ],
+    },
+
+    {
+        id: 'r2',
+        title: 'Cloudflare R2 — Storage',
+        description: 'Credenciais para armazenar imagens de páginas clonadas (S3-compatible).',
+        icon: 'r2',
+        fields: [
+            { key: 'r2_account_id', label: 'Account ID', placeholder: 'ID da conta Cloudflare', isSecret: false },
+            { key: 'r2_access_key_id', label: 'Access Key ID', placeholder: 'Sua chave de acesso', isSecret: false },
+            { key: 'r2_secret_access_key', label: 'Secret Access Key', placeholder: 'Seu secret', isSecret: true },
+            { key: 'r2_bucket_name', label: 'Bucket Name', placeholder: 'Nome do bucket', isSecret: false },
+            { key: 'r2_public_url', label: 'Public URL', placeholder: 'https://pub-....r2.dev', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'serpapi',
+        title: 'SerpApi — Search Engine Results',
+        description: 'API para extrair resultados de busca do Google.',
+        icon: 'serpapi',
+        fields: [
+            { key: 'serpapi_api_key', label: 'API Key', placeholder: 'Sua API Key', isSecret: true },
         ],
     },
 ]
@@ -182,7 +206,40 @@ export default function MaintenancePage() {
                 'openai_pilger_model',
                 'concierge_provider',
                 'pilger_provider',
-                'lead_extraction_prompt'
+                'lead_extraction_prompt',
+                'ads_provider',
+                'gemini_ads_model',
+                'openai_ads_model',
+                'vapid_subject',
+                'vapid_public_key',
+                'vapid_private_key',
+                'r2_account_id',
+                'r2_access_key_id',
+                'r2_secret_access_key',
+                'r2_bucket_name',
+                'r2_public_url',
+                'meta_app_id',
+                'meta_app_secret',
+                'meta_access_token',
+                'meta_ad_account_id',
+                'meta_pixel_id',
+                'google_ads_developer_token',
+                'google_ads_client_id',
+                'google_ads_client_secret',
+                'google_ads_refresh_token',
+                'google_ads_manager_id',
+                'google_ads_customer_id',
+                'serpapi_api_key',
+                'dataforseo_login',
+                'dataforseo_password',
+                'pilger_daily_days',
+                'pilger_daily_time',
+                'pilger_weekly_day',
+                'pilger_weekly_time',
+                'ads_analyst_system_prompt',
+                'pilger_daily_system_prompt',
+                'pilger_weekly_system_prompt',
+                'cloner_system_prompt'
             ]
             const configsToSave: Record<string, string> = {}
             for (const key of allKeys) {
@@ -248,6 +305,11 @@ export default function MaintenancePage() {
             case 'gemini': return <Brain size={22} />
             case 'openai': return <Bot size={22} />
             case 'vapid': return <Bell size={22} />
+            case 'meta_ads': return <Megaphone size={22} />
+            case 'google_ads': return <BarChart3 size={22} />
+            case 'serpapi': return <Search size={22} />
+            case 'dataforseo': return <TrendingUp size={22} />
+            case 'r2': return <Database size={22} />
             default: return null
         }
     }
@@ -893,6 +955,116 @@ export default function MaintenancePage() {
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                             Controla como a IA identifica e extrai leads da conversa. Deixe em branco para usar o padrão (exibido acima como placeholder).
                         </div>
+                    </div>
+                </div>
+
+                {/* ── 4. CLONADOR DE PÁGINAS IA ── */}
+                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#f472b6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>⚡</span> 4. Clonador de Páginas IA
+                    </h3>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt Mestre de Design e Extração (Clonador)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={10}
+                            value={configs['cloner_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, cloner_system_prompt: e.target.value })}
+                            placeholder={MASTER_LANDING_PAGE_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(244, 114, 182, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            A IA recebe aqui a tag {"{{html}}"} com o código bruto da página e deve cuspir um JSON de conteúdo.
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 5. TRÁFEGO (GESTOR IA) ── */}
+                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>📈</span> 5. Gestor de Tráfego (Análise Autônoma)
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Provedor do Gestor de Tráfego</label>
+                            <select className="form-input" value={configs['ads_provider'] || ''} onChange={e => setConfigs({ ...configs, ads_provider: e.target.value })}>
+                                <option value="">Usar Padrão Global</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Modelo do Gestor de Tráfego</label>
+                            <select className="form-input" value={configs['gemini_ads_model'] || configs['openai_ads_model'] || ''} onChange={e => {
+                                if (configs['ads_provider'] === 'openai') {
+                                    setConfigs({ ...configs, openai_ads_model: e.target.value })
+                                } else {
+                                    setConfigs({ ...configs, gemini_ads_model: e.target.value })
+                                }
+                            }}>
+                                <option value="">Selecione...</option>
+                                {configs['ads_provider'] === 'openai' ? openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>) : geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt do Sistema (Gestor de Tráfego)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={8}
+                            value={configs['ads_analyst_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, ads_analyst_system_prompt: e.target.value })}
+                            placeholder={ADS_ANALYSIS_SYSTEM_PROMPT}
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                        />
+                    </div>
+                </div>
+
+                {/* ── 6. AGENDAMENTOS E RELATÓRIOS ── */}
+                <div style={{ paddingBottom: '30px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>⏰</span> 6. Agendamento de Relatórios Pilger CEO
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        {/* Diário */}
+                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Relatório Diário</div>
+                            <div className="form-group">
+                                <label className="form-label">Dias de Execução</label>
+                                <input className="form-input" type="text" value={configs['pilger_daily_days'] || '1,2,3,4,5'} onChange={e => setConfigs({ ...configs, pilger_daily_days: e.target.value })} placeholder="1,2,3,4,5 (Seg-Sex)" />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Horário</label>
+                                <input className="form-input" type="number" min="0" max="23" value={configs['pilger_daily_time'] || '23'} onChange={e => setConfigs({ ...configs, pilger_daily_time: e.target.value })} placeholder="Ex: 23" />
+                            </div>
+                        </div>
+
+                        {/* Semanal */}
+                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Diretriz Semanal</div>
+                            <div className="form-group">
+                                <label className="form-label">Dia da Semana</label>
+                                <input className="form-input" type="number" min="0" max="6" value={configs['pilger_weekly_day'] || '1'} onChange={e => setConfigs({ ...configs, pilger_weekly_day: e.target.value })} placeholder="1 = Segunda-feira" />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Horário</label>
+                                <input className="form-input" type="number" min="0" max="23" value={configs['pilger_weekly_time'] || '8'} onChange={e => setConfigs({ ...configs, pilger_weekly_time: e.target.value })} placeholder="Ex: 8" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Prompts dos Relatórios */}
+                    <div className="form-group" style={{ marginTop: '20px' }}>
+                        <label className="form-label">Prompt do Relatório Diário</label>
+                        <textarea className="form-textarea" rows={6} value={configs['pilger_daily_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_daily_system_prompt: e.target.value })} placeholder={DAILY_REPORT_PROMPT} style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Prompt da Diretriz Semanal</label>
+                        <textarea className="form-textarea" rows={6} value={configs['pilger_weekly_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_weekly_system_prompt: e.target.value })} placeholder={WEEKLY_REPORT_PROMPT} style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
                     </div>
                 </div>
             </div>

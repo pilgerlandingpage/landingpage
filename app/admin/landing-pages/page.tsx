@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, ExternalLink, Copy, Trash2, Loader2, Check, MessageSquare, X, Save } from 'lucide-react'
+import { FileText, ExternalLink, Copy, Trash2, Loader2, Check, MessageSquare, X, Save, User } from 'lucide-react'
 import Link from 'next/link'
 
 interface LandingPage {
@@ -15,7 +15,13 @@ interface LandingPage {
     primary_color: string
     created_at: string
     ai_context?: string | null
+    assigned_broker_id?: string | null
     property?: { title: string } | null
+}
+
+interface Broker {
+    id: string
+    name: string
 }
 
 const TEMPLATES = [
@@ -32,6 +38,7 @@ export default function LandingPagesAdmin() {
     const [pages, setPages] = useState<LandingPage[]>([])
     const [loading, setLoading] = useState(true)
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+    const [brokers, setBrokers] = useState<Broker[]>([])
 
     // AI Context Modal State
     const [editingContextId, setEditingContextId] = useState<string | null>(null)
@@ -50,8 +57,18 @@ export default function LandingPagesAdmin() {
         setLoading(false)
     }
 
+    const fetchBrokers = async () => {
+        const { data } = await supabase
+            .from('virtual_brokers')
+            .select('id, name')
+            .eq('is_active', true)
+            .order('name')
+        if (data) setBrokers(data)
+    }
+
     useEffect(() => {
         fetchPages()
+        fetchBrokers()
 
         const subscription = supabase
             .channel('landing-pages-updates')
@@ -96,6 +113,20 @@ export default function LandingPagesAdmin() {
             alert('Erro ao salvar as instruções.')
         } finally {
             setSavingContext(false)
+        }
+    }
+
+    const handleBrokerChange = async (pageId: string, brokerId: string | null) => {
+        try {
+            await supabase
+                .from('landing_pages')
+                .update({ assigned_broker_id: brokerId || null })
+                .eq('id', pageId)
+
+            fetchPages()
+        } catch (error) {
+            console.error('Error updating broker:', error)
+            alert('Erro ao atualizar o corretor.')
         }
     }
 
@@ -192,12 +223,33 @@ export default function LandingPagesAdmin() {
                                         <div style={{
                                             display: 'flex', gap: 16, fontSize: '0.8rem',
                                             color: 'var(--text-muted)', flexWrap: 'wrap',
+                                            alignItems: 'center'
                                         }}>
                                             <span>/{page.slug}</span>
                                             <span>•</span>
                                             <span>{page.page_views || 0} views</span>
                                             <span>•</span>
-                                            <span>{new Date(page.created_at).toLocaleDateString('pt-BR')}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <User size={12} />
+                                                <select
+                                                    value={page.assigned_broker_id || ''}
+                                                    onChange={(e) => handleBrokerChange(page.id, e.target.value)}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.75rem',
+                                                        color: 'var(--text-secondary)',
+                                                        padding: '1px 4px',
+                                                        outline: 'none'
+                                                    }}
+                                                >
+                                                    <option value="">Escala de Plantão (Auto)</option>
+                                                    {brokers.map(b => (
+                                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 

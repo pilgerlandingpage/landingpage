@@ -13,6 +13,7 @@ export async function GET() {
         const [
             { count: visitorsCount },
             { count: leadsCount },
+            { count: partialLeadsCount },
             { count: vipCount },
             { count: whatsappCount },
             { data: chatData },
@@ -30,8 +31,11 @@ export async function GET() {
             // 1. Total Visitors
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
 
-            // 2. Total Leads
-            supabase.from('leads').select('*', { count: 'exact', head: true }),
+            // 2. Complete Leads (Nome + Telefone)
+            supabase.from('leads').select('*', { count: 'exact', head: true }).not('phone', 'is', null),
+
+            // 2b. Partial Leads (Iniciou o chat, mas não deixou contato)
+            supabase.from('leads').select('*', { count: 'exact', head: true }).is('phone', null),
 
             // 3. VIP Leads
             supabase.from('leads').select('*', { count: 'exact', head: true }).eq('is_vip', true),
@@ -52,7 +56,7 @@ export async function GET() {
 
             // 8. Last 7 Days Leads
             supabase.from('leads')
-                .select('created_at')
+                .select('created_at, phone')
                 .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
 
             // 9. Push Subscribers
@@ -99,7 +103,7 @@ export async function GET() {
             const dayLabel = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
             const visitors = dailyVisitors?.filter(v => v.first_visit_at?.startsWith(dateStr)).length || 0
-            const leads = dailyLeads?.filter(l => l.created_at?.startsWith(dateStr)).length || 0
+            const leads = dailyLeads?.filter(l => l.created_at?.startsWith(dateStr) && l.phone != null).length || 0
 
             dailyData.push({
                 date: dayLabel,
@@ -129,7 +133,7 @@ export async function GET() {
         const recentVisitorIds = recentVisitorsRaw?.map(v => v.id) || []
         const { data: recentLeads } = await supabase
             .from('leads')
-            .select('visitor_id, funnel_stage, push_subscribed_lead')
+            .select('visitor_id, funnel_stage, push_subscribed_lead, phone')
             .in('visitor_id', recentVisitorIds)
 
         const recentVisitors = recentVisitorsRaw?.map(visitor => {
@@ -137,6 +141,7 @@ export async function GET() {
             return {
                 ...visitor,
                 is_lead: !!lead,
+                is_complete_lead: lead?.phone != null,
                 funnel_stage: lead?.funnel_stage || 'visitor',
                 push_subscribed: lead?.push_subscribed_lead || false
             }
@@ -144,7 +149,9 @@ export async function GET() {
 
         const stats = {
             totalVisitors: visitorsCount || 0,
-            totalLeads: leadsCount || 0,
+            completeLeads: leadsCount || 0,
+            partialLeads: partialLeadsCount || 0,
+            totalLeads: (leadsCount || 0) + (partialLeadsCount || 0),
             conversionRate: visitorsCount ? parseFloat(((leadsCount! / visitorsCount!) * 100).toFixed(1)) : 0,
             vipLeads: vipCount || 0,
             chatSessions: uniqueChatSessions,

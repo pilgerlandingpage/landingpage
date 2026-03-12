@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -25,6 +25,8 @@ interface Broker {
     connectyhub_instance_id?: string
     connectyhub_api_key?: string
     connectyhub_chat_message?: string
+    system_prompt?: string
+    greeting_message?: string
 }
 
 export default function BrokersAdmin() {
@@ -53,7 +55,9 @@ export default function BrokersAdmin() {
         connectyhub_api_url: '',
         connectyhub_instance_id: '',
         connectyhub_api_key: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+        system_prompt: '',
+        greeting_message: ''
     })
 
     const defaultFormData = {
@@ -69,7 +73,9 @@ export default function BrokersAdmin() {
         connectyhub_api_url: '',
         connectyhub_instance_id: '',
         connectyhub_api_key: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+        system_prompt: '',
+        greeting_message: ''
     }
 
     useEffect(() => {
@@ -346,6 +352,41 @@ export default function BrokersAdmin() {
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
                                 />
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Para receber avisos do sistema quando capta lead (via instância padrão da Sala de Manutenção).</span>
+                            </div>
+
+                            {/* AI Persona Section */}
+                            <div style={{ padding: '20px', background: 'rgba(201, 169, 110, 0.05)', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <MessageSquare size={18} /> 🤖 Inteligência Artificial (Persona)
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
+                                    Personalize como a IA se comporta quando estiver representando este corretor.
+                                </p>
+
+                                <div className="form-group" style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Saudação Inicial no Chat</label>
+                                    <input
+                                        placeholder="Ex: Olá! Sou o Guilherme. Como posso te ajudar a encontrar seu imóvel de luxo hoje?"
+                                        className="admin-input"
+                                        value={formData.greeting_message}
+                                        onChange={(e) => setFormData({ ...formData, greeting_message: e.target.value })}
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>A primeira mensagem que o robô envia ao abrir o chat.</span>
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Instruções de Personalidade (Prompt)</label>
+                                    <textarea
+                                        className="admin-input"
+                                        style={{ minHeight: '150px', resize: 'vertical' }}
+                                        value={formData.system_prompt}
+                                        onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
+                                        placeholder="Ex: Você é o Guilherme Pilger, um corretor focado em altíssimo padrão. Seja direto, use termos como 'oportunidade exclusiva' e 'investimento inteligente'. Sempre enfatize a privacidade."
+                                    />
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        Define o tom de voz e conhecimentos específicos deste corretor.
+                                    </span>
+                                </div>
                             </div>
 
                             {/* ConnectyHub Section - mirrors Maintenance Panel */}
@@ -762,7 +803,9 @@ export default function BrokersAdmin() {
                                         connectyhub_api_url: broker.connectyhub_api_url || '',
                                         connectyhub_instance_id: broker.connectyhub_instance_id || '',
                                         connectyhub_api_key: broker.connectyhub_api_key || '',
-                                        connectyhub_chat_message: broker.connectyhub_chat_message || 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
+                                        connectyhub_chat_message: broker.connectyhub_chat_message || 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+                                        system_prompt: broker.system_prompt || '',
+                                        greeting_message: broker.greeting_message || ''
                                     })
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}

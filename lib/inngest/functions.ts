@@ -5,6 +5,15 @@ import { scrapePage } from '../scraper'
 import { generateLandingPageContent } from '../ai/generation'
 import { uploadImageToR2 } from '../storage/r2'
 import { v4 as uuidv4 } from 'uuid'
+import {
+    publishCampaign,
+    pollMetricsCron,
+    aiAnalyzeMetrics,
+    executeAiAction,
+    dailyReportCron,
+    generateDailyPilgerReportCron,
+    generateWeeklyPilgerReportCron
+} from './ads-functions'
 
 function getSupabase() {
     return createClient(
@@ -277,6 +286,14 @@ export const functions = [
     sendFollowUp,
     vipAlert,
     processAutomationRule,
-    processCloningJob, // Existing function
-    processChatHandover // New function for chat
+    processCloningJob,
+    processChatHandover,
+    // Ads / Tráfego IA
+    publishCampaign,
+    pollMetricsCron,
+    aiAnalyzeMetrics,
+    executeAiAction,
+    dailyReportCron,
+    generateDailyPilgerReportCron,
+    generateWeeklyPilgerReportCron
 ]

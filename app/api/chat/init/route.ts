@@ -42,71 +42,13 @@ export async function GET(request: NextRequest) {
         const todayWeekday = today.getDay() // 0-6 (Sun-Sat)
         const isLandingPage = type === 'landing_page' || type === 'cloned_landing_page'
 
-        // Try to find brokers scheduled for today (either specific date or weekday)
-        let { data: allDutyBrokers } = await supabase
-            .from('virtual_brokers')
-            .select('*')
-            .eq('is_active', true)
-            .or(`duty_dates.cs.[{"${todayDateStr}"}],duty_weekdays.cs.[${todayWeekday}]`)
+        // 1.1 First, if it's a landing page, check for an explicit assigned broker
+        let assignedBrokerId: string | null = null
+        let lpTitle: string | null = null
+        let lpPropertyTitle: string | null = null
 
-        // Fallback: If no priority broker, get all active brokers
-        if (!allDutyBrokers || allDutyBrokers.length === 0) {
-            const { data } = await supabase
-                .from('virtual_brokers')
-                .select('*')
-                .eq('is_active', true)
-            allDutyBrokers = data
-        }
-
-        // Filter brokers based on page assignment
-        let priorityBrokers = allDutyBrokers || []
-
-        if (isLandingPage && slug) {
-            // For landing pages: first try brokers specifically assigned to this LP
-            const lpSpecificBrokers = priorityBrokers.filter(
-                (b: any) => b.assignment_type === 'landing_pages' &&
-                    Array.isArray(b.assigned_page_slugs) &&
-                    b.assigned_page_slugs.includes(slug)
-            )
-
-            if (lpSpecificBrokers.length > 0) {
-                priorityBrokers = lpSpecificBrokers
-            } else {
-                // Fallback to "all" type brokers (general rotation)
-                const generalBrokers = priorityBrokers.filter(
-                    (b: any) => !b.assignment_type || b.assignment_type === 'all'
-                )
-                if (generalBrokers.length > 0) {
-                    priorityBrokers = generalBrokers
-                }
-            }
-        } else {
-            // For home/property pages: only use "all" type brokers
-            const generalBrokers = priorityBrokers.filter(
-                (b: any) => !b.assignment_type || b.assignment_type === 'all'
-            )
-            if (generalBrokers.length > 0) {
-                priorityBrokers = generalBrokers
-            }
-        }
-
-        const broker = priorityBrokers.length > 0
-            ? priorityBrokers[Math.floor(Math.random() * priorityBrokers.length)]
-            : { name: 'Guilherme Pilger', creci: 'CRECI 5555' }
-
-        // 2. Generate Greeting based on Context
-        let greeting = `Olá! Sou o corretor ${broker.name} (${broker.creci}). Como posso te ajudar hoje?`
-
-        if (type === 'home') {
-            greeting = `Olá! Bem-vindo à Pilger Imóveis. Sou ${broker.name}. Está buscando algum imóvel específico ou gostaria de ver nossos destaques?`
-        } else if (type === 'property' && id) {
-            const { data: property } = await supabase.from('properties').select('title').eq('id', id).maybeSingle()
-            if (property) {
-                greeting = `Olá! Sou ${broker.name}. Excelente escolha visitar o "${property.title}". Gostaria de saber mais detalhes ou agendar uma visita?`
-            }
-        } else if (((type === 'landing_page' || type === 'cloned_landing_page') && slug) || landingPageId) {
-            // Try fetching by slug first, then ID
-            let query = supabase.from('landing_pages').select('title, property:properties(title)')
+        if (isLandingPage || landingPageId) {
+            let query = supabase.from('landing_pages').select('title, assigned_broker_id, property:properties(title)')
 
             if (slug && slug !== 'preview') {
                 query = query.eq('slug', slug)
@@ -115,9 +57,96 @@ export async function GET(request: NextRequest) {
             }
 
             const { data: lp } = await query.maybeSingle()
-
             if (lp) {
-                const title = (lp.property as any)?.title || lp.title
+                assignedBrokerId = lp.assigned_broker_id
+                lpTitle = lp.title
+                lpPropertyTitle = (lp.property as any)?.title
+            }
+        }
+
+        let broker: any = null
+
+        if (assignedBrokerId) {
+            const { data: assignedBroker } = await supabase
+                .from('virtual_brokers')
+                .select('*')
+                .eq('id', assignedBrokerId)
+                .eq('is_active', true)
+                .maybeSingle()
+
+            if (assignedBroker) {
+                broker = assignedBroker
+            }
+        }
+
+        // 1.2 If no direct broker found, use duty schedule logic
+        if (!broker) {
+            // Try to find brokers scheduled for today (either specific date or weekday)
+            let { data: allDutyBrokers } = await supabase
+                .from('virtual_brokers')
+                .select('*')
+                .eq('is_active', true)
+                .or(`duty_dates.cs.[{"${todayDateStr}"}],duty_weekdays.cs.[${todayWeekday}]`)
+
+            // Fallback: If no priority broker, get all active brokers
+            if (!allDutyBrokers || allDutyBrokers.length === 0) {
+                const { data } = await supabase
+                    .from('virtual_brokers')
+                    .select('*')
+                    .eq('is_active', true)
+                allDutyBrokers = data
+            }
+
+            // Filter brokers based on page assignment
+            let priorityBrokers = allDutyBrokers || []
+
+            if (isLandingPage && slug) {
+                // For landing pages: first try brokers specifically assigned to this LP via slugs
+                const lpSpecificBrokers = priorityBrokers.filter(
+                    (b: any) => b.assignment_type === 'landing_pages' &&
+                        Array.isArray(b.assigned_page_slugs) &&
+                        b.assigned_page_slugs.includes(slug)
+                )
+
+                if (lpSpecificBrokers.length > 0) {
+                    priorityBrokers = lpSpecificBrokers
+                } else {
+                    // Fallback to "all" type brokers (general rotation)
+                    const generalBrokers = priorityBrokers.filter(
+                        (b: any) => !b.assignment_type || b.assignment_type === 'all'
+                    )
+                    if (generalBrokers.length > 0) {
+                        priorityBrokers = generalBrokers
+                    }
+                }
+            } else {
+                // For home/property pages: only use "all" type brokers
+                const generalBrokers = priorityBrokers.filter(
+                    (b: any) => !b.assignment_type || b.assignment_type === 'all'
+                )
+                if (generalBrokers.length > 0) {
+                    priorityBrokers = generalBrokers
+                }
+            }
+
+            broker = priorityBrokers.length > 0
+                ? priorityBrokers[Math.floor(Math.random() * priorityBrokers.length)]
+                : { name: 'Guilherme Pilger', creci: 'CRECI 5555' }
+        }
+
+        // 2. Generate Greeting based on Context
+        let greeting = broker.greeting_message || `Olá! Sou o corretor ${broker.name} (${broker.creci}). Como posso te ajudar hoje?`
+
+        if (!broker.greeting_message) {
+            if (type === 'home') {
+                greeting = `Olá! Bem-vindo à Pilger Imóveis. Sou ${broker.name}. Está buscando algum imóvel específico ou gostaria de ver nossos destaques?`
+            } else if (type === 'property' && id) {
+                const { data: property } = await supabase.from('properties').select('title').eq('id', id).maybeSingle()
+                if (property) {
+                    greeting = `Olá! Sou ${broker.name}. Excelente escolha visitar o "${property.title}". Gostaria de saber mais detalhes ou agendar uma visita?`
+                }
+            } else if (lpTitle || lpPropertyTitle) {
+                const title = lpPropertyTitle || lpTitle
                 greeting = `Olá! Sou ${broker.name}. Vi que você se interessou por "${title}". Posso te contar os diferenciais dessa oportunidade?`
             }
         }
@@ -161,7 +190,8 @@ export async function GET(request: NextRequest) {
                 connectyhub_api_url: broker.connectyhub_api_url,
                 connectyhub_instance_id: broker.connectyhub_instance_id,
                 connectyhub_api_key: broker.connectyhub_api_key,
-                connectyhub_chat_message: broker.connectyhub_chat_message
+                connectyhub_chat_message: broker.connectyhub_chat_message,
+                system_prompt: broker.system_prompt
             },
             timing,
             autoOpenDelay

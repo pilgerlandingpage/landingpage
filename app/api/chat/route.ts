@@ -175,8 +175,12 @@ export async function POST(req: NextRequest) {
         console.log('[Chat Debug] brokerConnectyhubChatMessage:', brokerConnectyhubChatMessage ? 'SET' : 'UNDEFINED')
         console.log('[Chat Debug] ════════════════════════════════════════════')
 
-        // Priority: admin maintenance prompt > ai_agents prompt > fallback
-        const basePrompt = promptConfig || agent?.system_prompt || CONCIERGE_BASE_PROMPT
+        // Priority order for Persona:
+        // 1. Specific Broker Prompt (from virtual_brokers table)
+        // 2. Maintenance Config Prompt (from app_config)
+        // 3. AI Agents table prompt
+        // 4. Default hardcoded fallback
+        const basePrompt = broker?.system_prompt || promptConfig || agent?.system_prompt || CONCIERGE_BASE_PROMPT
 
         // Root rules: admin-configurable or default hardcoded
         const rulesPrompt = configMap['concierge_rules_prompt'] || CONCIERGE_SAFEGUARD_RULES

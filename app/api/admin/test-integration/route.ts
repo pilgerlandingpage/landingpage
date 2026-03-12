@@ -165,6 +165,255 @@ export async function POST(request: NextRequest) {
                 })
             }
 
+            case 'meta_ads': {
+                const accessToken = config.meta_access_token
+                const adAccountId = config.meta_ad_account_id
+
+                if (!accessToken) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Access Token do Meta Ads não configurado',
+                    })
+                }
+
+                // If Ad Account ID is missing, we just test the token
+                const targetUrl = adAccountId && adAccountId.trim() !== ''
+                    ? `https://graph.facebook.com/v19.0/${adAccountId}?fields=name,account_status&access_token=${accessToken}`
+                    : `https://graph.facebook.com/v19.0/me?access_token=${accessToken}`
+
+                try {
+                    const res = await fetch(targetUrl)
+
+                    if (!res.ok) {
+                        const error = await res.json()
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro Meta Ads: ${error.error?.message || res.statusText}`,
+                        })
+                    }
+
+                    const data = await res.json()
+
+                    if (adAccountId && adAccountId.trim() !== '') {
+                        const statusName = data.account_status === 1 ? 'Ativa' :
+                            data.account_status === 2 ? 'Desativada' :
+                                data.account_status === 3 ? 'Unsettled' :
+                                    data.account_status === 7 ? 'Pendente de Revisão' :
+                                        data.account_status === 101 ? 'Fechada' :
+                                            `Status ${data.account_status}`
+                        return NextResponse.json({
+                            success: true,
+                            message: `Conectado! Conta: ${data.name || adAccountId} (${statusName})`,
+                        })
+                    }
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `Token válido! Conectado como: ${data.name || data.id}`,
+                    })
+
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro ao conectar com Meta Ads: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'google_ads': {
+                const developerToken = (config.google_ads_developer_token || process.env.GOOGLE_ADS_DEVELOPER_TOKEN)?.trim()
+                const clientId = (config.google_ads_client_id || process.env.GOOGLE_ADS_CLIENT_ID)?.trim()
+                const clientSecret = (config.google_ads_client_secret || process.env.GOOGLE_ADS_CLIENT_SECRET)?.trim()
+                const refreshToken = (config.google_ads_refresh_token || process.env.GOOGLE_ADS_REFRESH_TOKEN)?.trim()
+
+                let managerId = (config.google_ads_manager_id || process.env.GOOGLE_ADS_MANAGER_ID)?.trim()
+                const customerId = (config.google_ads_customer_id || process.env.GOOGLE_ADS_CUSTOMER_ID)?.trim()
+
+                // Limpeza de hifens
+                const cleanId = (id?: string) => id ? id.replace(/-/g, '') : undefined;
+                const cleanManagerId = cleanId(managerId);
+                const cleanCustomerId = cleanId(customerId);
+
+                if (!developerToken || !clientId || !clientSecret || !refreshToken || !cleanCustomerId || !cleanManagerId) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Preencha todos os campos do Google Ads (incluindo as 4 chaves OAuth e os 2 IDs de conta).',
+                    })
+                }
+
+                try {
+                    // 1. Obter Access Token via Refresh Token
+                    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            client_id: clientId,
+                            client_secret: clientSecret,
+                            refresh_token: refreshToken,
+                            grant_type: 'refresh_token'
+                        })
+                    })
+
+                    const tokenText = await tokenRes.text()
+                    let tokenData: any
+                    try {
+                        tokenData = JSON.parse(tokenText)
+                    } catch (e) {
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro na resposta do Google OAuth (${tokenRes.status}). Resposta não é JSON.`
+                        })
+                    }
+
+                    if (!tokenRes.ok || tokenData.error) {
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro OAuth Google (${tokenRes.status}): ${tokenData.error_description || tokenData.error || 'Token inválido'}`
+                        })
+                    }
+
+                    const accessToken = tokenData.access_token
+
+                    // 2. Testar chamada à API (listAccessibleCustomers v20)
+                    const apiUrl = `https://googleads.googleapis.com/v20/customers:listAccessibleCustomers`
+                    console.log('Testando conexão Google Ads URL:', apiUrl)
+
+                    const apiRes = await fetch(
+                        apiUrl,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${accessToken}`,
+                                'developer-token': developerToken,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        }
+                    )
+
+                    const apiText = await apiRes.text()
+                    let apiData: any
+                    try {
+                        apiData = JSON.parse(apiText)
+                    } catch (e) {
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro na resposta da API Google Ads (${apiRes.status}). URL: ${apiUrl}. Resposta: ${apiText.substring(0, 100)}...`
+                        })
+                    }
+
+                    if (!apiRes.ok || apiData.error) {
+                        const errorObj = apiData.error
+                        const errMsg = errorObj?.message || 'Erro desconhecido'
+                        
+                        // Check for specific Google Ads error codes
+                        const adsErrors = errorObj?.details?.find((d: any) => d['@type']?.includes('GoogleAdsFailure'))?.errors || []
+                        const specificError = adsErrors[0]?.errorCode ? Object.entries(adsErrors[0].errorCode)[0] : null
+                        const specificMsg = specificError ? `[${specificError[0]}: ${specificError[1]}] ` : ''
+                        const detailMsg = adsErrors[0]?.message || ''
+
+                        return NextResponse.json({
+                            success: false,
+                            message: `Autenticado, mas a API negou (${apiRes.status}): ${specificMsg}${detailMsg || errMsg}`
+                        })
+                    }
+
+                    const resourceNames = apiData.resourceNames || []
+                    return NextResponse.json({
+                        success: true,
+                        message: `Conectado com sucesso! Você tem acesso a ${resourceNames.length} contas.`
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Falha na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'serpapi': {
+                const apiKey = config.serpapi_api_key
+
+                if (!apiKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'API Key do SerpApi não configurada',
+                    })
+                }
+
+                try {
+                    const res = await fetch(`https://serpapi.com/account?api_key=${apiKey}`)
+                    if (!res.ok) {
+                        const error = await res.json().catch(() => ({ error: 'Desconhecido' }))
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro SerpApi: ${error.error || res.statusText}`,
+                        })
+                    }
+
+                    const data = await res.json()
+                    return NextResponse.json({
+                        success: true,
+                        message: `Conectado! Conta: ${data.account_email || 'Válida'} (${data.plan_searches_left} buscas restantes)`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'dataforseo': {
+                const login = config.dataforseo_login
+                const password = config.dataforseo_password
+
+                if (!login || !password) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Preencha Login e Password (API Key) do DataForSEO',
+                    })
+                }
+
+                try {
+                    // Endpoint oficial para info da conta no DataForSEO
+                    const res = await fetch('https://api.dataforseo.com/v3/appendix/user_data', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Basic ${Buffer.from(`${login}:${password}`).toString('base64')}`
+                        }
+                    })
+
+                    if (!res.ok) {
+                        const error = await res.json().catch(() => ({ status_message: 'Desconhecido' }))
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro DataForSEO: ${error.status_message || res.statusText}`,
+                        })
+                    }
+
+                    const data = await res.json()
+                    const tasks = data?.tasks || []
+                    if (tasks.length > 0 && tasks[0].result && tasks[0].result.length > 0) {
+                        const balance = tasks[0].result[0].money?.balance || 0
+                        return NextResponse.json({
+                            success: true,
+                            message: `Conectado com sucesso! Saldo: $${balance.toFixed(2)}`,
+                        })
+                    }
+
+                    return NextResponse.json({
+                        success: true,
+                        message: 'Conectado com sucesso com DataForSEO!',
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
             default:
                 return NextResponse.json({
                     success: false,

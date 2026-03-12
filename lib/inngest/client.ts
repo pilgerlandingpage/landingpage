@@ -61,5 +61,30 @@ export const inngest = new Inngest({
                 property_title?: string
             }
         }
+        // --- Ads / Tráfego ---
+        'ads/campaign-created': {
+            data: {
+                campaign_id: string
+            }
+        }
+        'ads/ai-analyze': {
+            data: {
+                campaign_id: string
+                metrics: Record<string, unknown>
+            }
+        }
+        'ads/execute-action': {
+            data: {
+                campaign_id: string
+                action: string
+                alert_message: string
+                urgency: string
+                budget_adjustment?: { type: string; new_daily_budget: number }
+                campaign_name: string
+                platform: string
+                external_campaign_id?: string
+                external_adset_id?: string
+            }
+        }
     }>()
 })

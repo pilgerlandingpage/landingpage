@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Wand2, ShieldCheck } from 'lucide-react'
+import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 import {
     BarChart,
@@ -22,6 +22,8 @@ import {
 
 interface DashboardStats {
     totalVisitors: number
+    completeLeads: number
+    partialLeads: number
     totalLeads: number
     conversionRate: number
     vipLeads: number
@@ -52,15 +54,44 @@ interface RecentVisitor {
     country: string
     last_visit_at: string
     is_lead: boolean
+    is_complete_lead?: boolean
     funnel_stage: string
     push_subscribed?: boolean
 }
 
 const PIE_COLORS = ['#c9a96e', '#dfc18e', '#a88b4a', '#8B7355', '#D4AF37', '#FFD700', '#B8860B', '#CD853F']
 
+function renderMarkdown(md: string): string {
+    // Escape HTML first (sanitization)
+    let html = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    // Headers
+    html = html.replace(/^### (.+)$/gm, '<h4 style="margin:16px 0 8px;color:var(--gold);font-size:1.1rem">$1</h4>')
+    html = html.replace(/^## (.+)$/gm, '<h3 style="margin:20px 0 8px;color:var(--text-primary);font-size:1.25rem">$1</h3>')
+    html = html.replace(/^# (.+)$/gm, '<h2 style="margin:24px 0 12px;color:var(--text-primary);font-size:1.5rem">$1</h2>')
+    // Bold & Italic
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Unordered lists
+    html = html.replace(/^[\-\*] (.+)$/gm, '<li style="margin:4px 0;padding-left:4px">$1</li>')
+    html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, (match) => `<ul style="margin:8px 0 8px 24px;padding:0;list-style:disc">${match}</ul>`)
+    // Numbered lists
+    html = html.replace(/^\d+\.\s+(.+)$/gm, '<li style="margin:4px 0;padding-left:4px">$1</li>')
+    // Line breaks
+    html = html.replace(/\n\n/g, '</p><p style="margin:8px 0">')
+    html = html.replace(/\n/g, '<br/>')
+    html = `<p style="margin:8px 0">${html}</p>`
+    return html
+}
+
 export default function AdminDashboard() {
     const [stats, setStats] = useState<DashboardStats>({
         totalVisitors: 0,
+        completeLeads: 0,
+        partialLeads: 0,
         totalLeads: 0,
         conversionRate: 0,
         vipLeads: 0,
@@ -75,6 +106,10 @@ export default function AdminDashboard() {
     const [topPages, setTopPages] = useState<any[]>([])
     const [dailyData, setDailyData] = useState<DailyData[]>([])
     const [recentVisitors, setRecentVisitors] = useState<RecentVisitor[]>([])
+    const [latestReport, setLatestReport] = useState<any>(null)
+    const [metaReport, setMetaReport] = useState<any>(null)
+    const [googleReport, setGoogleReport] = useState<any>(null)
+    const [adMetrics, setAdMetrics] = useState<{ totalSpend: number; totalLeads: number; avgCpa: number; activeCampaigns: number }>({ totalSpend: 0, totalLeads: 0, avgCpa: 0, activeCampaigns: 0 })
     const [loading, setLoading] = useState(true)
 
     const safeDecode = (str?: string) => {
@@ -98,22 +133,6 @@ export default function AdminDashboard() {
                 setSourceData(data.sourceData)
                 setTopPages(data.topPages || [])
                 setRecentVisitors(data.recentVisitors || [])
-
-                // Ensure dates are formatted correctly if needed, broadly simpler than client-side calc
-                setDailyData(data.dailyData.map((d: any) => ({
-                    ...d,
-                    // Format date if API sends ISO string or ensure consistent format
-                    date: d.date
-                })).reverse()) // API returns last 7 days descending (loop 6 to 0), but chart commonly likes ascending. 
-                // Wait, my API loop was: for (let i = 6; i >= 0; i--) -> 6 days ago, 5 days ago... today.
-                // So the array order is [T-6, T-5, ..., Today]. This is Ascending order.
-                // Recharts expects Ascending for X-Axis (Left to Right).
-                // My API code:
-                // for (let i = 6; i >= 0; i--) { push(...) }
-                // i=6 (6 days ago) -> push
-                // i=0 (today) -> push
-                // So API returns Ascending. 
-                // No need to reverse.
                 setDailyData(data.dailyData)
 
             } catch (error) {
@@ -123,7 +142,54 @@ export default function AdminDashboard() {
             }
         }
 
+        const fetchReport = async () => {
+            try {
+                // Fetch per-platform reports
+                const [metaRes, googleRes] = await Promise.all([
+                    fetch('/api/admin/reports/latest?platform=meta'),
+                    fetch('/api/admin/reports/latest?platform=google'),
+                ])
+                if (metaRes.ok) {
+                    const d = await metaRes.json()
+                    if (d.report) setMetaReport(d.report)
+                }
+                if (googleRes.ok) {
+                    const d = await googleRes.json()
+                    if (d.report) setGoogleReport(d.report)
+                }
+            } catch (err) {
+                console.error('Error fetching report', err)
+            }
+        }
+
+        const fetchAdMetrics = async () => {
+            try {
+                const [metaRes, googleRes] = await Promise.all([
+                    fetch('/api/admin/ads?date_preset=today'),
+                    fetch('/api/admin/ads/google?date_preset=today'),
+                ])
+                let allCampaigns: any[] = []
+                if (metaRes.ok) {
+                    const data = await metaRes.json()
+                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                }
+                if (googleRes.ok) {
+                    const data = await googleRes.json()
+                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                }
+                const active = allCampaigns.filter(c => c.status === 'active')
+                const spend = active.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
+                const leads = active.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
+                const cpa = leads > 0 ? spend / leads : 0
+                setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
+            } catch (err) {
+                console.error('Error fetching ad metrics', err)
+            }
+        }
+
         fetchData()
+        fetchReport()
+        fetchAdMetrics()
     }, [])
 
     if (loading) {
@@ -137,80 +203,158 @@ export default function AdminDashboard() {
         )
     }
 
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return '#22c55e'
+        if (score >= 60) return '#3b82f6'
+        if (score >= 40) return '#f59e0b'
+        if (score >= 20) return '#f97316'
+        return '#ef4444'
+    }
+    const getScoreLabel = (score: number) => {
+        if (score >= 80) return 'Excelente'
+        if (score >= 60) return 'Bom'
+        if (score >= 40) return 'Médio'
+        if (score >= 20) return 'Ruim'
+        return 'Crítico'
+    }
+    const getScoreEmoji = (score: number) => {
+        if (score >= 80) return '🟢'
+        if (score >= 60) return '🔵'
+        if (score >= 40) return '🟡'
+        if (score >= 20) return '🟠'
+        return '🔴'
+    }
+    const formatCurrency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+    // General score = average of meta + google scores
+    const metaScore = metaReport?.performance_score ?? null
+    const googleScore = googleReport?.performance_score ?? null
+    const generalScore = metaScore != null && googleScore != null
+        ? Math.round((metaScore + googleScore) / 2)
+        : metaScore ?? googleScore ?? null
+
     return (
         <div>
             <div className="admin-header">
-                <h1>Dashboard</h1>
+                <h1>Painel do CEO</h1>
+                <p style={{ color: 'var(--text-muted)' }}>"Olho de Deus" - Monitoramento Proativo</p>
             </div>
 
-            {/* Quick Actions */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
-                <Link href="/admin/landing-pages" style={{ textDecoration: 'none' }}>
-                    <div className="chart-card" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '24px',
-                        background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.1) 0%, rgba(201, 169, 110, 0.05) 100%)',
-                        border: '1px solid var(--gold)',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s',
-                        height: '100%'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{
-                                width: '48px',
-                                height: '48px',
-                                borderRadius: '50%',
-                                background: 'var(--gold)',
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <Wand2 size={24} />
-                            </div>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Landing Pages</h3>
-                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gerencie suas páginas personalizadas.</p>
-                            </div>
+            {/* ═══ Combined Traffic KPIs + General Thermometer ═══ */}
+            <div style={{ display: 'grid', gridTemplateColumns: generalScore != null ? '1fr 200px' : '1fr', gap: 24, marginBottom: 32 }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                        <Megaphone size={22} color="var(--gold)" />
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Tráfego Pago — Visão Geral</span>
+                    </div>
+                    <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 0 }}>
+                        <div className="kpi-card">
+                            <DollarSign size={20} color="#22c55e" style={{ marginBottom: 8 }} />
+                            <div className="kpi-label">Gasto Total Hoje</div>
+                            <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(adMetrics.totalSpend)}</div>
+                        </div>
+                        <div className="kpi-card">
+                            <Users size={20} color="#8b5cf6" style={{ marginBottom: 8 }} />
+                            <div className="kpi-label">Leads de Tráfego</div>
+                            <div className="kpi-value" style={{ color: '#8b5cf6' }}>{adMetrics.totalLeads}</div>
+                        </div>
+                        <div className="kpi-card">
+                            <Target size={20} color="#ec4899" style={{ marginBottom: 8 }} />
+                            <div className="kpi-label">CPA Geral</div>
+                            <div className="kpi-value" style={{ color: '#ec4899' }}>{adMetrics.avgCpa > 0 ? formatCurrency(adMetrics.avgCpa) : '—'}</div>
+                        </div>
+                        <div className="kpi-card">
+                            <TrendingUp size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
+                            <div className="kpi-label">Campanhas Ativas</div>
+                            <div className="kpi-value">{adMetrics.activeCampaigns}</div>
                         </div>
                     </div>
-                </Link>
+                </div>
 
-                <Link href="/admin/brokers" style={{ textDecoration: 'none' }}>
-                    <div className="chart-card" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '24px',
-                        background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.1) 0%, rgba(201, 169, 110, 0.05) 100%)',
-                        border: '1px solid var(--gold)',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s',
-                        height: '100%'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{
-                                width: '48px',
-                                height: '48px',
-                                borderRadius: '50%',
-                                background: 'var(--gold)',
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <ShieldCheck size={24} />
-                            </div>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--gold)' }}>Corretores de Plantão</h3>
-                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gerencie perfis e fotos do chat público.</p>
+                {/* General Thermometer */}
+                {generalScore != null && (
+                    <div className="chart-card" style={{ textAlign: 'center', padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <Thermometer size={22} color={getScoreColor(generalScore)} style={{ marginBottom: 8 }} />
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600, marginBottom: 6 }}>Termômetro Geral</div>
+                        <div style={{ position: 'relative', width: 90, height: 90, marginBottom: 8 }}>
+                            <svg viewBox="0 0 90 90" width="90" height="90">
+                                <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border-color)" strokeWidth="8" />
+                                <circle cx="45" cy="45" r="38" fill="none" stroke={getScoreColor(generalScore)} strokeWidth="8"
+                                    strokeDasharray={`${(generalScore / 100) * 238.8} 238.8`}
+                                    strokeLinecap="round" transform="rotate(-90 45 45)"
+                                    style={{ transition: 'stroke-dasharray 1s ease-out' }} />
+                            </svg>
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ fontSize: '1.5rem', fontWeight: 800, color: getScoreColor(generalScore), fontFamily: 'Playfair Display, serif' }}>{generalScore}</span>
                             </div>
                         </div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: getScoreColor(generalScore) }}>
+                            {getScoreEmoji(generalScore)} {getScoreLabel(generalScore)}
+                        </span>
+                        {metaScore != null && googleScore != null && (
+                            <div style={{ marginTop: 8, fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                Meta: {metaScore} | Google: {googleScore}
+                            </div>
+                        )}
                     </div>
-                </Link>
+                )}
             </div>
+
+            {/* ═══ Side-by-Side Platform Reports ═══ */}
+            <div style={{ display: 'grid', gridTemplateColumns: metaReport || googleReport ? '1fr 1fr' : '1fr', gap: 24, marginBottom: 32 }}>
+                {/* Meta Report */}
+                {metaReport ? (
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, boxShadow: 'var(--shadow-gold)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
+                            <Brain color="var(--gold)" size={24} />
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontFamily: 'Playfair Display, serif' }}>
+                                {metaReport.type === 'daily' ? '📋 Meta Ads' : '🔭 Meta Ads'}
+                            </h3>
+                            {metaReport.performance_score != null && (
+                                <span style={{ fontSize: '0.7rem', padding: '3px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(metaReport.performance_score)}15`, color: getScoreColor(metaReport.performance_score) }}>
+                                    {getScoreEmoji(metaReport.performance_score)} {metaReport.performance_score}/100
+                                </span>
+                            )}
+                            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                {new Date(metaReport.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem', maxHeight: 400, overflowY: 'auto' }}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(metaReport.content_markdown || '') }} />
+                    </div>
+                ) : !googleReport && (
+                    <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, gridColumn: '1 / -1' }}>
+                        <Brain color="var(--gold)" size={18} style={{ opacity: 0.6 }} />
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            Pilger AI — Relatórios automáticos: <strong style={{ color: 'var(--gold)' }}>Diário</strong> às 23h | <strong style={{ color: '#2563eb' }}>Semanal</strong> às Seg 06h
+                        </span>
+                    </div>
+                )}
+
+                {/* Google Report */}
+                {googleReport && (
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
+                            <Brain color="#4285F4" size={24} />
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontFamily: 'Playfair Display, serif' }}>
+                                {googleReport.type === 'daily' ? '📋 Google Ads' : '🔭 Google Ads'}
+                            </h3>
+                            {googleReport.performance_score != null && (
+                                <span style={{ fontSize: '0.7rem', padding: '3px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(googleReport.performance_score)}15`, color: getScoreColor(googleReport.performance_score) }}>
+                                    {getScoreEmoji(googleReport.performance_score)} {googleReport.performance_score}/100
+                                </span>
+                            )}
+                            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                {new Date(googleReport.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem', maxHeight: 400, overflowY: 'auto' }}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(googleReport.content_markdown || '') }} />
+                    </div>
+                )}
+            </div>
+
+
 
             {/* KPI Cards */}
             <div className="kpi-grid">
@@ -219,10 +363,17 @@ export default function AdminDashboard() {
                     <div className="kpi-label">Visitantes</div>
                     <div className="kpi-value">{stats.totalVisitors.toLocaleString()}</div>
                 </div>
-                <div className="kpi-card">
-                    <Users size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">Leads Capturados</div>
-                    <div className="kpi-value">{stats.totalLeads.toLocaleString()}</div>
+                <div className="kpi-card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                    <Users size={20} color="#22c55e" style={{ marginBottom: 8 }} />
+                    <div className="kpi-label" style={{ color: '#22c55e' }}>Leads Completos</div>
+                    <div className="kpi-value" style={{ color: '#22c55e' }}>{stats.completeLeads.toLocaleString()}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 4 }}>Nome + Telefone</div>
+                </div>
+                <div className="kpi-card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <Users size={20} color="#f59e0b" style={{ marginBottom: 8 }} />
+                    <div className="kpi-label" style={{ color: '#f59e0b' }}>Leads Parciais</div>
+                    <div className="kpi-value" style={{ color: '#f59e0b' }}>{stats.partialLeads.toLocaleString()}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 4 }}>Abandonou no meio</div>
                 </div>
                 <div className="kpi-card">
                     <TrendingUp size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
@@ -379,8 +530,8 @@ export default function AdminDashboard() {
                                 <tr key={v.id || i} style={{ borderBottom: '1px solid #2a2a2a', fontSize: '0.85rem' }}>
                                     <td style={{ padding: '12px 8px' }}>
                                         {v.is_lead ? (
-                                            <span style={{ fontSize: '0.7rem', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
-                                                Lead ({v.funnel_stage})
+                                            <span style={{ fontSize: '0.7rem', background: v.is_complete_lead ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: v.is_complete_lead ? '#22c55e' : '#f59e0b', padding: '2px 6px', borderRadius: '4px', border: `1px solid ${v.is_complete_lead ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)'}` }}>
+                                                {v.is_complete_lead ? 'Lead Completo' : 'Lead Parcial'} ({v.funnel_stage})
                                             </span>
                                         ) : (
                                             <span style={{ fontSize: '0.7rem', background: 'rgba(201, 169, 110, 0.1)', color: '#c9a96e', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>

@@ -8,7 +8,6 @@ function getSupabase() {
     )
 }
 
-// Map config keys → environment variable names
 const ENV_FALLBACKS: Record<string, string> = {
     connectyhub_api_url: 'CONNECTYHUB_API_URL',
     connectyhub_api_key: 'CONNECTYHUB_API_KEY',
@@ -18,6 +17,11 @@ const ENV_FALLBACKS: Record<string, string> = {
     vapid_subject: 'VAPID_SUBJECT',
     vapid_public_key: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY',
     vapid_private_key: 'VAPID_PRIVATE_KEY',
+    google_ads_manager_id: 'GOOGLE_ADS_MANAGER_ID',
+    google_ads_customer_id: 'GOOGLE_ADS_CUSTOMER_ID',
+    serpapi_api_key: 'SERPAPI_API_KEY',
+    dataforseo_login: 'DATAFORSEO_LOGIN',
+    dataforseo_password: 'DATAFORSEO_PASSWORD',
 }
 
 // GET — Load all configs (database values override env vars)

@@ -57,6 +57,18 @@ export async function getPilgerProvider() {
     return (await getAIConfig('pilger_provider')) || (await getActiveAIProvider())
 }
 
+export async function getAdsProvider() {
+    return (await getAIConfig('ads_provider')) || (await getActiveAIProvider())
+}
+
+export async function getAdsGeminiModel() {
+    return (await getAIConfig('gemini_ads_model')) || 'gemini-2.0-flash'
+}
+
+export async function getAdsOpenAIModel() {
+    return (await getAIConfig('openai_ads_model')) || 'gpt-4o'
+}
+
 import { MASTER_LANDING_PAGE_PROMPT, LEAD_EXTRACTION_PROMPT } from './prompts'
 
 export async function getClonerPrompt() {
@@ -65,4 +77,16 @@ export async function getClonerPrompt() {
 
 export async function getLeadExtractionPrompt() {
     return (await getAIConfig('lead_extraction_prompt')) || LEAD_EXTRACTION_PROMPT
+}
+
+export async function getSerpApiKey() {
+    return getAIConfig('serpapi_api_key')
+}
+
+export async function getDataForSEOLogin() {
+    return getAIConfig('dataforseo_login')
+}
+
+export async function getDataForSEOPassword() {
+    return getAIConfig('dataforseo_password')
 }
