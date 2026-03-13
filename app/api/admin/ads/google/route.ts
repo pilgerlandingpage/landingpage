@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as googleAds from '@/lib/ads/google'
 import type { GoogleDatePreset } from '@/lib/ads/google'
+import { startOfDay, endOfDay, subDays } from 'date-fns'
 
 export async function GET(request: Request) {
     try {
@@ -28,6 +29,8 @@ export async function GET(request: Request) {
 
         // Campaigns query — fetch from DB then enrich with LIVE Google Ads metrics
         const datePreset = (searchParams.get('date_preset') || 'maximum') as GoogleDatePreset
+        const startDate = searchParams.get('start_date')
+        const endDate = searchParams.get('end_date')
 
         const { data: campaigns, error } = await supabase
             .from('ad_campaigns')
@@ -60,7 +63,46 @@ export async function GET(request: Request) {
             return { ...camp, latest_metrics: null }
         })
 
-        return NextResponse.json(enriched)
+        // Fetch internal lead counts and recent leads
+        const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+        let sinceInternal: string
+        let untilInternal: string = spNow.toISOString()
+
+        if (datePreset === 'today') {
+            sinceInternal = startOfDay(spNow).toISOString()
+        } else if (datePreset === 'yesterday') {
+            const yesterday = subDays(spNow, 1)
+            sinceInternal = startOfDay(yesterday).toISOString()
+            untilInternal = endOfDay(yesterday).toISOString()
+        } else if (datePreset === 'last_7d') {
+            sinceInternal = startOfDay(subDays(spNow, 7)).toISOString()
+        } else if (datePreset === 'last_30d') {
+            sinceInternal = startOfDay(subDays(spNow, 30)).toISOString()
+        } else if ((datePreset as string) === 'custom' && startDate && endDate) {
+            sinceInternal = new Date(startDate).toISOString()
+            untilInternal = new Date(endDate).toISOString()
+        } else {
+            sinceInternal = startOfDay(subDays(spNow, 90)).toISOString()
+        }
+
+        const [internalLeadsRes, recentLeadsRes] = await Promise.all([
+            supabase.from('leads').select('*', { count: 'exact', head: true })
+                .eq('detected_source', 'Google')
+                .gte('created_at', sinceInternal)
+                .lte('created_at', untilInternal),
+            supabase.from('leads').select('name, phone, created_at, funnel_stage')
+                .eq('detected_source', 'Google')
+                .order('created_at', { ascending: false })
+                .limit(10)
+        ])
+
+        return NextResponse.json({
+            campaigns: enriched,
+            internalStats: {
+                totalLeads: internalLeadsRes.count || 0,
+                recentLeads: recentLeadsRes.data || []
+            }
+        })
     } catch (error: any) {
         console.error('Error fetching Google ads data:', error)
         return NextResponse.json(

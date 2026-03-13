@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as metaAds from '@/lib/ads/meta'
 import * as googleAds from '@/lib/ads/google'
+import { startOfDay, endOfDay, subDays, format } from 'date-fns'
 
 // GET — list all campaigns (with optional ?alerts=true to fetch alerts instead)
 export async function GET(request: NextRequest) {
@@ -83,7 +84,47 @@ export async function GET(request: NextRequest) {
             return { ...camp, latest_metrics: null }
         })
 
-        return NextResponse.json(enriched)
+        // Fetch internal lead counts and recent leads
+        const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+        let sinceInternal: string
+        let untilInternal: string = spNow.toISOString()
+
+        if (datePreset === 'today') {
+            sinceInternal = startOfDay(spNow).toISOString()
+        } else if (datePreset === 'yesterday') {
+            const yesterday = subDays(spNow, 1)
+            sinceInternal = startOfDay(yesterday).toISOString()
+            untilInternal = endOfDay(yesterday).toISOString()
+        } else if (datePreset === 'last_7d') {
+            sinceInternal = startOfDay(subDays(spNow, 7)).toISOString()
+        } else if (datePreset === 'last_30d') {
+            sinceInternal = startOfDay(subDays(spNow, 30)).toISOString()
+        } else if ((datePreset as string) === 'custom' && startDate && endDate) {
+            sinceInternal = new Date(startDate).toISOString()
+            untilInternal = new Date(endDate).toISOString()
+        } else {
+            sinceInternal = startOfDay(subDays(spNow, 90)).toISOString() // Fallback to 90d for 'maximum'
+        }
+
+        const metaSources = ['Facebook Ads', 'Instagram', 'Facebook']
+        const [internalLeadsRes, recentLeadsRes] = await Promise.all([
+            supabase.from('leads').select('*', { count: 'exact', head: true })
+                .in('detected_source', metaSources)
+                .gte('created_at', sinceInternal)
+                .lte('created_at', untilInternal),
+            supabase.from('leads').select('name, phone, created_at, funnel_stage')
+                .in('detected_source', metaSources)
+                .order('created_at', { ascending: false })
+                .limit(10)
+        ])
+
+        return NextResponse.json({
+            campaigns: enriched,
+            internalStats: {
+                totalLeads: internalLeadsRes.count || 0,
+                recentLeads: recentLeadsRes.data || []
+            }
+        })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }

@@ -8,6 +8,7 @@ import {
     Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X, Search
 } from 'lucide-react'
 import AdsCountdown from '@/components/admin/AdsCountdown'
+import LeadClock from '@/components/admin/LeadClock'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -122,6 +123,7 @@ export default function AdsPage() {
     const [latestScore, setLatestScore] = useState<number | null>(null)
     const [expandedReport, setExpandedReport] = useState<string | null>(null)
     const [showHistory, setShowHistory] = useState(false)
+    const [internalStats, setInternalStats] = useState<{ totalLeads: number; recentLeads: any[] }>({ totalLeads: 0, recentLeads: [] })
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type })
@@ -143,7 +145,11 @@ export default function AdsPage() {
                 fetch(url),
                 fetch('/api/admin/ads?alerts=true'),
             ])
-            if (campRes.ok) setCampaigns(await campRes.json())
+            if (campRes.ok) {
+                const data = await campRes.json()
+                setCampaigns(data.campaigns || [])
+                setInternalStats(data.internalStats || { totalLeads: 0, recentLeads: [] })
+            }
             if (alertRes.ok) {
                 const data = await alertRes.json()
                 setAlerts(Array.isArray(data) ? data : [])
@@ -442,7 +448,10 @@ export default function AdsPage() {
                 </div>
             </div>
 
-            <AdsCountdown />
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '24px' }}>
+                <AdsCountdown />
+                <LeadClock recentLeads={internalStats.recentLeads} />
+            </div>
 
             {/* ── KPI Cards ──────────────────────────────────────── */}
             <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', marginBottom: 24 }}>
@@ -471,14 +480,21 @@ export default function AdsPage() {
                     <div className="kpi-label">CTR Médio</div>
                     <div className="kpi-value" style={{ color: '#f59e0b', fontSize: '1.4rem' }}>{avgCtr.toFixed(2)}%</div>
                 </div>
+                <div className="kpi-card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), transparent)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                    <Plus size={20} color="#22c55e" style={{ marginBottom: 8 }} />
+                    <div className="kpi-label" style={{ color: '#22c55e', fontWeight: 600 }}>Leads Reais (DB)</div>
+                    <div className="kpi-value" style={{ color: '#22c55e', fontSize: '1.6rem' }}>{internalStats.totalLeads}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 4 }}>Capturados internamente</div>
+                </div>
                 <div className="kpi-card">
                     <CheckCircle size={20} color="#8b5cf6" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">Conversões</div>
+                    <div className="kpi-label">Leads (Meta)</div>
                     <div className="kpi-value" style={{ color: '#8b5cf6', fontSize: '1.4rem' }}>{totalConversions.toLocaleString('pt-BR')}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 4 }}>Reportado pela plataforma</div>
                 </div>
                 <div className="kpi-card">
                     <Target size={20} color="#ec4899" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">CPA Médio</div>
+                    <div className="kpi-label">CPA (Meta)</div>
                     <div className="kpi-value" style={{ color: '#ec4899', fontSize: '1.4rem' }}>{avgCpa > 0 ? formatCurrency(avgCpa) : '—'}</div>
                 </div>
                 <div className="kpi-card">
@@ -518,6 +534,44 @@ export default function AdsPage() {
                     📜 Histórico de Análises IA
                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: 4 }}>({reports.length})</span>
                 </button>
+            </div>
+
+            {/* ── Recent Leads Table ── */}
+            <div className="chart-card" style={{ marginBottom: 24 }}>
+                <div className="chart-title">📥 Últimos Leads Capturados (Meta/Insta)</div>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ color: '#666', borderBottom: '1px solid #2a2a2a', fontSize: '0.75rem' }}>
+                                <th style={{ padding: '12px 8px' }}>NOME</th>
+                                <th style={{ padding: '12px 8px' }}>CONTATO</th>
+                                <th style={{ padding: '12px 8px' }}>ETAPA</th>
+                                <th style={{ padding: '12px 8px' }}>HORÁRIO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {internalStats.recentLeads.map((lead, idx) => (
+                                <tr key={idx} style={{ borderBottom: '1px solid #1a1a1a', fontSize: '0.85rem' }}>
+                                    <td style={{ padding: '12px 8px', color: '#f5f5f5', fontWeight: 500 }}>{lead.name}</td>
+                                    <td style={{ padding: '12px 8px', color: '#c9a96e' }}>{lead.phone || '—'}</td>
+                                    <td style={{ padding: '12px 8px' }}>
+                                        <span style={{ fontSize: '0.7rem', background: 'rgba(201,169,110,0.1)', color: '#c9a96e', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(201,169,110,0.2)' }}>
+                                            {lead.funnel_stage}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '12px 8px', color: '#555' }}>
+                                        {new Date(lead.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    </td>
+                                </tr>
+                            ))}
+                            {internalStats.recentLeads.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} style={{ padding: 40, textAlign: 'center', color: '#666' }}>Nenhum lead direto encontrado para este período</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* ── Charts Row 1: Spend Bar + Spend Pie ─────────── */}
