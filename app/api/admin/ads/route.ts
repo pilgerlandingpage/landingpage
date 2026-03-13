@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as metaAds from '@/lib/ads/meta'
 import * as googleAds from '@/lib/ads/google'
-import { startOfDay, endOfDay, subDays, format } from 'date-fns'
+
+function startOfDay(d: Date) { const res = new Date(d); res.setHours(0,0,0,0); return res; }
+function endOfDay(d: Date) { const res = new Date(d); res.setHours(23,59,59,999); return res; }
+function subDays(d: Date, days: number) { const res = new Date(d); res.setDate(res.getDate() - days); return res; }
 
 // GET — list all campaigns (with optional ?alerts=true to fetch alerts instead)
 export async function GET(request: NextRequest) {
