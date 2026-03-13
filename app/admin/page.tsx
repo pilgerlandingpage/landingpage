@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone, Calendar } from 'lucide-react'
+import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone, Calendar, Search, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import {
     BarChart,
@@ -110,7 +110,11 @@ export default function AdminDashboard() {
     const [metaReport, setMetaReport] = useState<any>(null)
     const [googleReport, setGoogleReport] = useState<any>(null)
     const [adMetrics, setAdMetrics] = useState<{ totalSpend: number; totalLeads: number; avgCpa: number; activeCampaigns: number }>({ totalSpend: 0, totalLeads: 0, avgCpa: 0, activeCampaigns: 0 })
-    const [adDatePreset, setAdDatePreset] = useState('maximum')
+    const [adDatePreset, setAdDatePreset] = useState('today')
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
+    const [metaReports, setMetaReports] = useState<any[]>([])
+    const [googleReports, setGoogleReports] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     const safeDecode = (str?: string) => {
@@ -122,106 +126,95 @@ export default function AdminDashboard() {
         }
     }
 
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/admin/analytics')
+            const data = await res.json()
+            if (data.error) throw new Error(data.error)
+            setStats(data.stats)
+            setSourceData(data.sourceData)
+            setTopPages(data.topPages || [])
+            setRecentVisitors(data.recentVisitors || [])
+            setDailyData(data.dailyData)
+        } catch (error) {
+            console.error('Error loading dashboard:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const fetchReports = async () => {
+        try {
+            const [metaRes, googleRes] = await Promise.all([
+                fetch('/api/admin/reports?platform=meta&limit=50'),
+                fetch('/api/admin/reports?platform=google&limit=50'),
+            ])
+            if (metaRes.ok) {
+                const d = await metaRes.json()
+                setMetaReports(d.reports || [])
+            }
+            if (googleRes.ok) {
+                const d = await googleRes.json()
+                setGoogleReports(d.reports || [])
+            }
+        } catch (err) {
+            console.error('Error fetching reports', err)
+        }
+    }
+
+    const fetchAdMetrics = async (preset?: string, start?: string, end?: string) => {
+        const dp = preset || adDatePreset
+        const s = start || startDate
+        const e = end || endDate
+
+        try {
+            let metaUrl = `/api/admin/ads?date_preset=${dp}`
+            let googleUrl = `/api/admin/ads/google?date_preset=${dp}`
+
+            if (dp === 'custom' && s && e) {
+                metaUrl += `&start_date=${s}&end_date=${e}`
+                googleUrl += `&start_date=${s}&end_date=${e}`
+            }
+
+            const [metaRes, googleRes] = await Promise.all([
+                fetch(metaUrl),
+                fetch(googleUrl),
+            ])
+            let allCampaigns: any[] = []
+            if (metaRes.ok) {
+                const data = await metaRes.json()
+                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+            }
+            if (googleRes.ok) {
+                const data = await googleRes.json()
+                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+            }
+            const active = allCampaigns.filter(c => c.status === 'active')
+            const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
+            const leads = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
+            const cpa = leads > 0 ? spend / leads : 0
+            setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
+        } catch (err) {
+            console.error('Error fetching ad metrics', err)
+        }
+    }
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/admin/analytics')
-                const data = await res.json()
-
-                if (data.error) throw new Error(data.error)
-
-                setStats(data.stats)
-                setSourceData(data.sourceData)
-                setTopPages(data.topPages || [])
-                setRecentVisitors(data.recentVisitors || [])
-                setDailyData(data.dailyData)
-
-            } catch (error) {
-                console.error('Error loading dashboard:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        const fetchReport = async () => {
-            try {
-                // Fetch per-platform reports
-                const [metaRes, googleRes] = await Promise.all([
-                    fetch('/api/admin/reports/latest?platform=meta'),
-                    fetch('/api/admin/reports/latest?platform=google'),
-                ])
-                if (metaRes.ok) {
-                    const d = await metaRes.json()
-                    if (d.report) setMetaReport(d.report)
-                }
-                if (googleRes.ok) {
-                    const d = await googleRes.json()
-                    if (d.report) setGoogleReport(d.report)
-                }
-            } catch (err) {
-                console.error('Error fetching report', err)
-            }
-        }
-
-    const fetchAdMetrics = async (preset?: string) => {
-            const dp = preset || adDatePreset
-            try {
-                const [metaRes, googleRes] = await Promise.all([
-                    fetch(`/api/admin/ads?date_preset=${dp}`),
-                    fetch(`/api/admin/ads/google?date_preset=${dp}`),
-                ])
-                let allCampaigns: any[] = []
-                if (metaRes.ok) {
-                    const data = await metaRes.json()
-                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
-                }
-                if (googleRes.ok) {
-                    const data = await googleRes.json()
-                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
-                }
-                const active = allCampaigns.filter(c => c.status === 'active')
-                const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
-                const leads = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
-                const cpa = leads > 0 ? spend / leads : 0
-                setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
-            } catch (err) {
-                console.error('Error fetching ad metrics', err)
-            }
-        }
-
         fetchData()
-        fetchReport()
+        fetchReports()
         fetchAdMetrics()
     }, [])
 
-    // Refetch ad metrics when date preset changes
     const handleAdDateChange = (newPreset: string) => {
         setAdDatePreset(newPreset)
-        const fetchAdMetrics = async () => {
-            try {
-                const [metaRes, googleRes] = await Promise.all([
-                    fetch(`/api/admin/ads?date_preset=${newPreset}`),
-                    fetch(`/api/admin/ads/google?date_preset=${newPreset}`),
-                ])
-                let allCampaigns: any[] = []
-                if (metaRes.ok) {
-                    const data = await metaRes.json()
-                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
-                }
-                if (googleRes.ok) {
-                    const data = await googleRes.json()
-                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
-                }
-                const active = allCampaigns.filter(c => c.status === 'active')
-                const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
-                const leads = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
-                const cpa = leads > 0 ? spend / leads : 0
-                setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
-            } catch (err) {
-                console.error('Error fetching ad metrics', err)
-            }
+        if (newPreset !== 'custom') {
+            fetchAdMetrics(newPreset)
         }
-        fetchAdMetrics()
+    }
+
+    const handleCustomDateSearch = () => {
+        if (!startDate || !endDate) return
+        fetchAdMetrics('custom', startDate, endDate)
     }
 
     if (loading) {
@@ -258,9 +251,42 @@ export default function AdminDashboard() {
     }
     const formatCurrency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-    // General score = average of meta + google scores
-    const metaScore = metaReport?.performance_score ?? null
-    const googleScore = googleReport?.performance_score ?? null
+    // General score calculation based on datePreset
+    const getRelevantReport = (reports: any[]) => {
+        if (!reports || reports.length === 0) return null
+
+        const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+        let since: string
+        let until: string = spNow.toISOString().split('T')[0]
+
+        if (adDatePreset === 'today') {
+            since = until
+        } else if (adDatePreset === 'yesterday') {
+            since = new Date(spNow.getTime() - 86400000).toISOString().split('T')[0]
+            until = since
+        } else if (adDatePreset === 'last_7d') {
+            since = new Date(spNow.getTime() - 7 * 86400000).toISOString().split('T')[0]
+        } else if (adDatePreset === 'last_30d') {
+            since = new Date(spNow.getTime() - 30 * 86400000).toISOString().split('T')[0]
+        } else if (adDatePreset === 'custom' && startDate && endDate) {
+            since = startDate
+            until = endDate
+        } else {
+            return reports.find(r => r.type === 'weekly') || reports[0]
+        }
+
+        const rangeReports = reports.filter(r => r.date >= since && r.date <= until)
+        if (since === until) {
+            return rangeReports.find(r => r.type === 'daily') || rangeReports[0] || null
+        }
+        return rangeReports.find(r => r.type === 'weekly') || rangeReports.find(r => r.type === 'daily') || rangeReports[0] || null
+    }
+
+    const metaRelevant = getRelevantReport(metaReports)
+    const googleRelevant = getRelevantReport(googleReports)
+
+    const metaScore = metaRelevant?.performance_score ?? null
+    const googleScore = googleRelevant?.performance_score ?? null
     const generalScore = metaScore != null && googleScore != null
         ? Math.round((metaScore + googleScore) / 2)
         : metaScore ?? googleScore ?? null
@@ -274,6 +300,7 @@ export default function AdminDashboard() {
         this_month: 'Este mês',
         last_month: 'Mês passado',
         maximum: 'Vitalício',
+        custom: 'Personalizado',
     }
 
     return (
@@ -307,8 +334,30 @@ export default function AdminDashboard() {
                                 <option value="this_month">Este mês</option>
                                 <option value="last_month">Mês passado</option>
                                 <option value="maximum">Vitalício</option>
+                                <option value="custom">Personalizado</option>
                             </select>
                         </div>
+                        {adDatePreset === 'custom' && (
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--bg-secondary)', padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                                <input 
+                                    type="date" 
+                                    value={startDate} 
+                                    onChange={e => setStartDate(e.target.value)}
+                                    className="ads-date-input"
+                                />
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>até</span>
+                                <input 
+                                    type="date" 
+                                    value={endDate} 
+                                    onChange={e => setEndDate(e.target.value)}
+                                    className="ads-date-input"
+                                />
+                                <button onClick={handleCustomDateSearch} className="btn-gold" style={{ padding: '4px 8px' }}>
+                                    <Search size={14} />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                     <div className="kpi-grid" style={{ gridTemplateColumns: `repeat(${generalScore != null ? 5 : 4}, 1fr)`, marginBottom: 0 }}>
                         <div className="kpi-card">
@@ -355,6 +404,9 @@ export default function AdminDashboard() {
                                         Meta: {metaScore} | Google: {googleScore}
                                     </div>
                                 )}
+                                <div style={{ marginTop: 4, fontSize: '0.6rem', color: 'var(--text-muted)' }}>
+                                    Analise: {metaRelevant?.type || googleRelevant?.type || 'N/A'}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -571,6 +623,20 @@ export default function AdminDashboard() {
                     </table>
                 </div>
             </div>
+
+            <style jsx>{`
+                .ads-date-input {
+                    background: transparent;
+                    border: none;
+                    color: var(--text-primary);
+                    font-size: 0.85rem;
+                    outline: none;
+                }
+                .ads-date-input::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    cursor: pointer;
+                }
+            `}</style>
         </div>
     )
 }

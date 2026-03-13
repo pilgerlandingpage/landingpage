@@ -1031,94 +1031,20 @@ export default function MaintenancePage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                         {/* Diário */}
-                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Relatório Diário</div>
-                            <div className="form-group">
-                                <label className="form-label">Dias de Execução</label>
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                    {[
-                                        { v: '0', l: 'Dom' }, { v: '1', l: 'Seg' }, { v: '2', l: 'Ter' },
-                                        { v: '3', l: 'Qua' }, { v: '4', l: 'Qui' }, { v: '5', l: 'Sex' }, { v: '6', l: 'Sáb' }
-                                    ].map(day => {
-                                        const currentDays = (configs['pilger_daily_days'] || '1,2,3,4,5').split(',');
-                                        const isSelected = currentDays.includes(day.v);
-                                        return (
-                                            <label
-                                                key={day.v}
-                                                style={{
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem',
-                                                    cursor: 'pointer', userSelect: 'none',
-                                                    border: isSelected ? '1px solid var(--gold)' : '1px solid var(--border-color)',
-                                                    background: isSelected ? 'rgba(201, 169, 110, 0.1)' : 'var(--bg-primary)',
-                                                    color: isSelected ? 'var(--gold)' : 'var(--text-secondary)',
-                                                    transition: 'all 0.2s',
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isSelected}
-                                                    onChange={() => {
-                                                        let newDays = [...currentDays];
-                                                        if (isSelected) {
-                                                            newDays = newDays.filter(d => d !== day.v);
-                                                        } else {
-                                                            newDays.push(day.v);
-                                                        }
-                                                        setConfigs({ ...configs, pilger_daily_days: newDays.sort().join(',') });
-                                                    }}
-                                                    style={{ display: 'none' }}
-                                                />
-                                                {day.l}
-                                            </label>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Horário de Execução</label>
-                                <select 
-                                    className="form-input" 
-                                    value={configs['pilger_daily_time'] || '23'} 
-                                    onChange={e => setConfigs({ ...configs, pilger_daily_time: e.target.value })}
-                                >
-                                    {Array.from({ length: 24 }).map((_, i) => (
-                                        <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
-                                    ))}
-                                </select>
+                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Relatório Diário & Análise</div>
+                            <div style={{ color: 'var(--gold)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>23:00 (Brasília)</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                Execução diária automática e fixa para garantir a consistência das métricas.
                             </div>
                         </div>
 
                         {/* Semanal */}
-                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Diretriz Semanal</div>
-                            <div className="form-group">
-                                <label className="form-label">Dia da Semana</label>
-                                <select 
-                                    className="form-input" 
-                                    value={configs['pilger_weekly_day'] || '1'} 
-                                    onChange={e => setConfigs({ ...configs, pilger_weekly_day: e.target.value })}
-                                >
-                                    <option value="0">Domingo</option>
-                                    <option value="1">Segunda-feira</option>
-                                    <option value="2">Terça-feira</option>
-                                    <option value="3">Quarta-feira</option>
-                                    <option value="4">Quinta-feira</option>
-                                    <option value="5">Sexta-feira</option>
-                                    <option value="6">Sábado</option>
-                                </select>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Horário de Execução</label>
-                                <select 
-                                    className="form-input" 
-                                    value={configs['pilger_weekly_time'] || '8'} 
-                                    onChange={e => setConfigs({ ...configs, pilger_weekly_time: e.target.value })}
-                                >
-                                    {Array.from({ length: 24 }).map((_, i) => (
-                                        <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
-                                    ))}
-                                </select>
+                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Diretriz Semanal Pilger AI</div>
+                            <div style={{ color: '#8b5cf6', fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>Segunda, 23:00</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                Análise semanal profunda gerada toda segunda-feira à noite.
                             </div>
                         </div>
                     </div>
@@ -1162,29 +1088,54 @@ export default function MaintenancePage() {
             {/* Diagnostic Tools */}
             <div className="chart-card" style={{ marginTop: '24px' }}>
                 <div className="chart-title" style={{ marginBottom: '12px' }}>🔬 Ferramentas de Diagnóstico</div>
-                <Link
-                    href="/admin/gemini-diagnostic"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '14px 16px',
-                        borderRadius: '10px',
-                        background: 'var(--bg-primary)',
-                        border: '1px solid var(--border-color)',
-                        textDecoration: 'none',
-                        color: 'var(--text-primary)',
-                        transition: 'border-color 0.2s',
-                    }}
-                >
-                    <Microscope size={20} style={{ color: 'var(--gold)' }} />
-                    <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Diagnóstico Gemini API</div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            Verificar modelos disponíveis para sua API Key
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                    <Link
+                        href="/admin/gemini-diagnostic"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '14px 16px',
+                            borderRadius: '10px',
+                            background: 'var(--bg-primary)',
+                            border: '1px solid var(--border-color)',
+                            textDecoration: 'none',
+                            color: 'var(--text-primary)',
+                            transition: 'border-color 0.2s',
+                        }}
+                    >
+                        <Microscope size={20} style={{ color: 'var(--gold)' }} />
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Diagnóstico Gemini API</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                Verificar modelos disponíveis para sua API Key
+                            </div>
                         </div>
-                    </div>
-                </Link>
+                    </Link>
+                    <Link
+                        href="/admin/openai-diagnostic"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '14px 16px',
+                            borderRadius: '10px',
+                            background: 'var(--bg-primary)',
+                            border: '1px solid var(--border-color)',
+                            textDecoration: 'none',
+                            color: 'var(--text-primary)',
+                            transition: 'border-color 0.2s',
+                        }}
+                    >
+                        <Bot size={20} style={{ color: '#10a37f' }} />
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Diagnóstico OpenAI API</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                Verificar modelos disponíveis para sua API Key
+                            </div>
+                        </div>
+                    </Link>
+                </div>
             </div>
 
             {/* Info Card */}

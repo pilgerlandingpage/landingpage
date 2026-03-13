@@ -328,13 +328,19 @@ function mapDatePreset(preset: GoogleDatePreset): string | null {
 // --- Buscar TODAS campanhas com métricas (para dashboard) ---
 
 export async function getAllCampaignsWithMetrics(
-    datePreset: GoogleDatePreset = 'maximum'
+    datePreset: GoogleDatePreset | 'custom' = 'maximum',
+    customRange?: { startDate: string; endDate: string }
 ): Promise<Record<string, { campaign: any; metrics: any }>> {
     const config = await getGoogleConfig()
     const headers = await getHeaders(config)
 
-    const dateFilter = mapDatePreset(datePreset)
-    const dateClause = dateFilter ? `AND segments.date DURING ${dateFilter}` : ''
+    let dateClause = ''
+    if (datePreset === 'custom' && customRange) {
+        dateClause = `AND segments.date BETWEEN '${customRange.startDate}' AND '${customRange.endDate}'`
+    } else {
+        const dateFilter = mapDatePreset(datePreset === 'custom' ? 'maximum' : datePreset)
+        dateClause = dateFilter ? `AND segments.date DURING ${dateFilter}` : ''
+    }
 
     const query = `
         SELECT

@@ -311,7 +311,8 @@ export async function getAllCampaigns(): Promise<any[]> {
 export type DatePreset = 'today' | 'yesterday' | 'last_7d' | 'last_30d' | 'this_month' | 'last_month' | 'maximum'
 
 export async function getAccountInsightsByCampaign(
-    datePreset: DatePreset = 'maximum'
+    datePreset: DatePreset | 'custom' = 'maximum',
+    timeRange?: { since: string; until: string }
 ): Promise<Record<string, MetaInsightsResponse>> {
     const conf = await getMetaConfig();
     const fields = [
@@ -326,9 +327,16 @@ export async function getAccountInsightsByCampaign(
         'video_p100_watched_actions', 'video_avg_time_watched_actions'
     ].join(',')
 
-    const res = await fetch(
-        `${getBaseUrl()}/${conf.adAccountId}/insights?fields=${fields}&level=campaign&date_preset=${datePreset}&limit=500&access_token=${conf.accessToken}`
-    )
+    let url = `${getBaseUrl()}/${conf.adAccountId}/insights?fields=${fields}&level=campaign&limit=500&access_token=${conf.accessToken}`;
+    
+    if (datePreset === 'custom' && timeRange) {
+        const tr = JSON.stringify({ since: timeRange.since, until: timeRange.until });
+        url += `&time_range=${tr}`;
+    } else {
+        url += `&date_preset=${datePreset === 'custom' ? 'maximum' : datePreset}`;
+    }
+
+    const res = await fetch(url)
     const data = await res.json()
 
     if (data.error) {

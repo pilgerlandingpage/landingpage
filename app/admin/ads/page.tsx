@@ -5,8 +5,9 @@ import Link from 'next/link'
 import {
     Plus, Megaphone, DollarSign, Users, Target,
     TrendingUp, AlertTriangle, Brain, CheckCircle, AlertCircle, RefreshCw, Calendar,
-    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X
+    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X, Search
 } from 'lucide-react'
+import AdsCountdown from '@/components/admin/AdsCountdown'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -112,7 +113,9 @@ export default function AdsPage() {
     const [syncing, setSyncing] = useState(false)
     const [analyzing, setAnalyzing] = useState(false)
     const [filter, setFilter] = useState<'all' | 'active' | 'paused'>('active')
-    const [datePreset, setDatePreset] = useState('maximum')
+    const [datePreset, setDatePreset] = useState('today')
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
     const [expandedAlert, setExpandedAlert] = useState<string | null>(null)
     const [reports, setReports] = useState<Report[]>([])
@@ -125,11 +128,19 @@ export default function AdsPage() {
         setTimeout(() => setToast(null), 4000)
     }
 
-    const fetchData = async (preset?: string) => {
+    const fetchData = async (preset?: string, start?: string, end?: string) => {
         const dp = preset || datePreset
+        const s = start || startDate
+        const e = end || endDate
+
         try {
+            let url = `/api/admin/ads?date_preset=${dp}`
+            if (dp === 'custom' && s && e) {
+                url += `&start_date=${s}&end_date=${e}`
+            }
+
             const [campRes, alertRes] = await Promise.all([
-                fetch(`/api/admin/ads?date_preset=${dp}`),
+                fetch(url),
                 fetch('/api/admin/ads?alerts=true'),
             ])
             if (campRes.ok) setCampaigns(await campRes.json())
@@ -143,8 +154,19 @@ export default function AdsPage() {
 
     const handleDateChange = (newPreset: string) => {
         setDatePreset(newPreset)
+        if (newPreset !== 'custom') {
+            setLoading(true)
+            fetchData(newPreset)
+        }
+    }
+
+    const handleCustomDateSearch = () => {
+        if (!startDate || !endDate) {
+            showToast('Selecione ambas as datas', 'error')
+            return
+        }
         setLoading(true)
-        fetchData(newPreset)
+        fetchData('custom', startDate, endDate)
     }
 
     const handleSync = async () => {
@@ -185,17 +207,53 @@ export default function AdsPage() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const res = await fetch('/api/admin/reports?platform=meta&limit=10')
+                const res = await fetch('/api/admin/reports?platform=meta&limit=50')
                 if (res.ok) {
                     const data = await res.json()
                     setReports(data.reports || [])
-                    const latest = (data.reports || [])[0]
-                    if (latest?.performance_score != null) setLatestScore(latest.performance_score)
                 }
             } catch (err) { console.error('Error fetching meta reports:', err) }
         }
         fetchReports()
     }, [])
+
+    // Dynamic Thermometer Score
+    useEffect(() => {
+        if (reports.length === 0) return
+
+        const getReportForRange = () => {
+            const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+            let since: string
+            let until: string = spNow.toISOString().split('T')[0]
+
+            if (datePreset === 'today') {
+                since = until
+            } else if (datePreset === 'yesterday') {
+                since = new Date(spNow.getTime() - 86400000).toISOString().split('T')[0]
+                until = since
+            } else if (datePreset === 'last_7d') {
+                since = new Date(spNow.getTime() - 7 * 86400000).toISOString().split('T')[0]
+            } else if (datePreset === 'last_30d') {
+                since = new Date(spNow.getTime() - 30 * 86400000).toISOString().split('T')[0]
+            } else if (datePreset === 'custom' && startDate && endDate) {
+                since = startDate
+                until = endDate
+            } else {
+                return reports.find(r => r.type === 'weekly') || reports[0]
+            }
+
+            const rangeReports = reports.filter(r => r.date >= since && r.date <= until)
+            if (since === until) {
+                return rangeReports.find(r => r.type === 'daily') || rangeReports[0] || null
+            }
+            return rangeReports.find(r => r.type === 'weekly') || rangeReports.find(r => r.type === 'daily') || rangeReports[0] || null
+        }
+
+        const relevantReport = getReportForRange()
+        if (relevantReport?.performance_score != null) {
+            setLatestScore(relevantReport.performance_score)
+        }
+    }, [datePreset, reports, startDate, endDate])
 
     const getScoreColor = (score: number) => {
         if (score >= 80) return '#22c55e'
@@ -337,8 +395,31 @@ export default function AdsPage() {
                             <option value="this_month">Este Mês</option>
                             <option value="last_month">Mês Passado</option>
                             <option value="maximum">Vitalício</option>
+                            <option value="custom">Personalizado</option>
                         </select>
                     </div>
+                    
+                    {datePreset === 'custom' && (
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--bg-secondary)', padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <input 
+                                type="date" 
+                                value={startDate} 
+                                onChange={e => setStartDate(e.target.value)}
+                                className="ads-date-input"
+                            />
+                            <span style={{ color: 'var(--text-muted)' }}>até</span>
+                            <input 
+                                type="date" 
+                                value={endDate} 
+                                onChange={e => setEndDate(e.target.value)}
+                                className="ads-date-input"
+                            />
+                            <button onClick={handleCustomDateSearch} className="btn-gold" style={{ padding: '4px 12px', fontSize: '0.8rem' }}>
+                                <Search size={14} />
+                            </button>
+                        </div>
+                    )}
+
                     <button onClick={handleSync} disabled={syncing}
                         className="btn" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <RefreshCw size={18} className={syncing ? 'spin' : ''} />
@@ -360,6 +441,8 @@ export default function AdsPage() {
                     </Link>
                 </div>
             </div>
+
+            <AdsCountdown />
 
             {/* ── KPI Cards ──────────────────────────────────────── */}
             <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', marginBottom: 24 }}>
@@ -826,6 +909,28 @@ export default function AdsPage() {
                 .ai-alert-card:hover { border-color: rgba(139, 92, 246, 0.4); transform: translateX(2px); }
                 .report-history-card { transition: border-color 0.2s, transform 0.15s; }
                 .report-history-card:hover { border-color: var(--gold); transform: translateX(2px); }
+                .ads-date-select {
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border-color);
+                    color: var(--text-primary);
+                    padding: 8px 12px 8px 32px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    outline: none;
+                    appearance: none;
+                }
+                .ads-date-input {
+                    background: transparent;
+                    border: none;
+                    color: var(--text-primary);
+                    font-size: 0.85rem;
+                    outline: none;
+                }
+                .ads-date-input::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    cursor: pointer;
+                }
             `}</style>
         </div>
     )

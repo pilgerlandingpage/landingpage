@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
 
         // Default: list campaigns with metrics
         const datePreset = (searchParams.get('date_preset') || 'maximum') as metaAds.DatePreset
+        const startDate = searchParams.get('start_date')
+        const endDate = searchParams.get('end_date')
 
         const { data: campaigns, error } = await supabase
             .from('ad_campaigns')
@@ -44,9 +46,17 @@ export async function GET(request: NextRequest) {
         let googleInsightsMap: Record<string, any> = {}
         
         try {
+            const metaParams: any[] = [datePreset];
+            const googleParams: any[] = [datePreset as any];
+            
+            if ((datePreset as string) === 'custom' && startDate && endDate) {
+                metaParams[1] = { since: startDate, until: endDate };
+                googleParams[1] = { startDate, endDate };
+            }
+
             const [metaRes, googleRes] = await Promise.allSettled([
-                metaAds.getAccountInsightsByCampaign(datePreset),
-                googleAds.getAllCampaignsWithMetrics(datePreset as any)
+                metaAds.getAccountInsightsByCampaign(metaParams[0], metaParams[1]),
+                googleAds.getAllCampaignsWithMetrics(googleParams[0], googleParams[1])
             ])
             if (metaRes.status === 'fulfilled') metaInsightsMap = metaRes.value
             if (googleRes.status === 'fulfilled') googleInsightsMap = googleRes.value

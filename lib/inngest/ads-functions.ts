@@ -115,7 +115,7 @@ export const publishCampaign = inngest.createFunction(
 
 export const pollMetricsCron = inngest.createFunction(
     { id: 'ads-poll-metrics', name: 'Buscar Métricas de Campanhas' },
-    { cron: '0 * * * *' }, // A cada hora
+    { cron: '0 * * * *' }, // A cada hora para snapshot, mas análise IA às 23h
     async ({ step }) => {
         const supabase = getSupabase()
 
@@ -143,14 +143,22 @@ export const pollMetricsCron = inngest.createFunction(
 
                 if (campaign.platform === 'meta' && campaign.external_campaign_id) {
                     // metaAds module internally fetches the token from Supabase now 
-                    const insights = await metaAds.getInsights(campaign.external_campaign_id, 'today')
-                    if (insights) {
-                        snapshotData = metaAds.parseInsightsToSnapshot(campaign.id, insights)
+                    // Tenta buscar 'today' primeiro, mas se vier zerado (latência da API), tenta 'yesterday'
+                    let metaInsights = await metaAds.getInsights(campaign.external_campaign_id, 'today');
+                    if (!metaInsights || (parseInt(metaInsights.impressions || '0') === 0 && parseFloat(metaInsights.spend || '0') === 0)) {
+                        metaInsights = await metaAds.getInsights(campaign.external_campaign_id, 'yesterday');
+                    }
+
+                    if (metaInsights) {
+                        snapshotData = metaAds.parseInsightsToSnapshot(campaign.id, metaInsights);
                     }
                 } else if (campaign.platform === 'google' && campaign.external_campaign_id) {
-                    const metrics = await googleAds.getMetrics(campaign.external_campaign_id, 'TODAY')
-                    if (metrics) {
-                        snapshotData = { campaign_id: campaign.id, ...metrics }
+                    let gMetrics = await googleAds.getMetrics(campaign.external_campaign_id, 'TODAY');
+                    if (!gMetrics || (gMetrics.impressions === 0 && gMetrics.spend === 0)) {
+                        gMetrics = await googleAds.getMetrics(campaign.external_campaign_id, 'YESTERDAY');
+                    }
+                    if (gMetrics) {
+                        snapshotData = { campaign_id: campaign.id, ...gMetrics }
                     }
                 }
 
@@ -170,18 +178,21 @@ export const pollMetricsCron = inngest.createFunction(
             }
         }
 
-        // Disparar análise da IA para cada campanha com métricas
-        for (const result of results) {
-            await step.sendEvent('trigger-ai-analysis', {
-                name: 'ads/ai-analyze',
-                data: {
-                    campaign_id: result.campaign_id,
-                    metrics: result.metrics
-                }
-            })
+        // Disparar análise da IA apenas às 23 horas (Horário de Brasília)
+        const { hour } = getCurrentTimeSP()
+        if (hour === '23') {
+            for (const result of results) {
+                await step.sendEvent('trigger-ai-analysis', {
+                    name: 'ads/ai-analyze',
+                    data: {
+                        campaign_id: result.campaign_id,
+                        metrics: result.metrics
+                    }
+                })
+            }
         }
 
-        return { campaigns_polled: results.length }
+        return { campaigns_polled: results.length, analysis_triggered: hour === '23' }
     }
 )
 
@@ -439,14 +450,17 @@ export const radarCollectionCron = inngest.createFunction(
     }
 )
 
-// Função auxiliar para pegar hora atual em fuso horário
+// Função auxiliar para pegar hora atual em fuso horário (America/Sao_Paulo)
 function getCurrentTimeSP() {
     const spTime = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
     const dateObj = new Date(spTime);
-    return {
-        dayOfWeek: dateObj.getDay().toString(), // 0-6 (0 = Dom, 1 = Seg...)
-        hour: dateObj.getHours().toString().padStart(2, '0') // 00-23
-    }
+    
+    // Fallback manual caso toLocaleString falhe em extrair corretamente (raro em Node moderno)
+    // Mas para garantir 100% de estabilidade na comparação de strings:
+    const hour = dateObj.getHours().toString().padStart(2, '0');
+    const dayOfWeek = dateObj.getDay().toString();
+    
+    return { dayOfWeek, hour }
 }
 
 export const generateDailyPilgerReportCron = inngest.createFunction(
@@ -455,32 +469,24 @@ export const generateDailyPilgerReportCron = inngest.createFunction(
     async ({ step }) => {
         const supabase = getSupabase()
 
-        // 1. Verificar configuração
+        // 1. Verificar horário (Sempre às 23:00)
         const shouldRun = await step.run('check-daily-schedule', async () => {
-            const { data: configs } = await supabase
-                .from('app_config')
-                .select('key, value')
-                .in('key', ['pilger_daily_days', 'pilger_daily_time'])
-
-            const configMap = (configs || []).reduce((acc: any, c) => ({ ...acc, [c.key]: c.value }), {})
-            
-            const targetDays = (configMap['pilger_daily_days'] || '0,1,2,3,4,5,6').split(',')
-            const rawTargetHour = configMap['pilger_daily_time'] || '23:00'
-            const targetHour = rawTargetHour.split(':')[0].padStart(2, '0')
-
-            const { dayOfWeek, hour } = getCurrentTimeSP()
-
-            return targetDays.includes(dayOfWeek) && targetHour === hour
+            const { hour } = getCurrentTimeSP()
+            return hour === '23'
         })
 
         if (!shouldRun) {
-            return { skipped: true, reason: 'schedule_mismatch' }
+            return { skipped: true, reason: 'hour_mismatch', current_hour: getCurrentTimeSP().hour }
         }
 
         // 2. Extra proteção contra execuções duplas no mesmo dia
         const hasRunToday = await step.run('check-already-run', async () => {
+             const { hour } = getCurrentTimeSP()
              const spTime = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
              const todayStr = new Date(spTime).toISOString().split('T')[0]
+             
+             // Identificador único para a execução de hoje às 23h
+             const runId = `daily_23_${todayStr}`
              
              const { data } = await supabase
                 .from('pilger_ai_reports')
@@ -510,26 +516,15 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
     async ({ step }) => {
         const supabase = getSupabase()
 
-        // 1. Verificar configuração
+        // 1. Verificar horário (Fixo: Segunda-feira às 23:00)
         const shouldRun = await step.run('check-weekly-schedule', async () => {
-            const { data: configs } = await supabase
-                .from('app_config')
-                .select('key, value')
-                .in('key', ['pilger_weekly_day', 'pilger_weekly_time'])
-
-            const configMap = (configs || []).reduce((acc: any, c) => ({ ...acc, [c.key]: c.value }), {})
-            
-            const targetDay = configMap['pilger_weekly_day'] || '1' // Padrão: Segunda
-            const rawTargetHour = configMap['pilger_weekly_time'] || '08:00'
-            const targetHour = rawTargetHour.split(':')[0].padStart(2, '0')
-
             const { dayOfWeek, hour } = getCurrentTimeSP()
-
-            return targetDay === dayOfWeek && targetHour === hour
+            // 1 = Segunda-feira, 23 = 23:00
+            return dayOfWeek === '1' && hour === '23'
         })
 
         if (!shouldRun) {
-            return { skipped: true, reason: 'schedule_mismatch' }
+            return { skipped: true, reason: 'schedule_mismatch', ...getCurrentTimeSP() }
         }
 
         // 2. Extra proteção

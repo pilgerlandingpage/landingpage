@@ -413,7 +413,7 @@ export async function POST(request: NextRequest) {
                     })
                 }
             }
-            case 'r2': {
+            case 'cloudflare': {
                 const accountId = config.r2_account_id
                 const accessKeyId = config.r2_access_key_id
                 const secretAccessKey = config.r2_secret_access_key
