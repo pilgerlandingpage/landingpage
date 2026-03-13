@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone } from 'lucide-react'
+import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import {
     BarChart,
@@ -110,6 +110,7 @@ export default function AdminDashboard() {
     const [metaReport, setMetaReport] = useState<any>(null)
     const [googleReport, setGoogleReport] = useState<any>(null)
     const [adMetrics, setAdMetrics] = useState<{ totalSpend: number; totalLeads: number; avgCpa: number; activeCampaigns: number }>({ totalSpend: 0, totalLeads: 0, avgCpa: 0, activeCampaigns: 0 })
+    const [adDatePreset, setAdDatePreset] = useState('maximum')
     const [loading, setLoading] = useState(true)
 
     const safeDecode = (str?: string) => {
@@ -162,11 +163,12 @@ export default function AdminDashboard() {
             }
         }
 
-        const fetchAdMetrics = async () => {
+    const fetchAdMetrics = async (preset?: string) => {
+            const dp = preset || adDatePreset
             try {
                 const [metaRes, googleRes] = await Promise.all([
-                    fetch('/api/admin/ads?date_preset=today'),
-                    fetch('/api/admin/ads/google?date_preset=today'),
+                    fetch(`/api/admin/ads?date_preset=${dp}`),
+                    fetch(`/api/admin/ads/google?date_preset=${dp}`),
                 ])
                 let allCampaigns: any[] = []
                 if (metaRes.ok) {
@@ -178,8 +180,8 @@ export default function AdminDashboard() {
                     allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
                 }
                 const active = allCampaigns.filter(c => c.status === 'active')
-                const spend = active.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
-                const leads = active.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
+                const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
+                const leads = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
                 const cpa = leads > 0 ? spend / leads : 0
                 setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
             } catch (err) {
@@ -191,6 +193,36 @@ export default function AdminDashboard() {
         fetchReport()
         fetchAdMetrics()
     }, [])
+
+    // Refetch ad metrics when date preset changes
+    const handleAdDateChange = (newPreset: string) => {
+        setAdDatePreset(newPreset)
+        const fetchAdMetrics = async () => {
+            try {
+                const [metaRes, googleRes] = await Promise.all([
+                    fetch(`/api/admin/ads?date_preset=${newPreset}`),
+                    fetch(`/api/admin/ads/google?date_preset=${newPreset}`),
+                ])
+                let allCampaigns: any[] = []
+                if (metaRes.ok) {
+                    const data = await metaRes.json()
+                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                }
+                if (googleRes.ok) {
+                    const data = await googleRes.json()
+                    allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                }
+                const active = allCampaigns.filter(c => c.status === 'active')
+                const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)
+                const leads = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.leads_count || 0), 0)
+                const cpa = leads > 0 ? spend / leads : 0
+                setAdMetrics({ totalSpend: spend, totalLeads: leads, avgCpa: cpa, activeCampaigns: active.length })
+            } catch (err) {
+                console.error('Error fetching ad metrics', err)
+            }
+        }
+        fetchAdMetrics()
+    }
 
     if (loading) {
         return (
@@ -233,6 +265,17 @@ export default function AdminDashboard() {
         ? Math.round((metaScore + googleScore) / 2)
         : metaScore ?? googleScore ?? null
 
+    const adDateLabels: Record<string, string> = {
+        today: 'Hoje',
+        yesterday: 'Ontem',
+        last_7d: '7 dias',
+        last_14d: '14 dias',
+        last_30d: '30 dias',
+        this_month: 'Este mês',
+        last_month: 'Mês passado',
+        maximum: 'Vitalício',
+    }
+
     return (
         <div>
             <div className="admin-header">
@@ -241,16 +284,36 @@ export default function AdminDashboard() {
             </div>
 
             {/* ═══ Combined Traffic KPIs + General Thermometer ═══ */}
-            <div style={{ display: 'grid', gridTemplateColumns: generalScore != null ? '1fr 200px' : '1fr', gap: 24, marginBottom: 32 }}>
+            <div style={{ marginBottom: 32 }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                        <Megaphone size={22} color="var(--gold)" />
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Tráfego Pago — Visão Geral</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <Megaphone size={22} color="var(--gold)" />
+                            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Tráfego Pago — Visão Geral</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Calendar size={14} color="var(--text-muted)" />
+                            <select
+                                value={adDatePreset}
+                                onChange={e => handleAdDateChange(e.target.value)}
+                                className="form-input"
+                                style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: 8, minWidth: 120, cursor: 'pointer' }}
+                            >
+                                <option value="today">Hoje</option>
+                                <option value="yesterday">Ontem</option>
+                                <option value="last_7d">Últimos 7 dias</option>
+                                <option value="last_14d">Últimos 14 dias</option>
+                                <option value="last_30d">Últimos 30 dias</option>
+                                <option value="this_month">Este mês</option>
+                                <option value="last_month">Mês passado</option>
+                                <option value="maximum">Vitalício</option>
+                            </select>
+                        </div>
                     </div>
-                    <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 0 }}>
+                    <div className="kpi-grid" style={{ gridTemplateColumns: `repeat(${generalScore != null ? 5 : 4}, 1fr)`, marginBottom: 0 }}>
                         <div className="kpi-card">
                             <DollarSign size={20} color="#22c55e" style={{ marginBottom: 8 }} />
-                            <div className="kpi-label">Gasto Total Hoje</div>
+                            <div className="kpi-label">Gasto Total {adDateLabels[adDatePreset] && `(${adDateLabels[adDatePreset]})`}</div>
                             <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(adMetrics.totalSpend)}</div>
                         </div>
                         <div className="kpi-card">
@@ -268,91 +331,37 @@ export default function AdminDashboard() {
                             <div className="kpi-label">Campanhas Ativas</div>
                             <div className="kpi-value">{adMetrics.activeCampaigns}</div>
                         </div>
-                    </div>
-                </div>
-
-                {/* General Thermometer */}
-                {generalScore != null && (
-                    <div className="chart-card" style={{ textAlign: 'center', padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <Thermometer size={22} color={getScoreColor(generalScore)} style={{ marginBottom: 8 }} />
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600, marginBottom: 6 }}>Termômetro Geral</div>
-                        <div style={{ position: 'relative', width: 90, height: 90, marginBottom: 8 }}>
-                            <svg viewBox="0 0 90 90" width="90" height="90">
-                                <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border-color)" strokeWidth="8" />
-                                <circle cx="45" cy="45" r="38" fill="none" stroke={getScoreColor(generalScore)} strokeWidth="8"
-                                    strokeDasharray={`${(generalScore / 100) * 238.8} 238.8`}
-                                    strokeLinecap="round" transform="rotate(-90 45 45)"
-                                    style={{ transition: 'stroke-dasharray 1s ease-out' }} />
-                            </svg>
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ fontSize: '1.5rem', fontWeight: 800, color: getScoreColor(generalScore), fontFamily: 'Playfair Display, serif' }}>{generalScore}</span>
-                            </div>
-                        </div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: getScoreColor(generalScore) }}>
-                            {getScoreEmoji(generalScore)} {getScoreLabel(generalScore)}
-                        </span>
-                        {metaScore != null && googleScore != null && (
-                            <div style={{ marginTop: 8, fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                Meta: {metaScore} | Google: {googleScore}
+                        {/* General Thermometer — compact, same size as Meta/Google */}
+                        {generalScore != null && (
+                            <div className="kpi-card" style={{ position: 'relative', textAlign: 'center' }}>
+                                <div style={{ position: 'relative', width: 56, height: 56, margin: '0 auto 6px' }}>
+                                    <svg viewBox="0 0 56 56" width="56" height="56">
+                                        <circle cx="28" cy="28" r="24" fill="none" stroke="var(--border-color)" strokeWidth="5" />
+                                        <circle cx="28" cy="28" r="24" fill="none" stroke={getScoreColor(generalScore)} strokeWidth="5"
+                                            strokeDasharray={`${(generalScore / 100) * 150.8} 150.8`}
+                                            strokeLinecap="round" transform="rotate(-90 28 28)"
+                                            style={{ transition: 'stroke-dasharray 1s ease-out' }} />
+                                    </svg>
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: getScoreColor(generalScore), fontFamily: 'Playfair Display, serif', lineHeight: 1 }}>{generalScore}</span>
+                                    </div>
+                                </div>
+                                <div className="kpi-label">Termômetro Geral</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: getScoreColor(generalScore), marginTop: 2 }}>
+                                    {getScoreEmoji(generalScore)} {getScoreLabel(generalScore)}
+                                </div>
+                                {metaScore != null && googleScore != null && (
+                                    <div style={{ marginTop: 4, fontSize: '0.6rem', color: 'var(--text-muted)' }}>
+                                        Meta: {metaScore} | Google: {googleScore}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                )}
+                </div>
             </div>
 
-            {/* ═══ Side-by-Side Platform Reports ═══ */}
-            <div style={{ display: 'grid', gridTemplateColumns: metaReport || googleReport ? '1fr 1fr' : '1fr', gap: 24, marginBottom: 32 }}>
-                {/* Meta Report */}
-                {metaReport ? (
-                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, boxShadow: 'var(--shadow-gold)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
-                            <Brain color="var(--gold)" size={24} />
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontFamily: 'Playfair Display, serif' }}>
-                                {metaReport.type === 'daily' ? '📋 Meta Ads' : '🔭 Meta Ads'}
-                            </h3>
-                            {metaReport.performance_score != null && (
-                                <span style={{ fontSize: '0.7rem', padding: '3px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(metaReport.performance_score)}15`, color: getScoreColor(metaReport.performance_score) }}>
-                                    {getScoreEmoji(metaReport.performance_score)} {metaReport.performance_score}/100
-                                </span>
-                            )}
-                            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                {new Date(metaReport.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem', maxHeight: 400, overflowY: 'auto' }}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(metaReport.content_markdown || '') }} />
-                    </div>
-                ) : !googleReport && (
-                    <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, gridColumn: '1 / -1' }}>
-                        <Brain color="var(--gold)" size={18} style={{ opacity: 0.6 }} />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Pilger AI — Relatórios automáticos: <strong style={{ color: 'var(--gold)' }}>Diário</strong> às 23h | <strong style={{ color: '#2563eb' }}>Semanal</strong> às Seg 06h
-                        </span>
-                    </div>
-                )}
 
-                {/* Google Report */}
-                {googleReport && (
-                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
-                            <Brain color="#4285F4" size={24} />
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontFamily: 'Playfair Display, serif' }}>
-                                {googleReport.type === 'daily' ? '📋 Google Ads' : '🔭 Google Ads'}
-                            </h3>
-                            {googleReport.performance_score != null && (
-                                <span style={{ fontSize: '0.7rem', padding: '3px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(googleReport.performance_score)}15`, color: getScoreColor(googleReport.performance_score) }}>
-                                    {getScoreEmoji(googleReport.performance_score)} {googleReport.performance_score}/100
-                                </span>
-                            )}
-                            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                {new Date(googleReport.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem', maxHeight: 400, overflowY: 'auto' }}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(googleReport.content_markdown || '') }} />
-                    </div>
-                )}
-            </div>
 
 
 

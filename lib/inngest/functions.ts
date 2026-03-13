@@ -2,7 +2,6 @@ import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage, interpolateTemplate } from '../connectyhub'
 import { scrapePage } from '../scraper'
-import { generateLandingPageContent } from '../ai/generation'
 import { uploadImageToR2 } from '../storage/r2'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -12,7 +11,8 @@ import {
     executeAiAction,
     dailyReportCron,
     generateDailyPilgerReportCron,
-    generateWeeklyPilgerReportCron
+    generateWeeklyPilgerReportCron,
+    radarCollectionCron
 } from './ads-functions'
 
 function getSupabase() {
@@ -35,87 +35,6 @@ function slugify(text: string) {
         .replace(/--+/g, '-')
 }
 
-export const processCloningJob = inngest.createFunction(
-    { id: 'process-cloning-job', name: 'Process Cloning Job', concurrency: 5 },
-    { event: 'cloner/process-url' },
-    async ({ event, step }) => {
-        const { pageId, url, customPrompt, userId } = event.data
-        const supabase = getSupabase()
-
-        // 1. Update Status to Processing
-        await step.run('update-status-processing', async () => {
-            await supabase.from('landing_pages').update({ status: 'processing' }).eq('id', pageId)
-        })
-
-        // 2. Scrape Page
-        const scrapedData = await step.run('scrape-url', async () => {
-            return await scrapePage(url)
-        })
-
-        // 3. Generate Content with Gemini
-        const aiContent = await step.run('generate-content', async () => {
-            return await generateLandingPageContent(scrapedData.html, customPrompt)
-        })
-
-        // 4. Process Images (Upload to R2)
-        const processedContent = await step.run('process-images', async () => {
-            const newContent = { ...aiContent }
-
-            // Process Gallery
-            if (newContent.custom_gallery && Array.isArray(newContent.custom_gallery)) {
-                const newGallery = []
-                for (const imgUrl of newContent.custom_gallery) {
-                    if (imgUrl && imgUrl.startsWith('http')) {
-                        const key = `cloned/${pageId}/${uuidv4()}.jpg`
-                        const r2Url = await uploadImageToR2(imgUrl, key)
-                        newGallery.push(r2Url)
-                    }
-                }
-                newContent.custom_gallery = newGallery
-            }
-
-            // Process Hero Image
-            if (newContent.custom_hero_image && newContent.custom_hero_image.startsWith('http')) {
-                const key = `cloned/${pageId}/hero-${uuidv4()}.jpg`
-                const r2Url = await uploadImageToR2(newContent.custom_hero_image, key)
-                newContent.custom_hero_image = r2Url
-            }
-
-            return newContent
-        })
-
-        // 5. Save Result & Update SEO/Agent
-        await step.run('save-result', async () => {
-            // Use custom_title from AI or fallback
-            const title = processedContent.custom_title || processedContent.title || 'Nova Landing Page'
-            const baseSlug = slugify(title)
-            const finalSlug = `${baseSlug}-${uuidv4().substring(0, 4)}`
-
-            // Try to find a default agent if none assigned
-            const { data: pageNow } = await supabase.from('landing_pages').select('ai_agent_id').eq('id', pageId).single()
-            let agentId = pageNow?.ai_agent_id
-
-            if (!agentId) {
-                const { data: agents } = await supabase.from('ai_agents').select('id').limit(1)
-                if (agents && agents.length > 0) agentId = agents[0].id
-            }
-
-            const { error } = await supabase.from('landing_pages').update({
-                status: 'completed',
-                content: processedContent,
-                title: title,
-                slug: finalSlug,
-                description: processedContent.custom_description || processedContent.custom_seo_description || '',
-                ai_agent_id: agentId,
-                updated_at: new Date().toISOString()
-            }).eq('id', pageId)
-
-            if (error) throw new Error(error.message)
-        })
-
-        return { success: true, pageId }
-    }
-)
 
 // ------------------------------------------------------------------
 // EXISTING FUNCTIONS (Welcome, FollowUp, VIP, Automation)
@@ -286,7 +205,6 @@ export const functions = [
     sendFollowUp,
     vipAlert,
     processAutomationRule,
-    processCloningJob,
     processChatHandover,
     // Ads / Tráfego IA
     publishCampaign,
@@ -295,5 +213,6 @@ export const functions = [
     executeAiAction,
     dailyReportCron,
     generateDailyPilgerReportCron,
-    generateWeeklyPilgerReportCron
+    generateWeeklyPilgerReportCron,
+    radarCollectionCron
 ]

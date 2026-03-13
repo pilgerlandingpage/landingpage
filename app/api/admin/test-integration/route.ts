@@ -413,6 +413,94 @@ export async function POST(request: NextRequest) {
                     })
                 }
             }
+            case 'r2': {
+                const accountId = config.r2_account_id
+                const accessKeyId = config.r2_access_key_id
+                const secretAccessKey = config.r2_secret_access_key
+                const bucketName = config.r2_bucket_name
+
+                if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Preencha Account ID, Access Key ID, Secret Access Key e Bucket Name',
+                    })
+                }
+
+                try {
+                    const { S3Client, HeadBucketCommand } = await import('@aws-sdk/client-s3')
+                    
+                    const s3 = new S3Client({
+                        region: 'auto',
+                        endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+                        credentials: {
+                            accessKeyId,
+                            secretAccessKey,
+                        },
+                    })
+
+                    const command = new HeadBucketCommand({ Bucket: bucketName })
+                    await s3.send(command)
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `Conectado com sucesso ao bucket: ${bucketName}`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão ao bucket: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'inngest': {
+                const eventKey = config.inngest_event_key || process.env.INNGEST_EVENT_KEY
+                const signingKey = config.inngest_signing_key || process.env.INNGEST_SIGNING_KEY
+
+                if (!eventKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Event Key do Inngest não configurada',
+                    })
+                }
+
+                if (!signingKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Signing Key do Inngest não configurada',
+                    })
+                }
+
+                try {
+                    // Test the Event Key by sending a test event to Inngest
+                    const res = await fetch('https://inn.gs/e/' + eventKey, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: 'test/connection',
+                            data: { test: true, timestamp: new Date().toISOString() },
+                        }),
+                    })
+
+                    if (!res.ok) {
+                        const text = await res.text()
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro Inngest (${res.status}): ${text.slice(0, 100)}`,
+                        })
+                    }
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `Inngest Conectado! Event Key válida. Signing Key: ${signingKey.slice(0, 15)}...`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
 
             default:
                 return NextResponse.json({

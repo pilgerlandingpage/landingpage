@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
     Plus, Megaphone, DollarSign, Users, Target,
     TrendingUp, AlertTriangle, Brain, CheckCircle, AlertCircle, RefreshCw, Calendar,
-    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp
+    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X
 } from 'lucide-react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -403,6 +403,38 @@ export default function AdsPage() {
                     <div className="kpi-label">CPM Médio</div>
                     <div className="kpi-value" style={{ color: '#0ea5e9', fontSize: '1.4rem' }}>{formatCurrency(avgCpm)}</div>
                 </div>
+                {/* Thermometer as compact KPI card */}
+                {latestScore != null && (
+                    <div className="kpi-card" style={{ position: 'relative', textAlign: 'center' }}>
+                        <div style={{ position: 'relative', width: 56, height: 56, margin: '0 auto 6px' }}>
+                            <svg viewBox="0 0 56 56" width="56" height="56">
+                                <circle cx="28" cy="28" r="24" fill="none" stroke="var(--border-color)" strokeWidth="5" />
+                                <circle cx="28" cy="28" r="24" fill="none" stroke={getScoreColor(latestScore)} strokeWidth="5"
+                                    strokeDasharray={`${(latestScore / 100) * 150.8} 150.8`}
+                                    strokeLinecap="round" transform="rotate(-90 28 28)"
+                                    style={{ transition: 'stroke-dasharray 1s ease-out' }} />
+                            </svg>
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: getScoreColor(latestScore), fontFamily: 'Playfair Display, serif', lineHeight: 1 }}>{latestScore}</span>
+                            </div>
+                        </div>
+                        <div className="kpi-label">Termômetro IA</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: getScoreColor(latestScore), marginTop: 2 }}>
+                            {getScoreEmoji(latestScore)} {getScoreLabel(latestScore)}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* History Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24, marginTop: 8 }}>
+                <button onClick={() => setShowHistory(true)}
+                    className="btn btn-outline"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', padding: '8px 16px', borderRadius: 10 }}>
+                    <History size={16} color="var(--gold)" />
+                    📜 Histórico de Análises IA
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: 4 }}>({reports.length})</span>
+                </button>
             </div>
 
             {/* ── Charts Row 1: Spend Bar + Spend Pie ─────────── */}
@@ -683,88 +715,81 @@ export default function AdsPage() {
                 )}
             </div>
 
-            {/* ── Thermometer + Report History ──────────────── */}
-            <div style={{ marginTop: 32 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: latestScore != null ? '280px 1fr' : '1fr', gap: 24, marginBottom: 24 }}>
-                    {/* Thermometer */}
-                    {latestScore != null && (
-                        <div className="chart-card" style={{ textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <Thermometer size={28} color={getScoreColor(latestScore)} style={{ marginBottom: 12 }} />
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8, fontWeight: 600 }}>Termômetro Meta Ads</div>
-                            <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 12 }}>
-                                <svg viewBox="0 0 120 120" width="120" height="120">
-                                    <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border-color)" strokeWidth="10" />
-                                    <circle cx="60" cy="60" r="52" fill="none" stroke={getScoreColor(latestScore)} strokeWidth="10"
-                                        strokeDasharray={`${(latestScore / 100) * 326.7} 326.7`}
-                                        strokeLinecap="round" transform="rotate(-90 60 60)"
-                                        style={{ transition: 'stroke-dasharray 1s ease-out' }} />
-                                </svg>
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                    <span style={{ fontSize: '2rem', fontWeight: 800, color: getScoreColor(latestScore), fontFamily: 'Playfair Display, serif' }}>{latestScore}</span>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>/100</span>
-                                </div>
-                            </div>
-                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: getScoreColor(latestScore) }}>
-                                {getScoreEmoji(latestScore)} {getScoreLabel(latestScore)}
-                            </span>
+            {/* Modal de Histórico de Relatórios */}
+            {showHistory && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 99999, padding: 24
+                }}>
+                    <div className="chart-card" style={{
+                        width: '100%', maxWidth: '800px', maxHeight: '90vh',
+                        display: 'flex', flexDirection: 'column',
+                        background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.5)', padding: 0, overflow: 'hidden',
+                        animation: 'adsToastIn 0.3s ease-out'
+                    }}>
+                        <div style={{
+                            padding: '20px 24px', borderBottom: '1px solid var(--border-color)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            background: 'var(--bg-secondary)', position: 'sticky', top: 0, zIndex: 10
+                        }}>
+                            <h2 style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <History size={22} color="var(--gold)" />
+                                Histórico de Análises IA — Meta Ads
+                            </h2>
+                            <button onClick={() => setShowHistory(false)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                                <X size={24} />
+                            </button>
                         </div>
-                    )}
-
-                    {/* Report History Toggle */}
-                    <div>
-                        <button onClick={() => setShowHistory(!showHistory)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, padding: 0 }}>
-                            <History size={20} color="var(--gold)" />
-                            📜 Histórico de Análises IA — Meta Ads
-                            {showHistory ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: 8 }}>{reports.length} relatório(s)</span>
-                        </button>
-
-                        {showHistory && (
-                            <div style={{ display: 'grid', gap: 10, maxHeight: 600, overflowY: 'auto', paddingRight: 4 }}>
-                                {reports.length === 0 ? (
-                                    <div className="chart-card" style={{ textAlign: 'center', padding: '40px 16px' }}>
-                                        <Brain size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhum relatório ainda</p>
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Os relatórios são gerados automaticamente às 23h</p>
-                                    </div>
-                                ) : (
-                                    reports.map(report => {
+                        
+                        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, scrollbarWidth: 'thin' }}>
+                            {reports.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+                                    <Brain size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: 8 }}>Nenhum relatório gerado ainda</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Os relatórios são gerados automaticamente pelo Pilger AI.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'grid', gap: 16 }}>
+                                    {reports.map(report => {
                                         const isExpanded = expandedReport === report.id
                                         return (
-                                            <div key={report.id} className="chart-card report-history-card"
-                                                style={{ padding: 16, cursor: 'pointer', borderLeft: `3px solid ${report.performance_score != null ? getScoreColor(report.performance_score) : 'var(--border-color)'}` }}
+                                            <div key={report.id} className="report-history-card"
+                                                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: 20, cursor: 'pointer', borderLeft: `4px solid ${report.performance_score != null ? getScoreColor(report.performance_score) : 'var(--border-color)'}` }}
                                                 onClick={() => setExpandedReport(isExpanded ? null : report.id)}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: isExpanded ? 12 : 0 }}>
-                                                    <span style={{ fontSize: '0.85rem' }}>{report.type === 'daily' ? '📋' : '🔭'}</span>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: isExpanded ? 16 : 0 }}>
+                                                    <span style={{ fontSize: '1.2rem' }}>{report.type === 'daily' ? '📋' : '🔭'}</span>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 600 }}>
                                                         {report.type === 'daily' ? 'Fechamento Diário' : 'Diretriz Semanal'}
                                                     </span>
                                                     {report.performance_score != null && (
-                                                        <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(report.performance_score)}15`, color: getScoreColor(report.performance_score) }}>
+                                                        <span style={{ fontSize: '0.8rem', padding: '4px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(report.performance_score)}15`, color: getScoreColor(report.performance_score) }}>
                                                             {getScoreEmoji(report.performance_score)} {report.performance_score}/100
                                                         </span>
                                                     )}
-                                                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                                    <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                                         {new Date(report.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                                     </span>
-                                                    <span style={{ fontSize: '0.65rem', color: 'var(--gold)' }}>
-                                                        {isExpanded ? '▲' : '▼'}
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--gold)', marginLeft: 8 }}>
+                                                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                                     </span>
                                                 </div>
                                                 {isExpanded && (
-                                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.7 }}
+                                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.8, padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}
                                                         dangerouslySetInnerHTML={{ __html: renderMarkdown(report.content_markdown || '') }} />
                                                 )}
                                             </div>
                                         )
-                                    })
-                                )}
-                            </div>
-                        )}
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             <style>{`
                 .ads-toast { position: fixed; top: 24px; right: 24px; padding: 14px 24px; border-radius: 12px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 10px; z-index: 10000; animation: adsToastIn 0.35s ease-out; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }

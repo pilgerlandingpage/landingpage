@@ -1,16 +1,6 @@
-import { getActiveAIProvider, getClonerProvider, getConciergeProvider, getPilgerProvider } from './config'
-import { generateGeminiChat, generateGeminiLandingPage, extractGeminiLeadInfo } from './gemini'
-import { generateOpenAIChat, generateOpenAILandingPage, extractOpenAILeadInfo } from './openai'
-
-export async function generateLandingPageContent(htmlContent: string, customPrompt: string = '') {
-    const provider = await getClonerProvider()
-    console.log(`[AI Generation] Cloning with provider: ${provider}`)
-
-    if (provider === 'openai') {
-        return generateOpenAILandingPage(htmlContent, customPrompt)
-    }
-    return generateGeminiLandingPage(htmlContent, customPrompt)
-}
+import { getConciergeProvider, getPilgerProvider } from './config'
+import { generateGeminiChat, extractGeminiLeadInfo } from './gemini'
+import { generateOpenAIChat, extractOpenAILeadInfo } from './openai'
 
 export async function extractLeadInfo(conversation: string) {
     const provider = await getConciergeProvider()

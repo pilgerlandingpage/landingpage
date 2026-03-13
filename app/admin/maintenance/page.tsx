@@ -3,13 +3,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database } from 'lucide-react'
 import Link from 'next/link'
-import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT, MASTER_LANDING_PAGE_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
+import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest'
     fields: {
         key: string
         label: string
@@ -45,9 +45,9 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
 
     {
-        id: 'r2',
+        id: 'cloudflare',
         title: 'Cloudflare R2 — Storage',
-        description: 'Credenciais para armazenar imagens de páginas clonadas (S3-compatible).',
+        description: 'Armazenamento de objetos S3 compatível para imagens da plataforma.',
         icon: 'r2',
         fields: [
             { key: 'r2_account_id', label: 'Account ID', placeholder: 'ID da conta Cloudflare', isSecret: false },
@@ -65,6 +65,27 @@ const INTEGRATIONS: IntegrationCard[] = [
         icon: 'serpapi',
         fields: [
             { key: 'serpapi_api_key', label: 'API Key', placeholder: 'Sua API Key', isSecret: true },
+        ],
+    },
+    {
+        id: 'dataforseo',
+        title: 'DataForSEO — Market Trends',
+        description: 'API de backup para tendências de mercado e palavras-chave.',
+        icon: 'dataforseo',
+        fields: [
+            { key: 'dataforseo_login', label: 'Login (Email)', placeholder: 'seu@email.com', isSecret: false },
+            { key: 'dataforseo_password', label: 'API Password (Secret)', placeholder: 'Sua senha API', isSecret: true },
+        ],
+    },
+
+    {
+        id: 'inngest',
+        title: 'Inngest — Automação & Cron Jobs',
+        description: 'Motor de automação: crons do Radar, relatórios Pilger AI, follow-ups e alertas. ⚠️ Estas chaves também precisam estar nas variáveis de ambiente da Vercel.',
+        icon: 'inngest',
+        fields: [
+            { key: 'inngest_event_key', label: 'Event Key', placeholder: 'nSmu_X6u4f...', isSecret: true },
+            { key: 'inngest_signing_key', label: 'Signing Key', placeholder: 'signkey-prod-...', isSecret: true },
         ],
     },
 ]
@@ -109,7 +130,6 @@ export default function MaintenancePage() {
                     setConfigs(prev => {
                         const next = { ...prev }
                         if (!next['gemini_concierge_model'] && data.models.length > 0) next['gemini_concierge_model'] = 'gemini-1.5-flash'
-                        if (!next['gemini_cloner_model'] && data.models.length > 0) next['gemini_cloner_model'] = 'gemini-1.5-flash'
                         if (!next['gemini_pilger_model'] && data.models.length > 0) next['gemini_pilger_model'] = 'gemini-1.5-flash'
                         return next
                     })
@@ -144,7 +164,6 @@ export default function MaintenancePage() {
                     setConfigs(prev => {
                         const next = { ...prev }
                         if (!next['openai_concierge_model'] && data.models.length > 0) next['openai_concierge_model'] = 'gpt-3.5-turbo'
-                        if (!next['openai_cloner_model'] && data.models.length > 0) next['openai_cloner_model'] = 'gpt-3.5-turbo'
                         if (!next['openai_pilger_model'] && data.models.length > 0) next['openai_pilger_model'] = 'gpt-3.5-turbo'
                         return next
                     })
@@ -232,14 +251,16 @@ export default function MaintenancePage() {
                 'serpapi_api_key',
                 'dataforseo_login',
                 'dataforseo_password',
+                'inngest_event_key',
+                'inngest_signing_key',
                 'pilger_daily_days',
                 'pilger_daily_time',
                 'pilger_weekly_day',
                 'pilger_weekly_time',
+                'radar_collection_times',
                 'ads_analyst_system_prompt',
                 'pilger_daily_system_prompt',
-                'pilger_weekly_system_prompt',
-                'cloner_system_prompt'
+                'pilger_weekly_system_prompt'
             ]
             const configsToSave: Record<string, string> = {}
             for (const key of allKeys) {
@@ -310,6 +331,7 @@ export default function MaintenancePage() {
             case 'serpapi': return <Search size={22} />
             case 'dataforseo': return <TrendingUp size={22} />
             case 'r2': return <Database size={22} />
+            case 'inngest': return <Zap size={22} />
             default: return null
         }
     }
@@ -569,7 +591,7 @@ export default function MaintenancePage() {
                     <div>
                         <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.1rem' }}>Central de Controle AI (Multi-Provedor)</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Gerencie provedores e modelos específicos para cada função (Concierge, Pilger AI, Clonador).
+                            Gerencie provedores e modelos específicos para cada função (Concierge e Pilger AI).
                         </div>
                     </div>
                 </div>
@@ -616,7 +638,7 @@ export default function MaintenancePage() {
                     {/* API Keys (Conditional) */}
                     <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
                         {/* Gemini Key */}
-                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('gemini')) && (
+                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['pilger_provider']].includes('gemini')) && (
                             <div className="form-group" style={{ marginBottom: (configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('openai')) ? '20px' : '0' }}>
                                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Brain size={16} style={{ color: 'var(--gold)' }} />
@@ -668,7 +690,7 @@ export default function MaintenancePage() {
                         )}
 
                         {/* OpenAI Key */}
-                        {(configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('openai')) && (
+                        {(configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['pilger_provider']].includes('openai')) && (
                             <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Bot size={16} style={{ color: 'var(--gold)' }} />
@@ -958,32 +980,10 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 4. CLONADOR DE PÁGINAS IA ── */}
-                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#f472b6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>⚡</span> 4. Clonador de Páginas IA
-                    </h3>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt Mestre de Design e Extração (Clonador)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={10}
-                            value={configs['cloner_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, cloner_system_prompt: e.target.value })}
-                            placeholder={MASTER_LANDING_PAGE_PROMPT}
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(244, 114, 182, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            A IA recebe aqui a tag {"{{html}}"} com o código bruto da página e deve cuspir um JSON de conteúdo.
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 5. TRÁFEGO (GESTOR IA) ── */}
+                {/* ── 4. TRÁFEGO (GESTOR IA) ── */}
                 <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>📈</span> 5. Gestor de Tráfego (Análise Autônoma)
+                        <span>📈</span> 4. Gestor de Tráfego (Análise Autônoma)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -1026,7 +1026,7 @@ export default function MaintenancePage() {
                 {/* ── 6. AGENDAMENTOS E RELATÓRIOS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>⏰</span> 6. Agendamento de Relatórios Pilger CEO
+                        <span>⏰</span> 5. Agendamento de Relatórios Pilger CEO
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -1035,11 +1035,57 @@ export default function MaintenancePage() {
                             <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Relatório Diário</div>
                             <div className="form-group">
                                 <label className="form-label">Dias de Execução</label>
-                                <input className="form-input" type="text" value={configs['pilger_daily_days'] || '1,2,3,4,5'} onChange={e => setConfigs({ ...configs, pilger_daily_days: e.target.value })} placeholder="1,2,3,4,5 (Seg-Sex)" />
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {[
+                                        { v: '0', l: 'Dom' }, { v: '1', l: 'Seg' }, { v: '2', l: 'Ter' },
+                                        { v: '3', l: 'Qua' }, { v: '4', l: 'Qui' }, { v: '5', l: 'Sex' }, { v: '6', l: 'Sáb' }
+                                    ].map(day => {
+                                        const currentDays = (configs['pilger_daily_days'] || '1,2,3,4,5').split(',');
+                                        const isSelected = currentDays.includes(day.v);
+                                        return (
+                                            <label
+                                                key={day.v}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem',
+                                                    cursor: 'pointer', userSelect: 'none',
+                                                    border: isSelected ? '1px solid var(--gold)' : '1px solid var(--border-color)',
+                                                    background: isSelected ? 'rgba(201, 169, 110, 0.1)' : 'var(--bg-primary)',
+                                                    color: isSelected ? 'var(--gold)' : 'var(--text-secondary)',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => {
+                                                        let newDays = [...currentDays];
+                                                        if (isSelected) {
+                                                            newDays = newDays.filter(d => d !== day.v);
+                                                        } else {
+                                                            newDays.push(day.v);
+                                                        }
+                                                        setConfigs({ ...configs, pilger_daily_days: newDays.sort().join(',') });
+                                                    }}
+                                                    style={{ display: 'none' }}
+                                                />
+                                                {day.l}
+                                            </label>
+                                        );
+                                    })}
+                                </div>
                             </div>
                             <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Horário</label>
-                                <input className="form-input" type="number" min="0" max="23" value={configs['pilger_daily_time'] || '23'} onChange={e => setConfigs({ ...configs, pilger_daily_time: e.target.value })} placeholder="Ex: 23" />
+                                <label className="form-label">Horário de Execução</label>
+                                <select 
+                                    className="form-input" 
+                                    value={configs['pilger_daily_time'] || '23'} 
+                                    onChange={e => setConfigs({ ...configs, pilger_daily_time: e.target.value })}
+                                >
+                                    {Array.from({ length: 24 }).map((_, i) => (
+                                        <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
@@ -1048,11 +1094,55 @@ export default function MaintenancePage() {
                             <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Diretriz Semanal</div>
                             <div className="form-group">
                                 <label className="form-label">Dia da Semana</label>
-                                <input className="form-input" type="number" min="0" max="6" value={configs['pilger_weekly_day'] || '1'} onChange={e => setConfigs({ ...configs, pilger_weekly_day: e.target.value })} placeholder="1 = Segunda-feira" />
+                                <select 
+                                    className="form-input" 
+                                    value={configs['pilger_weekly_day'] || '1'} 
+                                    onChange={e => setConfigs({ ...configs, pilger_weekly_day: e.target.value })}
+                                >
+                                    <option value="0">Domingo</option>
+                                    <option value="1">Segunda-feira</option>
+                                    <option value="2">Terça-feira</option>
+                                    <option value="3">Quarta-feira</option>
+                                    <option value="4">Quinta-feira</option>
+                                    <option value="5">Sexta-feira</option>
+                                    <option value="6">Sábado</option>
+                                </select>
                             </div>
                             <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Horário</label>
-                                <input className="form-input" type="number" min="0" max="23" value={configs['pilger_weekly_time'] || '8'} onChange={e => setConfigs({ ...configs, pilger_weekly_time: e.target.value })} placeholder="Ex: 8" />
+                                <label className="form-label">Horário de Execução</label>
+                                <select 
+                                    className="form-input" 
+                                    value={configs['pilger_weekly_time'] || '8'} 
+                                    onChange={e => setConfigs({ ...configs, pilger_weekly_time: e.target.value })}
+                                >
+                                    {Array.from({ length: 24 }).map((_, i) => (
+                                        <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+                        {/* Radar de Mercado */}
+                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
+                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Radar de Mercado</div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Horários de Coleta (Horas: 0-23, separados por vírgula)</label>
+                                <input 
+                                    type="text"
+                                    className="form-input" 
+                                    placeholder="Ex: 06,12,18"
+                                    value={configs['radar_collection_times'] || '06,12,18'} 
+                                    onChange={e => setConfigs({ ...configs, radar_collection_times: e.target.value })}
+                                />
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '8px', lineHeight: '1.4' }}>
+                                    Determine os horários (dia de São Paulo) para o rastreio automático. 
+                                    Padrão recomendado: <b>06,12,18</b> para cobrir picos de interesse.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1106,7 +1196,7 @@ export default function MaintenancePage() {
                         Se uma chave for removida daqui, o sistema automaticamente usará a variável de ambiente como fallback.
                     </p>
                     <p style={{ marginTop: '8px' }}>
-                        <strong>Chaves de infraestrutura</strong> (Supabase, R2, Inngest) são gerenciadas apenas via variáveis de ambiente por segurança.
+                        <strong>Chaves de infraestrutura</strong> (Supabase) são gerenciadas apenas via variáveis de ambiente. O <strong>Inngest</strong> precisa estar configurado tanto aqui quanto nas variáveis de ambiente da Vercel.
                     </p>
                 </div>
             </div>

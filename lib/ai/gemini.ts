@@ -1,43 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { getGeminiApiKey, getGeminiModel, getClonerPrompt, getLeadExtractionPrompt } from './config'
-
-export async function generateGeminiLandingPage(htmlContent: string, customPrompt: string = '') {
-  try {
-    const apiKey = await getGeminiApiKey()
-    if (!apiKey) throw new Error('Gemini API Key not configured in Admin Panel')
-
-    const modelName = await getGeminiModel('cloner')
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: modelName })
-
-    const masterPrompt = await getClonerPrompt()
-
-    const prompt = `
-        ${masterPrompt}
-
-        CUSTOM PROMPT FROM ADMIN:
-        "${customPrompt}"
-
-        HTML CONTENT (Scraped):
-        \`\`\`html
-        ${htmlContent.substring(0, 30000)} 
-        \`\`\`
-        `
-    // Truncate HTML to 30k chars to avoid token limits if necessary, though Gemini 1.5 has huge context.
-
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    const text = response.text()
-
-    // Clean up markdown code blocks if present
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim()
-
-    return JSON.parse(jsonString)
-  } catch (error) {
-    console.error('Gemini Generation Error:', error)
-    throw new Error('Failed to generate content with Gemini')
-  }
-}
+import { getGeminiApiKey, getGeminiModel, getLeadExtractionPrompt } from './config'
 
 export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string) {
   const apiKey = await getGeminiApiKey()

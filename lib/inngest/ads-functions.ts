@@ -396,7 +396,48 @@ export const dailyReportCron = inngest.createFunction(
 // 6. Relatórios de Gestão (Olho de Deus)
 // =============================================
 
-import { generateDailyPilgerReport, generateWeeklyPilgerReport } from '../ai/pilger-ceo'
+import { generateDailyPilgerReport, generateWeeklyPilgerReport, collectMarketRadarData } from '../ai/pilger-ceo'
+
+// =============================================
+// 7. Monitoramento Real-Time (Radar de Mercado)
+// =============================================
+
+export const radarCollectionCron = inngest.createFunction(
+    { id: 'market-radar-collection', name: 'Coletar Dados do Radar de Mercado' },
+    { cron: '0 * * * *' }, // Executa a cada hora para avaliar horários
+    async ({ step }) => {
+        const supabase = getSupabase()
+
+        // 1. Verificar horários configurados
+        const config = await step.run('check-radar-schedule', async () => {
+            const { data } = await supabase
+                .from('app_config')
+                .select('value')
+                .eq('key', 'radar_collection_times')
+                .single()
+            
+            // Padrão: 06, 12, 18
+            const targetHours = (data?.value || '06,12,18').split(',')
+            const { hour } = getCurrentTimeSP()
+
+            return {
+                shouldRun: targetHours.includes(hour),
+                currentSlot: hour
+            }
+        })
+
+        if (!config.shouldRun) {
+            return { skipped: true, reason: 'hour_not_scheduled', hour: config.currentSlot }
+        }
+
+        // 2. Executar Coleta
+        const result = await step.run('collect-radar-data', async () => {
+            return await collectMarketRadarData(config.currentSlot)
+        })
+
+        return { collected: result.length, slot: config.currentSlot }
+    }
+)
 
 // Função auxiliar para pegar hora atual em fuso horário
 function getCurrentTimeSP() {
@@ -424,7 +465,8 @@ export const generateDailyPilgerReportCron = inngest.createFunction(
             const configMap = (configs || []).reduce((acc: any, c) => ({ ...acc, [c.key]: c.value }), {})
             
             const targetDays = (configMap['pilger_daily_days'] || '0,1,2,3,4,5,6').split(',')
-            const targetHour = configMap['pilger_daily_time'] || '23'
+            const rawTargetHour = configMap['pilger_daily_time'] || '23:00'
+            const targetHour = rawTargetHour.split(':')[0].padStart(2, '0')
 
             const { dayOfWeek, hour } = getCurrentTimeSP()
 
@@ -478,7 +520,8 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
             const configMap = (configs || []).reduce((acc: any, c) => ({ ...acc, [c.key]: c.value }), {})
             
             const targetDay = configMap['pilger_weekly_day'] || '1' // Padrão: Segunda
-            const targetHour = configMap['pilger_weekly_time'] || '06'
+            const rawTargetHour = configMap['pilger_weekly_time'] || '08:00'
+            const targetHour = rawTargetHour.split(':')[0].padStart(2, '0')
 
             const { dayOfWeek, hour } = getCurrentTimeSP()
 

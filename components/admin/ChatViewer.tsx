@@ -47,14 +47,14 @@ export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) 
     }
 
     return (
-        <div className="flex-1 flex items-center justify-center p-8 bg-[#0a0a0a] overflow-hidden">
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backgroundColor: '#0a0a0a', overflow: 'hidden', minHeight: 0 }}>
             {/* Phone Bezel */}
-            <div className="relative w-[360px] h-[720px] bg-[#1a1a1a] rounded-[45px] border-[8px] border-[#2a2a2a] shadow-2xl overflow-hidden flex flex-col">
+            <div style={{ position: 'relative', width: '100%', height: '100%', maxWidth: '360px', maxHeight: '720px', backgroundColor: '#1a1a1a', borderRadius: '32px', border: '8px solid #2a2a2a', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
                 {/* Status Bar */}
-                <div className="h-7 bg-white px-6 flex justify-between items-center text-[10px] font-bold text-black z-10 shrink-0">
+                <div style={{ height: '28px', backgroundColor: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', fontWeight: 'bold', color: '#000', zIndex: 10, flexShrink: 0 }}>
                     <span>9:41</span>
-                    <div className="flex items-center gap-1.5">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Signal size={12} fill="black" />
                         <Wifi size={12} />
                         <Battery size={12} fill="black" />
@@ -62,8 +62,8 @@ export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) 
                 </div>
 
                 {/* Header (Mimicking ConciergeChat) */}
-                <div className="bg-[#1a1a1a] p-4 text-white flex items-center gap-3 shrink-0 border-b border-[#333] z-10">
-                    <div className="w-10 h-10 bg-[#333] rounded-full flex items-center justify-center text-[#b8945f] border border-[#b8945f] overflow-hidden">
+                <div style={{ backgroundColor: '#1a1a1a', padding: '16px', color: '#fff', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, borderBottom: '1px solid #333', zIndex: 10 }}>
+                    <div style={{ width: '40px', height: '40px', backgroundColor: '#333', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b8945f', border: '1px solid #b8945f', overflow: 'hidden' }}>
                         <img
                             src="https://framerusercontent.com/images/k2FqGjDq0j8Xyw3mXyv3rU9I.png"
                             alt="Broker"
@@ -76,10 +76,10 @@ export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) 
                         {/* Fallback icon handled by css/display none logic above roughly, or better: */}
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold m-0 leading-tight">{brokerName || 'Corretor'}</h3>
-                        <div className="flex items-center gap-1.5 opacity-80">
-                            <span className="w-2 h-2 rounded-full bg-green-500 block"></span>
-                            <span className="text-[10px]">Online agora</span>
+                        <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: 0, lineHeight: 1.2 }}>{brokerName || 'Corretor'}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.8, marginTop: '2px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'block' }}></span>
+                            <span style={{ fontSize: '10px' }}>Online agora</span>
                         </div>
                     </div>
                 </div>
@@ -87,41 +87,47 @@ export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) 
                 {/* Screen / Messages Area */}
                 <div
                     ref={scrollRef}
-                    className="flex-1 bg-[#f9f9f9] overflow-y-auto p-4 flex flex-col gap-3 scrollbar-hide"
+                    className="scrollbar-hide"
+                    style={{ flex: 1, backgroundColor: '#f9f9f9', overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}
                 >
                     {/* Date Divider Mockup */}
-                    <div className="text-center my-2">
-                        <span className="bg-gray-200 text-gray-500 text-[10px] px-2 py-1 rounded-full font-medium">Hoje</span>
+                    <div style={{ textAlign: 'center', margin: '8px 0' }}>
+                        <span style={{ backgroundColor: '#e5e7eb', color: '#6b7280', fontSize: '10px', padding: '4px 8px', borderRadius: '9999px', fontWeight: 500 }}>Hoje</span>
                     </div>
 
-                    {messages.map((msg, idx) => {
+                    {messages?.map((msg, idx) => {
                         const isUser = msg.role === 'user'
                         const time = formatTime(msg.id)
 
                         return (
-                            <div key={idx} className={`flex gap-2 w-full ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div key={idx} style={{ display: 'flex', gap: '8px', width: '100%', flexDirection: isUser ? 'row-reverse' : 'row' }}>
                                 {/* Avatar */}
-                                <div className="w-7 h-7 bg-[#1a1a1a] rounded-full flex items-center justify-center text-[#b8945f] shrink-0 border border-[#b8945f] overflow-hidden mt-1">
+                                <div style={{ width: '28px', height: '28px', backgroundColor: '#1a1a1a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b8945f', flexShrink: 0, border: '1px solid #b8945f', overflow: 'hidden', marginTop: '4px' }}>
                                     {isUser ? (
-                                        <span className="text-xs font-bold">{leadName?.[0]?.toUpperCase() || 'U'}</span>
+                                        <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{leadName?.[0]?.toUpperCase() || 'U'}</span>
                                     ) : (
                                         <img
                                             src="https://framerusercontent.com/images/k2FqGjDq0j8Xyw3mXyv3rU9I.png"
                                             alt="Assistant"
-                                            className="w-full h-full object-cover"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
                                     )}
                                 </div>
 
                                 {/* Bubble */}
-                                <div className={`
-                                    max-w-[75%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed shadow-sm relative
-                                    ${isUser
-                                        ? 'bg-[#b8945f] text-[#0a0a0a] rounded-tr-sm'
-                                        : 'bg-white text-[#333] border border-[#e8e5e0] rounded-tl-sm'}
-                                `}>
+                                <div style={{
+                                    maxWidth: '75%', padding: '10px 14px', borderRadius: '12px', fontSize: '13px', lineHeight: 1.5, boxShadow: '0 1px 2px rgba(0,0,0,0.05)', position: 'relative',
+                                    ...(isUser ? {
+                                        backgroundColor: '#b8945f', color: '#0a0a0a', borderTopRightRadius: '2px'
+                                    } : {
+                                        backgroundColor: '#fff', color: '#333', border: '1px solid #e8e5e0', borderTopLeftRadius: '2px'
+                                    })
+                                }}>
                                     {msg.content}
-                                    <div className={`text-[10px] mt-1.5 opacity-80 flex items-center gap-1 ${isUser ? 'justify-end text-[#0a0a0a]/70' : 'text-gray-400'}`}>
+                                    <div style={{
+                                        fontSize: '10px', marginTop: '6px', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '4px',
+                                        ...(isUser ? { justifyContent: 'flex-end', color: 'rgba(10,10,10,0.7)' } : { color: '#9ca3af' })
+                                    }}>
                                         {time}
                                     </div>
                                 </div>
@@ -131,17 +137,17 @@ export function ChatViewer({ messages, leadName, brokerName }: ChatViewerProps) 
                 </div>
 
                 {/* Fake Input Area */}
-                <div className="bg-white p-4 border-t border-[#e8e5e0] flex gap-2 items-center shrink-0">
-                    <div className="flex-1 bg-gray-100 rounded-full h-10 px-4 flex items-center text-gray-400 text-sm border border-gray-200 cursor-not-allowed">
+                <div style={{ backgroundColor: '#fff', padding: '16px', borderTop: '1px solid #e8e5e0', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ flex: 1, backgroundColor: '#f3f4f6', borderRadius: '9999px', height: '40px', padding: '0 16px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: '14px', border: '1px solid #e5e7eb', cursor: 'not-allowed' }}>
                         Mensagem...
                     </div>
-                    <div className="w-10 h-10 bg-[#1a1a1a] rounded-full flex items-center justify-center text-white opacity-50 cursor-not-allowed">
+                    <div style={{ width: '40px', height: '40px', backgroundColor: '#1a1a1a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', opacity: 0.5, cursor: 'not-allowed' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </div>
                 </div>
 
                 {/* Home Indicator */}
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full mb-1"></div>
+                <div style={{ position: 'absolute', bottom: '4px', left: '50%', transform: 'translateX(-50%)', width: '128px', height: '4px', backgroundColor: '#d1d5db', borderRadius: '9999px', marginBottom: '4px' }}></div>
             </div>
 
             <style jsx global>{`

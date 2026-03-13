@@ -15,7 +15,17 @@ export async function GET() {
 
     if (error) throw error
 
-    return NextResponse.json({ radars: radars || [] })
+    // Sort market_radar_data manually by date and then time_slot if needed
+    // or improve the query if Supabase allowed sub-ordering easily
+    const sortedRadars = (radars || []).map(r => ({
+      ...r,
+      market_radar_data: (r.market_radar_data || []).sort((a: any, b: any) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date)
+        return (a.time_slot || '').localeCompare(b.time_slot || '')
+      })
+    }))
+
+    return NextResponse.json({ radars: sortedRadars })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -23,7 +33,16 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { keyword, location } = await req.json()
+    const body = await req.json()
+    const { keyword, location, action } = body
+
+    // Coleta manual
+    if (action === 'collect') {
+      const { collectMarketRadarData } = await import('@/lib/ai/pilger-ceo')
+      const results = await collectMarketRadarData()
+      return NextResponse.json({ success: true, collected: results.length })
+    }
+
     if (!keyword) return NextResponse.json({ error: 'Keyword is required' }, { status: 400 })
 
     const { data, error } = await supabase

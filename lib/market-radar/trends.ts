@@ -27,7 +27,7 @@ async function fetchSerpApiTrends(keyword: string, location: string): Promise<Tr
     // q: keyword
     // data_type: TIMESERIES
     // date: today 1-m (Últimos 30 dias - o mais próximo de 7 dias ou usamos now 7-d)
-    const url = `https://serpapi.com/search.json?engine=google_trends&q=${encodeURIComponent(keyword)}&data_type=TIMESERIES&date=now%207-d&api_key=${apiKey}`
+    const url = `https://serpapi.com/search.json?engine=google_trends&q=${encodeURIComponent(keyword)}&data_type=TIMESERIES&date=now%207-d&geo=${location || 'BR'}&api_key=${apiKey}`
 
     const res = await fetch(url)
     if (!res.ok) {
@@ -42,10 +42,11 @@ async function fetchSerpApiTrends(keyword: string, location: string): Promise<Tr
 
     // O SerpApi retorna values (interest) com a chave 'values' [ { extraction_date, values: [ { query, extracted_value } ] } ]
     const recentData = timelineData.map((point: any) => {
-      const valueObj = point.values?.find((v: any) => v.query.toLowerCase() === keyword.toLowerCase())
+      // Tenta encontrar o valor exato ou o primeiro disponível (se só houver um termo)
+      const valueObj = point.values?.find((v: any) => v.query.toLowerCase() === keyword.toLowerCase()) || point.values?.[0]
       return {
         date: point.date, // ex: "Nov 12"
-        value: valueObj ? parseInt(valueObj.extracted_value, 10) : 0
+        value: valueObj ? parseInt(valueObj.extracted_value || valueObj.value || '0', 10) : 0
       }
     })
 
@@ -192,7 +193,7 @@ export async function getMarketRadarTrends(
     const values = recentData.map(d => d.value)
     const currentScore = values[values.length - 1] || 0
     const sum = values.reduce((a, b) => a + b, 0)
-    const averageScore = Math.round(sum / values.length) || 0
+    const averageScore = Math.round(sum / (values.length || 1))
 
     // Definir a tendência (frios/mornos/quentes)
     let trend: 'hot' | 'warm' | 'cold' = 'cold'
@@ -211,7 +212,14 @@ export async function getMarketRadarTrends(
       recentData
     }
   } catch (error) {
-    console.error(`Erro ao buscar trends para "${keyword}":`, error)
-    return null
+    console.error(`[Market Radar] Erro na lib nativa para "${keyword}", tentando fallbacks...`, error)
+    
+    // Fallbacks em caso de erro na lib principal
+    console.log(`[Market Radar] Tentando fallback para SerpApi...`)
+    const serpApiResult = await fetchSerpApiTrends(keyword, location || 'BR')
+    if (serpApiResult) return serpApiResult
+
+    console.log(`[Market Radar] Tentando fallback para DataForSEO...`)
+    return await fetchDataForSEOTrends(keyword, location || 'BR')
   }
 }

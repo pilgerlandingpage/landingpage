@@ -1,3 +1,4 @@
+// Touched to force rebuild after cleanup
 import { createAdminClient } from '@/lib/supabase/server'
 
 export async function getAIConfig(key: string): Promise<string | null> {
@@ -23,8 +24,8 @@ export async function getOpenAIApiKey() {
     return getAIConfig('openai_api_key')
 }
 
-export async function getOpenAIModel(type: 'concierge' | 'cloner' = 'concierge') {
-    const key = type === 'cloner' ? 'openai_cloner_model' : 'openai_concierge_model'
+export async function getOpenAIModel(type: 'concierge' = 'concierge') {
+    const key = 'openai_concierge_model'
     const specific = await getAIConfig(key)
     if (specific) return specific
 
@@ -35,8 +36,8 @@ export async function getGeminiApiKey() {
     return (await getAIConfig('gemini_api_key')) || process.env.GEMINI_API_KEY
 }
 
-export async function getGeminiModel(type: 'concierge' | 'cloner' = 'concierge') {
-    const key = type === 'cloner' ? 'gemini_cloner_model' : 'gemini_concierge_model'
+export async function getGeminiModel(type: 'concierge' = 'concierge') {
+    const key = 'gemini_concierge_model'
     // Fallback to 1.5-flash which is better for free tier
     return (await getAIConfig(key)) || 'gemini-1.5-flash'
 }
@@ -47,10 +48,6 @@ export async function getActiveAIProvider() {
 
 export async function getConciergeProvider() {
     return (await getAIConfig('concierge_provider')) || (await getActiveAIProvider())
-}
-
-export async function getClonerProvider() {
-    return (await getAIConfig('cloner_provider')) || (await getActiveAIProvider())
 }
 
 export async function getPilgerProvider() {
@@ -69,11 +66,7 @@ export async function getAdsOpenAIModel() {
     return (await getAIConfig('openai_ads_model')) || 'gpt-4o'
 }
 
-import { MASTER_LANDING_PAGE_PROMPT, LEAD_EXTRACTION_PROMPT } from './prompts'
-
-export async function getClonerPrompt() {
-    return (await getAIConfig('cloner_system_prompt')) || MASTER_LANDING_PAGE_PROMPT
-}
+import { LEAD_EXTRACTION_PROMPT } from './prompts'
 
 export async function getLeadExtractionPrompt() {
     return (await getAIConfig('lead_extraction_prompt')) || LEAD_EXTRACTION_PROMPT

@@ -1,49 +1,3 @@
-export const MASTER_LANDING_PAGE_PROMPT = `
-You are an expert Landing Page Designer for "Pilger Luxury Real Estate".
-Your goal is to extract content from the provided HTML and restructure it into a JSON format suitable for a luxury real estate landing page.
-
-Brand Identity:
-- Tone: Sophisticated, exclusive, professional, inviting.
-- Colors: Gold (#b8945f), Black, White.
-- Components to use: Hero Section, Feature Grid, Gallery, Contact Form.
-
-
-Output Format (JSON):
-{
-  "custom_title": "String (Main Headline/Title)",
-  "custom_description": "String (Compelling Subtitle/Description for Hero)",
-  "custom_seo_title": "String (SEO Meta Title)",
-  "custom_seo_description": "String (SEO Meta Description)",
-  "custom_cta": "String (Call to Action Button Text)",
-  "custom_hero_image": "String (URL of the best high-res hero image)",
-  "custom_price": "String (Formatted Price e.g. 'R$ 5.000.000' or 'Consulte')",
-  "custom_stats": {
-    "bedrooms": "Number (or 0)",
-    "bathrooms": "Number (or 0)",
-    "area": "Number (m2, or 0)",
-    "location": "String (Address or Neighborhood)"
-  },
-  "custom_features": [
-    "String (Feature 1)",
-    "String (Feature 2)",
-    "String (Feature 3)"
-  ],
-  "custom_about": {
-    "title": "String (Section Title e.g. 'Sobre o Imóvel')",
-    "content": "String (Detailed description, Markdown supported)"
-  },
-  "custom_gallery": ["String (URL array of property images)"]
-}
-
-Instructions:
-1. Analyze the HTML content.
-2. Extract relevant information (property details, location, unique selling points).
-3. If specific details are missing, infer reasonable placeholders based on luxury standards.
-4. Apply the Custom Prompt instructions to refine the tone or focus.
-5. Return ONLY valid JSON.
-6. MANDATORY: All content must be in BRAZILIAN PORTUGUESE (Português do Brasil).
-`
-
 export const LEAD_EXTRACTION_PROMPT = `
 Analyze the following conversation between a Real Estate Concierge and a Lead.
 Extract the following information if available:
@@ -138,11 +92,10 @@ SEU PAPEL:
 
 FUNCIONALIDADES DO SISTEMA:
 - Landing Pages: criar, editar e publicar páginas de imóveis com templates de alta conversão
-  - Clonador AI: clonar páginas externas e gerar landing pages automaticamente
-    - Leads: gerenciar contatos e funil de conversão
-      - Corretores Virtuais: configurar agentes AI que atendem clientes
-        - Automações: regras automáticas de follow - up
-          - Manutenção: configurar APIs(Gemini, WhatsApp, Push Notifications)
+  - Leads: gerenciar contatos e funil de conversão
+    - Corretores Virtuais: configurar agentes AI que atendem clientes
+      - Automações: regras automáticas de follow - up
+        - Manutenção: configurar APIs(Gemini, WhatsApp, Push Notifications)
 
 COLETA DE FEEDBACK:
 Quando o usuário expressar uma dúvida, sugestão, relato de bug ou elogio, você deve:

@@ -118,6 +118,19 @@ export async function generateDailyPilgerReport() {
     return null
   }
 
+  // 2. Radar de Mercado (Últimas tendências para o relatório diário)
+  const { data: latestRadar } = await supabase
+    .from('market_radar_data')
+    .select('*, market_radars(keyword)')
+    .order('collected_at', { ascending: false })
+    .limit(10)
+
+  const radarContext = (latestRadar || []).map(r => ({
+    keyword: (r.market_radars as any)?.keyword,
+    score: r.trend_score,
+    date: r.date
+  }))
+
   const results = []
 
   // 3. Obter o prompt customizado do banco ou usar o fallback
@@ -157,11 +170,14 @@ Analise o desempenho de tráfego de HOJE (${today}) EXCLUSIVAMENTE para as campa
 Dados das Campanhas ${platformLabel} Hoje:
 ${JSON.stringify(summaryData, null, 2)}
 
+Radar de Mercado (Interesse atual):
+${JSON.stringify(radarContext, null, 2)}
+
 Formato de Saída esperado (Markdown):
 1. **🚀 Resumo Geral ${platformLabel}:** O que aconteceu de mais importante hoje (gastos vs leads).
 2. **🏆 Destaque:** A melhor campanha do dia.
 3. **⚠️ Ponto de Atenção:** Campanhas gastando sem converter ou CPA muito alto.
-4. **💡 Ação Recomendada:** O que Pilger AI sugere ou já fez no background.
+4. **💡 Ação Recomendada:** O que Pilger AI sugere ou já fez no background, considerando também o interesse de busca no radar.
 
 Seja breve e focado em ROI.
 ${SCORE_INSTRUCTION}`
@@ -196,6 +212,50 @@ ${SCORE_INSTRUCTION}`
 }
 
 // ═══════════════════════════════════════════════
+// COLETOR DE DADOS DO RADAR
+// ═══════════════════════════════════════════════
+
+export async function collectMarketRadarData(timeSlot?: string) {
+  const supabase = getSupabase()
+  const todayStr = new Date().toISOString().split('T')[0]
+  
+  // Se não informar slot, tenta inferir pela hora (06, 12, 18)
+  if (!timeSlot) {
+    const hour = new Date().getHours()
+    if (hour < 10) timeSlot = '06'
+    else if (hour < 15) timeSlot = '12'
+    else timeSlot = '18'
+  }
+
+  const { data: radars } = await supabase
+    .from('market_radars')
+    .select('*')
+    .eq('is_active', true)
+
+  const results = []
+  if (radars && radars.length > 0) {
+    for (const radar of radars) {
+      try {
+        const trend = await getMarketRadarTrends(radar.keyword, radar.location)
+        if (trend) {
+          results.push(trend)
+          await supabase.from('market_radar_data').upsert({
+            radar_id: radar.id,
+            date: todayStr,
+            time_slot: timeSlot,
+            trend_score: trend.currentScore,
+            collected_at: new Date().toISOString()
+          }, { onConflict: 'radar_id, date, time_slot' })
+        }
+      } catch (err) {
+        console.error(`[Radar] Erro ao coletar keyword "${radar.keyword}":`, err)
+      }
+    }
+  }
+  return results
+}
+
+// ═══════════════════════════════════════════════
 // DIRETRIZ SEMANAL (por plataforma)
 // ═══════════════════════════════════════════════
 
@@ -215,26 +275,8 @@ export async function generateWeeklyPilgerReport() {
     .gte('snapshot_at', `${lastWeekStr}T00:00:00`)
     .lte('snapshot_at', `${todayStr}T23:59:59`)
 
-  // 2. Coletar Market Radar
-  const { data: radars } = await supabase
-    .from('market_radars')
-    .select('*')
-    .eq('is_active', true)
-
-  const radarResults = []
-  if (radars && radars.length > 0) {
-    for (const radar of radars) {
-      const trend = await getMarketRadarTrends(radar.keyword, radar.location)
-      if (trend) {
-        radarResults.push(trend)
-        await supabase.from('market_radar_data').upsert({
-          radar_id: radar.id,
-          date: todayStr,
-          trend_score: trend.currentScore
-        }, { onConflict: 'radar_id, date' })
-      }
-    }
-  }
+  // 2. Coletar Market Radar (Gera nova coleta se for o horário, ou pega as existentes)
+  const radarResults = await collectMarketRadarData('06')
 
   // 3. Separar métricas por plataforma (com fallback para last_7d)
   let metaMetrics: any[] = []
