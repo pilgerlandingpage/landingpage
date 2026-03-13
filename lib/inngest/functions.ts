@@ -10,6 +10,7 @@ import {
     aiAnalyzeMetrics,
     executeAiAction,
     dailyReportCron,
+    syncMetaLeadsCron,
     generateDailyPilgerReportCron,
     generateWeeklyPilgerReportCron,
     radarCollectionCron
@@ -212,6 +213,7 @@ export const functions = [
     aiAnalyzeMetrics,
     executeAiAction,
     dailyReportCron,
+    syncMetaLeadsCron,
     generateDailyPilgerReportCron,
     generateWeeklyPilgerReportCron,
     radarCollectionCron

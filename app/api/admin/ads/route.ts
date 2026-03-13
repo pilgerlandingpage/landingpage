@@ -111,12 +111,12 @@ export async function GET(request: NextRequest) {
 
         const metaSources = ['Facebook Ads', 'Instagram', 'Facebook']
         const [internalLeadsRes, recentLeadsRes] = await Promise.all([
-            supabase.from('leads').select('*', { count: 'exact', head: true })
-                .in('detected_source', metaSources)
+            supabase.from('leads').select('id, visitors!inner(detected_source)', { count: 'exact', head: true })
+                .in('visitors.detected_source', metaSources)
                 .gte('created_at', sinceInternal)
                 .lte('created_at', untilInternal),
-            supabase.from('leads').select('name, phone, created_at, funnel_stage')
-                .in('detected_source', metaSources)
+            supabase.from('leads').select('name, phone, created_at, funnel_stage, visitors!inner(detected_source)')
+                .in('visitors.detected_source', metaSources)
                 .order('created_at', { ascending: false })
                 .limit(10)
         ])

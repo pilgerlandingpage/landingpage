@@ -437,6 +437,34 @@ export function parseInsightsToSnapshot(
     }
 }
 
+// --- Meta Lead Gen (Forms) ---
+
+export async function getLeadForms(): Promise<any[]> {
+    const conf = await getMetaConfig();
+    const res = await fetch(
+        `${getBaseUrl()}/${conf.adAccountId}/leadgen_forms?fields=id,name,status,created_time&access_token=${conf.accessToken}`
+    );
+    const data = await res.json();
+    if (data.error) {
+        console.error(`Erro ao buscar Lead Forms: ${data.error.message}`);
+        return [];
+    }
+    return data.data || [];
+}
+
+export async function getLeadsFromForm(formId: string): Promise<any[]> {
+    const conf = await getMetaConfig();
+    const res = await fetch(
+        `${getBaseUrl()}/${formId}/leads?fields=id,created_time,ad_id,ad_name,campaign_id,campaign_name,field_data&access_token=${conf.accessToken}`
+    );
+    const data = await res.json();
+    if (data.error) {
+        console.error(`Erro ao buscar Leads do form ${formId}: ${data.error.message}`);
+        return [];
+    }
+    return data.data || [];
+}
+
 // --- CAPI — API de Conversões (Server-Side) ---
 
 export async function sendConversionEvent(eventData: {

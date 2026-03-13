@@ -89,12 +89,12 @@ export async function GET(request: Request) {
         }
 
         const [internalLeadsRes, recentLeadsRes] = await Promise.all([
-            supabase.from('leads').select('*', { count: 'exact', head: true })
-                .eq('detected_source', 'Google')
+            supabase.from('leads').select('id, visitors!inner(detected_source)', { count: 'exact', head: true })
+                .eq('visitors.detected_source', 'Google Ads')
                 .gte('created_at', sinceInternal)
                 .lte('created_at', untilInternal),
-            supabase.from('leads').select('name, phone, created_at, funnel_stage')
-                .eq('detected_source', 'Google')
+            supabase.from('leads').select('name, phone, created_at, funnel_stage, visitors!inner(detected_source)')
+                .eq('visitors.detected_source', 'Google Ads')
                 .order('created_at', { ascending: false })
                 .limit(10)
         ])

@@ -404,7 +404,85 @@ export const dailyReportCron = inngest.createFunction(
 )
 
 // =============================================
-// 6. Relatórios de Gestão (Olho de Deus)
+// 6. Sincronizar Leads Nativos do Meta (Forms)
+// =============================================
+
+export const syncMetaLeadsCron = inngest.createFunction(
+    { id: 'ads-sync-meta-leads', name: 'Sincronizar Leads Nativos (Meta Forms)' },
+    { cron: '0 * * * *' }, // A cada hora
+    async ({ step }) => {
+        const supabase = getSupabase()
+
+        // 1. Buscar formulários ativos
+        const forms = await step.run('fetch-meta-forms', async () => {
+            return await metaAds.getLeadForms()
+        })
+
+        if (!forms || forms.length === 0) return { message: 'Nenhum formulário encontrado' }
+
+        const summary = { forked_leads: 0, new_leads: 0 }
+
+        for (const form of forms) {
+            const leads = await step.run(`fetch-leads-from-form-${form.id}`, async () => {
+                return await metaAds.getLeadsFromForm(form.id)
+            })
+
+            for (const metaLead of leads) {
+                const leadId = metaLead.id
+                
+                // Extrair dados dos campos
+                const fieldMap: Record<string, string> = {}
+                metaLead.field_data?.forEach((f: any) => {
+                    if (f.name && f.values?.[0]) {
+                        fieldMap[f.name] = f.values[0]
+                    }
+                })
+
+                const name = fieldMap.full_name || fieldMap.first_name || fieldMap.last_name || null
+                const email = fieldMap.email || null
+                const phone = (fieldMap.phone_number || '').replace(/\D/g, '')
+
+                // 2. Verificar duplicidade por meta_lead_id no metadata
+                const alreadyExists = await step.run(`check-lead-${leadId}`, async () => {
+                    const { data } = await supabase
+                        .from('leads')
+                        .select('id')
+                        .contains('metadata', { meta_lead_id: leadId })
+                        .maybeSingle()
+                    return !!data
+                })
+
+                if (!alreadyExists) {
+                    await step.run(`insert-lead-${leadId}`, async () => {
+                        // Buscar ou criar visitante fictício para o lead nativo se necessário,
+                        // mas idealmente marcamos o source como 'Facebook Ads'
+                        const { error } = await supabase.from('leads').insert({
+                            name,
+                            email,
+                            phone,
+                            acquired_via: 'Meta Lead Form',
+                            funnel_stage: 'lead',
+                            metadata: {
+                                meta_lead_id: leadId,
+                                meta_form_id: form.id,
+                                meta_campaign_id: metaLead.campaign_id,
+                                meta_ad_id: metaLead.ad_id,
+                                platform: 'meta'
+                            }
+                        })
+                        if (error) console.error(`Erro ao inserir lead nativo: ${error.message}`)
+                    })
+                    summary.new_leads++
+                }
+            }
+        }
+
+        return summary
+    }
+)
+
+// =============================================
+// 7. Relatórios de Gestão (Olho de Deus)
 // =============================================
 
 import { generateDailyPilgerReport, generateWeeklyPilgerReport, collectMarketRadarData } from '../ai/pilger-ceo'
