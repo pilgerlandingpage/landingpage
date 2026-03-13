@@ -454,7 +454,12 @@ export default function AdsPage() {
             </div>
 
             {/* ── KPI Cards ──────────────────────────────────────── */}
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', marginBottom: 24 }}>
+            <div className="kpi-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', 
+                gap: '12px', 
+                marginBottom: 24 
+            }}>
                 <div className="kpi-card">
                     <DollarSign size={20} color="#22c55e" style={{ marginBottom: 8 }} />
                     <div className="kpi-label">Gasto Total</div>

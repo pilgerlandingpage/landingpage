@@ -91,8 +91,8 @@ export default function AdsCountdown({ noMargin }: { noMargin?: boolean }) {
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Diretriz Semanal:</span>
                 <span style={{ fontSize: '0.95rem', color: '#a78bfa', fontWeight: 700 }}>{timeLeft.weekly} dias</span>
             </div>
-            <div style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                Horário fixo (23:00 BRT) para máxima precisão de métricas.
+            <div style={{ marginLeft: 'auto', fontSize: '0.65rem', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'right' }}>
+                Análise diária às 23:00 (BRT)
             </div>
         </div>
     )
