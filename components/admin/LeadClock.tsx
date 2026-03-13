@@ -53,8 +53,10 @@ export default function LeadClock({ recentLeads }: LeadClockProps) {
             gap: '12px', 
             background: 'rgba(201, 169, 110, 0.05)',
             border: '1px solid rgba(201, 169, 110, 0.2)',
-            padding: '8px 16px',
+            padding: '12px 16px',
             borderRadius: '12px',
+            height: '100%',
+            boxSizing: 'border-box'
         }}>
             <div style={{ position: 'relative' }}>
                 <Bell size={18} color="var(--gold)" className={recentLeads.length > 0 ? 'pulse' : ''} />

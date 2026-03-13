@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Clock, Calendar } from 'lucide-react'
 
-export default function AdsCountdown() {
+export default function AdsCountdown({ noMargin }: { noMargin?: boolean }) {
     const [timeLeft, setTimeLeft] = useState<{ daily: string; weekly: number }>({ daily: '00:00:00', weekly: 0 })
 
     useEffect(() => {
@@ -74,7 +74,7 @@ export default function AdsCountdown() {
         <div style={{ 
             display: 'flex', 
             gap: '16px', 
-            marginBottom: '24px',
+            marginBottom: noMargin ? '0' : '24px',
             background: 'rgba(201, 169, 110, 0.05)',
             border: '1px solid rgba(201, 169, 110, 0.2)',
             padding: '12px 16px',

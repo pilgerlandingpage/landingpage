@@ -8,6 +8,7 @@ import {
     Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X, Search
 } from 'lucide-react'
 import AdsCountdown from '@/components/admin/AdsCountdown'
+import LeadClock from '@/components/admin/LeadClock'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -447,7 +448,10 @@ export default function AdsPage() {
                 </div>
             </div>
 
-            <AdsCountdown />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                <AdsCountdown noMargin />
+                <LeadClock recentLeads={internalStats.recentLeads} />
+            </div>
 
             {/* ── KPI Cards ──────────────────────────────────────── */}
             <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', marginBottom: 24 }}>
