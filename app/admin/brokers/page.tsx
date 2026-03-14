@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare, Wifi, WifiOff, Phone, Smartphone, QrCode, Bot, Brain } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -21,12 +21,20 @@ interface Broker {
     assignment_type: string
     assigned_page_slugs: string[]
     phone?: string
-    connectyhub_api_url?: string
-    connectyhub_instance_id?: string
-    connectyhub_api_key?: string
     connectyhub_chat_message?: string
     system_prompt?: string
     greeting_message?: string
+    whatsapp_instance_id?: string
+    ai_provider?: string
+    ai_model?: string
+}
+
+interface WhatsAppInstance {
+    id: string
+    instance_name: string
+    phone_number: string | null
+    status: 'disconnected' | 'connecting' | 'connected'
+    connected_at: string | null
 }
 
 export default function BrokersAdmin() {
@@ -40,6 +48,11 @@ export default function BrokersAdmin() {
     const [landingPages, setLandingPages] = useState<LandingPage[]>([])
     const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle')
     const [testMessage, setTestMessage] = useState('')
+    // WhatsApp Instance State
+    const [whatsappInstance, setWhatsappInstance] = useState<WhatsAppInstance | null>(null)
+    const [whatsappQR, setWhatsappQR] = useState<string | null>(null)
+    const [whatsappLoading, setWhatsappLoading] = useState(false)
+    const [whatsappConnecting, setWhatsappConnecting] = useState(false)
 
     // Form State
     const [formData, setFormData] = useState({
@@ -52,12 +65,11 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        connectyhub_api_url: '',
-        connectyhub_instance_id: '',
-        connectyhub_api_key: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+        connectyhub_chat_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?',
         system_prompt: '',
-        greeting_message: ''
+        greeting_message: '',
+        ai_provider: '',
+        ai_model: ''
     })
 
     const defaultFormData = {
@@ -70,12 +82,59 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        connectyhub_api_url: '',
-        connectyhub_instance_id: '',
-        connectyhub_api_key: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+        connectyhub_chat_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?',
         system_prompt: '',
-        greeting_message: ''
+        greeting_message: '',
+        ai_provider: '',
+        ai_model: ''
+    }
+
+    // WhatsApp Instance Functions
+    async function loadWhatsAppInstance(brokerId: string) {
+        setWhatsappLoading(true)
+        try {
+            const res = await fetch(`/api/admin/whatsapp/instances?broker_id=${brokerId}`)
+            const data = await res.json()
+            if (data?.instances?.length > 0) {
+                setWhatsappInstance(data.instances[0])
+            } else {
+                setWhatsappInstance(null)
+            }
+        } catch { setWhatsappInstance(null) }
+        finally { setWhatsappLoading(false) }
+    }
+
+    async function connectWhatsApp() {
+        if (!editingBroker && !formData.name) return
+        setWhatsappConnecting(true)
+        setWhatsappQR(null)
+        try {
+            const instanceName = `broker_${editingBroker?.id || 'new'}_${Date.now()}`
+            const res = await fetch('/api/admin/whatsapp/qrcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instance_name: instanceName, broker_id: editingBroker?.id })
+            })
+            const data = await res.json()
+            if (data.qrcode) {
+                setWhatsappQR(data.qrcode)
+            }
+        } catch (err) {
+            console.error('WhatsApp QR Error:', err)
+        }
+        finally { setWhatsappConnecting(false) }
+    }
+
+    async function checkWhatsAppStatus() {
+        if (!whatsappInstance) return
+        try {
+            const res = await fetch(`/api/admin/whatsapp/status?instance_name=${whatsappInstance.instance_name}`)
+            const data = await res.json()
+            if (data.status) {
+                setWhatsappInstance(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
+                if (data.status === 'connected') setWhatsappQR(null)
+            }
+        } catch {}
     }
 
     useEffect(() => {
@@ -183,41 +242,16 @@ export default function BrokersAdmin() {
         fetchBrokers()
     }
 
-    async function testConnectyHubConnection() {
-        setTestStatus('testing')
-        setTestMessage('Testando conexão...')
-        try {
-            const res = await fetch('/api/admin/test-integration', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    service: 'connectyhub',
-                    config: {
-                        connectyhub_api_url: formData.connectyhub_api_url,
-                        connectyhub_api_key: formData.connectyhub_api_key,
-                        connectyhub_instance: formData.connectyhub_instance_id
-                    },
-                }),
-            })
-            const data = await res.json()
-            setTestStatus(data.success ? 'success' : 'error')
-            setTestMessage(data.message)
-        } catch {
-            setTestStatus('error')
-            setTestMessage('Erro ao testar conexão')
-        }
-    }
-
     return (
         <div className="admin-page-container">
             <div className="admin-header" style={{ marginBottom: '32px' }}>
                 <div className="flex justify-between items-center w-full">
                     <div>
                         <h1 className="flex items-center gap-3">
-                            <Shield className="text-gold" size={28} /> Gerenciar Corretores de Plantão
+                            <Shield className="text-gold" size={28} /> Gerenciar Corretores IA de Plantão
                         </h1>
                         <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                            Configure os perfis reais ou virtuais que atendem os clientes no site.
+                            Configure os agentes IA que atendem leads via WhatsApp.
                         </p>
                     </div>
                     <button
@@ -231,7 +265,7 @@ export default function BrokersAdmin() {
                         className="btn btn-primary"
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
                     >
-                        <Plus size={20} /> Novo Corretor
+                        <Plus size={20} /> Novo Corretor IA
                     </button>
                 </div>
             </div>
@@ -335,143 +369,172 @@ export default function BrokersAdmin() {
                                 />
                                 <label htmlFor="is_active" style={{ cursor: 'pointer' }}>
                                     <div style={{ color: formData.is_active ? '#22c55e' : '#888', fontWeight: 600, fontSize: '0.95rem' }}>
-                                        {formData.is_active ? '✅ Corretor Ativo' : '⏸️ Corretor Inativo'}
+                                        {formData.is_active ? '✅ Corretor IA Ativo' : '⏸️ Corretor IA Inativo'}
                                     </div>
                                     <div style={{ color: '#888', fontSize: '0.75rem', marginTop: '2px' }}>
-                                        Quando ativo, a IA poderá se passar por este corretor no chat do site e ele entrará no rodízio de atendimento.
+                                        Quando ativo, este agente IA atenderá leads no WhatsApp e entrará no rodízio de atendimento.
                                     </div>
                                 </label>
                             </div>
 
                             <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone Whatsapp (com DDD)</label>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone WhatsApp (com DDD)</label>
                                 <input
                                     placeholder="Ex: 5547999887766"
                                     className="form-input"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
                                 />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Para receber avisos do sistema quando capta lead (via instância padrão da Sala de Manutenção).</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Número do WhatsApp deste agente IA.</div>
                             </div>
 
-                            {/* AI Persona Section */}
-                            <div style={{ padding: '20px', background: 'rgba(201, 169, 110, 0.05)', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
-                                <h3 style={{ fontSize: '1rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <MessageSquare size={18} /> 🤖 Inteligência Artificial (Persona)
+                            {/* ── SEÇÃO 2: WHATSAPP WEB ── */}
+                            <div style={{ padding: '20px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                                <h3 style={{ fontSize: '1rem', color: '#22c55e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Smartphone size={18} /> 📱 WhatsApp Web
                                 </h3>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
-                                    Personalize como a IA se comporta quando estiver representando este corretor.
+                                    Conecte o WhatsApp deste corretor IA para que ele possa enviar e receber mensagens.
                                 </p>
 
+                                {whatsappLoading ? (
+                                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                                        <Loader2 size={24} className="animate-spin" style={{ color: '#22c55e' }} />
+                                        <div style={{ fontSize: '0.85rem', color: '#888', marginTop: '8px' }}>Carregando instância...</div>
+                                    </div>
+                                ) : whatsappInstance?.status === 'connected' ? (
+                                    <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                            <Wifi size={20} style={{ color: '#22c55e' }} />
+                                            <span style={{ fontWeight: 600, color: '#22c55e', fontSize: '0.95rem' }}>✅ WhatsApp Conectado</span>
+                                        </div>
+                                        {whatsappInstance.phone_number && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                                <Phone size={14} /> {whatsappInstance.phone_number}
+                                            </div>
+                                        )}
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                                            <button type="button" onClick={checkWhatsAppStatus} style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <RefreshCw size={12} /> Verificar Status
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : whatsappQR ? (
+                                    <div style={{ textAlign: 'center', padding: '16px' }}>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '12px', fontWeight: 600 }}>
+                                            📷 Escaneie o QR Code com o WhatsApp
+                                        </div>
+                                        <div style={{ display: 'inline-block', padding: '16px', background: 'white', borderRadius: '12px' }}>
+                                            <img src={whatsappQR} alt="QR Code" style={{ width: '256px', height: '256px' }} />
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '12px' }}>
+                                            Abra o WhatsApp no celular → Dispositivos conectados → Conectar dispositivo
+                                        </div>
+                                        <button type="button" onClick={checkWhatsAppStatus} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#22c55e', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                            <RefreshCw size={14} /> Já escaniei, verificar conexão
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
+                                            <WifiOff size={20} style={{ color: '#888' }} />
+                                            <span style={{ color: '#888', fontSize: '0.9rem' }}>❌ WhatsApp não conectado</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={connectWhatsApp}
+                                            disabled={whatsappConnecting || (!editingBroker && !formData.name)}
+                                            style={{
+                                                padding: '10px 24px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 600,
+                                                background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none',
+                                                color: 'white', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                                opacity: whatsappConnecting ? 0.6 : 1
+                                            }}
+                                        >
+                                            {whatsappConnecting ? <Loader2 size={16} className="animate-spin" /> : <QrCode size={16} />}
+                                            {whatsappConnecting ? 'Gerando QR Code...' : 'Conectar WhatsApp'}
+                                        </button>
+                                        {!editingBroker && !formData.name && (
+                                            <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '8px' }}>Salve o corretor primeiro para conectar o WhatsApp.</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ── SEÇÃO 3: AGENTE IA (PROMPT) ── */}
+                            <div style={{ padding: '20px', background: 'rgba(201, 169, 110, 0.05)', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Brain size={18} /> 🤖 Agente IA (Prompt do WhatsApp)
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
+                                    Configure o prompt e personalidade do agente IA que atenderá leads via WhatsApp.
+                                </p>
+
+                                {/* Provider + Model per broker */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', padding: '14px', background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                            <Bot size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Provedor IA
+                                        </label>
+                                        <select className="form-input" value={formData.ai_provider || ''} onChange={e => setFormData({ ...formData, ai_provider: e.target.value })}>
+                                            <option value="">Usar Padrão Global (Manutenção)</option>
+                                            <option value="gemini">Google Gemini</option>
+                                            <option value="openai">OpenAI</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Modelo IA</label>
+                                        <input className="form-input" value={formData.ai_model || ''} onChange={e => setFormData({ ...formData, ai_model: e.target.value })} placeholder="Ex: gemini-2.0-flash ou gpt-4o-mini" />
+                                    </div>
+                                </div>
+
                                 <div className="form-group" style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Saudação Inicial no Chat</label>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Saudação Inicial no WhatsApp</label>
                                     <input
-                                        placeholder="Ex: Olá! Sou o Guilherme. Como posso te ajudar a encontrar seu imóvel de luxo hoje?"
+                                        placeholder="Ex: Olá! Sou o Guilherme da Pilger Imóveis. Como posso te ajudar a encontrar seu imóvel de luxo hoje?"
                                         className="form-input"
                                         value={formData.greeting_message}
                                         onChange={(e) => setFormData({ ...formData, greeting_message: e.target.value })}
                                     />
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>A primeira mensagem que o robô envia ao abrir o chat.</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>A primeira mensagem que o agente IA envia ao lead no WhatsApp.</div>
                                 </div>
 
                                 <div className="form-group">
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Instruções de Personalidade (Prompt)</label>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Prompt do Agente IA (Instruções Completas)</label>
                                     <textarea
                                         className="form-textarea"
-                                        style={{ minHeight: '150px', resize: 'vertical' }}
+                                        style={{ minHeight: '200px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem' }}
                                         value={formData.system_prompt}
                                         onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                                        placeholder="Ex: Você é o Guilherme Pilger, um corretor focado em altíssimo padrão. Seja direto, use termos como 'oportunidade exclusiva' e 'investimento inteligente'. Sempre enfatize a privacidade."
+                                        placeholder={`Você é o Guilherme Pilger, corretor especializado em imóveis de alto padrão na Pilger Imóveis.\n\nSua missão:\n- Atender leads no WhatsApp de forma profissional e amigável\n- Coletar: nome completo, telefone, tipo de imóvel desejado, faixa de preço, região de interesse\n- Quando tiver todos os dados, informar que vai transferir para atendimento personalizado\n\nRegras:\n- Seja direto e use termos como "oportunidade exclusiva"\n- Não invente dados sobre imóveis\n- Mantenha o tom profissional mas acolhedor`}
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Define o tom de voz e conhecimentos específicos deste corretor.
+                                        Defina a personalidade, missão, dados a coletar e regras do agente IA. Quanto mais detalhado, melhor o atendimento.
                                     </div>
                                 </div>
                             </div>
 
-                            {/* ConnectyHub Section - mirrors Maintenance Panel */}
-                            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    📱 ConnectyHub — Instância do Corretor
+                            {/* ── SEÇÃO 4: TRANSFERÊNCIA PARA CORRETOR HUMANO ── */}
+                            <div style={{ padding: '20px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                                <h3 style={{ fontSize: '1rem', color: '#6366f1', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <MessageSquare size={18} /> 🔄 Transferência para Corretor Humano
                                 </h3>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
-                                    Configure a instância ConnectyHub deste corretor. A mensagem para o lead sairá do celular conectado a esta instância.
-                                    Deixe em branco para usar a configuração global da Sala de Manutenção.
+                                    Mensagem enviada automaticamente pelo WhatsApp do corretor humano ao lead quando o agente IA transferir o atendimento.
                                 </p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="form-group">
-                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>API URL</label>
-                                        <input
-                                            placeholder="https://api.connectyhub.com.br"
-                                            className="form-input"
-                                            value={formData.connectyhub_api_url}
-                                            onChange={(e) => setFormData({ ...formData, connectyhub_api_url: e.target.value })}
-                                        />
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>URL da API. Em branco = usa a global.</div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>API Key</label>
-                                        <input
-                                            placeholder="Sua API Key"
-                                            className="form-input"
-                                            value={formData.connectyhub_api_key}
-                                            onChange={(e) => setFormData({ ...formData, connectyhub_api_key: e.target.value })}
-                                        />
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Key da instância. Em branco = usa a global.</div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Instance</label>
-                                        <input
-                                            placeholder="ID da instância"
-                                            className="form-input"
-                                            value={formData.connectyhub_instance_id}
-                                            onChange={(e) => setFormData({ ...formData, connectyhub_instance_id: e.target.value })}
-                                        />
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>ID da instância conectada ao celular do corretor.</div>
-                                    </div>
-                                </div>
-
                                 <div className="form-group" style={{ marginTop: '16px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mensagem Inicial para o Lead</label>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mensagem de Transferência</label>
                                     <textarea
                                         className="form-textarea"
                                         style={{ minHeight: '100px', resize: 'vertical' }}
                                         value={formData.connectyhub_chat_message}
                                         onChange={(e) => setFormData({ ...formData, connectyhub_chat_message: e.target.value })}
-                                        placeholder="Mensagem que o corretor enviará automaticamente..."
+                                        placeholder="Mensagem que o corretor humano enviará ao lead após transferência..."
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Variáveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
+                                        Variáveis disponíveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
                                     </div>
-                                </div>
-
-                                {/* Test Connection Button */}
-                                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <button
-                                        type="button"
-                                        onClick={testConnectyHubConnection}
-                                        disabled={testStatus === 'testing'}
-                                        className="btn btn-secondary"
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '8px',
-                                            padding: '10px 16px', borderRadius: '8px',
-                                            fontSize: '0.9rem', cursor: testStatus === 'testing' ? 'not-allowed' : 'pointer'
-                                        }}
-                                    >
-                                        <RefreshCw size={16} className={testStatus === 'testing' ? "animate-spin" : ""} />
-                                        {testStatus === 'testing' ? 'Testando...' : 'Testar Conexão'}
-                                    </button>
-                                    {testStatus !== 'idle' && (
-                                        <div style={{
-                                            fontSize: '0.85rem',
-                                            color: testStatus === 'success' ? '#22c55e' : '#ef4444',
-                                            display: 'flex', alignItems: 'center', gap: '6px'
-                                        }}>
-                                            {testStatus === 'success' ? <Check size={14} /> : <X size={14} />}
-                                            {testMessage}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
@@ -593,7 +656,7 @@ export default function BrokersAdmin() {
                             <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                                 <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Shield size={18} className="text-gold" />
-                                    Escala de Plantão / Chat
+                                    Escala de Plantão / WhatsApp
                                 </h3>
 
                                 <div className="form-group">
@@ -800,13 +863,16 @@ export default function BrokersAdmin() {
                                         assignment_type: broker.assignment_type || 'all',
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
-                                        connectyhub_api_url: broker.connectyhub_api_url || '',
-                                        connectyhub_instance_id: broker.connectyhub_instance_id || '',
-                                        connectyhub_api_key: broker.connectyhub_api_key || '',
-                                        connectyhub_chat_message: broker.connectyhub_chat_message || 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?',
+                                        connectyhub_chat_message: broker.connectyhub_chat_message || '',
                                         system_prompt: broker.system_prompt || '',
-                                        greeting_message: broker.greeting_message || ''
+                                        greeting_message: broker.greeting_message || '',
+                                        ai_provider: (broker as any).ai_provider || '',
+                                        ai_model: (broker as any).ai_model || ''
                                     })
+                                    // Load WhatsApp instance for this broker
+                                    setWhatsappInstance(null)
+                                    setWhatsappQR(null)
+                                    loadWhatsAppInstance(broker.id)
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}
                                 style={{

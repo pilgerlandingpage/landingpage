@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Clock, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database } from 'lucide-react'
 import Link from 'next/link'
-import { LEAD_EXTRACTION_PROMPT, CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES, PILGER_AI_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
+import { LEAD_EXTRACTION_PROMPT, PILGER_AI_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
@@ -21,14 +21,13 @@ interface IntegrationCard {
 
 const INTEGRATIONS: IntegrationCard[] = [
     {
-        id: 'connectyhub',
-        title: 'ConnectyHub — WhatsApp',
-        description: 'Integração com a API ConnectyHub para envio de mensagens WhatsApp automáticas.',
+        id: 'uazapi',
+        title: 'ConnectyHub — WhatsApp API',
+        description: 'API premium para WhatsApp via ConnectyHub: instâncias, mensagens, botões, menus e automações. Cada usuário terá sua própria instância gerenciada no painel.',
         icon: 'whatsapp',
         fields: [
-            { key: 'connectyhub_api_url', label: 'API URL', placeholder: 'https://api.connectyhub.com.br', isSecret: false },
-            { key: 'connectyhub_api_key', label: 'API Key', placeholder: 'Sua API Key', isSecret: true },
-            { key: 'connectyhub_instance', label: 'Instance', placeholder: 'ID da instância', isSecret: false },
+            { key: 'uazapi_base_url', label: 'URL do Servidor', placeholder: 'https://connectyhub.uazapi.com', isSecret: false },
+            { key: 'uazapi_admin_token', label: 'Admin Token', placeholder: 'Seu admin token', isSecret: true },
         ],
     },
 
@@ -205,25 +204,10 @@ export default function MaintenancePage() {
                 'ai_provider',
                 'gemini_api_key',
                 'openai_api_key',
-                'concierge_system_prompt',
-                'concierge_rules_prompt',
                 'pilger_ai_system_prompt',
                 'pilger_ai_rules_prompt',
-                'chat_delay_before_typing',
-                'chat_typing_min_duration',
-                'chat_typing_max_duration',
-                'chat_max_response_length',
-                'concierge_delay_home',
-                'concierge_delay_property',
-                'concierge_delay_landing_page',
-                'concierge_connection_search_delay',
-                'concierge_connection_found_delay',
-                'concierge_connection_connecting_delay',
-                'gemini_concierge_model',
                 'gemini_pilger_model',
-                'openai_concierge_model',
                 'openai_pilger_model',
-                'concierge_provider',
                 'pilger_provider',
                 'lead_extraction_prompt',
                 'ads_provider',
@@ -591,7 +575,7 @@ export default function MaintenancePage() {
                     <div>
                         <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.1rem' }}>Central de Controle AI (Multi-Provedor)</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Gerencie provedores e modelos específicos para cada função (Concierge e Pilger AI).
+                            Gerencie provedores e modelos específicos para cada função (Agentes IA WhatsApp e Pilger AI).
                         </div>
                     </div>
                 </div>
@@ -743,170 +727,10 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 1. CONCIERGE (CHAT) ── */}
-                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>💬</span> 1. Concierge (Chat do Site)
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        {/* Provider Select */}
-                        <div className="form-group">
-                            <label className="form-label">Provedor do Concierge</label>
-                            <select
-                                className="form-input"
-                                value={configs['concierge_provider'] || ''}
-                                onChange={e => setConfigs({ ...configs, concierge_provider: e.target.value })}
-                            >
-                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-
-                        {/* Model Select */}
-                        <div className="form-group">
-                            <label className="form-label">Modelo do Concierge</label>
-                            {(configs['concierge_provider'] === 'openai' || (!configs['concierge_provider'] && configs['ai_provider'] === 'openai')) ? (
-                                <div style={{ position: 'relative' }}>
-                                    <select
-                                        className="form-input"
-                                        value={configs['openai_concierge_model'] || ''}
-                                        onChange={e => setConfigs({ ...configs, openai_concierge_model: e.target.value })}
-                                    >
-                                        <option value="">Selecione...</option>
-                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                    {loadingOpenAIModels && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}><RefreshCw size={14} className="spin" /></div>}
-                                </div>
-                            ) : (
-                                <div style={{ position: 'relative' }}>
-                                    <select
-                                        className="form-input"
-                                        value={configs['gemini_concierge_model'] || ''}
-                                        onChange={e => setConfigs({ ...configs, gemini_concierge_model: e.target.value })}
-                                    >
-                                        <option value="">Selecione...</option>
-                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                    {loadingGeminiModels && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}><RefreshCw size={14} className="spin" /></div>}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Prompts for Concierge */}
-                    <div className="form-group">
-                        <label className="form-label">Prompt do Sistema (Personalidade)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={6}
-                            value={configs['concierge_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, concierge_system_prompt: e.target.value })}
-                            placeholder={CONCIERGE_BASE_PROMPT}
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Personalidade base do agente. Deixe em branco para usar o padrão (exibido acima).
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Regras de Segurança (Concierge)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={8}
-                            value={configs['concierge_rules_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, concierge_rules_prompt: e.target.value })}
-                            placeholder={CONCIERGE_SAFEGUARD_RULES}
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Regras invioláveis que o agente deve seguir. Deixe em branco para usar as regras de segurança padrão.
-                        </div>
-                    </div>
-
-                    {/* Chat Behaviour (Humanization + Length) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label">Tempo Espera (s)</label>
-                            <input className="form-input" type="number" step="0.5" value={configs['chat_delay_before_typing'] || '2'} onChange={e => setConfigs({ ...configs, chat_delay_before_typing: e.target.value })} />
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo que o agente espera antes de mostrar "digitando..." após receber uma mensagem.</div>
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label">Digitando Min (s)</label>
-                            <input className="form-input" type="number" step="0.5" value={configs['chat_typing_min_duration'] || '5'} onChange={e => setConfigs({ ...configs, chat_typing_min_duration: e.target.value })} />
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Duração mínima do indicador "digitando..." para simular uma resposta humana natural.</div>
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label">Tamanho Resposta</label>
-                            <select className="form-input" value={configs['chat_max_response_length'] || 'Curta (2-3 frases)'} onChange={e => setConfigs({ ...configs, chat_max_response_length: e.target.value })}>
-                                <option value="Muito curta (1 frase, máximo 20 palavras)">Muito Curta</option>
-                                <option value="Curta (2-3 frases, máximo 50 palavras)">Curta (Padrão)</option>
-                                <option value="Média (3-5 frases, máximo 100 palavras)">Média</option>
-                                <option value="Longa (parágrafos completos sem limite)">Longa</option>
-                            </select>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Controla o tamanho máximo das respostas do agente. Respostas curtas parecem mais naturais.</div>
-                        </div>
-                    </div>
-
-                    {/* Auto-Open Delay per Page Type */}
-                    <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                            <Clock size={16} style={{ color: 'var(--gold)' }} />
-                            <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Tempo para Abrir Chat Automaticamente</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Defina em segundos quanto tempo o agente espera antes de chamar o visitante em cada tipo de página.</div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label" style={{ fontSize: '0.8rem' }}>🏠 Home (s)</label>
-                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_home'] || '15'} onChange={e => setConfigs({ ...configs, concierge_delay_home: e.target.value })} />
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo na página inicial antes do chat aparecer. Ideal dar mais tempo pois o visitante está explorando.</div>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label" style={{ fontSize: '0.8rem' }}>🏢 Página Imóvel (s)</label>
-                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_property'] || '5'} onChange={e => setConfigs({ ...configs, concierge_delay_property: e.target.value })} />
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo na página de um imóvel específico. O visitante já demonstrou interesse, aborde rapidamente.</div>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label" style={{ fontSize: '0.8rem' }}>📄 Landing Page (s)</label>
-                                <input className="form-input" type="number" min="0" step="1" value={configs['concierge_delay_landing_page'] || '10'} onChange={e => setConfigs({ ...configs, concierge_delay_landing_page: e.target.value })} />
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Tempo nas landing pages personalizadas. Espere o visitante absorver o conteúdo antes de abordar.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Configuração do Pipeline de Conexão (Novo) */}
-                <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                        <Zap size={16} style={{ color: 'var(--gold)' }} />
-                        <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Velocidade da Animação de Conexão</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Defina em segundos o tempo que cada etapa da animação de conexão leva.</div>
-                        </div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>1. Procurando Corretor (s)</label>
-                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_search_delay'] || '1.5'} onChange={e => setConfigs({ ...configs, concierge_connection_search_delay: e.target.value })} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>2. Corretor Encontrado (s)</label>
-                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_found_delay'] || '1'} onChange={e => setConfigs({ ...configs, concierge_connection_found_delay: e.target.value })} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>3. Conectando (s)</label>
-                            <input className="form-input" type="number" min="0" step="0.5" value={configs['concierge_connection_connecting_delay'] || '1.2'} onChange={e => setConfigs({ ...configs, concierge_connection_connecting_delay: e.target.value })} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 2. PILGER AI (ADMIN) ── */}
+                {/* ── 1. PILGER AI (ADMIN) ── */}
                 <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#818cf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🧠</span> 2. Pilger AI (Assistente Admin)
+                        <span>🧠</span> 1. Pilger AI (Assistente Admin)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -958,10 +782,10 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 3. EXTRAÇÃO DE LEADS ── */}
+                {/* ── 2. EXTRAÇÃO DE LEADS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🕵️</span> 3. Extração de Leads (Chat)
+                        <span>🕵️</span> 2. Extração de Leads (WhatsApp)
                     </h3>
 
                     <div className="form-group">
@@ -983,7 +807,7 @@ export default function MaintenancePage() {
                 {/* ── 4. TRÁFEGO (GESTOR IA) ── */}
                 <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>📈</span> 4. Gestor de Tráfego (Análise Autônoma)
+                        <span>📈</span> 3. Gestor de Tráfego (Análise Autônoma)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -1026,7 +850,7 @@ export default function MaintenancePage() {
                 {/* ── 6. AGENDAMENTOS E RELATÓRIOS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>⏰</span> 5. Agendamento de Relatórios Pilger CEO
+                        <span>⏰</span> 4. Agendamento de Relatórios Pilger CEO
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

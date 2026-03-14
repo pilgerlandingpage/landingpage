@@ -9,9 +9,8 @@ function getSupabase() {
 }
 
 const ENV_FALLBACKS: Record<string, string> = {
-    connectyhub_api_url: 'CONNECTYHUB_API_URL',
-    connectyhub_api_key: 'CONNECTYHUB_API_KEY',
-    connectyhub_instance: 'CONNECTYHUB_INSTANCE',
+    uazapi_base_url: 'UAZAPI_BASE_URL',
+    uazapi_admin_token: 'UAZAPI_ADMIN_TOKEN',
     gemini_api_key: 'GEMINI_API_KEY',
     gemini_model: '',  // no env var, default handled in lib
     vapid_subject: 'VAPID_SUBJECT',

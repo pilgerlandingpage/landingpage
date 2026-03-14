@@ -5,44 +5,43 @@ export async function POST(request: NextRequest) {
         const { service, config } = await request.json()
 
         switch (service) {
-            case 'connectyhub': {
-                const apiUrl = config.connectyhub_api_url || process.env.CONNECTYHUB_API_URL
-                const apiKey = config.connectyhub_api_key || process.env.CONNECTYHUB_API_KEY
-                const instance = config.connectyhub_instance || process.env.CONNECTYHUB_INSTANCE
+            case 'uazapi': {
+                const baseUrl = config.uazapi_base_url
+                const adminToken = config.uazapi_admin_token
 
-                if (!apiUrl || !apiKey || !instance) {
+                if (!baseUrl || !adminToken) {
                     return NextResponse.json({
                         success: false,
-                        message: 'Preencha todos os campos (URL, API Key, Instance)',
+                        message: 'Preencha URL do Servidor e Admin Token',
                     })
                 }
 
-                const targetUrl = `${apiUrl}/instance/connectionState/${instance}`;
-                console.log('Testing ConnectyHub:', targetUrl);
-
                 try {
-                    const res = await fetch(targetUrl, {
-                        headers: { apikey: apiKey },
+                    const res = await fetch(`${baseUrl}/instance/all`, {
+                        headers: {
+                            'admintoken': adminToken,
+                            'Content-Type': 'application/json',
+                        },
                     })
 
                     if (!res.ok) {
                         const text = await res.text()
                         return NextResponse.json({
                             success: false,
-                            message: `Erro ${res.status}: ${text.slice(0, 100)}`,
+                            message: `Erro ${res.status}: ${text.slice(0, 200)}`,
                         })
                     }
 
                     const data = await res.json()
-                    const state = data?.instance?.state || data?.state || 'unknown'
+                    const instances = Array.isArray(data) ? data : (data?.instances || [])
                     return NextResponse.json({
                         success: true,
-                        message: `Conectado! Estado: ${state}`,
+                        message: `Conectado à uazapi! ${instances.length} instância(s) encontrada(s).`,
                     })
                 } catch (e) {
                     return NextResponse.json({
                         success: false,
-                        message: `Erro ao conectar em ${targetUrl}: ${e instanceof Error ? e.message : String(e)}`,
+                        message: `Erro ao conectar: ${e instanceof Error ? e.message : String(e)}`,
                     })
                 }
             }

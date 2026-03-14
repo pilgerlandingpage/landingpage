@@ -1,6 +1,6 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
-import { sendWhatsAppMessage, interpolateTemplate } from '../connectyhub'
+import { sendWhatsAppMessage, interpolateTemplate } from '../uazapi'
 import { scrapePage } from '../scraper'
 import { uploadImageToR2 } from '../storage/r2'
 import { v4 as uuidv4 } from 'uuid'
@@ -146,10 +146,7 @@ export const processChatHandover = inngest.createFunction(
             leadId,
             brokerPhone,
             brokerMsg,
-            leadMsg,
-            brokerConnectyhubInstance,
-            brokerConnectyhubApiKey,
-            brokerConnectyhubApiUrl
+            leadMsg
         } = event.data
 
         const results = { broker: false, lead: false }
@@ -170,30 +167,25 @@ export const processChatHandover = inngest.createFunction(
             }
         }
 
-        // 2. Send to Lead (using broker's custom instance)
-        if (brokerConnectyhubInstance) {
-            try {
-                await sendWhatsAppMessage({
-                    phone: leadPhone,
-                    message: leadMsg,
-                    instanceName: brokerConnectyhubInstance,
-                    apiKey: brokerConnectyhubApiKey,
-                    apiUrl: brokerConnectyhubApiUrl
-                })
-                results.lead = true
-                console.log(`[Inngest Handover] ✅ WA successfully sent to lead: ${leadPhone}`)
+        // 2. Send to Lead (using system's default instance since brokers no longer have their own stored)
+        try {
+            await sendWhatsAppMessage({
+                phone: leadPhone,
+                message: leadMsg
+            })
+            results.lead = true
+            console.log(`[Inngest Handover] ✅ WA successfully sent to lead: ${leadPhone}`)
 
-                // NEW: Mark lead as having received a WhatsApp message for Dashboard Tracking
-                if (leadId) {
-                    const supabase = getSupabase()
-                    await supabase.from('leads').update({ whatsapp_sent: true }).eq('id', leadId)
-                    console.log(`[Inngest Handover] ✅ Marked lead ${leadId} as whatsapp_sent: true`)
-                }
-            } catch (error) {
-                console.error(`[Inngest Handover] ❌ Failed to send WA to lead: ${leadPhone}`, error)
-                // If the lead message fails, we throw to trigger Inngest auto-retry
-                throw new Error(`Failed to send WhatsApp to lead: ${error}`)
+            // NEW: Mark lead as having received a WhatsApp message for Dashboard Tracking
+            if (leadId) {
+                const supabase = getSupabase()
+                await supabase.from('leads').update({ whatsapp_sent: true }).eq('id', leadId)
+                console.log(`[Inngest Handover] ✅ Marked lead ${leadId} as whatsapp_sent: true`)
             }
+        } catch (error) {
+            console.error(`[Inngest Handover] ❌ Failed to send WA to lead: ${leadPhone}`, error)
+            // If the lead message fails, we throw to trigger Inngest auto-retry
+            throw new Error(`Failed to send WhatsApp to lead: ${error}`)
         }
 
         return { success: true, results }

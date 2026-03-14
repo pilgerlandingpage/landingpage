@@ -5,7 +5,7 @@
 // para os administradores via WhatsApp.
 // =============================================
 
-import { sendWhatsAppMessage } from '../connectyhub'
+import { sendWhatsAppMessage } from '../uazapi'
 import type { AICampaignAlert, AdminAlertContact, AlertType, AlertUrgency } from './types'
 
 // --- Mapa de urgência (para comparação) ---

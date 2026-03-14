@@ -22,7 +22,8 @@ import {
     UserCog,
     Loader2,
     Crown,
-    Radar
+    Radar,
+    Smartphone
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -34,7 +35,7 @@ const MODULE_NAV: Record<string, { href: string; icon: any; label: string; secti
     leads: { href: '/admin/leads', icon: Users, label: 'Leads', section: 'PRINCIPAL' },
     landing_pages: { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages', section: 'CONTEÚDO' },
     properties: { href: '/admin/properties', icon: Building2, label: 'Imóveis', section: 'CONTEÚDO' },
-    brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores', section: 'CONTEÚDO' },
+    brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores IA', section: 'CONTEÚDO' },
     automation: { href: '/admin/automation', icon: Zap, label: 'Automações', section: 'AUTOMAÇÃO' },
     push: { href: '/admin/push', icon: Bell, label: 'Notificações', section: 'AUTOMAÇÃO' },
     ads: { 
@@ -47,7 +48,8 @@ const MODULE_NAV: Record<string, { href: string; icon: any; label: string; secti
             { href: '/admin/ads/google', label: 'Google Ads' }
         ]
     },
-    radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'SISTEMA' },
+    radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'AUTOMAÇÃO' },
+    whatsapp: { href: '/admin/whatsapp', icon: Smartphone, label: 'WhatsApp Web', section: 'AUTOMAÇÃO' },
     feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
     maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutenção', section: 'SISTEMA' },
 }

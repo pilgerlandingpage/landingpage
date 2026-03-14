@@ -159,9 +159,6 @@ export async function POST(req: NextRequest) {
         const brokerName = broker?.name || 'Guilherme Pilger'
         const brokerCreci = broker?.creci || 'CRECI 5555'
         const brokerPhone = broker?.phone
-        const brokerConnectyhubApiUrl = broker?.connectyhub_api_url
-        const brokerConnectyhubInstance = broker?.connectyhub_instance_id
-        const brokerConnectyhubApiKey = broker?.connectyhub_api_key
         const brokerConnectyhubChatMessage = broker?.connectyhub_chat_message
 
         // ===== DIAGNOSTIC: Log everything received from frontend =====
@@ -169,9 +166,6 @@ export async function POST(req: NextRequest) {
         console.log('[Chat Debug] broker object keys:', broker ? Object.keys(broker) : 'NULL')
         console.log('[Chat Debug] brokerName:', brokerName)
         console.log('[Chat Debug] brokerPhone:', brokerPhone)
-        console.log('[Chat Debug] brokerConnectyhubApiUrl:', brokerConnectyhubApiUrl)
-        console.log('[Chat Debug] brokerConnectyhubInstance:', brokerConnectyhubInstance)
-        console.log('[Chat Debug] brokerConnectyhubApiKey:', brokerConnectyhubApiKey ? '***SET***' : 'UNDEFINED')
         console.log('[Chat Debug] brokerConnectyhubChatMessage:', brokerConnectyhubChatMessage ? 'SET' : 'UNDEFINED')
         console.log('[Chat Debug] ════════════════════════════════════════════')
 
@@ -417,7 +411,7 @@ export async function POST(req: NextRequest) {
 
                         // WhatsApp Notifications: fire if phone was just added OR re-engagement from new session
                         if (shouldTriggerWhatsApp) {
-                            console.log(`[Chat Debug] brokerPhone: ${brokerPhone}, brokerConnectyhubInstance: ${brokerConnectyhubInstance}`)
+                            console.log(`[Chat Debug] brokerPhone: ${brokerPhone}, brokerConnectyhubChatMessage: ${brokerConnectyhubChatMessage}`)
                             const urlContext = page_context?.url || 'Site / LP'
                             const fullHistory = [...safeHistory, { role: 'user', content: message }, { role: 'assistant', content: response }]
                             const conversationTranscript = fullHistory
@@ -427,7 +421,7 @@ export async function POST(req: NextRequest) {
                             // CRITICAL: Use the stored name (already confirmed) over freshly extracted name (can hallucinate)
                             const confirmedName = existingLead.name || updateData.name || leadData.name || null
 
-                            if (brokerPhone || brokerConnectyhubInstance) {
+                            if (brokerPhone || brokerConnectyhubChatMessage) {
                                 const leadNameSafe = confirmedName ? confirmedName.split(' ')[0] : ''
                                 const defaultMsg = leadNameSafe
                                     ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
@@ -463,10 +457,7 @@ export async function POST(req: NextRequest) {
                                         brokerName: brokerName,
                                         brokerMsg: brokerMsg,
                                         leadMsg: leadMsg,
-                                        leadId: existingLead.id,
-                                        brokerConnectyhubInstance: brokerConnectyhubInstance,
-                                        brokerConnectyhubApiKey: brokerConnectyhubApiKey,
-                                        brokerConnectyhubApiUrl: brokerConnectyhubApiUrl
+                                        leadId: existingLead.id
                                     }
                                 })
                             }
@@ -520,7 +511,7 @@ export async function POST(req: NextRequest) {
                                 // 1. Notify Broker with FULL conversation summary (via system default instance)
                                 // So the broker knows exactly what was discussed before continuing
                                 // Fire Inngest Event instead of blocking the chat response
-                                if (brokerPhone || brokerConnectyhubInstance) {
+                                if (brokerPhone || brokerConnectyhubChatMessage) {
                                     const leadNameSafe = leadData.name ? leadData.name.split(' ')[0] : ''
                                     const defaultMsg = leadNameSafe
                                         ? 'Oi {{lead_name}}! Acabei de falar com você pelo site e quero continuar nosso papo por aqui, fica mais fácil pra gente 😊\n\nMe conta, como posso te ajudar?'
@@ -556,10 +547,7 @@ export async function POST(req: NextRequest) {
                                             brokerPhone: brokerPhone,
                                             brokerName: brokerName,
                                             brokerMsg: brokerMsg,
-                                            leadMsg: leadMsg,
-                                            brokerConnectyhubInstance: brokerConnectyhubInstance,
-                                            brokerConnectyhubApiKey: brokerConnectyhubApiKey,
-                                            brokerConnectyhubApiUrl: brokerConnectyhubApiUrl
+                                            leadMsg: leadMsg
                                         }
                                     })
                                 }
