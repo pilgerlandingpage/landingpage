@@ -31,7 +31,8 @@ export async function GET() {
 
     const results = []
     for (const sql of queries) {
-        const { error } = await supabase.rpc('exec', { sql }).catch(() => ({ error: null }))
+        let rpcError = null
+        try { const res = await supabase.rpc('exec', { sql }); rpcError = res.error } catch { rpcError = null }
         // Try raw approach
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`, {
