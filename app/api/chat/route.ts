@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { extractLeadInfo } from '@/lib/ai/generation'
 import { generateChatResponse } from '@/lib/ai/generation'
 import { CONCIERGE_BASE_PROMPT, CONCIERGE_SAFEGUARD_RULES } from '@/lib/ai/prompts'
-import { sendWhatsAppMessage } from '@/lib/connectyhub'
+// sendWhatsAppMessage removed — WhatsApp is now handled via Inngest events and webhook
 import { inngest } from '@/lib/inngest/client'
 
 export const maxDuration = 60 // Allow longer timeout for AI processing
