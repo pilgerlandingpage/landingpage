@@ -1,12 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { getGeminiApiKey, getGeminiModel, getLeadExtractionPrompt } from './config'
+import { getGeminiApiKey, getAIConfig } from './config'
 
 export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string) {
   const apiKey = await getGeminiApiKey()
   if (!apiKey) throw new Error('Gemini API Key not configured. Configure em Admin > Manutenção.')
 
-  const modelName = await getGeminiModel('concierge')
-  console.log('[Gemini Chat] Using model:', modelName)
+  const modelName = (await getAIConfig('gemini_model')) || 'gemini-1.5-flash'
+  console.log('[Gemini Chat] Usando modelo:', modelName)
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey)
@@ -17,16 +17,13 @@ export async function generateGeminiChat(history: { role: string; content: strin
 
     const chat = model.startChat({
       history: (() => {
-        // Gemini requires first message to be 'user', and alternating roles
         const mapped = (history || []).map(h => ({
           role: (h.role === 'user' ? 'user' : 'model') as 'user' | 'model',
           parts: [{ text: h.content }]
         }))
-        // Drop leading 'model' messages (e.g. the initial AI greeting)
         while (mapped.length > 0 && mapped[0].role === 'model') {
           mapped.shift()
         }
-        // Remove consecutive same-role messages (keep last of each run)
         return mapped.filter((msg, i, arr) =>
           i === arr.length - 1 || msg.role !== arr[i + 1].role
         )
@@ -37,41 +34,9 @@ export async function generateGeminiChat(history: { role: string; content: strin
     const response = result.response
     return response.text()
   } catch (error: any) {
-    console.error('[Gemini Chat] Error details:', error?.message || error)
-    console.error('[Gemini Chat] Model:', modelName, '| Key length:', apiKey?.length)
+    console.error('[Gemini Chat] Erro:', error?.message || error)
+    console.error('[Gemini Chat] Modelo:', modelName, '| Key length:', apiKey?.length)
     throw error
   }
 }
 
-export async function extractGeminiLeadInfo(conversation: string) {
-  try {
-    const apiKey = await getGeminiApiKey()
-    if (!apiKey) return null
-
-    const modelName = await getGeminiModel() // Use same model or maybe a faster/cheaper one if preferred, but standardization is safer
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: { responseMimeType: 'application/json' }
-    })
-
-    const extractionPrompt = await getLeadExtractionPrompt()
-
-    const prompt = `
-        ${extractionPrompt}
-
-        CONVERSATION LOG:
-        ${conversation}
-    `
-
-    const result = await model.generateContent(prompt)
-    const text = result.response.text()
-    console.log('[Gemini Extraction] Raw response:', text) // Debug log
-
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim()
-    return JSON.parse(jsonString)
-  } catch (error) {
-    console.error('Gemini Extraction Error:', error)
-    return null
-  }
-}

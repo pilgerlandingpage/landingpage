@@ -16,7 +16,6 @@ export async function GET() {
             { count: partialLeadsCount },
             { count: vipCount },
             { count: whatsappCount },
-            { data: chatData },
             { data: sourceRaw },
             { data: dailyVisitors },
             { data: dailyLeads },
@@ -40,11 +39,8 @@ export async function GET() {
             // 3. VIP Leads
             supabase.from('leads').select('*', { count: 'exact', head: true }).eq('is_vip', true),
 
-            // 4. WhatsApp Sent
+            // 4. WhatsApp Enviados
             supabase.from('leads').select('*', { count: 'exact', head: true }).eq('whatsapp_sent', true),
-
-            // 5. Chat Sessions (fetch visitor_ids to count unique)
-            supabase.from('chat_history').select('visitor_id'),
 
             // 6. Source Distribution
             supabase.from('visitors').select('detected_source'),
@@ -81,8 +77,7 @@ export async function GET() {
             supabase.from('landing_pages').select('id, title, slug')
         ])
 
-        // Process Chat Sessions
-        const uniqueChatSessions = new Set(chatData?.map(c => c.visitor_id)).size
+
 
         // Process Source Distribution
         const sourceCounts: Record<string, number> = {}
@@ -154,7 +149,7 @@ export async function GET() {
             totalLeads: (leadsCount || 0) + (partialLeadsCount || 0),
             conversionRate: visitorsCount ? parseFloat(((leadsCount! / visitorsCount!) * 100).toFixed(1)) : 0,
             vipLeads: vipCount || 0,
-            chatSessions: uniqueChatSessions,
+            whatsappConversations: whatsappCount || 0,
             whatsappSent: whatsappCount || 0,
             pushSubscribers: pushCount || 0,
             cookieConsent: cookieConsentCount || 0,

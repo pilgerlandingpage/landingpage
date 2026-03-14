@@ -65,7 +65,6 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?',
         system_prompt: '',
         greeting_message: '',
         ai_provider: '',
@@ -82,7 +81,6 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        connectyhub_chat_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?',
         system_prompt: '',
         greeting_message: '',
         ai_provider: '',
@@ -514,29 +512,6 @@ export default function BrokersAdmin() {
                                 </div>
                             </div>
 
-                            {/* ── SEÇÃO 4: TRANSFERÊNCIA PARA CORRETOR HUMANO ── */}
-                            <div style={{ padding: '20px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-                                <h3 style={{ fontSize: '1rem', color: '#6366f1', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <MessageSquare size={18} /> 🔄 Transferência para Corretor Humano
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
-                                    Mensagem enviada automaticamente pelo WhatsApp do corretor humano ao lead quando o agente IA transferir o atendimento.
-                                </p>
-
-                                <div className="form-group" style={{ marginTop: '16px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mensagem de Transferência</label>
-                                    <textarea
-                                        className="form-textarea"
-                                        style={{ minHeight: '100px', resize: 'vertical' }}
-                                        value={formData.connectyhub_chat_message}
-                                        onChange={(e) => setFormData({ ...formData, connectyhub_chat_message: e.target.value })}
-                                        placeholder="Mensagem que o corretor humano enviará ao lead após transferência..."
-                                    />
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Variáveis disponíveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
-                                    </div>
-                                </div>
-                            </div>
 
                             {/* Tipo de Atendimento / Page Assignment */}
                             <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
@@ -863,7 +838,7 @@ export default function BrokersAdmin() {
                                         assignment_type: broker.assignment_type || 'all',
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
-                                        connectyhub_chat_message: broker.connectyhub_chat_message || '',
+
                                         system_prompt: broker.system_prompt || '',
                                         greeting_message: broker.greeting_message || '',
                                         ai_provider: (broker as any).ai_provider || '',

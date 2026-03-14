@@ -13,9 +13,21 @@ export default function VipExclusiveTemplate({ data, slug, landingPageId, agentN
         setSpotsLeft(Math.floor(Math.random() * 8) + 3)
     }, [])
 
+    const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
+
+    useEffect(() => {
+        fetch(`/api/broker-for-page?slug=${slug}`)
+            .then(r => r.json())
+            .then(d => { if (d.broker) setBroker(d.broker) })
+            .catch(() => {})
+    }, [slug])
+
     const openChat = useCallback(() => {
-        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
-    }, [])
+        if (broker?.phone) {
+            const msg = encodeURIComponent(broker.greeting_message || '')
+            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+        }
+    }, [broker])
 
     const filledSpots = 20 - spotsLeft
     const percentage = (filledSpots / 20) * 100

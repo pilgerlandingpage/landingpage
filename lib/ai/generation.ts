@@ -1,49 +1,28 @@
-import { getConciergeProvider, getPilgerProvider } from './config'
-import { generateGeminiChat, extractGeminiLeadInfo } from './gemini'
-import { generateOpenAIChat, extractOpenAILeadInfo } from './openai'
+import { getPilgerProvider } from './config'
+import { generateGeminiChat } from './gemini'
+import { generateOpenAIChat } from './openai'
 
-export async function extractLeadInfo(conversation: string) {
-    const provider = await getConciergeProvider()
+export async function generateChatResponse(history: { role: string; content: string }[], message: string, systemPrompt: string) {
+    const provider = await getPilgerProvider()
 
-    if (provider === 'openai') {
-        try {
-            return await extractOpenAILeadInfo(conversation)
-        } catch (error: any) {
-            console.error('[OpenAI Lead Extraction] Failed:', error.message)
-            console.log('[AI Generation] Falling back to Gemini for lead extraction...')
-            return await extractGeminiLeadInfo(conversation)
-        }
-    } else {
-        try {
-            return await extractGeminiLeadInfo(conversation)
-        } catch (error: any) {
-            console.error('[Gemini Lead Extraction] Failed:', error.message)
-            console.log('[AI Generation] Falling back to OpenAI for lead extraction...')
-            return await extractOpenAILeadInfo(conversation)
-        }
-    }
-}
-
-export async function generateChatResponse(history: { role: string; content: string }[], message: string, systemPrompt: string, context: 'concierge' | 'pilger' = 'concierge') {
-    const provider = context === 'pilger' ? await getPilgerProvider() : await getConciergeProvider()
-
-    console.log(`[AI Generation] Using provider: ${provider}`)
+    console.log(`[AI Generation] Usando provider: ${provider}`)
 
     if (provider === 'openai') {
         try {
             return await generateOpenAIChat(history, message, systemPrompt)
         } catch (error: any) {
-            console.error('[OpenAI Generation] Failed:', error.message)
-            console.log('[AI Generation] Falling back to Gemini...')
+            console.error('[OpenAI Generation] Falhou:', error.message)
+            console.log('[AI Generation] Fallback para Gemini...')
             return await generateGeminiChat(history, message, systemPrompt)
         }
     } else {
         try {
             return await generateGeminiChat(history, message, systemPrompt)
         } catch (error: any) {
-            console.error('[Gemini Generation] Failed:', error.message)
-            console.log('[AI Generation] Falling back to OpenAI...')
+            console.error('[Gemini Generation] Falhou:', error.message)
+            console.log('[AI Generation] Fallback para OpenAI...')
             return await generateOpenAIChat(history, message, systemPrompt)
         }
     }
 }
+

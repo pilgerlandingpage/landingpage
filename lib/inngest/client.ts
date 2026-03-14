@@ -11,28 +11,6 @@ export const inngest = new Inngest({
                 property_title?: string
             }
         }
-        'chat/handover': {
-            data: {
-                leadPhone: string
-                leadName: string
-                leadId?: string
-                brokerPhone?: string
-                brokerName: string
-                brokerMsg: string // The message for the broker (with transcript)
-                leadMsg: string // The message for the lead
-                brokerConnectyhubInstance?: string
-                brokerConnectyhubApiKey?: string
-                brokerConnectyhubApiUrl?: string
-            }
-        }
-        'cloner/process-url': {
-            data: {
-                pageId: string
-                url: string
-                customPrompt?: string
-                userId?: string
-            }
-        }
         'lead/schedule-followup': {
             data: {
                 phone: string

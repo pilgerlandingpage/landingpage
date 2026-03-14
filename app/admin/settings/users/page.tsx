@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, Shield, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, Lock, User, Power, Crown, Search,
-    Smartphone, Wifi, WifiOff, QrCode, Bot, Clock, Brain, RefreshCw
+    Smartphone, Wifi, WifiOff, QrCode, Bot, Clock, Brain, RefreshCw, MessageSquare
 } from 'lucide-react'
 
 interface Sector { id: string; name: string; color: string; icon: string }
@@ -47,7 +47,8 @@ export default function UsersPage() {
         shadow_agent_prompt: '',
         shadow_agent_enabled: false,
         available_from: '08:00',
-        available_until: '20:00'
+        available_until: '20:00',
+        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
     })
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -72,7 +73,7 @@ export default function UsersPage() {
 
     const startCreate = () => {
         setCreating(true); setEditing(null)
-        setForm({ name: '', email: '', password: '', phone: '', is_master: false, sector_ids: [], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00' })
+        setForm({ name: '', email: '', password: '', phone: '', is_master: false, sector_ids: [], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
         setUserWhatsapp(null); setUserWhatsappQR(null)
     }
 
@@ -84,7 +85,8 @@ export default function UsersPage() {
             shadow_agent_prompt: u.shadow_agent_prompt || '',
             shadow_agent_enabled: u.shadow_agent_enabled || false,
             available_from: u.available_from || '08:00',
-            available_until: u.available_until || '20:00'
+            available_until: u.available_until || '20:00',
+            transfer_message: (u as any).transfer_message || ''
         })
         setUserWhatsapp(null); setUserWhatsappQR(null)
         loadUserWhatsApp(u.id)
@@ -151,7 +153,7 @@ export default function UsersPage() {
             const method = creating ? 'POST' : 'PUT'
             const body: any = creating
                 ? { name: form.name, email: form.email, password: form.password, phone: form.phone, is_master: form.is_master, sector_ids: form.sector_ids }
-                : { id: editing, name: form.name, phone: form.phone, is_master: form.is_master, sector_ids: form.sector_ids, shadow_agent_prompt: form.shadow_agent_prompt, shadow_agent_enabled: form.shadow_agent_enabled, available_from: form.available_from, available_until: form.available_until }
+                : { id: editing, name: form.name, phone: form.phone, is_master: form.is_master, sector_ids: form.sector_ids, shadow_agent_prompt: form.shadow_agent_prompt, shadow_agent_enabled: form.shadow_agent_enabled, available_from: form.available_from, available_until: form.available_until, transfer_message: form.transfer_message }
 
             const res = await fetch('/api/admin/users', {
                 method, headers: { 'Content-Type': 'application/json' },
@@ -412,6 +414,27 @@ export default function UsersPage() {
                                 )}
                             </div>
                         </>
+                    )}
+
+                    {/* ── SEÇÃO: MENSAGEM DE TRANSFERÊNCIA ── */}
+                    {editing && (
+                        <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                <MessageSquare size={16} style={{ color: '#6366f1' }} />
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🔄 Mensagem de Transferência</span>
+                            </div>
+                            <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
+                                Mensagem enviada ao lead quando o agente IA transferir o atendimento para este corretor.
+                            </p>
+                            <textarea
+                                value={form.transfer_message}
+                                onChange={e => setForm(p => ({ ...p, transfer_message: e.target.value }))}
+                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊"
+                                style={{ width: '100%', minHeight: '100px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', resize: 'vertical' }} />
+                            <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
+                                Variáveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
+                            </div>
+                        </div>
                     )}
 
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

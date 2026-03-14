@@ -1,40 +1,5 @@
 import OpenAI from 'openai'
-import { getOpenAIApiKey, getOpenAIModel, getLeadExtractionPrompt } from './config'
-
-export async function extractOpenAILeadInfo(conversation: string) {
-    const apiKey = await getOpenAIApiKey()
-    if (!apiKey) return null
-
-    const modelName = await getOpenAIModel()
-    const openai = new OpenAI({ apiKey })
-
-    const prompt = await getLeadExtractionPrompt()
-
-    const fullPrompt = `
-        ${prompt}
-
-        CONVERSATION LOG:
-        ${conversation}
-    `
-
-    try {
-        const completion = await openai.chat.completions.create({
-            model: modelName,
-            messages: [
-                { role: 'system', content: 'You are a JSON extraction engine.' },
-                { role: 'user', content: fullPrompt }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.1,
-        })
-
-        const content = completion.choices[0].message.content
-        return content ? JSON.parse(content) : null
-    } catch (error) {
-        console.error('[OpenAI Extraction] Error:', error)
-        return null
-    }
-}
+import { getOpenAIApiKey, getAIConfig } from './config'
 
 export async function generateOpenAIChat(
     history: { role: string; content: string }[],
@@ -47,13 +12,12 @@ export async function generateOpenAIChat(
         throw new Error('OpenAI API Key não configurada. Configure na Sala de Manutenção.')
     }
 
-    const modelName = await getOpenAIModel()
-    console.log('[OpenAI Chat] Using model:', modelName)
+    const modelName = (await getAIConfig('openai_model')) || 'gpt-3.5-turbo'
+    console.log('[OpenAI Chat] Usando modelo:', modelName)
 
     try {
         const openai = new OpenAI({ apiKey })
 
-        // Map history to OpenAI format (user/assistant)
         const messages = [
             { role: 'system', content: systemPrompt },
             ...(history || []).map(msg => ({
@@ -72,7 +36,8 @@ export async function generateOpenAIChat(
         return completion.choices[0].message.content || ''
 
     } catch (error: any) {
-        console.error('[OpenAI Chat] Error:', error.message || error)
+        console.error('[OpenAI Chat] Erro:', error.message || error)
         throw error
     }
 }
+

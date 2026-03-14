@@ -29,10 +29,22 @@ export default function UrgencyTemplate({ data, slug, landingPageId, agentName, 
         return () => clearInterval(id)
     }, [slug])
 
-    // Open chat programmatically
+    const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
+
+    useEffect(() => {
+        fetch(`/api/broker-for-page?slug=${slug}`)
+            .then(r => r.json())
+            .then(d => { if (d.broker) setBroker(d.broker) })
+            .catch(() => {})
+    }, [slug])
+
+    // Open WhatsApp with the assigned AI broker
     const openChat = useCallback(() => {
-        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
-    }, [])
+        if (broker?.phone) {
+            const msg = encodeURIComponent(broker.greeting_message || '')
+            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+        }
+    }, [broker])
 
     return (
         <div className="urg" style={{ '--pc': primaryColor } as React.CSSProperties}>

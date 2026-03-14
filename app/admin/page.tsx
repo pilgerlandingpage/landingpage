@@ -27,7 +27,7 @@ interface DashboardStats {
     totalLeads: number
     conversionRate: number
     vipLeads: number
-    chatSessions: number
+    whatsappConversations: number
     whatsappSent: number
     pushSubscribers: number
     cookieConsent: number
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
         totalLeads: 0,
         conversionRate: 0,
         vipLeads: 0,
-        chatSessions: 0,
+        whatsappConversations: 0,
         whatsappSent: 0,
         pushSubscribers: 0,
         cookieConsent: 0,
@@ -442,9 +442,9 @@ export default function AdminDashboard() {
                     <div className="kpi-value">{stats.conversionRate}%</div>
                 </div>
                 <div className="kpi-card">
-                    <MessageCircle size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">Sessões de Chat</div>
-                    <div className="kpi-value">{stats.chatSessions.toLocaleString()}</div>
+                    <MessageCircle size={20} color="#25D366" style={{ marginBottom: 8 }} />
+                    <div className="kpi-label">Conversas WhatsApp</div>
+                    <div className="kpi-value">{stats.whatsappConversations.toLocaleString()}</div>
                 </div>
                 <div className="kpi-card">
                     <Star size={20} color="#c9a96e" style={{ marginBottom: 8 }} />

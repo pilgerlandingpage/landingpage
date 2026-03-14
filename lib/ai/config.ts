@@ -24,31 +24,19 @@ export async function getOpenAIApiKey() {
     return getAIConfig('openai_api_key')
 }
 
-export async function getOpenAIModel(type: 'concierge' = 'concierge') {
-    const key = 'openai_concierge_model'
-    const specific = await getAIConfig(key)
-    if (specific) return specific
 
-    return (await getAIConfig('openai_model')) || 'gpt-3.5-turbo'
-}
 
 export async function getGeminiApiKey() {
     return (await getAIConfig('gemini_api_key')) || process.env.GEMINI_API_KEY
 }
 
-export async function getGeminiModel(type: 'concierge' = 'concierge') {
-    const key = 'gemini_concierge_model'
-    // Fallback to 1.5-flash which is better for free tier
-    return (await getAIConfig(key)) || 'gemini-1.5-flash'
-}
+
 
 export async function getActiveAIProvider() {
     return (await getAIConfig('ai_provider')) || 'gemini'
 }
 
-export async function getConciergeProvider() {
-    return (await getAIConfig('concierge_provider')) || (await getActiveAIProvider())
-}
+
 
 export async function getPilgerProvider() {
     return (await getAIConfig('pilger_provider')) || (await getActiveAIProvider())

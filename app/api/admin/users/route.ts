@@ -180,7 +180,9 @@ export async function PUT(request: NextRequest) {
         const master = await verifyMaster()
         if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
-        const { id, name, phone, is_active, is_master: newIsMaster, sector_ids } = await request.json()
+        const { id, name, phone, is_active, is_master: newIsMaster, sector_ids,
+            shadow_agent_prompt, shadow_agent_enabled, available_from, available_until, transfer_message
+        } = await request.json()
         if (!id) return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
 
         const admin = createAdminClient()
@@ -191,6 +193,11 @@ export async function PUT(request: NextRequest) {
         if (phone !== undefined) updateData.phone = phone
         if (is_active !== undefined) updateData.is_active = is_active
         if (newIsMaster !== undefined) updateData.is_master = newIsMaster
+        if (shadow_agent_prompt !== undefined) updateData.shadow_agent_prompt = shadow_agent_prompt
+        if (shadow_agent_enabled !== undefined) updateData.shadow_agent_enabled = shadow_agent_enabled
+        if (available_from !== undefined) updateData.available_from = available_from
+        if (available_until !== undefined) updateData.available_until = available_until
+        if (transfer_message !== undefined) updateData.transfer_message = transfer_message
 
         const { error } = await admin.from('admin_users').update(updateData).eq('id', id)
         if (error) throw error

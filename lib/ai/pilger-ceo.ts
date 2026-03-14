@@ -182,7 +182,7 @@ Formato de Saída esperado (Markdown):
 Seja breve e focado em ROI.
 ${SCORE_INSTRUCTION}`
 
-    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt, 'pilger')
+    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt)
     const performanceScore = extractPerformanceScore(reportMarkdown)
 
     // Salvar no Supabase com a plataforma
@@ -376,7 +376,7 @@ Formato de Saída esperado (Markdown):
 Seja extremamente estratégico e assuma a persona de um Gestor de Elite.
 ${SCORE_INSTRUCTION}`
 
-    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt, 'pilger')
+    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt)
     const performanceScore = extractPerformanceScore(reportMarkdown)
 
     await supabase.from('pilger_ai_reports').insert({

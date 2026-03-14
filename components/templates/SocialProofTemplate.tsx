@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Star, Eye, MapPin, ChevronRight, Quote } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
@@ -14,9 +14,21 @@ const testimonials = [
 export default function SocialProofTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const { title, heroImage, price, cta, stats, primaryColor } = data
 
+    const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
+
+    useEffect(() => {
+        fetch(`/api/broker-for-page?slug=${slug}`)
+            .then(r => r.json())
+            .then(d => { if (d.broker) setBroker(d.broker) })
+            .catch(() => {})
+    }, [slug])
+
     const openChat = useCallback(() => {
-        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
-    }, [])
+        if (broker?.phone) {
+            const msg = encodeURIComponent(broker.greeting_message || '')
+            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+        }
+    }, [broker])
 
     return (
         <div className="sp" style={{ '--pc': primaryColor } as React.CSSProperties}>

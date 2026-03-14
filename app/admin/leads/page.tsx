@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Search, Download, Filter } from 'lucide-react'
-import { ChatViewer } from '@/components/admin/ChatViewer'
+
 
 interface Lead {
     id: string
@@ -721,24 +721,43 @@ export default function LeadsPage() {
                                 </button>
                             </div>
 
-                            {/* Right Content: Chat History */}
+                            {/* Right Content: Conversas WhatsApp */}
                             <div style={{ flex: 1, backgroundColor: '#111', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
-                                {/* Chat Header */}
+                                {/* Header */}
                                 <div style={{ padding: '16px 24px', borderBottom: '1px solid #2a2a2a', backgroundColor: 'rgba(17, 17, 17, 0.8)', backdropFilter: 'blur(4px)', position: 'sticky', top: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ color: '#666', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'serif', margin: 0 }}>
-                                        Histórico da Conversa
+                                        Conversas WhatsApp
                                     </h3>
                                     <span style={{ backgroundColor: '#1a1a1a', color: '#888', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', fontFamily: 'monospace', border: '1px solid #2a2a2a' }}>
                                         {selectedLead.conversation_log?.length || 0} mensagens
                                     </span>
                                 </div>
 
-                                {/* Chat Messages Area */}
-                                <ChatViewer
-                                    messages={selectedLead.conversation_log}
-                                    leadName={selectedLead.name || 'Cliente'}
-                                    brokerName={selectedLead.landing_page?.title}
-                                />
+                                {/* Messages Area */}
+                                <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {selectedLead.conversation_log && selectedLead.conversation_log.length > 0 ? (
+                                        selectedLead.conversation_log.map((msg: any, idx: number) => (
+                                            <div key={idx} style={{
+                                                alignSelf: msg.role === 'assistant' ? 'flex-start' : 'flex-end',
+                                                maxWidth: '75%',
+                                                padding: '10px 14px',
+                                                borderRadius: '12px',
+                                                backgroundColor: msg.role === 'assistant' ? '#1a1a1a' : '#25D366',
+                                                color: msg.role === 'assistant' ? '#ccc' : '#fff',
+                                                fontSize: '0.85rem',
+                                                lineHeight: 1.5,
+                                                border: msg.role === 'assistant' ? '1px solid #2a2a2a' : 'none',
+                                            }}>
+                                                {msg.content}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#555', gap: '8px' }}>
+                                            <span style={{ fontSize: '2rem' }}>💬</span>
+                                            <span style={{ fontSize: '0.85rem' }}>Nenhuma conversa registrada</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

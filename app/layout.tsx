@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import ConciergeChat from '@/components/ai/ConciergeChat'
 import MainTracker from '@/components/tracking/MainTracker'
 
 export const metadata: Metadata = {
@@ -18,7 +17,6 @@ export default function RootLayout({
       <body>
         <MainTracker />
         {children}
-        <ConciergeChat />
       </body>
     </html>
   )
