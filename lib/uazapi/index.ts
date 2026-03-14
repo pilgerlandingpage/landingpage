@@ -146,7 +146,7 @@ export async function createInstance(instanceName: string) {
     return uazapiFetch('/instance/init', {
         method: 'POST',
         adminToken: config.adminToken,
-        body: { name: instanceName },
+        body: { instanceName },
     })
 }
 
