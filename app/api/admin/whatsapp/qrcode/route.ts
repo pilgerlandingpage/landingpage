@@ -120,11 +120,28 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', instance.id)
 
+        // Extrair QR code do resultado
+        let qrcode = result.qrcode || result.qr || result.base64 || null
+        
+        // Se o resultado inteiro é uma string (pode ser o QR direto)
+        if (!qrcode && typeof result === 'string') {
+            qrcode = result
+        }
+
+        // Normalizar: adicionar prefixo data URI se for base64 puro
+        if (qrcode && typeof qrcode === 'string' && !qrcode.startsWith('data:') && !qrcode.startsWith('http')) {
+            qrcode = `data:image/png;base64,${qrcode}`
+        }
+
+        console.log('[QR Code] QR extraído:', qrcode ? `${String(qrcode).substring(0, 80)}...` : 'null')
+        console.log('[QR Code] Chaves do resultado:', Object.keys(result))
+
         return NextResponse.json({
             success: true,
-            qrcode: result.qrcode || result.qr || result.base64 || result,
+            qrcode,
             pairingCode: result.pairingCode || result.code || null,
             instanceId: instance.id,
+            debug_keys: Object.keys(result),
         })
     } catch (error) {
         console.error('[QR Code Error]', error)
