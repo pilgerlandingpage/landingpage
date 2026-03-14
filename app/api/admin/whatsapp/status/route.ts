@@ -39,12 +39,16 @@ export async function GET(request: NextRequest) {
 
         // Consultar status na uazapi
         const result = await getInstanceStatus(instance.instance_token)
-        const status = result.status || result.state || 'disconnected'
-        const phone = result.phone || result.number || instance.phone_number || null
+        console.log('[Status] Resultado uazapi:', JSON.stringify(result).substring(0, 300))
+        
+        // uazapi retorna: { status: { connected, loggedIn }, instance: { qrcode, ... } }
+        const isConnected = result?.status?.connected === true || result?.connected === true
+        const isLoggedIn = result?.status?.loggedIn === true || result?.loggedIn === true
+        const phone = result?.instance?.phone || result?.phone || result?.number || instance.phone_number || null
 
-        // Atualizar status no banco se mudou
-        const newStatus = status === 'connected' ? 'connected' :
-                          status === 'connecting' ? 'connecting' : 'disconnected'
+        // Determinar status
+        const newStatus = (isConnected && isLoggedIn) ? 'connected' :
+                          (isConnected || result?.response?.includes?.('Connecting')) ? 'connecting' : 'disconnected'
 
         if (newStatus !== instance.status) {
             await supabase

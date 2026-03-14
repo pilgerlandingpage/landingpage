@@ -117,6 +117,15 @@ export default function BrokersAdmin() {
             console.log('[WhatsApp QR] Response:', data)
             if (data.qrcode) {
                 setWhatsappQR(data.qrcode)
+                // Salvar instanceId para poder verificar status depois
+                if (data.instanceId) {
+                    setWhatsappInstance(prev => ({
+                        ...(prev || {}),
+                        id: data.instanceId,
+                        instance_name: instanceName,
+                        status: 'connecting',
+                    } as any))
+                }
             } else if (data.message || data.error) {
                 alert(`Erro ao gerar QR Code: ${data.message || data.error}`)
             } else {
@@ -131,15 +140,27 @@ export default function BrokersAdmin() {
     }
 
     async function checkWhatsAppStatus() {
-        if (!whatsappInstance) return
+        if (!whatsappInstance?.id) {
+            alert('Nenhuma instância para verificar. Gere o QR Code primeiro.')
+            return
+        }
         try {
-            const res = await fetch(`/api/admin/whatsapp/status?instance_name=${whatsappInstance.instance_name}`)
+            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${whatsappInstance.id}`)
             const data = await res.json()
+            console.log('[WhatsApp Status] Response:', data)
             if (data.status) {
-                setWhatsappInstance(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
-                if (data.status === 'connected') setWhatsappQR(null)
+                setWhatsappInstance(prev => prev ? { ...prev, status: data.status, phone_number: data.phone || prev.phone_number } : null)
+                if (data.status === 'connected') {
+                    setWhatsappQR(null)
+                    alert('✅ WhatsApp conectado com sucesso!')
+                } else {
+                    alert(`Status atual: ${data.status}. Escaneie o QR Code e tente novamente.`)
+                }
             }
-        } catch {}
+        } catch (err: any) {
+            console.error('WhatsApp Status Error:', err)
+            alert(`Erro ao verificar: ${err.message}`)
+        }
     }
 
     useEffect(() => {
