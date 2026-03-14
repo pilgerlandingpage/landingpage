@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
             pairingCode: result.pairingCode || result.code || null,
             instanceId: instance.id,
             debug_keys: Object.keys(result),
+            debug_result: result,
         })
     } catch (error) {
         console.error('[QR Code Error]', error)
