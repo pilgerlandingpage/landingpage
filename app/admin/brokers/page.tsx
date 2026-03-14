@@ -114,11 +114,18 @@ export default function BrokersAdmin() {
                 body: JSON.stringify({ instance_name: instanceName, broker_id: editingBroker?.id })
             })
             const data = await res.json()
+            console.log('[WhatsApp QR] Response:', data)
             if (data.qrcode) {
                 setWhatsappQR(data.qrcode)
+            } else if (data.message || data.error) {
+                alert(`Erro ao gerar QR Code: ${data.message || data.error}`)
+            } else {
+                alert('QR Code não retornado. Verifique os logs do servidor.')
+                console.error('[WhatsApp QR] Resposta inesperada:', data)
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('WhatsApp QR Error:', err)
+            alert(`Erro de conexão: ${err.message}`)
         }
         finally { setWhatsappConnecting(false) }
     }
