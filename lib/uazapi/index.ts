@@ -143,10 +143,10 @@ async function uazapiFetch(
 /** Criar nova instância (requer admin token) */
 export async function createInstance(instanceName: string) {
     const config = await getUazapiConfig()
-    return uazapiFetch('/instance/create', {
+    return uazapiFetch('/instance/init', {
         method: 'POST',
         adminToken: config.adminToken,
-        body: { instanceName },
+        body: { name: instanceName },
     })
 }
 
