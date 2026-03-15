@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
             || ''
 
         const senderName = messageData.senderName || messageData.sender_name || messageData.pushName || ''
-        const messageText = messageData.text
+
+        // Extract text — ensure it's always a string (audio msgs may have objects here)
+        const rawText = messageData.text
             || messageData.content
             || messageData.body
             || messageData.message?.conversation
@@ -59,10 +61,22 @@ export async function POST(request: NextRequest) {
             || body.text
             || body.body
             || ''
+        const messageText = typeof rawText === 'string' ? rawText : ''
 
         const isFromMe = messageData.fromMe ?? messageData.key?.fromMe ?? body.fromMe ?? false
-        const audioUrl = messageData.audioUrl || messageData.media?.url || messageData.message?.audioMessage?.url || null
-        const isAudio = !!(audioUrl || messageData.messageType === 'audioMessage' || messageData.message?.audioMessage || messageData.type === 'audio')
+
+        // Audio URL — ConnectyHub can send in many different places
+        const audioUrl = messageData.audioUrl
+            || messageData.media?.url
+            || messageData.message?.audioMessage?.url
+            || messageData.audio?.url
+            || messageData.message?.audio?.url
+            || null
+        const isAudio = !!(audioUrl
+            || messageData.messageType === 'audioMessage'
+            || messageData.message?.audioMessage
+            || messageData.type === 'audio'
+            || messageData.audio)
 
         // Clean phone number
         const cleanPhone = remotePhone?.toString().replace(/@.+$/, '').replace(/\D/g, '') || ''
@@ -99,7 +113,8 @@ export async function POST(request: NextRequest) {
                 || cleanPhone)
             : cleanPhone
 
-        console.log(`[Webhook] 📱 Phone: ${finalPhone} | Name: ${senderName} | FromMe: ${isFromMe} | Audio: ${isAudio} | Instance: ${instanceName} | Text: "${(messageText || '[empty/audio]').substring(0, 80)}"`)
+        const logText = messageText ? messageText.substring(0, 80) : '[empty/audio]'
+        console.log(`[Webhook] 📱 Phone: ${finalPhone} | Name: ${senderName} | FromMe: ${isFromMe} | Audio: ${isAudio} | Instance: ${instanceName} | Text: "${logText}"`)
 
         // ── Find instance in DB ──
         let instance: any = null

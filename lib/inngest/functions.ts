@@ -18,7 +18,8 @@ import {
 import {
     processWhatsAppMessage,
     detectHumanTakeover,
-    shadowAgentResponse
+    shadowAgentResponse,
+    whatsappKeepOnline
 } from './whatsapp-agent'
 
 function getSupabase() {
@@ -161,5 +162,6 @@ export const functions = [
     // WhatsApp Agent IA
     processWhatsAppMessage,
     detectHumanTakeover,
-    shadowAgentResponse
+    shadowAgentResponse,
+    whatsappKeepOnline
 ]

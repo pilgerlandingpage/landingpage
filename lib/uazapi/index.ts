@@ -439,6 +439,24 @@ export async function markAsRead(phone: string, instanceToken: string) {
     })
 }
 
+/** Mostrar "gravando áudio..." */
+export async function setPresenceRecording(phone: string, instanceToken: string) {
+    return uazapiFetch('/chat/presence', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: cleanPhone(phone), presence: 'recording' },
+    })
+}
+
+/** Ficar online (presença "available") */
+export async function setPresenceAvailable(instanceToken: string) {
+    return uazapiFetch('/chat/presence', {
+        method: 'POST',
+        token: instanceToken,
+        body: { presence: 'available' },
+    })
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  UTILITÁRIOS
 // ═══════════════════════════════════════════════════════════════

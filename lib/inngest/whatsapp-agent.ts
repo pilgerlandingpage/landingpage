@@ -5,6 +5,8 @@ import {
     sendAudioMessage,
     sendMenuMessage,
     setPresenceTyping,
+    setPresenceRecording,
+    setPresenceAvailable,
     markAsRead
 } from '../uazapi'
 
@@ -419,14 +421,22 @@ export const processWhatsAppMessage = inngest.createFunction(
         const readDelay = Math.floor(Math.random() * 2000) + 1000
         await step.sleep('reading-delay', `${readDelay}ms`)
 
-        await step.run('show-typing', async () => {
-            await setPresenceTyping(cleanPhone, instanceToken).catch(() => { })
+        // Decide presence: "recording" if sending audio, "typing" otherwise
+        const willSendAudio = isAudio && configs['whatsapp_audio_enabled'] === 'true'
+            && !responseRequiresText(aiResponse.text) && !parseButtons(aiResponse.text).buttons
+
+        await step.run('show-presence', async () => {
+            if (willSendAudio) {
+                await setPresenceRecording(cleanPhone, instanceToken).catch(() => { })
+            } else {
+                await setPresenceTyping(cleanPhone, instanceToken).catch(() => { })
+            }
         })
 
-        // Typing delay proportional to response length
+        // Typing/recording delay proportional to response length
         const typingMs = Math.min(Math.max(aiResponse.text.length * 25, 1500), 8000)
         const actualTypingMs = Math.floor(typingMs * (0.7 + Math.random() * 0.6))
-        await step.sleep('typing-delay', `${actualTypingMs}ms`)
+        await step.sleep('composing-delay', `${actualTypingMs}ms`)
 
         // ── Step 6: Send response (Função Espelho) ──
         await step.run('send-response', async () => {
@@ -688,5 +698,45 @@ export const shadowAgentResponse = inngest.createFunction(
         })
 
         return { action: 'shadow_responded', phone: cleanPhone }
+    }
+)
+
+// ═══════════════════════════════════════════════════════════════
+// INNGEST CRON: Keep WhatsApp Always Online
+// ═══════════════════════════════════════════════════════════════
+
+export const whatsappKeepOnline = inngest.createFunction(
+    {
+        id: 'whatsapp-keep-online',
+        name: 'WhatsApp — Keep Instances Online',
+        retries: 0,
+    },
+    { cron: '*/4 * * * *' },  // Every 4 minutes
+    async () => {
+        const supabase = getSupabase()
+
+        // Get all connected instances
+        const { data: instances } = await supabase
+            .from('whatsapp_instances')
+            .select('id, instance_name, instance_token')
+            .eq('status', 'connected')
+
+        if (!instances || instances.length === 0) {
+            return { action: 'no_connected_instances' }
+        }
+
+        const results: { instance: string; ok: boolean }[] = []
+        for (const inst of instances) {
+            try {
+                await setPresenceAvailable(inst.instance_token)
+                results.push({ instance: inst.instance_name, ok: true })
+            } catch (e) {
+                console.warn(`[KeepOnline] Failed for ${inst.instance_name}:`, e)
+                results.push({ instance: inst.instance_name, ok: false })
+            }
+        }
+
+        console.log(`[KeepOnline] Pinged ${results.length} instances:`, results)
+        return { action: 'pinged', results }
     }
 )
