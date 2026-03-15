@@ -53,11 +53,12 @@ export async function POST(request: NextRequest) {
 
         // Extract text — ensure it's always a string (audio msgs may have objects here)
         const rawText = messageData.text
-            || messageData.content
-            || messageData.body
+            || messageData.caption
             || messageData.message?.conversation
             || messageData.message?.extendedTextMessage?.text
-            || messageData.caption
+            // Only use content/body if they are strings (not audio objects like {URL: "..."})
+            || (typeof messageData.content === 'string' ? messageData.content : '')
+            || (typeof messageData.body === 'string' ? messageData.body : '')
             || body.text
             || body.body
             || ''
@@ -65,8 +66,10 @@ export async function POST(request: NextRequest) {
 
         const isFromMe = messageData.fromMe ?? messageData.key?.fromMe ?? body.fromMe ?? false
 
-        // Audio URL — ConnectyHub can send in many different places
-        const audioUrl = messageData.audioUrl
+        // Audio URL — ConnectyHub sends in message.content.URL (uppercase!)
+        const audioUrl = messageData.content?.URL        // ConnectyHub: message.content.URL
+            || messageData.content?.url                   // lowercase variant
+            || messageData.audioUrl
             || messageData.media?.url
             || messageData.message?.audioMessage?.url
             || messageData.message?.body?.audioMessage?.url
@@ -78,16 +81,25 @@ export async function POST(request: NextRequest) {
             || body.chat?.audio?.url
             || body.chat?.media?.url
             || null
+
+        // Audio detection — ConnectyHub uses type:"audio" or messageType:"AudioMessage"
+        const msgType = (messageData.type || '').toString().toLowerCase()
+        const msgMessageType = (messageData.messageType || '').toString().toLowerCase()
+        const chatLastMsgType = (body.chat?.wa_lastMessageType || '').toString().toLowerCase()
+        
         const isAudio = !!(audioUrl
-            || messageData.messageType === 'audioMessage'
+            || msgType === 'audio'
+            || msgType === 'audiomessage'
+            || msgType === 'ptt'
+            || msgMessageType === 'audiomessage'
+            || msgMessageType === 'audio'
+            || chatLastMsgType === 'audiomessage'
             || messageData.message?.audioMessage
             || messageData.message?.body?.audioMessage
             || messageData.body?.audioMessage
-            || messageData.type === 'audio'
             || messageData.audio
             || body.chat?.audioMessage
-            || body.chat?.message?.audioMessage
-            || body.chat?.type === 'audio')
+            || body.chat?.message?.audioMessage)
 
         // ── DEEP DEBUG: Log full structure when we get empty text (likely audio) ──
         if (!messageText && !isAudio) {
@@ -97,7 +109,6 @@ export async function POST(request: NextRequest) {
             if (body.chat?.message) console.log('[Webhook] 🔍 body.chat.message keys:', Object.keys(body.chat.message).join(', '))
             if (body.data) console.log('[Webhook] 🔍 body.data keys:', Object.keys(body.data).join(', '))
             if (body.message) console.log('[Webhook] 🔍 body.message keys:', typeof body.message === 'object' ? Object.keys(body.message).join(', ') : body.message)
-            // Log the FULL body (up to 2000 chars) for audio debugging
             console.log('[Webhook] 🔍 FULL PAYLOAD:', JSON.stringify(body).substring(0, 2000))
         }
 
