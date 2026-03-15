@@ -20,18 +20,10 @@ export async function GET(request: NextRequest) {
     try {
         const supabase = getSupabase()
 
-        // Fetch instances with broker data joined
+        // Fetch instances (simple select, no joins that might break)
         const { data: instances, error } = await supabase
             .from('whatsapp_instances')
-            .select(`
-                *,
-                virtual_brokers:broker_id (
-                    id, name, creci, photo_url, is_active, system_prompt, voice_id
-                ),
-                admin_users:admin_user_id (
-                    id, name, email
-                )
-            `)
+            .select('*')
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -39,10 +31,48 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: false, message: error.message }, { status: 500 })
         }
 
+        if (!instances || instances.length === 0) {
+            return NextResponse.json({ success: true, instances: [] })
+        }
+
+        // Fetch broker data separately (safe — won't fail if column doesn't exist)
+        let brokersMap: Record<string, any> = {}
+        try {
+            const brokerIds = instances.map(i => i.broker_id).filter(Boolean)
+            if (brokerIds.length > 0) {
+                const { data: brokers } = await supabase
+                    .from('virtual_brokers')
+                    .select('id, name, creci, photo_url, is_active, system_prompt, voice_id')
+                    .in('id', brokerIds)
+                if (brokers) {
+                    brokers.forEach(b => { brokersMap[b.id] = b })
+                }
+            }
+        } catch { /* broker_id column may not exist yet */ }
+
+        // Fetch admin user data separately
+        let adminsMap: Record<string, any> = {}
+        try {
+            const adminIds = instances.map(i => i.admin_user_id).filter(Boolean)
+            if (adminIds.length > 0) {
+                const { data: admins } = await supabase
+                    .from('admin_users')
+                    .select('id, name, email')
+                    .in('id', adminIds)
+                if (admins) {
+                    admins.forEach(a => { adminsMap[a.id] = a })
+                }
+            }
+        } catch { /* admin_users table may not exist */ }
+
         // Enrich each connected instance with live data from ConnectyHub
         const enrichedInstances = await Promise.all(
-            (instances || []).map(async (inst: any) => {
-                const enriched: any = { ...inst }
+            instances.map(async (inst: any) => {
+                const enriched: any = {
+                    ...inst,
+                    virtual_brokers: inst.broker_id ? brokersMap[inst.broker_id] || null : null,
+                    admin_users: inst.admin_user_id ? adminsMap[inst.admin_user_id] || null : null,
+                }
 
                 if (inst.status === 'connected' && inst.instance_token) {
                     try {
@@ -99,12 +129,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'ID do usuário ou corretor é obrigatório' }, { status: 400 })
         }
 
-        // Generate unique instance name
         const prefix = brokerId ? 'broker' : 'user'
         const id = (brokerId || adminUserId).split('-')[0]
         const instanceName = `${prefix}_${id}_${Date.now()}`
 
-        // Create on uazapi
         let instanceToken = ''
         try {
             const uazapiResult = await createInstance(instanceName)
@@ -113,7 +141,6 @@ export async function POST(request: NextRequest) {
             console.warn('[WhatsApp] API creation failed, saving to DB anyway:', apiErr)
         }
 
-        // Save to database
         const insertData: any = {
             instance_name: instanceName,
             instance_token: instanceToken,
