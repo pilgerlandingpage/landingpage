@@ -64,5 +64,35 @@ export const inngest = new Inngest({
                 external_adset_id?: string
             }
         }
+        // --- WhatsApp Agent ---
+        'whatsapp/message-received': {
+            data: {
+                cleanPhone: string
+                messageText: string
+                isAudio: boolean
+                audioUrl: string | null
+                instanceId: string
+                instanceToken: string
+                instanceName: string
+                brokerId: string | null
+                senderName: string
+            }
+        }
+        'whatsapp/from-me-message': {
+            data: {
+                botMsgId: string
+                instanceId: string
+                recipientPhone: string
+            }
+        }
+        'whatsapp/shadow-agent': {
+            data: {
+                cleanPhone: string
+                messageText: string
+                instanceId: string
+                instanceToken: string
+                adminUserId: string
+            }
+        }
     }>()
 })

@@ -15,6 +15,11 @@ import {
     generateWeeklyPilgerReportCron,
     radarCollectionCron
 } from './ads-functions'
+import {
+    processWhatsAppMessage,
+    detectHumanTakeover,
+    shadowAgentResponse
+} from './whatsapp-agent'
 
 function getSupabase() {
     return createClient(
@@ -152,5 +157,9 @@ export const functions = [
     syncMetaLeadsCron,
     generateDailyPilgerReportCron,
     generateWeeklyPilgerReportCron,
-    radarCollectionCron
+    radarCollectionCron,
+    // WhatsApp Agent IA
+    processWhatsAppMessage,
+    detectHumanTakeover,
+    shadowAgentResponse
 ]
