@@ -298,35 +298,41 @@ export async function POST(request: NextRequest) {
         console.log('[Webhook] 📩 Incoming payload:', JSON.stringify(body).substring(0, 500))
 
         // Extract message data (ConnectyHub/UAZAPI format)
-        // ConnectyHub sends: { event, instance, data: { ... } }
-        const event = body.event || body.action || ''
+        // ConnectyHub payload: { BaseUrl, EventType:"messages", chat:{...}, data:{sender, sender_pn, chatid, text, content, fromMe, type, ...} }
+        // or: { event, instance, data: { ... } }
+        const event = body.event || body.EventType || body.action || ''
         const instanceName = body.instance || body.instanceName || body.server_url || ''
         const messageData = body.data || body.message || body
 
         // Skip non-message events (status, presence, etc.)
-        if (event && !['messages.upsert', 'message', 'messages', 'chat', ''].includes(event)) {
+        const messageEvents = ['messages.upsert', 'message', 'messages', 'chat', '']
+        if (event && !messageEvents.includes(event)) {
             console.log(`[Webhook] ⏭️ Skipped event: ${event}`)
             return NextResponse.json({ success: true, action: 'ignored_event', event })
         }
 
-        // Extract phone - try multiple paths
-        const remotePhone = messageData.from
+        // Extract phone - ConnectyHub uses: sender, sender_pn, chatid
+        const remotePhone = messageData.sender
+            || messageData.sender_pn
+            || messageData.chatid
+            || messageData.from
             || messageData.remoteJid
             || messageData.phone
             || messageData.key?.remoteJid
-            || messageData.message?.key?.remoteJid
+            || body.sender
             || body.from
             || body.phone
             || ''
 
-        // Extract message text - try multiple paths
-        const messageText = messageData.body
+        // Extract message text - ConnectyHub uses: text, content, body
+        const messageText = messageData.text
+            || messageData.content
+            || messageData.body
             || messageData.message?.conversation
             || messageData.message?.extendedTextMessage?.text
-            || messageData.text
             || messageData.caption
-            || body.body
             || body.text
+            || body.body
             || ''
 
         const isFromMe = messageData.fromMe ?? messageData.key?.fromMe ?? body.fromMe ?? false
