@@ -294,80 +294,149 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const supabase = getSupabase()
 
+        // ── DEBUG: Log the full incoming payload ──
+        console.log('[Webhook] 📩 Incoming payload:', JSON.stringify(body).substring(0, 500))
+
         // Extract message data (ConnectyHub/UAZAPI format)
-        const instanceName = body.instance || body.instanceName
-        const messageData = body.data || body
-        const remotePhone = messageData.from || messageData.remoteJid || messageData.phone
-        const messageText = messageData.body || messageData.message?.conversation || messageData.text || ''
-        const isFromMe = messageData.fromMe || false
+        // ConnectyHub sends: { event, instance, data: { ... } }
+        const event = body.event || body.action || ''
+        const instanceName = body.instance || body.instanceName || body.server_url || ''
+        const messageData = body.data || body.message || body
+
+        // Skip non-message events (status, presence, etc.)
+        if (event && !['messages.upsert', 'message', 'messages', 'chat', ''].includes(event)) {
+            console.log(`[Webhook] ⏭️ Skipped event: ${event}`)
+            return NextResponse.json({ success: true, action: 'ignored_event', event })
+        }
+
+        // Extract phone - try multiple paths
+        const remotePhone = messageData.from
+            || messageData.remoteJid
+            || messageData.phone
+            || messageData.key?.remoteJid
+            || messageData.message?.key?.remoteJid
+            || body.from
+            || body.phone
+            || ''
+
+        // Extract message text - try multiple paths
+        const messageText = messageData.body
+            || messageData.message?.conversation
+            || messageData.message?.extendedTextMessage?.text
+            || messageData.text
+            || messageData.caption
+            || body.body
+            || body.text
+            || ''
+
+        const isFromMe = messageData.fromMe ?? messageData.key?.fromMe ?? body.fromMe ?? false
 
         // Audio detection
         const audioUrl = messageData.audioUrl || messageData.media?.url || messageData.message?.audioMessage?.url || null
-        const isAudio = !!(audioUrl || messageData.messageType === 'audioMessage' || messageData.message?.audioMessage)
+        const isAudio = !!(audioUrl || messageData.messageType === 'audioMessage' || messageData.message?.audioMessage || messageData.type === 'audio')
 
-        // Clean phone number
-        const cleanPhone = remotePhone?.replace(/@.+$/, '').replace(/\D/g, '')
+        // Clean phone number (remove @s.whatsapp.net, keep only digits)
+        const cleanPhone = remotePhone?.toString().replace(/@.+$/, '').replace(/\D/g, '') || ''
         if (!cleanPhone) {
+            console.log('[Webhook] ⚠️ No phone number found in payload. Keys:', Object.keys(messageData).join(', '))
             return NextResponse.json({ success: true, action: 'ignored_no_phone' })
         }
 
-        // Find instance in database (needed for routing and takeover scoping)
-        const { data: instance } = await supabase
-            .from('whatsapp_instances')
-            .select('*, broker_id')
-            .eq('instance_name', instanceName)
-            .single()
+        console.log(`[Webhook] 📱 Phone: ${cleanPhone} | FromMe: ${isFromMe} | Audio: ${isAudio} | Instance: ${instanceName} | Text: "${(messageText || '[empty/audio]').substring(0, 80)}"`)
+
+        // Find instance in database
+        let instance: any = null
+
+        // Try by instance_name first
+        if (instanceName) {
+            const { data } = await supabase
+                .from('whatsapp_instances')
+                .select('*')
+                .eq('instance_name', instanceName)
+                .maybeSingle()
+            instance = data
+        }
+
+        // Fallback: find any connected instance
+        if (!instance) {
+            console.log(`[Webhook] ⚠️ Instance "${instanceName}" not found by name, trying fallback...`)
+            const { data } = await supabase
+                .from('whatsapp_instances')
+                .select('*')
+                .eq('status', 'connected')
+                .limit(1)
+                .maybeSingle()
+            instance = data
+        }
 
         if (!instance) {
-            console.warn(`[Webhook] Instance not found: ${instanceName}`)
+            console.error(`[Webhook] ❌ No instance found at all. instanceName: ${instanceName}`)
             return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
         }
 
+        console.log(`[Webhook] ✅ Instance found: ${instance.instance_name} (id: ${instance.id}, broker_id: ${instance.broker_id || 'none'})`)
+
         // ── HUMAN TAKEOVER DETECTION ──
-        // If message is fromMe (sent by the phone owner), check if it's from the bot or a human
         if (isFromMe) {
-            // Check if this is a bot-sent message (we track these)
-            // If it's NOT bot-sent, a human has taken over
-            const botMsgId = messageData.id?.id || messageData.key?.id
-            if (botMsgId) {
-                const { data: botMsg } = await supabase
-                    .from('whatsapp_ai_conversations')
-                    .select('id')
-                    .contains('bot_message_ids', [botMsgId])
-                    .limit(1)
-                    .maybeSingle()
+            console.log('[Webhook] 👤 Message is fromMe — checking human takeover...')
+            try {
+                const botMsgId = messageData.id?.id || messageData.key?.id
+                if (botMsgId) {
+                    const { data: botMsg } = await supabase
+                        .from('whatsapp_ai_conversations')
+                        .select('id')
+                        .contains('bot_message_ids', [botMsgId])
+                        .limit(1)
+                        .maybeSingle()
 
-                if (!botMsg) {
-                    // Human sent this message — mark all active conversations for this instance as human_takeover
-                    console.log(`[Human Takeover] Detected manual message on instance ${instanceName}`)
-
-                    // Find the active conversation with the recipient
-                    const recipientPhone = messageData.to?.replace(/@.+$/, '').replace(/\D/g, '') || ''
-                    if (recipientPhone) {
-                        await supabase
-                            .from('whatsapp_ai_conversations')
-                            .update({ status: 'human_takeover', updated_at: new Date().toISOString() })
-                            .eq('instance_id', instance.id)
-                            .eq('lead_phone', recipientPhone)
-                            .eq('status', 'active')
+                    if (!botMsg) {
+                        console.log(`[Human Takeover] Detected manual message on instance ${instanceName}`)
+                        const recipientPhone = messageData.to?.replace(/@.+$/, '').replace(/\D/g, '') || ''
+                        if (recipientPhone) {
+                            await supabase
+                                .from('whatsapp_ai_conversations')
+                                .update({ status: 'human_takeover', updated_at: new Date().toISOString() })
+                                .eq('instance_id', instance.id)
+                                .eq('lead_phone', recipientPhone)
+                                .eq('status', 'active')
+                        }
                     }
                 }
+            } catch (e) {
+                console.warn('[Human Takeover] Error (non-fatal):', e)
             }
             return NextResponse.json({ success: true, action: 'from_me_processed' })
         }
 
-        // Ignore status updates and empty messages
+        // Ignore empty messages (no text and no audio)
         if (!messageText && !isAudio) {
+            console.log('[Webhook] ⏭️ Ignored empty message (no text, no audio)')
             return NextResponse.json({ success: true, action: 'ignored_empty' })
         }
 
-        console.log(`[Webhook] ${isAudio ? '🎤 Audio' : '💬 Text'} from ${cleanPhone} on ${instanceName}: "${(messageText || '[audio]').substring(0, 50)}"`)
+        console.log(`[Webhook] 🤖 Processing ${isAudio ? '🎤 Audio' : '💬 Text'} from ${cleanPhone}: "${(messageText || '[audio]').substring(0, 80)}"`)
 
-        // 2. Route to AI Broker or Shadow Agent
+        // Route to AI Broker or Shadow Agent
         if (instance.broker_id) {
             await handleAIBrokerMessage(supabase, instance, cleanPhone, messageText, isAudio, audioUrl)
         } else if (instance.admin_user_id) {
-            await handleShadowAgentMessage(supabase, instance, cleanPhone, messageText)
+            // Try to find a broker to use as the AI responder
+            const { data: broker } = await supabase
+                .from('virtual_brokers')
+                .select('id')
+                .eq('is_active', true)
+                .limit(1)
+                .maybeSingle()
+
+            if (broker) {
+                console.log(`[Webhook] 🔄 No broker_id on instance, using fallback broker: ${broker.id}`)
+                instance.broker_id = broker.id
+                await handleAIBrokerMessage(supabase, instance, cleanPhone, messageText, isAudio, audioUrl)
+            } else {
+                await handleShadowAgentMessage(supabase, instance, cleanPhone, messageText)
+            }
+        } else {
+            console.warn('[Webhook] ⚠️ Instance has no broker_id and no admin_user_id — cannot route')
         }
 
         return NextResponse.json({ success: true, action: 'processed' })
