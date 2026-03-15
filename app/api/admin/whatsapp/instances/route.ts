@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 import {
     createInstance,
     deleteInstance,
+    getInstanceStatus,
+    getWebhook,
+    getContactAvatar,
 } from '@/lib/uazapi'
 
 function getSupabase() {
@@ -12,14 +15,23 @@ function getSupabase() {
     )
 }
 
-// GET — Lista todas as instâncias (admin via service role)
+// GET — Lista todas as instâncias com dados enriquecidos
 export async function GET(request: NextRequest) {
     try {
         const supabase = getSupabase()
 
-        const { data, error } = await supabase
+        // Fetch instances with broker data joined
+        const { data: instances, error } = await supabase
             .from('whatsapp_instances')
-            .select('*')
+            .select(`
+                *,
+                virtual_brokers:broker_id (
+                    id, name, creci, photo_url, is_active, system_prompt, voice_id
+                ),
+                admin_users:admin_user_id (
+                    id, name, email
+                )
+            `)
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -27,7 +39,50 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: false, message: error.message }, { status: 500 })
         }
 
-        return NextResponse.json({ success: true, instances: data || [] })
+        // Enrich each connected instance with live data from ConnectyHub
+        const enrichedInstances = await Promise.all(
+            (instances || []).map(async (inst: any) => {
+                const enriched: any = { ...inst }
+
+                if (inst.status === 'connected' && inst.instance_token) {
+                    try {
+                        // Fetch live status from ConnectyHub
+                        const liveStatus = await getInstanceStatus(inst.instance_token)
+                        enriched.live_data = {
+                            phone: liveStatus?.phone || liveStatus?.me?.id?.split(':')[0] || inst.phone_number,
+                            pushName: liveStatus?.pushName || liveStatus?.me?.name || liveStatus?.profileName || null,
+                            platform: liveStatus?.platform || liveStatus?.device || null,
+                            battery: liveStatus?.battery ?? null,
+                            plugged: liveStatus?.plugged ?? null,
+                            isOnline: liveStatus?.isOnline ?? null,
+                        }
+
+                        // Fetch profile picture
+                        const phoneNumber = enriched.live_data.phone || inst.phone_number
+                        if (phoneNumber) {
+                            try {
+                                const avatarData = await getContactAvatar(phoneNumber, inst.instance_token)
+                                enriched.live_data.profilePicUrl = avatarData?.url || avatarData?.profilePictureUrl || avatarData?.imgUrl || null
+                            } catch { /* avatar not critical */ }
+                        }
+
+                        // Check webhook status
+                        try {
+                            const webhookData = await getWebhook(inst.instance_token)
+                            enriched.live_data.webhookUrl = webhookData?.url || webhookData?.webhook || null
+                        } catch { /* webhook check not critical */ }
+
+                    } catch (e) {
+                        console.warn(`[Instances] Failed to enrich ${inst.instance_name}:`, e)
+                        enriched.live_data = null
+                    }
+                }
+
+                return enriched
+            })
+        )
+
+        return NextResponse.json({ success: true, instances: enrichedInstances })
     } catch (error) {
         console.error('Error listing instances:', error)
         return NextResponse.json({ success: false, message: 'Erro ao listar instâncias' }, { status: 500 })
@@ -38,33 +93,38 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const supabase = getSupabase()
-        const { adminUserId } = await request.json()
+        const { adminUserId, brokerId } = await request.json()
 
-        if (!adminUserId) {
-            return NextResponse.json({ success: false, message: 'ID do usuário é obrigatório' }, { status: 400 })
+        if (!adminUserId && !brokerId) {
+            return NextResponse.json({ success: false, message: 'ID do usuário ou corretor é obrigatório' }, { status: 400 })
         }
 
-        // Gerar nome único para a instância
-        const instanceName = `pilger_${adminUserId.split('-')[0]}_${Date.now()}`
+        // Generate unique instance name
+        const prefix = brokerId ? 'broker' : 'user'
+        const id = (brokerId || adminUserId).split('-')[0]
+        const instanceName = `${prefix}_${id}_${Date.now()}`
 
-        // Criar na uazapi
+        // Create on uazapi
         let instanceToken = ''
         try {
             const uazapiResult = await createInstance(instanceName)
             instanceToken = uazapiResult?.token || uazapiResult?.instance?.token || ''
         } catch (apiErr) {
-            console.warn('[WhatsApp] Criação na API remota falhou, salvando no banco mesmo assim:', apiErr)
+            console.warn('[WhatsApp] API creation failed, saving to DB anyway:', apiErr)
         }
 
-        // Salvar no banco
+        // Save to database
+        const insertData: any = {
+            instance_name: instanceName,
+            instance_token: instanceToken,
+            status: 'disconnected',
+        }
+        if (adminUserId) insertData.admin_user_id = adminUserId
+        if (brokerId) insertData.broker_id = brokerId
+
         const { data, error } = await supabase
             .from('whatsapp_instances')
-            .insert({
-                admin_user_id: adminUserId,
-                instance_name: instanceName,
-                instance_token: instanceToken,
-                status: 'disconnected',
-            })
+            .insert(insertData)
             .select()
             .single()
 
@@ -92,7 +152,6 @@ export async function DELETE(request: NextRequest) {
         const supabase = getSupabase()
         const { instanceId } = await request.json()
 
-        // Buscar dados da instância
         const { data: instance, error: fetchError } = await supabase
             .from('whatsapp_instances')
             .select('*')
@@ -103,14 +162,12 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
         }
 
-        // Tentar deletar na uazapi (não bloqueia em caso de falha)
         try {
             await deleteInstance(instance.instance_name)
         } catch (e) {
-            console.warn('Falha ao deletar na uazapi (pode já não existir):', e)
+            console.warn('Falha ao deletar na uazapi:', e)
         }
 
-        // Deletar do banco
         const { error } = await supabase
             .from('whatsapp_instances')
             .delete()
