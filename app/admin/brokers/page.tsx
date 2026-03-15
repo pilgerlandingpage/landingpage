@@ -53,6 +53,10 @@ export default function BrokersAdmin() {
     const [whatsappQR, setWhatsappQR] = useState<string | null>(null)
     const [whatsappLoading, setWhatsappLoading] = useState(false)
     const [whatsappConnecting, setWhatsappConnecting] = useState(false)
+    // Voice State
+    const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
+    const [loadingVoices, setLoadingVoices] = useState(false)
+    const [ttsConfigs, setTtsConfigs] = useState<Record<string, string>>({})
 
     // Form State
     const [formData, setFormData] = useState({
@@ -168,6 +172,24 @@ export default function BrokersAdmin() {
         fetchLandingPages()
         // Run migration for new columns
         fetch('/api/admin/migrate-broker-assignment', { method: 'POST' }).catch(() => { })
+        // Load TTS configs and voices
+        fetch('/api/admin/configs').then(r => r.json()).then(json => {
+            if (json.success) {
+                setTtsConfigs(json.configs)
+                // Auto-load ElevenLabs voices
+                const apiKey = json.configs['elevenlabs_api_key']
+                if (apiKey) {
+                    setLoadingVoices(true)
+                    fetch('/api/admin/elevenlabs-voices', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ apiKey })
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) setElevenLabsVoices(data.voices)
+                    }).catch(() => { }).finally(() => setLoadingVoices(false))
+                }
+            }
+        }).catch(() => { })
     }, [])
 
     async function fetchLandingPages() {
@@ -514,20 +536,51 @@ export default function BrokersAdmin() {
                                     </div>
                                 </div>
 
-                                {/* Voice ID (ElevenLabs) */}
+                                {/* Voice Selection */}
                                 <div className="form-group">
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                        <Mic size={16} /> Voz do Agente (ElevenLabs Voice ID)
+                                        <Mic size={16} /> Voz do Agente
                                     </label>
-                                    <input
+                                    <select
                                         className="form-input"
-                                        type="text"
                                         value={formData.voice_id}
                                         onChange={(e) => setFormData({ ...formData, voice_id: e.target.value })}
-                                        placeholder="Deixe vazio para usar a voz padrão da Sala de Manutenção"
-                                    />
+                                    >
+                                        <option value="">🔄 Usar voz padrão da Sala de Manutenção</option>
+                                        {/* ElevenLabs voices */}
+                                        {elevenLabsVoices.length > 0 && (
+                                            <optgroup label="🎤 ElevenLabs">
+                                                {elevenLabsVoices.filter(v => v.category === 'cloned').map(v => (
+                                                    <option key={v.voice_id} value={v.voice_id}>
+                                                        🎤 {v.name} (Clonada)
+                                                    </option>
+                                                ))}
+                                                {elevenLabsVoices.filter(v => v.category !== 'cloned').map(v => (
+                                                    <option key={v.voice_id} value={v.voice_id}>
+                                                        🔊 {v.name} ({v.category})
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                        {/* OpenAI TTS voices */}
+                                        <optgroup label="🤖 OpenAI TTS">
+                                            <option value="openai:alloy">Alloy (Neutra)</option>
+                                            <option value="openai:echo">Echo (Masculina)</option>
+                                            <option value="openai:fable">Fable (Narrativa)</option>
+                                            <option value="openai:onyx">Onyx (Masculina Grave)</option>
+                                            <option value="openai:nova">Nova (Feminina)</option>
+                                            <option value="openai:shimmer">Shimmer (Feminina Suave)</option>
+                                        </optgroup>
+                                        {/* Fallback for saved voice not in list */}
+                                        {formData.voice_id && !elevenLabsVoices.find(v => v.voice_id === formData.voice_id) && !formData.voice_id.startsWith('openai:') && (
+                                            <option value={formData.voice_id}>
+                                                🎤 ID salvo: {formData.voice_id.substring(0, 20)}...
+                                            </option>
+                                        )}
+                                    </select>
+                                    {loadingVoices && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>⏳ Carregando vozes do ElevenLabs...</div>}
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Cole o Voice ID da ElevenLabs para usar uma voz clonada específica deste corretor. Encontre IDs em elevenlabs.io/voices.
+                                        Escolha a voz que este corretor usará para responder áudios. Deixe em branco para usar a voz padrão configurada na Sala de Manutenção.
                                     </div>
                                 </div>
                             </div>

@@ -189,6 +189,28 @@ export default function MaintenancePage() {
         return () => clearTimeout(timer)
     }, [configs['openai_api_key']])
 
+    // Auto-fetch ElevenLabs voices when API key is available
+    useEffect(() => {
+        const apiKey = configs['elevenlabs_api_key']
+        if (!apiKey || elevenLabsVoices.length > 0) return
+
+        const fetchVoices = async () => {
+            setLoadingVoices(true)
+            try {
+                const res = await fetch('/api/admin/elevenlabs-voices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey })
+                })
+                const data = await res.json()
+                if (data.success) setElevenLabsVoices(data.voices)
+            } catch (e) { console.error(e) }
+            setLoadingVoices(false)
+        }
+        const timer = setTimeout(fetchVoices, 1500)
+        return () => clearTimeout(timer)
+    }, [configs['elevenlabs_api_key']])
+
 
     const fetchConfigs = useCallback(async () => {
         try {
@@ -889,29 +911,33 @@ export default function MaintenancePage() {
                                                     {v.category === 'cloned' ? '🎤 ' : '🔊 '}{v.name} ({v.category})
                                                 </option>
                                             ))}
+                                            {/* Show saved voice ID if voices haven't loaded yet */}
+                                            {configs['whatsapp_tts_voice'] && !elevenLabsVoices.find(v => v.voice_id === configs['whatsapp_tts_voice']) && (
+                                                <option value={configs['whatsapp_tts_voice']}>
+                                                    🎤 Voz salva ({configs['whatsapp_tts_voice'].substring(0, 12)}...)
+                                                </option>
+                                            )}
                                         </select>
-                                        {!loadingVoices && elevenLabsVoices.length === 0 && configs['elevenlabs_api_key'] && (
-                                            <button
-                                                type="button"
-                                                onClick={async () => {
-                                                    setLoadingVoices(true)
-                                                    try {
-                                                        const res = await fetch('/api/admin/elevenlabs-voices', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ apiKey: configs['elevenlabs_api_key'] })
-                                                        })
-                                                        const data = await res.json()
-                                                        if (data.success) setElevenLabsVoices(data.voices)
-                                                    } catch (e) { console.error(e) }
-                                                    setLoadingVoices(false)
-                                                }}
-                                                style={{ marginTop: '6px', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                                            >
-                                                🔄 Carregar Vozes
-                                            </button>
-                                        )}
-                                        {loadingVoices && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Carregando vozes...</div>}
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                setLoadingVoices(true)
+                                                try {
+                                                    const res = await fetch('/api/admin/elevenlabs-voices', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ apiKey: configs['elevenlabs_api_key'] })
+                                                    })
+                                                    const data = await res.json()
+                                                    if (data.success) setElevenLabsVoices(data.voices)
+                                                } catch (e) { console.error(e) }
+                                                setLoadingVoices(false)
+                                            }}
+                                            disabled={loadingVoices || !configs['elevenlabs_api_key']}
+                                            style={{ marginTop: '6px', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                                        >
+                                            {loadingVoices ? '⏳ Carregando...' : '🔄 Carregar Vozes'}
+                                        </button>
                                     </div>
                                 )}
                             </div>
