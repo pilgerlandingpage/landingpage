@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getInstanceStatus, disconnectInstance } from '@/lib/uazapi'
+import { getInstanceStatus, disconnectInstance, setWebhook, getWebhook } from '@/lib/uazapi'
 
 function getSupabase() {
     return createClient(
@@ -60,6 +60,33 @@ export async function GET(request: NextRequest) {
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', instanceId)
+        }
+
+        // ── AUTO-CONFIGURE WEBHOOK whenever connected ──
+        // Runs every time status is checked and instance is connected (not just on change)
+        if (newStatus === 'connected' && instance.instance_token) {
+            try {
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL
+                    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+                if (appUrl) {
+                    const webhookUrl = `${appUrl}/api/webhooks/whatsapp`
+                    // Check current webhook to avoid redundant calls
+                    let currentWebhook = ''
+                    try {
+                        const whData = await getWebhook(instance.instance_token)
+                        currentWebhook = whData?.url || whData?.webhook || ''
+                    } catch { /* ignore */ }
+
+                    if (currentWebhook !== webhookUrl) {
+                        await setWebhook(webhookUrl, instance.instance_token)
+                        console.log(`[Status] ✅ Webhook configurado: ${webhookUrl}`)
+                    }
+                } else {
+                    console.warn('[Status] ⚠️ APP_URL não configurada, webhook não pôde ser setado')
+                }
+            } catch (e) {
+                console.error('[Status] Erro ao configurar webhook:', e)
+            }
         }
 
         return NextResponse.json({

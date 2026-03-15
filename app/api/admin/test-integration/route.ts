@@ -501,6 +501,44 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            case 'elevenlabs': {
+                const apiKey = config.elevenlabs_api_key
+
+                if (!apiKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'API Key da ElevenLabs não configurada',
+                    })
+                }
+
+                try {
+                    const res = await fetch('https://api.elevenlabs.io/v1/voices', {
+                        headers: { 'xi-api-key': apiKey }
+                    })
+
+                    if (!res.ok) {
+                        const text = await res.text()
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro ElevenLabs (${res.status}): ${text.slice(0, 150)}`,
+                        })
+                    }
+
+                    const data = await res.json()
+                    const voices = data.voices || []
+                    const cloned = voices.filter((v: any) => v.category === 'cloned').length
+                    return NextResponse.json({
+                        success: true,
+                        message: `Conectado! ${voices.length} vozes disponíveis${cloned > 0 ? ` (${cloned} clonada${cloned > 1 ? 's' : ''})` : ''}.`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
             default:
                 return NextResponse.json({
                     success: false,

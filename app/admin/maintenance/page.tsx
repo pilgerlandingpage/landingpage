@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2 } from 'lucide-react'
 import Link from 'next/link'
 import { LEAD_EXTRACTION_PROMPT, PILGER_AI_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
 
@@ -9,7 +9,7 @@ interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest' | 'elevenlabs'
     fields: {
         key: string
         label: string
@@ -87,6 +87,16 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'inngest_signing_key', label: 'Signing Key', placeholder: 'signkey-prod-...', isSecret: true },
         ],
     },
+
+    {
+        id: 'elevenlabs',
+        title: 'ElevenLabs — Voice AI & Clonagem',
+        description: 'Vozes ultra-realistas e clonagem de voz para os agentes WhatsApp. Clone a voz do corretor para atendimento natural.',
+        icon: 'elevenlabs',
+        fields: [
+            { key: 'elevenlabs_api_key', label: 'API Key', placeholder: 'Sua API Key ElevenLabs', isSecret: true },
+        ],
+    },
 ]
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'error'
@@ -108,6 +118,8 @@ export default function MaintenancePage() {
     const [openaiModels, setOpenaiModels] = useState<{ id: string; name: string }[]>([])
     const [loadingGeminiModels, setLoadingGeminiModels] = useState(false)
     const [loadingOpenAIModels, setLoadingOpenAIModels] = useState(false)
+    const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
+    const [loadingVoices, setLoadingVoices] = useState(false)
 
     // Fetch Gemini Models
     useEffect(() => {
@@ -244,7 +256,17 @@ export default function MaintenancePage() {
                 'radar_collection_times',
                 'ads_analyst_system_prompt',
                 'pilger_daily_system_prompt',
-                'pilger_weekly_system_prompt'
+                'pilger_weekly_system_prompt',
+                'whatsapp_provider',
+                'gemini_whatsapp_model',
+                'openai_whatsapp_model',
+                'whatsapp_audio_enabled',
+                'whatsapp_tts_provider',
+                'whatsapp_tts_voice',
+                'elevenlabs_api_key',
+                'ads_provider',
+                'openai_ads_model',
+                'gemini_ads_model'
             ]
             const configsToSave: Record<string, string> = {}
             for (const key of allKeys) {
@@ -316,6 +338,7 @@ export default function MaintenancePage() {
             case 'dataforseo': return <TrendingUp size={22} />
             case 'r2': return <Database size={22} />
             case 'inngest': return <Zap size={22} />
+            case 'elevenlabs': return <Mic size={22} />
             default: return null
         }
     }
@@ -782,10 +805,130 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 2. EXTRAÇÃO DE LEADS ── */}
+                {/* ── 2. AGENTES IA WHATSAPP ── */}
+                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#22c55e', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>📱</span> 2. Agentes IA WhatsApp (Corretores)
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Provedor dos Agentes WhatsApp</label>
+                            <select
+                                className="form-input"
+                                value={configs['whatsapp_provider'] || ''}
+                                onChange={e => setConfigs({ ...configs, whatsapp_provider: e.target.value })}
+                            >
+                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Modelo dos Agentes WhatsApp</label>
+                            {(configs['whatsapp_provider'] === 'openai' || (!configs['whatsapp_provider'] && configs['ai_provider'] === 'openai')) ? (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['openai_whatsapp_model'] || ''} onChange={e => setConfigs({ ...configs, openai_whatsapp_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div style={{ position: 'relative' }}>
+                                    <select className="form-input" value={configs['gemini_whatsapp_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_whatsapp_model: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ── Audio Config ── */}
+                    <div style={{ marginTop: '8px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                            <Volume2 size={18} style={{ color: '#22c55e' }} />
+                            <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Função Espelho — Áudio</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Lead envia áudio → agente responde com áudio. Lead envia texto → agente responde com texto.</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Áudio Habilitado</label>
+                                <select className="form-input" value={configs['whatsapp_audio_enabled'] || 'false'} onChange={e => setConfigs({ ...configs, whatsapp_audio_enabled: e.target.value })}>
+                                    <option value="false">Desabilitado</option>
+                                    <option value="true">Habilitado (Função Espelho)</option>
+                                </select>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Provedor de Voz (TTS)</label>
+                                <select className="form-input" value={configs['whatsapp_tts_provider'] || 'elevenlabs'} onChange={e => setConfigs({ ...configs, whatsapp_tts_provider: e.target.value })}>
+                                    <option value="elevenlabs">ElevenLabs (Premium + Clonagem)</option>
+                                    <option value="openai">OpenAI TTS</option>
+                                </select>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Voz Padrão</label>
+                                {configs['whatsapp_tts_provider'] === 'openai' ? (
+                                    <select className="form-input" value={configs['whatsapp_tts_voice'] || 'onyx'} onChange={e => setConfigs({ ...configs, whatsapp_tts_voice: e.target.value })}>
+                                        <option value="alloy">Alloy (Neutra)</option>
+                                        <option value="echo">Echo (Masculina)</option>
+                                        <option value="fable">Fable (Narrativa)</option>
+                                        <option value="onyx">Onyx (Masculina Grave)</option>
+                                        <option value="nova">Nova (Feminina)</option>
+                                        <option value="shimmer">Shimmer (Feminina Suave)</option>
+                                    </select>
+                                ) : (
+                                    <div style={{ position: 'relative' }}>
+                                        <select className="form-input" value={configs['whatsapp_tts_voice'] || ''} onChange={e => setConfigs({ ...configs, whatsapp_tts_voice: e.target.value })}>
+                                            <option value="">Selecione uma voz...</option>
+                                            {elevenLabsVoices.map(v => (
+                                                <option key={v.voice_id} value={v.voice_id}>
+                                                    {v.category === 'cloned' ? '🎤 ' : '🔊 '}{v.name} ({v.category})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {!loadingVoices && elevenLabsVoices.length === 0 && configs['elevenlabs_api_key'] && (
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    setLoadingVoices(true)
+                                                    try {
+                                                        const res = await fetch('/api/admin/elevenlabs-voices', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ apiKey: configs['elevenlabs_api_key'] })
+                                                        })
+                                                        const data = await res.json()
+                                                        if (data.success) setElevenLabsVoices(data.voices)
+                                                    } catch (e) { console.error(e) }
+                                                    setLoadingVoices(false)
+                                                }}
+                                                style={{ marginTop: '6px', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                                            >
+                                                🔄 Carregar Vozes
+                                            </button>
+                                        )}
+                                        {loadingVoices && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Carregando vozes...</div>}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.15)' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                            💡 O provedor e modelo escolhidos aqui serão usados por <strong>todos os agentes IA de WhatsApp</strong> (corretores). O prompt de cada agente é configurado individualmente na <strong>página de Corretores</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 3. EXTRAÇÃO DE LEADS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🕵️</span> 2. Extração de Leads (WhatsApp)
+                        <span>🕵️</span> 3. Extração de Leads (WhatsApp)
                     </h3>
 
                     <div className="form-group">
@@ -807,7 +950,7 @@ export default function MaintenancePage() {
                 {/* ── 4. TRÁFEGO (GESTOR IA) ── */}
                 <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>📈</span> 3. Gestor de Tráfego (Análise Autônoma)
+                        <span>📈</span> 4. Gestor de Tráfego (Análise Autônoma)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -821,7 +964,7 @@ export default function MaintenancePage() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Modelo do Gestor de Tráfego</label>
-                            <select className="form-input" value={configs['gemini_ads_model'] || configs['openai_ads_model'] || ''} onChange={e => {
+                            <select className="form-input" value={configs['ads_provider'] === 'openai' ? (configs['openai_ads_model'] || '') : (configs['gemini_ads_model'] || '')} onChange={e => {
                                 if (configs['ads_provider'] === 'openai') {
                                     setConfigs({ ...configs, openai_ads_model: e.target.value })
                                 } else {
@@ -850,7 +993,7 @@ export default function MaintenancePage() {
                 {/* ── 6. AGENDAMENTOS E RELATÓRIOS ── */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>⏰</span> 4. Agendamento de Relatórios Pilger CEO
+                        <span>⏰</span> 5. Agendamento de Relatórios Pilger CEO
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

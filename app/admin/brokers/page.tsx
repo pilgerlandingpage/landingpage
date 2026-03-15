@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare, Wifi, WifiOff, Phone, Smartphone, QrCode, Bot, Brain } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare, Wifi, WifiOff, Phone, Smartphone, QrCode, Brain, Mic } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -23,10 +23,10 @@ interface Broker {
     phone?: string
     connectyhub_chat_message?: string
     system_prompt?: string
-    greeting_message?: string
+    voice_id?: string
+
     whatsapp_instance_id?: string
-    ai_provider?: string
-    ai_model?: string
+
 }
 
 interface WhatsAppInstance {
@@ -66,9 +66,9 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         system_prompt: '',
-        greeting_message: '',
-        ai_provider: '',
-        ai_model: ''
+        voice_id: '',
+
+
     })
 
     const defaultFormData = {
@@ -82,9 +82,9 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         system_prompt: '',
-        greeting_message: '',
-        ai_provider: '',
-        ai_model: ''
+        voice_id: '',
+
+
     }
 
     // WhatsApp Instance Functions
@@ -496,34 +496,9 @@ export default function BrokersAdmin() {
                                     Configure o prompt e personalidade do agente IA que atenderá leads via WhatsApp.
                                 </p>
 
-                                {/* Provider + Model per broker */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', padding: '14px', background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid var(--border)' }}>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                            <Bot size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Provedor IA
-                                        </label>
-                                        <select className="form-input" value={formData.ai_provider || ''} onChange={e => setFormData({ ...formData, ai_provider: e.target.value })}>
-                                            <option value="">Usar Padrão Global (Manutenção)</option>
-                                            <option value="gemini">Google Gemini</option>
-                                            <option value="openai">OpenAI</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Modelo IA</label>
-                                        <input className="form-input" value={formData.ai_model || ''} onChange={e => setFormData({ ...formData, ai_model: e.target.value })} placeholder="Ex: gemini-2.0-flash ou gpt-4o-mini" />
-                                    </div>
-                                </div>
 
-                                <div className="form-group" style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Saudação Inicial no WhatsApp</label>
-                                    <input
-                                        placeholder="Ex: Olá! Sou o Guilherme da Pilger Imóveis. Como posso te ajudar a encontrar seu imóvel de luxo hoje?"
-                                        className="form-input"
-                                        value={formData.greeting_message}
-                                        onChange={(e) => setFormData({ ...formData, greeting_message: e.target.value })}
-                                    />
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>A primeira mensagem que o agente IA envia ao lead no WhatsApp.</div>
-                                </div>
+
+
 
                                 <div className="form-group">
                                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Prompt do Agente IA (Instruções Completas)</label>
@@ -536,6 +511,23 @@ export default function BrokersAdmin() {
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                                         Defina a personalidade, missão, dados a coletar e regras do agente IA. Quanto mais detalhado, melhor o atendimento.
+                                    </div>
+                                </div>
+
+                                {/* Voice ID (ElevenLabs) */}
+                                <div className="form-group">
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        <Mic size={16} /> Voz do Agente (ElevenLabs Voice ID)
+                                    </label>
+                                    <input
+                                        className="form-input"
+                                        type="text"
+                                        value={formData.voice_id}
+                                        onChange={(e) => setFormData({ ...formData, voice_id: e.target.value })}
+                                        placeholder="Deixe vazio para usar a voz padrão da Sala de Manutenção"
+                                    />
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                                        Cole o Voice ID da ElevenLabs para usar uma voz clonada específica deste corretor. Encontre IDs em elevenlabs.io/voices.
                                     </div>
                                 </div>
                             </div>
@@ -868,9 +860,9 @@ export default function BrokersAdmin() {
                                         phone: broker.phone || '',
 
                                         system_prompt: broker.system_prompt || '',
-                                        greeting_message: broker.greeting_message || '',
-                                        ai_provider: (broker as any).ai_provider || '',
-                                        ai_model: (broker as any).ai_model || ''
+                                        voice_id: (broker as any).voice_id || '',
+
+
                                     })
                                     // Load WhatsApp instance for this broker
                                     setWhatsappInstance(null)
