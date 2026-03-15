@@ -876,7 +876,7 @@ export default function MaintenancePage() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label">Áudio Habilitado</label>
                                 <select className="form-input" value={configs['whatsapp_audio_enabled'] || 'false'} onChange={e => setConfigs({ ...configs, whatsapp_audio_enabled: e.target.value })}>
@@ -891,56 +891,9 @@ export default function MaintenancePage() {
                                     <option value="openai">OpenAI TTS</option>
                                 </select>
                             </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Voz Padrão</label>
-                                {configs['whatsapp_tts_provider'] === 'openai' ? (
-                                    <select className="form-input" value={configs['whatsapp_tts_voice'] || 'onyx'} onChange={e => setConfigs({ ...configs, whatsapp_tts_voice: e.target.value })}>
-                                        <option value="alloy">Alloy (Neutra)</option>
-                                        <option value="echo">Echo (Masculina)</option>
-                                        <option value="fable">Fable (Narrativa)</option>
-                                        <option value="onyx">Onyx (Masculina Grave)</option>
-                                        <option value="nova">Nova (Feminina)</option>
-                                        <option value="shimmer">Shimmer (Feminina Suave)</option>
-                                    </select>
-                                ) : (
-                                    <div style={{ position: 'relative' }}>
-                                        <select className="form-input" value={configs['whatsapp_tts_voice'] || ''} onChange={e => setConfigs({ ...configs, whatsapp_tts_voice: e.target.value })}>
-                                            <option value="">Selecione uma voz...</option>
-                                            {elevenLabsVoices.map(v => (
-                                                <option key={v.voice_id} value={v.voice_id}>
-                                                    {v.category === 'cloned' ? '🎤 ' : '🔊 '}{v.name} ({v.category})
-                                                </option>
-                                            ))}
-                                            {/* Show saved voice ID if voices haven't loaded yet */}
-                                            {configs['whatsapp_tts_voice'] && !elevenLabsVoices.find(v => v.voice_id === configs['whatsapp_tts_voice']) && (
-                                                <option value={configs['whatsapp_tts_voice']}>
-                                                    🎤 Voz salva ({configs['whatsapp_tts_voice'].substring(0, 12)}...)
-                                                </option>
-                                            )}
-                                        </select>
-                                        <button
-                                            type="button"
-                                            onClick={async () => {
-                                                setLoadingVoices(true)
-                                                try {
-                                                    const res = await fetch('/api/admin/elevenlabs-voices', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ apiKey: configs['elevenlabs_api_key'] })
-                                                    })
-                                                    const data = await res.json()
-                                                    if (data.success) setElevenLabsVoices(data.voices)
-                                                } catch (e) { console.error(e) }
-                                                setLoadingVoices(false)
-                                            }}
-                                            disabled={loadingVoices || !configs['elevenlabs_api_key']}
-                                            style={{ marginTop: '6px', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                                        >
-                                            {loadingVoices ? '⏳ Carregando...' : '🔄 Carregar Vozes'}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '12px', padding: '8px 12px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '6px' }}>
+                            💡 A voz de cada agente é configurada na <strong>página de Corretores IA</strong>. Lá você pode escolher vozes do ElevenLabs ou OpenAI TTS para cada corretor individualmente.
                         </div>
                     </div>
 

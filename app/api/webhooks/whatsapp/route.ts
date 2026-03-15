@@ -69,12 +69,16 @@ export async function POST(request: NextRequest) {
         const audioUrl = messageData.audioUrl
             || messageData.media?.url
             || messageData.message?.audioMessage?.url
+            || messageData.message?.body?.audioMessage?.url
+            || messageData.body?.audioMessage?.url
             || messageData.audio?.url
             || messageData.message?.audio?.url
             || null
         const isAudio = !!(audioUrl
             || messageData.messageType === 'audioMessage'
             || messageData.message?.audioMessage
+            || messageData.message?.body?.audioMessage
+            || messageData.body?.audioMessage
             || messageData.type === 'audio'
             || messageData.audio)
 
