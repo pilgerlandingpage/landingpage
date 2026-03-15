@@ -73,6 +73,10 @@ export async function POST(request: NextRequest) {
             || messageData.body?.audioMessage?.url
             || messageData.audio?.url
             || messageData.message?.audio?.url
+            || body.chat?.message?.audioMessage?.url
+            || body.chat?.audioMessage?.url
+            || body.chat?.audio?.url
+            || body.chat?.media?.url
             || null
         const isAudio = !!(audioUrl
             || messageData.messageType === 'audioMessage'
@@ -80,7 +84,22 @@ export async function POST(request: NextRequest) {
             || messageData.message?.body?.audioMessage
             || messageData.body?.audioMessage
             || messageData.type === 'audio'
-            || messageData.audio)
+            || messageData.audio
+            || body.chat?.audioMessage
+            || body.chat?.message?.audioMessage
+            || body.chat?.type === 'audio')
+
+        // ── DEEP DEBUG: Log full structure when we get empty text (likely audio) ──
+        if (!messageText && !isAudio) {
+            console.log('[Webhook] 🔍 AUDIO DEBUG — Empty message detected. Full key analysis:')
+            console.log('[Webhook] 🔍 Top-level keys:', Object.keys(body).join(', '))
+            if (body.chat) console.log('[Webhook] 🔍 body.chat keys:', Object.keys(body.chat).join(', '))
+            if (body.chat?.message) console.log('[Webhook] 🔍 body.chat.message keys:', Object.keys(body.chat.message).join(', '))
+            if (body.data) console.log('[Webhook] 🔍 body.data keys:', Object.keys(body.data).join(', '))
+            if (body.message) console.log('[Webhook] 🔍 body.message keys:', typeof body.message === 'object' ? Object.keys(body.message).join(', ') : body.message)
+            // Log the FULL body (up to 2000 chars) for audio debugging
+            console.log('[Webhook] 🔍 FULL PAYLOAD:', JSON.stringify(body).substring(0, 2000))
+        }
 
         // Clean phone number
         const cleanPhone = remotePhone?.toString().replace(/@.+$/, '').replace(/\D/g, '') || ''
