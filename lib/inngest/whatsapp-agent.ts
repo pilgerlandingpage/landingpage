@@ -1,5 +1,6 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 import {
     sendWhatsAppMessage,
     sendAudioMessage,
@@ -79,6 +80,87 @@ function parseButtons(text: string): { cleanText: string; buttons?: { title: str
 
 function responseRequiresText(text: string): boolean {
     return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[MENU:/i.test(text)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WhatsApp Media Decryption (E2EE)
+// WhatsApp encrypts all media with AES-256-CBC
+// The mediaKey from payload is used to derive decryption keys via HKDF
+// ═══════════════════════════════════════════════════════════════
+
+async function decryptWhatsAppMedia(
+    encryptedUrl: string,
+    mediaKeyBase64: string,
+    mediaType: 'audio' | 'image' | 'video' | 'document' = 'audio'
+): Promise<Buffer | null> {
+    try {
+        console.log(`[WA Decrypt] Downloading encrypted media from: ${encryptedUrl.substring(0, 80)}...`)
+        
+        const response = await fetch(encryptedUrl)
+        if (!response.ok) {
+            console.error(`[WA Decrypt] Download failed (${response.status})`)
+            return null
+        }
+        
+        const encData = Buffer.from(await response.arrayBuffer())
+        console.log(`[WA Decrypt] Downloaded ${encData.length} bytes encrypted`)
+        
+        if (encData.length < 10) {
+            console.error(`[WA Decrypt] Encrypted data too small`)
+            return null
+        }
+        
+        // WhatsApp media type info strings for HKDF
+        const mediaTypeInfo: Record<string, string> = {
+            audio: 'WhatsApp Audio Keys',
+            image: 'WhatsApp Image Keys',
+            video: 'WhatsApp Video Keys',
+            document: 'WhatsApp Document Keys',
+        }
+        
+        const mediaKey = Buffer.from(mediaKeyBase64, 'base64')
+        const info = mediaTypeInfo[mediaType] || 'WhatsApp Audio Keys'
+        
+        // HKDF expand: derive 112 bytes from mediaKey
+        const hkdfKey = hkdfExpand(mediaKey, Buffer.from(info, 'utf8'), 112)
+        
+        const iv = hkdfKey.subarray(0, 16)
+        const cipherKey = hkdfKey.subarray(16, 48)
+        
+        // Remove last 10 bytes (MAC) from encrypted data
+        const encFile = encData.subarray(0, encData.length - 10)
+        
+        // Decrypt with AES-256-CBC
+        const decipher = crypto.createDecipheriv('aes-256-cbc', cipherKey, iv)
+        const decrypted = Buffer.concat([decipher.update(encFile), decipher.final()])
+        
+        console.log(`[WA Decrypt] ✅ Decrypted successfully: ${decrypted.length} bytes`)
+        return decrypted
+    } catch (e) {
+        console.error(`[WA Decrypt] Decryption error:`, e)
+        return null
+    }
+}
+
+/** HKDF-Expand (SHA-256) — derives key material from input key */
+function hkdfExpand(key: Buffer, info: Buffer, length: number): Buffer {
+    // HKDF-Extract
+    const prk = crypto.createHmac('sha256', Buffer.alloc(32, 0)).update(key).digest()
+    
+    // HKDF-Expand
+    let t = Buffer.alloc(0)
+    let okm = Buffer.alloc(0)
+    let counter = 1
+    
+    while (okm.length < length) {
+        const hmac = crypto.createHmac('sha256', prk)
+        hmac.update(Buffer.concat([t, info, Buffer.from([counter])]))
+        t = hmac.digest()
+        okm = Buffer.concat([okm, t])
+        counter++
+    }
+    
+    return okm.subarray(0, length)
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -288,7 +370,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     { event: 'whatsapp/message-received' },
     async ({ event, step }) => {
         const {
-            cleanPhone, messageText, isAudio, audioUrl, messageId,
+            cleanPhone, messageText, isAudio, audioUrl, audioMediaKey, audioDirectPath, messageId,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
 
@@ -385,11 +467,26 @@ export const processWhatsAppMessage = inngest.createFunction(
         // 3) Get a stable public URL for transcription
         const audioR2Url = isAudio ? await step.run('download-audio-to-r2', async () => {
             console.log(`[WhatsApp Agent] 🎤 Audio detected from ${cleanPhone}`)
-            console.log(`[WhatsApp Agent] 🎤 audioUrl=${audioUrl ? audioUrl.substring(0, 100) + '...' : 'NULL'}, messageId=${messageId || 'NULL'}`)
+            console.log(`[WhatsApp Agent] 🎤 audioUrl=${audioUrl ? audioUrl.substring(0, 100) + '...' : 'NULL'}, messageId=${messageId || 'NULL'}, mediaKey=${audioMediaKey ? 'available' : 'NULL'}`)
 
             let audioBuffer: Buffer | null = null
 
-            // Strategy 1: Try direct URL if available
+            // Strategy 0: Decrypt the encrypted WhatsApp media using mediaKey (BEST approach)
+            if (audioUrl && audioMediaKey) {
+                try {
+                    console.log(`[WhatsApp Agent] 🎤 Attempting WhatsApp E2EE decryption with mediaKey...`)
+                    audioBuffer = await decryptWhatsAppMedia(audioUrl, audioMediaKey, 'audio')
+                    if (audioBuffer) {
+                        console.log(`[WhatsApp Agent] 🎤 E2EE decryption success! Size: ${audioBuffer.length} bytes`)
+                    } else {
+                        console.warn(`[WhatsApp Agent] 🎤 E2EE decryption returned null, trying other approaches...`)
+                    }
+                } catch (e) {
+                    console.error(`[WhatsApp Agent] 🎤 E2EE decryption error:`, e)
+                }
+            }
+
+            // Strategy 1: Try direct URL if available (might work for non-encrypted URLs)
             if (audioUrl) {
                 try {
                     console.log(`[WhatsApp Agent] 🎤 Attempting direct download from audioUrl...`)

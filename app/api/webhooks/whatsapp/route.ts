@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
             || msgType === 'audio'
             || msgType === 'audiomessage'
             || msgType === 'ptt'
+            || msgType === 'media' && (msgMessageType === 'audiomessage' || msgMessageType === 'audio')
             || msgMessageType === 'audiomessage'
             || msgMessageType === 'audio'
             || chatLastMsgType === 'audiomessage'
@@ -100,6 +101,10 @@ export async function POST(request: NextRequest) {
             || messageData.audio
             || body.chat?.audioMessage
             || body.chat?.message?.audioMessage)
+
+        // ── Extract media decryption data (WhatsApp E2EE media keys) ──
+        const audioMediaKey = messageData.content?.mediaKey || messageData.message?.audioMessage?.mediaKey || null
+        const audioDirectPath = messageData.content?.directPath || messageData.message?.audioMessage?.directPath || null
 
         // ── Extract message ID (needed for UAZAPI /message/download fallback) ──
         // ConnectyHub uses 'messageid' (lowercase), other providers use 'id' or 'key.id'
@@ -264,6 +269,8 @@ export async function POST(request: NextRequest) {
                     messageText,
                     isAudio,
                     audioUrl,
+                    audioMediaKey,
+                    audioDirectPath,
                     messageId,
                     instanceId: instance.id,
                     instanceToken: instance.instance_token,
