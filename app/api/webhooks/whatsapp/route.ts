@@ -101,6 +101,23 @@ export async function POST(request: NextRequest) {
             || body.chat?.audioMessage
             || body.chat?.message?.audioMessage)
 
+        // ── Extract message ID (needed for UAZAPI /message/download fallback) ──
+        const messageId = messageData.id?.id
+            || messageData.key?.id
+            || messageData.id
+            || messageData.messageId
+            || body.chat?.id?.id
+            || body.chat?.key?.id
+            || null
+
+        // ── Audio detected: log details for debugging ──
+        if (isAudio) {
+            console.log(`[Webhook] 🎤 AUDIO DETECTED | audioUrl=${audioUrl ? audioUrl.substring(0, 100) : 'NULL'} | messageId=${messageId || 'NULL'} | type=${msgType} | messageType=${msgMessageType}`)
+            if (!audioUrl) {
+                console.log('[Webhook] 🎤 No direct audioUrl — agent will use UAZAPI /message/download with messageId')
+            }
+        }
+
         // ── DEEP DEBUG: Log full structure when we get empty text (likely audio) ──
         if (!messageText && !isAudio) {
             console.log('[Webhook] 🔍 AUDIO DEBUG — Empty message detected. Full key analysis:')
@@ -221,6 +238,7 @@ export async function POST(request: NextRequest) {
                     messageText,
                     isAudio,
                     audioUrl,
+                    messageId,
                     instanceId: instance.id,
                     instanceToken: instance.instance_token,
                     instanceName: instance.instance_name,

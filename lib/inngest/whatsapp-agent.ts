@@ -7,7 +7,8 @@ import {
     setPresenceTyping,
     setPresenceRecording,
     setPresenceAvailable,
-    markAsRead
+    markAsRead,
+    downloadMedia
 } from '../uazapi'
 
 function getSupabase() {
@@ -86,7 +87,15 @@ function responseRequiresText(text: string): boolean {
 
 async function transcribeWithWhisper(audioUrl: string, apiKey: string): Promise<string> {
     const audioRes = await fetch(audioUrl)
+    if (!audioRes.ok) {
+        console.error(`[Whisper STT] Failed to download audio (${audioRes.status}): ${audioUrl.substring(0, 100)}`)
+        return ''
+    }
     const audioBuffer = await audioRes.arrayBuffer()
+    if (audioBuffer.byteLength < 100) {
+        console.error(`[Whisper STT] Audio too small (${audioBuffer.byteLength} bytes), likely invalid`)
+        return ''
+    }
     const blob = new Blob([audioBuffer], { type: 'audio/ogg' })
     const formData = new FormData()
     formData.append('file', blob, 'audio.ogg')
@@ -97,13 +106,26 @@ async function transcribeWithWhisper(audioUrl: string, apiKey: string): Promise<
         headers: { 'Authorization': `Bearer ${apiKey}` },
         body: formData
     })
+    if (!res.ok) {
+        const errBody = await res.text()
+        console.error(`[Whisper STT] API error (${res.status}):`, errBody.substring(0, 300))
+        return ''
+    }
     const data = await res.json()
     return data.text || ''
 }
 
 async function transcribeWithGemini(audioUrl: string, apiKey: string, model: string): Promise<string> {
     const audioRes = await fetch(audioUrl)
+    if (!audioRes.ok) {
+        console.error(`[Gemini STT] Failed to download audio (${audioRes.status}): ${audioUrl.substring(0, 100)}`)
+        return ''
+    }
     const audioBuffer = await audioRes.arrayBuffer()
+    if (audioBuffer.byteLength < 100) {
+        console.error(`[Gemini STT] Audio too small (${audioBuffer.byteLength} bytes), likely invalid`)
+        return ''
+    }
     const base64Audio = Buffer.from(audioBuffer).toString('base64')
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.0-flash'}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -118,6 +140,11 @@ async function transcribeWithGemini(audioUrl: string, apiKey: string, model: str
             }]
         })
     })
+    if (!res.ok) {
+        const errBody = await res.text()
+        console.error(`[Gemini STT] API error (${res.status}):`, errBody.substring(0, 300))
+        return ''
+    }
     const data = await res.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 }
@@ -261,7 +288,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     { event: 'whatsapp/message-received' },
     async ({ event, step }) => {
         const {
-            cleanPhone, messageText, isAudio, audioUrl,
+            cleanPhone, messageText, isAudio, audioUrl, messageId,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
 
@@ -351,11 +378,66 @@ export const processWhatsAppMessage = inngest.createFunction(
         let botMessageIds: string[] = Array.isArray(conversation.bot_message_ids)
             ? conversation.bot_message_ids : []
 
-        // ── Step 3: Transcribe audio if needed ──
+        // ── Step 3: Download audio to R2 if needed ──
+        // This step runs in Inngest (no Vercel timeout!) so we can take the time to:
+        // 1) Download audio from UAZAPI
+        // 2) Upload to R2 (Cloudflare)
+        // 3) Get a stable public URL for transcription
+        const audioR2Url = isAudio ? await step.run('download-audio-to-r2', async () => {
+            console.log(`[WhatsApp Agent] 🎤 Audio detected from ${cleanPhone}`)
+            console.log(`[WhatsApp Agent] 🎤 audioUrl=${audioUrl ? audioUrl.substring(0, 100) + '...' : 'NULL'}, messageId=${messageId || 'NULL'}`)
+
+            let audioBuffer: Buffer | null = null
+
+            // Strategy 1: Try direct URL if available
+            if (audioUrl) {
+                try {
+                    console.log(`[WhatsApp Agent] 🎤 Attempting direct download from audioUrl...`)
+                    const audioRes = await fetch(audioUrl)
+                    if (audioRes.ok) {
+                        audioBuffer = Buffer.from(await audioRes.arrayBuffer())
+                        console.log(`[WhatsApp Agent] 🎤 Direct download success! Size: ${audioBuffer.length} bytes`)
+                    } else {
+                        console.warn(`[WhatsApp Agent] 🎤 Direct download failed (${audioRes.status}), trying UAZAPI fallback...`)
+                    }
+                } catch (e) {
+                    console.error(`[WhatsApp Agent] 🎤 Direct download error:`, e)
+                }
+            }
+
+            // Strategy 2: Use UAZAPI /message/download if direct URL failed or wasn't available
+            if (!audioBuffer && messageId) {
+                console.log(`[WhatsApp Agent] 🎤 Attempting UAZAPI /message/download with messageId=${messageId}...`)
+                audioBuffer = await downloadMedia(messageId, instanceToken)
+                if (audioBuffer) {
+                    console.log(`[WhatsApp Agent] 🎤 UAZAPI download success! Size: ${audioBuffer.length} bytes`)
+                } else {
+                    console.error(`[WhatsApp Agent] 🎤 UAZAPI download also failed!`)
+                }
+            }
+
+            if (!audioBuffer) {
+                console.error(`[WhatsApp Agent] 🎤 Could not obtain audio buffer from any source`)
+                return null
+            }
+
+            // Upload to R2 for a stable, public URL
+            console.log(`[WhatsApp Agent] 🎤 Uploading ${audioBuffer.length} bytes to R2...`)
+            const r2Url = await uploadAudioToR2(audioBuffer, supabase)
+            if (r2Url) {
+                console.log(`[WhatsApp Agent] 🎤 R2 upload success: ${r2Url.substring(0, 100)}`)
+            } else {
+                console.error(`[WhatsApp Agent] 🎤 R2 upload failed!`)
+            }
+            return r2Url
+        }) : null
+
+        // ── Step 4: Transcribe audio if we got a R2 URL ──
         const inputText = await step.run('process-input', async () => {
-            console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioUrl=${audioUrl ? audioUrl.substring(0, 80) + '...' : 'null'}, messageText="${messageText}"`)            
-            if (isAudio && audioUrl) {
-                console.log(`[WhatsApp Agent] Transcribing audio from ${cleanPhone}...`)
+            console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioR2Url=${audioR2Url ? 'available' : 'null'}, messageText="${messageText}"`)
+            
+            if (isAudio && audioR2Url) {
+                console.log(`[WhatsApp Agent] Transcribing audio from R2 URL...`)
                 
                 // Helper: check if transcription result is actually valid
                 const isValidTranscription = (text: string | undefined | null): boolean => {
@@ -368,47 +450,82 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const hasOpenAI = !!configs['openai_api_key']
                 const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
                 
-                console.log(`[WhatsApp Agent] Available providers: Gemini=${hasGemini}, OpenAI=${hasOpenAI}`)
+                // Respect the provider configured in the maintenance panel
+                const globalProvider = configs['ai_provider'] || 'openai'
+                const effectiveProvider = configs['whatsapp_provider'] || globalProvider
+                const useWhisperFirst = effectiveProvider === 'openai'
                 
-                // Strategy: Try Gemini FIRST (better with WhatsApp OGG/Opus audio)
-                // Then fallback to Whisper if Gemini fails or returns empty
+                console.log(`[WhatsApp Agent] STT: provider=${effectiveProvider}, useWhisperFirst=${useWhisperFirst}, hasOpenAI=${hasOpenAI}, hasGemini=${hasGemini}`)
                 
                 let result: string | undefined
                 
-                // Attempt 1: Gemini (preferred for WhatsApp audio)
-                if (hasGemini) {
-                    try {
-                        console.log(`[WhatsApp Agent] Attempting Gemini transcription...`)
-                        result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], geminiModel)
-                        console.log(`[WhatsApp Agent] Gemini result: "${result?.substring(0, 150)}"`)
-                        if (isValidTranscription(result)) {
-                            return result!.trim()
+                if (useWhisperFirst) {
+                    // ── OpenAI configured: Whisper first → Gemini fallback ──
+                    if (hasOpenAI) {
+                        try {
+                            console.log(`[WhatsApp Agent] Attempting Whisper (OpenAI) transcription...`)
+                            result = await transcribeWithWhisper(audioR2Url, configs['openai_api_key'])
+                            console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 150)}"`)
+                            if (isValidTranscription(result)) {
+                                return result!.trim()
+                            }
+                            console.log(`[WhatsApp Agent] Whisper returned invalid/empty result, trying Gemini fallback...`)
+                        } catch (e) {
+                            console.error('[WhatsApp Agent] Whisper transcription error:', e)
                         }
-                        console.log(`[WhatsApp Agent] Gemini returned invalid/empty result, trying fallback...`)
-                    } catch (e) {
-                        console.error('[WhatsApp Agent] Gemini transcription error:', e)
+                    }
+                    if (hasGemini) {
+                        try {
+                            console.log(`[WhatsApp Agent] Attempting Gemini transcription (fallback)...`)
+                            result = await transcribeWithGemini(audioR2Url, configs['gemini_api_key'], geminiModel)
+                            console.log(`[WhatsApp Agent] Gemini result: "${result?.substring(0, 150)}"`)
+                            if (isValidTranscription(result)) {
+                                return result!.trim()
+                            }
+                        } catch (e) {
+                            console.error('[WhatsApp Agent] Gemini transcription error:', e)
+                        }
+                    }
+                } else {
+                    // ── Gemini configured: Gemini first → Whisper fallback ──
+                    if (hasGemini) {
+                        try {
+                            console.log(`[WhatsApp Agent] Attempting Gemini transcription...`)
+                            result = await transcribeWithGemini(audioR2Url, configs['gemini_api_key'], geminiModel)
+                            console.log(`[WhatsApp Agent] Gemini result: "${result?.substring(0, 150)}"`)
+                            if (isValidTranscription(result)) {
+                                return result!.trim()
+                            }
+                            console.log(`[WhatsApp Agent] Gemini returned invalid/empty result, trying Whisper fallback...`)
+                        } catch (e) {
+                            console.error('[WhatsApp Agent] Gemini transcription error:', e)
+                        }
+                    }
+                    if (hasOpenAI) {
+                        try {
+                            console.log(`[WhatsApp Agent] Attempting Whisper transcription (fallback)...`)
+                            result = await transcribeWithWhisper(audioR2Url, configs['openai_api_key'])
+                            console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 150)}"`)
+                            if (isValidTranscription(result)) {
+                                return result!.trim()
+                            }
+                        } catch (e) {
+                            console.error('[WhatsApp Agent] Whisper transcription error:', e)
+                        }
                     }
                 }
                 
-                // Attempt 2: Whisper fallback
-                if (hasOpenAI) {
-                    try {
-                        console.log(`[WhatsApp Agent] Attempting Whisper transcription...`)
-                        result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
-                        console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 150)}"`)
-                        if (isValidTranscription(result)) {
-                            return result!.trim()
-                        }
-                        console.log(`[WhatsApp Agent] Whisper also returned invalid result`)
-                    } catch (e) {
-                        console.error('[WhatsApp Agent] Whisper transcription error:', e)
-                    }
-                }
-                
-                // All attempts failed — return a user-friendly fallback
+                // All transcription attempts failed
                 console.error('[WhatsApp Agent] All transcription attempts failed or returned empty')
                 return '[O usuário enviou uma mensagem de áudio que não pôde ser transcrita. Responda pedindo que repita ou envie por texto.]'
             }
+            
+            // Audio detected but we couldn't get the buffer at all
+            if (isAudio && !audioR2Url) {
+                console.error('[WhatsApp Agent] Audio detected but no R2 URL available (download failed)')
+                return '[O usuário enviou uma mensagem de áudio que não pôde ser processada. Responda pedindo que repita ou envie por texto.]'
+            }
+            
             return messageText
         })
 

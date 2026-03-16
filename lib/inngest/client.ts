@@ -71,6 +71,7 @@ export const inngest = new Inngest({
                 messageText: string
                 isAudio: boolean
                 audioUrl: string | null
+                messageId: string | null
                 instanceId: string
                 instanceToken: string
                 instanceName: string
