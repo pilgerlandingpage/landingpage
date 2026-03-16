@@ -407,11 +407,10 @@ export const processWhatsAppMessage = inngest.createFunction(
         id: 'whatsapp-agent-process-message',
         name: 'WhatsApp Agent — Process Incoming Message',
         retries: 1,
-        concurrency: [{ limit: 5 }],
-        debounce: {
-            period: '15s',
-            key: 'event.data.cleanPhone',
-        },
+        concurrency: [
+            { limit: 5 },
+            { limit: 1, key: 'event.data.cleanPhone' },  // serialize per phone
+        ],
     },
     { event: 'whatsapp/message-received' },
     async ({ event, step }) => {
@@ -526,6 +525,29 @@ export const processWhatsAppMessage = inngest.createFunction(
             }
         }
 
+        // ── Manual Debounce: wait 15s to collect multiple messages ──
+        // (Per-phone concurrency=1 ensures only one function runs at a time)
+
+        // Quick check: if queue is already empty (processed by previous invocation), skip
+        const hasWork = await step.run('check-queue', async () => {
+            const { data } = await supabase
+                .from('app_config')
+                .select('key')
+                .like('key', `_pmq_${cleanPhone}_%`)
+                .limit(1)
+            return (data && data.length > 0) || isAudio
+        })
+
+        if (!hasWork) {
+            console.log(`[WhatsApp Agent] Queue empty for ${cleanPhone}, skipping (already processed)`)
+            return { action: 'skipped', reason: 'already_processed' }
+        }
+
+        // Sleep 15s to allow more messages to accumulate
+        if (!isAudio) {
+            await step.sleep('debounce-collect', '15s')
+        }
+
         // Read queued messages from debounce window (atomic INSERTs in app_config)
         const pendingMessages = await step.run('read-pending-messages', async () => {
             const { data: queuedMsgs } = await supabase
@@ -546,6 +568,12 @@ export const processWhatsAppMessage = inngest.createFunction(
             console.log(`[WhatsApp Agent] 📨 Read ${queuedMsgs.length} queued messages: ${queuedMsgs.map(m => m.value).join(' | ')}`)
             return queuedMsgs.map(m => m.value) as string[]
         })
+
+        // If queue was emptied by another function and not audio, skip
+        if (pendingMessages.length === 0 && !isAudio) {
+            console.log(`[WhatsApp Agent] No messages after debounce for ${cleanPhone}, skipping`)
+            return { action: 'skipped', reason: 'already_processed_after_sleep' }
+        }
 
         // Combine all queued messages into one input (they form a single thought)
         const allMessages = pendingMessages.length > 0
