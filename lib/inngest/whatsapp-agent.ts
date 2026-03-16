@@ -471,45 +471,29 @@ export const processWhatsAppMessage = inngest.createFunction(
 
             let audioBuffer: Buffer | null = null
 
-            // Strategy 0: Decrypt the encrypted WhatsApp media using mediaKey (BEST approach)
-            if (audioUrl && audioMediaKey) {
+            // Strategy 1: UAZAPI /message/download (PREFERRED — decrypts and returns base64)
+            if (!audioBuffer && messageId) {
+                console.log(`[WhatsApp Agent] 🎤 Attempting UAZAPI /message/download with id=${messageId}...`)
+                audioBuffer = await downloadMedia(messageId, instanceToken)
+                if (audioBuffer) {
+                    console.log(`[WhatsApp Agent] 🎤 UAZAPI download success! Size: ${audioBuffer.length} bytes`)
+                } else {
+                    console.warn(`[WhatsApp Agent] 🎤 UAZAPI download failed, trying E2EE decryption...`)
+                }
+            }
+
+            // Strategy 2: E2EE decryption fallback (decrypt the encrypted WhatsApp CDN URL)
+            if (!audioBuffer && audioUrl && audioMediaKey) {
                 try {
                     console.log(`[WhatsApp Agent] 🎤 Attempting WhatsApp E2EE decryption with mediaKey...`)
                     audioBuffer = await decryptWhatsAppMedia(audioUrl, audioMediaKey, 'audio')
                     if (audioBuffer) {
                         console.log(`[WhatsApp Agent] 🎤 E2EE decryption success! Size: ${audioBuffer.length} bytes`)
                     } else {
-                        console.warn(`[WhatsApp Agent] 🎤 E2EE decryption returned null, trying other approaches...`)
+                        console.error(`[WhatsApp Agent] 🎤 E2EE decryption also failed!`)
                     }
                 } catch (e) {
                     console.error(`[WhatsApp Agent] 🎤 E2EE decryption error:`, e)
-                }
-            }
-
-            // Strategy 1: Try direct URL if available (might work for non-encrypted URLs)
-            if (audioUrl) {
-                try {
-                    console.log(`[WhatsApp Agent] 🎤 Attempting direct download from audioUrl...`)
-                    const audioRes = await fetch(audioUrl)
-                    if (audioRes.ok) {
-                        audioBuffer = Buffer.from(await audioRes.arrayBuffer())
-                        console.log(`[WhatsApp Agent] 🎤 Direct download success! Size: ${audioBuffer.length} bytes`)
-                    } else {
-                        console.warn(`[WhatsApp Agent] 🎤 Direct download failed (${audioRes.status}), trying UAZAPI fallback...`)
-                    }
-                } catch (e) {
-                    console.error(`[WhatsApp Agent] 🎤 Direct download error:`, e)
-                }
-            }
-
-            // Strategy 2: Use UAZAPI /message/download if direct URL failed or wasn't available
-            if (!audioBuffer && messageId) {
-                console.log(`[WhatsApp Agent] 🎤 Attempting UAZAPI /message/download with messageId=${messageId}...`)
-                audioBuffer = await downloadMedia(messageId, instanceToken)
-                if (audioBuffer) {
-                    console.log(`[WhatsApp Agent] 🎤 UAZAPI download success! Size: ${audioBuffer.length} bytes`)
-                } else {
-                    console.error(`[WhatsApp Agent] 🎤 UAZAPI download also failed!`)
                 }
             }
 
