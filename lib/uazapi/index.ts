@@ -463,95 +463,78 @@ export async function setPresenceAvailable(instanceToken: string) {
 
 /** Download media (audio, image, etc.) from a received message using message ID */
 export async function downloadMedia(messageId: string, instanceToken: string): Promise<Buffer | null> {
-    const config = await getUazapiConfig()
-    
-    console.log(`[UAZAPI] downloadMedia: messageId=${messageId}, baseUrl=${config.baseUrl}`)
-    
-    // Try multiple approaches since UAZAPI formats vary
-    const approaches = [
-        { name: '/message/download (messageId)', url: '/message/download', body: { messageId } },
-        { name: '/message/download (id)', url: '/message/download', body: { id: messageId } },
-        { name: '/message/find (getLink)', url: '/message/find', body: { messageId, getLink: true, returnBase64: true } },
-    ]
+    try {
+        const config = await getUazapiConfig()
+        
+        console.log(`[UAZAPI] downloadMedia: id=${messageId}, baseUrl=${config.baseUrl}`)
+        
+        const response = await fetch(`${config.baseUrl}/message/download`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': instanceToken,
+            },
+            body: JSON.stringify({
+                id: messageId,           // UAZAPI uses 'id' NOT 'messageId'
+                return_base64: true,     // Return as base64 string
+                generate_mp3: true,      // Convert to MP3 for better compatibility
+                return_link: false,      // We don't need a link, we have base64
+            }),
+        })
 
-    for (const approach of approaches) {
-        try {
-            console.log(`[UAZAPI] Trying: ${approach.name}...`)
-            
-            const response = await fetch(`${config.baseUrl}${approach.url}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'token': instanceToken,
-                },
-                body: JSON.stringify(approach.body),
-            })
+        console.log(`[UAZAPI] /message/download → status=${response.status}`)
 
-            console.log(`[UAZAPI] ${approach.name} → status=${response.status}`)
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => 'could not read')
+            console.error(`[UAZAPI] Download failed (${response.status}):`, errorText.substring(0, 300))
+            return null
+        }
 
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => 'could not read')
-                console.error(`[UAZAPI] ${approach.name} failed (${response.status}):`, errorText.substring(0, 300))
-                continue
-            }
+        const contentType = response.headers.get('content-type') || ''
 
-            const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+            const data = await response.json()
+            const keys = Object.keys(data)
+            console.log(`[UAZAPI] Response JSON keys:`, keys.join(', '))
 
-            // JSON response — may have base64 or a download URL
-            if (contentType.includes('application/json')) {
-                const data = await response.json()
-                const keys = Object.keys(data)
-                console.log(`[UAZAPI] ${approach.name} JSON keys:`, keys.join(', '))
-
-                // Handle base64 audio
-                if (data.base64) {
-                    console.log(`[UAZAPI] ✅ Got base64 audio from ${approach.name}`)
-                    const base64Data = data.base64.replace(/^data:[^;]+;base64,/, '')
-                    return Buffer.from(base64Data, 'base64')
-                }
-
-                // Handle nested base64 in message content
-                if (data.message?.base64 || data.data?.base64 || data.content?.base64) {
-                    const b64 = data.message?.base64 || data.data?.base64 || data.content?.base64
-                    console.log(`[UAZAPI] ✅ Got nested base64 from ${approach.name}`)
-                    const base64Data = b64.replace(/^data:[^;]+;base64,/, '')
-                    return Buffer.from(base64Data, 'base64')
-                }
-
-                // Handle download URL response
-                const mediaUrl = data.url || data.link || data.mediaUrl || data.downloadUrl || data.download
-                if (mediaUrl && typeof mediaUrl === 'string' && mediaUrl.startsWith('http')) {
-                    console.log(`[UAZAPI] Got media URL from ${approach.name}: ${mediaUrl.substring(0, 100)}...`)
-                    const mediaRes = await fetch(mediaUrl)
-                    if (mediaRes.ok) {
-                        const buf = Buffer.from(await mediaRes.arrayBuffer())
-                        if (buf.length > 100) {
-                            console.log(`[UAZAPI] ✅ Downloaded ${buf.length} bytes from URL`)
-                            return buf
-                        }
-                    }
-                    console.warn(`[UAZAPI] Media URL fetch failed or too small`)
-                }
-
-                // Log what we got for debugging
-                console.log(`[UAZAPI] ${approach.name} response:`, JSON.stringify(data).substring(0, 500))
-                continue
-            }
-
-            // Binary response — audio file directly
-            const buf = Buffer.from(await response.arrayBuffer())
-            if (buf.length > 100) {
-                console.log(`[UAZAPI] ✅ Got binary (${contentType}), size: ${buf.length} bytes from ${approach.name}`)
+            // UAZAPI returns 'base64Data' field
+            const b64 = data.base64Data || data.base64 || data.data
+            if (b64 && typeof b64 === 'string') {
+                const cleanB64 = b64.replace(/^data:[^;]+;base64,/, '')
+                const buf = Buffer.from(cleanB64, 'base64')
+                console.log(`[UAZAPI] ✅ Got base64 audio: ${buf.length} bytes`)
                 return buf
             }
-            console.warn(`[UAZAPI] Binary response too small (${buf.length} bytes) from ${approach.name}`)
-        } catch (e) {
-            console.error(`[UAZAPI] ${approach.name} error:`, e)
-        }
-    }
 
-    console.error('[UAZAPI] All download approaches failed for messageId:', messageId)
-    return null
+            // Handle URL response as fallback
+            const mediaUrl = data.url || data.link || data.mediaUrl
+            if (mediaUrl && typeof mediaUrl === 'string' && mediaUrl.startsWith('http')) {
+                console.log(`[UAZAPI] Got media URL: ${mediaUrl.substring(0, 100)}...`)
+                const mediaRes = await fetch(mediaUrl)
+                if (mediaRes.ok) {
+                    const buf = Buffer.from(await mediaRes.arrayBuffer())
+                    console.log(`[UAZAPI] ✅ Downloaded ${buf.length} bytes from URL`)
+                    return buf
+                }
+            }
+
+            console.error('[UAZAPI] Unexpected response:', JSON.stringify(data).substring(0, 500))
+            return null
+        }
+
+        // Binary response
+        const buf = Buffer.from(await response.arrayBuffer())
+        if (buf.length > 100) {
+            console.log(`[UAZAPI] ✅ Got binary (${contentType}): ${buf.length} bytes`)
+            return buf
+        }
+        
+        console.error(`[UAZAPI] Response too small (${buf.length} bytes)`)
+        return null
+    } catch (e) {
+        console.error('[UAZAPI] downloadMedia error:', e)
+        return null
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
