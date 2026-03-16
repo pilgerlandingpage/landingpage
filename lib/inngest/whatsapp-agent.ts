@@ -353,17 +353,33 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 3: Transcribe audio if needed ──
         const inputText = await step.run('process-input', async () => {
+            console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioUrl=${audioUrl ? audioUrl.substring(0, 80) + '...' : 'null'}, messageText="${messageText}"`)            
             if (isAudio && audioUrl) {
                 console.log(`[WhatsApp Agent] Transcribing audio from ${cleanPhone}...`)
                 try {
+                    // First, verify the audio URL is accessible
+                    const testFetch = await fetch(audioUrl, { method: 'HEAD' }).catch(() => null)
+                    console.log(`[WhatsApp Agent] Audio URL status: ${testFetch?.status || 'FAILED'}`)
+                    
                     const effectiveProvider = configs['whatsapp_provider'] || configs['ai_provider'] || 'gemini'
+                    console.log(`[WhatsApp Agent] Using provider: ${effectiveProvider}, has openai key: ${!!configs['openai_api_key']}, has gemini key: ${!!configs['gemini_api_key']}`)
+                    
                     if (effectiveProvider === 'openai' && configs['openai_api_key']) {
-                        return await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
+                        const result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
+                        console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 100)}..."`)
+                        return result
                     } else if (configs['gemini_api_key']) {
                         const model = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
-                        return await transcribeWithGemini(audioUrl, configs['gemini_api_key'], model)
+                        const result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], model)
+                        console.log(`[WhatsApp Agent] Gemini transcription result: "${result?.substring(0, 100)}..."`)
+                        return result
                     } else if (configs['openai_api_key']) {
-                        return await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
+                        const result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
+                        console.log(`[WhatsApp Agent] Whisper fallback result: "${result?.substring(0, 100)}..."`)
+                        return result
+                    } else {
+                        console.error('[WhatsApp Agent] No transcription provider configured!')
+                        return '[Áudio recebido mas sem provedor de transcrição configurado]'
                     }
                 } catch (e) {
                     console.error('[WhatsApp Agent] Transcription error:', e)
@@ -732,18 +748,15 @@ export const whatsappKeepOnline = inngest.createFunction(
             return { action: 'no_connected_instances' }
         }
 
-        const results: { instance: string; ok: boolean }[] = []
-        for (const inst of instances) {
-            try {
-                await setPresenceAvailable(inst.instance_token)
-                results.push({ instance: inst.instance_name, ok: true })
-            } catch (e) {
-                console.warn(`[KeepOnline] Failed for ${inst.instance_name}:`, e)
-                results.push({ instance: inst.instance_name, ok: false })
-            }
+        // UAZAPI v2 only supports 'composing' and 'recording' as presence values
+        // There is no 'available' / 'online' presence endpoint
+        // The WhatsApp connection itself keeps the instance online
+        console.log(`[KeepOnline] ${instances.length} instance(s) connected. Status OK.`)
+        
+        return {
+            action: 'instances_checked',
+            count: instances.length,
+            instances: instances.map(i => i.instance_name)
         }
-
-        console.log(`[KeepOnline] Pinged ${results.length} instances:`, results)
-        return { action: 'pinged', results }
     }
 )
