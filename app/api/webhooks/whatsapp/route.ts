@@ -110,11 +110,32 @@ export async function POST(request: NextRequest) {
             || body.chat?.key?.id
             || null
 
-        // ── Audio detected: log details for debugging ──
+        // ── Audio detected: log details and save debug payload ──
         if (isAudio) {
             console.log(`[Webhook] 🎤 AUDIO DETECTED | audioUrl=${audioUrl ? audioUrl.substring(0, 100) : 'NULL'} | messageId=${messageId || 'NULL'} | type=${msgType} | messageType=${msgMessageType}`)
             if (!audioUrl) {
                 console.log('[Webhook] 🎤 No direct audioUrl — agent will use UAZAPI /message/download with messageId')
+            }
+            // Save full payload to DB for debugging (we can query this!)
+            try {
+                await supabase.from('app_config').upsert({
+                    key: '_debug_last_audio_payload',
+                    value: JSON.stringify({
+                        timestamp: new Date().toISOString(),
+                        audioUrl: audioUrl || null,
+                        messageId: messageId || null,
+                        msgType,
+                        msgMessageType,
+                        chatLastMsgType,
+                        topLevelKeys: Object.keys(body),
+                        dataKeys: messageData ? Object.keys(messageData) : [],
+                        contentKeys: messageData?.content ? Object.keys(messageData.content) : [],
+                        contentValue: typeof messageData?.content === 'object' ? JSON.stringify(messageData.content).substring(0, 500) : String(messageData?.content || '').substring(0, 200),
+                        fullPayload: JSON.stringify(body).substring(0, 3000),
+                    }).substring(0, 4000)
+                }, { onConflict: 'key' })
+            } catch (e) {
+                console.error('[Webhook] Debug save error:', e)
             }
         }
 
