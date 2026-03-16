@@ -754,11 +754,13 @@ export const processWhatsAppMessage = inngest.createFunction(
                 }
 
                 // Save debug to DB (fire-and-forget)
-                await supabase.from('app_config').upsert({
-                    key: '_debug_tts_pipeline',
-                    value: JSON.stringify({ timestamp: new Date().toISOString(), steps: debugSteps }),
-                    updated_at: new Date().toISOString()
-                }).then(() => {}).catch(() => {})
+                try {
+                    await supabase.from('app_config').upsert({
+                        key: '_debug_tts_pipeline',
+                        value: JSON.stringify({ timestamp: new Date().toISOString(), steps: debugSteps }),
+                        updated_at: new Date().toISOString()
+                    })
+                } catch (_) { /* ignore */ }
             } else {
                 const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText || aiResponse.text, instanceToken })
                 botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
