@@ -274,31 +274,19 @@ export async function POST(request: NextRequest) {
             }
         } catch { /* ignore */ }
 
-        // 2) Save message to pending_messages for debounce batching
+        // 2) Queue message for debounce batching (atomic INSERT, no race condition)
         try {
             const msgContent = messageText || (isAudio ? '[audio]' : '')
-            if (msgContent) {
-                // Find active conversation for this phone+broker
-                const { data: activeConv } = await supabase
-                    .from('whatsapp_ai_conversations')
-                    .select('id, pending_messages')
-                    .eq('lead_phone', finalPhone)
-                    .in('status', ['active', 'human_takeover'])
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle()
-
-                if (activeConv && !isAudio) {
-                    const pending = Array.isArray(activeConv.pending_messages) ? activeConv.pending_messages : []
-                    pending.push(msgContent)
-                    await supabase
-                        .from('whatsapp_ai_conversations')
-                        .update({ pending_messages: pending, updated_at: new Date().toISOString() })
-                        .eq('id', activeConv.id)
-                }
+            if (msgContent && !isAudio) {
+                await supabase.from('app_config').insert({
+                    key: `_pmq_${finalPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                    value: msgContent,
+                    updated_at: new Date().toISOString()
+                })
+                console.log(`[Webhook] 📝 Queued pending message for ${finalPhone}`)
             }
         } catch (e) {
-            console.warn('[Webhook] Failed to save pending message:', e)
+            console.warn('[Webhook] Failed to queue pending message:', e)
         }
 
         // ── Route: AI Broker or Shadow Agent ──

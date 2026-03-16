@@ -526,27 +526,30 @@ export const processWhatsAppMessage = inngest.createFunction(
             }
         }
 
-        // Read pending messages (accumulated during debounce)
+        // Read queued messages from debounce window (atomic INSERTs in app_config)
         const pendingMessages = await step.run('read-pending-messages', async () => {
-            const { data: freshConv } = await supabase
-                .from('whatsapp_ai_conversations')
-                .select('pending_messages')
-                .eq('id', conversation.id)
-                .single()
-            const pending = freshConv?.pending_messages || []
-            // Clear pending
-            if (pending.length > 0) {
-                await supabase
-                    .from('whatsapp_ai_conversations')
-                    .update({ pending_messages: [], updated_at: new Date().toISOString() })
-                    .eq('id', conversation.id)
-            }
-            return pending as string[]
+            const { data: queuedMsgs } = await supabase
+                .from('app_config')
+                .select('key, value')
+                .like('key', `_pmq_${cleanPhone}_%`)
+                .order('updated_at', { ascending: true })
+
+            if (!queuedMsgs || queuedMsgs.length === 0) return [] as string[]
+
+            // Delete processed entries
+            const keys = queuedMsgs.map(m => m.key)
+            await supabase
+                .from('app_config')
+                .delete()
+                .in('key', keys)
+
+            console.log(`[WhatsApp Agent] 📨 Read ${queuedMsgs.length} queued messages: ${queuedMsgs.map(m => m.value).join(' | ')}`)
+            return queuedMsgs.map(m => m.value) as string[]
         })
 
-        // Combine event message with any pending messages
+        // Combine all queued messages into one input (they form a single thought)
         const allMessages = pendingMessages.length > 0
-            ? [...pendingMessages].join('\n')
+            ? pendingMessages.join(' ')
             : messageText
 
         let botMessageIds: string[] = Array.isArray(conversation.bot_message_ids)
