@@ -102,10 +102,12 @@ export async function POST(request: NextRequest) {
             || body.chat?.message?.audioMessage)
 
         // ── Extract message ID (needed for UAZAPI /message/download fallback) ──
-        const messageId = messageData.id?.id
-            || messageData.key?.id
-            || messageData.id
-            || messageData.messageId
+        // ConnectyHub uses 'messageid' (lowercase), other providers use 'id' or 'key.id'
+        const messageId = messageData.messageid       // ConnectyHub: 'messageid' field
+            || messageData.id?.id                      // nested {id: {id: 'xxx'}}
+            || messageData.key?.id                     // Baileys format
+            || (typeof messageData.id === 'string' ? messageData.id : null)  // string id
+            || messageData.messageId                   // camelCase variant
             || body.chat?.id?.id
             || body.chat?.key?.id
             || null
@@ -124,6 +126,9 @@ export async function POST(request: NextRequest) {
                         timestamp: new Date().toISOString(),
                         audioUrl: audioUrl || null,
                         messageId: messageId || null,
+                        messageId_raw_messageid: messageData.messageid || null,
+                        messageId_raw_id: typeof messageData.id === 'string' ? messageData.id : JSON.stringify(messageData.id)?.substring(0, 200) || null,
+                        messageId_raw_keyid: messageData.key?.id || null,
                         msgType,
                         msgMessageType,
                         chatLastMsgType,
