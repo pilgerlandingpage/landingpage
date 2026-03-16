@@ -356,35 +356,58 @@ export const processWhatsAppMessage = inngest.createFunction(
             console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioUrl=${audioUrl ? audioUrl.substring(0, 80) + '...' : 'null'}, messageText="${messageText}"`)            
             if (isAudio && audioUrl) {
                 console.log(`[WhatsApp Agent] Transcribing audio from ${cleanPhone}...`)
-                try {
-                    // First, verify the audio URL is accessible
-                    const testFetch = await fetch(audioUrl, { method: 'HEAD' }).catch(() => null)
-                    console.log(`[WhatsApp Agent] Audio URL status: ${testFetch?.status || 'FAILED'}`)
-                    
-                    const effectiveProvider = configs['whatsapp_provider'] || configs['ai_provider'] || 'gemini'
-                    console.log(`[WhatsApp Agent] Using provider: ${effectiveProvider}, has openai key: ${!!configs['openai_api_key']}, has gemini key: ${!!configs['gemini_api_key']}`)
-                    
-                    if (effectiveProvider === 'openai' && configs['openai_api_key']) {
-                        const result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
-                        console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 100)}..."`)
-                        return result
-                    } else if (configs['gemini_api_key']) {
-                        const model = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
-                        const result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], model)
-                        console.log(`[WhatsApp Agent] Gemini transcription result: "${result?.substring(0, 100)}..."`)
-                        return result
-                    } else if (configs['openai_api_key']) {
-                        const result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
-                        console.log(`[WhatsApp Agent] Whisper fallback result: "${result?.substring(0, 100)}..."`)
-                        return result
-                    } else {
-                        console.error('[WhatsApp Agent] No transcription provider configured!')
-                        return '[Áudio recebido mas sem provedor de transcrição configurado]'
-                    }
-                } catch (e) {
-                    console.error('[WhatsApp Agent] Transcription error:', e)
-                    return '[Áudio não transcrito]'
+                
+                // Helper: check if transcription result is actually valid
+                const isValidTranscription = (text: string | undefined | null): boolean => {
+                    if (!text) return false
+                    const cleaned = text.replace(/[.\s…]+/g, '').trim()
+                    return cleaned.length >= 2  // At least 2 real characters
                 }
+                
+                const hasGemini = !!configs['gemini_api_key']
+                const hasOpenAI = !!configs['openai_api_key']
+                const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
+                
+                console.log(`[WhatsApp Agent] Available providers: Gemini=${hasGemini}, OpenAI=${hasOpenAI}`)
+                
+                // Strategy: Try Gemini FIRST (better with WhatsApp OGG/Opus audio)
+                // Then fallback to Whisper if Gemini fails or returns empty
+                
+                let result: string | undefined
+                
+                // Attempt 1: Gemini (preferred for WhatsApp audio)
+                if (hasGemini) {
+                    try {
+                        console.log(`[WhatsApp Agent] Attempting Gemini transcription...`)
+                        result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], geminiModel)
+                        console.log(`[WhatsApp Agent] Gemini result: "${result?.substring(0, 150)}"`)
+                        if (isValidTranscription(result)) {
+                            return result!.trim()
+                        }
+                        console.log(`[WhatsApp Agent] Gemini returned invalid/empty result, trying fallback...`)
+                    } catch (e) {
+                        console.error('[WhatsApp Agent] Gemini transcription error:', e)
+                    }
+                }
+                
+                // Attempt 2: Whisper fallback
+                if (hasOpenAI) {
+                    try {
+                        console.log(`[WhatsApp Agent] Attempting Whisper transcription...`)
+                        result = await transcribeWithWhisper(audioUrl, configs['openai_api_key'])
+                        console.log(`[WhatsApp Agent] Whisper result: "${result?.substring(0, 150)}"`)
+                        if (isValidTranscription(result)) {
+                            return result!.trim()
+                        }
+                        console.log(`[WhatsApp Agent] Whisper also returned invalid result`)
+                    } catch (e) {
+                        console.error('[WhatsApp Agent] Whisper transcription error:', e)
+                    }
+                }
+                
+                // All attempts failed — return a user-friendly fallback
+                console.error('[WhatsApp Agent] All transcription attempts failed or returned empty')
+                return '[O usuário enviou uma mensagem de áudio que não pôde ser transcrita. Responda pedindo que repita ou envie por texto.]'
             }
             return messageText
         })
