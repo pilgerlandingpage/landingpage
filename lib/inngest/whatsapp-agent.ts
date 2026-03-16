@@ -31,12 +31,54 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>) {
             'ai_provider', 'gemini_api_key', 'openai_api_key',
             'whatsapp_provider', 'gemini_whatsapp_model', 'openai_whatsapp_model',
             'whatsapp_audio_enabled', 'whatsapp_tts_provider', 'whatsapp_tts_voice',
-            'elevenlabs_api_key'
+            'elevenlabs_api_key',
+            // New settings
+            'whatsapp_always_online', 'whatsapp_mark_as_read',
+            'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
+            'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
+            'whatsapp_agent_enabled', 'whatsapp_split_messages',
+            'whatsapp_debounce_seconds'
         ])
 
     const map: Record<string, string> = {}
     data?.forEach((c: any) => { map[c.key] = c.value })
     return map
+}
+
+// Split long text into human-like message chunks
+function splitIntoHumanChunks(text: string): string[] {
+    // Don't split short messages
+    if (text.length <= 120) return [text]
+
+    // Split on sentence boundaries: . ! ? followed by space or newline
+    const sentences = text.split(/(?<=[.!?])\s+|\n+/).filter(s => s.trim())
+    if (sentences.length <= 1) return [text]
+
+    // Group sentences into chunks of ~80-150 chars, max 4 chunks
+    const chunks: string[] = []
+    let current = ''
+
+    for (const sentence of sentences) {
+        if (current && (current.length + sentence.length + 1) > 150) {
+            chunks.push(current.trim())
+            current = sentence
+        } else {
+            current = current ? current + ' ' + sentence : sentence
+        }
+    }
+    if (current.trim()) chunks.push(current.trim())
+
+    // Limit to max 4 chunks to avoid spamming
+    if (chunks.length > 4) {
+        const merged: string[] = []
+        const perGroup = Math.ceil(chunks.length / 4)
+        for (let i = 0; i < chunks.length; i += perGroup) {
+            merged.push(chunks.slice(i, i + perGroup).join(' '))
+        }
+        return merged
+    }
+
+    return chunks
 }
 
 function extractOutboundMessageId(payload: any): string | null {
@@ -365,7 +407,11 @@ export const processWhatsAppMessage = inngest.createFunction(
         id: 'whatsapp-agent-process-message',
         name: 'WhatsApp Agent — Process Incoming Message',
         retries: 1,
-        concurrency: [{ limit: 5 }],  // Limit concurrent processing
+        concurrency: [{ limit: 5 }],
+        debounce: {
+            period: '15s',
+            key: 'event.data.cleanPhone',
+        },
     },
     { event: 'whatsapp/message-received' },
     async ({ event, step }) => {
@@ -451,11 +497,57 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'error', reason: 'could_not_create_conversation' }
         }
 
+        // Check if agent is enabled
+        if (configs['whatsapp_agent_enabled'] === 'false') {
+            console.log(`[WhatsApp Agent] Agent disabled, skipping`)
+            return { action: 'skipped', reason: 'agent_disabled' }
+        }
+
         // Check human_takeover
         if (conversation.status === 'human_takeover') {
-            console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
-            return { action: 'skipped', reason: 'human_takeover' }
+            // Check if auto-reactivation time has passed
+            const interventionMinutes = parseInt(configs['whatsapp_human_intervention_minutes'] || '60')
+            const takeoverAt = conversation.human_takeover_at
+            if (takeoverAt && interventionMinutes > 0) {
+                const elapsed = (Date.now() - new Date(takeoverAt).getTime()) / 60000
+                if (elapsed >= interventionMinutes) {
+                    console.log(`[WhatsApp Agent] Auto-reactivating after ${Math.floor(elapsed)}min`)
+                    await supabase
+                        .from('whatsapp_ai_conversations')
+                        .update({ status: 'active', human_takeover_at: null, updated_at: new Date().toISOString() })
+                        .eq('id', conversation.id)
+                } else {
+                    console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
+                    return { action: 'skipped', reason: 'human_takeover' }
+                }
+            } else {
+                console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
+                return { action: 'skipped', reason: 'human_takeover' }
+            }
         }
+
+        // Read pending messages (accumulated during debounce)
+        const pendingMessages = await step.run('read-pending-messages', async () => {
+            const { data: freshConv } = await supabase
+                .from('whatsapp_ai_conversations')
+                .select('pending_messages')
+                .eq('id', conversation.id)
+                .single()
+            const pending = freshConv?.pending_messages || []
+            // Clear pending
+            if (pending.length > 0) {
+                await supabase
+                    .from('whatsapp_ai_conversations')
+                    .update({ pending_messages: [], updated_at: new Date().toISOString() })
+                    .eq('id', conversation.id)
+            }
+            return pending as string[]
+        })
+
+        // Combine event message with any pending messages
+        const allMessages = pendingMessages.length > 0
+            ? [...pendingMessages].join('\n')
+            : messageText
 
         let botMessageIds: string[] = Array.isArray(conversation.bot_message_ids)
             ? conversation.bot_message_ids : []
@@ -607,7 +699,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 return '[O usuário enviou uma mensagem de áudio que não pôde ser processada. Responda pedindo que repita ou envie por texto.]'
             }
             
-            return messageText
+            return allMessages
         })
 
         if (!inputText) {
@@ -762,8 +854,26 @@ export const processWhatsAppMessage = inngest.createFunction(
                     })
                 } catch (_) { /* ignore */ }
             } else {
-                const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText || aiResponse.text, instanceToken })
-                botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                // Split messages into human-like chunks if enabled
+                const splitEnabled = configs['whatsapp_split_messages'] !== 'false'
+                const textToSend = cleanText || aiResponse.text
+
+                if (splitEnabled && textToSend.length > 120) {
+                    const chunks = splitIntoHumanChunks(textToSend)
+                    for (let i = 0; i < chunks.length; i++) {
+                        if (i > 0) {
+                            // Show typing between chunks + delay
+                            await setPresenceTyping(cleanPhone, instanceToken).catch(() => {})
+                            const chunkDelay = Math.floor(Math.random() * 2000) + 1000 + (chunks[i].length * 20)
+                            await new Promise(r => setTimeout(r, Math.min(chunkDelay, 4000)))
+                        }
+                        const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: chunks[i], instanceToken })
+                        botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                    }
+                } else {
+                    const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: textToSend, instanceToken })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
             }
         })
 
@@ -978,9 +1088,20 @@ export const whatsappKeepOnline = inngest.createFunction(
         name: 'WhatsApp — Keep Instances Online',
         retries: 0,
     },
-    { cron: '*/4 * * * *' },  // Every 4 minutes
+    { cron: '*/2 * * * *' },  // Every 2 minutes
     async () => {
         const supabase = getSupabase()
+
+        // Check if always_online is enabled
+        const { data: cfg } = await supabase
+            .from('app_config')
+            .select('value')
+            .eq('key', 'whatsapp_always_online')
+            .maybeSingle()
+
+        if (cfg?.value === 'false') {
+            return { action: 'skipped', reason: 'always_online_disabled' }
+        }
 
         // Get all connected instances
         const { data: instances } = await supabase
@@ -992,15 +1113,22 @@ export const whatsappKeepOnline = inngest.createFunction(
             return { action: 'no_connected_instances' }
         }
 
-        // UAZAPI v2 only supports 'composing' and 'recording' as presence values
-        // There is no 'available' / 'online' presence endpoint
-        // The WhatsApp connection itself keeps the instance online
-        console.log(`[KeepOnline] ${instances.length} instance(s) connected. Status OK.`)
-        
+        // Set presence to available for each instance
+        const results: string[] = []
+        for (const inst of instances) {
+            try {
+                await setPresenceAvailable(inst.instance_token)
+                results.push(`${inst.instance_name}: online`)
+            } catch {
+                results.push(`${inst.instance_name}: error`)
+            }
+        }
+
+        console.log(`[KeepOnline] ${results.join(', ')}`)
         return {
-            action: 'instances_checked',
+            action: 'presence_set',
             count: instances.length,
-            instances: instances.map(i => i.instance_name)
+            results
         }
     }
 )

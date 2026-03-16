@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
     Smartphone,
     RefreshCw,
@@ -20,7 +20,17 @@ import {
     Link2,
     Monitor,
     MessageSquare,
-    Mic
+    Mic,
+    Settings,
+    ChevronDown,
+    ChevronUp,
+    Save,
+    Power,
+    Eye,
+    Volume2,
+    SplitSquareVertical,
+    Users,
+    Timer
 } from 'lucide-react'
 
 interface LiveData {
@@ -99,6 +109,53 @@ export default function WhatsAppInstancesPage() {
 
     const connectedCount = instances.filter(i => i.status === 'connected').length
     const disconnectedCount = instances.filter(i => i.status !== 'connected').length
+
+    // ── Settings Panel State ──
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const [settings, setSettings] = useState<Record<string, string>>({})
+    const [settingsLoading, setSettingsLoading] = useState(false)
+    const [settingsSaving, setSettingsSaving] = useState(false)
+    const [settingsSaved, setSettingsSaved] = useState(false)
+
+    const loadSettings = useCallback(async () => {
+        setSettingsLoading(true)
+        try {
+            const res = await fetch('/api/admin/whatsapp/settings')
+            const data = await res.json()
+            if (data.success) setSettings(data.settings)
+        } catch (e) { console.error('Failed to load settings', e) }
+        finally { setSettingsLoading(false) }
+    }, [])
+
+    useEffect(() => { if (settingsOpen) loadSettings() }, [settingsOpen, loadSettings])
+
+    const saveSettings = async () => {
+        setSettingsSaving(true)
+        try {
+            const res = await fetch('/api/admin/whatsapp/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            })
+            const data = await res.json()
+            if (data.success) {
+                setSettingsSaved(true)
+                setTimeout(() => setSettingsSaved(false), 2000)
+            }
+        } catch (e) { console.error('Failed to save settings', e) }
+        finally { setSettingsSaving(false) }
+    }
+
+    const toggleSetting = (key: string) => {
+        setSettings(prev => ({ ...prev, [key]: prev[key] === 'true' ? 'false' : 'true' }))
+    }
+
+    const setNumericSetting = (key: string, value: string) => {
+        const num = parseInt(value)
+        if (!isNaN(num) && num >= 0) {
+            setSettings(prev => ({ ...prev, [key]: String(num) }))
+        }
+    }
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -192,6 +249,93 @@ export default function WhatsAppInstancesPage() {
                     <span style={{ color: '#ef4444', fontSize: '0.9rem' }}>{error}</span>
                 </div>
             )}
+
+            {/* Settings Panel */}
+            <div className="chart-card" style={{ marginBottom: '24px', overflow: 'hidden' }}>
+                <button
+                    onClick={() => setSettingsOpen(!settingsOpen)}
+                    style={{
+                        width: '100%', padding: '16px 24px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600,
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Settings size={20} style={{ color: 'var(--gold)' }} />
+                        Configurações do Agente
+                    </div>
+                    {settingsOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+
+                {settingsOpen && (
+                    <div style={{ padding: '0 24px 24px', borderTop: '1px solid var(--border)' }}>
+                        {settingsLoading ? (
+                            <div style={{ textAlign: 'center', padding: '24px' }}>
+                                <Loader2 size={24} className="animate-spin" style={{ color: 'var(--gold)' }} />
+                            </div>
+                        ) : (
+                            <>
+                                {/* Behavior Section */}
+                                <div style={{ marginTop: '20px' }}>
+                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Bot size={14} /> Comportamento
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                                        <ToggleSwitch label="Agente Ativado" icon={<Power size={14} />} checked={settings.whatsapp_agent_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_agent_enabled')} />
+                                        <ToggleSwitch label="Sempre Online" icon={<Wifi size={14} />} checked={settings.whatsapp_always_online !== 'false'} onChange={() => toggleSetting('whatsapp_always_online')} />
+                                        <ToggleSwitch label="Marcar como Lidas" icon={<Eye size={14} />} checked={settings.whatsapp_mark_as_read !== 'false'} onChange={() => toggleSetting('whatsapp_mark_as_read')} />
+                                        <ToggleSwitch label="Dividir Mensagens" icon={<SplitSquareVertical size={14} />} checked={settings.whatsapp_split_messages !== 'false'} onChange={() => toggleSetting('whatsapp_split_messages')} />
+                                        <ToggleSwitch label="Função Espelho" icon={<Monitor size={14} />} checked={settings.whatsapp_mirror_mode !== 'false'} onChange={() => toggleSetting('whatsapp_mirror_mode')} />
+                                        <ToggleSwitch label="Intervenção Humana" icon={<Users size={14} />} checked={settings.whatsapp_human_intervention !== 'false'} onChange={() => toggleSetting('whatsapp_human_intervention')} />
+                                    </div>
+                                </div>
+
+                                {/* Audio Section */}
+                                <div style={{ marginTop: '24px' }}>
+                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Volume2 size={14} /> Áudio
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                                        <ToggleSwitch label="Resposta por Áudio" icon={<Mic size={14} />} checked={settings.whatsapp_audio_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_audio_enabled')} />
+                                        <ToggleSwitch label="Transcrição de Áudio" icon={<MessageSquare size={14} />} checked={settings.whatsapp_transcription_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_transcription_enabled')} />
+                                    </div>
+                                </div>
+
+                                {/* Timing Section */}
+                                <div style={{ marginTop: '24px' }}>
+                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Timer size={14} /> Temporização
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
+                                        <NumericInput label="Debounce (segundos)" value={settings.whatsapp_debounce_seconds || '15'} onChange={(v) => setNumericSetting('whatsapp_debounce_seconds', v)} min={5} max={60} />
+                                        <NumericInput label="Intervalo Humano (min)" value={settings.whatsapp_human_intervention_minutes || '60'} onChange={(v) => setNumericSetting('whatsapp_human_intervention_minutes', v)} min={1} max={1440} />
+                                    </div>
+                                </div>
+
+                                {/* Save Button */}
+                                <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={saveSettings}
+                                        disabled={settingsSaving}
+                                        className="btn btn-primary"
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            padding: '10px 24px',
+                                            background: settingsSaved ? '#22c55e' : undefined,
+                                            borderColor: settingsSaved ? '#22c55e' : undefined,
+                                            transition: 'all 0.3s'
+                                        }}
+                                    >
+                                        {settingsSaving ? <Loader2 size={16} className="animate-spin" /> : settingsSaved ? <CheckCircle2 size={16} /> : <Save size={16} />}
+                                        {settingsSaving ? 'Salvando...' : settingsSaved ? 'Salvo!' : 'Salvar'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* Info Banner */}
             <div className="chart-card" style={{
@@ -448,6 +592,101 @@ function DetailItem({ icon, label, value, valueColor }: {
             <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
                 <div style={{ fontSize: '0.82rem', color: valueColor || 'var(--text-secondary)', fontWeight: 500 }}>{value}</div>
+            </div>
+        </div>
+    )
+}
+
+// Toggle switch sub-component
+function ToggleSwitch({ label, icon, checked, onChange }: {
+    label: string
+    icon: React.ReactNode
+    checked: boolean
+    onChange: () => void
+}) {
+    return (
+        <div
+            onClick={onChange}
+            style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--border)',
+                transition: 'all 0.2s',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: checked ? 'var(--gold)' : 'var(--text-muted)' }}>{icon}</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+            </div>
+            <div style={{
+                width: '40px', height: '22px', borderRadius: '11px',
+                background: checked ? '#22c55e' : 'rgba(255,255,255,0.12)',
+                position: 'relative', transition: 'background 0.2s',
+                flexShrink: 0,
+            }}>
+                <div style={{
+                    width: '16px', height: '16px', borderRadius: '50%',
+                    background: 'white',
+                    position: 'absolute', top: '3px',
+                    left: checked ? '21px' : '3px',
+                    transition: 'left 0.2s',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                }} />
+            </div>
+        </div>
+    )
+}
+
+// Numeric input sub-component
+function NumericInput({ label, value, onChange, min, max }: {
+    label: string
+    value: string
+    onChange: (v: string) => void
+    min?: number
+    max?: number
+}) {
+    return (
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 14px', borderRadius: '10px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border)',
+        }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                    onClick={() => onChange(String(Math.max(min || 0, parseInt(value) - 1)))}
+                    style={{
+                        width: '28px', height: '28px', borderRadius: '6px',
+                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)',
+                        color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                >−</button>
+                <input
+                    type="number"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    min={min}
+                    max={max}
+                    style={{
+                        width: '50px', textAlign: 'center',
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
+                        borderRadius: '6px', padding: '4px 6px',
+                        color: 'var(--gold)', fontSize: '0.9rem', fontWeight: 600,
+                        outline: 'none',
+                    }}
+                />
+                <button
+                    onClick={() => onChange(String(Math.min(max || 9999, parseInt(value) + 1)))}
+                    style={{
+                        width: '28px', height: '28px', borderRadius: '6px',
+                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)',
+                        color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                >+</button>
             </div>
         </div>
     )

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
+import { markAsRead } from '@/lib/uazapi'
 
 function getSupabase() {
     return createClient(
@@ -257,6 +258,47 @@ export async function POST(request: NextRequest) {
         if (!messageText && !isAudio) {
             console.log('[Webhook] ⏭️ Ignored empty message')
             return NextResponse.json({ success: true, action: 'ignored_empty' })
+        }
+
+        // ── Immediate actions (before async Inngest processing) ──
+
+        // 1) Mark as read (blue ticks) — fire-and-forget
+        try {
+            const { data: markCfg } = await supabase
+                .from('app_config')
+                .select('value')
+                .eq('key', 'whatsapp_mark_as_read')
+                .maybeSingle()
+            if (markCfg?.value !== 'false') {
+                markAsRead(finalPhone, instance.instance_token).catch(() => {})
+            }
+        } catch { /* ignore */ }
+
+        // 2) Save message to pending_messages for debounce batching
+        try {
+            const msgContent = messageText || (isAudio ? '[audio]' : '')
+            if (msgContent) {
+                // Find active conversation for this phone+broker
+                const { data: activeConv } = await supabase
+                    .from('whatsapp_ai_conversations')
+                    .select('id, pending_messages')
+                    .eq('lead_phone', finalPhone)
+                    .in('status', ['active', 'human_takeover'])
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle()
+
+                if (activeConv && !isAudio) {
+                    const pending = Array.isArray(activeConv.pending_messages) ? activeConv.pending_messages : []
+                    pending.push(msgContent)
+                    await supabase
+                        .from('whatsapp_ai_conversations')
+                        .update({ pending_messages: pending, updated_at: new Date().toISOString() })
+                        .eq('id', activeConv.id)
+                }
+            }
+        } catch (e) {
+            console.warn('[Webhook] Failed to save pending message:', e)
         }
 
         // ── Route: AI Broker or Shadow Agent ──
