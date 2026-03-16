@@ -273,13 +273,13 @@ export async function sendImageMessage({ phone, imageUrl, caption, instanceToken
 export async function sendAudioMessage({ phone, audioUrl, ptt, instanceToken }: SendAudioOptions) {
     if (!instanceToken) throw new Error('Token da instância é obrigatório')
 
-    return uazapiFetch('/send/audio', {
+    return uazapiFetch('/send/media', {
         method: 'POST',
         token: instanceToken,
         body: {
             number: cleanPhone(phone),
-            url: audioUrl,
-            ptt: ptt ?? true,
+            file: audioUrl,           // UAZAPI uses 'file' not 'url'
+            type: ptt ? 'ptt' : 'audio',  // 'ptt' for voice note, 'audio' for regular
         },
     })
 }
