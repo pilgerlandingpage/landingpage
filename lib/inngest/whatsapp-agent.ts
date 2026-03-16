@@ -682,6 +682,8 @@ export const processWhatsAppMessage = inngest.createFunction(
             const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
             const shouldSendAudio = isAudio && audioEnabled && !needsTextFormat && !buttons
 
+            console.log(`[WhatsApp Agent] 📤 Send decision: isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, shouldSendAudio=${shouldSendAudio}`)
+
             if (buttons && buttons.options.length > 0) {
                 try {
                     const sendResult = await sendMenuMessage({
@@ -709,13 +711,18 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const isOpenAIVoice = rawVoiceId.startsWith('openai:')
                 const voiceId = isOpenAIVoice ? rawVoiceId.replace('openai:', '') : rawVoiceId
 
+                console.log(`[WhatsApp Agent] 🔊 TTS: provider=${ttsProvider}, voiceId=${voiceId}, isOpenAIVoice=${isOpenAIVoice}, textLen=${cleanText.length}`)
+
                 if (isOpenAIVoice && configs['openai_api_key']) {
                     // Broker explicitly chose an OpenAI TTS voice
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], voiceId || 'onyx')
+                    console.log(`[WhatsApp Agent] 🔊 OpenAI TTS result: ${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}`)
                 } else if (ttsProvider === 'elevenlabs' && configs['elevenlabs_api_key'] && voiceId) {
                     audioBuffer = await ttsElevenLabs(cleanText, configs['elevenlabs_api_key'], voiceId)
+                    console.log(`[WhatsApp Agent] 🔊 ElevenLabs TTS result: ${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}`)
                 }
                 if (!audioBuffer && configs['openai_api_key']) {
+                    console.log(`[WhatsApp Agent] 🔊 Falling back to OpenAI TTS...`)
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], configs['whatsapp_tts_voice'] || 'onyx')
                 }
 
