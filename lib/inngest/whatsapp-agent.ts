@@ -711,40 +711,54 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const isOpenAIVoice = rawVoiceId.startsWith('openai:')
                 const voiceId = isOpenAIVoice ? rawVoiceId.replace('openai:', '') : rawVoiceId
 
-                console.log(`[WhatsApp Agent] 🔊 TTS: provider=${ttsProvider}, voiceId=${voiceId}, isOpenAIVoice=${isOpenAIVoice}, textLen=${cleanText.length}`)
+                const debugSteps: string[] = []
+                debugSteps.push(`provider=${ttsProvider}, voiceId=${voiceId}, isOpenAI=${isOpenAIVoice}, textLen=${cleanText.length}`)
 
                 if (isOpenAIVoice && configs['openai_api_key']) {
-                    // Broker explicitly chose an OpenAI TTS voice
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], voiceId || 'onyx')
-                    console.log(`[WhatsApp Agent] 🔊 OpenAI TTS result: ${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}`)
+                    debugSteps.push(`openai_tts: ${audioBuffer ? audioBuffer.length + 'b' : 'NULL'}`)
                 } else if (ttsProvider === 'elevenlabs' && configs['elevenlabs_api_key'] && voiceId) {
                     audioBuffer = await ttsElevenLabs(cleanText, configs['elevenlabs_api_key'], voiceId)
-                    console.log(`[WhatsApp Agent] 🔊 ElevenLabs TTS result: ${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}`)
+                    debugSteps.push(`elevenlabs_tts: ${audioBuffer ? audioBuffer.length + 'b' : 'NULL'}`)
+                } else {
+                    debugSteps.push(`no_tts_match: provider=${ttsProvider}, hasELKey=${!!configs['elevenlabs_api_key']}, hasOAIKey=${!!configs['openai_api_key']}, voiceId=${voiceId}`)
                 }
                 if (!audioBuffer && configs['openai_api_key']) {
-                    console.log(`[WhatsApp Agent] 🔊 Falling back to OpenAI TTS...`)
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], configs['whatsapp_tts_voice'] || 'onyx')
+                    debugSteps.push(`openai_fallback: ${audioBuffer ? audioBuffer.length + 'b' : 'NULL'}`)
                 }
 
                 if (audioBuffer) {
+                    debugSteps.push(`uploading_to_r2: ${audioBuffer.length}b`)
                     const audioPublicUrl = await uploadAudioToR2(audioBuffer, supabase)
+                    debugSteps.push(`r2_url: ${audioPublicUrl || 'NULL'}`)
                     if (audioPublicUrl) {
                         try {
                             const sendResult = await sendAudioMessage({ phone: cleanPhone, audioUrl: audioPublicUrl, ptt: true, instanceToken })
+                            debugSteps.push(`send_audio: OK, result=${JSON.stringify(sendResult).substring(0, 200)}`)
                             botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
-                        } catch (e) {
-                            console.warn('[Audio] Failed, text fallback:', e)
+                        } catch (e: any) {
+                            debugSteps.push(`send_audio: FAIL, error=${e?.message || String(e)}`)
                             const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
                             botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                         }
                     } else {
+                        debugSteps.push('r2_upload_failed, sending text')
                         const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
                         botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                     }
                 } else {
+                    debugSteps.push('all_tts_failed, sending text')
                     const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                 }
+
+                // Save debug to DB (fire-and-forget)
+                await supabase.from('app_config').upsert({
+                    key: '_debug_tts_pipeline',
+                    value: JSON.stringify({ timestamp: new Date().toISOString(), steps: debugSteps }),
+                    updated_at: new Date().toISOString()
+                }).then(() => {}).catch(() => {})
             } else {
                 const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText || aiResponse.text, instanceToken })
                 botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
