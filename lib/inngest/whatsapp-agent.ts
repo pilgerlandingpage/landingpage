@@ -23,7 +23,7 @@ function getSupabase() {
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
 
-async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>) {
+async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceId?: string) {
     const { data } = await supabase
         .from('app_config')
         .select('key, value')
@@ -32,7 +32,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>) {
             'whatsapp_provider', 'gemini_whatsapp_model', 'openai_whatsapp_model',
             'whatsapp_audio_enabled', 'whatsapp_tts_provider', 'whatsapp_tts_voice',
             'elevenlabs_api_key',
-            // New settings
+            // Global fallback settings
             'whatsapp_always_online', 'whatsapp_mark_as_read',
             'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
             'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
@@ -42,6 +42,41 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>) {
 
     const map: Record<string, string> = {}
     data?.forEach((c: any) => { map[c.key] = c.value })
+
+    // Merge per-instance config (overrides global settings)
+    if (instanceId) {
+        try {
+            const { data: inst } = await supabase
+                .from('whatsapp_instances')
+                .select('config')
+                .eq('id', instanceId)
+                .single()
+
+            if (inst?.config && typeof inst.config === 'object') {
+                const cfg = inst.config as Record<string, any>
+                // Map instance config keys to global config keys
+                const keyMap: Record<string, string> = {
+                    agent_enabled: 'whatsapp_agent_enabled',
+                    always_online: 'whatsapp_always_online',
+                    mark_as_read: 'whatsapp_mark_as_read',
+                    split_messages: 'whatsapp_split_messages',
+                    mirror_mode: 'whatsapp_mirror_mode',
+                    audio_response: 'whatsapp_audio_enabled',
+                    audio_transcription: 'whatsapp_transcription_enabled',
+                    human_intervention: 'whatsapp_human_intervention',
+                    debounce_seconds: 'whatsapp_debounce_seconds',
+                    human_intervention_minutes: 'whatsapp_human_intervention_minutes',
+                }
+                for (const [instKey, globalKey] of Object.entries(keyMap)) {
+                    if (cfg[instKey] !== undefined) {
+                        map[globalKey] = String(cfg[instKey])
+                    }
+                }
+                console.log(`[WhatsApp Agent] Loaded per-instance config for ${instanceId}`)
+            }
+        } catch { /* instance config not available, use global */ }
+    }
+
     return map
 }
 
@@ -453,7 +488,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 brokerData = data
             }
 
-            const cfgs = await loadAIConfigs(supabase)
+            const cfgs = await loadAIConfigs(supabase, instanceId)
             return { instance: inst, broker: brokerData, configs: cfgs }
         })
 
@@ -1123,30 +1158,25 @@ export const whatsappKeepOnline = inngest.createFunction(
     async () => {
         const supabase = getSupabase()
 
-        // Check if always_online is enabled
-        const { data: cfg } = await supabase
-            .from('app_config')
-            .select('value')
-            .eq('key', 'whatsapp_always_online')
-            .maybeSingle()
-
-        if (cfg?.value === 'false') {
-            return { action: 'skipped', reason: 'always_online_disabled' }
-        }
-
-        // Get all connected instances
+        // Get all connected instances with their config
         const { data: instances } = await supabase
             .from('whatsapp_instances')
-            .select('id, instance_name, instance_token')
+            .select('id, instance_name, instance_token, config')
             .eq('status', 'connected')
 
         if (!instances || instances.length === 0) {
             return { action: 'no_connected_instances' }
         }
 
-        // Set presence to available for each instance
+        // Set presence for each instance that has always_online enabled
         const results: string[] = []
         for (const inst of instances) {
+            const cfg = (inst.config as Record<string, any>) || {}
+            // Default to true if not explicitly set to false
+            if (cfg.always_online === false) {
+                results.push(`${inst.instance_name}: skipped (always_online=false)`)
+                continue
+            }
             try {
                 await setPresenceAvailable(inst.instance_token)
                 results.push(`${inst.instance_name}: online`)
@@ -1156,10 +1186,6 @@ export const whatsappKeepOnline = inngest.createFunction(
         }
 
         console.log(`[KeepOnline] ${results.join(', ')}`)
-        return {
-            action: 'presence_set',
-            count: instances.length,
-            results
-        }
+        return { action: 'presence_set', count: instances.length, results }
     }
 )

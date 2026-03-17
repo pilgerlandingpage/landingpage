@@ -1,78 +1,41 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import {
-    Smartphone,
-    RefreshCw,
-    Loader2,
-    AlertCircle,
-    CheckCircle2,
-    Wifi,
-    WifiOff,
-    Phone,
-    User,
-    Clock,
-    Globe,
-    Battery,
-    BatteryCharging,
-    Bot,
-    Shield,
-    Link2,
-    Monitor,
-    MessageSquare,
-    Mic,
-    Settings,
-    ChevronDown,
-    ChevronUp,
-    Save,
-    Power,
-    Eye,
-    Volume2,
-    SplitSquareVertical,
-    Users,
-    Timer
+    Smartphone, RefreshCw, Loader2, AlertCircle, CheckCircle2,
+    Wifi, WifiOff, Phone, User, Clock, Globe, Battery, BatteryCharging,
+    Bot, Shield, Link2, Monitor, MessageSquare, Mic, Settings,
+    ChevronDown, ChevronUp, Save, Power, Eye, Volume2,
+    SplitSquareVertical, Users, Timer
 } from 'lucide-react'
 
 interface LiveData {
-    phone?: string
-    pushName?: string
-    platform?: string
-    battery?: number
-    plugged?: boolean
-    isOnline?: boolean
-    profilePicUrl?: string
-    webhookUrl?: string
+    phone?: string; pushName?: string; platform?: string
+    battery?: number; plugged?: boolean; isOnline?: boolean
+    profilePicUrl?: string; webhookUrl?: string
 }
-
-interface BrokerData {
-    id: string
-    name: string
-    creci: string
-    photo_url: string
-    is_active: boolean
-    system_prompt?: string
-    voice_id?: string
-}
-
-interface AdminUserData {
-    id: string
-    name: string
-    email: string
-}
-
+interface BrokerData { id: string; name: string; creci: string; photo_url: string; is_active: boolean; system_prompt?: string; voice_id?: string }
+interface AdminUserData { id: string; name: string; email: string }
 interface Instance {
-    id: string
-    admin_user_id: string
-    broker_id?: string
-    instance_name: string
-    instance_token?: string
-    phone_number: string | null
-    status: 'disconnected' | 'connecting' | 'connected'
-    connected_at: string | null
-    created_at: string
-    virtual_brokers?: BrokerData
-    admin_users?: AdminUserData
-    live_data?: LiveData | null
+    id: string; admin_user_id: string; broker_id?: string
+    instance_name: string; instance_token?: string
+    phone_number: string | null; status: 'disconnected' | 'connecting' | 'connected'
+    connected_at: string | null; created_at: string; config?: Record<string, any>
+    virtual_brokers?: BrokerData; admin_users?: AdminUserData; live_data?: LiveData | null
+}
+
+interface InstanceConfig {
+    agent_enabled: boolean; always_online: boolean; mark_as_read: boolean
+    split_messages: boolean; mirror_mode: boolean; audio_response: boolean
+    audio_transcription: boolean; human_intervention: boolean
+    debounce_seconds: number; human_intervention_minutes: number
+}
+
+const DEFAULT_CONFIG: InstanceConfig = {
+    agent_enabled: true, always_online: true, mark_as_read: true,
+    split_messages: true, mirror_mode: false, audio_response: true,
+    audio_transcription: true, human_intervention: true,
+    debounce_seconds: 15, human_intervention_minutes: 60,
 }
 
 export default function WhatsAppInstancesPage() {
@@ -80,512 +43,351 @@ export default function WhatsAppInstancesPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [refreshing, setRefreshing] = useState(false)
+    const [expandedCard, setExpandedCard] = useState<string | null>(null)
+    const [expandedSettings, setExpandedSettings] = useState<string | null>(null)
+    const [configs, setConfigs] = useState<Record<string, InstanceConfig>>({})
+    const [savingSettings, setSavingSettings] = useState<string | null>(null)
 
-    useEffect(() => {
-        loadInstances()
-    }, [])
+    useEffect(() => { loadInstances() }, [])
 
     const loadInstances = async () => {
-        setLoading(true)
-        setError(null)
+        setLoading(true); setError(null)
         try {
             const res = await fetch('/api/admin/whatsapp/instances')
             if (!res.ok) throw new Error('Falha ao carregar instâncias')
             const data = await res.json()
             if (!data.success) throw new Error(data.message)
-            setInstances(data.instances || [])
+            const insts = data.instances || []
+            setInstances(insts)
+            // Load configs from instance.config field
+            const cfgMap: Record<string, InstanceConfig> = {}
+            insts.forEach((inst: Instance) => {
+                cfgMap[inst.id] = { ...DEFAULT_CONFIG, ...(inst.config || {}) }
+            })
+            setConfigs(cfgMap)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro desconhecido')
-        } finally {
-            setLoading(false)
-        }
+        } finally { setLoading(false) }
     }
 
     const refreshAll = async () => {
-        setRefreshing(true)
-        await loadInstances()
-        setRefreshing(false)
+        setRefreshing(true); await loadInstances(); setRefreshing(false)
     }
 
-    const connectedCount = instances.filter(i => i.status === 'connected').length
-    const disconnectedCount = instances.filter(i => i.status !== 'connected').length
-
-    // ── Settings Panel State ──
-    const [settingsOpen, setSettingsOpen] = useState(false)
-    const [settings, setSettings] = useState<Record<string, string>>({})
-    const [settingsLoading, setSettingsLoading] = useState(false)
-    const [settingsSaving, setSettingsSaving] = useState(false)
-    const [settingsSaved, setSettingsSaved] = useState(false)
-
-    const loadSettings = useCallback(async () => {
-        setSettingsLoading(true)
-        try {
-            const res = await fetch('/api/admin/whatsapp/settings')
-            const data = await res.json()
-            if (data.success) setSettings(data.settings)
-        } catch (e) { console.error('Failed to load settings', e) }
-        finally { setSettingsLoading(false) }
-    }, [])
-
-    useEffect(() => { if (settingsOpen) loadSettings() }, [settingsOpen, loadSettings])
-
-    const saveSettings = async () => {
-        setSettingsSaving(true)
+    const saveSettings = async (instanceId: string) => {
+        setSavingSettings(instanceId)
         try {
             const res = await fetch('/api/admin/whatsapp/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
+                body: JSON.stringify({ instance_id: instanceId, settings: configs[instanceId] })
             })
-            const data = await res.json()
-            if (data.success) {
-                setSettingsSaved(true)
-                setTimeout(() => setSettingsSaved(false), 2000)
-            }
-        } catch (e) { console.error('Failed to save settings', e) }
-        finally { setSettingsSaving(false) }
+            if (!res.ok) throw new Error('Erro ao salvar')
+        } catch (err) { console.error(err) }
+        finally { setSavingSettings(null) }
     }
 
-    const toggleSetting = (key: string) => {
-        setSettings(prev => ({ ...prev, [key]: prev[key] === 'true' ? 'false' : 'true' }))
+    const updateConfig = (instanceId: string, key: string, value: any) => {
+        setConfigs(prev => ({
+            ...prev,
+            [instanceId]: { ...prev[instanceId], [key]: value }
+        }))
     }
 
-    const setNumericSetting = (key: string, value: string) => {
-        const num = parseInt(value)
-        if (!isNaN(num) && num >= 0) {
-            setSettings(prev => ({ ...prev, [key]: String(num) }))
-        }
-    }
+    const connectedCount = instances.filter(i => i.status === 'connected').length
+    const agentInstances = instances.filter(i => i.broker_id)
+    const userInstances = instances.filter(i => !i.broker_id)
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'connected':
-                return {
-                    color: '#22c55e', bg: 'rgba(34, 197, 94, 0.12)',
-                    border: 'rgba(34, 197, 94, 0.3)',
-                    Icon: CheckCircle2, text: 'Conectado'
-                }
-            case 'connecting':
-                return {
-                    color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)',
-                    border: 'rgba(245, 158, 11, 0.3)',
-                    Icon: RefreshCw, text: 'Aguardando QR'
-                }
-            default:
-                return {
-                    color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)',
-                    border: 'rgba(239, 68, 68, 0.3)',
-                    Icon: WifiOff, text: 'Desconectado'
-                }
-        }
-    }
+    if (loading) return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
+            <Loader2 size={24} className="spin" /> Carregando instâncias...
+        </div>
+    )
 
-    const formatPhone = (phone: string) => {
-        const clean = phone.replace(/\D/g, '')
-        if (clean.length === 13 && clean.startsWith('55')) {
-            return `+${clean.slice(0, 2)} (${clean.slice(2, 4)}) ${clean.slice(4, 9)}-${clean.slice(9)}`
-        }
-        if (clean.length === 12 && clean.startsWith('55')) {
-            return `+${clean.slice(0, 2)} (${clean.slice(2, 4)}) ${clean.slice(4, 8)}-${clean.slice(8)}`
-        }
-        return phone
-    }
+    if (error) return (
+        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+            <AlertCircle size={48} style={{ color: '#ef4444', marginBottom: 16 }} />
+            <p style={{ color: '#ef4444', fontSize: '1.1rem' }}>Falha ao carregar instâncias</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>{error}</p>
+            <button onClick={loadInstances} style={{ marginTop: 16, padding: '10px 24px', borderRadius: '10px', background: 'var(--gold)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                Tentar Novamente
+            </button>
+        </div>
+    )
 
     return (
         <div>
             {/* Header */}
-            <div className="admin-header" style={{ marginBottom: '32px' }}>
-                <div className="flex justify-between items-center w-full">
-                    <div>
-                        <h1 className="flex items-center gap-3">
-                            <Smartphone className="text-gold" size={28} />
-                            WhatsApps Conectados
-                        </h1>
-                        <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                            Monitore todas as instâncias WhatsApp conectadas aos Corretores IA e Usuários.
-                        </p>
-                    </div>
-                    <button
-                        onClick={refreshAll}
-                        className="btn btn-primary"
-                        disabled={refreshing}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
-                    >
-                        <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
-                        Atualizar Status
-                    </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                    <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
+                        <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp — Instâncias
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
+                        {instances.length} instância{instances.length !== 1 ? 's' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
+                    </p>
                 </div>
+                <button onClick={refreshAll} disabled={refreshing}
+                    style={{ padding: '10px 20px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
+                    <RefreshCw size={16} className={refreshing ? 'spin' : ''} />
+                    {refreshing ? 'Atualizando...' : 'Atualizar'}
+                </button>
             </div>
 
-            {/* Summary Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-                <div className="chart-card" style={{ padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--gold)' }}>{instances.length}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>Total de Instâncias</div>
-                </div>
-                <div className="chart-card" style={{ padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e' }}>{connectedCount}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <Wifi size={14} /> Conectados
+            {/* Agent Instances Section */}
+            {agentInstances.length > 0 && (
+                <div style={{ marginBottom: '32px' }}>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '12px' }}>
+                        <Bot size={20} /> Agentes IA ({agentInstances.length})
+                    </h2>
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                        {agentInstances.map(inst => (
+                            <InstanceCard key={inst.id} inst={inst} type="agent"
+                                expanded={expandedCard === inst.id}
+                                onToggleExpand={() => setExpandedCard(expandedCard === inst.id ? null : inst.id)}
+                                settingsExpanded={expandedSettings === inst.id}
+                                onToggleSettings={() => setExpandedSettings(expandedSettings === inst.id ? null : inst.id)}
+                                config={configs[inst.id] || DEFAULT_CONFIG}
+                                onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
+                                onSaveSettings={() => saveSettings(inst.id)}
+                                savingSettings={savingSettings === inst.id}
+                            />
+                        ))}
                     </div>
-                </div>
-                <div className="chart-card" style={{ padding: '20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#ef4444' }}>{disconnectedCount}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <WifiOff size={14} /> Desconectados
-                    </div>
-                </div>
-            </div>
-
-            {/* Error Banner */}
-            {error && (
-                <div className="chart-card" style={{
-                    marginBottom: '24px', padding: '16px 20px',
-                    background: 'rgba(239, 68, 68, 0.08)',
-                    border: '1px solid rgba(239, 68, 68, 0.25)',
-                    display: 'flex', alignItems: 'center', gap: '12px'
-                }}>
-                    <AlertCircle size={18} style={{ color: '#ef4444', flexShrink: 0 }} />
-                    <span style={{ color: '#ef4444', fontSize: '0.9rem' }}>{error}</span>
                 </div>
             )}
 
-            {/* Settings Panel */}
-            <div className="chart-card" style={{ marginBottom: '24px', overflow: 'hidden' }}>
-                <button
-                    onClick={() => setSettingsOpen(!settingsOpen)}
-                    style={{
-                        width: '100%', padding: '16px 24px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        background: 'transparent', border: 'none', cursor: 'pointer',
-                        color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600,
-                    }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Settings size={20} style={{ color: 'var(--gold)' }} />
-                        Configurações do Agente
+            {/* User Instances Section */}
+            {userInstances.length > 0 && (
+                <div style={{ marginBottom: '32px' }}>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', color: '#6366f1', marginBottom: '12px' }}>
+                        <Users size={20} /> Corretores / Usuários ({userInstances.length})
+                    </h2>
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                        {userInstances.map(inst => (
+                            <InstanceCard key={inst.id} inst={inst} type="user"
+                                expanded={expandedCard === inst.id}
+                                onToggleExpand={() => setExpandedCard(expandedCard === inst.id ? null : inst.id)}
+                                settingsExpanded={expandedSettings === inst.id}
+                                onToggleSettings={() => setExpandedSettings(expandedSettings === inst.id ? null : inst.id)}
+                                config={configs[inst.id] || DEFAULT_CONFIG}
+                                onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
+                                onSaveSettings={() => saveSettings(inst.id)}
+                                savingSettings={savingSettings === inst.id}
+                            />
+                        ))}
                     </div>
-                    {settingsOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-
-                {settingsOpen && (
-                    <div style={{ padding: '0 24px 24px', borderTop: '1px solid var(--border)' }}>
-                        {settingsLoading ? (
-                            <div style={{ textAlign: 'center', padding: '24px' }}>
-                                <Loader2 size={24} className="animate-spin" style={{ color: 'var(--gold)' }} />
-                            </div>
-                        ) : (
-                            <>
-                                {/* Behavior Section */}
-                                <div style={{ marginTop: '20px' }}>
-                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Bot size={14} /> Comportamento
-                                    </h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-                                        <ToggleSwitch label="Agente Ativado" icon={<Power size={14} />} checked={settings.whatsapp_agent_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_agent_enabled')} />
-                                        <ToggleSwitch label="Sempre Online" icon={<Wifi size={14} />} checked={settings.whatsapp_always_online !== 'false'} onChange={() => toggleSetting('whatsapp_always_online')} />
-                                        <ToggleSwitch label="Marcar como Lidas" icon={<Eye size={14} />} checked={settings.whatsapp_mark_as_read !== 'false'} onChange={() => toggleSetting('whatsapp_mark_as_read')} />
-                                        <ToggleSwitch label="Dividir Mensagens" icon={<SplitSquareVertical size={14} />} checked={settings.whatsapp_split_messages !== 'false'} onChange={() => toggleSetting('whatsapp_split_messages')} />
-                                        <ToggleSwitch label="Função Espelho" icon={<Monitor size={14} />} checked={settings.whatsapp_mirror_mode !== 'false'} onChange={() => toggleSetting('whatsapp_mirror_mode')} />
-                                        <ToggleSwitch label="Intervenção Humana" icon={<Users size={14} />} checked={settings.whatsapp_human_intervention !== 'false'} onChange={() => toggleSetting('whatsapp_human_intervention')} />
-                                    </div>
-                                </div>
-
-                                {/* Audio Section */}
-                                <div style={{ marginTop: '24px' }}>
-                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Volume2 size={14} /> Áudio
-                                    </h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-                                        <ToggleSwitch label="Resposta por Áudio" icon={<Mic size={14} />} checked={settings.whatsapp_audio_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_audio_enabled')} />
-                                        <ToggleSwitch label="Transcrição de Áudio" icon={<MessageSquare size={14} />} checked={settings.whatsapp_transcription_enabled !== 'false'} onChange={() => toggleSetting('whatsapp_transcription_enabled')} />
-                                    </div>
-                                </div>
-
-                                {/* Timing Section */}
-                                <div style={{ marginTop: '24px' }}>
-                                    <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Timer size={14} /> Temporização
-                                    </h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-                                        <NumericInput label="Debounce (segundos)" value={settings.whatsapp_debounce_seconds || '15'} onChange={(v) => setNumericSetting('whatsapp_debounce_seconds', v)} min={5} max={60} />
-                                        <NumericInput label="Intervalo Humano (min)" value={settings.whatsapp_human_intervention_minutes || '60'} onChange={(v) => setNumericSetting('whatsapp_human_intervention_minutes', v)} min={1} max={1440} />
-                                    </div>
-                                </div>
-
-                                {/* Save Button */}
-                                <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button
-                                        onClick={saveSettings}
-                                        disabled={settingsSaving}
-                                        className="btn btn-primary"
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '8px',
-                                            padding: '10px 24px',
-                                            background: settingsSaved ? '#22c55e' : undefined,
-                                            borderColor: settingsSaved ? '#22c55e' : undefined,
-                                            transition: 'all 0.3s'
-                                        }}
-                                    >
-                                        {settingsSaving ? <Loader2 size={16} className="animate-spin" /> : settingsSaved ? <CheckCircle2 size={16} /> : <Save size={16} />}
-                                        {settingsSaving ? 'Salvando...' : settingsSaved ? 'Salvo!' : 'Salvar'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Info Banner */}
-            <div className="chart-card" style={{
-                marginBottom: '24px', padding: '16px 20px',
-                background: 'rgba(99, 102, 241, 0.06)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-                display: 'flex', alignItems: 'flex-start', gap: '12px'
-            }}>
-                <Smartphone size={18} style={{ color: '#6366f1', flexShrink: 0, marginTop: '2px' }} />
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>Painel de Monitoramento</strong> —
-                    As instâncias WhatsApp são gerenciadas diretamente na tela de cada <strong>Corretor IA</strong> ou na tela de <strong>Gestão de Usuários</strong>.
-                    Aqui você pode monitorar o status de todas as conexões ativas.
                 </div>
-            </div>
+            )}
 
-            {/* Instances Grid */}
-            {loading ? (
-                <div className="chart-card" style={{ textAlign: 'center', padding: '80px 0' }}>
-                    <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto', color: 'var(--gold)' }} />
-                    <p style={{ marginTop: '16px', color: 'var(--text-muted)' }}>Carregando instâncias e perfis...</p>
-                </div>
-            ) : instances.length === 0 ? (
-                <div className="chart-card" style={{ textAlign: 'center', padding: '80px 0' }}>
-                    <Smartphone size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhuma instância WhatsApp encontrada</p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>
-                        Conecte um WhatsApp pelo menu <strong>Corretores IA</strong> para começar.
+            {instances.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                    <Smartphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhuma instância WhatsApp</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>
+                        Crie agentes IA em <strong>Corretores IA</strong> ou conecte WhatsApp em <strong>Gestão de Usuários</strong>.
                     </p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '20px' }}>
-                    {instances.map(inst => {
-                        const badge = getStatusBadge(inst.status)
-                        const broker = inst.virtual_brokers
-                        const adminUser = inst.admin_users
-                        const live = inst.live_data
-                        const displayPhone = live?.phone || inst.phone_number
-                        const displayName = live?.pushName || broker?.name || adminUser?.name || inst.instance_name
-                        const profilePic = live?.profilePicUrl || broker?.photo_url || null
-                        const hasWebhook = !!live?.webhookUrl
-                        const agentType = broker ? 'Corretor IA' : adminUser ? 'Agente Sombra' : 'Instância'
-
-                        return (
-                            <div key={inst.id} className="chart-card" style={{
-                                padding: '0',
-                                overflow: 'hidden',
-                                borderLeft: `4px solid ${badge.color}`,
-                                transition: 'all 0.2s',
-                            }}>
-                                {/* Top Section: Profile + Status */}
-                                <div style={{
-                                    padding: '20px 24px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '16px',
-                                    background: inst.status === 'connected' ? 'rgba(34, 197, 94, 0.03)' : 'transparent'
-                                }}>
-                                    {/* Profile Photo */}
-                                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                                        <div style={{
-                                            width: '64px', height: '64px', borderRadius: '50%',
-                                            background: profilePic ? 'transparent' : 'linear-gradient(135deg, var(--gold), #b8860b)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            overflow: 'hidden',
-                                            border: `3px solid ${badge.color}`,
-                                            boxShadow: `0 0 0 3px ${badge.bg}`,
-                                        }}>
-                                            {profilePic ? (
-                                                <img
-                                                    src={profilePic}
-                                                    alt={displayName}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).style.display = 'none';
-                                                        (e.target as HTMLImageElement).parentElement!.innerHTML = `<span style="color:white;font-size:1.4rem;font-weight:700">${displayName.charAt(0).toUpperCase()}</span>`
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span style={{ color: 'white', fontSize: '1.4rem', fontWeight: 700 }}>
-                                                    {displayName.charAt(0).toUpperCase()}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {/* Online indicator */}
-                                        {inst.status === 'connected' && (
-                                            <div style={{
-                                                position: 'absolute', bottom: '2px', right: '2px',
-                                                width: '14px', height: '14px', borderRadius: '50%',
-                                                background: live?.isOnline ? '#22c55e' : '#94a3b8',
-                                                border: '2px solid var(--bg-primary)',
-                                            }} title={live?.isOnline ? 'Online' : 'Offline'} />
-                                        )}
-                                    </div>
-
-                                    {/* Name & Type */}
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                            <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                                                {displayName}
-                                            </span>
-                                            <div style={{
-                                                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                                                padding: '2px 10px', borderRadius: '12px',
-                                                background: badge.bg, border: `1px solid ${badge.border}`,
-                                                fontSize: '0.7rem', fontWeight: 600, color: badge.color,
-                                            }}>
-                                                <badge.Icon size={10} />
-                                                {badge.text}
-                                            </div>
-                                        </div>
-
-                                        {/* Agent Type */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                                            {broker ? (
-                                                <Bot size={13} style={{ color: 'var(--gold)' }} />
-                                            ) : adminUser ? (
-                                                <Shield size={13} style={{ color: '#8b5cf6' }} />
-                                            ) : (
-                                                <Smartphone size={13} style={{ color: 'var(--text-muted)' }} />
-                                            )}
-                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                {agentType}
-                                                {broker?.creci && <span style={{ color: 'var(--text-muted)' }}> · CRECI {broker.creci}</span>}
-                                            </span>
-                                        </div>
-
-                                        {/* Phone */}
-                                        {displayPhone && (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                                                <Phone size={12} style={{ color: 'var(--text-muted)' }} />
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
-                                                    {formatPhone(displayPhone)}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Details Section */}
-                                {inst.status === 'connected' && (
-                                    <div style={{
-                                        padding: '14px 24px',
-                                        borderTop: '1px solid var(--border)',
-                                        display: 'grid',
-                                        gridTemplateColumns: '1fr 1fr',
-                                        gap: '10px',
-                                        background: 'rgba(0,0,0,0.01)',
-                                    }}>
-                                        {/* Push Name */}
-                                        {live?.pushName && (
-                                            <DetailItem
-                                                icon={<User size={13} />}
-                                                label="Nome WhatsApp"
-                                                value={live.pushName}
-                                            />
-                                        )}
-
-                                        {/* Platform */}
-                                        {live?.platform && (
-                                            <DetailItem
-                                                icon={<Monitor size={13} />}
-                                                label="Dispositivo"
-                                                value={live.platform}
-                                            />
-                                        )}
-
-                                        {/* Battery */}
-                                        {live?.battery !== null && live?.battery !== undefined && (
-                                            <DetailItem
-                                                icon={live.plugged ? <BatteryCharging size={13} style={{ color: '#22c55e' }} /> : <Battery size={13} />}
-                                                label="Bateria"
-                                                value={`${live.battery}%${live.plugged ? ' ⚡' : ''}`}
-                                                valueColor={live.battery < 20 ? '#ef4444' : live.battery < 50 ? '#f59e0b' : '#22c55e'}
-                                            />
-                                        )}
-
-                                        {/* Webhook */}
-                                        <DetailItem
-                                            icon={<Link2 size={13} />}
-                                            label="Webhook"
-                                            value={hasWebhook ? '✅ Configurado' : '❌ Não configurado'}
-                                            valueColor={hasWebhook ? '#22c55e' : '#ef4444'}
-                                        />
-
-                                        {/* Voice */}
-                                        {broker?.voice_id && (
-                                            <DetailItem
-                                                icon={<Mic size={13} />}
-                                                label="Voz"
-                                                value="ElevenLabs configurada"
-                                            />
-                                        )}
-
-                                        {/* System Prompt */}
-                                        {broker?.system_prompt && (
-                                            <DetailItem
-                                                icon={<MessageSquare size={13} />}
-                                                label="Prompt"
-                                                value={`${broker.system_prompt.length} caracteres`}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Footer */}
-                                <div style={{
-                                    padding: '10px 24px',
-                                    borderTop: '1px solid var(--border)',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    background: 'rgba(0,0,0,0.02)',
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Clock size={12} style={{ color: 'var(--text-muted)' }} />
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                            {inst.connected_at
-                                                ? `Conectado ${new Date(inst.connected_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
-                                                : `Criado ${new Date(inst.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
-                                            }
-                                        </span>
-                                    </div>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                                        {inst.instance_name.length > 30 ? inst.instance_name.slice(0, 30) + '...' : inst.instance_name}
-                                    </span>
-                                </div>
-                            </div>
-                        )
-                    })}
                 </div>
             )}
 
             <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
+                @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+                .spin { animation: spin 1.2s linear infinite; }
             `}</style>
         </div>
     )
 }
 
-// Detail item sub-component
-function DetailItem({ icon, label, value, valueColor }: {
-    icon: React.ReactNode
-    label: string
-    value: string
-    valueColor?: string
+// ═══════════════════════════════════════════
+// Instance Card Component
+// ═══════════════════════════════════════════
+
+function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings }: {
+    inst: Instance; type: 'agent' | 'user'
+    expanded: boolean; onToggleExpand: () => void
+    settingsExpanded: boolean; onToggleSettings: () => void
+    config: InstanceConfig
+    onUpdateConfig: (key: string, value: any) => void
+    onSaveSettings: () => void; savingSettings: boolean
 }) {
+    const isConnected = inst.status === 'connected'
+    const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
+    const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
+    const subtitle = type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
+    const photoUrl = type === 'agent' ? inst.virtual_brokers?.photo_url : inst.live_data?.profilePicUrl
+    const prompt = type === 'agent' ? inst.virtual_brokers?.system_prompt : null
+
+    return (
+        <div style={{
+            background: 'var(--bg-secondary)', borderRadius: '14px',
+            border: `1px solid ${isConnected ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
+            overflow: 'hidden', transition: 'all 0.2s',
+        }}>
+            {/* Card Header */}
+            <div onClick={onToggleExpand} style={{
+                padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px',
+                cursor: 'pointer', transition: 'background 0.2s',
+            }}>
+                {/* Avatar */}
+                <div style={{
+                    width: '48px', height: '48px', borderRadius: '50%',
+                    background: `linear-gradient(135deg, ${accentColor}22, ${accentColor}44)`,
+                    border: `2px solid ${isConnected ? '#22c55e' : 'var(--border)'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden', flexShrink: 0,
+                }}>
+                    {photoUrl ? (
+                        <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : type === 'agent' ? (
+                        <Bot size={22} style={{ color: accentColor }} />
+                    ) : (
+                        <User size={22} style={{ color: accentColor }} />
+                    )}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                            {name || inst.instance_name}
+                        </span>
+                        <span style={{
+                            fontSize: '0.65rem', padding: '2px 8px', borderRadius: '20px',
+                            background: type === 'agent' ? 'rgba(201,169,110,0.15)' : 'rgba(99,102,241,0.15)',
+                            color: accentColor, fontWeight: 700,
+                        }}>
+                            {type === 'agent' ? '🤖 AGENTE IA' : '👤 CORRETOR'}
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {subtitle}
+                    </div>
+                </div>
+
+                {/* Status */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    {isConnected ? (
+                        <>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(34,197,94,0.1)', borderRadius: '20px' }}>
+                                <Wifi size={14} style={{ color: '#22c55e' }} />
+                                <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.8rem' }}>Online</span>
+                            </div>
+                            {inst.live_data?.phone && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    {inst.live_data.phone}
+                                </span>
+                            )}
+                        </>
+                    ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: '20px' }}>
+                            <WifiOff size={14} style={{ color: '#ef4444' }} />
+                            <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.8rem' }}>Desconectado</span>
+                        </div>
+                    )}
+                    {expanded ? <ChevronUp size={18} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={18} style={{ color: 'var(--text-muted)' }} />}
+                </div>
+            </div>
+
+            {/* Expanded Details */}
+            {expanded && (
+                <div style={{ borderTop: '1px solid var(--border)' }}>
+                    {/* Instance Details */}
+                    <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                        <DetailItem icon={<Globe size={13} />} label="Instância" value={inst.instance_name} />
+                        {inst.live_data?.platform && <DetailItem icon={<Monitor size={13} />} label="Plataforma" value={inst.live_data.platform} />}
+                        {inst.live_data?.battery != null && (
+                            <DetailItem icon={inst.live_data.plugged ? <BatteryCharging size={13} /> : <Battery size={13} />}
+                                label="Bateria" value={`${inst.live_data.battery}%${inst.live_data.plugged ? ' ⚡' : ''}`} />
+                        )}
+                        {inst.live_data?.webhookUrl && <DetailItem icon={<Link2 size={13} />} label="Webhook" value="✅ Configurado" valueColor="#22c55e" />}
+                        {prompt && <DetailItem icon={<MessageSquare size={13} />} label="Prompt" value={`${prompt.length} caracteres`} />}
+                        <DetailItem icon={<Clock size={13} />} label="Criada" value={new Date(inst.created_at).toLocaleDateString('pt-BR')} />
+                    </div>
+
+                    {/* Settings Toggle Button */}
+                    <div style={{ padding: '0 20px 16px' }}>
+                        <button onClick={(e) => { e.stopPropagation(); onToggleSettings() }}
+                            style={{
+                                width: '100%', padding: '12px 16px', borderRadius: '10px',
+                                background: settingsExpanded ? `${accentColor}15` : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${settingsExpanded ? accentColor : 'var(--border)'}`,
+                                color: 'var(--text-primary)', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s',
+                            }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Settings size={16} style={{ color: accentColor }} />
+                                ⚙️ Configurações de Comportamento
+                            </span>
+                            {settingsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                    </div>
+
+                    {/* Per-Instance Settings Panel */}
+                    {settingsExpanded && (
+                        <div style={{ padding: '0 20px 20px' }}>
+                            <div style={{ display: 'grid', gap: '8px' }}>
+                                {/* Behavior Toggles */}
+                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '8px 0 4px' }}>
+                                    Comportamento
+                                </div>
+                                <ToggleSwitch label="Agente Ativado" icon={<Power size={15} />}
+                                    checked={config.agent_enabled} onChange={() => onUpdateConfig('agent_enabled', !config.agent_enabled)} />
+                                <ToggleSwitch label="Sempre Online" icon={<Wifi size={15} />}
+                                    checked={config.always_online} onChange={() => onUpdateConfig('always_online', !config.always_online)} />
+                                <ToggleSwitch label="Marcar como Lido (✓✓)" icon={<Eye size={15} />}
+                                    checked={config.mark_as_read} onChange={() => onUpdateConfig('mark_as_read', !config.mark_as_read)} />
+                                <ToggleSwitch label="Dividir Respostas em Partes" icon={<SplitSquareVertical size={15} />}
+                                    checked={config.split_messages} onChange={() => onUpdateConfig('split_messages', !config.split_messages)} />
+                                <ToggleSwitch label="Modo Espelho (responde com áudio se receber áudio)" icon={<Mic size={15} />}
+                                    checked={config.mirror_mode} onChange={() => onUpdateConfig('mirror_mode', !config.mirror_mode)} />
+                                <ToggleSwitch label="Intervenção Humana (parar quando humano intervém)" icon={<Shield size={15} />}
+                                    checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} />
+
+                                {/* Audio Toggles */}
+                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
+                                    Áudio
+                                </div>
+                                <ToggleSwitch label="Respostas por Áudio" icon={<Volume2 size={15} />}
+                                    checked={config.audio_response} onChange={() => onUpdateConfig('audio_response', !config.audio_response)} />
+                                <ToggleSwitch label="Transcrição de Áudio Recebido" icon={<Mic size={15} />}
+                                    checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} />
+
+                                {/* Timing */}
+                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
+                                    Temporizadores
+                                </div>
+                                <NumericInput label="Debounce (segundos)" value={String(config.debounce_seconds)}
+                                    onChange={(v) => onUpdateConfig('debounce_seconds', parseInt(v) || 15)} min={5} max={120} />
+                                <NumericInput label="Reativar agente após (minutos)" value={String(config.human_intervention_minutes)}
+                                    onChange={(v) => onUpdateConfig('human_intervention_minutes', parseInt(v) || 60)} min={5} max={1440} />
+
+                                {/* Save Button */}
+                                <button onClick={onSaveSettings} disabled={savingSettings}
+                                    style={{
+                                        marginTop: '8px', padding: '12px 20px', borderRadius: '10px',
+                                        background: 'linear-gradient(135deg, var(--gold), #b8860b)',
+                                        border: 'none', color: '#000', fontWeight: 700, fontSize: '0.9rem',
+                                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        gap: '8px', opacity: savingSettings ? 0.6 : 1,
+                                    }}>
+                                    {savingSettings ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+                                    {savingSettings ? 'Salvando...' : 'Salvar Configurações'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    )
+}
+
+// ═══════════════════════════════════════════
+// Sub-Components
+// ═══════════════════════════════════════════
+
+function DetailItem({ icon, label, value, valueColor }: { icon: React.ReactNode; label: string; value: string; valueColor?: string }) {
     return (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ color: 'var(--text-muted)', marginTop: '1px', flexShrink: 0 }}>{icon}</div>
@@ -597,24 +399,13 @@ function DetailItem({ icon, label, value, valueColor }: {
     )
 }
 
-// Toggle switch sub-component
-function ToggleSwitch({ label, icon, checked, onChange }: {
-    label: string
-    icon: React.ReactNode
-    checked: boolean
-    onChange: () => void
-}) {
+function ToggleSwitch({ label, icon, checked, onChange }: { label: string; icon: React.ReactNode; checked: boolean; onChange: () => void }) {
     return (
-        <div
-            onClick={onChange}
-            style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid var(--border)',
-                transition: 'all 0.2s',
-            }}
-        >
+        <div onClick={onChange} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', transition: 'all 0.2s',
+        }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: checked ? 'var(--gold)' : 'var(--text-muted)' }}>{icon}</span>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
@@ -622,71 +413,38 @@ function ToggleSwitch({ label, icon, checked, onChange }: {
             <div style={{
                 width: '40px', height: '22px', borderRadius: '11px',
                 background: checked ? '#22c55e' : 'rgba(255,255,255,0.12)',
-                position: 'relative', transition: 'background 0.2s',
-                flexShrink: 0,
+                position: 'relative', transition: 'background 0.2s', flexShrink: 0,
             }}>
                 <div style={{
-                    width: '16px', height: '16px', borderRadius: '50%',
-                    background: 'white',
-                    position: 'absolute', top: '3px',
-                    left: checked ? '21px' : '3px',
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    width: '16px', height: '16px', borderRadius: '50%', background: 'white',
+                    position: 'absolute', top: '3px', left: checked ? '21px' : '3px',
+                    transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                 }} />
             </div>
         </div>
     )
 }
 
-// Numeric input sub-component
-function NumericInput({ label, value, onChange, min, max }: {
-    label: string
-    value: string
-    onChange: (v: string) => void
-    min?: number
-    max?: number
-}) {
+function NumericInput({ label, value, onChange, min, max }: { label: string; value: string; onChange: (v: string) => void; min?: number; max?: number }) {
     return (
         <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '10px 14px', borderRadius: '10px',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid var(--border)',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)',
         }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <button
-                    onClick={() => onChange(String(Math.max(min || 0, parseInt(value) - 1)))}
-                    style={{
-                        width: '28px', height: '28px', borderRadius: '6px',
-                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)',
-                        color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                >−</button>
-                <input
-                    type="number"
-                    value={value}
-                    onChange={e => onChange(e.target.value)}
-                    min={min}
-                    max={max}
-                    style={{
-                        width: '50px', textAlign: 'center',
-                        background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                        borderRadius: '6px', padding: '4px 6px',
-                        color: 'var(--gold)', fontSize: '0.9rem', fontWeight: 600,
-                        outline: 'none',
-                    }}
+                <button onClick={() => onChange(String(Math.max(min || 0, parseInt(value) - 1)))}
+                    style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    −
+                </button>
+                <input type="number" value={value} onChange={e => onChange(e.target.value)} min={min} max={max}
+                    style={{ width: '50px', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px 6px', color: 'var(--gold)', fontSize: '0.9rem', fontWeight: 600, outline: 'none' }}
                 />
-                <button
-                    onClick={() => onChange(String(Math.min(max || 9999, parseInt(value) + 1)))}
-                    style={{
-                        width: '28px', height: '28px', borderRadius: '6px',
-                        background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)',
-                        color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                >+</button>
+                <button onClick={() => onChange(String(Math.min(max || 9999, parseInt(value) + 1)))}
+                    style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    +
+                </button>
             </div>
         </div>
     )
