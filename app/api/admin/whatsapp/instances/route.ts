@@ -15,15 +15,26 @@ function getSupabase() {
     )
 }
 
-// GET — Lista todas as instâncias com dados enriquecidos
+// GET — Lista instâncias (filtra por broker_id ou admin_user_id se fornecido)
 export async function GET(request: NextRequest) {
     try {
         const supabase = getSupabase()
+        const brokerId = request.nextUrl.searchParams.get('broker_id')
+        const adminUserId = request.nextUrl.searchParams.get('admin_user_id')
 
-        // Fetch instances (simple select, no joins that might break)
-        const { data: instances, error } = await supabase
+        // Build query with optional filters
+        let query = supabase
             .from('whatsapp_instances')
             .select('*')
+        
+        if (brokerId) {
+            query = query.eq('broker_id', brokerId)
+        }
+        if (adminUserId) {
+            query = query.eq('admin_user_id', adminUserId)
+        }
+
+        const { data: instances, error } = await query
             .order('created_at', { ascending: false })
 
         if (error) {
