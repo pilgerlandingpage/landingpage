@@ -210,6 +210,22 @@ export default function AdminSidebar() {
             </nav>
 
             <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid var(--border-color)' }}>
+                <Link
+                    href="/admin/minha-conta"
+                    className="admin-nav-item"
+                    style={{
+                        width: '100%',
+                        justifyContent: 'flex-start',
+                        marginBottom: '8px',
+                        color: pathname === '/admin/minha-conta' ? 'var(--gold)' : 'var(--text-primary)',
+                        background: pathname === '/admin/minha-conta' ? 'var(--bg-card)' : 'transparent',
+                        borderLeft: pathname === '/admin/minha-conta' ? '2px solid var(--gold)' : '2px solid transparent'
+                    }}
+                >
+                    <UserCog size={18} />
+                    Minha Conta
+                </Link>
+
                 <button
                     onClick={handleLogout}
                     className="admin-nav-item"
