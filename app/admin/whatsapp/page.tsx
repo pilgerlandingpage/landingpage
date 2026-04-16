@@ -210,6 +210,10 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     onUpdateConfig: (key: string, value: any) => void
     onSaveSettings: () => void; savingSettings: boolean
 }) {
+    const [webhookLoading, setWebhookLoading] = useState(false)
+    const [webhookMessage, setWebhookMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [setupLoading, setSetupLoading] = useState(false)
+    const [setupMessage, setSetupMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const isConnected = inst.status === 'connected'
     const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
     const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
@@ -304,7 +308,130 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                         <DetailItem icon={<Clock size={13} />} label="Criada" value={new Date(inst.created_at).toLocaleDateString('pt-BR')} />
                     </div>
 
-                    {/* Settings Toggle Button */}
+                    {/* Webhook Auto-Setup */}
+                    {isConnected && (
+                        <div style={{ padding: '0 20px 12px' }}>
+                            <div style={{
+                                padding: '12px 16px', borderRadius: '10px',
+                                background: inst.live_data?.webhookUrl ? 'rgba(34,197,94,0.06)' : 'rgba(245,158,11,0.06)',
+                                border: `1px solid ${inst.live_data?.webhookUrl ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'}`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                                    <Link2 size={16} style={{ color: inst.live_data?.webhookUrl ? '#22c55e' : '#f59e0b', flexShrink: 0 }} />
+                                    <div>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                            Webhook {inst.live_data?.webhookUrl ? 'Ativo' : 'Não Configurado'}
+                                        </div>
+                                        {inst.live_data?.webhookUrl && (
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+                                                {inst.live_data.webhookUrl}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation()
+                                        setWebhookLoading(true)
+                                        setWebhookMessage(null)
+                                        try {
+                                            const res = await fetch('/api/admin/whatsapp/webhook-setup', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ instanceId: inst.id })
+                                            })
+                                            const data = await res.json()
+                                            if (data.success) {
+                                                setWebhookMessage({ type: 'success', text: `✅ Webhook configurado: ${data.webhookUrl}` })
+                                            } else {
+                                                setWebhookMessage({ type: 'error', text: `❌ ${data.message}` })
+                                            }
+                                        } catch (err) {
+                                            setWebhookMessage({ type: 'error', text: `❌ Erro de conexão` })
+                                        } finally {
+                                            setWebhookLoading(false)
+                                        }
+                                    }}
+                                    disabled={webhookLoading}
+                                    style={{
+                                        padding: '8px 16px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600,
+                                        border: 'none', cursor: 'pointer', flexShrink: 0,
+                                        background: inst.live_data?.webhookUrl ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, var(--gold), #b8860b)',
+                                        color: inst.live_data?.webhookUrl ? 'var(--text-secondary)' : '#000',
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        opacity: webhookLoading ? 0.6 : 1,
+                                    }}
+                                >
+                                    {webhookLoading ? <Loader2 size={14} className="spin" /> : <Link2 size={14} />}
+                                    {inst.live_data?.webhookUrl ? 'Reconfigurar' : 'Configurar Webhook'}
+                                </button>
+                            </div>
+                            {webhookMessage && (
+                                <div style={{
+                                    marginTop: '8px', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem',
+                                    background: webhookMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                    color: webhookMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                    border: `1px solid ${webhookMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                                }}>
+                                    {webhookMessage.text}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Setup Completo Button */}
+                    {isConnected && (
+                        <div style={{ padding: '0 20px 12px' }}>
+                            <button
+                                onClick={async (e) => {
+                                    e.stopPropagation()
+                                    setSetupLoading(true)
+                                    setSetupMessage(null)
+                                    try {
+                                        const res = await fetch('/api/admin/whatsapp/setup-full', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ instanceId: inst.id })
+                                        })
+                                        const data = await res.json()
+                                        if (data.success) {
+                                            setSetupMessage({ type: 'success', text: `✅ ${data.message}` })
+                                        } else {
+                                            setSetupMessage({ type: 'error', text: `❌ ${data.message}` })
+                                        }
+                                    } catch {
+                                        setSetupMessage({ type: 'error', text: '❌ Erro de conexão' })
+                                    } finally {
+                                        setSetupLoading(false)
+                                    }
+                                }}
+                                disabled={setupLoading}
+                                style={{
+                                    width: '100%', padding: '12px 16px', borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                    border: 'none', color: '#fff', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    fontWeight: 600, fontSize: '0.85rem',
+                                    opacity: setupLoading ? 0.6 : 1,
+                                }}
+                            >
+                                {setupLoading ? <Loader2 size={16} className="spin" /> : '🚀'}
+                                Setup Completo (Webhook + Privacidade + Etiquetas + Respostas Rápidas)
+                            </button>
+                            {setupMessage && (
+                                <div style={{
+                                    marginTop: '8px', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem',
+                                    background: setupMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                    color: setupMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                    border: `1px solid ${setupMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                                }}>
+                                    {setupMessage.text}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div style={{ padding: '0 20px 16px' }}>
                         <button onClick={(e) => { e.stopPropagation(); onToggleSettings() }}
                             style={{

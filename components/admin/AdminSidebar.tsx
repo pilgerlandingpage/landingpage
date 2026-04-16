@@ -23,7 +23,9 @@ import {
     Loader2,
     Crown,
     Radar,
-    Smartphone
+    Smartphone,
+    Send,
+    Tag
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -49,7 +51,18 @@ const MODULE_NAV: Record<string, { href: string; icon: any; label: string; secti
         ]
     },
     radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'AUTOMAÇÃO' },
-    whatsapp: { href: '/admin/whatsapp', icon: Smartphone, label: 'WhatsApp Web', section: 'AUTOMAÇÃO' },
+    whatsapp: { 
+        href: '/admin/whatsapp', 
+        icon: Smartphone, 
+        label: 'WhatsApp Web', 
+        section: 'AUTOMAÇÃO',
+        subItems: [
+            { href: '/admin/whatsapp', label: 'Instâncias' },
+            { href: '/admin/whatsapp/campaigns', label: 'Campanhas', icon: Send },
+            { href: '/admin/whatsapp/labels', label: 'Etiquetas', icon: Tag },
+            { href: '/admin/whatsapp/quick-replies', label: 'Respostas Rápidas', icon: Zap },
+        ]
+    },
     feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
     maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutenção', section: 'SISTEMA' },
 }
@@ -92,6 +105,9 @@ export default function AdminSidebar() {
     useEffect(() => {
         if (pathname.startsWith('/admin/ads')) {
             setExpandedMenus(prev => ({ ...prev, '/admin/ads': true }))
+        }
+        if (pathname.startsWith('/admin/whatsapp')) {
+            setExpandedMenus(prev => ({ ...prev, '/admin/whatsapp': true }))
         }
     }, [pathname])
     

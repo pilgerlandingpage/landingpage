@@ -97,5 +97,12 @@ export const inngest = new Inngest({
                 adminUserId: string
             }
         }
+        'whatsapp/instance-setup': {
+            data: {
+                instanceId: string
+                instanceToken: string
+                webhookBaseUrl: string
+            }
+        }
     }>()
 })

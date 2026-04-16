@@ -103,6 +103,58 @@ export async function POST(request: NextRequest) {
             || body.chat?.audioMessage
             || body.chat?.message?.audioMessage)
 
+        // ── Detect interactive button/list responses ──
+        const buttonResponse = messageData.message?.buttonsResponseMessage
+            || messageData.message?.listResponseMessage
+            || messageData.buttonsResponseMessage
+            || messageData.listResponseMessage
+            || null
+        const buttonResponseId = buttonResponse?.selectedButtonId
+            || buttonResponse?.singleSelectReply?.selectedRowId
+            || buttonResponse?.selectedRowId
+            || messageData.selectedButtonId
+            || messageData.selectedRowId
+            || null
+        const buttonResponseTitle = buttonResponse?.selectedDisplayText
+            || buttonResponse?.title
+            || messageData.selectedDisplayText
+            || null
+        const isButtonResponse = !!(buttonResponseId || buttonResponseTitle)
+
+        // ── Detect poll vote responses ──
+        const pollUpdate = messageData.message?.pollUpdateMessage
+            || messageData.pollUpdateMessage
+            || null
+        const pollVotes = pollUpdate?.vote?.selectedOptions
+            || pollUpdate?.selectedOptions
+            || (messageData.type === 'poll_vote' ? messageData.options : null)
+            || null
+        const isPollResponse = !!pollVotes
+
+        // ── Detect location received ──
+        const locationMsg = messageData.message?.locationMessage
+            || messageData.locationMessage
+            || messageData.location
+            || null
+        const receivedLatitude = locationMsg?.degreesLatitude || locationMsg?.latitude || null
+        const receivedLongitude = locationMsg?.degreesLongitude || locationMsg?.longitude || null
+        const isLocation = !!(receivedLatitude && receivedLongitude)
+
+        // ── Detect reactions ──
+        const reactionMsg = messageData.message?.reactionMessage
+            || messageData.reactionMessage
+            || null
+        const reactionEmoji = reactionMsg?.text || reactionMsg?.emoji || null
+        const isReaction = !!reactionEmoji
+
+        // ── Determine message type ──
+        const messageType = isAudio ? 'audio'
+            : isButtonResponse ? 'button_response'
+            : isPollResponse ? 'poll_response'
+            : isLocation ? 'location'
+            : isReaction ? 'reaction'
+            : 'text'
+
         // ── Extract media decryption data (WhatsApp E2EE media keys) ──
         const audioMediaKey = messageData.content?.mediaKey || messageData.message?.audioMessage?.mediaKey || null
         const audioDirectPath = messageData.content?.directPath || messageData.message?.audioMessage?.directPath || null
@@ -254,8 +306,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, action: 'from_me_dispatched' })
         }
 
-        // Ignore empty messages
-        if (!messageText && !isAudio) {
+        // Ignore truly empty messages (but allow button responses, polls, locations, reactions)
+        if (!messageText && !isAudio && !isButtonResponse && !isPollResponse && !isLocation && !isReaction) {
             console.log('[Webhook] ⏭️ Ignored empty message')
             return NextResponse.json({ success: true, action: 'ignored_empty' })
         }
@@ -276,14 +328,25 @@ export async function POST(request: NextRequest) {
 
         // 2) Queue message for debounce batching (atomic INSERT, no race condition)
         try {
-            const msgContent = messageText || (isAudio ? '[audio]' : '')
+            // Build content from various message types
+            let msgContent = messageText || ''
+            if (!msgContent && isButtonResponse) {
+                msgContent = buttonResponseTitle || `[botão: ${buttonResponseId}]`
+            } else if (!msgContent && isPollResponse) {
+                msgContent = `[enquete: ${Array.isArray(pollVotes) ? pollVotes.join(', ') : pollVotes}]`
+            } else if (!msgContent && isLocation) {
+                msgContent = `[localização: ${receivedLatitude}, ${receivedLongitude}]`
+            } else if (!msgContent && isAudio) {
+                msgContent = '[audio]'
+            }
+
             if (msgContent && !isAudio) {
                 await supabase.from('app_config').insert({
                     key: `_pmq_${finalPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
                     value: msgContent,
                     updated_at: new Date().toISOString()
                 })
-                console.log(`[Webhook] 📝 Queued pending message for ${finalPhone}`)
+                console.log(`[Webhook] 📝 Queued pending message for ${finalPhone} (type: ${messageType})`)
             }
         } catch (e) {
             console.warn('[Webhook] Failed to queue pending message:', e)
@@ -297,11 +360,20 @@ export async function POST(request: NextRequest) {
                 data: {
                     cleanPhone: finalPhone,
                     messageText,
+                    messageType,
                     isAudio,
                     audioUrl,
                     audioMediaKey,
                     audioDirectPath,
                     messageId,
+                    // Interactive message data
+                    buttonResponseId: buttonResponseId || null,
+                    buttonResponseTitle: buttonResponseTitle || null,
+                    pollVotes: pollVotes || null,
+                    receivedLatitude: receivedLatitude || null,
+                    receivedLongitude: receivedLongitude || null,
+                    reactionEmoji: reactionEmoji || null,
+                    // Instance/routing
                     instanceId: instance.id,
                     instanceToken: instance.instance_token,
                     instanceName: instance.instance_name,

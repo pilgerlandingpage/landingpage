@@ -21,6 +21,7 @@ import {
     shadowAgentResponse,
     whatsappKeepOnline
 } from './whatsapp-agent'
+import { whatsappInstanceSetup } from './whatsapp-setup'
 
 function getSupabase() {
     return createClient(
@@ -163,5 +164,7 @@ export const functions = [
     processWhatsAppMessage,
     detectHumanTakeover,
     shadowAgentResponse,
-    whatsappKeepOnline
+    whatsappKeepOnline,
+    // WhatsApp Instance Setup
+    whatsappInstanceSetup
 ]

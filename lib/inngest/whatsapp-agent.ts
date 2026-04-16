@@ -145,18 +145,106 @@ async function trackBotMessageId(
     return nextIds
 }
 
+interface InteractiveElements {
+    cleanText: string
+    buttons?: { title: string; options: string[] }
+    list?: { buttonText: string; sections: { title: string; rows: { title: string; id: string; description?: string }[] }[] }
+    poll?: { question: string; options: string[]; multiSelect?: boolean }
+    locationRequest?: boolean
+}
+
+function parseInteractiveElements(text: string): InteractiveElements {
+    let cleanText = text
+
+    // ── Parse [BOTOES:titulo|op1|op2|op3] ──
+    const btnMatch = cleanText.match(/\[BOTOES:([^\]]+)\]/i)
+    let buttons: InteractiveElements['buttons'] | undefined
+    if (btnMatch) {
+        const parts = btnMatch[1].split('|').map(s => s.trim())
+        const title = parts[0] || 'Escolha uma opção'
+        const options = parts.slice(1).filter(Boolean)
+        if (options.length > 0) {
+            buttons = { title, options }
+        }
+        cleanText = cleanText.replace(btnMatch[0], '').trim()
+    }
+
+    // ── Parse [LISTA:botao|[Seção]|item1|desc1|item2|desc2] ──
+    const listMatch = cleanText.match(/\[LISTA:([^\]]+)\]/i)
+    let list: InteractiveElements['list'] | undefined
+    if (listMatch) {
+        const parts = listMatch[1].split('|').map(s => s.trim())
+        const buttonText = parts[0] || 'Ver opções'
+        const sections: { title: string; rows: { title: string; id: string; description?: string }[] }[] = []
+        let currentSection: { title: string; rows: { title: string; id: string; description?: string }[] } = { title: 'Opções', rows: [] }
+
+        for (let i = 1; i < parts.length; i++) {
+            const part = parts[i]
+            if (part.startsWith('[') && part.endsWith(']')) {
+                // New section header
+                if (currentSection.rows.length > 0) sections.push(currentSection)
+                currentSection = { title: part.slice(1, -1), rows: [] }
+            } else {
+                // Row — check if next part is description
+                const nextPart = parts[i + 1]
+                const isNextASection = nextPart?.startsWith('[')
+                const isNextARow = nextPart && !isNextASection
+
+                // If current item has a description following it (not a section header)
+                if (isNextARow && !parts[i + 2]?.startsWith('[') && currentSection.rows.length < parts.length) {
+                    currentSection.rows.push({
+                        title: part.substring(0, 24),
+                        id: `row_${currentSection.rows.length}`,
+                        description: nextPart.substring(0, 72),
+                    })
+                    i++ // skip description
+                } else {
+                    currentSection.rows.push({
+                        title: part.substring(0, 24),
+                        id: `row_${currentSection.rows.length}`,
+                    })
+                }
+            }
+        }
+        if (currentSection.rows.length > 0) sections.push(currentSection)
+        if (sections.length > 0) {
+            list = { buttonText, sections }
+        }
+        cleanText = cleanText.replace(listMatch[0], '').trim()
+    }
+
+    // ── Parse [ENQUETE:pergunta|op1|op2|op3] ──
+    const pollMatch = cleanText.match(/\[ENQUETE:([^\]]+)\]/i)
+    let poll: InteractiveElements['poll'] | undefined
+    if (pollMatch) {
+        const parts = pollMatch[1].split('|').map(s => s.trim())
+        const question = parts[0] || 'O que você prefere?'
+        const options = parts.slice(1).filter(Boolean)
+        if (options.length >= 2) {
+            poll = { question, options, multiSelect: false }
+        }
+        cleanText = cleanText.replace(pollMatch[0], '').trim()
+    }
+
+    // ── Parse [LOCALIZACAO] ──
+    const locMatch = cleanText.match(/\[LOCALIZACAO\]/i)
+    let locationRequest = false
+    if (locMatch) {
+        locationRequest = true
+        cleanText = cleanText.replace(locMatch[0], '').trim()
+    }
+
+    return { cleanText, buttons, list, poll, locationRequest }
+}
+
+// Keep parseButtons as alias for backward compatibility
 function parseButtons(text: string): { cleanText: string; buttons?: { title: string; options: string[] } } {
-    const match = text.match(/\[BOTOES:([^\]]+)\]/i)
-    if (!match) return { cleanText: text }
-    const parts = match[1].split('|').map(s => s.trim())
-    const title = parts[0] || 'Escolha uma opção'
-    const options = parts.slice(1)
-    const cleanText = text.replace(match[0], '').trim()
-    return { cleanText, buttons: { title, options } }
+    const result = parseInteractiveElements(text)
+    return { cleanText: result.cleanText, buttons: result.buttons }
 }
 
 function responseRequiresText(text: string): boolean {
-    return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[MENU:/i.test(text)
+    return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[LISTA:/i.test(text) || /\[ENQUETE:/i.test(text) || /\[LOCALIZACAO\]/i.test(text)
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -385,14 +473,45 @@ async function generateAIResponse(
         return { text: 'Desculpe, estou com um problema técnico. Por favor, tente novamente em breve.', shouldTransfer: false }
     }
 
-    const systemPrompt = broker.system_prompt || `Você é ${broker.name}, corretor de imóveis de alto padrão. Atenda o lead com profissionalismo, colete informações e ajude a encontrar o imóvel ideal.
+    const systemPrompt = broker.system_prompt || `Você é ${broker.name}, corretor de imóveis de alto padrão da Pilger Imóveis. Atenda o lead com profissionalismo, colete informações e ajude a encontrar o imóvel ideal.
 
-REGRAS:
-- Responda de forma natural e humana, como um corretor real
-- Colete: nome, telefone, tipo de imóvel, faixa de preço, região
-- Quando tiver todos os dados, use [TRANSFERIR] para indicar transferência
-- Pode usar [BOTOES:titulo|opção1|opção2|opção3] para oferecer opções interativas
-- NUNCA revele que é uma IA`
+REGRAS DE COMUNICAÇÃO:
+- Responda de forma natural e humana, como um corretor real do mercado de luxo
+- Seja cordial, empático e proativo — antecipe as necessidades do cliente
+- Use frases curtas e diretas (é WhatsApp, não email)
+- NUNCA revele que é uma IA ou agente virtual
+- Colete: nome, tipo de imóvel desejado, faixa de preço, região, prazo
+
+MENSAGENS INTERATIVAS (use quando fizer sentido, não em toda mensagem):
+
+1. BOTÕES — Para perguntas com 2-3 opções claras:
+   [BOTOES:Escolha|Investimento|Moradia|Ambos]
+   Use para: tipo de interesse, confirmar dados, próximo passo
+
+2. LISTA — Para muitas opções organizadas em categorias:
+   [LISTA:Ver Regiões|[Litoral]|Balneário Camboriú|Imóveis de luxo frente mar|Itapema|Meia Praia e região|[Interior]|Blumenau|Capital do Vale]
+   Use para: regiões, tipos de imóvel, faixas de preço
+
+3. ENQUETE — Para pesquisa de preferências:
+   [ENQUETE:O que é mais importante para você?|Localização|Preço|Acabamento|Lazer|Vista]
+   Use para: prioridades, feedback, pesquisa
+
+4. LOCALIZAÇÃO — Para pedir localização do cliente:
+   [LOCALIZACAO]
+   Use quando: cliente menciona a região onde mora/quer morar
+
+5. TRANSFERÊNCIA — Quando coltar todos os dados:
+   [TRANSFERIR]
+   Use quando: tem nome + interesse + orçamento + região + prazo
+
+ESTRATÉGIA DE QUALIFICAÇÃO:
+1ª msg: Cumprimente pelo nome (se souber), pergunte interesse
+2ª msg: Use BOTÕES para tipo (Investimento/Moradia)
+3ª msg: Use LISTA para região
+4ª msg: Pergunte faixa de preço
+5ª msg: Confirme dados e [TRANSFERIR]
+
+IMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem.`
 
     const chatMessages = messages.map((m: any) => ({ role: m.role, content: m.content }))
 
@@ -808,6 +927,10 @@ export const processWhatsAppMessage = inngest.createFunction(
         })
 
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
+        await step.run('ensure-online', async () => {
+            await setPresenceAvailable(instanceToken).catch(() => { })
+        })
+
         await step.run('mark-as-read', async () => {
             await markAsRead(cleanPhone, instanceToken).catch(() => { })
         })
@@ -833,25 +956,24 @@ export const processWhatsAppMessage = inngest.createFunction(
         const actualTypingMs = Math.floor(typingMs * (0.7 + Math.random() * 0.6))
         await step.sleep('composing-delay', `${actualTypingMs}ms`)
 
-        // ── Step 6: Send response (Função Espelho) ──
+        // ── Step 6: Send response (Função Espelho + Interactive Messages) ──
         await step.run('send-response', async () => {
-            const { cleanText, buttons } = parseButtons(aiResponse.text)
+            const interactive = parseInteractiveElements(aiResponse.text)
+            const { cleanText, buttons, list, poll, locationRequest } = interactive
             const needsTextFormat = responseRequiresText(aiResponse.text)
+            const hasInteractive = !!(buttons || list || poll || locationRequest)
             const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
-            const shouldSendAudio = isAudio && audioEnabled && !needsTextFormat && !buttons
+            const shouldSendAudio = isAudio && audioEnabled && !needsTextFormat && !hasInteractive
 
-            console.log(`[WhatsApp Agent] 📤 Send decision: isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, shouldSendAudio=${shouldSendAudio}`)
+            console.log(`[WhatsApp Agent] 📤 Send decision: isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, shouldSendAudio=${shouldSendAudio}`)
 
             if (buttons && buttons.options.length > 0) {
                 try {
                     const sendResult = await sendMenuMessage({
                         phone: cleanPhone,
-                        title: buttons.title,
-                        description: cleanText || buttons.title,
-                        buttons: buttons.options.slice(0, 3).map((opt, i) => ({
-                            id: `btn_${i}`,
-                            title: opt.substring(0, 20)
-                        })),
+                        text: cleanText || buttons.title,
+                        type: 'button',
+                        choices: buttons.options.slice(0, 3).map(opt => opt.substring(0, 20)),
                         instanceToken
                     })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
@@ -859,6 +981,80 @@ export const processWhatsAppMessage = inngest.createFunction(
                     console.warn('[Buttons] Failed, falling back to text:', e)
                     const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText || aiResponse.text, instanceToken })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
+            } else if (list && list.sections.length > 0) {
+                // Send as UAZAPI list with choices format
+                try {
+                    const choices: string[] = []
+                    for (const section of list.sections) {
+                        choices.push(`[${section.title}]`)
+                        for (const row of section.rows) {
+                            if (row.description) {
+                                choices.push(`${row.title}|${row.id}|${row.description}`)
+                            } else {
+                                choices.push(row.title)
+                            }
+                        }
+                    }
+                    const sendResult = await sendMenuMessage({
+                        phone: cleanPhone,
+                        text: cleanText || 'Escolha uma opção:',
+                        type: 'list',
+                        choices,
+                        listButton: list.buttonText,
+                        instanceToken
+                    })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                } catch (e) {
+                    console.warn('[List] Failed, falling back to text:', e)
+                    // Fallback: send as numbered text
+                    const fallbackText = list.sections.map(s =>
+                        `*${s.title}*\n${s.rows.map((r, i) => `${i + 1}. ${r.title}${r.description ? ` — ${r.description}` : ''}`).join('\n')}`
+                    ).join('\n\n')
+                    const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: `${cleanText}\n\n${fallbackText}`, instanceToken })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
+            } else if (poll && poll.options.length >= 2) {
+                // Send as UAZAPI poll
+                try {
+                    const sendResult = await sendMenuMessage({
+                        phone: cleanPhone,
+                        text: poll.question,
+                        type: 'poll',
+                        choices: poll.options,
+                        selectableCount: poll.multiSelect ? poll.options.length : 1,
+                        instanceToken
+                    })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                    // Also send the text before the poll if any
+                    if (cleanText) {
+                        await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
+                    }
+                } catch (e) {
+                    console.warn('[Poll] Failed, falling back to text:', e)
+                    const fallbackText = `${poll.question}\n\n${poll.options.map((o, i) => `${i + 1}. ${o}`).join('\n')}`
+                    const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: `${cleanText ? cleanText + '\n\n' : ''}${fallbackText}`, instanceToken })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
+            } else if (locationRequest) {
+                // Send text first, then location request button
+                try {
+                    if (cleanText) {
+                        await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
+                    }
+                    const { sendLocationRequest } = await import('../uazapi')
+                    const sendResult = await sendLocationRequest(
+                        cleanPhone,
+                        cleanText || 'Pode compartilhar sua localização? Isso nos ajuda a encontrar os melhores imóveis perto de você! 📍',
+                        instanceToken
+                    )
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                } catch (e) {
+                    console.warn('[Location] Failed, sending text only:', e)
+                    if (!cleanText) {
+                        const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: 'Pode nos informar em qual região você está buscando?', instanceToken })
+                        botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                    }
                 }
             } else if (shouldSendAudio) {
                 let audioBuffer: Buffer | null = null
@@ -960,6 +1156,49 @@ export const processWhatsAppMessage = inngest.createFunction(
                     .eq('id', conversation.id)
             })
         }
+
+        // ── Step 8: Sync CRM (fire-and-forget) ──
+        await step.run('sync-crm', async () => {
+            try {
+                const { updateLead } = await import('../uazapi')
+                const leadData: Record<string, unknown> = {
+                    id: cleanPhone,
+                    lead_field12: new Date().toISOString(),  // Último contato
+                    lead_field05: broker.name || 'AI Agent',  // Agente
+                }
+
+                // Sync sender name if available
+                if (senderName) {
+                    leadData.lead_name = senderName
+                }
+
+                // Extract data from conversation if AI extracted it
+                if (aiResponse.extractedData) {
+                    const d = aiResponse.extractedData
+                    if (d.name) leadData.lead_fullName = d.name
+                    if (d.phone) leadData.lead_field01 = d.phone  // may duplicate but useful
+                    if (d.budget) leadData.lead_field02 = d.budget
+                    if (d.interest) leadData.lead_field01 = d.interest  // Tipo de imóvel
+                    if (d.timeframe) leadData.lead_field04 = d.timeframe
+                    if (d.email) leadData.lead_email = d.email
+                    if (d.classification) {
+                        leadData.lead_status = d.classification
+                        // Auto-tag
+                        const tags: string[] = []
+                        if (d.classification === 'vip') tags.push('VIP')
+                        if (d.classification === 'hot') tags.push('Qualificado')
+                        if (d.is_partner) tags.push('Parceiro')
+                        if (tags.length > 0) leadData.lead_tags = tags
+                    }
+                    if (d.summary) leadData.lead_field20 = d.summary  // Notas AI
+                }
+
+                await updateLead(leadData as any, instanceToken)
+                console.log(`[WhatsApp Agent] 📋 CRM sync completed for ${cleanPhone}`)
+            } catch (e) {
+                console.warn('[WhatsApp Agent] CRM sync failed (non-fatal):', e)
+            }
+        })
 
         return {
             action: 'processed',

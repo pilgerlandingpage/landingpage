@@ -18,6 +18,21 @@ interface SendTextOptions {
 
 interface SendMenuOptions {
     phone: string
+    text: string
+    type: 'button' | 'list' | 'poll' | 'carousel'
+    choices: string[]
+    footerText?: string
+    listButton?: string         // texto do botão que abre a lista
+    selectableCount?: number    // para polls: quantas opções selecionáveis
+    imageButton?: string        // URL de imagem para botões
+    delay?: number
+    readchat?: boolean
+    instanceToken?: string
+}
+
+// Legacy interface for backward compatibility with existing agent code
+interface SendMenuOptionsLegacy {
+    phone: string
     title: string
     description: string
     footer?: string
@@ -231,26 +246,87 @@ export async function sendWhatsAppMessage({ phone, message, instanceToken, delay
     })
 }
 
-/** Enviar menu interativo (botões ou listas) */
-export async function sendMenuMessage({ phone, title, description, footer, buttons, sections, instanceToken }: SendMenuOptions) {
-    if (!instanceToken) {
+/** Enviar menu interativo (botões, listas, enquetes, carrossel) — formato UAZAPI real */
+export async function sendMenuMessage(options: SendMenuOptions | SendMenuOptionsLegacy): Promise<any> {
+    // Detect if using legacy format and convert
+    if ('title' in options && 'description' in options && !('type' in options)) {
+        return sendMenuLegacy(options as SendMenuOptionsLegacy)
+    }
+
+    const opts = options as SendMenuOptions
+    if (!opts.instanceToken) {
         throw new Error('Token da instância é obrigatório')
     }
 
     const body: Record<string, unknown> = {
-        number: cleanPhone(phone),
-        title,
-        description,
+        number: cleanPhone(opts.phone),
+        type: opts.type,
+        text: opts.text,
+        choices: opts.choices,
     }
 
-    if (footer) body.footer = footer
-    if (buttons) body.buttons = buttons
-    if (sections) body.sections = sections
+    if (opts.footerText) body.footerText = opts.footerText
+    if (opts.listButton) body.listButton = opts.listButton
+    if (opts.selectableCount !== undefined) body.selectableCount = opts.selectableCount
+    if (opts.imageButton) body.imageButton = opts.imageButton
+    if (opts.delay) body.delay = opts.delay
+    if (opts.readchat) body.readchat = opts.readchat
 
     return uazapiFetch('/send/menu', {
         method: 'POST',
-        token: instanceToken,
+        token: opts.instanceToken,
         body,
+    })
+}
+
+/** Wrapper legado — converte buttons/sections antigo para formato choices */
+async function sendMenuLegacy(opts: SendMenuOptionsLegacy): Promise<any> {
+    if (!opts.instanceToken) {
+        throw new Error('Token da instância é obrigatório')
+    }
+
+    // Convert legacy buttons to choices format
+    if (opts.buttons && opts.buttons.length > 0) {
+        const choices = opts.buttons.map(b => `${b.title}|${b.id}`)
+        return sendMenuMessage({
+            phone: opts.phone,
+            text: opts.description || opts.title,
+            type: 'button',
+            choices,
+            footerText: opts.footer,
+            instanceToken: opts.instanceToken,
+        })
+    }
+
+    // Convert legacy sections to list choices format
+    if (opts.sections && opts.sections.length > 0) {
+        const choices: string[] = []
+        for (const section of opts.sections) {
+            choices.push(`[${section.title}]`)
+            for (const row of section.rows) {
+                if (row.description) {
+                    choices.push(`${row.title}|${row.id}|${row.description}`)
+                } else {
+                    choices.push(`${row.title}|${row.id}`)
+                }
+            }
+        }
+        return sendMenuMessage({
+            phone: opts.phone,
+            text: opts.description || opts.title,
+            type: 'list',
+            choices,
+            listButton: opts.title,
+            footerText: opts.footer,
+            instanceToken: opts.instanceToken,
+        })
+    }
+
+    // Fallback to text
+    return sendWhatsAppMessage({
+        phone: opts.phone,
+        message: `${opts.title}\n\n${opts.description}`,
+        instanceToken: opts.instanceToken,
     })
 }
 
@@ -545,3 +621,427 @@ export async function downloadMedia(messageId: string, instanceToken: string): P
 export function interpolateTemplate(template: string, variables: Record<string, string>): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] || `{{${key}}}`)
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  CARROSSEL (formato estruturado com botões tipados)
+// ═══════════════════════════════════════════════════════════════
+
+interface CarouselCard {
+    text: string
+    image?: string
+    buttons: { id: string; text: string; type: 'REPLY' | 'URL' | 'CALL' | 'COPY' }[]
+}
+
+/** Enviar carrossel estruturado — /send/carousel */
+export async function sendCarousel(
+    phone: string,
+    text: string,
+    cards: CarouselCard[],
+    instanceToken: string,
+    options?: { delay?: number; readchat?: boolean }
+) {
+    return uazapiFetch('/send/carousel', {
+        method: 'POST',
+        token: instanceToken,
+        body: {
+            number: cleanPhone(phone),
+            text,
+            carousel: cards,
+            ...(options?.delay ? { delay: options.delay } : {}),
+            ...(options?.readchat ? { readchat: options.readchat } : {}),
+        },
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PAGAMENTOS NATIVOS (PIX / Boleto)
+// ═══════════════════════════════════════════════════════════════
+
+interface PaymentRequestOptions {
+    phone: string
+    title: string
+    text?: string
+    footer?: string
+    itemName: string
+    invoiceNumber?: string
+    amount: number   // em reais (ex: 5000.00)
+    pixKey?: string
+    pixType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'
+    pixName?: string
+    boletoCode?: string
+    fileUrl?: string    // URL do PDF do boleto
+    fileName?: string
+    paymentLink?: string
+    instanceToken: string
+}
+
+/** Solicitar pagamento via WhatsApp nativo — /send/request-payment */
+export async function sendRequestPayment(opts: PaymentRequestOptions) {
+    return uazapiFetch('/send/request-payment', {
+        method: 'POST',
+        token: opts.instanceToken,
+        body: {
+            number: cleanPhone(opts.phone),
+            title: opts.title,
+            text: opts.text,
+            footer: opts.footer,
+            itemName: opts.itemName,
+            invoiceNumber: opts.invoiceNumber,
+            amount: opts.amount,
+            pixKey: opts.pixKey,
+            pixType: opts.pixType,
+            pixName: opts.pixName,
+            boletoCode: opts.boletoCode,
+            fileUrl: opts.fileUrl,
+            fileName: opts.fileName,
+            paymentLink: opts.paymentLink,
+        },
+    })
+}
+
+/** Enviar botão PIX rápido — /send/pix-button */
+export async function sendPixButton(
+    phone: string,
+    pixKey: string,
+    pixName: string,
+    pixType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM',
+    instanceToken: string
+) {
+    return uazapiFetch('/send/pix-button', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: cleanPhone(phone), pixKey, pixName, pixType },
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SOLICITAR LOCALIZAÇÃO
+// ═══════════════════════════════════════════════════════════════
+
+/** Pedir localização do cliente — /send/location-button */
+export async function sendLocationRequest(phone: string, text: string, instanceToken: string) {
+    return uazapiFetch('/send/location-button', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: cleanPhone(phone), text },
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CRM INTEGRADO (Gestão de Leads)
+// ═══════════════════════════════════════════════════════════════
+
+interface UpdateLeadOptions {
+    /** JID do chat (ex: "5511999999999@s.whatsapp.net") ou número limpo */
+    id: string
+    lead_name?: string
+    lead_fullName?: string
+    lead_email?: string
+    lead_personalid?: string
+    lead_status?: string
+    lead_notes?: string
+    lead_isTicketOpen?: boolean
+    lead_assignedAttendant_id?: string
+    lead_kanbanOrder?: number
+    lead_tags?: string[]
+    /** Campos customizados 01-20 — mapeamento Pilger:
+     * 01: Tipo de imóvel, 02: Orçamento, 03: Região,
+     * 04: Prazo, 05: Agente, 06: Origem, 07: Imóveis visitados,
+     * 08: Score, 09: Renda, 10: Pagamento, 11: Aprovação bancária,
+     * 12: Último contato, 13: Motivo perda, 14: Campanha,
+     * 15: Dependentes, 16: Pets, 17: Necessidades especiais,
+     * 18: Corretor preferido, 19: Idioma, 20: Notas AI
+     */
+    lead_field01?: string; lead_field02?: string; lead_field03?: string
+    lead_field04?: string; lead_field05?: string; lead_field06?: string
+    lead_field07?: string; lead_field08?: string; lead_field09?: string
+    lead_field10?: string; lead_field11?: string; lead_field12?: string
+    lead_field13?: string; lead_field14?: string; lead_field15?: string
+    lead_field16?: string; lead_field17?: string; lead_field18?: string
+    lead_field19?: string; lead_field20?: string
+    /** Desativar chatbot até timestamp UTC (0 = reativar) */
+    chatbot_disableUntil?: number
+}
+
+/** Atualizar dados de um lead — /chat/editLead */
+export async function updateLead(opts: UpdateLeadOptions, instanceToken: string) {
+    // Garantir formato JID
+    const id = opts.id.includes('@') ? opts.id : `${cleanPhone(opts.id)}@s.whatsapp.net`
+    return uazapiFetch('/chat/editLead', {
+        method: 'POST',
+        token: instanceToken,
+        body: { ...opts, id },
+    })
+}
+
+interface FindChatsOptions {
+    operator?: 'AND' | 'OR'
+    sort?: string          // ex: "-wa_lastMsgTimestamp" (desc) ou "wa_lastMsgTimestamp" (asc)
+    limit?: number
+    offset?: number
+    lead_status?: string   // use ~ para LIKE, != para diferente
+    lead_tags?: string     // use ~ para contém
+    lead_isTicketOpen?: boolean
+    [key: string]: unknown // campos adicionais com operadores
+}
+
+/** Buscar chats com filtros avançados — /chat/find */
+export async function findChats(opts: FindChatsOptions, instanceToken: string) {
+    return uazapiFetch('/chat/find', {
+        method: 'POST',
+        token: instanceToken,
+        body: opts,
+    })
+}
+
+/** Salvar notas internas — /chat/notes/edit */
+export async function updateNotes(phone: string, notes: string, instanceToken: string) {
+    const jid = phone.includes('@') ? phone : `${cleanPhone(phone)}@s.whatsapp.net`
+    return uazapiFetch('/chat/notes/edit', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: jid, notes },
+    })
+}
+
+/** Buscar notas de um chat — /chat/notes */
+export async function getNotes(phone: string, instanceToken: string) {
+    const jid = phone.includes('@') ? phone : `${cleanPhone(phone)}@s.whatsapp.net`
+    return uazapiFetch('/chat/notes', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: jid },
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WEBHOOK AVANÇADO
+// ═══════════════════════════════════════════════════════════════
+
+interface WebhookConfig {
+    enabled: boolean
+    url: string
+    events?: string[]      // messages, messages_update, connection, presence, labels, chats, etc.
+    excludeMessages?: string[]  // wasSentByApi, isGroupYes, fromMeYes, etc.
+    addUrlEvents?: boolean     // adiciona /event_type na URL
+    addUrlTypesMessages?: boolean
+}
+
+/** Configurar webhook de uma instância — POST /webhook */
+export async function configureWebhook(config: WebhookConfig, instanceToken: string) {
+    return uazapiFetch('/webhook', {
+        method: 'POST',
+        token: instanceToken,
+        body: config,
+    })
+}
+
+/** Obter erros de webhook — GET /webhook/errors */
+export async function getWebhookErrors(instanceToken: string) {
+    return uazapiFetch('/webhook/errors', {
+        token: instanceToken,
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ETIQUETAS (Labels)
+// ═══════════════════════════════════════════════════════════════
+
+/** Listar todas as etiquetas — GET /labels */
+export async function listLabels(instanceToken: string) {
+    return uazapiFetch('/labels', {
+        token: instanceToken,
+    })
+}
+
+/** Criar, editar ou deletar etiqueta — POST /label/edit */
+export async function editLabel(
+    labelId: string,    // "new" para criar, ID existente para editar/deletar
+    name: string,
+    color: number,      // 0-19
+    shouldDelete: boolean,
+    instanceToken: string
+) {
+    return uazapiFetch('/label/edit', {
+        method: 'POST',
+        token: instanceToken,
+        body: { labelid: labelId, name, color, delete: shouldDelete },
+    })
+}
+
+/** Atribuir etiquetas a um chat — POST /chat/labels */
+export async function setChatLabels(
+    phone: string,
+    labelIds: string[],
+    instanceToken: string
+) {
+    const jid = phone.includes('@') ? phone : `${cleanPhone(phone)}@s.whatsapp.net`
+    return uazapiFetch('/chat/labels', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: jid, labels: labelIds },
+    })
+}
+
+/** Recarregar etiquetas do WhatsApp — POST /labels/refresh */
+export async function refreshLabels(instanceToken: string, force = false) {
+    return uazapiFetch('/labels/refresh', {
+        method: 'POST',
+        token: instanceToken,
+        body: { force },
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CAMPANHAS EM MASSA (Sender)
+// ═══════════════════════════════════════════════════════════════
+
+interface SimpleCampaignOptions {
+    numbers: string[]       // JIDs (5511...@s.whatsapp.net)
+    type: 'text' | 'image' | 'document' | 'audio' | 'video' | 'button' | 'list' | 'poll'
+    text?: string
+    file?: string           // URL da mídia
+    folder?: string         // nome da campanha
+    delayMin?: number       // delay mínimo entre msgs (segundos)
+    delayMax?: number       // delay máximo
+    scheduled_for?: number  // timestamp para agendamento
+    linkPreview?: boolean
+    linkPreviewTitle?: string
+    linkPreviewDescription?: string
+    linkPreviewImage?: string
+}
+
+/** Enviar campanha simples — POST /sender/simple */
+export async function sendSimpleCampaign(opts: SimpleCampaignOptions, instanceToken: string) {
+    return uazapiFetch('/sender/simple', {
+        method: 'POST',
+        token: instanceToken,
+        body: opts,
+    })
+}
+
+interface AdvancedCampaignMessage {
+    number: string
+    type: string
+    text?: string
+    file?: string
+    choices?: string[]
+    [key: string]: unknown
+}
+
+interface AdvancedCampaignOptions {
+    delayMin?: number
+    delayMax?: number
+    info?: string
+    scheduled_for?: number
+    messages: AdvancedCampaignMessage[]
+}
+
+/** Enviar campanha avançada (msg por destinatário) — POST /sender/advanced */
+export async function sendAdvancedCampaign(opts: AdvancedCampaignOptions, instanceToken: string) {
+    return uazapiFetch('/sender/advanced', {
+        method: 'POST',
+        token: instanceToken,
+        body: opts,
+    })
+}
+
+/** Gerenciar campanha (pausar, continuar, deletar) — POST /sender/edit */
+export async function manageCampaign(
+    folderId: string,
+    action: 'stop' | 'continue' | 'delete',
+    instanceToken: string
+) {
+    return uazapiFetch('/sender/edit', {
+        method: 'POST',
+        token: instanceToken,
+        body: { id: folderId, action },
+    })
+}
+
+/** Listar pastas/campanhas — GET /sender/listfolders */
+export async function listCampaigns(instanceToken: string) {
+    return uazapiFetch('/sender/listfolders', {
+        token: instanceToken,
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RESPOSTAS RÁPIDAS (Quick Replies)
+// ═══════════════════════════════════════════════════════════════
+
+/** Listar todas as respostas rápidas — GET /quickreply/showall */
+export async function listQuickReplies(instanceToken: string) {
+    return uazapiFetch('/quickreply/showall', {
+        token: instanceToken,
+    })
+}
+
+/** Criar/editar/deletar resposta rápida — POST /quickreply/edit */
+export async function editQuickReply(
+    data: {
+        id?: string          // omitir para criar
+        shortCut: string
+        type: 'text' | 'audio' | 'ptt' | 'document' | 'image' | 'video'
+        text?: string
+        file?: string        // URL da mídia  
+        docName?: string
+        delete?: boolean
+    },
+    instanceToken: string
+) {
+    return uazapiFetch('/quickreply/edit', {
+        method: 'POST',
+        token: instanceToken,
+        body: data,
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CONFIGURAÇÕES DA INSTÂNCIA
+// ═══════════════════════════════════════════════════════════════
+
+interface PrivacySettings {
+    groupadd?: 'all' | 'contacts' | 'contact_blacklist' | 'none'
+    last?: 'all' | 'contacts' | 'contact_blacklist' | 'none'
+    status?: 'all' | 'contacts' | 'contact_blacklist' | 'none'
+    profile?: 'all' | 'contacts' | 'contact_blacklist' | 'none'
+    readreceipts?: 'all' | 'none'
+    online?: 'all' | 'match_last_seen'
+    calladd?: 'all' | 'known'
+}
+
+/** Buscar configurações de privacidade — GET /instance/privacy */
+export async function getPrivacy(instanceToken: string) {
+    return uazapiFetch('/instance/privacy', { token: instanceToken })
+}
+
+/** Configurar privacidade — POST /instance/privacy */
+export async function configurePrivacy(settings: PrivacySettings, instanceToken: string) {
+    return uazapiFetch('/instance/privacy', {
+        method: 'POST',
+        token: instanceToken,
+        body: settings,
+    })
+}
+
+/** Configurar delay da fila de mensagens — POST /instance/updateDelaySettings */
+export async function updateDelaySettings(
+    minDelay: number,
+    maxDelay: number,
+    instanceToken: string
+) {
+    return uazapiFetch('/instance/updateDelaySettings', {
+        method: 'POST',
+        token: instanceToken,
+        body: { msg_delay_min: minDelay, msg_delay_max: maxDelay },
+    })
+}
+
+/** Obter limites de envio do WhatsApp — GET /instance/wa_messages_limits */
+export async function getMessageLimits(instanceToken: string) {
+    return uazapiFetch('/instance/wa_messages_limits', {
+        token: instanceToken,
+    })
+}
+
