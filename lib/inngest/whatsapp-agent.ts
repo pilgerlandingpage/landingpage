@@ -1,8 +1,6 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import { buildAgentPrompt, DEFAULT_FLOW_CONFIG } from '../ai/prompt-builder'
-import type { AgentFlowConfig } from '../ai/prompt-builder'
 import {
     sendWhatsAppMessage,
     sendAudioMessage,
@@ -475,21 +473,33 @@ async function generateAIResponse(
         return { text: 'Desculpe, estou com um problema técnico. Por favor, tente novamente em breve.', shouldTransfer: false }
     }
 
-    // Prioridade: broker.system_prompt manual > buildAgentPrompt(flowConfig) > fallback
-    let systemPrompt: string
-    if (broker.system_prompt) {
-        systemPrompt = broker.system_prompt
-    } else {
-        // Tentar carregar flow config do app_config
-        let flowConfig: AgentFlowConfig = DEFAULT_FLOW_CONFIG
-        try {
-            const flowRaw = configs['agent_flow_config']
-            if (flowRaw) {
-                flowConfig = typeof flowRaw === 'string' ? JSON.parse(flowRaw) : flowRaw
-            }
-        } catch { /* use default */ }
-        systemPrompt = buildAgentPrompt(flowConfig, broker.name || 'Corretor')
-    }
+    // Prompt único: broker.system_prompt com tags processadas, ou fallback natural
+    const brokerName = broker.name || 'Corretor'
+    const rawPrompt = broker.system_prompt || `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
+Converse naturalmente no WhatsApp, como uma pessoa real.
+Seja simpático, use linguagem informal mas profissional.
+Use frases curtas — é WhatsApp, não email.
+NUNCA pareça robô ou siga roteiro engessado.
+
+Colete naturalmente durante a conversa: nome, interesse (morar/investir), região, orçamento.
+Quando o lead demonstrar interesse real e você tiver os dados, ofereça agendar uma visita com {agendamento}.
+Quando tiver todas as informações, use {transferir} para passar ao corretor humano.
+Sempre chame pelo nome quando souber: {nome_lead}.
+
+NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato.`
+
+    // Processar tags no prompt
+    const systemPrompt = rawPrompt
+        .replace(/\{nome_corretor\}/g, brokerName)
+        .replace(/\{nome_lead\}/g, '(use o nome do cliente quando souber)')
+        .replace(/\{agendamento\}/g, 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
+        .replace(/\{regioes\}/g, 'envie uma lista com [LISTA:Ver Regiões|[Litoral]|Balneário Camboriú|Imóveis frente mar|Itapema|Meia Praia|[Interior]|Blumenau|Capital do Vale]')
+        .replace(/\{transferir\}/g, 'use [TRANSFERIR] para encaminhar ao corretor humano')
+        .replace(/\{localizacao\}/g, 'peça a localização com [LOCALIZACAO]')
+        .replace(/\{documentos\}/g, 'envie botões com [BOTOES:Enviar Documentos|RG e CPF|Comprovante de Renda|Todos os Documentos]')
+        .replace(/\{horario\}/g, 'informe que o atendimento é de segunda a sexta, das 9h às 18h, e sábados das 9h às 13h')
+        .replace(/\{empresa\}/g, 'mencione que a Pilger Imóveis é referência em imóveis de alto padrão em Balneário Camboriú e região')
+    + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
 
     const chatMessages = messages.map((m: any) => ({ role: m.role, content: m.content }))
 

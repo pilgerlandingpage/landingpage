@@ -515,24 +515,60 @@ export default function BrokersAdmin() {
                                     <Brain size={18} /> 🤖 Agente IA (Prompt do WhatsApp)
                                 </h3>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
-                                    Configure o prompt e personalidade do agente IA que atenderá leads via WhatsApp.
+                                    Escreva como o agente deve conversar. Use as <strong>tags</strong> abaixo para dar poderes ao agente — ele usará cada uma no momento certo, de forma natural.
                                 </p>
 
 
-
-
+                                {/* Tags Reference Panel */}
+                                <div style={{ marginBottom: '14px', padding: '14px', borderRadius: '10px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
+                                    <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#818cf8', fontWeight: 700, marginBottom: '10px' }}>
+                                        📌 Tags Disponíveis — clique para inserir no prompt
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {[
+                                            { tag: '{nome_lead}', desc: 'Nome do lead (coletado na conversa)', color: '#22c55e' },
+                                            { tag: '{nome_corretor}', desc: 'Nome deste corretor IA', color: '#22c55e' },
+                                            { tag: '{agendamento}', desc: 'Botão para agendar visita/reunião', color: '#818cf8' },
+                                            { tag: '{regioes}', desc: 'Lista interativa de regiões', color: '#818cf8' },
+                                            { tag: '{transferir}', desc: 'Transferir ao corretor humano', color: '#f59e0b' },
+                                            { tag: '{localizacao}', desc: 'Pedir localização do lead', color: '#818cf8' },
+                                            { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
+                                            { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
+                                            { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
+                                        ].map(t => (
+                                            <button key={t.tag} type="button" title={t.desc}
+                                                onClick={() => {
+                                                    const ta = document.getElementById('broker-prompt-textarea') as HTMLTextAreaElement
+                                                    if (ta) {
+                                                        const start = ta.selectionStart; const end = ta.selectionEnd
+                                                        const text = formData.system_prompt || ''
+                                                        const newText = text.substring(0, start) + t.tag + text.substring(end)
+                                                        setFormData({ ...formData, system_prompt: newText })
+                                                        setTimeout(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = start + t.tag.length }, 50)
+                                                    } else { setFormData({ ...formData, system_prompt: (formData.system_prompt || '') + t.tag }) }
+                                                }}
+                                                style={{ padding: '4px 10px', borderRadius: '6px', border: `1px solid ${t.color}33`, background: `${t.color}15`, color: t.color, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'monospace' }}>
+                                                {t.tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={{ marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                        💡 O agente usará estas ações no momento certo da conversa — não seguirá roteiro, será natural como uma pessoa real.
+                                    </div>
+                                </div>
 
                                 <div className="form-group">
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Prompt do Agente IA (Instruções Completas)</label>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Prompt do Agente IA</label>
                                     <textarea
+                                        id="broker-prompt-textarea"
                                         className="form-textarea"
-                                        style={{ minHeight: '200px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem' }}
+                                        style={{ minHeight: '280px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: '1.6' }}
                                         value={formData.system_prompt}
                                         onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                                        placeholder={`Você é o Guilherme Pilger, corretor especializado em imóveis de alto padrão na Pilger Imóveis.\n\nSua missão:\n- Atender leads no WhatsApp de forma profissional e amigável\n- Coletar: nome completo, telefone, tipo de imóvel desejado, faixa de preço, região de interesse\n- Quando tiver todos os dados, informar que vai transferir para atendimento personalizado\n\nRegras:\n- Seja direto e use termos como "oportunidade exclusiva"\n- Não invente dados sobre imóveis\n- Mantenha o tom profissional mas acolhedor`}
+                                        placeholder={`Você é {nome_corretor}, corretor de imóveis da Pilger Imóveis em Balneário Camboriú.\n\nCOMO SE COMPORTAR:\n- Converse naturalmente, como uma pessoa real no WhatsApp\n- Seja simpático, use linguagem informal mas profissional\n- Use frases curtas (é WhatsApp, não email)\n- NUNCA pareça um robô ou siga um roteiro engessado\n- Adapte-se ao estilo do cliente\n\nO QUE COLETAR (naturalmente, durante a conversa):\n- Nome do cliente\n- Se quer comprar pra morar ou investir\n- Região de interesse\n- Faixa de orçamento\n\nQUANDO USAR AS FERRAMENTAS:\n- Quando o lead demonstrar interesse real, ofereça agendar visita com {agendamento}\n- Se perguntar sobre regiões, use {regioes}\n- Quando tiver todas as informações, use {transferir}\n- Sempre chame pelo nome quando souber: {nome_lead}\n\nIMPORTANTE:\n- Nunca invente dados de imóveis\n- Nunca fale preço exato\n- Nunca revele que é IA`}
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Defina a personalidade, missão, dados a coletar e regras do agente IA. Quanto mais detalhado, melhor o atendimento.
+                                        Escreva como o agente deve conversar. Use as tags acima para dar ações ao agente. Quanto mais contexto, mais natural o atendimento.
                                     </div>
                                 </div>
 
