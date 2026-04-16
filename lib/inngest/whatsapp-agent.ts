@@ -489,7 +489,7 @@ Sempre chame pelo nome quando souber: {nome_lead}.
 NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato.`
 
     // Processar tags no prompt
-    const systemPrompt = rawPrompt
+    let systemPrompt = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
         .replace(/\{nome_lead\}/g, '(use o nome do cliente quando souber)')
         .replace(/\{agendamento\}/g, 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
@@ -500,6 +500,39 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{horario\}/g, 'informe que o atendimento é de segunda a sexta, das 9h às 18h, e sábados das 9h às 13h')
         .replace(/\{empresa\}/g, 'mencione que a Pilger Imóveis é referência em imóveis de alto padrão em Balneário Camboriú e região')
     + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
+
+    // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
+    try {
+        const supabase = getSupabase()
+        const { data: properties } = await supabase
+            .from('properties')
+            .select('title, city, state, price, property_type, bedrooms, bathrooms, area_m2, amenities, description')
+            .eq('status', 'active')
+            .order('price', { ascending: false })
+            .limit(30)
+
+        if (properties && properties.length > 0) {
+            const catalog = properties.map((p: any, i: number) => {
+                const parts: string[] = []
+                parts.push(`${i + 1}. ${p.title}`)
+                if (p.city) parts.push(`📍 ${p.city}${p.state ? '/' + p.state : ''}`)
+                if (p.price) parts.push(`💰 R$ ${Number(p.price).toLocaleString('pt-BR')}`)
+                if (p.property_type) parts.push(`🏠 ${p.property_type}`)
+                const specs: string[] = []
+                if (p.bedrooms) specs.push(`${p.bedrooms}q`)
+                if (p.bathrooms) specs.push(`${p.bathrooms}b`)
+                if (p.area_m2) specs.push(`${p.area_m2}m²`)
+                if (specs.length) parts.push(`📐 ${specs.join(' | ')}`)
+                if (p.amenities?.length) parts.push(`✨ ${p.amenities.slice(0, 4).join(', ')}`)
+                if (p.description) parts.push(`ℹ️ ${p.description.substring(0, 100)}${p.description.length > 100 ? '...' : ''}`)
+                return parts.join(' | ')
+            }).join('\n')
+
+            systemPrompt += `\n\n═══ IMÓVEIS DISPONÍVEIS (use como referência para sugerir ao cliente) ═══\n${catalog}\n\nUSO DO CATÁLOGO:\n- Quando souber o que o cliente procura (região, orçamento, tipo), sugira imóveis que combinam\n- NÃO liste todos de uma vez — mencione 1 ou 2 que se encaixam e pergunte se quer ver mais\n- Diga "a partir de R$ X" em vez de valor exato\n- Se não tiver nada que combine, diga que tem opções sendo lançadas e pergunte se pode avisar quando sair\n- Se o cliente pedir detalhes de um imóvel específico, dê as informações que você tem`
+        }
+    } catch (err) {
+        console.error('[AI Agent] Erro ao carregar catálogo de imóveis:', err)
+    }
 
     const chatMessages = messages.map((m: any) => ({ role: m.role, content: m.content }))
 

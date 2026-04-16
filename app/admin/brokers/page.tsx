@@ -535,6 +535,7 @@ export default function BrokersAdmin() {
                                             { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
                                             { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
                                             { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
+                                            { tag: '{imoveis}', desc: 'O agente já tem acesso aos imóveis ativos automaticamente', color: '#f59e0b' },
                                         ].map(t => (
                                             <button key={t.tag} type="button" title={t.desc}
                                                 onClick={() => {
