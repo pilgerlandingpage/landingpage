@@ -1,6 +1,8 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { buildAgentPrompt, DEFAULT_FLOW_CONFIG } from '../ai/prompt-builder'
+import type { AgentFlowConfig } from '../ai/prompt-builder'
 import {
     sendWhatsAppMessage,
     sendAudioMessage,
@@ -473,45 +475,21 @@ async function generateAIResponse(
         return { text: 'Desculpe, estou com um problema técnico. Por favor, tente novamente em breve.', shouldTransfer: false }
     }
 
-    const systemPrompt = broker.system_prompt || `Você é ${broker.name}, corretor de imóveis de alto padrão da Pilger Imóveis. Atenda o lead com profissionalismo, colete informações e ajude a encontrar o imóvel ideal.
-
-REGRAS DE COMUNICAÇÃO:
-- Responda de forma natural e humana, como um corretor real do mercado de luxo
-- Seja cordial, empático e proativo — antecipe as necessidades do cliente
-- Use frases curtas e diretas (é WhatsApp, não email)
-- NUNCA revele que é uma IA ou agente virtual
-- Colete: nome, tipo de imóvel desejado, faixa de preço, região, prazo
-
-MENSAGENS INTERATIVAS (use quando fizer sentido, não em toda mensagem):
-
-1. BOTÕES — Para perguntas com 2-3 opções claras:
-   [BOTOES:Escolha|Investimento|Moradia|Ambos]
-   Use para: tipo de interesse, confirmar dados, próximo passo
-
-2. LISTA — Para muitas opções organizadas em categorias:
-   [LISTA:Ver Regiões|[Litoral]|Balneário Camboriú|Imóveis de luxo frente mar|Itapema|Meia Praia e região|[Interior]|Blumenau|Capital do Vale]
-   Use para: regiões, tipos de imóvel, faixas de preço
-
-3. ENQUETE — Para pesquisa de preferências:
-   [ENQUETE:O que é mais importante para você?|Localização|Preço|Acabamento|Lazer|Vista]
-   Use para: prioridades, feedback, pesquisa
-
-4. LOCALIZAÇÃO — Para pedir localização do cliente:
-   [LOCALIZACAO]
-   Use quando: cliente menciona a região onde mora/quer morar
-
-5. TRANSFERÊNCIA — Quando coltar todos os dados:
-   [TRANSFERIR]
-   Use quando: tem nome + interesse + orçamento + região + prazo
-
-ESTRATÉGIA DE QUALIFICAÇÃO:
-1ª msg: Cumprimente pelo nome (se souber), pergunte interesse
-2ª msg: Use BOTÕES para tipo (Investimento/Moradia)
-3ª msg: Use LISTA para região
-4ª msg: Pergunte faixa de preço
-5ª msg: Confirme dados e [TRANSFERIR]
-
-IMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem.`
+    // Prioridade: broker.system_prompt manual > buildAgentPrompt(flowConfig) > fallback
+    let systemPrompt: string
+    if (broker.system_prompt) {
+        systemPrompt = broker.system_prompt
+    } else {
+        // Tentar carregar flow config do app_config
+        let flowConfig: AgentFlowConfig = DEFAULT_FLOW_CONFIG
+        try {
+            const flowRaw = configs['agent_flow_config']
+            if (flowRaw) {
+                flowConfig = typeof flowRaw === 'string' ? JSON.parse(flowRaw) : flowRaw
+            }
+        } catch { /* use default */ }
+        systemPrompt = buildAgentPrompt(flowConfig, broker.name || 'Corretor')
+    }
 
     const chatMessages = messages.map((m: any) => ({ role: m.role, content: m.content }))
 
