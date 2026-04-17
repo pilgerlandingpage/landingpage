@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { configurePrivacy } from '@/lib/uazapi'
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
         // Merge with existing config
         const { data: existing } = await supabase
             .from('whatsapp_instances')
-            .select('config')
+            .select('config, instance_token')
             .eq('id', instance_id)
             .single()
 
@@ -70,6 +71,18 @@ export async function POST(req: NextRequest) {
             .eq('id', instance_id)
 
         if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+        // Sync WhatsApp privacy settings so "online" and "read receipts"
+        // in the phone app match the toggles configured in admin panel.
+        const instanceToken = existing?.instance_token
+        if (instanceToken) {
+            await configurePrivacy({
+                readreceipts: mergedConfig.mark_as_read === false ? 'none' : 'all',
+                online: mergedConfig.always_online === false ? 'match_last_seen' : 'all',
+            }, instanceToken).catch((privacyErr) => {
+                console.warn('[WhatsApp Settings] Privacy sync failed:', privacyErr)
+            })
+        }
 
         return NextResponse.json({ success: true, config: mergedConfig })
     } catch (err: any) {

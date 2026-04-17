@@ -214,6 +214,8 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [webhookMessage, setWebhookMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [setupLoading, setSetupLoading] = useState(false)
     const [setupMessage, setSetupMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [privacyLoading, setPrivacyLoading] = useState(false)
+    const [privacyMessage, setPrivacyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const isConnected = inst.status === 'connected'
     const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
     const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
@@ -427,6 +429,61 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     border: `1px solid ${setupMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
                                 }}>
                                     {setupMessage.text}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Privacy Diagnostic Button */}
+                    {isConnected && (
+                        <div style={{ padding: '0 20px 12px' }}>
+                            <button
+                                onClick={async (e) => {
+                                    e.stopPropagation()
+                                    setPrivacyLoading(true)
+                                    setPrivacyMessage(null)
+                                    try {
+                                        const res = await fetch(`/api/admin/whatsapp/privacy-diagnostic?instance_id=${encodeURIComponent(inst.id)}`)
+                                        const data = await res.json()
+
+                                        if (!res.ok || !data.success) {
+                                            setPrivacyMessage({ type: 'error', text: `❌ ${data.message || 'Falha no diagnóstico'}` })
+                                            return
+                                        }
+
+                                        const onlineOk = data?.matches?.online ? '✅' : '⚠️'
+                                        const readOk = data?.matches?.readreceipts ? '✅' : '⚠️'
+                                        setPrivacyMessage({
+                                            type: data?.matches?.online && data?.matches?.readreceipts ? 'success' : 'error',
+                                            text: `${onlineOk} online: atual=${data?.actual?.online ?? 'n/a'} esperado=${data?.expected?.online} | ${readOk} readreceipts: atual=${data?.actual?.readreceipts ?? 'n/a'} esperado=${data?.expected?.readreceipts}`,
+                                        })
+                                    } catch {
+                                        setPrivacyMessage({ type: 'error', text: '❌ Erro de conexão no diagnóstico de privacidade' })
+                                    } finally {
+                                        setPrivacyLoading(false)
+                                    }
+                                }}
+                                disabled={privacyLoading}
+                                style={{
+                                    width: '100%', padding: '12px 16px', borderRadius: '10px',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    fontWeight: 600, fontSize: '0.84rem', opacity: privacyLoading ? 0.6 : 1,
+                                }}
+                            >
+                                {privacyLoading ? <Loader2 size={16} className="spin" /> : <Shield size={16} />}
+                                Diagnosticar Privacidade (online + visualizado)
+                            </button>
+                            {privacyMessage && (
+                                <div style={{
+                                    marginTop: '8px', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem',
+                                    background: privacyMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                    color: privacyMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                    border: `1px solid ${privacyMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                                    wordBreak: 'break-word',
+                                }}>
+                                    {privacyMessage.text}
                                 </div>
                             )}
                         </div>

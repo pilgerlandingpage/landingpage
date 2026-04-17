@@ -1115,7 +1115,9 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
         await step.run('ensure-online', async () => {
-            await setPresenceAvailable(instanceToken).catch(() => { })
+            if (configs['whatsapp_always_online'] !== 'false') {
+                await setPresenceAvailable(instanceToken).catch(() => { })
+            }
         })
 
         await step.run('mark-as-read', async () => {
