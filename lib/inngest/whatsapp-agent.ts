@@ -1851,6 +1851,52 @@ export const shadowAgentResponse = inngest.createFunction(
 // INNGEST CRON: Keep WhatsApp Always Online
 // ═══════════════════════════════════════════════════════════════
 
+export const reliableMarkAsRead = inngest.createFunction(
+    {
+        id: 'whatsapp-reliable-mark-read',
+        name: 'WhatsApp - Reliable Mark As Read',
+        retries: 0,
+    },
+    { event: 'whatsapp/mark-read' },
+    async ({ event, step }) => {
+        const { instanceToken, remotePhone, cleanPhone } = event.data as {
+            instanceToken: string
+            remotePhone?: string | null
+            cleanPhone: string
+        }
+
+        if (!instanceToken || !cleanPhone) {
+            return { action: 'skipped', reason: 'missing_data' }
+        }
+
+        const targets = Array.from(new Set([
+            remotePhone || '',
+            cleanPhone,
+            `${cleanPhone}@s.whatsapp.net`,
+        ].filter(Boolean)))
+
+        const delays = [0, 1, 2, 4, 8]
+        const results: string[] = []
+
+        for (let i = 0; i < delays.length; i++) {
+            const delay = delays[i]
+            if (delay > 0) {
+                await step.sleep(`retry-wait-${i}`, `${delay}s`)
+            }
+
+            await step.run(`retry-mark-read-${i}`, async () => {
+                const settled = await Promise.allSettled(
+                    targets.map((target) => markAsRead(target, instanceToken))
+                )
+                const ok = settled.filter(r => r.status === 'fulfilled').length
+                results.push(`t+${delay}s: ok=${ok}/${targets.length}`)
+            })
+        }
+
+        return { action: 'done', targets, results }
+    }
+)
+
 export const whatsappKeepOnline = inngest.createFunction(
     {
         id: 'whatsapp-keep-online',

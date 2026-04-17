@@ -362,6 +362,17 @@ export async function POST(request: NextRequest) {
                         await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)))
                     }
                 }
+
+                // Reliability fallback in background: retries over a few seconds
+                // (helps when provider hasn't indexed the inbound message yet).
+                await inngest.send({
+                    name: 'whatsapp/mark-read',
+                    data: {
+                        instanceToken: instance.instance_token,
+                        remotePhone: remotePhone || null,
+                        cleanPhone: finalPhone,
+                    }
+                })
             }
         } catch { /* ignore */ }
 

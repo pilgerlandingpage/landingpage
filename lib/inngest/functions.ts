@@ -19,6 +19,7 @@ import {
     processWhatsAppMessage,
     detectHumanTakeover,
     shadowAgentResponse,
+    reliableMarkAsRead,
     whatsappKeepOnline
 } from './whatsapp-agent'
 import { whatsappInstanceSetup } from './whatsapp-setup'
@@ -164,6 +165,7 @@ export const functions = [
     processWhatsAppMessage,
     detectHumanTakeover,
     shadowAgentResponse,
+    reliableMarkAsRead,
     whatsappKeepOnline,
     // WhatsApp Instance Setup
     whatsappInstanceSetup
