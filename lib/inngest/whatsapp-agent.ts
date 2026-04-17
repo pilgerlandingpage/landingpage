@@ -1323,6 +1323,65 @@ export const processWhatsAppMessage = inngest.createFunction(
             }
         })
 
+        // ── Step 9: Sync lead_collected_data (CRM interno) ──
+        await step.run('sync-lead-collected-data', async () => {
+            try {
+                const d = aiResponse.extractedData || {}
+                const leadUpdate: Record<string, unknown> = {
+                    lead_phone: cleanPhone,
+                    updated_at: new Date().toISOString(),
+                }
+
+                if (senderName || d.name) leadUpdate.lead_name = d.name || senderName
+                if (d.interest) leadUpdate.interest = d.interest
+                if (d.region) leadUpdate.region = d.region
+                if (d.budget) {
+                    // Try to parse budget — could be "800 mil", "R$ 800.000", etc.
+                    const budgetStr = String(d.budget).replace(/[^\d]/g, '')
+                    const budgetNum = parseInt(budgetStr)
+                    if (budgetNum > 0) leadUpdate.budget_max = budgetNum > 10000 ? budgetNum : budgetNum * 1000
+                }
+                if (d.bedrooms) leadUpdate.bedrooms_wanted = parseInt(d.bedrooms) || null
+                if (d.property_type) leadUpdate.property_type = d.property_type
+                if (d.timeframe) leadUpdate.timeline = d.timeframe
+
+                // Calculate qualification score (0-100)
+                let score = 0
+                if (leadUpdate.lead_name) score += 15
+                if (leadUpdate.interest) score += 15
+                if (leadUpdate.region) score += 15
+                if (leadUpdate.budget_max) score += 20
+                if (leadUpdate.bedrooms_wanted) score += 10
+                if (leadUpdate.property_type) score += 10
+                if (leadUpdate.timeline) score += 15
+                leadUpdate.qualification_score = score
+
+                // Determine status based on score
+                if (aiResponse.shouldTransfer) {
+                    leadUpdate.status = 'transferred'
+                } else if (score >= 70) {
+                    leadUpdate.status = 'qualified'
+                } else if (score >= 30) {
+                    leadUpdate.status = 'qualifying'
+                }
+
+                if (broker.id) leadUpdate.broker_id = broker.id
+
+                // Upsert by lead_phone
+                const { error } = await supabase
+                    .from('lead_collected_data')
+                    .upsert(leadUpdate, { onConflict: 'lead_phone' })
+
+                if (error) {
+                    console.warn('[CRM Interno] Upsert error:', error.message)
+                } else {
+                    console.log(`[CRM Interno] ✅ Lead ${cleanPhone} atualizado (score: ${score})`)
+                }
+            } catch (e) {
+                console.warn('[CRM Interno] Sync failed (non-fatal):', e)
+            }
+        })
+
         return {
             action: 'processed',
             phone: cleanPhone,

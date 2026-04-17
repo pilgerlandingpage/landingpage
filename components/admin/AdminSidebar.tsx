@@ -35,7 +35,16 @@ import { useRouter } from 'next/navigation'
 const MODULE_NAV: Record<string, { href: string; icon: any; label: string; section: string; subItems?: { href: string; label: string; icon?: any }[] }> = {
     dashboard: { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', section: 'PRINCIPAL' },
     funnel: { href: '/admin/funnel', icon: Filter, label: 'Funil de Conversão', section: 'PRINCIPAL' },
-    leads: { href: '/admin/leads', icon: Users, label: 'Leads', section: 'PRINCIPAL' },
+    leads: { 
+        href: '/admin/leads', 
+        icon: Users, 
+        label: 'Leads', 
+        section: 'PRINCIPAL',
+        subItems: [
+            { href: '/admin/leads', label: 'Todos os Leads' },
+            { href: '/admin/leads/crm', label: 'CRM do Agente' },
+        ]
+    },
     landing_pages: { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages', section: 'CONTEÚDO' },
     properties: { href: '/admin/properties', icon: Building2, label: 'Imóveis', section: 'CONTEÚDO' },
     brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores IA', section: 'CONTEÚDO' },
