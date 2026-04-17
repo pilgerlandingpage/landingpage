@@ -533,18 +533,14 @@ export async function setPresenceRecording(phone: string, instanceToken: string)
 }
 
 /** Ficar online (presença "available") */
-export async function setPresenceAvailable(instanceToken: string, phoneOrJid?: string) {
-    const raw = (phoneOrJid || '').trim()
-    const number = raw ? cleanPhone(raw) : undefined
-    const jid = raw ? (raw.includes('@') ? raw : `${number}@s.whatsapp.net`) : undefined
-    return uazapiFetch('/message/presence', {
+export async function setPresenceAvailable(instanceToken: string, _phoneOrJid?: string) {
+    // "Always online" is an instance-level presence control.
+    // /message/presence only supports composing|recording|paused for a specific chat.
+    return uazapiFetch('/instance/presence', {
         method: 'POST',
         token: instanceToken,
         body: {
             presence: 'available',
-            ...(number ? { number } : {}),
-            ...(jid ? { id: jid, jid, chatId: jid } : {}),
-            delay: 5000,
         },
     })
 }
