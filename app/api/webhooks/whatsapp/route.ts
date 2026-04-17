@@ -343,14 +343,25 @@ export async function POST(request: NextRequest) {
 
         // ── Immediate actions (before async Inngest processing) ──
 
-        // 1) Mark as read (blue ticks) — fire-and-forget
+        // 1) Mark as read (blue ticks) — immediate + short retries for reliability
         try {
             const instanceMarkAsRead = (instance as any)?.config?.mark_as_read
             const shouldMarkAsRead = instanceMarkAsRead !== false && instanceMarkAsRead !== 'false'
             if (shouldMarkAsRead) {
-                markAsRead(remotePhone || finalPhone, instance.instance_token).catch((err) => {
-                    console.warn('[Webhook] markAsRead failed:', err)
-                })
+                const readTargets = Array.from(new Set([
+                    remotePhone || '',
+                    finalPhone || '',
+                    finalPhone ? `${finalPhone}@s.whatsapp.net` : '',
+                ].filter(Boolean)))
+
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    await Promise.allSettled(
+                        readTargets.map((target) => markAsRead(target, instance.instance_token))
+                    )
+                    if (attempt < 2) {
+                        await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)))
+                    }
+                }
             }
         } catch { /* ignore */ }
 
