@@ -1382,6 +1382,56 @@ export const processWhatsAppMessage = inngest.createFunction(
             }
         })
 
+        // ── Step 10: Detect and save appointment ──
+        await step.run('detect-appointment', async () => {
+            try {
+                // Check if the incoming message or AI response indicates scheduling
+                const lastUserMsg = (messageText || '').toLowerCase()
+                const lastAiMsg = (aiResponse.text || '').toLowerCase()
+                const allMsgs = `${lastUserMsg} ${lastAiMsg}`
+
+                const timeSlots = ['manhã', 'tarde', 'noite', 'manha']
+                const selectedSlot = timeSlots.find(s => lastUserMsg.includes(s))
+
+                // Also check AI extracted data for scheduling
+                const hasSchedulingContext = allMsgs.includes('agend') || allMsgs.includes('visita') || allMsgs.includes('visit')
+
+                if (selectedSlot && hasSchedulingContext) {
+                    // Calculate next business day
+                    const tomorrow = new Date()
+                    tomorrow.setDate(tomorrow.getDate() + 1)
+                    // Skip weekends
+                    while (tomorrow.getDay() === 0 || tomorrow.getDay() === 6) {
+                        tomorrow.setDate(tomorrow.getDate() + 1)
+                    }
+                    const appointmentDate = tomorrow.toISOString().split('T')[0]
+
+                    const timeLabel = selectedSlot.charAt(0).toUpperCase() + selectedSlot.slice(1).replace('manha', 'manhã')
+
+                    const { error } = await supabase
+                        .from('appointments')
+                        .insert([{
+                            lead_phone: cleanPhone,
+                            lead_name: senderName || null,
+                            broker_id: broker.id || null,
+                            appointment_date: appointmentDate,
+                            appointment_time: timeLabel,
+                            appointment_type: 'visita',
+                            property_title: aiResponse.extractedData?.property || null,
+                            status: 'pending',
+                        }])
+
+                    if (error) {
+                        console.warn('[Appointment] Insert error:', error.message)
+                    } else {
+                        console.log(`[Appointment] 📅 Agendamento criado: ${cleanPhone} em ${appointmentDate} (${timeLabel})`)
+                    }
+                }
+            } catch (e) {
+                console.warn('[Appointment] Detection failed (non-fatal):', e)
+            }
+        })
+
         return {
             action: 'processed',
             phone: cleanPhone,
