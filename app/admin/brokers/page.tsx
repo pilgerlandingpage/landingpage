@@ -69,6 +69,7 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
+        transfer_to_phone: '',
         system_prompt: '',
         voice_id: '',
 
@@ -85,6 +86,7 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
+        transfer_to_phone: '',
         system_prompt: '',
         voice_id: '',
 
@@ -507,6 +509,28 @@ export default function BrokersAdmin() {
                                         )}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* ── SEÇÃO 2.5: TRANSFERÊNCIA ── */}
+                            <div style={{ padding: '20px', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
+                                <h3 style={{ fontSize: '1rem', color: '#f59e0b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    📲 Transferência para Humano
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '12px' }}>
+                                    Quando o agente usar a tag {'{transferir}'}, a conversa será encaminhada para este número.
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>Telefone do Corretor Humano</label>
+                                        <input
+                                            value={formData.transfer_to_phone}
+                                            onChange={(e) => setFormData({ ...formData, transfer_to_phone: e.target.value.replace(/\D/g, '') })}
+                                            placeholder="5547999999999"
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
+                                        />
+                                        <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '4px' }}>Formato: 55 + DDD + número (ex: 5547992528080)</p>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* ── SEÇÃO 3: AGENTE IA (PROMPT) ── */}
@@ -948,6 +972,7 @@ export default function BrokersAdmin() {
                                         assignment_type: broker.assignment_type || 'all',
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
+                                        transfer_to_phone: (broker as any).transfer_to_phone || '',
 
                                         system_prompt: broker.system_prompt || '',
                                         voice_id: (broker as any).voice_id || '',

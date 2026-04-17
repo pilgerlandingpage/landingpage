@@ -59,6 +59,7 @@ const MODULE_NAV: Record<string, { href: string; icon: any; label: string; secti
         section: 'AUTOMAÇÃO',
         subItems: [
             { href: '/admin/whatsapp', label: 'Instâncias' },
+            { href: '/admin/whatsapp/agent-config', label: 'Config do Agente' },
             { href: '/admin/whatsapp/campaigns', label: 'Campanhas', icon: Send },
             { href: '/admin/whatsapp/labels', label: 'Etiquetas', icon: Tag },
             { href: '/admin/whatsapp/quick-replies', label: 'Respostas Rápidas', icon: Zap },

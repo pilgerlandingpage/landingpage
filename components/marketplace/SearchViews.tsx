@@ -1,27 +1,24 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { List, Map as MapIcon, GripHorizontal } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
 
 interface SearchViewsProps {
     children: React.ReactNode
     map: React.ReactNode
 }
 
-// Bottom sheet snap points (percentage of screen height from top)
-const SNAP_FULL_MAP = 85    // Sheet at bottom: 85% from top = only 15% visible (handle + peek)
-const SNAP_HALF = 50        // Sheet at middle: 50/50 split
-const SNAP_FULL_LIST = 8    // Sheet at top: only 8% from top = almost full list
+const SNAP_FULL_MAP = 85
+const SNAP_HALF = 50
+const SNAP_FULL_LIST = 8
 
 export default function SearchViews({ children, map }: SearchViewsProps) {
-    const [sheetPosition, setSheetPosition] = useState(SNAP_HALF) // Start at half
+    const [sheetPosition, setSheetPosition] = useState(SNAP_HALF)
     const [isDragging, setIsDragging] = useState(false)
     const sheetRef = useRef<HTMLDivElement>(null)
     const startY = useRef(0)
     const startPosition = useRef(SNAP_HALF)
     const currentTranslate = useRef(SNAP_HALF)
 
-    // Touch handlers for bottom sheet
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         const touch = e.touches[0]
         startY.current = touch.clientY
@@ -43,7 +40,6 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
     const handleTouchEnd = useCallback(() => {
         setIsDragging(false)
         const pos = currentTranslate.current
-        // Snap to nearest point
         const snapPoints = [SNAP_FULL_LIST, SNAP_HALF, SNAP_FULL_MAP]
         let closest = snapPoints[0]
         let minDist = Math.abs(pos - snapPoints[0])
@@ -61,55 +57,30 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
     return (
         <>
             <style>{`
-                /* ====== DESKTOP LAYOUT ====== */
-                .sv-main {
-                    display: flex;
-                    flex: 1;
-                    overflow: hidden;
-                    position: relative;
-                    width: 100%;
-                    background: #f7f7f5;
-                }
-                .sv-list-desktop {
-                    overflow-y: auto;
-                    scrollbar-width: thin;
-                    scrollbar-color: rgba(0,0,0,0.15) transparent;
-                    display: none;
-                }
-                .sv-list-desktop::-webkit-scrollbar { width: 6px; }
-                .sv-list-desktop::-webkit-scrollbar-track { background: transparent; }
-                .sv-list-desktop::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
-                .sv-list-inner {
-                    padding: 20px 20px;
-                }
-                .sv-map-desktop {
-                    flex: 1;
-                    position: relative;
-                    overflow: hidden;
-                    transform: translate3d(0,0,0);
-                    isolation: isolate;
-                    z-index: 1;
-                    display: none;
-                }
-
-                /* ====== MOBILE LAYOUT (bottom sheet) ====== */
-                .sv-mobile-container {
+                /* ===== WRAPPER ===== */
+                .sv-wrap {
                     display: flex;
                     flex-direction: column;
                     flex: 1;
                     position: relative;
                     overflow: hidden;
+                    background: #f7f7f5;
+                    /* Explicit height calculation — doesn't depend on parent flex chain */
+                    height: calc(100vh - 57px);  /* fallback: 100vh minus mobile header */
+                    height: calc(100dvh - 57px); /* preferred: dynamic viewport height */
                 }
-                .sv-mobile-map {
+
+                /* ===== MAP ===== */
+                .sv-map {
                     position: absolute;
-                    inset: 0;
+                    top: 0; left: 0; right: 0; bottom: 0;
                     z-index: 1;
                 }
-                .sv-mobile-sheet {
+
+                /* ===== CONTENT PANEL (bottom sheet on mobile) ===== */
+                .sv-panel {
                     position: absolute;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
+                    left: 0; right: 0; bottom: 0;
                     z-index: 10;
                     background: #fff;
                     border-top-left-radius: 20px;
@@ -119,7 +90,7 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     flex-direction: column;
                     overflow: hidden;
                 }
-                .sv-sheet-handle {
+                .sv-handle {
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -130,13 +101,12 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     user-select: none;
                     -webkit-user-select: none;
                 }
-                .sv-sheet-handle-bar {
-                    width: 40px;
-                    height: 5px;
+                .sv-handle-bar {
+                    width: 40px; height: 5px;
                     background: #d1d1d1;
                     border-radius: 100px;
                 }
-                .sv-sheet-content {
+                .sv-scroll {
                     flex: 1;
                     overflow-y: auto;
                     overscroll-behavior: contain;
@@ -145,94 +115,96 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     scrollbar-width: thin;
                     scrollbar-color: rgba(0,0,0,0.1) transparent;
                 }
-                .sv-sheet-content::-webkit-scrollbar { width: 4px; }
-                .sv-sheet-content::-webkit-scrollbar-track { background: transparent; }
-                .sv-sheet-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 20px; }
+                .sv-scroll::-webkit-scrollbar { width: 4px; }
+                .sv-scroll::-webkit-scrollbar-track { background: transparent; }
+                .sv-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 20px; }
 
-                /* ====== DESKTOP breakpoints ====== */
+                /* ===== DESKTOP (>=1024px) ===== */
                 @media (min-width: 1024px) {
-                    .sv-mobile-container { display: none; }
-                    .sv-main {
+                    .sv-wrap {
+                        flex-direction: row;
                         padding: 24px;
                         gap: 24px;
+                        height: calc(100vh - 65px);
+                        height: calc(100dvh - 65px);
                     }
-                    .sv-list-desktop {
-                        display: block;
+                    /* Panel becomes left sidebar */
+                    .sv-panel {
+                        position: relative;
+                        top: auto !important;
+                        left: auto; right: auto; bottom: auto;
                         width: 52%;
                         min-width: 480px;
                         max-width: 780px;
+                        flex-shrink: 0;
+                        background: transparent;
+                        border-radius: 0;
+                        box-shadow: none;
+                        overflow-y: auto;
+                        transition: none !important;
+                        scrollbar-width: thin;
+                        scrollbar-color: rgba(0,0,0,0.15) transparent;
                     }
-                    .sv-list-inner {
+                    .sv-panel::-webkit-scrollbar { width: 6px; }
+                    .sv-panel::-webkit-scrollbar-track { background: transparent; }
+                    .sv-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
+                    /* Hide drag handle */
+                    .sv-handle { display: none; }
+                    /* Adjust scroll padding */
+                    .sv-scroll {
                         padding: 20px 16px 20px 0;
+                        overflow-y: visible;
                     }
-                    .sv-map-desktop {
-                        display: block;
+                    /* Map becomes right panel */
+                    .sv-map {
+                        position: relative;
+                        top: auto; left: auto; right: auto; bottom: auto;
+                        flex: 1;
+                        min-width: 0;
                         border-radius: 20px;
                         border: 1px solid #e8e5e0;
                         box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+                        overflow: hidden;
                     }
                 }
                 @media (min-width: 1280px) {
-                    .sv-main {
-                        padding: 32px;
-                        gap: 32px;
-                    }
-                    .sv-list-desktop {
-                        max-width: 780px;
-                    }
+                    .sv-wrap { padding: 32px; gap: 32px; }
+                    .sv-panel { max-width: 780px; }
                 }
-                @media (min-width: 1024px) {
-                    .sv-mobile-container { display: none !important; }
-                }
-                @media (max-width: 1023px) {
-                    .sv-main > .sv-list-desktop,
-                    .sv-main > .sv-map-desktop { display: none !important; }
-                    .sv-mobile-container { display: flex !important; }
+
+                /* Force leaflet containers */
+                .sv-map .leaflet-container {
+                    width: 100% !important;
+                    height: 100% !important;
                 }
             `}</style>
 
-            <main className="sv-main">
-                {/* ======= DESKTOP: side-by-side ======= */}
-                <div className="sv-list-desktop">
-                    <div className="sv-list-inner">
+            <main className="sv-wrap">
+                {/* Content panel: bottom sheet (mobile) / left sidebar (desktop) */}
+                <div
+                    ref={sheetRef}
+                    className="sv-panel"
+                    style={{
+                        top: `${sheetPosition}%`,
+                        transition: isDragging ? 'none' : 'top 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                >
+                    <div
+                        className="sv-handle"
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <div className="sv-handle-bar" />
+                    </div>
+                    <div className="sv-scroll">
                         {children}
                     </div>
                 </div>
-                <div className="sv-map-desktop">
+
+                {/* Map: fullscreen (mobile) / right panel (desktop) */}
+                <div className="sv-map">
                     {map}
-                </div>
-
-                {/* ======= MOBILE: map + bottom sheet ======= */}
-                <div className="sv-mobile-container">
-                    {/* Map always behind */}
-                    <div className="sv-mobile-map">
-                        {map}
-                    </div>
-
-                    {/* Draggable bottom sheet */}
-                    <div
-                        ref={sheetRef}
-                        className="sv-mobile-sheet"
-                        style={{
-                            top: `${sheetPosition}%`,
-                            transition: isDragging ? 'none' : 'top 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
-                        }}
-                    >
-                        {/* Handle */}
-                        <div
-                            className="sv-sheet-handle"
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                        >
-                            <div className="sv-sheet-handle-bar" />
-                        </div>
-
-                        {/* Scrollable content */}
-                        <div className="sv-sheet-content">
-                            {children}
-                        </div>
-                    </div>
                 </div>
             </main>
         </>

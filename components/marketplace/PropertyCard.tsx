@@ -136,6 +136,8 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     flex-direction: column;
                     gap: 10px;
                     width: 100%;
+                    min-width: 0;
+                    overflow: hidden;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                     cursor: pointer;
                 }

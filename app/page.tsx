@@ -4,6 +4,7 @@ import PropertyCard from '@/components/marketplace/PropertyCard'
 import HomeSearchBar from '@/components/marketplace/HomeSearchBar'
 import { Search, Filter, Warehouse, Building2, Palmtree, Mountain, Gem } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
+import GlobalHeader from '@/components/layout/GlobalHeader'
 
 // This is a Server Component
 export default async function MarketplaceHome() {
@@ -33,15 +34,15 @@ export default async function MarketplaceHome() {
     { icon: <Building2 size={24} />, label: 'Coberturas' },
     { icon: <Gem size={24} />, label: 'Mansões' },
     { icon: <Warehouse size={24} />, label: 'Condomínios' },
-    { icon: <Mountain size={24} />, label: 'Serra' },
-    { icon: <Filter size={24} />, label: 'Filtros' },
   ]
 
   return (
     <div className="marketplace-container">
+      <GlobalHeader />
 
       {/* === COMPACT HERO STRIP (scrolls away) === */}
       <div className="hero-strip">
+        <div className="hero-top-fade" />
         <div className="hero-video-bg">
           <iframe
             src="https://www.youtube.com/embed/rKzkb0onX1Q?autoplay=1&mute=1&controls=0&loop=1&playlist=rKzkb0onX1Q&showinfo=0&rel=0&iv_load_policy=3&disablekb=1&modestbranding=1"
@@ -117,6 +118,22 @@ export default async function MarketplaceHome() {
           justify-content: center;
           padding-bottom: 16px;
           background: linear-gradient(180deg, #f0ede8 0%, #f7f7f5 100%);
+        }
+        .hero-top-fade {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 40px;
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.7) 30%,
+            rgba(255, 255, 255, 0.3) 60%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          z-index: 4;
+          pointer-events: none;
         }
         .hero-photo-glow {
           position: absolute;

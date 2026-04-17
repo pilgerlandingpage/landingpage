@@ -25,7 +25,7 @@ interface MapSearchProps {
 
 export default function MapSearch({ properties }: MapSearchProps) {
     return (
-        <div className="w-full h-full min-h-[400px] relative overflow-hidden">
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             <PropertyMap properties={properties} />
         </div>
     )

@@ -488,17 +488,66 @@ Sempre chame pelo nome quando souber: {nome_lead}.
 
 NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato.`
 
+    // ═══ Carregar configs dinâmicas do admin ═══
+    const agentConfigs: Record<string, string> = {}
+    try {
+        const supabase = getSupabase()
+        const { data: cfgRows } = await supabase
+            .from('app_config')
+            .select('key, value')
+            .like('key', 'agent_%')
+        if (cfgRows) {
+            for (const row of cfgRows) agentConfigs[row.key] = row.value
+        }
+    } catch (err) {
+        console.error('[AI Agent] Erro ao carregar agent configs:', err)
+    }
+
+    // Parsear configs JSON com fallback
+    let regionsForList = 'Balneário Camboriú|Itapema|Itajaí|Porto Belo'
+    try {
+        const parsed = JSON.parse(agentConfigs['agent_regions'] || '[]')
+        if (parsed.length > 0) regionsForList = parsed.join('|')
+    } catch {}
+
+    let docsForButtons = 'RG e CPF|Comprovante de Renda|Todos os Documentos'
+    try {
+        const parsed = JSON.parse(agentConfigs['agent_required_documents'] || '[]')
+        if (parsed.length > 0) docsForButtons = parsed.join('|')
+    } catch {}
+
+    let hoursText = 'segunda a sexta, das 9h às 18h, e sábados das 9h às 13h'
+    try {
+        const h = JSON.parse(agentConfigs['agent_working_hours'] || '{}')
+        if (h.seg_sex_inicio) {
+            hoursText = `segunda a sexta, das ${h.seg_sex_inicio} às ${h.seg_sex_fim}`
+            if (h.sab_inicio && h.sab_fim) hoursText += `, sábados das ${h.sab_inicio} às ${h.sab_fim}`
+            if (h.dom && h.dom !== 'Fechado') hoursText += `, domingos ${h.dom}`
+            else hoursText += ', domingos fechado'
+        }
+    } catch {}
+
+    const companyName = agentConfigs['agent_company_name'] || 'Pilger Imóveis'
+    const companyDesc = agentConfigs['agent_company_description'] || 'referência em imóveis de alto padrão em Balneário Camboriú e região'
+    const companyAddress = agentConfigs['agent_company_address'] || ''
+    const companyMapsLink = agentConfigs['agent_company_maps_link'] || ''
+    const locationInstruction = companyMapsLink
+        ? `envie o link da localização: ${companyMapsLink} e mencione o endereço: ${companyAddress}`
+        : companyAddress
+        ? `informe o endereço: ${companyAddress} e peça a localização do cliente com [LOCALIZACAO]`
+        : 'peça a localização com [LOCALIZACAO]'
+
     // Processar tags no prompt
     let systemPrompt = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
         .replace(/\{nome_lead\}/g, '(use o nome do cliente quando souber)')
         .replace(/\{agendamento\}/g, 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
-        .replace(/\{regioes\}/g, 'envie uma lista com [LISTA:Ver Regiões|[Litoral]|Balneário Camboriú|Imóveis frente mar|Itapema|Meia Praia|[Interior]|Blumenau|Capital do Vale]')
+        .replace(/\{regioes\}/g, `envie uma lista com [LISTA:Ver Regiões|${regionsForList}]`)
         .replace(/\{transferir\}/g, 'use [TRANSFERIR] para encaminhar ao corretor humano')
-        .replace(/\{localizacao\}/g, 'peça a localização com [LOCALIZACAO]')
-        .replace(/\{documentos\}/g, 'envie botões com [BOTOES:Enviar Documentos|RG e CPF|Comprovante de Renda|Todos os Documentos]')
-        .replace(/\{horario\}/g, 'informe que o atendimento é de segunda a sexta, das 9h às 18h, e sábados das 9h às 13h')
-        .replace(/\{empresa\}/g, 'mencione que a Pilger Imóveis é referência em imóveis de alto padrão em Balneário Camboriú e região')
+        .replace(/\{localizacao\}/g, locationInstruction)
+        .replace(/\{documentos\}/g, `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
+        .replace(/\{horario\}/g, `informe que o atendimento é de ${hoursText}`)
+        .replace(/\{empresa\}/g, `mencione que a ${companyName} é ${companyDesc}`)
     + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
 
     // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
@@ -1166,6 +1215,8 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const summary = aiResponse.updatedMessages
                     .map((m: any) => `${m.role === 'user' ? 'Lead' : 'Agente'}: ${m.content}`)
                     .join('\n')
+
+                // Mark conversation as transferred
                 await supabase
                     .from('whatsapp_ai_conversations')
                     .update({
@@ -1175,6 +1226,57 @@ export const processWhatsAppMessage = inngest.createFunction(
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', conversation.id)
+
+                // ═══ NOTIFICAR CORRETOR HUMANO ═══
+                try {
+                    // Load transfer configs
+                    const { data: transferConfigs } = await supabase
+                        .from('app_config')
+                        .select('key, value')
+                        .in('key', ['agent_transfer_message_broker', 'agent_transfer_message_lead'])
+
+                    const tCfg: Record<string, string> = {}
+                    for (const r of (transferConfigs || [])) tCfg[r.key] = r.value
+
+                    // Find broker's transfer-to phone (from broker config or instance admin)
+                    const transferToPhone = broker.transfer_to_phone
+                        || broker.phone
+                        || ''
+
+                    if (transferToPhone) {
+                        // Extract lead data from conversation context
+                        const leadName = senderName || 'Não informado'
+                        const lastMessages = aiResponse.updatedMessages.slice(-6)
+                            .map((m: any) => `${m.role === 'user' ? '👤' : '🤖'} ${m.content}`)
+                            .join('\n')
+
+                        // Build broker notification
+                        let brokerMsg = tCfg['agent_transfer_message_broker']
+                            || '🔔 *Lead qualificado transferido!*\n\n👤 Nome: {nome_lead}\n📱 Telefone: {telefone}\n\n⚡ Entre em contato agora!'
+
+                        brokerMsg = brokerMsg
+                            .replace(/\{nome_lead\}/g, leadName)
+                            .replace(/\{telefone\}/g, cleanPhone)
+                            .replace(/\{interesse\}/g, aiResponse.extractedData?.interest || 'Não identificado')
+                            .replace(/\{orcamento\}/g, aiResponse.extractedData?.budget || 'Não informado')
+                            .replace(/\{regiao\}/g, aiResponse.extractedData?.region || 'Não informada')
+
+                        brokerMsg += `\n\n📝 *Últimas mensagens:*\n${lastMessages}`
+
+                        // Send to human broker
+                        const { sendWhatsAppMessage } = await import('../uazapi')
+                        await sendWhatsAppMessage({
+                            phone: transferToPhone,
+                            message: brokerMsg,
+                            instanceToken
+                        })
+                        console.log(`[Transfer] 📲 Notificação enviada para corretor: ${transferToPhone}`)
+                    } else {
+                        console.warn('[Transfer] ⚠️ Nenhum telefone de transferência configurado para o broker')
+                    }
+                } catch (transferErr) {
+                    console.error('[Transfer] Erro ao notificar corretor:', transferErr)
+                }
             })
         }
 
