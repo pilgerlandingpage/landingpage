@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
-import { markAsRead } from '@/lib/uazapi'
+import { markAsRead, setPresenceAvailable } from '@/lib/uazapi'
 
 function getSupabase() {
     return createClient(
@@ -348,7 +348,20 @@ export async function POST(request: NextRequest) {
             const instanceMarkAsRead = (instance as any)?.config?.mark_as_read
             const shouldMarkAsRead = instanceMarkAsRead !== false && instanceMarkAsRead !== 'false'
             if (shouldMarkAsRead) {
-                markAsRead(finalPhone, instance.instance_token).catch(() => {})
+                markAsRead(remotePhone || finalPhone, instance.instance_token).catch((err) => {
+                    console.warn('[Webhook] markAsRead failed:', err)
+                })
+            }
+        } catch { /* ignore */ }
+
+        // 1.1) Keep contact-level presence available when enabled
+        try {
+            const instanceAlwaysOnline = (instance as any)?.config?.always_online
+            const shouldStayOnline = instanceAlwaysOnline !== false && instanceAlwaysOnline !== 'false'
+            if (shouldStayOnline) {
+                setPresenceAvailable(instance.instance_token, remotePhone || finalPhone).catch((err) => {
+                    console.warn('[Webhook] setPresenceAvailable failed:', err)
+                })
             }
         } catch { /* ignore */ }
 

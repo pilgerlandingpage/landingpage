@@ -14,6 +14,8 @@ interface SendTextOptions {
     message: string
     instanceToken?: string
     delay?: number
+    readchat?: boolean
+    readmessages?: boolean
 }
 
 interface SendMenuOptions {
@@ -242,6 +244,8 @@ export async function sendWhatsAppMessage({ phone, message, instanceToken, delay
             number: cleanPhone(phone),
             text: message,
             ...(delay ? { delay } : {}),
+            readchat: true,
+            readmessages: true,
         },
     })
 }
@@ -507,11 +511,15 @@ export async function setPresenceTyping(phone: string, instanceToken: string) {
 }
 
 /** Marcar mensagens como lidas */
-export async function markAsRead(phone: string, instanceToken: string) {
+export async function markAsRead(phoneOrJid: string, instanceToken: string) {
+    const raw = (phoneOrJid || '').trim()
+    const number = cleanPhone(raw)
+    const jid = raw.includes('@') ? raw : `${number}@s.whatsapp.net`
     return uazapiFetch('/chat/read', {
         method: 'POST',
         token: instanceToken,
-        body: { number: cleanPhone(phone) },
+        // Compatibility payload: some providers expect "number", others "id"/"jid"/"chatId".
+        body: { number, id: jid, jid, chatId: jid },
     })
 }
 
@@ -525,11 +533,19 @@ export async function setPresenceRecording(phone: string, instanceToken: string)
 }
 
 /** Ficar online (presença "available") */
-export async function setPresenceAvailable(instanceToken: string) {
+export async function setPresenceAvailable(instanceToken: string, phoneOrJid?: string) {
+    const raw = (phoneOrJid || '').trim()
+    const number = raw ? cleanPhone(raw) : undefined
+    const jid = raw ? (raw.includes('@') ? raw : `${number}@s.whatsapp.net`) : undefined
     return uazapiFetch('/message/presence', {
         method: 'POST',
         token: instanceToken,
-        body: { presence: 'available' },
+        body: {
+            presence: 'available',
+            ...(number ? { number } : {}),
+            ...(jid ? { id: jid, jid, chatId: jid } : {}),
+            delay: 5000,
+        },
     })
 }
 
@@ -1044,4 +1060,3 @@ export async function getMessageLimits(instanceToken: string) {
         token: instanceToken,
     })
 }
-

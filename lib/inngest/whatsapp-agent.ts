@@ -1116,13 +1116,17 @@ export const processWhatsAppMessage = inngest.createFunction(
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
         await step.run('ensure-online', async () => {
             if (configs['whatsapp_always_online'] !== 'false') {
-                await setPresenceAvailable(instanceToken).catch(() => { })
+                await setPresenceAvailable(instanceToken, cleanPhone).catch((err) => {
+                    console.warn('[WhatsApp Agent] setPresenceAvailable failed:', err)
+                })
             }
         })
 
         await step.run('mark-as-read', async () => {
             if (configs['whatsapp_mark_as_read'] !== 'false') {
-                await markAsRead(cleanPhone, instanceToken).catch(() => { })
+                await markAsRead(cleanPhone, instanceToken).catch((err) => {
+                    console.warn('[WhatsApp Agent] markAsRead (before send) failed:', err)
+                })
             }
         })
 
@@ -1329,6 +1333,14 @@ export const processWhatsAppMessage = inngest.createFunction(
                     const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: textToSend, instanceToken })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                 }
+            }
+        })
+
+        await step.run('mark-as-read-after-send', async () => {
+            if (configs['whatsapp_mark_as_read'] !== 'false') {
+                await markAsRead(cleanPhone, instanceToken).catch((err) => {
+                    console.warn('[WhatsApp Agent] markAsRead (after send) failed:', err)
+                })
             }
         })
 
