@@ -70,6 +70,9 @@ export const inngest = new Inngest({
                 cleanPhone: string
                 messageText: string
                 isAudio: boolean
+                buttonResponseId: string | null
+                buttonResponseTitle: string | null
+                pollVotes: string[] | string | null
                 audioUrl: string | null
                 audioMediaKey: string | null
                 audioDirectPath: string | null
