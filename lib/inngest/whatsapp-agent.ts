@@ -37,7 +37,9 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
             'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
             'whatsapp_agent_enabled', 'whatsapp_split_messages',
-            'whatsapp_debounce_seconds'
+            'whatsapp_debounce_seconds',
+            // Agent controls from admin panel
+            'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone'
         ])
 
     const map: Record<string, string> = {}
@@ -245,6 +247,67 @@ function parseButtons(text: string): { cleanText: string; buttons?: { title: str
 
 function responseRequiresText(text: string): boolean {
     return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[LISTA:/i.test(text) || /\[ENQUETE:/i.test(text) || /\[LOCALIZACAO\]/i.test(text)
+}
+
+function parseBudgetToNumber(value: unknown): number | null {
+    if (!value) return null
+    const raw = String(value).toLowerCase()
+    const digits = raw.replace(/[^\d]/g, '')
+    if (!digits) return null
+    let n = parseInt(digits, 10)
+    if (!Number.isFinite(n) || n <= 0) return null
+    if (raw.includes('mil') && n < 10000) n *= 1000
+    if (raw.includes('mi') && n < 1000) n *= 1000000
+    if (n < 10000) n *= 1000
+    return n
+}
+
+function extractLeadDataFromText(inputText: string, aiText: string, senderName?: string): Record<string, any> {
+    const merged = `${inputText}\n${aiText}`
+    const lower = merged.toLowerCase()
+    const out: Record<string, any> = {}
+
+    if (senderName) out.name = senderName
+
+    const budgetMatch = merged.match(/(?:r\$\s*)?(\d{2,3}(?:[.\s]\d{3})+|\d{2,4})\s*(mil|mi|milh(?:ão|oes|ões))?/i)
+    if (budgetMatch) {
+        const rawBudget = `${budgetMatch[1]} ${budgetMatch[2] || ''}`.trim()
+        out.budget = rawBudget
+    }
+
+    const regionMatch = merged.match(/\b(gramado|canela|nova petr[oó]polis|caxias do sul|bento gon[çc]alves|balne[aá]rio cambori[uú]|itapema|itaja[ií]|porto belo)\b/i)
+    if (regionMatch) out.region = regionMatch[1]
+
+    const bedroomsMatch = merged.match(/(\d+)\s*(?:quartos?|dormit[oó]rios?|su[ií]tes?)/i)
+    if (bedroomsMatch) out.bedrooms = bedroomsMatch[1]
+
+    if (/\b(casa|sobrado|apartamento|apto|terreno|cobertura|sala comercial|loja)\b/i.test(lower)) {
+        const typeMatch = lower.match(/\b(casa|sobrado|apartamento|apto|terreno|cobertura|sala comercial|loja)\b/i)
+        if (typeMatch) {
+            out.property_type = typeMatch[1] === 'apto' ? 'apartamento' : typeMatch[1]
+        }
+    }
+
+    if (/\b(invest|renda|aluguel)\b/i.test(lower)) out.interest = 'investir'
+    if (/\b(morar|residir|mudar)\b/i.test(lower)) out.interest = out.interest || 'morar'
+
+    if (/\b(urgente|imediat|agora)\b/i.test(lower)) out.timeframe = 'imediato'
+    else if (/\b(30 dias|1 m[eê]s|2 meses|3 meses)\b/i.test(lower)) out.timeframe = 'até 3 meses'
+    else if (/\b(6 meses|ano que vem|pr[oó]ximo ano)\b/i.test(lower)) out.timeframe = 'médio prazo'
+
+    return out
+}
+
+function computeLeadScore(lead: Record<string, unknown>): number {
+    let score = 0
+    if (lead.lead_name) score += 15
+    if (lead.interest) score += 15
+    if (lead.region) score += 15
+    if (lead.budget_max) score += 20
+    if (lead.bedrooms_wanted) score += 10
+    if (lead.property_type) score += 10
+    if (lead.timeline) score += 15
+    return Math.min(score, 100)
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -462,7 +525,8 @@ async function uploadAudioToR2(audioBuffer: Buffer, supabase: ReturnType<typeof 
 async function generateAIResponse(
     configs: Record<string, string>,
     broker: any,
-    messages: any[]
+    messages: any[],
+    senderName?: string
 ): Promise<{ text: string; shouldTransfer: boolean; extractedData?: any }> {
     const globalProvider = configs['ai_provider'] || 'gemini'
     const effectiveProvider = configs['whatsapp_provider'] || globalProvider
@@ -538,6 +602,13 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         : 'peça a localização com [LOCALIZACAO]'
 
     // Processar tags no prompt
+    const tone = (agentConfigs['agent_tone'] || 'amigavel').toLowerCase()
+    const toneInstruction = tone === 'formal'
+        ? 'Use um tom formal, objetivo e respeitoso, sem gírias.'
+        : tone === 'consultivo'
+            ? 'Use tom consultivo, faça perguntas qualificadoras e conduza com clareza.'
+            : 'Use tom amigável, humano e próximo, mantendo profissionalismo.'
+
     let systemPrompt = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
         .replace(/\{nome_lead\}/g, '(use o nome do cliente quando souber)')
@@ -548,6 +619,7 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{documentos\}/g, `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
         .replace(/\{horario\}/g, `informe que o atendimento é de ${hoursText}`)
         .replace(/\{empresa\}/g, `mencione que a ${companyName} é ${companyDesc}`)
+    + `\n\n${toneInstruction}`
     + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
 
     // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
@@ -613,9 +685,14 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
         }
 
+        const extractedData = extractLeadDataFromText(
+            messages[messages.length - 1]?.content || '',
+            responseText,
+            senderName
+        )
         const shouldTransfer = /\[transferir\]/i.test(responseText) || /\[transfer\]/i.test(responseText)
         const cleanText = responseText.replace(/\[transferir\]/gi, '').replace(/\[transfer\]/gi, '').trim()
-        return { text: cleanText || 'Desculpe, não entendi. Pode reformular?', shouldTransfer }
+        return { text: cleanText || 'Desculpe, não entendi. Pode reformular?', shouldTransfer, extractedData }
     } catch (error) {
         console.error('[AI Response Error]', error)
         return { text: 'Estou com um problema temporário. Tente novamente em instantes.', shouldTransfer: false }
@@ -640,6 +717,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     async ({ event, step }) => {
         const {
             cleanPhone, messageText, isAudio, audioUrl, audioMediaKey, audioDirectPath, messageId,
+            buttonResponseId, buttonResponseTitle, pollVotes,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
 
@@ -693,12 +771,22 @@ export const processWhatsAppMessage = inngest.createFunction(
                 .select('*')
                 .eq('broker_id', broker.id)
                 .eq('lead_phone', cleanPhone)
-                .in('status', ['active', 'human_takeover'])
+                .in('status', ['active', 'human_takeover', 'transferred'])
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle()
 
-            if (existing) return existing
+            if (existing) {
+                if (existing.status === 'transferred') {
+                    const lockMinutes = parseInt(configs['agent_transfer_lock_minutes'] || '1440', 10)
+                    const transferredAt = existing.transferred_at ? new Date(existing.transferred_at).getTime() : 0
+                    const elapsedMinutes = transferredAt > 0 ? (Date.now() - transferredAt) / 60000 : 0
+                    if (lockMinutes > 0 && elapsedMinutes < lockMinutes) {
+                        return existing
+                    }
+                }
+                return existing
+            }
 
             const { data: newConv } = await supabase
                 .from('whatsapp_ai_conversations')
@@ -720,6 +808,11 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'error', reason: 'could_not_create_conversation' }
         }
 
+        if (conversation.status === 'transferred') {
+            console.log('[WhatsApp Agent] Conversation is transferred/human handling, skipping bot response')
+            return { action: 'skipped', reason: 'human_handling' }
+        }
+
         // Check if agent is enabled
         if (configs['whatsapp_agent_enabled'] === 'false') {
             console.log(`[WhatsApp Agent] Agent disabled, skipping`)
@@ -727,7 +820,8 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         // Check human_takeover
-        if (conversation.status === 'human_takeover') {
+        const humanInterventionEnabled = configs['whatsapp_human_intervention'] !== 'false'
+        if (humanInterventionEnabled && conversation.status === 'human_takeover') {
             // Check if auto-reactivation time has passed
             const interventionMinutes = parseInt(configs['whatsapp_human_intervention_minutes'] || '60')
             const takeoverAt = conversation.human_takeover_at
@@ -767,9 +861,10 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'skipped', reason: 'already_processed' }
         }
 
-        // Sleep 15s to allow more messages to accumulate
+        // Sleep configurable debounce to allow more messages to accumulate
         if (!isAudio) {
-            await step.sleep('debounce-collect', '15s')
+            const debounceSeconds = Math.max(1, parseInt(configs['whatsapp_debounce_seconds'] || '15', 10) || 15)
+            await step.sleep('debounce-collect', `${debounceSeconds}s`)
         }
 
         // Read queued messages from debounce window (atomic INSERTs in app_config)
@@ -864,6 +959,12 @@ export const processWhatsAppMessage = inngest.createFunction(
         const inputText = await step.run('process-input', async () => {
             console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioR2Url=${audioR2Url ? 'available' : 'null'}, messageText="${messageText}"`)
             
+            const transcriptionEnabled = configs['whatsapp_transcription_enabled'] !== 'false'
+
+            if (isAudio && !transcriptionEnabled) {
+                return '[O usuário enviou áudio, mas a transcrição de áudio está desativada. Peça para ele enviar em texto ou ative a transcrição.]'
+            }
+
             if (isAudio && audioR2Url) {
                 console.log(`[WhatsApp Agent] Transcribing audio from R2 URL...`)
                 
@@ -970,7 +1071,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 timestamp: new Date().toISOString()
             }]
 
-            const response = await generateAIResponse(configs, broker, updatedMessages)
+            const response = await generateAIResponse(configs, broker, updatedMessages, senderName)
 
             // Add assistant message to history
             updatedMessages.push({
@@ -996,13 +1097,31 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { ...response, updatedMessages }
         })
 
+        const transferThreshold = parseInt(configs['agent_transfer_score_threshold'] || '80', 10)
+        const extractedForThreshold = aiResponse.extractedData || {}
+        const thresholdLead: Record<string, unknown> = {
+            lead_name: extractedForThreshold.name || senderName || null,
+            interest: extractedForThreshold.interest || null,
+            region: extractedForThreshold.region || null,
+            budget_max: parseBudgetToNumber(extractedForThreshold.budget),
+            bedrooms_wanted: extractedForThreshold.bedrooms ? parseInt(extractedForThreshold.bedrooms, 10) : null,
+            property_type: extractedForThreshold.property_type || null,
+            timeline: extractedForThreshold.timeframe || null,
+        }
+        const thresholdScore = computeLeadScore(thresholdLead)
+        if (!aiResponse.shouldTransfer && transferThreshold > 0 && thresholdScore >= transferThreshold) {
+            aiResponse.shouldTransfer = true
+        }
+
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
         await step.run('ensure-online', async () => {
             await setPresenceAvailable(instanceToken).catch(() => { })
         })
 
         await step.run('mark-as-read', async () => {
-            await markAsRead(cleanPhone, instanceToken).catch(() => { })
+            if (configs['whatsapp_mark_as_read'] !== 'false') {
+                await markAsRead(cleanPhone, instanceToken).catch(() => { })
+            }
         })
 
         // Reading delay (1-3s) — Inngest native sleep, no timeout risk!
@@ -1010,7 +1129,8 @@ export const processWhatsAppMessage = inngest.createFunction(
         await step.sleep('reading-delay', `${readDelay}ms`)
 
         // Decide presence: "recording" if sending audio, "typing" otherwise
-        const willSendAudio = isAudio && configs['whatsapp_audio_enabled'] === 'true'
+        const mirrorModeEnabled = configs['whatsapp_mirror_mode'] === 'true'
+        const willSendAudio = isAudio && mirrorModeEnabled && configs['whatsapp_audio_enabled'] === 'true'
             && !responseRequiresText(aiResponse.text) && !parseButtons(aiResponse.text).buttons
 
         await step.run('show-presence', async () => {
@@ -1033,7 +1153,8 @@ export const processWhatsAppMessage = inngest.createFunction(
             const needsTextFormat = responseRequiresText(aiResponse.text)
             const hasInteractive = !!(buttons || list || poll || locationRequest)
             const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
-            const shouldSendAudio = isAudio && audioEnabled && !needsTextFormat && !hasInteractive
+            const mirrorModeEnabled = configs['whatsapp_mirror_mode'] === 'true'
+            const shouldSendAudio = isAudio && mirrorModeEnabled && audioEnabled && !needsTextFormat && !hasInteractive
 
             console.log(`[WhatsApp Agent] 📤 Send decision: isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, shouldSendAudio=${shouldSendAudio}`)
 
@@ -1274,6 +1395,18 @@ export const processWhatsAppMessage = inngest.createFunction(
                     } else {
                         console.warn('[Transfer] ⚠️ Nenhum telefone de transferência configurado para o broker')
                     }
+
+                    // Notify lead that a human broker will continue
+                    let leadMsg = tCfg['agent_transfer_message_lead']
+                        || 'Perfeito! Vou te encaminhar para um corretor humano agora. Ele já recebeu seu contexto. 🙂'
+                    leadMsg = leadMsg
+                        .replace(/\{nome_lead\}/g, senderName || 'cliente')
+                        .replace(/\{telefone\}/g, cleanPhone)
+                    await sendWhatsAppMessage({
+                        phone: cleanPhone,
+                        message: leadMsg,
+                        instanceToken
+                    })
                 } catch (transferErr) {
                     console.error('[Transfer] Erro ao notificar corretor:', transferErr)
                 }
@@ -1327,33 +1460,31 @@ export const processWhatsAppMessage = inngest.createFunction(
         await step.run('sync-lead-collected-data', async () => {
             try {
                 const d = aiResponse.extractedData || {}
+                const { data: existingLead } = await supabase
+                    .from('lead_collected_data')
+                    .select('*')
+                    .eq('lead_phone', cleanPhone)
+                    .maybeSingle()
+
                 const leadUpdate: Record<string, unknown> = {
                     lead_phone: cleanPhone,
                     updated_at: new Date().toISOString(),
                 }
 
-                if (senderName || d.name) leadUpdate.lead_name = d.name || senderName
-                if (d.interest) leadUpdate.interest = d.interest
-                if (d.region) leadUpdate.region = d.region
+                if (senderName || d.name || existingLead?.lead_name) leadUpdate.lead_name = d.name || senderName || existingLead?.lead_name
+                if (d.interest || existingLead?.interest) leadUpdate.interest = d.interest || existingLead?.interest
+                if (d.region || existingLead?.region) leadUpdate.region = d.region || existingLead?.region
                 if (d.budget) {
-                    // Try to parse budget — could be "800 mil", "R$ 800.000", etc.
-                    const budgetStr = String(d.budget).replace(/[^\d]/g, '')
-                    const budgetNum = parseInt(budgetStr)
-                    if (budgetNum > 0) leadUpdate.budget_max = budgetNum > 10000 ? budgetNum : budgetNum * 1000
+                    const budgetNum = parseBudgetToNumber(d.budget)
+                    if (budgetNum) leadUpdate.budget_max = budgetNum
                 }
-                if (d.bedrooms) leadUpdate.bedrooms_wanted = parseInt(d.bedrooms) || null
-                if (d.property_type) leadUpdate.property_type = d.property_type
-                if (d.timeframe) leadUpdate.timeline = d.timeframe
+                if (!leadUpdate.budget_max && existingLead?.budget_max) leadUpdate.budget_max = existingLead.budget_max
+                if (d.bedrooms || existingLead?.bedrooms_wanted) leadUpdate.bedrooms_wanted = parseInt(d.bedrooms) || existingLead?.bedrooms_wanted || null
+                if (d.property_type || existingLead?.property_type) leadUpdate.property_type = d.property_type || existingLead?.property_type
+                if (d.timeframe || existingLead?.timeline) leadUpdate.timeline = d.timeframe || existingLead?.timeline
 
                 // Calculate qualification score (0-100)
-                let score = 0
-                if (leadUpdate.lead_name) score += 15
-                if (leadUpdate.interest) score += 15
-                if (leadUpdate.region) score += 15
-                if (leadUpdate.budget_max) score += 20
-                if (leadUpdate.bedrooms_wanted) score += 10
-                if (leadUpdate.property_type) score += 10
-                if (leadUpdate.timeline) score += 15
+                const score = computeLeadScore(leadUpdate)
                 leadUpdate.qualification_score = score
 
                 // Determine status based on score
@@ -1388,10 +1519,12 @@ export const processWhatsAppMessage = inngest.createFunction(
                 // Check if the incoming message or AI response indicates scheduling
                 const lastUserMsg = (messageText || '').toLowerCase()
                 const lastAiMsg = (aiResponse.text || '').toLowerCase()
-                const allMsgs = `${lastUserMsg} ${lastAiMsg}`
+                const buttonText = String(buttonResponseTitle || buttonResponseId || '').toLowerCase()
+                const pollText = Array.isArray(pollVotes) ? pollVotes.join(' ').toLowerCase() : String(pollVotes || '').toLowerCase()
+                const allMsgs = `${lastUserMsg} ${lastAiMsg} ${buttonText} ${pollText}`
 
                 const timeSlots = ['manhã', 'tarde', 'noite', 'manha']
-                const selectedSlot = timeSlots.find(s => lastUserMsg.includes(s))
+                const selectedSlot = timeSlots.find(s => allMsgs.includes(s))
 
                 // Also check AI extracted data for scheduling
                 const hasSchedulingContext = allMsgs.includes('agend') || allMsgs.includes('visita') || allMsgs.includes('visit')
@@ -1407,6 +1540,25 @@ export const processWhatsAppMessage = inngest.createFunction(
                     const appointmentDate = tomorrow.toISOString().split('T')[0]
 
                     const timeLabel = selectedSlot.charAt(0).toUpperCase() + selectedSlot.slice(1).replace('manha', 'manhã')
+
+                    const normalizedSlot = timeLabel.toLowerCase().replace('ã', 'a')
+                    const { data: sameDayAppointments } = await supabase
+                        .from('appointments')
+                        .select('id, appointment_time, status')
+                        .eq('lead_phone', cleanPhone)
+                        .eq('appointment_date', appointmentDate)
+                        .neq('status', 'cancelled')
+                        .limit(20)
+
+                    const alreadyExists = (sameDayAppointments || []).some((a: any) => {
+                        const value = String(a.appointment_time || '').toLowerCase()
+                        return value.includes(normalizedSlot) || value.includes(timeLabel.toLowerCase())
+                    })
+
+                    if (alreadyExists) {
+                        console.log(`[Appointment] ℹ️ Duplicate prevented for ${cleanPhone} on ${appointmentDate} (${timeLabel})`)
+                        return
+                    }
 
                     const { error } = await supabase
                         .from('appointments')
@@ -1456,7 +1608,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 }
 
                 // Log document/image received
-                if (evData.mediaType && evData.messageType === 'document') {
+                if (evData.mediaType && ['document', 'image', 'video'].includes(evData.messageType || '')) {
                     const docEntry = {
                         type: evData.mediaType,
                         filename: evData.mediaFilename || `${evData.mediaType}_${Date.now()}`,
@@ -1533,7 +1685,11 @@ export const detectHumanTakeover = inngest.createFunction(
             console.log(`[Human Takeover] Detected on instance ${instanceId}`)
             await supabase
                 .from('whatsapp_ai_conversations')
-                .update({ status: 'human_takeover', updated_at: new Date().toISOString() })
+                .update({
+                    status: 'human_takeover',
+                    human_takeover_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
                 .eq('instance_id', instanceId)
                 .eq('lead_phone', recipientPhone)
                 .eq('status', 'active')

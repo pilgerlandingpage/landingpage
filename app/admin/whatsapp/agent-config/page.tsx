@@ -50,6 +50,9 @@ export default function AgentConfigPage() {
     const [transferMsgBroker, setTransferMsgBroker] = useState(
         '🔔 *Lead qualificado transferido!*\n\n👤 Nome: {nome_lead}\n📱 Telefone: {telefone}\n🏠 Interesse: {interesse}\n💰 Orçamento: {orcamento}\n📍 Região: {regiao}\n\n⚡ Entre em contato agora!'
     )
+    const [agentTone, setAgentTone] = useState('amigavel')
+    const [transferLockMinutes, setTransferLockMinutes] = useState('1440')
+    const [transferScoreThreshold, setTransferScoreThreshold] = useState('80')
 
     useEffect(() => {
         loadConfig()
@@ -78,6 +81,9 @@ export default function AgentConfigPage() {
                 }
                 if (c.agent_transfer_message_lead) setTransferMsgLead(c.agent_transfer_message_lead)
                 if (c.agent_transfer_message_broker) setTransferMsgBroker(c.agent_transfer_message_broker)
+                if (c.agent_tone) setAgentTone(c.agent_tone)
+                if (c.agent_transfer_lock_minutes) setTransferLockMinutes(c.agent_transfer_lock_minutes)
+                if (c.agent_transfer_score_threshold) setTransferScoreThreshold(c.agent_transfer_score_threshold)
             }
         } catch (err) {
             console.error('Erro ao carregar config:', err)
@@ -106,6 +112,9 @@ export default function AgentConfigPage() {
                         agent_required_documents: JSON.stringify(documents),
                         agent_transfer_message_lead: transferMsgLead,
                         agent_transfer_message_broker: transferMsgBroker,
+                        agent_tone: agentTone,
+                        agent_transfer_lock_minutes: transferLockMinutes,
+                        agent_transfer_score_threshold: transferScoreThreshold,
                     }
                 })
             })
@@ -417,6 +426,39 @@ export default function AgentConfigPage() {
                     </svg>
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Mensagens de Transferência</h2>
                     <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tag: {'{transferir}'}</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+                    <div>
+                        <label style={labelStyle}>Tom de voz</label>
+                        <select style={inputStyle} value={agentTone} onChange={e => setAgentTone(e.target.value)}>
+                            <option value="amigavel">Amigável</option>
+                            <option value="formal">Formal</option>
+                            <option value="consultivo">Consultivo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Bloqueio da IA após transferência (min)</label>
+                        <input
+                            type="number"
+                            min={0}
+                            style={inputStyle}
+                            value={transferLockMinutes}
+                            onChange={e => setTransferLockMinutes(e.target.value)}
+                            placeholder="1440"
+                        />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Score para transferência automática</label>
+                        <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            style={inputStyle}
+                            value={transferScoreThreshold}
+                            onChange={e => setTransferScoreThreshold(e.target.value)}
+                            placeholder="80"
+                        />
+                    </div>
                 </div>
                 <div style={{ marginBottom: 16 }}>
                     <label style={labelStyle}>Mensagem para o Lead (quando transferir)</label>

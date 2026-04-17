@@ -345,12 +345,9 @@ export async function POST(request: NextRequest) {
 
         // 1) Mark as read (blue ticks) — fire-and-forget
         try {
-            const { data: markCfg } = await supabase
-                .from('app_config')
-                .select('value')
-                .eq('key', 'whatsapp_mark_as_read')
-                .maybeSingle()
-            if (markCfg?.value !== 'false') {
+            const instanceMarkAsRead = (instance as any)?.config?.mark_as_read
+            const shouldMarkAsRead = instanceMarkAsRead !== false && instanceMarkAsRead !== 'false'
+            if (shouldMarkAsRead) {
                 markAsRead(finalPhone, instance.instance_token).catch(() => {})
             }
         } catch { /* ignore */ }

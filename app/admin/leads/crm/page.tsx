@@ -17,7 +17,9 @@ interface LeadData {
     qualification_score: number
     status: string
     notes: string | null
-    documents_received: string[]
+    documents_received: any[]
+    latitude: number | null
+    longitude: number | null
     broker_id: string | null
     created_at: string
     updated_at: string
@@ -326,6 +328,21 @@ export default function LeadCRMPage() {
                                             <div>
                                                 <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>PRAZO</label>
                                                 <span style={{ fontSize: '0.85rem', color: '#333' }}>{lead.timeline || '—'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>LOCALIZAÇÃO</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>
+                                                    {lead.latitude && lead.longitude ? `${lead.latitude}, ${lead.longitude}` : '—'}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>DOCUMENTOS RECEBIDOS</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>
+                                                    {Array.isArray(lead.documents_received) ? lead.documents_received.length : 0}
+                                                </span>
                                             </div>
                                         </div>
 

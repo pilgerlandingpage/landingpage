@@ -23,6 +23,9 @@ const AGENT_CONFIG_KEYS = [
     'agent_required_documents',
     'agent_transfer_message_lead',
     'agent_transfer_message_broker',
+    'agent_tone',
+    'agent_transfer_lock_minutes',
+    'agent_transfer_score_threshold',
 ]
 
 // GET — Load all agent config values
