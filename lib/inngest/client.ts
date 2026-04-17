@@ -100,6 +100,13 @@ export const inngest = new Inngest({
                 adminUserId: string
             }
         }
+        'whatsapp/mark-read': {
+            data: {
+                instanceToken: string
+                remotePhone?: string | null
+                cleanPhone: string
+            }
+        }
         'whatsapp/instance-setup': {
             data: {
                 instanceId: string
