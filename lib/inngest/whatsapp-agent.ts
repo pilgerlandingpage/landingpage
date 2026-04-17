@@ -1432,6 +1432,68 @@ export const processWhatsAppMessage = inngest.createFunction(
             }
         })
 
+        // ── Step 11: Save location & documents ──
+        await step.run('save-location-docs', async () => {
+            try {
+                const evData = event.data as any
+
+                // Save GPS location if received
+                if (evData.receivedLatitude && evData.receivedLongitude) {
+                    const { error } = await supabase
+                        .from('lead_collected_data')
+                        .upsert({
+                            lead_phone: cleanPhone,
+                            latitude: evData.receivedLatitude,
+                            longitude: evData.receivedLongitude,
+                            updated_at: new Date().toISOString(),
+                        }, { onConflict: 'lead_phone' })
+
+                    if (error) {
+                        console.warn('[Location] Save error:', error.message)
+                    } else {
+                        console.log(`[Location] 📍 GPS salvo para ${cleanPhone}: ${evData.receivedLatitude}, ${evData.receivedLongitude}`)
+                    }
+                }
+
+                // Log document/image received
+                if (evData.mediaType && evData.messageType === 'document') {
+                    const docEntry = {
+                        type: evData.mediaType,
+                        filename: evData.mediaFilename || `${evData.mediaType}_${Date.now()}`,
+                        mimetype: evData.mediaMimetype || 'unknown',
+                        url: evData.mediaUrl || null,
+                        received_at: new Date().toISOString(),
+                    }
+
+                    // Get existing docs
+                    const { data: existing } = await supabase
+                        .from('lead_collected_data')
+                        .select('documents_received')
+                        .eq('lead_phone', cleanPhone)
+                        .maybeSingle()
+
+                    const docs = Array.isArray(existing?.documents_received) ? existing.documents_received : []
+                    docs.push(docEntry)
+
+                    const { error } = await supabase
+                        .from('lead_collected_data')
+                        .upsert({
+                            lead_phone: cleanPhone,
+                            documents_received: docs,
+                            updated_at: new Date().toISOString(),
+                        }, { onConflict: 'lead_phone' })
+
+                    if (error) {
+                        console.warn('[Document] Save error:', error.message)
+                    } else {
+                        console.log(`[Document] 📄 Documento salvo para ${cleanPhone}: ${docEntry.filename} (${docEntry.type})`)
+                    }
+                }
+            } catch (e) {
+                console.warn('[Location/Docs] Save failed (non-fatal):', e)
+            }
+        })
+
         return {
             action: 'processed',
             phone: cleanPhone,

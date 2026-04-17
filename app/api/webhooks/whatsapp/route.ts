@@ -140,6 +140,34 @@ export async function POST(request: NextRequest) {
         const receivedLongitude = locationMsg?.degreesLongitude || locationMsg?.longitude || null
         const isLocation = !!(receivedLatitude && receivedLongitude)
 
+        // ── Detect documents/images/videos ──
+        const documentMsg = messageData.message?.documentMessage
+            || messageData.message?.documentWithCaptionMessage?.message?.documentMessage
+            || messageData.documentMessage
+            || null
+        const imageMsg = messageData.message?.imageMessage
+            || messageData.imageMessage
+            || null
+        const videoMsg = messageData.message?.videoMessage
+            || messageData.videoMessage
+            || null
+        const mediaMsg = documentMsg || imageMsg || videoMsg || null
+        const mediaUrl = mediaMsg?.url
+            || mediaMsg?.URL
+            || messageData.content?.URL
+            || messageData.content?.url
+            || messageData.media?.url
+            || null
+        const mediaMimetype = mediaMsg?.mimetype
+            || messageData.content?.mimetype
+            || null
+        const mediaFilename = documentMsg?.fileName
+            || messageData.content?.fileName
+            || messageData.fileName
+            || null
+        const isDocument = !!(documentMsg || (imageMsg && !isAudio) || videoMsg)
+        const mediaType = documentMsg ? 'document' : imageMsg ? 'image' : videoMsg ? 'video' : null
+
         // ── Detect reactions ──
         const reactionMsg = messageData.message?.reactionMessage
             || messageData.reactionMessage
@@ -152,6 +180,7 @@ export async function POST(request: NextRequest) {
             : isButtonResponse ? 'button_response'
             : isPollResponse ? 'poll_response'
             : isLocation ? 'location'
+            : isDocument ? 'document'
             : isReaction ? 'reaction'
             : 'text'
 
@@ -307,7 +336,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Ignore truly empty messages (but allow button responses, polls, locations, reactions)
-        if (!messageText && !isAudio && !isButtonResponse && !isPollResponse && !isLocation && !isReaction) {
+        if (!messageText && !isAudio && !isButtonResponse && !isPollResponse && !isLocation && !isDocument && !isReaction) {
             console.log('[Webhook] ⏭️ Ignored empty message')
             return NextResponse.json({ success: true, action: 'ignored_empty' })
         }
@@ -373,6 +402,11 @@ export async function POST(request: NextRequest) {
                     receivedLatitude: receivedLatitude || null,
                     receivedLongitude: receivedLongitude || null,
                     reactionEmoji: reactionEmoji || null,
+                    // Media/document data
+                    mediaUrl: mediaUrl || null,
+                    mediaMimetype: mediaMimetype || null,
+                    mediaFilename: mediaFilename || null,
+                    mediaType: mediaType || null,
                     // Instance/routing
                     instanceId: instance.id,
                     instanceToken: instance.instance_token,
