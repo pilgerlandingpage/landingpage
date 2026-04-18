@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, RefreshCw, MessageSquare, Wifi, WifiOff, Phone, Smartphone, QrCode, Brain, Mic } from 'lucide-react'
+import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, MessageSquare, Phone, Smartphone, Brain, Mic } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -32,8 +32,28 @@ interface WhatsAppInstance {
     id: string
     instance_name: string
     phone_number: string | null
+    live_data?: { phone?: string | null } | null
     status: 'disconnected' | 'connecting' | 'connected'
     connected_at: string | null
+    broker_id?: string | null
+    virtual_brokers?: { name?: string | null } | null
+}
+
+function getInstancePhone(instance?: WhatsAppInstance | null): string {
+    const raw = instance?.live_data?.phone || instance?.phone_number || ''
+    return String(raw).replace(/\D/g, '')
+}
+
+function formatBrPhone(phone?: string | null): string {
+    const digits = String(phone || '').replace(/\D/g, '')
+    if (!digits) return ''
+    if (digits.length === 13 && digits.startsWith('55')) {
+        return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+    }
+    if (digits.length === 12 && digits.startsWith('55')) {
+        return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 8)}-${digits.slice(8)}`
+    }
+    return `+${digits}`
 }
 
 export default function BrokersAdmin() {
@@ -49,9 +69,8 @@ export default function BrokersAdmin() {
     const [testMessage, setTestMessage] = useState('')
     // WhatsApp Instance State
     const [whatsappInstance, setWhatsappInstance] = useState<WhatsAppInstance | null>(null)
-    const [whatsappQR, setWhatsappQR] = useState<string | null>(null)
-    const [whatsappLoading, setWhatsappLoading] = useState(false)
-    const [whatsappConnecting, setWhatsappConnecting] = useState(false)
+    const [availableInstances, setAvailableInstances] = useState<WhatsAppInstance[]>([])
+    const [selectedInstanceId, setSelectedInstanceId] = useState('')
     // Voice State
     const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
     const [loadingVoices, setLoadingVoices] = useState(false)
@@ -66,7 +85,6 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        transfer_to_phone: '',
         summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
@@ -82,7 +100,6 @@ export default function BrokersAdmin() {
         assignment_type: 'all',
         assigned_page_slugs: [] as string[],
         phone: '',
-        transfer_to_phone: '',
         summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
@@ -91,84 +108,36 @@ export default function BrokersAdmin() {
     }
 
     // WhatsApp Instance Functions
-    async function loadWhatsAppInstance(brokerId: string) {
-        setWhatsappLoading(true)
+    async function loadAvailableInstances() {
         try {
-            const res = await fetch(`/api/admin/whatsapp/instances?broker_id=${brokerId}`)
+            const res = await fetch('/api/admin/whatsapp/instances')
             const data = await res.json()
-            if (data?.instances?.length > 0) {
-                setWhatsappInstance(data.instances[0])
-            } else {
-                setWhatsappInstance(null)
-            }
-        } catch { setWhatsappInstance(null) }
-        finally { setWhatsappLoading(false) }
+            setAvailableInstances((data?.instances || []) as WhatsAppInstance[])
+        } catch {
+            setAvailableInstances([])
+        }
     }
 
-    async function connectWhatsApp() {
-        if (!editingBroker && !formData.name) return
-        setWhatsappConnecting(true)
-        setWhatsappQR(null)
-        try {
-            const instanceName = `broker_${editingBroker?.id || 'new'}_${Date.now()}`
-            const res = await fetch('/api/admin/whatsapp/qrcode', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ instance_name: instanceName, broker_id: editingBroker?.id })
+    async function assignInstanceToBroker(brokerId: string, instanceId?: string) {
+        const res = await fetch('/api/admin/whatsapp/instances', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                brokerId,
+                instanceId: instanceId || null,
             })
-            const data = await res.json()
-            console.log('[WhatsApp QR] Response:', data)
-            if (data.qrcode) {
-                setWhatsappQR(data.qrcode)
-                // Salvar instanceId para poder verificar status depois
-                if (data.instanceId) {
-                    setWhatsappInstance(prev => ({
-                        ...(prev || {}),
-                        id: data.instanceId,
-                        instance_name: instanceName,
-                        status: 'connecting',
-                    } as any))
-                }
-            } else if (data.message || data.error) {
-                alert(`Erro ao gerar QR Code: ${data.message || data.error}`)
-            } else {
-                alert('QR Code não retornado. Verifique os logs do servidor.')
-                console.error('[WhatsApp QR] Resposta inesperada:', data)
-            }
-        } catch (err: any) {
-            console.error('WhatsApp QR Error:', err)
-            alert(`Erro de conexão: ${err.message}`)
-        }
-        finally { setWhatsappConnecting(false) }
-    }
+        })
 
-    async function checkWhatsAppStatus() {
-        if (!whatsappInstance?.id) {
-            alert('Nenhuma instância para verificar. Gere o QR Code primeiro.')
-            return
-        }
-        try {
-            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${whatsappInstance.id}`)
-            const data = await res.json()
-            console.log('[WhatsApp Status] Response:', data)
-            if (data.status) {
-                setWhatsappInstance(prev => prev ? { ...prev, status: data.status, phone_number: data.phone || prev.phone_number } : null)
-                if (data.status === 'connected') {
-                    setWhatsappQR(null)
-                    alert('✅ WhatsApp conectado com sucesso!')
-                } else {
-                    alert(`Status atual: ${data.status}. Escaneie o QR Code e tente novamente.`)
-                }
-            }
-        } catch (err: any) {
-            console.error('WhatsApp Status Error:', err)
-            alert(`Erro ao verificar: ${err.message}`)
+        const data = await res.json()
+        if (!res.ok || !data?.success) {
+            throw new Error(data?.message || 'Erro ao vincular instancia ao corretor')
         }
     }
 
     useEffect(() => {
         fetchBrokers()
         fetchLandingPages()
+        loadAvailableInstances()
         // Run migration for new columns
         fetch('/api/admin/migrate-broker-assignment', { method: 'POST' }).catch(() => { })
         // Load TTS configs and voices
@@ -192,11 +161,47 @@ export default function BrokersAdmin() {
     }, [])
 
     useEffect(() => {
-        if (!whatsappInstance?.phone_number) return
-        const clean = whatsappInstance.phone_number.replace(/\D/g, '')
-        if (!clean) return
+        const selected = availableInstances.find(i => i.id === selectedInstanceId) || null
+        setWhatsappInstance(selected)
+        const clean = getInstancePhone(selected)
         setFormData(prev => ({ ...prev, phone: clean }))
-    }, [whatsappInstance?.phone_number])
+    }, [selectedInstanceId, availableInstances])
+
+    useEffect(() => {
+        if (!selectedInstanceId) return
+        const selected = availableInstances.find(i => i.id === selectedInstanceId)
+        if (!selected) return
+        if (getInstancePhone(selected)) return
+
+        ; (async () => {
+            try {
+                const res = await fetch(`/api/admin/whatsapp/status?instanceId=${selectedInstanceId}`)
+                const data = await res.json()
+                if (res.ok && data?.phone) {
+                    const clean = String(data.phone).replace(/\D/g, '')
+                    setFormData(prev => ({ ...prev, phone: clean }))
+                }
+                await loadAvailableInstances()
+            } catch {
+                // noop
+            }
+        })()
+    }, [selectedInstanceId])
+
+    useEffect(() => {
+        if (!editingBroker) return
+        if (selectedInstanceId) return
+        const brokerPhoneDigits = String(editingBroker.phone || '').replace(/\D/g, '')
+        const linked = availableInstances.find(i =>
+            i.broker_id === editingBroker.id ||
+            i.id === editingBroker.whatsapp_instance_id ||
+            (!!brokerPhoneDigits && getInstancePhone(i) === brokerPhoneDigits)
+        )
+        if (linked?.id) {
+            setSelectedInstanceId(linked.id)
+            setWhatsappInstance(linked)
+        }
+    }, [editingBroker, availableInstances, selectedInstanceId])
 
     async function fetchLandingPages() {
         const { data } = await supabase
@@ -244,7 +249,8 @@ export default function BrokersAdmin() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        const syncedWhatsAppPhone = (whatsappInstance?.phone_number || formData.phone || '').replace(/\D/g, '')
+        const selectedInstance = availableInstances.find(i => i.id === selectedInstanceId) || null
+        const syncedWhatsAppPhone = getInstancePhone(selectedInstance) || formData.phone || ''
 
         const payload = {
             ...formData,
@@ -265,9 +271,12 @@ export default function BrokersAdmin() {
                     console.error('Update Form Error:', result.error)
                     alert('Erro ao atualizar. Veja console.')
                 } else {
+                    await assignInstanceToBroker(editingBroker.id, selectedInstanceId || undefined)
                     setEditingBroker(null)
+                    await loadAvailableInstances()
                     fetchBrokers()
                     setFormData({ ...defaultFormData })
+                    setSelectedInstanceId('')
                 }
             } else {
                 const res = await fetch('/api/admin/brokers', {
@@ -280,9 +289,14 @@ export default function BrokersAdmin() {
                     console.error('Insert Form Error:', result.error)
                     alert('Erro ao inserir. Veja o console.')
                 } else {
+                    if (result?.data?.id) {
+                        await assignInstanceToBroker(result.data.id, selectedInstanceId || undefined)
+                    }
                     setIsAdding(false)
+                    await loadAvailableInstances()
                     fetchBrokers()
                     setFormData({ ...defaultFormData })
+                    setSelectedInstanceId('')
                 }
             }
         } catch (err) {
@@ -313,6 +327,8 @@ export default function BrokersAdmin() {
                             setIsAdding(true)
                             setEditingBroker(null)
                             setFormData({ ...defaultFormData })
+                            setSelectedInstanceId('')
+                            setWhatsappInstance(null)
                             setTestStatus('idle')
                             setTestMessage('')
                         }}
@@ -378,6 +394,20 @@ export default function BrokersAdmin() {
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
                                 Use fotos quadradas (1:1) de alta qualidade.
                             </p>
+                            {!!formatBrPhone(getInstancePhone(whatsappInstance) || formData.phone) && (
+                                <div style={{
+                                    marginTop: '2px',
+                                    padding: '6px 10px',
+                                    borderRadius: '999px',
+                                    border: '1px solid rgba(34,197,94,0.25)',
+                                    background: 'rgba(34,197,94,0.08)',
+                                    color: '#16a34a',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 600,
+                                }}>
+                                    WhatsApp {formatBrPhone(getInstancePhone(whatsappInstance) || formData.phone)}
+                                </div>
+                            )}
                         </div>
 
                         {/* Fields Area */}
@@ -432,108 +462,40 @@ export default function BrokersAdmin() {
                             </div>
 
                             <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone WhatsApp (sincronizado automaticamente)</label>
-                                <input
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Conectados deste Corretor</label>
+                                <select
                                     className="form-input"
-                                    value={whatsappInstance?.phone_number || formData.phone || ''}
-                                    readOnly
-                                    placeholder="Conecte o WhatsApp abaixo para preencher automaticamente"
-                                    style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', cursor: 'not-allowed' }}
-                                />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Este numero e detectado automaticamente ao conectar no WhatsApp Web.</div>
-                            </div>
-                            {/* ── SEÇÃO 2: WHATSAPP WEB ── */}
-                            <div style={{ padding: '20px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-                                <h3 style={{ fontSize: '1rem', color: '#22c55e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Smartphone size={18} /> 📱 WhatsApp Web
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '16px' }}>
-                                    Conecte o WhatsApp deste corretor IA para que ele possa enviar e receber mensagens.
-                                </p>
-
-                                {whatsappLoading ? (
-                                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                                        <Loader2 size={24} className="animate-spin" style={{ color: '#22c55e' }} />
-                                        <div style={{ fontSize: '0.85rem', color: '#888', marginTop: '8px' }}>Carregando instância...</div>
-                                    </div>
-                                ) : whatsappInstance?.status === 'connected' ? (
-                                    <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                                            <Wifi size={20} style={{ color: '#22c55e' }} />
-                                            <span style={{ fontWeight: 600, color: '#22c55e', fontSize: '0.95rem' }}>✅ WhatsApp Conectado</span>
-                                        </div>
-                                        {whatsappInstance.phone_number && (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                                <Phone size={14} /> {whatsappInstance.phone_number}
-                                            </div>
-                                        )}
-                                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                                            <button type="button" onClick={checkWhatsAppStatus} style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <RefreshCw size={12} /> Verificar Status
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : whatsappQR ? (
-                                    <div style={{ textAlign: 'center', padding: '16px' }}>
-                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '12px', fontWeight: 600 }}>
-                                            📷 Escaneie o QR Code com o WhatsApp
-                                        </div>
-                                        <div style={{ display: 'inline-block', padding: '16px', background: 'white', borderRadius: '12px' }}>
-                                            <img src={whatsappQR} alt="QR Code" style={{ width: '256px', height: '256px' }} />
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '12px' }}>
-                                            Abra o WhatsApp no celular → Dispositivos conectados → Conectar dispositivo
-                                        </div>
-                                        <button type="button" onClick={checkWhatsAppStatus} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#22c55e', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                            <RefreshCw size={14} /> Já escaniei, verificar conexão
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
-                                            <WifiOff size={20} style={{ color: '#888' }} />
-                                            <span style={{ color: '#888', fontSize: '0.9rem' }}>❌ WhatsApp não conectado</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={connectWhatsApp}
-                                            disabled={whatsappConnecting || (!editingBroker && !formData.name)}
-                                            style={{
-                                                padding: '10px 24px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 600,
-                                                background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none',
-                                                color: 'white', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
-                                                opacity: whatsappConnecting ? 0.6 : 1
-                                            }}
-                                        >
-                                            {whatsappConnecting ? <Loader2 size={16} className="animate-spin" /> : <QrCode size={16} />}
-                                            {whatsappConnecting ? 'Gerando QR Code...' : 'Conectar WhatsApp'}
-                                        </button>
-                                        {!editingBroker && !formData.name && (
-                                            <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '8px' }}>Salve o corretor primeiro para conectar o WhatsApp.</div>
-                                        )}
-                                    </div>
-                                )}
+                                    value={selectedInstanceId}
+                                    onChange={(e) => setSelectedInstanceId(e.target.value)}
+                                >
+                                    <option value="">Selecione uma instância já escaneada...</option>
+                                    {availableInstances.map((inst) => {
+                                        const occupiedByOther = !!inst.broker_id && inst.broker_id !== editingBroker?.id
+                                        const brokerName = inst.virtual_brokers?.name || 'agente'
+                                        const phoneText = formatBrPhone(getInstancePhone(inst))
+                                        return (
+                                            <option key={inst.id} value={inst.id} disabled={occupiedByOther}>
+                                                {inst.instance_name} • {inst.status}{phoneText ? ` • ${phoneText}` : ''}{occupiedByOther ? ` • em uso por ${brokerName}` : ''}
+                                            </option>
+                                        )
+                                    })}
+                                </select>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                                    O QR Code é gerado apenas em WhatsApp Web &gt; Instâncias. Aqui você só vincula uma instância já conectada.
+                                </div>
                             </div>
 
-                            {/* ── SEÇÃO 2.5: TRANSFERÊNCIA ── */}
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-6px' }}>
+                                O número WhatsApp sincronizado aparece ao lado da foto do corretor.
+                            </div>
                             <div style={{ padding: '20px', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
                                 <h3 style={{ fontSize: '1rem', color: '#f59e0b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     📲 Transferência para Humano
                                 </h3>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '12px' }}>
-                                    Quando o agente usar a tag {'{transferir}'}, a conversa será encaminhada para este número.
+                                    Defina para onde os resumos de plantão devem ser enviados.
                                 </p>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>Telefone do Corretor Humano</label>
-                                        <input
-                                            value={formData.transfer_to_phone}
-                                            onChange={(e) => setFormData({ ...formData, transfer_to_phone: e.target.value.replace(/\D/g, '') })}
-                                            placeholder="5547999999999"
-                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
-                                        />
-                                        <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '4px' }}>Formato: 55 + DDD + número (ex: 5547992528080)</p>
-                                    </div>
                                     <div>
                                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>WhatsApp para Resumo de Plantão</label>
                                         <input
@@ -549,7 +511,7 @@ export default function BrokersAdmin() {
                                 </div>
                             </div>
 
-                            {/* ── SEÇÃO 3: AGENTE IA (PROMPT) ── */}
+                            {/* —— SEÇÃO 3: AGENTE IA (PROMPT) —— */}
                             <div style={{ padding: '20px', background: 'rgba(201, 169, 110, 0.05)', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
                                 <h3 style={{ fontSize: '1rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Brain size={18} /> 🤖 Agente IA (Prompt do WhatsApp)
@@ -879,7 +841,6 @@ export default function BrokersAdmin() {
                                         assignment_type: broker.assignment_type || 'all',
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
-                                        transfer_to_phone: (broker as any).transfer_to_phone || '',
                                         summary_to_phone: (broker as any).summary_to_phone || '',
 
                                         system_prompt: broker.system_prompt || '',
@@ -887,10 +848,15 @@ export default function BrokersAdmin() {
 
 
                                     })
-                                    // Load WhatsApp instance for this broker
-                                    setWhatsappInstance(null)
-                                    setWhatsappQR(null)
-                                    loadWhatsAppInstance(broker.id)
+                                    // Load linked instance for this broker
+                                    const brokerPhoneDigits = String(broker.phone || '').replace(/\D/g, '')
+                                    const linked = availableInstances.find(i =>
+                                        i.broker_id === broker.id ||
+                                        i.id === broker.whatsapp_instance_id ||
+                                        (!!brokerPhoneDigits && getInstancePhone(i) === brokerPhoneDigits)
+                                    )
+                                    setSelectedInstanceId(linked?.id || '')
+                                    setWhatsappInstance(linked || null)
                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                 }}
                                 style={{

@@ -301,6 +301,57 @@ async function sendShiftConsolidatedSummaryIfNeeded(
     return true
 }
 
+async function pickTransferTargetInstance(
+    supabase: ReturnType<typeof getSupabase>,
+    sourceInstanceId: string,
+    transferConfig: Record<string, string>
+) {
+    const defaultInstanceId = transferConfig['agent_default_instance_id'] || ''
+    const mode = (transferConfig['agent_transfer_mode'] || 'round_robin').toLowerCase()
+    let targetIds: string[] = []
+    try {
+        const parsed = JSON.parse(transferConfig['agent_transfer_instance_ids'] || '[]')
+        if (Array.isArray(parsed)) targetIds = parsed.filter(Boolean)
+    } catch {
+        targetIds = []
+    }
+
+    // Only default triage instance can distribute to queue.
+    if (!defaultInstanceId || sourceInstanceId !== defaultInstanceId) return null
+    if (targetIds.length === 0) return null
+
+    const { data: candidates } = await supabase
+        .from('whatsapp_instances')
+        .select('id, instance_token, phone_number, status')
+        .in('id', targetIds)
+
+    const valid = (candidates || [])
+        .filter((i: any) => i.id !== sourceInstanceId && i.status === 'connected' && i.instance_token && i.phone_number)
+        .sort((a: any, b: any) => targetIds.indexOf(a.id) - targetIds.indexOf(b.id))
+
+    if (valid.length === 0) return null
+    if (mode === 'fixed') return valid[0]
+
+    const rrKey = 'agent_transfer_rr_index'
+    const { data: rr } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', rrKey)
+        .maybeSingle()
+    let idx = parseInt(rr?.value || transferConfig[rrKey] || '0', 10)
+    if (!Number.isFinite(idx) || idx < 0) idx = 0
+    const chosen = valid[idx % valid.length]
+    const next = String((idx + 1) % valid.length)
+    try {
+        await supabase.from('app_config').upsert({
+            key: rrKey,
+            value: next,
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' })
+    } catch {}
+    return chosen
+}
+
 async function appendConversationMessage(
     supabase: ReturnType<typeof getSupabase>,
     conversationId: string,
@@ -351,6 +402,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_ai_schedule_enabled', 'whatsapp_ai_schedule_start', 'whatsapp_ai_schedule_end', 'whatsapp_ai_schedule_timezone',
             // Agent controls from admin panel
             'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone',
+            'agent_default_instance_id', 'agent_transfer_instance_ids', 'agent_transfer_mode', 'agent_transfer_rr_index',
             'agent_social_instagram', 'agent_social_facebook', 'agent_social_youtube',
             'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site'
         ])
@@ -2031,59 +2083,53 @@ export const processWhatsAppMessage = inngest.createFunction(
                     const { data: transferConfigs } = await supabase
                         .from('app_config')
                         .select('key, value')
-                        .in('key', ['agent_transfer_message_broker', 'agent_transfer_message_lead'])
+                        .in('key', ['agent_transfer_message_broker', 'agent_transfer_message_lead', 'agent_default_instance_id', 'agent_transfer_instance_ids', 'agent_transfer_mode', 'agent_transfer_rr_index'])
 
                     const tCfg: Record<string, string> = {}
                     for (const r of (transferConfigs || [])) tCfg[r.key] = r.value
-
-                    // Find broker's transfer-to phone (from broker config or instance admin)
-                    const transferToPhone = broker.transfer_to_phone
-                        || broker.phone
-                        || ''
-
-                    if (transferToPhone) {
+                    const targetInstance = await pickTransferTargetInstance(supabase, instanceId, tCfg)
+                    if (targetInstance?.phone_number && targetInstance?.instance_token) {
                         // Extract lead data from conversation context
-                        const leadName = senderName || 'Não informado'
+                        const leadName = senderName || 'Nao informado'
                         const lastMessages = aiResponse.updatedMessages.slice(-6)
-                            .map((m: any) => `${m.role === 'user' ? '👤' : '🤖'} ${m.content}`)
+                            .map((m: any) => `${m.role === 'user' ? '??' : '??'} ${m.content}`)
                             .join('\n')
 
-                        // Build broker notification
+                        // Build specialist notification with lead context
                         let brokerMsg = tCfg['agent_transfer_message_broker']
-                            || '🔔 *Lead qualificado transferido!*\n\n👤 Nome: {nome_lead}\n📱 Telefone: {telefone}\n\n⚡ Entre em contato agora!'
+                            || '?? *Lead qualificado transferido!*\n\n?? Nome: {nome_lead}\n?? Telefone: {telefone}\n\n? Entre em contato agora!'
 
                         brokerMsg = brokerMsg
                             .replace(/\{nome_lead\}/g, leadName)
                             .replace(/\{telefone\}/g, cleanPhone)
-                            .replace(/\{interesse\}/g, aiResponse.extractedData?.interest || 'Não identificado')
-                            .replace(/\{orcamento\}/g, aiResponse.extractedData?.budget || 'Não informado')
-                            .replace(/\{regiao\}/g, aiResponse.extractedData?.region || 'Não informada')
+                            .replace(/\{interesse\}/g, aiResponse.extractedData?.interest || 'Nao identificado')
+                            .replace(/\{orcamento\}/g, aiResponse.extractedData?.budget || 'Nao informado')
+                            .replace(/\{regiao\}/g, aiResponse.extractedData?.region || 'Nao informada')
 
-                        brokerMsg += `\n\n📝 *Últimas mensagens:*\n${lastMessages}`
+                        brokerMsg += `\n\n?? *Ultimas mensagens:*\n${lastMessages}`
 
-                        // Send to human broker
                         const { sendWhatsAppMessage } = await import('../uazapi')
                         await sendWhatsAppMessage({
-                            phone: transferToPhone,
+                            phone: targetInstance.phone_number,
                             message: brokerMsg,
                             instanceToken
                         })
-                        console.log(`[Transfer] 📲 Notificação enviada para corretor: ${transferToPhone}`)
-                    } else {
-                        console.warn('[Transfer] ⚠️ Nenhum telefone de transferência configurado para o broker')
-                    }
+                        console.log(`[Transfer] Summary sent to specialist instance ${targetInstance.id}`)
 
-                    // Notify lead that a human broker will continue
-                    let leadMsg = tCfg['agent_transfer_message_lead']
-                        || 'Perfeito! Vou te encaminhar para um corretor humano agora. Ele já recebeu seu contexto. 🙂'
-                    leadMsg = leadMsg
-                        .replace(/\{nome_lead\}/g, senderName || 'cliente')
-                        .replace(/\{telefone\}/g, cleanPhone)
-                    await sendWhatsAppMessage({
-                        phone: cleanPhone,
-                        message: leadMsg,
-                        instanceToken
-                    })
+                        // Specialist instance reaches the lead from its own WhatsApp
+                        let leadMsg = tCfg['agent_transfer_message_lead']
+                            || 'Perfeito! Vou te encaminhar para nosso especialista agora. Ele ja recebeu seu contexto.'
+                        leadMsg = leadMsg
+                            .replace(/\{nome_lead\}/g, senderName || 'cliente')
+                            .replace(/\{telefone\}/g, cleanPhone)
+                        await sendWhatsAppMessage({
+                            phone: cleanPhone,
+                            message: leadMsg,
+                            instanceToken: targetInstance.instance_token
+                        })
+                    } else {
+                        console.warn('[Transfer] No eligible specialist instance in configured queue')
+                    }
                 } catch (transferErr) {
                     console.error('[Transfer] Erro ao notificar corretor:', transferErr)
                 }
@@ -2667,3 +2713,4 @@ export const whatsappKeepOnline = inngest.createFunction(
         return { action: 'presence_set', count: instances.length, results }
     }
 )
+

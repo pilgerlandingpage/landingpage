@@ -97,6 +97,17 @@ export async function POST(request: NextRequest) {
                     }
                     instance = newInst
                 }
+
+                if (broker_id && instance?.id) {
+                    try {
+                        await supabase
+                            .from('virtual_brokers')
+                            .update({ whatsapp_instance_id: instance.id, updated_at: new Date().toISOString() })
+                            .eq('id', broker_id)
+                    } catch {
+                        // ignore schema/version differences
+                    }
+                }
             }
         } else {
             return NextResponse.json({ success: false, message: 'Parâmetros inválidos. Envie instanceId ou instance_name.' }, { status: 400 })

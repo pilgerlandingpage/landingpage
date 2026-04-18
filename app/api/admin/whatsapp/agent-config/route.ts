@@ -32,6 +32,11 @@ const AGENT_CONFIG_KEYS = [
     'agent_tone',
     'agent_transfer_lock_minutes',
     'agent_transfer_score_threshold',
+    'agent_default_broker_id',
+    'agent_default_instance_id',
+    'agent_transfer_instance_ids',
+    'agent_transfer_mode',
+    'agent_transfer_rr_index',
 ]
 
 // GET — Load all agent config values

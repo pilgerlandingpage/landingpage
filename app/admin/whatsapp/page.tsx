@@ -5,7 +5,7 @@ import {
     Smartphone, RefreshCw, Loader2, AlertCircle, CheckCircle2,
     Wifi, WifiOff, Phone, User, Clock, Globe, Battery, BatteryCharging,
     Bot, Shield, Link2, Monitor, MessageSquare, Mic, Settings,
-    ChevronDown, ChevronUp, Save, Power, Eye,
+    ChevronDown, ChevronUp, Save, Power, Eye, Plus,
     SplitSquareVertical, Users, Timer
 } from 'lucide-react'
 
@@ -14,7 +14,7 @@ interface LiveData {
     battery?: number; plugged?: boolean; isOnline?: boolean
     profilePicUrl?: string; webhookUrl?: string
 }
-interface BrokerData { id: string; name: string; creci: string; photo_url: string; is_active: boolean; system_prompt?: string; voice_id?: string }
+interface BrokerData { id: string; name: string; creci: string; photo_url: string; is_active: boolean; phone?: string; system_prompt?: string; voice_id?: string }
 interface AdminUserData { id: string; name: string; email: string }
 interface Instance {
     id: string; admin_user_id: string; broker_id?: string
@@ -22,6 +22,14 @@ interface Instance {
     phone_number: string | null; status: 'disconnected' | 'connecting' | 'connected'
     connected_at: string | null; created_at: string; config?: Record<string, any>
     virtual_brokers?: BrokerData; admin_users?: AdminUserData; live_data?: LiveData | null
+}
+
+function formatBrPhone(phone?: string | null): string {
+    const digits = String(phone || '').replace(/\D/g, '')
+    if (!digits) return ''
+    if (digits.length === 13 && digits.startsWith('55')) return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+    if (digits.length === 12 && digits.startsWith('55')) return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 8)}-${digits.slice(8)}`
+    return `+${digits}`
 }
 
 interface InstanceConfig {
@@ -74,8 +82,45 @@ export default function WhatsAppInstancesPage() {
     const [expandedSettings, setExpandedSettings] = useState<string | null>(null)
     const [configs, setConfigs] = useState<Record<string, InstanceConfig>>({})
     const [savingSettings, setSavingSettings] = useState<string | null>(null)
+    const [createBrokerName, setCreateBrokerName] = useState('')
+    const [createInstanceName, setCreateInstanceName] = useState('')
+    const [creatingInstance, setCreatingInstance] = useState(false)
+    const [createQrCode, setCreateQrCode] = useState<string | null>(null)
+    const [createMessage, setCreateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [createFlowInstanceId, setCreateFlowInstanceId] = useState<string | null>(null)
+    const [autoCheckingCreateStatus, setAutoCheckingCreateStatus] = useState(false)
 
     useEffect(() => { loadInstances() }, [])
+
+    useEffect(() => {
+        if (!createModalOpen || !createFlowInstanceId || !createQrCode) return
+
+        const intervalId = setInterval(async () => {
+            setAutoCheckingCreateStatus(true)
+            try {
+                const res = await fetch(`/api/admin/whatsapp/status?instanceId=${createFlowInstanceId}`)
+                const data = await res.json()
+                if (!res.ok || !data?.success) return
+
+                if (data?.status === 'connected') {
+                    setCreateMessage({ type: 'success', text: 'Instância conectada com sucesso. Você já pode configurar o agente.' })
+                    setCreateQrCode(null)
+                    setCreateFlowInstanceId(null)
+                    await loadInstances()
+                    setTimeout(() => setCreateModalOpen(false), 900)
+                } else {
+                    await loadInstances()
+                }
+            } catch {
+                // noop: polling resiliente
+            } finally {
+                setAutoCheckingCreateStatus(false)
+            }
+        }, 4000)
+
+        return () => clearInterval(intervalId)
+    }, [createModalOpen, createFlowInstanceId, createQrCode])
 
     const loadInstances = async () => {
         setLoading(true); setError(null)
@@ -103,6 +148,62 @@ export default function WhatsAppInstancesPage() {
 
     const refreshAll = async () => {
         setRefreshing(true); await loadInstances(); setRefreshing(false)
+    }
+
+    const createInstanceAndGetQr = async () => {
+        const brokerName = createBrokerName.trim()
+        if (!brokerName) {
+            setCreateMessage({ type: 'error', text: 'Informe o nome do corretor.' })
+            return
+        }
+        setCreatingInstance(true)
+        setCreateMessage(null)
+        try {
+            const brokerRes = await fetch('/api/admin/brokers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: brokerName, is_active: true }),
+            })
+            const brokerData = await brokerRes.json()
+            const newBrokerId = brokerData?.data?.id
+            if (!brokerRes.ok || !newBrokerId) {
+                throw new Error(brokerData?.error || 'Falha ao criar corretor.')
+            }
+
+            const normalized = brokerName
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .slice(0, 24)
+
+            const defaultInstanceName = `broker_${normalized || 'novo'}_${Date.now()}`
+            const res = await fetch('/api/admin/whatsapp/qrcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    instance_name: createInstanceName.trim() || defaultInstanceName,
+                    broker_id: newBrokerId,
+                })
+            })
+            const data = await res.json()
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.message || 'Falha ao criar/conectar instância.')
+            }
+            if (data?.qrcode) {
+                setCreateQrCode(data.qrcode)
+                setCreateFlowInstanceId(data.instanceId || null)
+                setCreateMessage({ type: 'success', text: 'Instância criada. Escaneie o QR code.' })
+            } else {
+                setCreateMessage({ type: 'error', text: 'A instância foi criada, mas o QR code não retornou. Tente novamente.' })
+            }
+            await loadInstances()
+        } catch (err) {
+            setCreateMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao criar instância.' })
+        } finally {
+            setCreatingInstance(false)
+        }
     }
 
     const saveSettings = async (instanceId: string) => {
@@ -163,7 +264,7 @@ export default function WhatsAppInstancesPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp - Instâncias
+                        <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp - Conectados
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
                         {instances.length} instância{instances.length !== 1 ? 's' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
@@ -175,6 +276,103 @@ export default function WhatsAppInstancesPage() {
                     {refreshing ? 'Atualizando...' : 'Atualizar'}
                 </button>
             </div>
+
+            <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.2)' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>
+                    <Plus size={14} style={{ display: 'inline', marginRight: 6, color: 'var(--gold)' }} />
+                    Criar Novo Conectado (com QR)
+                </div>
+                <button
+                    onClick={() => {
+                        setCreateModalOpen(true)
+                        setCreateMessage(null)
+                        setCreateQrCode(null)
+                        setCreateFlowInstanceId(null)
+                    }}
+                    style={{ padding: '10px 14px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', fontWeight: 700, cursor: 'pointer' }}
+                >
+                    Criar Novo Conectado
+                </button>
+            </div>
+
+            {createModalOpen && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '16px',
+                }}>
+                    <div style={{
+                        width: '100%',
+                        maxWidth: '560px',
+                        borderRadius: '14px',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        padding: '16px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Novo Conectado WhatsApp</div>
+                            <button
+                                onClick={() => setCreateModalOpen(false)}
+                                style={{ border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', borderRadius: '8px', padding: '6px 10px', cursor: 'pointer' }}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                            <input
+                                value={createBrokerName}
+                                onChange={(e) => setCreateBrokerName(e.target.value)}
+                                placeholder="Nome do corretor"
+                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                            />
+                            <input
+                                value={createInstanceName}
+                                onChange={(e) => setCreateInstanceName(e.target.value)}
+                                placeholder="Nome da instância (opcional)"
+                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                            />
+                            <button
+                                onClick={createInstanceAndGetQr}
+                                disabled={creatingInstance}
+                                style={{ padding: '10px 14px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: creatingInstance ? 0.7 : 1 }}
+                            >
+                                {creatingInstance ? 'Gerando...' : 'Gerar QR Code'}
+                            </button>
+                        </div>
+
+                        {!!createQrCode && (
+                            <div style={{ marginTop: 12 }}>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 8 }}>
+                                    Escaneie o QR no WhatsApp. O status será atualizado automaticamente.
+                                </div>
+                                <div style={{ display: 'inline-block', background: '#fff', borderRadius: 8, padding: 8 }}>
+                                    <img src={createQrCode} alt="QR code nova instância" style={{ width: 240, height: 240 }} />
+                                </div>
+                                <div style={{ marginTop: 8, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                    {autoCheckingCreateStatus ? 'Verificando conexão...' : 'Aguardando conexão...'}
+                                </div>
+                            </div>
+                        )}
+
+                        {createMessage && (
+                            <div style={{
+                                marginTop: '10px', padding: '8px 10px', borderRadius: '8px', fontSize: '0.78rem',
+                                background: createMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                color: createMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                border: `1px solid ${createMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                            }}>
+                                {createMessage.text}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Agent Instances Section */}
             {agentInstances.length > 0 && (
@@ -193,6 +391,7 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
+                                onRefresh={loadInstances}
                             />
                         ))}
                     </div>
@@ -216,6 +415,7 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
+                                onRefresh={loadInstances}
                             />
                         ))}
                     </div>
@@ -225,7 +425,7 @@ export default function WhatsAppInstancesPage() {
             {instances.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <Smartphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhuma instância WhatsApp</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum conectado WhatsApp</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>
                         Crie agentes IA em <strong>Corretores IA</strong> ou conecte WhatsApp em <strong>Gestão de Usuários</strong>.
                     </p>
@@ -242,13 +442,14 @@ export default function WhatsAppInstancesPage() {
 
 // Instance Card Component
 
-function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings }: {
+function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings, onRefresh }: {
     inst: Instance; type: 'agent' | 'user'
     expanded: boolean; onToggleExpand: () => void
     settingsExpanded: boolean; onToggleSettings: () => void
     config: InstanceConfig
     onUpdateConfig: (key: string, value: any) => void
     onSaveSettings: () => void; savingSettings: boolean
+    onRefresh: () => Promise<void> | void
 }) {
     const [webhookLoading, setWebhookLoading] = useState(false)
     const [webhookMessage, setWebhookMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -256,13 +457,138 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [setupMessage, setSetupMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [privacyLoading, setPrivacyLoading] = useState(false)
     const [privacyMessage, setPrivacyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [qrLoading, setQrLoading] = useState(false)
+    const [checkingStatus, setCheckingStatus] = useState(false)
+    const [deletingInstance, setDeletingInstance] = useState(false)
+    const [qrCode, setQrCode] = useState<string | null>(null)
+    const [qrMessage, setQrMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const isConnected = inst.status === 'connected'
     const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
     const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
     const subtitle = type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
-    const photoUrl = type === 'agent' ? inst.virtual_brokers?.photo_url : inst.live_data?.profilePicUrl
+    const photoUrl = type === 'agent'
+        ? (inst.live_data?.profilePicUrl || inst.virtual_brokers?.photo_url)
+        : inst.live_data?.profilePicUrl
     const prompt = type === 'agent' ? inst.virtual_brokers?.system_prompt : null
     const agentDisabled = !config.agent_enabled
+
+    const connectAndGetQr = async () => {
+        setQrLoading(true)
+        setQrMessage(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/qrcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instanceId: inst.id }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.message || 'Nao foi possivel gerar o QR code.')
+            }
+            if (data?.qrcode) {
+                setQrCode(data.qrcode)
+                setQrMessage({ type: 'success', text: 'QR code gerado. Escaneie no WhatsApp do celular.' })
+            } else {
+                setQrMessage({ type: 'error', text: 'A API nao retornou QR code. Tente novamente em alguns segundos.' })
+            }
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao gerar QR code.' })
+        } finally {
+            setQrLoading(false)
+        }
+    }
+
+    const checkConnectionStatus = async () => {
+        setCheckingStatus(true)
+        setQrMessage(null)
+        try {
+            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${inst.id}`)
+            const data = await res.json()
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.message || 'Falha ao verificar status.')
+            }
+            if (data?.status === 'connected') {
+                setQrCode(null)
+                setQrMessage({ type: 'success', text: 'Instancia conectada com sucesso.' })
+            } else {
+                setQrMessage({ type: 'error', text: `Status atual: ${data?.status || 'desconhecido'}.` })
+            }
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao verificar status.' })
+        } finally {
+            setCheckingStatus(false)
+        }
+    }
+
+    const disconnectInstance = async () => {
+        setCheckingStatus(true)
+        setQrMessage(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instanceId: inst.id }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.message || 'Falha ao desconectar instância.')
+            }
+            setQrCode(null)
+            setQrMessage({ type: 'success', text: 'Instância desconectada com sucesso.' })
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao desconectar instância.' })
+        } finally {
+            setCheckingStatus(false)
+        }
+    }
+
+    const deleteInstance = async () => {
+        const confirmed = window.confirm(`Tem certeza que deseja excluir a instância "${inst.instance_name}"?`)
+        if (!confirmed) return
+
+        setDeletingInstance(true)
+        setQrMessage(null)
+        try {
+            let res = await fetch('/api/admin/whatsapp/instances', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instanceId: inst.id }),
+            })
+            let data = await res.json()
+
+            if (!res.ok || !data?.success) {
+                const shouldForce = window.confirm(
+                    `${data?.message || 'Falha ao excluir no servidor da API.'}\n\nDeseja forçar exclusão apenas local?`
+                )
+
+                if (!shouldForce) {
+                    setQrMessage({ type: 'success', text: 'Exclusão cancelada. A instância foi mantida.' })
+                    return
+                }
+
+                res = await fetch('/api/admin/whatsapp/instances', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ instanceId: inst.id, forceLocalDelete: true }),
+                })
+                data = await res.json()
+
+                if (!res.ok || !data?.success) {
+                    throw new Error(data?.message || 'Falha ao excluir instância localmente.')
+                }
+            }
+
+            setQrMessage({ type: 'success', text: data?.message || 'Instância excluída com sucesso.' })
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao excluir instância.' })
+        } finally {
+            setDeletingInstance(false)
+        }
+    }
 
     return (
         <div style={{
@@ -319,9 +645,9 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 <Wifi size={14} style={{ color: '#22c55e' }} />
                                 <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.8rem' }}>Online</span>
                             </div>
-                            {inst.live_data?.phone && (
+                            {(inst.live_data?.phone || inst.phone_number || inst.virtual_brokers?.phone) && (
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                    {inst.live_data.phone}
+                                    {formatBrPhone(inst.live_data?.phone || inst.phone_number || inst.virtual_brokers?.phone)}
                                 </span>
                             )}
                         </>
@@ -340,7 +666,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                 <div style={{ borderTop: '1px solid var(--border)' }}>
                     {/* Instance Details */}
                     <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-                        <DetailItem icon={<Globe size={13} />} label="Instância" value={inst.instance_name} />
+                        <DetailItem icon={<Globe size={13} />} label="Conectados" value={inst.instance_name} />
                         {inst.live_data?.platform && <DetailItem icon={<Monitor size={13} />} label="Plataforma" value={inst.live_data.platform} />}
                         {inst.live_data?.battery != null && (
                             <DetailItem icon={inst.live_data.plugged ? <BatteryCharging size={13} /> : <Battery size={13} />}
@@ -351,9 +677,101 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                         <DetailItem icon={<Clock size={13} />} label="Criada" value={new Date(inst.created_at).toLocaleDateString('pt-BR')} />
                     </div>
 
+                    {!isConnected && (
+                        <div style={{ padding: '0 20px 12px' }}>
+                            <div style={{
+                                padding: '12px 16px',
+                                borderRadius: '10px',
+                                background: 'rgba(245,158,11,0.06)',
+                                border: '1px solid rgba(245,158,11,0.2)'
+                            }}>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    <button
+                                        onClick={connectAndGetQr}
+                                        disabled={qrLoading}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontWeight: 600,
+                                            fontSize: '0.82rem',
+                                            opacity: qrLoading ? 0.7 : 1
+                                        }}
+                                    >
+                                        {qrLoading ? 'Gerando QR...' : 'Conectar / Gerar QR'}
+                                    </button>
+                                    <button
+                                        onClick={checkConnectionStatus}
+                                        disabled={checkingStatus}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            background: 'var(--bg-secondary)',
+                                            color: 'var(--text-primary)',
+                                            border: '1px solid var(--border)',
+                                            cursor: 'pointer',
+                                            fontWeight: 600,
+                                            fontSize: '0.82rem',
+                                            opacity: checkingStatus ? 0.7 : 1
+                                        }}
+                                    >
+                                        {checkingStatus ? 'Verificando...' : 'Verificar Status'}
+                                    </button>
+                                </div>
+
+                                {!!qrCode && (
+                                    <div style={{ marginTop: 12 }}>
+                                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 8 }}>
+                                            Escaneie este QR no WhatsApp do celular.
+                                        </div>
+                                        <div style={{ background: '#fff', borderRadius: 8, display: 'inline-block', padding: 8 }}>
+                                            <img src={qrCode} alt="QR Code WhatsApp" style={{ width: 220, height: 220 }} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {qrMessage && (
+                                    <div style={{
+                                        marginTop: '10px',
+                                        padding: '8px 10px',
+                                        borderRadius: '8px',
+                                        fontSize: '0.78rem',
+                                        background: qrMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                        color: qrMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                        border: `1px solid ${qrMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                                    }}>
+                                        {qrMessage.text}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Webhook Auto-Setup */}
                     {isConnected && (
                         <div style={{ padding: '0 20px 12px' }}>
+                            <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={disconnectInstance}
+                                    disabled={checkingStatus}
+                                    style={{
+                                        padding: '8px 14px',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(239,68,68,0.3)',
+                                        background: 'rgba(239,68,68,0.1)',
+                                        color: '#ef4444',
+                                        fontWeight: 700,
+                                        fontSize: '0.8rem',
+                                        cursor: 'pointer',
+                                        opacity: checkingStatus ? 0.7 : 1,
+                                    }}
+                                >
+                                    {checkingStatus ? 'Desconectando...' : 'Desconectar Instância'}
+                                </button>
+                            </div>
                             <div style={{
                                 padding: '12px 16px', borderRadius: '10px',
                                 background: inst.live_data?.webhookUrl ? 'rgba(34,197,94,0.06)' : 'rgba(245,158,11,0.06)',
@@ -545,6 +963,26 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 ⚙️ Configurações de Comportamento
                             </span>
                             {settingsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                    </div>
+
+                    <div style={{ padding: '0 20px 16px' }}>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); deleteInstance() }}
+                            disabled={deletingInstance}
+                            style={{
+                                width: '100%',
+                                padding: '10px 14px',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(239,68,68,0.3)',
+                                background: 'rgba(239,68,68,0.1)',
+                                color: '#ef4444',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                opacity: deletingInstance ? 0.7 : 1,
+                            }}
+                        >
+                            {deletingInstance ? 'Excluindo instância...' : 'Excluir Instância'}
                         </button>
                     </div>
 
@@ -747,6 +1185,8 @@ function NumericInput({ label, value, onChange, min, max, disabled = false }: { 
                     +
                 </button>
             </div>
+
+
         </div>
     )
 }

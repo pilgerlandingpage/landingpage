@@ -309,6 +309,27 @@ export async function POST(request: NextRequest) {
 
         console.log(`[Webhook] ✅ Instance: ${instance.instance_name} (broker: ${instance.broker_id || 'none'})`)
 
+        // Anti-loop: ignore inbound messages coming from another connected instance number.
+        try {
+            const senderDigits = (finalPhone || '').replace(/\D/g, '')
+            if (senderDigits) {
+                const { data: connectedInstances } = await supabase
+                    .from('whatsapp_instances')
+                    .select('id, phone_number')
+                    .eq('status', 'connected')
+                const internalSender = (connectedInstances || []).find((row: any) => {
+                    const rowDigits = String(row?.phone_number || '').replace(/\D/g, '')
+                    return row.id !== instance.id && rowDigits && rowDigits === senderDigits
+                })
+                if (internalSender) {
+                    console.log(`[Webhook] ⛔ Ignored internal instance-to-instance message from ${senderDigits}`)
+                    return NextResponse.json({ success: true, action: 'ignored_internal_instance_message' })
+                }
+            }
+        } catch (e) {
+            console.warn('[Webhook] Anti-loop check failed (non-fatal):', e)
+        }
+
         // ═══════════════════════════════════════════
         // DISPATCH TO INNGEST (async processing)
         // ═══════════════════════════════════════════

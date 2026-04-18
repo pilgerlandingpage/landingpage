@@ -9,6 +9,23 @@ function getSupabase() {
     )
 }
 
+function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
+    const raw =
+        result?.instance?.phone ||
+        result?.phone ||
+        result?.number ||
+        result?.jid ||
+        result?.status?.jid ||
+        result?.me?.id ||
+        result?.instance?.me?.id ||
+        fallback ||
+        null
+
+    if (!raw) return null
+    const digits = String(raw).replace(/\D/g, '')
+    return digits || null
+}
+
 // GET — Verificar status de conexão da instância
 export async function GET(request: NextRequest) {
     try {
@@ -44,7 +61,7 @@ export async function GET(request: NextRequest) {
         // uazapi retorna: { status: { connected, loggedIn }, instance: { qrcode, ... } }
         const isConnected = result?.status?.connected === true || result?.connected === true
         const isLoggedIn = result?.status?.loggedIn === true || result?.loggedIn === true
-        const phone = result?.instance?.phone || result?.phone || result?.number || instance.phone_number || null
+        const phone = extractPhoneFromStatus(result, instance.phone_number)
 
         // Determinar status
         const newStatus = (isConnected && isLoggedIn) ? 'connected' :
