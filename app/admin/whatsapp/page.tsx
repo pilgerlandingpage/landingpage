@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import {
@@ -58,7 +58,7 @@ export default function WhatsAppInstancesPage() {
         setLoading(true); setError(null)
         try {
             const res = await fetch('/api/admin/whatsapp/instances')
-            if (!res.ok) throw new Error('Falha ao carregar instÃ¢ncias')
+            if (!res.ok) throw new Error('Falha ao carregar instâncias')
             const data = await res.json()
             if (!data.success) throw new Error(data.message)
             const insts = data.instances || []
@@ -108,14 +108,14 @@ export default function WhatsAppInstancesPage() {
 
     if (loading) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando instÃ¢ncias...
+            <Loader2 size={24} className="spin" /> Carregando instâncias...
         </div>
     )
 
     if (error) return (
         <div style={{ textAlign: 'center', padding: '60px 24px' }}>
             <AlertCircle size={48} style={{ color: '#ef4444', marginBottom: 16 }} />
-            <p style={{ color: '#ef4444', fontSize: '1.1rem' }}>Falha ao carregar instÃ¢ncias</p>
+            <p style={{ color: '#ef4444', fontSize: '1.1rem' }}>Falha ao carregar instâncias</p>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>{error}</p>
             <button onClick={loadInstances} style={{ marginTop: 16, padding: '10px 24px', borderRadius: '10px', background: 'var(--gold)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                 Tentar Novamente
@@ -129,10 +129,10 @@ export default function WhatsAppInstancesPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp â€” InstÃ¢ncias
+                        <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp - Instâncias
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        {instances.length} instÃ¢ncia{instances.length !== 1 ? 's' : ''} â€¢ {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
+                        {instances.length} instância{instances.length !== 1 ? 's' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
                     </p>
                 </div>
                 <button onClick={refreshAll} disabled={refreshing}
@@ -169,7 +169,7 @@ export default function WhatsAppInstancesPage() {
             {userInstances.length > 0 && (
                 <div style={{ marginBottom: '32px' }}>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', color: '#6366f1', marginBottom: '12px' }}>
-                        <Users size={20} /> Corretores / UsuÃ¡rios ({userInstances.length})
+                        <Users size={20} /> Corretores / Usuários ({userInstances.length})
                     </h2>
                     <div style={{ display: 'grid', gap: '12px' }}>
                         {userInstances.map(inst => (
@@ -191,9 +191,9 @@ export default function WhatsAppInstancesPage() {
             {instances.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <Smartphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhuma instÃ¢ncia WhatsApp</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhuma instância WhatsApp</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>
-                        Crie agentes IA em <strong>Corretores IA</strong> ou conecte WhatsApp em <strong>GestÃ£o de UsuÃ¡rios</strong>.
+                        Crie agentes IA em <strong>Corretores IA</strong> ou conecte WhatsApp em <strong>Gestão de Usuários</strong>.
                     </p>
                 </div>
             )}
@@ -206,9 +206,7 @@ export default function WhatsAppInstancesPage() {
     )
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Instance Card Component
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings }: {
     inst: Instance; type: 'agent' | 'user'
@@ -227,7 +225,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const isConnected = inst.status === 'connected'
     const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
     const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
-    const subtitle = type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || 'â€”'}` : inst.admin_users?.email
+    const subtitle = type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
     const photoUrl = type === 'agent' ? inst.virtual_brokers?.photo_url : inst.live_data?.profilePicUrl
     const prompt = type === 'agent' ? inst.virtual_brokers?.system_prompt : null
 
@@ -270,7 +268,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                             background: type === 'agent' ? 'rgba(201,169,110,0.15)' : 'rgba(99,102,241,0.15)',
                             color: accentColor, fontWeight: 700,
                         }}>
-                            {type === 'agent' ? 'ðŸ¤– AGENTE IA' : 'ðŸ‘¤ CORRETOR'}
+                            {type === 'agent' ? 'AGENTE IA' : 'CORRETOR'}
                         </span>
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -307,13 +305,13 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                 <div style={{ borderTop: '1px solid var(--border)' }}>
                     {/* Instance Details */}
                     <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-                        <DetailItem icon={<Globe size={13} />} label="InstÃ¢ncia" value={inst.instance_name} />
+                        <DetailItem icon={<Globe size={13} />} label="Instância" value={inst.instance_name} />
                         {inst.live_data?.platform && <DetailItem icon={<Monitor size={13} />} label="Plataforma" value={inst.live_data.platform} />}
                         {inst.live_data?.battery != null && (
                             <DetailItem icon={inst.live_data.plugged ? <BatteryCharging size={13} /> : <Battery size={13} />}
-                                label="Bateria" value={`${inst.live_data.battery}%${inst.live_data.plugged ? ' âš¡' : ''}`} />
+                                label="Bateria" value={`${inst.live_data.battery}%${inst.live_data.plugged ? ' ⚡' : ''}`} />
                         )}
-                        {inst.live_data?.webhookUrl && <DetailItem icon={<Link2 size={13} />} label="Webhook" value="âœ… Configurado" valueColor="#22c55e" />}
+                        {inst.live_data?.webhookUrl && <DetailItem icon={<Link2 size={13} />} label="Webhook" value="✅ Configurado" valueColor="#22c55e" />}
                         {prompt && <DetailItem icon={<MessageSquare size={13} />} label="Prompt" value={`${prompt.length} caracteres`} />}
                         <DetailItem icon={<Clock size={13} />} label="Criada" value={new Date(inst.created_at).toLocaleDateString('pt-BR')} />
                     </div>
@@ -331,7 +329,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     <Link2 size={16} style={{ color: inst.live_data?.webhookUrl ? '#22c55e' : '#f59e0b', flexShrink: 0 }} />
                                     <div>
                                         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                                            Webhook {inst.live_data?.webhookUrl ? 'Ativo' : 'NÃ£o Configurado'}
+                                            Webhook {inst.live_data?.webhookUrl ? 'Ativo' : 'Não Configurado'}
                                         </div>
                                         {inst.live_data?.webhookUrl && (
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
@@ -353,12 +351,12 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                             })
                                             const data = await res.json()
                                             if (data.success) {
-                                                setWebhookMessage({ type: 'success', text: `âœ… Webhook configurado: ${data.webhookUrl}` })
+                                                setWebhookMessage({ type: 'success', text: `✅ Webhook configurado: ${data.webhookUrl}` })
                                             } else {
-                                                setWebhookMessage({ type: 'error', text: `âŒ ${data.message}` })
+                                                setWebhookMessage({ type: 'error', text: `❌ ${data.message}` })
                                             }
                                         } catch (err) {
-                                            setWebhookMessage({ type: 'error', text: `âŒ Erro de conexÃ£o` })
+                                            setWebhookMessage({ type: 'error', text: `❌ Erro de conexão` })
                                         } finally {
                                             setWebhookLoading(false)
                                         }
@@ -406,12 +404,12 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                         })
                                         const data = await res.json()
                                         if (data.success) {
-                                            setSetupMessage({ type: 'success', text: `âœ… ${data.message}` })
+                                            setSetupMessage({ type: 'success', text: `✅ ${data.message}` })
                                         } else {
-                                            setSetupMessage({ type: 'error', text: `âŒ ${data.message}` })
+                                            setSetupMessage({ type: 'error', text: `❌ ${data.message}` })
                                         }
                                     } catch {
-                                        setSetupMessage({ type: 'error', text: 'âŒ Erro de conexÃ£o' })
+                                        setSetupMessage({ type: 'error', text: '❌ Erro de conexão' })
                                     } finally {
                                         setSetupLoading(false)
                                     }
@@ -426,8 +424,8 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     opacity: setupLoading ? 0.6 : 1,
                                 }}
                             >
-                                {setupLoading ? <Loader2 size={16} className="spin" /> : 'ðŸš€'}
-                                Setup Completo (Webhook + Privacidade + Etiquetas + Respostas RÃ¡pidas)
+                                {setupLoading ? <Loader2 size={16} className="spin" /> : '🚀'}
+                                Setup Completo (Webhook + Privacidade + Etiquetas + Respostas Rápidas)
                             </button>
                             {setupMessage && (
                                 <div style={{
@@ -455,18 +453,18 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                         const data = await res.json()
 
                                         if (!res.ok || !data.success) {
-                                            setPrivacyMessage({ type: 'error', text: `âŒ ${data.message || 'Falha no diagnÃ³stico'}` })
+                                            setPrivacyMessage({ type: 'error', text: `❌ ${data.message || 'Falha no diagnóstico'}` })
                                             return
                                         }
 
-                                        const onlineOk = data?.matches?.online ? 'âœ…' : 'âš ï¸'
-                                        const readOk = data?.matches?.readreceipts ? 'âœ…' : 'âš ï¸'
+                                        const onlineOk = data?.matches?.online ? '✅' : '⚠️'
+                                        const readOk = data?.matches?.readreceipts ? '✅' : '⚠️'
                                         setPrivacyMessage({
                                             type: data?.matches?.online && data?.matches?.readreceipts ? 'success' : 'error',
                                             text: `${onlineOk} online: atual=${data?.actual?.online ?? 'n/a'} esperado=${data?.expected?.online} | ${readOk} readreceipts: atual=${data?.actual?.readreceipts ?? 'n/a'} esperado=${data?.expected?.readreceipts}`,
                                         })
                                     } catch {
-                                        setPrivacyMessage({ type: 'error', text: 'âŒ Erro de conexÃ£o no diagnÃ³stico de privacidade' })
+                                        setPrivacyMessage({ type: 'error', text: '❌ Erro de conexão no diagnóstico de privacidade' })
                                     } finally {
                                         setPrivacyLoading(false)
                                     }
@@ -509,7 +507,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                             }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Settings size={16} style={{ color: accentColor }} />
-                                âš™ï¸ ConfiguraÃ§Ãµes de Comportamento
+                                ⚙️ Configurações de Comportamento
                             </span>
                             {settingsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
@@ -527,7 +525,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     checked={config.agent_enabled} onChange={() => onUpdateConfig('agent_enabled', !config.agent_enabled)} />
                                 <ToggleSwitch label="Sempre Online" icon={<Wifi size={15} />}
                                     checked={config.always_online} onChange={() => onUpdateConfig('always_online', !config.always_online)} />
-                                <ToggleSwitch label="Marcar como Lido (âœ“âœ“)" icon={<Eye size={15} />}
+                                <ToggleSwitch label="Marcar como Lido (✓✓)" icon={<Eye size={15} />}
                                     checked={config.mark_as_read} onChange={() => onUpdateConfig('mark_as_read', !config.mark_as_read)} />
                                 <ToggleSwitch label="Dividir Respostas em Partes" icon={<SplitSquareVertical size={15} />}
                                     checked={config.split_messages} onChange={() => onUpdateConfig('split_messages', !config.split_messages)} />
@@ -535,14 +533,14 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     value={config.response_mode}
                                     onChange={(mode) => onUpdateConfig('response_mode', mode)}
                                 />
-                                <ToggleSwitch label="IntervenÃ§Ã£o Humana (parar quando humano intervÃ©m)" icon={<Shield size={15} />}
+                                <ToggleSwitch label="Intervenção Humana (parar quando humano intervém)" icon={<Shield size={15} />}
                                     checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} />
 
                                 {/* Audio Toggles */}
                                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
-                                    Ãudio
+                                    Áudio
                                 </div>
-                                <ToggleSwitch label="TranscriÃ§Ã£o de Ãudio Recebido" icon={<Mic size={15} />}
+                                <ToggleSwitch label="Transcrição de Áudio Recebido" icon={<Mic size={15} />}
                                     checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} />
                                 {/* Media AI Toggles */}
                                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
@@ -560,7 +558,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 </div>
                                 <NumericInput label="Debounce (segundos)" value={String(config.debounce_seconds)}
                                     onChange={(v) => onUpdateConfig('debounce_seconds', parseInt(v) || 15)} min={5} max={120} />
-                                <NumericInput label="Reativar agente apÃ³s (minutos)" value={String(config.human_intervention_minutes)}
+                                <NumericInput label="Reativar agente após (minutos)" value={String(config.human_intervention_minutes)}
                                     onChange={(v) => onUpdateConfig('human_intervention_minutes', parseInt(v) || 60)} min={5} max={1440} />
 
                                 {/* Save Button */}
@@ -573,7 +571,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                         gap: '8px', opacity: savingSettings ? 0.6 : 1,
                                     }}>
                                     {savingSettings ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
-                                    {savingSettings ? 'Salvando...' : 'Salvar ConfiguraÃ§Ãµes'}
+                                    {savingSettings ? 'Salvando...' : 'Salvar Configurações'}
                                 </button>
                             </div>
                         </div>
@@ -584,9 +582,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     )
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Sub-Components
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function DetailItem({ icon, label, value, valueColor }: { icon: React.ReactNode; label: string; value: string; valueColor?: string }) {
     return (
@@ -629,8 +625,8 @@ function ToggleSwitch({ label, icon, checked, onChange }: { label: string; icon:
 function ResponseModeSelector({ value, onChange }: { value: 'text' | 'audio' | 'mirror'; onChange: (v: 'text' | 'audio' | 'mirror') => void }) {
     const options: Array<{ value: 'text' | 'audio' | 'mirror'; label: string; desc: string }> = [
         { value: 'text', label: 'Sempre texto', desc: 'Responde sempre por texto.' },
-        { value: 'audio', label: 'Sempre Ã¡udio', desc: 'Responde por Ã¡udio quando possÃ­vel.' },
-        { value: 'mirror', label: 'Espelho', desc: 'Se receber Ã¡udio, responde em Ã¡udio.' },
+        { value: 'audio', label: 'Sempre áudio', desc: 'Responde por áudio quando possível.' },
+        { value: 'mirror', label: 'Espelho', desc: 'Se receber áudio, responde em áudio.' },
     ]
 
     return (
@@ -673,7 +669,7 @@ function NumericInput({ label, value, onChange, min, max }: { label: string; val
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <button onClick={() => onChange(String(Math.max(min || 0, parseInt(value) - 1)))}
                     style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    âˆ’
+                    −
                 </button>
                 <input type="number" value={value} onChange={e => onChange(e.target.value)} min={min} max={max}
                     style={{ width: '50px', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px 6px', color: 'var(--gold)', fontSize: '0.9rem', fontWeight: 600, outline: 'none' }}
@@ -686,6 +682,7 @@ function NumericInput({ label, value, onChange, min, max }: { label: string; val
         </div>
     )
 }
+
 
 
 
