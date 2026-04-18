@@ -160,13 +160,12 @@ async function sendHandoffSummaryIfNeeded(
         .maybeSingle()
     if (existingMarker?.key) return false
 
-    const { data: broker } = await supabase
-        .from('virtual_brokers')
-        .select('phone, transfer_to_phone')
-        .eq('id', conversation.broker_id)
-        .maybeSingle()
-
-    const handoffPhone = (broker?.transfer_to_phone || broker?.phone || '').replace(/\D/g, '')
+    const handoffPhone = await resolveSummaryTargetPhone(
+        supabase,
+        conversation.broker_id,
+        instanceId,
+        recipientPhone
+    )
     if (!handoffPhone || handoffPhone === recipientPhone) return false
 
     const summary = buildStructuredHandoffSummary(conversation.lead_phone || recipientPhone, conversation)
@@ -189,6 +188,36 @@ async function sendHandoffSummaryIfNeeded(
     }
 
     return true
+}
+
+async function resolveSummaryTargetPhone(
+    supabase: ReturnType<typeof getSupabase>,
+    brokerId: string,
+    instanceId: string,
+    recipientPhone: string
+): Promise<string> {
+    const { data: broker } = await supabase
+        .from('virtual_brokers')
+        .select('phone, transfer_to_phone, summary_to_phone')
+        .eq('id', brokerId)
+        .maybeSingle()
+
+    const { data: inst } = await supabase
+        .from('whatsapp_instances')
+        .select('phone_number')
+        .eq('id', instanceId)
+        .maybeSingle()
+
+    const candidates = [
+        broker?.summary_to_phone,
+        inst?.phone_number,
+        broker?.transfer_to_phone,
+        broker?.phone,
+    ].map(v => String(v || '').replace(/\D/g, '')).filter(Boolean)
+
+    const recipient = String(recipientPhone || '').replace(/\D/g, '')
+    const firstValid = candidates.find(c => c && c !== recipient)
+    return firstValid || ''
 }
 
 function buildShiftConsolidatedSummary(conversations: any[], timezone: string): string {
@@ -236,12 +265,8 @@ async function sendShiftConsolidatedSummaryIfNeeded(
         .maybeSingle()
     if (marker?.key) return false
 
-    const { data: broker } = await supabase
-        .from('virtual_brokers')
-        .select('phone, transfer_to_phone')
-        .eq('id', brokerId)
-        .maybeSingle()
-    const handoffPhone = (broker?.transfer_to_phone || broker?.phone || '').replace(/\D/g, '')
+    // recipientPhone not relevant here; use empty to only avoid impossible self-recipient collision.
+    const handoffPhone = await resolveSummaryTargetPhone(supabase, brokerId, instanceId, '')
     if (!handoffPhone) return false
 
     const windowStart = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()

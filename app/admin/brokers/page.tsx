@@ -21,6 +21,7 @@ interface Broker {
     assignment_type: string
     assigned_page_slugs: string[]
     phone?: string
+    summary_to_phone?: string
     connectyhub_chat_message?: string
     system_prompt?: string
     voice_id?: string
@@ -70,6 +71,7 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         transfer_to_phone: '',
+        summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
 
@@ -87,6 +89,7 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         transfer_to_phone: '',
+        summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
 
@@ -539,6 +542,18 @@ export default function BrokersAdmin() {
                                         />
                                         <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '4px' }}>Formato: 55 + DDD + número (ex: 5547992528080)</p>
                                     </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>WhatsApp para Resumo de Plantão</label>
+                                        <input
+                                            value={formData.summary_to_phone || ''}
+                                            onChange={(e) => setFormData({ ...formData, summary_to_phone: e.target.value.replace(/\D/g, '') })}
+                                            placeholder="Opcional: 5547999999999"
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
+                                        />
+                                        <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '4px' }}>
+                                            Se vazio, o sistema tenta enviar o resumo para o próprio número da instância (mensagem para si mesmo).
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -989,6 +1004,7 @@ export default function BrokersAdmin() {
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
                                         transfer_to_phone: (broker as any).transfer_to_phone || '',
+                                        summary_to_phone: (broker as any).summary_to_phone || '',
 
                                         system_prompt: broker.system_prompt || '',
                                         voice_id: (broker as any).voice_id || '',

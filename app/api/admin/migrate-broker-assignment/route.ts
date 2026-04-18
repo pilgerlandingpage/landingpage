@@ -17,13 +17,18 @@ export async function POST() {
             query: `ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS assigned_page_slugs jsonb DEFAULT '[]'::jsonb;`
         })
 
-        if (err1 || err2) {
+        // Add summary_to_phone column (destination for shift summaries)
+        const { error: err3 } = await supabase.rpc('exec_sql', {
+            query: `ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS summary_to_phone text;`
+        })
+
+        if (err1 || err2 || err3) {
             // Fallback: try direct SQL via postgrest
             console.log('RPC not available, trying alternative approach...')
             // The columns may already exist, try an update to verify
             const { error: testErr } = await supabase
                 .from('virtual_brokers')
-                .select('assignment_type, assigned_page_slugs')
+                .select('assignment_type, assigned_page_slugs, summary_to_phone')
                 .limit(1)
 
             if (testErr) {
@@ -32,7 +37,8 @@ export async function POST() {
                     error: 'Columns do not exist yet. Please run the SQL manually in Supabase Dashboard.',
                     sql: [
                         "ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS assignment_type text DEFAULT 'all';",
-                        "ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS assigned_page_slugs jsonb DEFAULT '[]'::jsonb;"
+                        "ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS assigned_page_slugs jsonb DEFAULT '[]'::jsonb;",
+                        "ALTER TABLE public.virtual_brokers ADD COLUMN IF NOT EXISTS summary_to_phone text;"
                     ]
                 })
             }
