@@ -19,6 +19,20 @@ function getSupabase() {
     )
 }
 
+function getSaoPauloTimeContext() {
+    const spNow = new Date(
+        new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
+    )
+    const hour = spNow.getHours()
+    const greeting = hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite'
+    const date = spNow.toLocaleDateString('pt-BR')
+    const time = spNow.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+    return { hour, greeting, date, time }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
@@ -623,6 +637,7 @@ async function generateAIResponse(
     }
 
     // Prompt único: broker.system_prompt com tags processadas, ou fallback natural
+    const spTime = getSaoPauloTimeContext()
     const brokerName = broker.name || 'Corretor'
     const rawPrompt = broker.system_prompt || `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
 Converse naturalmente no WhatsApp, como uma pessoa real.
@@ -706,6 +721,12 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{empresa\}/g, `mencione que a ${companyName} é ${companyDesc}`)
     + `\n\n${toneInstruction}`
     + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
+    + `\n\nCONTEXTO DE TEMPO (America/Sao_Paulo): agora sao ${spTime.time} de ${spTime.date}. Saudacao correta neste momento: "${spTime.greeting}".`
+    + '\nREGRAS DE SAUDACAO:'
+    + '\n- Sempre valide a saudacao pelo horario atual antes de responder.'
+    + '\n- Nao espelhe automaticamente a saudacao enviada pelo cliente.'
+    + '\n- Se o cliente usar saudacao fora do horario, responda com a saudacao correta do horario atual.'
+    + '\n- Nao diga que esta corrigindo o cliente; apenas responda de forma natural e humana.'
 
     // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
     try {
