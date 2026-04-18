@@ -999,6 +999,11 @@ async function generateAIResponse(
     messages: any[],
     senderName?: string
 ): Promise<{ text: string; shouldTransfer: boolean; extractedData?: any }> {
+    const lastUserTextRaw = String(messages[messages.length - 1]?.content || '')
+    const lastUserText = lastUserTextRaw.toLowerCase().trim()
+    const isSimpleGreeting =
+        /^(oi+|ol[aá]+|eai|eae|bom dia|boa tarde|boa noite|tudo bem|blz|beleza)[!,. ]*$/i.test(lastUserText)
+
     const globalProvider = configs['ai_provider'] || 'gemini'
     const effectiveProvider = configs['whatsapp_provider'] || globalProvider
     const apiKey = effectiveProvider === 'openai' ? configs['openai_api_key'] : configs['gemini_api_key']
@@ -1205,9 +1210,27 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         )
         const shouldTransfer = /\[transferir\]/i.test(responseText) || /\[transfer\]/i.test(responseText)
         const cleanText = responseText.replace(/\[transferir\]/gi, '').replace(/\[transfer\]/gi, '').trim()
-        return { text: cleanText || 'Desculpe, não entendi. Pode reformular?', shouldTransfer, extractedData }
+        if (!cleanText) {
+            if (isSimpleGreeting) {
+                const lead = senderName?.trim() || 'tudo bem por aí'
+                return {
+                    text: `Oi! ${lead}. Posso te ajudar a encontrar um imóvel para morar ou investir hoje?`,
+                    shouldTransfer: false,
+                    extractedData
+                }
+            }
+            return {
+                text: 'Perfeito. Me conta em uma frase o que você busca: morar ou investir, região e faixa de valor.',
+                shouldTransfer: false,
+                extractedData
+            }
+        }
+        return { text: cleanText, shouldTransfer, extractedData }
     } catch (error) {
         console.error('[AI Response Error]', error)
+        if (isSimpleGreeting) {
+            return { text: 'Oi! Tudo bem? Posso te ajudar com opções de imóveis para morar ou investir.', shouldTransfer: false }
+        }
         return { text: 'Estou com um problema temporário. Tente novamente em instantes.', shouldTransfer: false }
     }
 }

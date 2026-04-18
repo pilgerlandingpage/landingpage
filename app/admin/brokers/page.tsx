@@ -56,6 +56,10 @@ function formatBrPhone(phone?: string | null): string {
     return `+${digits}`
 }
 
+function instanceIsConnected(instance?: WhatsAppInstance | null): boolean {
+    return instance?.status === 'connected'
+}
+
 export default function BrokersAdmin() {
     const supabase = createClient()
     const [brokers, setBrokers] = useState<Broker[]>([])
@@ -192,11 +196,18 @@ export default function BrokersAdmin() {
         if (!editingBroker) return
         if (selectedInstanceId) return
         const brokerPhoneDigits = String(editingBroker.phone || '').replace(/\D/g, '')
-        const linked = availableInstances.find(i =>
+        let linked = availableInstances.find(i =>
             i.broker_id === editingBroker.id ||
             i.id === editingBroker.whatsapp_instance_id ||
             (!!brokerPhoneDigits && getInstancePhone(i) === brokerPhoneDigits)
         )
+
+        // Fallback: if there is exactly one connected instance, use it for convenience
+        if (!linked) {
+            const connected = availableInstances.filter(instanceIsConnected)
+            if (connected.length === 1) linked = connected[0]
+        }
+
         if (linked?.id) {
             setSelectedInstanceId(linked.id)
             setWhatsappInstance(linked)
