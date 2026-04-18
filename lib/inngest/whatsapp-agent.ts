@@ -948,10 +948,39 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'skipped', reason: 'already_processed' }
         }
 
-        // Sleep configurable debounce to allow more messages to accumulate
+        // Sliding debounce: timer resets whenever a new message arrives.
+        // We only proceed when there has been a full quiet window.
         if (!isAudio && !isMediaMessage) {
             const debounceSeconds = Math.max(1, parseInt(configs['whatsapp_debounce_seconds'] || '15', 10) || 15)
-            await step.sleep('debounce-collect', `${debounceSeconds}s`)
+            const maxCycles = 12 // safety cap to avoid endless loops on extremely chatty threads
+
+            for (let cycle = 0; cycle < maxCycles; cycle++) {
+                await step.sleep(`debounce-collect-${cycle}`, `${debounceSeconds}s`)
+
+                const peek = await step.run(`peek-latest-pending-${cycle}`, async () => {
+                    const { data: latest } = await supabase
+                        .from('app_config')
+                        .select('updated_at')
+                        .like('key', `_pmq_${cleanPhone}_%`)
+                        .order('updated_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle()
+
+                    return { latestAt: latest?.updated_at || null }
+                })
+
+                // Queue vanished (handled by another run) or no data: proceed and let next step decide.
+                if (!peek?.latestAt) break
+
+                const ageSeconds = (Date.now() - new Date(peek.latestAt).getTime()) / 1000
+                if (ageSeconds >= debounceSeconds) {
+                    // Quiet period reached.
+                    break
+                }
+
+                // New message arrived recently: loop again and reset window.
+                console.log(`[WhatsApp Agent] Debounce reset for ${cleanPhone}; latest message age=${ageSeconds.toFixed(2)}s`)
+            }
         }
 
         // Read queued messages from debounce window (atomic INSERTs in app_config)
