@@ -1016,7 +1016,9 @@ async function generateAIResponse(
     // Prompt único: broker.system_prompt com tags processadas, ou fallback natural
     const spTime = getSaoPauloTimeContext()
     const brokerName = broker.name || 'Corretor'
-    const rawPrompt = broker.system_prompt || `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
+    const customPrompt = String(broker.system_prompt || '').trim()
+    const hasCustomPrompt = customPrompt.length > 0
+    const rawPrompt = hasCustomPrompt ? customPrompt : `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
 Converse naturalmente no WhatsApp, como uma pessoa real.
 Seja simpático, use linguagem informal mas profissional.
 Use frases curtas — é WhatsApp, não email.
@@ -1108,9 +1110,9 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             ? 'Use tom consultivo, faça perguntas qualificadoras e conduza com clareza.'
             : 'Use tom amigável, humano e próximo, mantendo profissionalismo.'
 
-    let systemPrompt = rawPrompt
+    const basePromptWithTags = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
-        .replace(/\{nome_lead\}/g, '(use o nome do cliente quando souber)')
+        .replace(/\{nome_lead\}/g, senderName?.trim() || 'cliente')
         .replace(/\{agendamento\}/g, 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
         .replace(/\{regioes\}/g, `envie uma lista com [LISTA:Ver Regiões|${regionsForList}]`)
         .replace(/\{transferir\}/g, 'use [TRANSFERIR] para encaminhar ao corretor humano')
@@ -1127,20 +1129,25 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{redes_sociais\}/g, socialButtonOptions.length
             ? `ofereça botões com [BOTOES:Ver redes sociais|${socialButtonOptions.join('|')}] e envie o link da opção escolhida. Links disponíveis: ${socialLinksList}`
             : (socialLinksList || 'redes sociais não configuradas'))
-    + `\n\n${toneInstruction}`
-    + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
-    + `\n\nCONTEXTO DE TEMPO (America/Sao_Paulo): agora sao ${spTime.time} de ${spTime.date}. Saudacao correta neste momento: "${spTime.greeting}".`
-    + '\nREGRAS DE SAUDACAO:'
-    + '\n- Sempre valide a saudacao pelo horario atual antes de responder.'
-    + '\n- Nao espelhe automaticamente a saudacao enviada pelo cliente.'
-    + '\n- Se o cliente usar saudacao fora do horario, responda com a saudacao correta do horario atual.'
-    + '\n- Nao diga que esta corrigindo o cliente; apenas responda de forma natural e humana.'
-    + '\nREGRAS DE REDES SOCIAIS:'
-    + '\n- Envie redes sociais somente quando fizer sentido (prova social, vídeos, portfólio, pedido do cliente).'
-    + '\n- Se o cliente demonstrar preferência por vídeos, priorize YouTube quando configurado.'
-    + '\n- Se enviar rede social, prefira compartilhar 1 link por vez para manter a conversa natural.'
+
+    let systemPrompt = basePromptWithTags
+    if (!hasCustomPrompt) {
+        systemPrompt += `\n\n${toneInstruction}`
+        + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
+        + `\n\nCONTEXTO DE TEMPO (America/Sao_Paulo): agora sao ${spTime.time} de ${spTime.date}. Saudacao correta neste momento: "${spTime.greeting}".`
+        + '\nREGRAS DE SAUDACAO:'
+        + '\n- Sempre valide a saudacao pelo horario atual antes de responder.'
+        + '\n- Nao espelhe automaticamente a saudacao enviada pelo cliente.'
+        + '\n- Se o cliente usar saudacao fora do horario, responda com a saudacao correta do horario atual.'
+        + '\n- Nao diga que esta corrigindo o cliente; apenas responda de forma natural e humana.'
+        + '\nREGRAS DE REDES SOCIAIS:'
+        + '\n- Envie redes sociais somente quando fizer sentido (prova social, vídeos, portfólio, pedido do cliente).'
+        + '\n- Se o cliente demonstrar preferência por vídeos, priorize YouTube quando configurado.'
+        + '\n- Se enviar rede social, prefira compartilhar 1 link por vez para manter a conversa natural.'
+    }
 
     // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
+    if (!hasCustomPrompt) {
     try {
         const supabase = getSupabase()
         const { data: properties } = await supabase
@@ -1171,6 +1178,7 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         }
     } catch (err) {
         console.error('[AI Agent] Erro ao carregar catálogo de imóveis:', err)
+    }
     }
 
     const chatMessages = messages.map((m: any) => ({ role: m.role, content: m.content }))
