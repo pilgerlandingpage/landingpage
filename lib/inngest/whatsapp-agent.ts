@@ -520,6 +520,85 @@ async function uploadAudioToR2(audioBuffer: Buffer, supabase: ReturnType<typeof 
     } catch (e) { console.error('[Audio Upload] Error:', e); return null }
 }
 
+function inferMimeType(kind: 'image' | 'video' | 'document', provided?: string | null): string {
+    if (provided && provided.trim()) return provided.trim()
+    if (kind === 'image') return 'image/jpeg'
+    if (kind === 'video') return 'video/mp4'
+    return 'application/pdf'
+}
+
+async function analyzeMediaWithGemini(
+    mediaBuffer: Buffer,
+    mimeType: string,
+    apiKey: string,
+    model: string,
+    kind: 'image' | 'video' | 'document',
+    fileName?: string | null
+): Promise<string> {
+    const prompt = `Analise esta mídia enviada por um cliente no WhatsApp de imobiliária.
+Tipo: ${kind}
+Arquivo: ${fileName || 'sem nome'}
+
+Responda em português (pt-BR), curto e prático com:
+1) O que aparece/contém (resumo objetivo)
+2) Perfil de imóvel/interesse provável do cliente
+3) Características-chave (estilo, localização sugerida, padrão, quartos, área, lazer, etc. quando possível)
+4) 3 perguntas curtas que o corretor deve fazer para qualificar melhor
+
+Se não for possível analisar com confiança, diga isso claramente.`
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.0-flash'}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                role: 'user',
+                parts: [
+                    { inlineData: { mimeType, data: mediaBuffer.toString('base64') } },
+                    { text: prompt }
+                ]
+            }]
+        })
+    })
+    if (!res.ok) return ''
+    const data = await res.json()
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+}
+
+async function analyzeMediaWithOpenAIImage(
+    mediaBuffer: Buffer,
+    mimeType: string,
+    apiKey: string,
+    model: string,
+    fileName?: string | null
+): Promise<string> {
+    const dataUrl = `data:${mimeType};base64,${mediaBuffer.toString('base64')}`
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: model || 'gpt-4o-mini',
+            temperature: 0.2,
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Você analisa mídia de clientes para uma imobiliária. Responda em pt-BR, de forma objetiva e útil para o corretor.'
+                },
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: `Analise esta imagem (arquivo: ${fileName || 'sem nome'}) e traga: resumo, perfil de interesse e 3 perguntas de qualificação.` },
+                        { type: 'image_url', image_url: { url: dataUrl } }
+                    ]
+                }
+            ]
+        })
+    })
+    if (!res.ok) return ''
+    const data = await res.json()
+    return data?.choices?.[0]?.message?.content || ''
+}
+
 // ═══════════════════════════════════════════════════════════════
 // AI RESPONSE
 // ═══════════════════════════════════════════════════════════════
@@ -719,6 +798,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     async ({ event, step }) => {
         const {
             cleanPhone, messageText, isAudio, audioUrl, audioMediaKey, audioDirectPath, messageId,
+            messageType, mediaUrl, mediaMimetype, mediaFilename, mediaType,
             buttonResponseId, buttonResponseTitle, pollVotes,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
@@ -957,9 +1037,69 @@ export const processWhatsAppMessage = inngest.createFunction(
             return r2Url
         }) : null
 
+        // ── Step 3.1: Download and analyze media (image/document/video) ──
+        const mediaAnalysis = !isAudio && mediaType && ['image', 'video', 'document'].includes(String(mediaType))
+            ? await step.run('analyze-media', async () => {
+                const kind = mediaType as 'image' | 'video' | 'document'
+                if (!messageId) {
+                    return { text: '', reason: 'missing_message_id' }
+                }
+
+                const mediaBuffer = await downloadMedia(messageId, instanceToken)
+                if (!mediaBuffer || mediaBuffer.length < 64) {
+                    return { text: '', reason: 'download_failed' }
+                }
+
+                // Keep memory/latency safe for very large files.
+                const maxBytes = 12 * 1024 * 1024
+                if (mediaBuffer.length > maxBytes) {
+                    return { text: '', reason: `file_too_large_${mediaBuffer.length}` }
+                }
+
+                const mimeType = inferMimeType(kind, mediaMimetype)
+                const geminiKey = configs['gemini_api_key']
+                const openaiKey = configs['openai_api_key']
+                const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
+                const openaiModel = configs['openai_whatsapp_model'] || 'gpt-4o-mini'
+
+                let analysisText = ''
+
+                // Prefer Gemini for generic multimodal (image, pdf, video).
+                if (geminiKey) {
+                    analysisText = await analyzeMediaWithGemini(
+                        mediaBuffer,
+                        mimeType,
+                        geminiKey,
+                        geminiModel,
+                        kind,
+                        mediaFilename || null
+                    )
+                }
+
+                // OpenAI fallback only for images.
+                if (!analysisText && openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
+                    analysisText = await analyzeMediaWithOpenAIImage(
+                        mediaBuffer,
+                        mimeType,
+                        openaiKey,
+                        openaiModel,
+                        mediaFilename || null
+                    )
+                }
+
+                return {
+                    text: analysisText || '',
+                    reason: analysisText ? 'ok' : 'no_analysis',
+                    kind,
+                    mimeType,
+                    size: mediaBuffer.length
+                }
+            })
+            : null
+
         // ── Step 4: Transcribe audio if we got a R2 URL ──
         const inputText = await step.run('process-input', async () => {
-            console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, audioR2Url=${audioR2Url ? 'available' : 'null'}, messageText="${messageText}"`)
+            console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, mediaType=${mediaType || 'none'}, audioR2Url=${audioR2Url ? 'available' : 'null'}, messageText="${messageText}"`)
             
             const transcriptionEnabled = configs['whatsapp_transcription_enabled'] !== 'false'
 
@@ -1055,6 +1195,13 @@ export const processWhatsAppMessage = inngest.createFunction(
             if (isAudio && !audioR2Url) {
                 console.error('[WhatsApp Agent] Audio detected but no R2 URL available (download failed)')
                 return '[O usuário enviou uma mensagem de áudio que não pôde ser processada. Responda pedindo que repita ou envie por texto.]'
+            }
+
+            // Image/document/video analysis path
+            if (!isAudio && mediaAnalysis && mediaAnalysis.text) {
+                const leadText = allMessages?.trim() || ''
+                const base = leadText || `[O usuário enviou uma mídia do tipo ${mediaType || messageType || 'desconhecido'}]`
+                return `${base}\n\n[ANÁLISE DA MÍDIA]\n${mediaAnalysis.text}`
             }
             
             return allMessages

@@ -69,6 +69,7 @@ export const inngest = new Inngest({
             data: {
                 cleanPhone: string
                 messageText: string
+                messageType?: string | null
                 isAudio: boolean
                 buttonResponseId: string | null
                 buttonResponseTitle: string | null
@@ -77,6 +78,10 @@ export const inngest = new Inngest({
                 audioMediaKey: string | null
                 audioDirectPath: string | null
                 messageId: string | null
+                mediaUrl?: string | null
+                mediaMimetype?: string | null
+                mediaFilename?: string | null
+                mediaType?: 'image' | 'video' | 'document' | null
                 instanceId: string
                 instanceToken: string
                 instanceName: string
