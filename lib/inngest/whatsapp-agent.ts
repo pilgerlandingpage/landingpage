@@ -33,6 +33,275 @@ function getSaoPauloTimeContext() {
     return { hour, greeting, date, time }
 }
 
+function parseHourMinuteToMinutes(raw: string | null | undefined): number | null {
+    if (!raw) return null
+    const m = String(raw).match(/^(\d{1,2}):(\d{2})$/)
+    if (!m) return null
+    const hh = parseInt(m[1], 10)
+    const mm = parseInt(m[2], 10)
+    if (Number.isNaN(hh) || Number.isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null
+    return hh * 60 + mm
+}
+
+function getNowInTimezone(timezone: string): Date {
+    const safeTz = timezone || 'America/Sao_Paulo'
+    return new Date(new Date().toLocaleString('en-US', { timeZone: safeTz }))
+}
+
+function isWithinAISchedule(configs: Record<string, string>) {
+    const enabled = configs['whatsapp_ai_schedule_enabled'] === 'true'
+    if (!enabled) return { enabled: false, within: true, reason: 'schedule_disabled' as const }
+
+    const startRaw = configs['whatsapp_ai_schedule_start'] || '18:00'
+    const endRaw = configs['whatsapp_ai_schedule_end'] || '08:00'
+    const timezone = configs['whatsapp_ai_schedule_timezone'] || 'America/Sao_Paulo'
+    const startMin = parseHourMinuteToMinutes(startRaw)
+    const endMin = parseHourMinuteToMinutes(endRaw)
+    if (startMin == null || endMin == null) {
+        return { enabled: true, within: true, reason: 'invalid_schedule_values' as const }
+    }
+
+    const now = getNowInTimezone(timezone)
+    const nowMin = now.getHours() * 60 + now.getMinutes()
+
+    // Same start/end means 24h window.
+    if (startMin === endMin) {
+        return { enabled: true, within: true, reason: '24h_window' as const, nowMin, startMin, endMin, timezone }
+    }
+
+    const within = startMin < endMin
+        ? nowMin >= startMin && nowMin < endMin
+        : nowMin >= startMin || nowMin < endMin
+
+    return { enabled: true, within, reason: 'ok' as const, nowMin, startMin, endMin, timezone }
+}
+
+function buildHandoffSummary(leadPhone: string, messages: any[]): string {
+    const safeMessages = Array.isArray(messages) ? messages : []
+    const recent = safeMessages.slice(-10)
+    const lines = recent.map((m: any) => {
+        const who = m?.role === 'assistant' ? 'Atendente' : 'Lead'
+        const txt = String(m?.content || '').replace(/\s+/g, ' ').trim()
+        if (!txt) return ''
+        return `- ${who}: ${txt.length > 180 ? `${txt.slice(0, 180)}...` : txt}`
+    }).filter(Boolean)
+
+    const body = lines.length
+        ? lines.join('\n')
+        : '- Conversa iniciada, sem conteúdo textual suficiente para resumir.'
+
+    return `📋 *Passagem de Plantão (IA → Humano)*\n\n👤 Lead: ${leadPhone}\n\nResumo rápido da conversa:\n${body}\n\n✅ Atendimento humano assumido.`
+}
+
+function buildStructuredHandoffSummary(leadPhone: string, conversation: any): string {
+    const extracted = conversation?.lead_data_extracted || {}
+    const name = extracted?.name || 'Não informado'
+    const interest = extracted?.interest || 'Não informado'
+    const region = extracted?.region || 'Não informado'
+    const budget = extracted?.budget || 'Não informado'
+    const timeframe = extracted?.timeframe || 'Não informado'
+
+    const recentMessages = Array.isArray(conversation?.messages) ? conversation.messages.slice(-8) : []
+    const timeline = recentMessages.map((m: any) => {
+        const who = m?.role === 'assistant' ? 'Atendente' : 'Lead'
+        const txt = String(m?.content || '').replace(/\s+/g, ' ').trim()
+        if (!txt) return ''
+        return `- ${who}: ${txt.length > 140 ? `${txt.slice(0, 140)}...` : txt}`
+    }).filter(Boolean).join('\n')
+
+    const heuristicScore = (() => {
+        let score = 0
+        if (interest && interest !== 'Não informado') score += 25
+        if (region && region !== 'Não informado') score += 20
+        if (budget && budget !== 'Não informado') score += 25
+        if (timeframe && timeframe !== 'Não informado') score += 15
+        if (Array.isArray(conversation?.messages) && conversation.messages.length >= 6) score += 15
+        return Math.min(100, score)
+    })()
+    const priority = heuristicScore >= 70 ? 'Quente' : heuristicScore >= 45 ? 'Morno' : 'Frio'
+
+    return [
+        '📋 *Passagem de Plantão (IA → Humano)*',
+        '',
+        `👤 Lead: ${name}`,
+        `📱 Telefone: ${leadPhone}`,
+        `🎯 Interesse: ${interest}`,
+        `📍 Região: ${region}`,
+        `💰 Orçamento: ${budget}`,
+        `⏱️ Prazo: ${timeframe}`,
+        `🔥 Prioridade: ${priority} (${heuristicScore}/100)`,
+        '',
+        'Resumo das últimas interações:',
+        timeline || '- Sem conteúdo textual suficiente.',
+        '',
+        'Próximo passo sugerido:',
+        '- Fazer contato humano imediato, confirmar critérios e avançar para visita/proposta.',
+    ].join('\n')
+}
+
+async function sendHandoffSummaryIfNeeded(
+    supabase: ReturnType<typeof getSupabase>,
+    params: {
+        conversation: any
+        instanceId: string
+        instanceToken: string
+        recipientPhone: string
+        markerSuffix: string
+    }
+) {
+    const { conversation, instanceId, instanceToken, recipientPhone, markerSuffix } = params
+    if (!conversation?.id || !conversation?.broker_id || !instanceToken) return false
+
+    const markerKey = `_handoff_${conversation.id}_${markerSuffix}`
+    const { data: existingMarker } = await supabase
+        .from('app_config')
+        .select('key')
+        .eq('key', markerKey)
+        .maybeSingle()
+    if (existingMarker?.key) return false
+
+    const { data: broker } = await supabase
+        .from('virtual_brokers')
+        .select('phone, transfer_to_phone')
+        .eq('id', conversation.broker_id)
+        .maybeSingle()
+
+    const handoffPhone = (broker?.transfer_to_phone || broker?.phone || '').replace(/\D/g, '')
+    if (!handoffPhone || handoffPhone === recipientPhone) return false
+
+    const summary = buildStructuredHandoffSummary(conversation.lead_phone || recipientPhone, conversation)
+    await sendWhatsAppMessage({
+        phone: handoffPhone,
+        message: summary,
+        instanceToken,
+    }).catch((err) => {
+        console.warn('[Handoff] Failed to send summary:', err)
+    })
+
+    try {
+        await supabase.from('app_config').upsert({
+            key: markerKey,
+            value: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' })
+    } catch {
+        // best effort marker
+    }
+
+    return true
+}
+
+function buildShiftConsolidatedSummary(conversations: any[], timezone: string): string {
+    const safe = Array.isArray(conversations) ? conversations : []
+    const header = `📊 *Resumo Consolidado do Plantão IA*\n🕒 Fuso: ${timezone}\n👥 Atendimentos: ${safe.length}\n`
+    if (safe.length === 0) {
+        return `${header}\nNenhum atendimento registrado neste turno.`
+    }
+
+    const lines: string[] = []
+    for (const conv of safe.slice(0, 20)) {
+        const d = conv?.lead_data_extracted || {}
+        const leadName = d?.name || 'Lead sem nome'
+        const leadPhone = conv?.lead_phone || 'sem telefone'
+        const interest = d?.interest || 'não informado'
+        const region = d?.region || 'não informada'
+        const budget = d?.budget || 'não informado'
+        const score = typeof conv?.qualification_score === 'number' ? conv.qualification_score : null
+        const priority = score != null ? (score >= 70 ? 'quente' : score >= 45 ? 'morno' : 'frio') : 'indefinida'
+        lines.push(`- ${leadName} (${leadPhone}) | ${interest} | ${region} | orçamento: ${budget} | prioridade: ${priority}`)
+    }
+
+    const truncated = safe.length > 20 ? `\n...e mais ${safe.length - 20} atendimento(s).` : ''
+    return `${header}\n${lines.join('\n')}${truncated}\n\n✅ Recomendação: priorize contatos *quentes* primeiro.`
+}
+
+async function sendShiftConsolidatedSummaryIfNeeded(
+    supabase: ReturnType<typeof getSupabase>,
+    params: {
+        brokerId: string
+        instanceId: string
+        instanceToken: string
+        timezone: string
+        markerSuffix: string
+    }
+) {
+    const { brokerId, instanceId, instanceToken, timezone, markerSuffix } = params
+    if (!brokerId || !instanceToken) return false
+
+    const markerKey = `_handoff_shift_${instanceId}_${markerSuffix}`
+    const { data: marker } = await supabase
+        .from('app_config')
+        .select('key')
+        .eq('key', markerKey)
+        .maybeSingle()
+    if (marker?.key) return false
+
+    const { data: broker } = await supabase
+        .from('virtual_brokers')
+        .select('phone, transfer_to_phone')
+        .eq('id', brokerId)
+        .maybeSingle()
+    const handoffPhone = (broker?.transfer_to_phone || broker?.phone || '').replace(/\D/g, '')
+    if (!handoffPhone) return false
+
+    const windowStart = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    const { data: conversations } = await supabase
+        .from('whatsapp_ai_conversations')
+        .select('id, lead_phone, lead_data_extracted, qualification_score, updated_at')
+        .eq('instance_id', instanceId)
+        .eq('broker_id', brokerId)
+        .gte('updated_at', windowStart)
+        .order('updated_at', { ascending: false })
+        .limit(50)
+
+    const summary = buildShiftConsolidatedSummary(conversations || [], timezone)
+    await sendWhatsAppMessage({
+        phone: handoffPhone,
+        message: summary,
+        instanceToken,
+    }).catch((err) => {
+        console.warn('[Handoff Shift] Failed to send consolidated summary:', err)
+    })
+
+    try {
+        await supabase.from('app_config').upsert({
+            key: markerKey,
+            value: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' })
+    } catch {
+        // best effort marker
+    }
+
+    return true
+}
+
+async function appendConversationMessage(
+    supabase: ReturnType<typeof getSupabase>,
+    conversationId: string,
+    message: { role: 'user' | 'assistant'; content: string; type?: string; source?: string }
+) {
+    const { data: conv } = await supabase
+        .from('whatsapp_ai_conversations')
+        .select('messages')
+        .eq('id', conversationId)
+        .maybeSingle()
+
+    const current = Array.isArray(conv?.messages) ? conv.messages : []
+    current.push({
+        role: message.role,
+        content: message.content,
+        type: message.type || 'text',
+        source: message.source || null,
+        timestamp: new Date().toISOString(),
+    })
+
+    await supabase
+        .from('whatsapp_ai_conversations')
+        .update({ messages: current, updated_at: new Date().toISOString() })
+        .eq('id', conversationId)
+}
+
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
@@ -54,8 +323,11 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_media_image_enabled', 'whatsapp_media_document_enabled', 'whatsapp_media_video_enabled',
             'whatsapp_agent_enabled', 'whatsapp_split_messages',
             'whatsapp_debounce_seconds',
+            'whatsapp_ai_schedule_enabled', 'whatsapp_ai_schedule_start', 'whatsapp_ai_schedule_end', 'whatsapp_ai_schedule_timezone',
             // Agent controls from admin panel
-            'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone'
+            'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone',
+            'agent_social_instagram', 'agent_social_facebook', 'agent_social_youtube',
+            'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site'
         ])
 
     const map: Record<string, string> = {}
@@ -88,6 +360,10 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
                     human_intervention: 'whatsapp_human_intervention',
                     debounce_seconds: 'whatsapp_debounce_seconds',
                     human_intervention_minutes: 'whatsapp_human_intervention_minutes',
+                    ai_schedule_enabled: 'whatsapp_ai_schedule_enabled',
+                    ai_schedule_start: 'whatsapp_ai_schedule_start',
+                    ai_schedule_end: 'whatsapp_ai_schedule_end',
+                    ai_schedule_timezone: 'whatsapp_ai_schedule_timezone',
                 }
                 for (const [instKey, globalKey] of Object.entries(keyMap)) {
                     if (cfg[instKey] !== undefined) {
@@ -267,6 +543,25 @@ function parseButtons(text: string): { cleanText: string; buttons?: { title: str
 
 function responseRequiresText(text: string): boolean {
     return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[LISTA:/i.test(text) || /\[ENQUETE:/i.test(text) || /\[LOCALIZACAO\]/i.test(text)
+}
+
+function resolveSocialQuickReply(choiceRaw: string | null | undefined, configs: Record<string, string>): string | null {
+    const choice = String(choiceRaw || '').toLowerCase().trim()
+    if (!choice) return null
+    const ig = configs['agent_social_instagram'] || ''
+    const yt = configs['agent_social_youtube'] || ''
+    const site = configs['agent_social_site'] || ''
+    const fb = configs['agent_social_facebook'] || ''
+    const li = configs['agent_social_linkedin'] || ''
+    const tt = configs['agent_social_tiktok'] || ''
+
+    if (choice.includes('instagram') && ig) return `Perfeito! Nosso Instagram: ${ig}`
+    if ((choice.includes('youtube') || choice.includes('vídeo') || choice.includes('video')) && yt) return `Claro! Nosso YouTube: ${yt}`
+    if (choice.includes('site') && site) return `Aqui está nosso site oficial: ${site}`
+    if (choice.includes('facebook') && fb) return `Aqui está nosso Facebook: ${fb}`
+    if (choice.includes('linkedin') && li) return `Aqui está nosso LinkedIn: ${li}`
+    if (choice.includes('tiktok') && tt) return `Aqui está nosso TikTok: ${tt}`
+    return null
 }
 
 function parseBudgetToNumber(value: unknown): number | null {
@@ -695,6 +990,28 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
     const companyDesc = agentConfigs['agent_company_description'] || 'referência em imóveis de alto padrão em Balneário Camboriú e região'
     const companyAddress = agentConfigs['agent_company_address'] || ''
     const companyMapsLink = agentConfigs['agent_company_maps_link'] || ''
+    const socialInstagram = agentConfigs['agent_social_instagram'] || ''
+    const socialFacebook = agentConfigs['agent_social_facebook'] || ''
+    const socialYoutube = agentConfigs['agent_social_youtube'] || ''
+    const socialLinkedin = agentConfigs['agent_social_linkedin'] || ''
+    const socialTiktok = agentConfigs['agent_social_tiktok'] || ''
+    const socialSite = agentConfigs['agent_social_site'] || ''
+    const socialLinksList = [
+        socialInstagram ? `Instagram: ${socialInstagram}` : '',
+        socialYoutube ? `YouTube: ${socialYoutube}` : '',
+        socialFacebook ? `Facebook: ${socialFacebook}` : '',
+        socialLinkedin ? `LinkedIn: ${socialLinkedin}` : '',
+        socialTiktok ? `TikTok: ${socialTiktok}` : '',
+        socialSite ? `Site: ${socialSite}` : '',
+    ].filter(Boolean).join(' | ')
+    const socialButtonOptions = [
+        socialInstagram ? 'Instagram' : '',
+        socialYoutube ? 'YouTube' : '',
+        socialSite ? 'Site' : '',
+        socialFacebook ? 'Facebook' : '',
+        socialLinkedin ? 'LinkedIn' : '',
+        socialTiktok ? 'TikTok' : '',
+    ].filter(Boolean).slice(0, 3)
     const locationInstruction = companyMapsLink
         ? `envie o link da localização: ${companyMapsLink} e mencione o endereço: ${companyAddress}`
         : companyAddress
@@ -719,6 +1036,15 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{documentos\}/g, `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
         .replace(/\{horario\}/g, `informe que o atendimento é de ${hoursText}`)
         .replace(/\{empresa\}/g, `mencione que a ${companyName} é ${companyDesc}`)
+        .replace(/\{instagram\}/g, socialInstagram || 'instagram não configurado')
+        .replace(/\{facebook\}/g, socialFacebook || 'facebook não configurado')
+        .replace(/\{youtube\}/g, socialYoutube || 'youtube não configurado')
+        .replace(/\{linkedin\}/g, socialLinkedin || 'linkedin não configurado')
+        .replace(/\{tiktok\}/g, socialTiktok || 'tiktok não configurado')
+        .replace(/\{site\}/g, socialSite || 'site não configurado')
+        .replace(/\{redes_sociais\}/g, socialButtonOptions.length
+            ? `ofereça botões com [BOTOES:Ver redes sociais|${socialButtonOptions.join('|')}] e envie o link da opção escolhida. Links disponíveis: ${socialLinksList}`
+            : (socialLinksList || 'redes sociais não configuradas'))
     + `\n\n${toneInstruction}`
     + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
     + `\n\nCONTEXTO DE TEMPO (America/Sao_Paulo): agora sao ${spTime.time} de ${spTime.date}. Saudacao correta neste momento: "${spTime.greeting}".`
@@ -727,6 +1053,10 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
     + '\n- Nao espelhe automaticamente a saudacao enviada pelo cliente.'
     + '\n- Se o cliente usar saudacao fora do horario, responda com a saudacao correta do horario atual.'
     + '\n- Nao diga que esta corrigindo o cliente; apenas responda de forma natural e humana.'
+    + '\nREGRAS DE REDES SOCIAIS:'
+    + '\n- Envie redes sociais somente quando fizer sentido (prova social, vídeos, portfólio, pedido do cliente).'
+    + '\n- Se o cliente demonstrar preferência por vídeos, priorize YouTube quando configurado.'
+    + '\n- Se enviar rede social, prefira compartilhar 1 link por vez para manter a conversa natural.'
 
     // ═══ CATÁLOGO DE IMÓVEIS — Injetar imóveis reais no contexto do agente ═══
     try {
@@ -917,14 +1247,63 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         if (conversation.status === 'transferred') {
+            if (messageText?.trim()) {
+                await appendConversationMessage(supabase, conversation.id, {
+                    role: 'user',
+                    content: messageText.trim(),
+                    type: isAudio ? 'audio' : 'text',
+                    source: 'lead',
+                }).catch(() => { })
+            }
             console.log('[WhatsApp Agent] Conversation is transferred/human handling, skipping bot response')
             return { action: 'skipped', reason: 'human_handling' }
         }
 
         // Check if agent is enabled
         if (configs['whatsapp_agent_enabled'] === 'false') {
+            if (messageText?.trim()) {
+                await appendConversationMessage(supabase, conversation.id, {
+                    role: 'user',
+                    content: messageText.trim(),
+                    type: isAudio ? 'audio' : 'text',
+                    source: 'lead',
+                }).catch(() => { })
+            }
             console.log(`[WhatsApp Agent] Agent disabled, skipping`)
             return { action: 'skipped', reason: 'agent_disabled' }
+        }
+
+        // Check if current time is inside AI service schedule (when enabled)
+        const scheduleStatus = isWithinAISchedule(configs)
+        if (scheduleStatus.enabled && !scheduleStatus.within) {
+            if (messageText?.trim()) {
+                await appendConversationMessage(supabase, conversation.id, {
+                    role: 'user',
+                    content: messageText.trim(),
+                    type: isAudio ? 'audio' : 'text',
+                    source: 'lead',
+                }).catch(() => { })
+            }
+            const tzNow = getNowInTimezone(scheduleStatus.timezone || 'America/Sao_Paulo')
+            const cycleDate = `${tzNow.getFullYear()}${String(tzNow.getMonth() + 1).padStart(2, '0')}${String(tzNow.getDate()).padStart(2, '0')}`
+            const startKey = String(configs['whatsapp_ai_schedule_start'] || '18:00').replace(':', '')
+            const endKey = String(configs['whatsapp_ai_schedule_end'] || '08:00').replace(':', '')
+            await sendHandoffSummaryIfNeeded(supabase, {
+                conversation,
+                instanceId,
+                instanceToken,
+                recipientPhone: cleanPhone,
+                markerSuffix: `schedule_${cycleDate}_${startKey}_${endKey}`,
+            }).catch(() => { })
+            await sendShiftConsolidatedSummaryIfNeeded(supabase, {
+                brokerId: broker.id,
+                instanceId,
+                instanceToken,
+                timezone: scheduleStatus.timezone || 'America/Sao_Paulo',
+                markerSuffix: `${cycleDate}_${startKey}_${endKey}`,
+            }).catch(() => { })
+            console.log(`[WhatsApp Agent] Outside AI schedule (${scheduleStatus.timezone}), skipping`)
+            return { action: 'skipped', reason: 'outside_ai_schedule' }
         }
 
         // Check human_takeover
@@ -936,16 +1315,38 @@ export const processWhatsAppMessage = inngest.createFunction(
             if (takeoverAt && interventionMinutes > 0) {
                 const elapsed = (Date.now() - new Date(takeoverAt).getTime()) / 60000
                 if (elapsed >= interventionMinutes) {
-                    console.log(`[WhatsApp Agent] Auto-reactivating after ${Math.floor(elapsed)}min`)
-                    await supabase
-                        .from('whatsapp_ai_conversations')
-                        .update({ status: 'active', human_takeover_at: null, updated_at: new Date().toISOString() })
-                        .eq('id', conversation.id)
+                    const canReactivateNow = !scheduleStatus.enabled || scheduleStatus.within
+                    if (canReactivateNow) {
+                        console.log(`[WhatsApp Agent] Auto-reactivating after ${Math.floor(elapsed)}min`)
+                        await supabase
+                            .from('whatsapp_ai_conversations')
+                            .update({ status: 'active', human_takeover_at: null, updated_at: new Date().toISOString() })
+                            .eq('id', conversation.id)
+                    } else {
+                        console.log(`[WhatsApp Agent] Reactivation window reached, but outside AI schedule; keeping human takeover`)
+                        return { action: 'skipped', reason: 'human_takeover_outside_schedule' }
+                    }
                 } else {
+                    if (messageText?.trim()) {
+                        await appendConversationMessage(supabase, conversation.id, {
+                            role: 'user',
+                            content: messageText.trim(),
+                            type: isAudio ? 'audio' : 'text',
+                            source: 'lead',
+                        }).catch(() => { })
+                    }
                     console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
                     return { action: 'skipped', reason: 'human_takeover' }
                 }
             } else {
+                if (messageText?.trim()) {
+                    await appendConversationMessage(supabase, conversation.id, {
+                        role: 'user',
+                        content: messageText.trim(),
+                        type: isAudio ? 'audio' : 'text',
+                        source: 'lead',
+                    }).catch(() => { })
+                }
                 console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
                 return { action: 'skipped', reason: 'human_takeover' }
             }
@@ -1282,6 +1683,11 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'skipped', reason: 'empty_input' }
         }
 
+        const quickSocialReply = resolveSocialQuickReply(
+            buttonResponseTitle || buttonResponseId || null,
+            configs
+        )
+
         // ── Step 4: Generate AI response ──
         const aiResponse = await step.run('generate-ai-response', async () => {
             const updatedMessages = [...(conversation.messages || []), {
@@ -1291,7 +1697,9 @@ export const processWhatsAppMessage = inngest.createFunction(
                 timestamp: new Date().toISOString()
             }]
 
-            const response = await generateAIResponse(configs, broker, updatedMessages, senderName)
+            const response = quickSocialReply
+                ? { text: quickSocialReply, shouldTransfer: false, extractedData: undefined as any }
+                : await generateAIResponse(configs, broker, updatedMessages, senderName)
 
             // Add assistant message to history
             updatedMessages.push({
@@ -1913,7 +2321,7 @@ export const detectHumanTakeover = inngest.createFunction(
     },
     { event: 'whatsapp/from-me-message' },
     async ({ event }) => {
-        const { botMsgId, instanceId, recipientPhone } = event.data
+        const { botMsgId, instanceId, recipientPhone, messageText } = event.data
         const supabase = getSupabase()
 
         // Check if this message was sent by the bot
@@ -1927,16 +2335,82 @@ export const detectHumanTakeover = inngest.createFunction(
         if (!botMsg && recipientPhone) {
             // This was a MANUAL message from the human operator
             console.log(`[Human Takeover] Detected on instance ${instanceId}`)
-            await supabase
+            const { data: conv } = await supabase
                 .from('whatsapp_ai_conversations')
-                .update({
-                    status: 'human_takeover',
-                    human_takeover_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
+                .select('id, broker_id, lead_phone, messages, status')
                 .eq('instance_id', instanceId)
                 .eq('lead_phone', recipientPhone)
-                .eq('status', 'active')
+                .in('status', ['active', 'human_takeover', 'transferred'])
+                .order('updated_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+            let currentConv = conv
+            if (!currentConv?.id) {
+                const { data: inst } = await supabase
+                    .from('whatsapp_instances')
+                    .select('broker_id')
+                    .eq('id', instanceId)
+                    .maybeSingle()
+
+                if (inst?.broker_id) {
+                    const { data: created } = await supabase
+                        .from('whatsapp_ai_conversations')
+                        .insert({
+                            broker_id: inst.broker_id,
+                            instance_id: instanceId,
+                            lead_phone: recipientPhone,
+                            messages: [],
+                            bot_message_ids: [],
+                            status: 'human_takeover',
+                            human_takeover_at: new Date().toISOString(),
+                        })
+                        .select('id, broker_id, lead_phone, messages, status')
+                        .single()
+                    currentConv = created as any
+                }
+            }
+
+            if (currentConv?.id) {
+                const nextMessages = Array.isArray(currentConv.messages) ? [...currentConv.messages] : []
+                const cleanHumanText = (messageText || '').trim()
+                if (cleanHumanText) {
+                    // Store manual broker message as assistant role so future AI turns preserve full context.
+                    nextMessages.push({
+                        role: 'assistant',
+                        content: cleanHumanText,
+                        type: 'text',
+                        source: 'human',
+                        timestamp: new Date().toISOString(),
+                    })
+                }
+
+                await supabase
+                    .from('whatsapp_ai_conversations')
+                    .update({
+                        status: 'human_takeover',
+                        human_takeover_at: new Date().toISOString(),
+                        messages: nextMessages,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentConv.id)
+
+                // Send shift handoff summary to broker phone (if configured)
+                if (currentConv.broker_id) {
+                    const { data: inst } = await supabase
+                        .from('whatsapp_instances')
+                        .select('instance_token')
+                        .eq('id', instanceId)
+                        .maybeSingle()
+                    const instanceToken = inst?.instance_token || ''
+                    await sendHandoffSummaryIfNeeded(supabase, {
+                        conversation: { ...currentConv, messages: nextMessages },
+                        instanceId,
+                        instanceToken,
+                        recipientPhone,
+                        markerSuffix: `takeover_${new Date().toISOString().slice(0, 10)}`,
+                    }).catch(() => { })
+                }
+            }
 
             return { action: 'takeover_activated', phone: recipientPhone }
         }

@@ -327,6 +327,7 @@ export async function POST(request: NextRequest) {
                         botMsgId,
                         instanceId: instance.id,
                         recipientPhone,
+                        messageText: messageText || null,
                     }
                 })
                 console.log(`[Webhook] 📤 Dispatched human-takeover check to Inngest`)

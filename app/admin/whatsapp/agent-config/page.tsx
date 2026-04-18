@@ -21,6 +21,12 @@ export default function AgentConfigPage() {
     const [companyCreci, setCompanyCreci] = useState('')
     const [companyPhone, setCompanyPhone] = useState('')
     const [companyDescription, setCompanyDescription] = useState('')
+    const [socialInstagram, setSocialInstagram] = useState('')
+    const [socialFacebook, setSocialFacebook] = useState('')
+    const [socialYoutube, setSocialYoutube] = useState('')
+    const [socialLinkedin, setSocialLinkedin] = useState('')
+    const [socialTiktok, setSocialTiktok] = useState('')
+    const [socialSite, setSocialSite] = useState('')
 
     // Localização
     const [companyAddress, setCompanyAddress] = useState('')
@@ -68,6 +74,12 @@ export default function AgentConfigPage() {
                 if (c.agent_company_creci) setCompanyCreci(c.agent_company_creci)
                 if (c.agent_company_phone) setCompanyPhone(c.agent_company_phone)
                 if (c.agent_company_description) setCompanyDescription(c.agent_company_description)
+                if (c.agent_social_instagram) setSocialInstagram(c.agent_social_instagram)
+                if (c.agent_social_facebook) setSocialFacebook(c.agent_social_facebook)
+                if (c.agent_social_youtube) setSocialYoutube(c.agent_social_youtube)
+                if (c.agent_social_linkedin) setSocialLinkedin(c.agent_social_linkedin)
+                if (c.agent_social_tiktok) setSocialTiktok(c.agent_social_tiktok)
+                if (c.agent_social_site) setSocialSite(c.agent_social_site)
                 if (c.agent_company_address) setCompanyAddress(c.agent_company_address)
                 if (c.agent_company_maps_link) setCompanyMapsLink(c.agent_company_maps_link)
                 if (c.agent_working_hours) {
@@ -105,6 +117,12 @@ export default function AgentConfigPage() {
                         agent_company_creci: companyCreci,
                         agent_company_phone: companyPhone,
                         agent_company_description: companyDescription,
+                        agent_social_instagram: socialInstagram,
+                        agent_social_facebook: socialFacebook,
+                        agent_social_youtube: socialYoutube,
+                        agent_social_linkedin: socialLinkedin,
+                        agent_social_tiktok: socialTiktok,
+                        agent_social_site: socialSite,
                         agent_company_address: companyAddress,
                         agent_company_maps_link: companyMapsLink,
                         agent_working_hours: JSON.stringify(hours),
@@ -298,6 +316,44 @@ export default function AgentConfigPage() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* ═══ REDES SOCIAIS ═══ */}
+            <div style={sectionStyle}>
+                <div style={sectionHeaderStyle}>
+                    <Map size={20} color="#ec4899" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Redes Sociais</h2>
+                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tags: {'{redes_sociais}'} {'{instagram}'} {'{youtube}'}</span>
+                </div>
+                <div style={gridStyle}>
+                    <div>
+                        <label style={labelStyle}>Instagram</label>
+                        <input style={inputStyle} value={socialInstagram} onChange={e => setSocialInstagram(e.target.value)} placeholder="https://instagram.com/suaempresa" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Facebook</label>
+                        <input style={inputStyle} value={socialFacebook} onChange={e => setSocialFacebook(e.target.value)} placeholder="https://facebook.com/suaempresa" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>YouTube</label>
+                        <input style={inputStyle} value={socialYoutube} onChange={e => setSocialYoutube(e.target.value)} placeholder="https://youtube.com/@seucanal" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>LinkedIn</label>
+                        <input style={inputStyle} value={socialLinkedin} onChange={e => setSocialLinkedin(e.target.value)} placeholder="https://linkedin.com/company/suaempresa" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>TikTok</label>
+                        <input style={inputStyle} value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)} placeholder="https://tiktok.com/@seuusuario" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Site</label>
+                        <input style={inputStyle} value={socialSite} onChange={e => setSocialSite(e.target.value)} placeholder="https://pilgerimoveis.com.br" />
+                    </div>
+                </div>
+                <p style={{ fontSize: '0.74rem', color: '#888', marginTop: 10 }}>
+                    O agente pode enviar os links quando fizer sentido na conversa, usando as tags do prompt.
+                </p>
             </div>
 
             {/* ═══ LOCALIZAÇÃO ═══ */}

@@ -194,6 +194,13 @@ export default function BrokersAdmin() {
         }).catch(() => { })
     }, [])
 
+    useEffect(() => {
+        if (!whatsappInstance?.phone_number) return
+        const clean = whatsappInstance.phone_number.replace(/\D/g, '')
+        if (!clean) return
+        setFormData(prev => ({ ...prev, phone: clean }))
+    }, [whatsappInstance?.phone_number])
+
     async function fetchLandingPages() {
         const { data } = await supabase
             .from('landing_pages')
@@ -240,9 +247,11 @@ export default function BrokersAdmin() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
+        const syncedWhatsAppPhone = (whatsappInstance?.phone_number || formData.phone || '').replace(/\D/g, '')
 
         const payload = {
             ...formData,
+            phone: syncedWhatsAppPhone,
             duty_weekdays: formData.duty_weekdays,
             duty_dates: formData.duty_dates,
             assignment_type: formData.assignment_type,
@@ -428,16 +437,16 @@ export default function BrokersAdmin() {
                             </div>
 
                             <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone WhatsApp (com DDD)</label>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Telefone WhatsApp (sincronizado automaticamente)</label>
                                 <input
-                                    placeholder="Ex: 5547999887766"
                                     className="form-input"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                                    value={whatsappInstance?.phone_number || formData.phone || ''}
+                                    readOnly
+                                    placeholder="Conecte o WhatsApp abaixo para preencher automaticamente"
+                                    style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', cursor: 'not-allowed' }}
                                 />
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Número do WhatsApp deste agente IA.</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Este numero e detectado automaticamente ao conectar no WhatsApp Web.</div>
                             </div>
-
                             {/* ── SEÇÃO 2: WHATSAPP WEB ── */}
                             <div style={{ padding: '20px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
                                 <h3 style={{ fontSize: '1rem', color: '#22c55e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -559,6 +568,13 @@ export default function BrokersAdmin() {
                                             { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
                                             { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
                                             { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
+                                            { tag: '{redes_sociais}', desc: 'Lista de redes sociais da empresa', color: '#ec4899' },
+                                            { tag: '{instagram}', desc: 'Link do Instagram da empresa', color: '#ec4899' },
+                                            { tag: '{youtube}', desc: 'Link do YouTube da empresa', color: '#ec4899' },
+                                            { tag: '{facebook}', desc: 'Link do Facebook da empresa', color: '#ec4899' },
+                                            { tag: '{linkedin}', desc: 'Link do LinkedIn da empresa', color: '#ec4899' },
+                                            { tag: '{tiktok}', desc: 'Link do TikTok da empresa', color: '#ec4899' },
+                                            { tag: '{site}', desc: 'Link do site da empresa', color: '#ec4899' },
                                             { tag: '{imoveis}', desc: 'O agente já tem acesso aos imóveis ativos automaticamente', color: '#f59e0b' },
                                         ].map(t => (
                                             <button key={t.tag} type="button" title={t.desc}
@@ -1035,3 +1051,4 @@ export default function BrokersAdmin() {
         </div>
     )
 }
+

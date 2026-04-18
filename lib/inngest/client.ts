@@ -94,6 +94,7 @@ export const inngest = new Inngest({
                 botMsgId: string
                 instanceId: string
                 recipientPhone: string
+                messageText?: string | null
             }
         }
         'whatsapp/shadow-agent': {

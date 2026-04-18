@@ -22,6 +22,10 @@ const DEFAULT_CONFIG: Record<string, any> = {
     human_intervention: true,
     debounce_seconds: 15,
     human_intervention_minutes: 60,
+    ai_schedule_enabled: false,
+    ai_schedule_start: '18:00',
+    ai_schedule_end: '08:00',
+    ai_schedule_timezone: 'America/Sao_Paulo',
 }
 
 // GET /api/admin/whatsapp/settings?instance_id=xxx

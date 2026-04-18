@@ -30,6 +30,10 @@ interface InstanceConfig {
     media_image_enabled: boolean; media_document_enabled: boolean; media_video_enabled: boolean
     split_messages: boolean; mirror_mode: boolean; audio_response: boolean
     audio_transcription: boolean; human_intervention: boolean
+    ai_schedule_enabled: boolean
+    ai_schedule_start: string
+    ai_schedule_end: string
+    ai_schedule_timezone: string
     debounce_seconds: number; human_intervention_minutes: number
 }
 
@@ -48,6 +52,7 @@ const AGENT_DEPENDENT_BOOLEAN_KEYS: BooleanConfigKey[] = [
     'media_image_enabled',
     'media_document_enabled',
     'media_video_enabled',
+    'ai_schedule_enabled',
 ]
 
 const DEFAULT_CONFIG: InstanceConfig = {
@@ -56,6 +61,7 @@ const DEFAULT_CONFIG: InstanceConfig = {
     media_image_enabled: true, media_document_enabled: true, media_video_enabled: true,
     split_messages: true, mirror_mode: false, audio_response: true,
     audio_transcription: true, human_intervention: true,
+    ai_schedule_enabled: false, ai_schedule_start: '18:00', ai_schedule_end: '08:00', ai_schedule_timezone: 'America/Sao_Paulo',
     debounce_seconds: 15, human_intervention_minutes: 60,
 }
 
@@ -579,6 +585,8 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 />
                                 <ToggleSwitch label="Intervenção Humana (parar quando humano intervém)" icon={<Shield size={15} />}
                                     checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} disabled={agentDisabled} />
+                                <ToggleSwitch label="Horário da IA (atende só na janela configurada)" icon={<Clock size={15} />}
+                                    checked={config.ai_schedule_enabled} onChange={() => onUpdateConfig('ai_schedule_enabled', !config.ai_schedule_enabled)} disabled={agentDisabled} />
 
                                 {/* Audio Toggles */}
                                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
@@ -604,6 +612,19 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     onChange={(v) => onUpdateConfig('debounce_seconds', parseInt(v) || 15)} min={5} max={120} disabled={agentDisabled} />
                                 <NumericInput label="Reativar agente após (minutos)" value={String(config.human_intervention_minutes)}
                                     onChange={(v) => onUpdateConfig('human_intervention_minutes', parseInt(v) || 60)} min={5} max={1440} disabled={agentDisabled} />
+
+                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
+                                    Janela da IA
+                                </div>
+                                <TimeRangeInput
+                                    start={config.ai_schedule_start}
+                                    end={config.ai_schedule_end}
+                                    timezone={config.ai_schedule_timezone}
+                                    onChangeStart={(v) => onUpdateConfig('ai_schedule_start', v)}
+                                    onChangeEnd={(v) => onUpdateConfig('ai_schedule_end', v)}
+                                    onChangeTimezone={(v) => onUpdateConfig('ai_schedule_timezone', v)}
+                                    disabled={agentDisabled || !config.ai_schedule_enabled}
+                                />
 
                                 {/* Save Button */}
                                 <button onClick={onSaveSettings} disabled={savingSettings}
@@ -725,6 +746,74 @@ function NumericInput({ label, value, onChange, min, max, disabled = false }: { 
                     style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: disabled ? 'not-allowed' : 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     +
                 </button>
+            </div>
+        </div>
+    )
+}
+
+function TimeRangeInput({
+    start,
+    end,
+    timezone,
+    onChangeStart,
+    onChangeEnd,
+    onChangeTimezone,
+    disabled = false,
+}: {
+    start: string
+    end: string
+    timezone: string
+    onChangeStart: (v: string) => void
+    onChangeEnd: (v: string) => void
+    onChangeTimezone: (v: string) => void
+    disabled?: boolean
+}) {
+    return (
+        <div style={{
+            display: 'grid',
+            gap: '10px',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border)',
+            opacity: disabled ? 0.55 : 1,
+        }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <label style={{ display: 'grid', gap: '4px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Início</span>
+                    <input
+                        type="time"
+                        value={start || '18:00'}
+                        disabled={disabled}
+                        onChange={(e) => onChangeStart(e.target.value)}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.06)', color: 'var(--text-primary)' }}
+                    />
+                </label>
+                <label style={{ display: 'grid', gap: '4px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Fim</span>
+                    <input
+                        type="time"
+                        value={end || '08:00'}
+                        disabled={disabled}
+                        onChange={(e) => onChangeEnd(e.target.value)}
+                        style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.06)', color: 'var(--text-primary)' }}
+                    />
+                </label>
+            </div>
+            <label style={{ display: 'grid', gap: '4px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Fuso horário</span>
+                <select
+                    value={timezone || 'America/Sao_Paulo'}
+                    disabled={disabled}
+                    onChange={(e) => onChangeTimezone(e.target.value)}
+                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.06)', color: 'var(--text-primary)' }}
+                >
+                    <option value="America/Sao_Paulo">America/Sao_Paulo (Brasil)</option>
+                    <option value="UTC">UTC</option>
+                </select>
+            </label>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                Exemplo: 18:00 → 08:00 faz a IA atender durante a noite e madrugada.
             </div>
         </div>
     )
