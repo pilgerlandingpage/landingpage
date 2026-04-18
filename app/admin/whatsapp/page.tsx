@@ -33,7 +33,11 @@ interface InstanceConfig {
     debounce_seconds: number; human_intervention_minutes: number
 }
 
-const AGENT_DEPENDENT_BOOLEAN_KEYS: Array<keyof InstanceConfig> = [
+type BooleanConfigKey = {
+    [K in keyof InstanceConfig]: InstanceConfig[K] extends boolean ? K : never
+}[keyof InstanceConfig]
+
+const AGENT_DEPENDENT_BOOLEAN_KEYS: BooleanConfigKey[] = [
     'always_online',
     'mark_as_read',
     'split_messages',
