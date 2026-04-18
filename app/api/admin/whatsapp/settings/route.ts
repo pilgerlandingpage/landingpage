@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { configurePrivacy } from '@/lib/uazapi'
+import { configurePrivacy, setPresenceAvailable, setPresenceUnavailable } from '@/lib/uazapi'
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +11,7 @@ const DEFAULT_CONFIG: Record<string, any> = {
     agent_enabled: true,
     always_online: true,
     mark_as_read: true,
+    response_mode: 'mirror', // text | audio | mirror
     split_messages: true,
     mirror_mode: false,
     audio_response: true,
@@ -65,6 +66,21 @@ export async function POST(req: NextRequest) {
 
         const mergedConfig = { ...(existing?.config || {}), ...settings }
 
+        // Normalize response strategy and keep legacy flags in sync.
+        const mode = mergedConfig.response_mode
+        if (mode === 'text') {
+            mergedConfig.audio_response = false
+            mergedConfig.mirror_mode = false
+        } else if (mode === 'audio') {
+            mergedConfig.audio_response = true
+            mergedConfig.mirror_mode = false
+        } else if (mode === 'mirror') {
+            mergedConfig.audio_response = true
+            mergedConfig.mirror_mode = true
+        } else {
+            mergedConfig.response_mode = mergedConfig.mirror_mode ? 'mirror' : (mergedConfig.audio_response ? 'audio' : 'text')
+        }
+
         const { error } = await supabase
             .from('whatsapp_instances')
             .update({ config: mergedConfig, updated_at: new Date().toISOString() })
@@ -82,6 +98,17 @@ export async function POST(req: NextRequest) {
             }, instanceToken).catch((privacyErr) => {
                 console.warn('[WhatsApp Settings] Privacy sync failed:', privacyErr)
             })
+
+            // Apply current presence immediately so UI toggle effect is visible without waiting cron.
+            if (mergedConfig.always_online === false || mergedConfig.always_online === 'false') {
+                await setPresenceUnavailable(instanceToken).catch((presenceErr) => {
+                    console.warn('[WhatsApp Settings] Presence unavailable failed:', presenceErr)
+                })
+            } else {
+                await setPresenceAvailable(instanceToken).catch((presenceErr) => {
+                    console.warn('[WhatsApp Settings] Presence available failed:', presenceErr)
+                })
+            }
         }
 
         return NextResponse.json({ success: true, config: mergedConfig })

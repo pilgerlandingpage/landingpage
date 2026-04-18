@@ -5,7 +5,7 @@ import {
     Smartphone, RefreshCw, Loader2, AlertCircle, CheckCircle2,
     Wifi, WifiOff, Phone, User, Clock, Globe, Battery, BatteryCharging,
     Bot, Shield, Link2, Monitor, MessageSquare, Mic, Settings,
-    ChevronDown, ChevronUp, Save, Power, Eye, Volume2,
+    ChevronDown, ChevronUp, Save, Power, Eye,
     SplitSquareVertical, Users, Timer
 } from 'lucide-react'
 
@@ -26,6 +26,7 @@ interface Instance {
 
 interface InstanceConfig {
     agent_enabled: boolean; always_online: boolean; mark_as_read: boolean
+    response_mode: 'text' | 'audio' | 'mirror'
     split_messages: boolean; mirror_mode: boolean; audio_response: boolean
     audio_transcription: boolean; human_intervention: boolean
     debounce_seconds: number; human_intervention_minutes: number
@@ -33,6 +34,7 @@ interface InstanceConfig {
 
 const DEFAULT_CONFIG: InstanceConfig = {
     agent_enabled: true, always_online: true, mark_as_read: true,
+    response_mode: 'mirror',
     split_messages: true, mirror_mode: false, audio_response: true,
     audio_transcription: true, human_intervention: true,
     debounce_seconds: 15, human_intervention_minutes: 60,
@@ -62,7 +64,11 @@ export default function WhatsAppInstancesPage() {
             // Load configs from instance.config field
             const cfgMap: Record<string, InstanceConfig> = {}
             insts.forEach((inst: Instance) => {
-                cfgMap[inst.id] = { ...DEFAULT_CONFIG, ...(inst.config || {}) }
+                const raw = { ...DEFAULT_CONFIG, ...(inst.config || {}) } as InstanceConfig
+                if (!raw.response_mode) {
+                    raw.response_mode = raw.mirror_mode ? 'mirror' : (raw.audio_response ? 'audio' : 'text')
+                }
+                cfgMap[inst.id] = raw
             })
             setConfigs(cfgMap)
         } catch (err) {
@@ -523,8 +529,10 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     checked={config.mark_as_read} onChange={() => onUpdateConfig('mark_as_read', !config.mark_as_read)} />
                                 <ToggleSwitch label="Dividir Respostas em Partes" icon={<SplitSquareVertical size={15} />}
                                     checked={config.split_messages} onChange={() => onUpdateConfig('split_messages', !config.split_messages)} />
-                                <ToggleSwitch label="Modo Espelho (responde com áudio se receber áudio)" icon={<Mic size={15} />}
-                                    checked={config.mirror_mode} onChange={() => onUpdateConfig('mirror_mode', !config.mirror_mode)} />
+                                <ResponseModeSelector
+                                    value={config.response_mode}
+                                    onChange={(mode) => onUpdateConfig('response_mode', mode)}
+                                />
                                 <ToggleSwitch label="Intervenção Humana (parar quando humano intervém)" icon={<Shield size={15} />}
                                     checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} />
 
@@ -532,8 +540,6 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
                                     Áudio
                                 </div>
-                                <ToggleSwitch label="Respostas por Áudio" icon={<Volume2 size={15} />}
-                                    checked={config.audio_response} onChange={() => onUpdateConfig('audio_response', !config.audio_response)} />
                                 <ToggleSwitch label="Transcrição de Áudio Recebido" icon={<Mic size={15} />}
                                     checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} />
 
@@ -609,6 +615,42 @@ function ToggleSwitch({ label, icon, checked, onChange }: { label: string; icon:
     )
 }
 
+function ResponseModeSelector({ value, onChange }: { value: 'text' | 'audio' | 'mirror'; onChange: (v: 'text' | 'audio' | 'mirror') => void }) {
+    const options: Array<{ value: 'text' | 'audio' | 'mirror'; label: string; desc: string }> = [
+        { value: 'text', label: 'Sempre texto', desc: 'Responde sempre por texto.' },
+        { value: 'audio', label: 'Sempre áudio', desc: 'Responde por áudio quando possível.' },
+        { value: 'mirror', label: 'Espelho', desc: 'Se receber áudio, responde em áudio.' },
+    ]
+
+    return (
+        <div style={{ display: 'grid', gap: '6px' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Modo de resposta</div>
+            {options.map((opt) => {
+                const active = value === opt.value
+                return (
+                    <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => onChange(opt.value)}
+                        style={{
+                            textAlign: 'left',
+                            padding: '10px 12px',
+                            borderRadius: '10px',
+                            border: `1px solid ${active ? 'var(--gold)' : 'var(--border)'}`,
+                            background: active ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.03)',
+                            color: 'var(--text-primary)',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{opt.label}</div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{opt.desc}</div>
+                    </button>
+                )
+            })}
+        </div>
+    )
+}
+
 function NumericInput({ label, value, onChange, min, max }: { label: string; value: string; onChange: (v: string) => void; min?: number; max?: number }) {
     return (
         <div style={{
@@ -633,3 +675,4 @@ function NumericInput({ label, value, onChange, min, max }: { label: string; val
         </div>
     )
 }
+

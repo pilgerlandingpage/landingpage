@@ -36,6 +36,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_always_online', 'whatsapp_mark_as_read',
             'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
             'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
+            'whatsapp_response_mode',
             'whatsapp_agent_enabled', 'whatsapp_split_messages',
             'whatsapp_debounce_seconds',
             // Agent controls from admin panel
@@ -61,6 +62,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
                     agent_enabled: 'whatsapp_agent_enabled',
                     always_online: 'whatsapp_always_online',
                     mark_as_read: 'whatsapp_mark_as_read',
+                    response_mode: 'whatsapp_response_mode',
                     split_messages: 'whatsapp_split_messages',
                     mirror_mode: 'whatsapp_mirror_mode',
                     audio_response: 'whatsapp_audio_enabled',
@@ -1135,8 +1137,13 @@ export const processWhatsAppMessage = inngest.createFunction(
         await step.sleep('reading-delay', `${readDelay}ms`)
 
         // Decide presence: "recording" if sending audio, "typing" otherwise
+        const mode = (configs['whatsapp_response_mode'] || '').toLowerCase()
+        const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
         const mirrorModeEnabled = configs['whatsapp_mirror_mode'] === 'true'
-        const willSendAudio = isAudio && mirrorModeEnabled && configs['whatsapp_audio_enabled'] === 'true'
+        const shouldMirror = mode ? mode === 'mirror' : mirrorModeEnabled
+        const shouldAlwaysAudio = mode === 'audio'
+        const willSendAudio = audioEnabled
+            && (shouldAlwaysAudio || (isAudio && shouldMirror))
             && !responseRequiresText(aiResponse.text) && !parseButtons(aiResponse.text).buttons
 
         await step.run('show-presence', async () => {
@@ -1158,11 +1165,16 @@ export const processWhatsAppMessage = inngest.createFunction(
             const { cleanText, buttons, list, poll, locationRequest } = interactive
             const needsTextFormat = responseRequiresText(aiResponse.text)
             const hasInteractive = !!(buttons || list || poll || locationRequest)
+            const mode = (configs['whatsapp_response_mode'] || '').toLowerCase()
             const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
             const mirrorModeEnabled = configs['whatsapp_mirror_mode'] === 'true'
-            const shouldSendAudio = isAudio && mirrorModeEnabled && audioEnabled && !needsTextFormat && !hasInteractive
+            const shouldMirror = mode ? mode === 'mirror' : mirrorModeEnabled
+            const shouldAlwaysAudio = mode === 'audio'
+            const shouldSendAudio = audioEnabled
+                && (shouldAlwaysAudio || (isAudio && shouldMirror))
+                && !needsTextFormat && !hasInteractive
 
-            console.log(`[WhatsApp Agent] 📤 Send decision: isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, shouldSendAudio=${shouldSendAudio}`)
+            console.log(`[WhatsApp Agent] 📤 Send decision: mode=${mode || 'legacy'}, isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, shouldSendAudio=${shouldSendAudio}`)
 
             if (buttons && buttons.options.length > 0) {
                 try {
@@ -1922,7 +1934,7 @@ export const whatsappKeepOnline = inngest.createFunction(
         for (const inst of instances) {
             const cfg = (inst.config as Record<string, any>) || {}
             // Default to true if not explicitly set to false
-            if (cfg.always_online === false) {
+            if (cfg.always_online === false || cfg.always_online === 'false') {
                 results.push(`${inst.instance_name}: skipped (always_online=false)`)
                 continue
             }

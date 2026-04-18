@@ -545,6 +545,17 @@ export async function setPresenceAvailable(instanceToken: string, _phoneOrJid?: 
     })
 }
 
+/** Ficar offline (presença "unavailable") */
+export async function setPresenceUnavailable(instanceToken: string) {
+    return uazapiFetch('/instance/presence', {
+        method: 'POST',
+        token: instanceToken,
+        body: {
+            presence: 'unavailable',
+        },
+    })
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  MEDIA DOWNLOAD
 // ═══════════════════════════════════════════════════════════════
