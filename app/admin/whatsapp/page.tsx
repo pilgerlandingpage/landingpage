@@ -27,6 +27,7 @@ interface Instance {
 interface InstanceConfig {
     agent_enabled: boolean; always_online: boolean; mark_as_read: boolean
     response_mode: 'text' | 'audio' | 'mirror'
+    media_image_enabled: boolean; media_document_enabled: boolean; media_video_enabled: boolean
     split_messages: boolean; mirror_mode: boolean; audio_response: boolean
     audio_transcription: boolean; human_intervention: boolean
     debounce_seconds: number; human_intervention_minutes: number
@@ -35,6 +36,7 @@ interface InstanceConfig {
 const DEFAULT_CONFIG: InstanceConfig = {
     agent_enabled: true, always_online: true, mark_as_read: true,
     response_mode: 'mirror',
+    media_image_enabled: true, media_document_enabled: true, media_video_enabled: true,
     split_messages: true, mirror_mode: false, audio_response: true,
     audio_transcription: true, human_intervention: true,
     debounce_seconds: 15, human_intervention_minutes: 60,
@@ -542,7 +544,16 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                 </div>
                                 <ToggleSwitch label="TranscriÃ§Ã£o de Ãudio Recebido" icon={<Mic size={15} />}
                                     checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} />
-
+                                {/* Media AI Toggles */}
+                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
+                                    Mídia com IA
+                                </div>
+                                <ToggleSwitch label="Analisar Imagens" icon={<Eye size={15} />}
+                                    checked={config.media_image_enabled} onChange={() => onUpdateConfig('media_image_enabled', !config.media_image_enabled)} />
+                                <ToggleSwitch label="Analisar Documentos" icon={<Eye size={15} />}
+                                    checked={config.media_document_enabled} onChange={() => onUpdateConfig('media_document_enabled', !config.media_document_enabled)} />
+                                <ToggleSwitch label="Analisar Vídeos" icon={<Eye size={15} />}
+                                    checked={config.media_video_enabled} onChange={() => onUpdateConfig('media_video_enabled', !config.media_video_enabled)} />
                                 {/* Timing */}
                                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
                                     Temporizadores
@@ -675,4 +686,6 @@ function NumericInput({ label, value, onChange, min, max }: { label: string; val
         </div>
     )
 }
+
+
 

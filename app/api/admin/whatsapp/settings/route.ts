@@ -12,6 +12,9 @@ const DEFAULT_CONFIG: Record<string, any> = {
     always_online: true,
     mark_as_read: true,
     response_mode: 'mirror', // text | audio | mirror
+    media_image_enabled: true,
+    media_document_enabled: true,
+    media_video_enabled: true,
     split_messages: true,
     mirror_mode: false,
     audio_response: true,

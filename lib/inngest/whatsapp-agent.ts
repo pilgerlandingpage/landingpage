@@ -37,6 +37,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
             'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
             'whatsapp_response_mode',
+            'whatsapp_media_image_enabled', 'whatsapp_media_document_enabled', 'whatsapp_media_video_enabled',
             'whatsapp_agent_enabled', 'whatsapp_split_messages',
             'whatsapp_debounce_seconds',
             // Agent controls from admin panel
@@ -63,6 +64,9 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
                     always_online: 'whatsapp_always_online',
                     mark_as_read: 'whatsapp_mark_as_read',
                     response_mode: 'whatsapp_response_mode',
+                    media_image_enabled: 'whatsapp_media_image_enabled',
+                    media_document_enabled: 'whatsapp_media_document_enabled',
+                    media_video_enabled: 'whatsapp_media_video_enabled',
                     split_messages: 'whatsapp_split_messages',
                     mirror_mode: 'whatsapp_mirror_mode',
                     audio_response: 'whatsapp_audio_enabled',
@@ -802,6 +806,7 @@ export const processWhatsAppMessage = inngest.createFunction(
             buttonResponseId, buttonResponseTitle, pollVotes,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
+        const isMediaMessage = !isAudio && !!mediaType && ['image', 'video', 'document'].includes(String(mediaType))
 
         const supabase = getSupabase()
 
@@ -935,7 +940,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 .select('key')
                 .like('key', `_pmq_${cleanPhone}_%`)
                 .limit(1)
-            return (data && data.length > 0) || isAudio
+            return (data && data.length > 0) || isAudio || isMediaMessage
         })
 
         if (!hasWork) {
@@ -944,7 +949,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         // Sleep configurable debounce to allow more messages to accumulate
-        if (!isAudio) {
+        if (!isAudio && !isMediaMessage) {
             const debounceSeconds = Math.max(1, parseInt(configs['whatsapp_debounce_seconds'] || '15', 10) || 15)
             await step.sleep('debounce-collect', `${debounceSeconds}s`)
         }
@@ -971,7 +976,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         })
 
         // If queue was emptied by another function and not audio, skip
-        if (pendingMessages.length === 0 && !isAudio) {
+        if (pendingMessages.length === 0 && !isAudio && !isMediaMessage) {
             console.log(`[WhatsApp Agent] No messages after debounce for ${cleanPhone}, skipping`)
             return { action: 'skipped', reason: 'already_processed_after_sleep' }
         }
@@ -1041,6 +1046,16 @@ export const processWhatsAppMessage = inngest.createFunction(
         const mediaAnalysis = !isAudio && mediaType && ['image', 'video', 'document'].includes(String(mediaType))
             ? await step.run('analyze-media', async () => {
                 const kind = mediaType as 'image' | 'video' | 'document'
+                const mediaImageEnabled = configs['whatsapp_media_image_enabled'] !== 'false'
+                const mediaDocumentEnabled = configs['whatsapp_media_document_enabled'] !== 'false'
+                const mediaVideoEnabled = configs['whatsapp_media_video_enabled'] !== 'false'
+                const allowed = (kind === 'image' && mediaImageEnabled)
+                    || (kind === 'document' && mediaDocumentEnabled)
+                    || (kind === 'video' && mediaVideoEnabled)
+                if (!allowed) {
+                    return { text: '', reason: `disabled_${kind}` }
+                }
+
                 if (!messageId) {
                     return { text: '', reason: 'missing_message_id' }
                 }
@@ -1202,6 +1217,12 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const leadText = allMessages?.trim() || ''
                 const base = leadText || `[O usuário enviou uma mídia do tipo ${mediaType || messageType || 'desconhecido'}]`
                 return `${base}\n\n[ANÁLISE DA MÍDIA]\n${mediaAnalysis.text}`
+            }
+
+            if (!isAudio && isMediaMessage) {
+                const leadText = allMessages?.trim() || messageText?.trim() || ''
+                const base = leadText || `[O usuário enviou uma mídia do tipo ${mediaType || messageType || 'desconhecido'}]`
+                return `${base}\n\n[MÍDIA RECEBIDA]\nO cliente enviou ${mediaType || 'mídia'}, mas a análise automática desse tipo está desativada nas configurações.`
             }
             
             return allMessages
