@@ -641,6 +641,33 @@ function resolveSocialQuickReply(choiceRaw: string | null | undefined, configs: 
     return null
 }
 
+function sanitizeLeadName(raw?: string | null): string {
+    const name = String(raw || '').trim()
+    if (!name) return ''
+    const lower = name.toLowerCase()
+    // Ignore provider/system-like names that look robotic or not a real lead name.
+    if (
+        lower.includes('connectyhub') ||
+        lower.includes('uazapi') ||
+        lower.includes('whatsapp') ||
+        lower.includes('bot')
+    ) return ''
+    return name
+}
+
+function normalizeGreetingByTime(text: string, userText: string, greeting: string): string {
+    const clean = String(text || '')
+    const user = String(userText || '').toLowerCase()
+    const isGreetingInput = /\b(oi|ol[aá]|bom dia|boa tarde|boa noite|e ai|eai)\b/i.test(user)
+    if (!isGreetingInput) return clean
+
+    const expected = greeting.toLowerCase()
+    return clean
+        .replace(/\bbom dia\b/i, expected)
+        .replace(/\bboa tarde\b/i, expected)
+        .replace(/\bboa noite\b/i, expected)
+}
+
 function parseBudgetToNumber(value: unknown): number | null {
     if (!value) return null
     const raw = String(value).toLowerCase()
@@ -999,6 +1026,8 @@ async function generateAIResponse(
     messages: any[],
     senderName?: string
 ): Promise<{ text: string; shouldTransfer: boolean; extractedData?: any }> {
+    const lastUserTextRaw = String(messages[messages.length - 1]?.content || '')
+    const lastUserText = lastUserTextRaw.toLowerCase().trim()
     const globalProvider = configs['ai_provider'] || 'openai'
     const effectiveProvider = configs['whatsapp_provider'] || globalProvider
     const apiKey = effectiveProvider === 'openai' ? configs['openai_api_key'] : configs['gemini_api_key']
@@ -1011,6 +1040,7 @@ async function generateAIResponse(
     // Prompt único: broker.system_prompt com tags processadas, ou fallback natural
     const spTime = getSaoPauloTimeContext()
     const brokerName = broker.name || 'Corretor'
+    const safeLeadName = sanitizeLeadName(senderName)
     const customPrompt = String(broker.system_prompt || '').trim()
     const hasCustomPrompt = customPrompt.length > 0
     const rawPrompt = hasCustomPrompt ? customPrompt : `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
@@ -1107,21 +1137,23 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
 
     const basePromptWithTags = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
-        .replace(/\{nome_lead\}/g, senderName?.trim() || 'cliente')
-        .replace(/\{agendamento\}/g, 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
-        .replace(/\{regioes\}/g, `envie uma lista com [LISTA:Ver Regiões|${regionsForList}]`)
-        .replace(/\{transferir\}/g, 'use [TRANSFERIR] para encaminhar ao corretor humano')
-        .replace(/\{localizacao\}/g, locationInstruction)
-        .replace(/\{documentos\}/g, `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
-        .replace(/\{horario\}/g, `informe que o atendimento é de ${hoursText}`)
-        .replace(/\{empresa\}/g, `mencione que a ${companyName} é ${companyDesc}`)
+        .replace(/\{nome_lead\}/g, safeLeadName || 'cliente')
+        .replace(/\{agendamento\}/g, hasCustomPrompt ? '[BOTOES:Agendar visita|Manhã|Tarde|Noite]' : 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
+        .replace(/\{regioes\}/g, hasCustomPrompt ? regionsForList.split('|').join(', ') : `envie uma lista com [LISTA:Ver Regiões|${regionsForList}]`)
+        .replace(/\{transferir\}/g, hasCustomPrompt ? '[TRANSFERIR]' : 'use [TRANSFERIR] para encaminhar ao corretor humano')
+        .replace(/\{localizacao\}/g, hasCustomPrompt ? (companyMapsLink || companyAddress || 'localização não configurada') : locationInstruction)
+        .replace(/\{documentos\}/g, hasCustomPrompt ? docsForButtons.split('|').join(', ') : `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
+        .replace(/\{horario\}/g, hasCustomPrompt ? hoursText : `informe que o atendimento é de ${hoursText}`)
+        .replace(/\{empresa\}/g, hasCustomPrompt ? `${companyName} — ${companyDesc}` : `mencione que a ${companyName} é ${companyDesc}`)
         .replace(/\{instagram\}/g, socialInstagram || 'instagram não configurado')
         .replace(/\{facebook\}/g, socialFacebook || 'facebook não configurado')
         .replace(/\{youtube\}/g, socialYoutube || 'youtube não configurado')
         .replace(/\{linkedin\}/g, socialLinkedin || 'linkedin não configurado')
         .replace(/\{tiktok\}/g, socialTiktok || 'tiktok não configurado')
         .replace(/\{site\}/g, socialSite || 'site não configurado')
-        .replace(/\{redes_sociais\}/g, socialButtonOptions.length
+        .replace(/\{redes_sociais\}/g, hasCustomPrompt
+            ? (socialLinksList || 'redes sociais não configuradas')
+            : socialButtonOptions.length
             ? `ofereça botões com [BOTOES:Ver redes sociais|${socialButtonOptions.join('|')}] e envie o link da opção escolhida. Links disponíveis: ${socialLinksList}`
             : (socialLinksList || 'redes sociais não configuradas'))
 
@@ -1220,7 +1252,8 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
                 extractedData
             }
         }
-        return { text: cleanText, shouldTransfer, extractedData }
+        const finalText = normalizeGreetingByTime(cleanText, lastUserText, spTime.greeting)
+        return { text: finalText, shouldTransfer, extractedData }
     } catch (error) {
         console.error('[AI Response Error]', error)
         return { text: 'Desculpe, tive uma falha técnica momentânea. Pode enviar novamente?', shouldTransfer: false }
@@ -1765,20 +1798,16 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         const quickSocialReply = resolveSocialQuickReply(
-            buttonResponseTitle || buttonResponseId || null,
+            buttonResponseTitle || buttonResponseId || inputText || null,
             configs
         )
 
         // ── Step 4: Generate AI response ──
         const aiResponse = await step.run('generate-ai-response', async () => {
-            const legacyAssistantPattern =
-                /(connectyhub|morar ou investir|me conta em uma frase o que você busca)/i
-            const recentHistory = (Array.isArray(conversation.messages) ? conversation.messages : [])
+            const historyMessages = (Array.isArray(conversation.messages) ? conversation.messages : [])
                 .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
-                .filter((m: any) => !(m.role === 'assistant' && legacyAssistantPattern.test(m.content || '')))
-                .slice(-24)
 
-            const updatedMessages = [...recentHistory, {
+            const updatedMessages = [...historyMessages, {
                 role: 'user',
                 content: inputText,
                 type: isAudio ? 'audio' : 'text',
