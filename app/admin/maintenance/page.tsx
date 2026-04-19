@@ -106,6 +106,17 @@ interface TestResult {
     message: string
 }
 
+type LLMProviderStatus = 'ok' | 'no_credits' | 'invalid_key' | 'missing_key' | 'error'
+
+interface LLMCreditCheck {
+    success: boolean
+    checked_at?: string
+    active_provider?: string
+    whatsapp_provider?: string | null
+    openai?: { configured: boolean; status: LLMProviderStatus; message: string }
+    gemini?: { configured: boolean; status: LLMProviderStatus; message: string }
+}
+
 export default function MaintenancePage() {
     const [configs, setConfigs] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(true)
@@ -120,6 +131,8 @@ export default function MaintenancePage() {
     const [loadingOpenAIModels, setLoadingOpenAIModels] = useState(false)
     const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
     const [loadingVoices, setLoadingVoices] = useState(false)
+    const [llmCreditLoading, setLlmCreditLoading] = useState(false)
+    const [llmCreditCheck, setLlmCreditCheck] = useState<LLMCreditCheck | null>(null)
 
     // Fetch Gemini Models
     useEffect(() => {
@@ -229,6 +242,39 @@ export default function MaintenancePage() {
     useEffect(() => {
         fetchConfigs()
     }, [fetchConfigs])
+
+    const runLLMCreditCheck = useCallback(async () => {
+        setLlmCreditLoading(true)
+        try {
+            const res = await fetch('/api/admin/llm-credits')
+            const data = await res.json()
+            setLlmCreditCheck(data)
+        } catch {
+            setLlmCreditCheck({ success: false })
+        } finally {
+            setLlmCreditLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        runLLMCreditCheck()
+    }, [runLLMCreditCheck])
+
+    const getStatusColor = (status?: LLMProviderStatus) => {
+        if (status === 'ok') return '#22c55e'
+        if (status === 'no_credits') return '#ef4444'
+        if (status === 'invalid_key') return '#f97316'
+        if (status === 'missing_key') return '#6b7280'
+        return '#f59e0b'
+    }
+
+    const getStatusLabel = (status?: LLMProviderStatus) => {
+        if (status === 'ok') return 'OK'
+        if (status === 'no_credits') return 'Sem Créditos/Quota'
+        if (status === 'invalid_key') return 'Chave Inválida'
+        if (status === 'missing_key') return 'Chave Ausente'
+        return 'Erro'
+    }
 
     const handleSave = async () => {
         setSaving(true)
@@ -1034,6 +1080,72 @@ export default function MaintenancePage() {
             {/* Diagnostic Tools */}
             <div className="chart-card" style={{ marginTop: '24px' }}>
                 <div className="chart-title" style={{ marginBottom: '12px' }}>🔬 Ferramentas de Diagnóstico</div>
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-primary)',
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>
+                            Status de Créditos / Quota (LLMs)
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                Provider ativo: <strong>{llmCreditCheck?.active_provider || '—'}</strong>
+                                {llmCreditCheck?.whatsapp_provider ? ` • WhatsApp: ${llmCreditCheck.whatsapp_provider}` : ''}
+                            </div>
+                        </div>
+                        <button
+                            onClick={runLLMCreditCheck}
+                            disabled={llmCreditLoading}
+                            className="btn btn-outline btn-sm"
+                            style={{ minWidth: 170 }}
+                        >
+                            {llmCreditLoading ? 'Verificando...' : 'Verificar Créditos Agora'}
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '10px', marginTop: '12px' }}>
+                        <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <strong>OpenAI</strong>
+                                <span style={{
+                                    fontSize: '0.72rem',
+                                    padding: '3px 8px',
+                                    borderRadius: '999px',
+                                    background: `${getStatusColor(llmCreditCheck?.openai?.status)}22`,
+                                    color: getStatusColor(llmCreditCheck?.openai?.status),
+                                    border: `1px solid ${getStatusColor(llmCreditCheck?.openai?.status)}55`,
+                                    fontWeight: 700,
+                                }}>
+                                    {getStatusLabel(llmCreditCheck?.openai?.status)}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                                {llmCreditCheck?.openai?.message || 'Sem verificação ainda.'}
+                            </div>
+                        </div>
+                        <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <strong>Gemini</strong>
+                                <span style={{
+                                    fontSize: '0.72rem',
+                                    padding: '3px 8px',
+                                    borderRadius: '999px',
+                                    background: `${getStatusColor(llmCreditCheck?.gemini?.status)}22`,
+                                    color: getStatusColor(llmCreditCheck?.gemini?.status),
+                                    border: `1px solid ${getStatusColor(llmCreditCheck?.gemini?.status)}55`,
+                                    fontWeight: 700,
+                                }}>
+                                    {getStatusLabel(llmCreditCheck?.gemini?.status)}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                                {llmCreditCheck?.gemini?.message || 'Sem verificação ainda.'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                     <Link
                         href="/admin/gemini-diagnostic"
