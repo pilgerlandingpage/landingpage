@@ -436,7 +436,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Route: AI Broker or Shadow Agent ──
-        if (instance.broker_id || !instance.admin_user_id) {
+        if (instance.broker_id) {
             // AI Broker path
             await inngest.send({
                 name: 'whatsapp/message-received',
@@ -483,6 +483,10 @@ export async function POST(request: NextRequest) {
                 }
             })
             console.log(`[Webhook] 📤 Dispatched shadow agent message to Inngest for ${finalPhone}`)
+        } else {
+            // No broker and no shadow owner: skip safely to avoid wrong persona/prompt.
+            console.warn(`[Webhook] Skipped message: instance ${instance.id} has no broker_id/admin_user_id`)
+            return NextResponse.json({ success: true, action: 'ignored_unassigned_instance' })
         }
 
         return NextResponse.json({ success: true, action: 'dispatched' })

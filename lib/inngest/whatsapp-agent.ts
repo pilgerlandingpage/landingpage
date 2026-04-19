@@ -1004,7 +1004,7 @@ async function generateAIResponse(
     const isSimpleGreeting =
         /^(oi+|ol[aá]+|eai|eae|bom dia|boa tarde|boa noite|tudo bem|blz|beleza)[!,. ]*$/i.test(lastUserText)
 
-    const globalProvider = configs['ai_provider'] || 'gemini'
+    const globalProvider = configs['ai_provider'] || 'openai'
     const effectiveProvider = configs['whatsapp_provider'] || globalProvider
     const apiKey = effectiveProvider === 'openai' ? configs['openai_api_key'] : configs['gemini_api_key']
 
@@ -1219,6 +1219,13 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         const shouldTransfer = /\[transferir\]/i.test(responseText) || /\[transfer\]/i.test(responseText)
         const cleanText = responseText.replace(/\[transferir\]/gi, '').replace(/\[transfer\]/gi, '').trim()
         if (!cleanText) {
+            if (hasCustomPrompt) {
+                return {
+                    text: 'Desculpe, não consegui formular uma resposta agora. Pode repetir de outra forma?',
+                    shouldTransfer: false,
+                    extractedData
+                }
+            }
             if (isSimpleGreeting) {
                 const lead = senderName?.trim() || 'tudo bem por aí'
                 return {
@@ -1236,6 +1243,9 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         return { text: cleanText, shouldTransfer, extractedData }
     } catch (error) {
         console.error('[AI Response Error]', error)
+        if (hasCustomPrompt) {
+            return { text: 'Desculpe, tive uma falha técnica momentânea. Pode enviar novamente?', shouldTransfer: false }
+        }
         if (isSimpleGreeting) {
             return { text: 'Oi! Tudo bem? Posso te ajudar com opções de imóveis para morar ou investir.', shouldTransfer: false }
         }
@@ -1287,17 +1297,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                     .select('*')
                     .eq('id', effectiveBrokerId)
                     .single()
-                brokerData = data
-            }
-
-            // If no broker found from instance, try any active broker
-            if (!brokerData) {
-                const { data } = await supabase
-                    .from('virtual_brokers')
-                    .select('*')
-                    .eq('is_active', true)
-                    .limit(1)
-                    .maybeSingle()
                 brokerData = data
             }
 
