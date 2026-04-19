@@ -139,3 +139,103 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Erro ao atualizar conversa' }, { status: 500 })
     }
 }
+
+// DELETE — Limpar cache/contexto das conversas IA (manual para testes)
+export async function DELETE(request: NextRequest) {
+    try {
+        const supabase = getSupabase()
+        const body = await request.json().catch(() => ({}))
+        const {
+            conversation_id,
+            instance_id,
+            broker_id,
+            lead_phone,
+            hard_reset,
+        } = body || {}
+
+        if (!conversation_id && !instance_id && !broker_id && !lead_phone) {
+            return NextResponse.json(
+                { success: false, message: 'Informe ao menos um filtro: conversation_id, instance_id, broker_id ou lead_phone.' },
+                { status: 400 }
+            )
+        }
+
+        let query = supabase
+            .from('whatsapp_ai_conversations')
+            .select('id, lead_phone, instance_id')
+
+        if (conversation_id) query = query.eq('id', conversation_id)
+        if (instance_id) query = query.eq('instance_id', instance_id)
+        if (broker_id) query = query.eq('broker_id', broker_id)
+        if (lead_phone) query = query.eq('lead_phone', lead_phone)
+
+        const { data: targets, error: targetErr } = await query
+        if (targetErr) throw targetErr
+
+        const list = targets || []
+        if (list.length === 0) {
+            return NextResponse.json({ success: true, deleted: 0, message: 'Nenhuma conversa encontrada para limpar.' })
+        }
+
+        const ids = list.map((c: any) => c.id)
+        const leadPhones = Array.from(
+            new Set(list.map((c: any) => String(c.lead_phone || '').replace(/\D/g, '')).filter(Boolean))
+        )
+
+        const { error: deleteErr } = await supabase
+            .from('whatsapp_ai_conversations')
+            .delete()
+            .in('id', ids)
+
+        if (deleteErr) throw deleteErr
+
+        // Hard reset opcional: limpa chaves efêmeras em app_config usadas no runtime.
+        if (hard_reset) {
+            // 1) Filas pendentes por telefone (_pmq_<phone>_*)
+            for (const phone of leadPhones) {
+                const { data: queueKeys } = await supabase
+                    .from('app_config')
+                    .select('key')
+                    .like('key', `_pmq_${phone}_%`)
+
+                const keys = (queueKeys || []).map((k: any) => k.key).filter(Boolean)
+                if (keys.length > 0) {
+                    await supabase.from('app_config').delete().in('key', keys)
+                }
+            }
+
+            // 2) Marcadores por conversa (_handoff_<conversationId>_*)
+            for (const id of ids) {
+                const { data: handoffKeys } = await supabase
+                    .from('app_config')
+                    .select('key')
+                    .like('key', `_handoff_${id}_%`)
+                const keys = (handoffKeys || []).map((k: any) => k.key).filter(Boolean)
+                if (keys.length > 0) {
+                    await supabase.from('app_config').delete().in('key', keys)
+                }
+            }
+
+            // 3) Marcadores de turno por instância (_handoff_shift_<instanceId>_*)
+            if (instance_id) {
+                const { data: shiftKeys } = await supabase
+                    .from('app_config')
+                    .select('key')
+                    .like('key', `_handoff_shift_${instance_id}_%`)
+                const keys = (shiftKeys || []).map((k: any) => k.key).filter(Boolean)
+                if (keys.length > 0) {
+                    await supabase.from('app_config').delete().in('key', keys)
+                }
+            }
+        }
+
+        return NextResponse.json({
+            success: true,
+            deleted: ids.length,
+            message: `Cache limpo com sucesso (${ids.length} conversa${ids.length > 1 ? 's' : ''}).`,
+        })
+    } catch (error) {
+        console.error('[AI Conversation DELETE]', error)
+        return NextResponse.json({ success: false, message: 'Erro ao limpar cache das conversas' }, { status: 500 })
+    }
+}

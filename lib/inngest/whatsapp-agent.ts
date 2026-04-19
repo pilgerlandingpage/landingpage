@@ -999,11 +999,6 @@ async function generateAIResponse(
     messages: any[],
     senderName?: string
 ): Promise<{ text: string; shouldTransfer: boolean; extractedData?: any }> {
-    const lastUserTextRaw = String(messages[messages.length - 1]?.content || '')
-    const lastUserText = lastUserTextRaw.toLowerCase().trim()
-    const isSimpleGreeting =
-        /^(oi+|ol[aá]+|eai|eae|bom dia|boa tarde|boa noite|tudo bem|blz|beleza)[!,. ]*$/i.test(lastUserText)
-
     const globalProvider = configs['ai_provider'] || 'openai'
     const effectiveProvider = configs['whatsapp_provider'] || globalProvider
     const apiKey = effectiveProvider === 'openai' ? configs['openai_api_key'] : configs['gemini_api_key']
@@ -1219,23 +1214,8 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         const shouldTransfer = /\[transferir\]/i.test(responseText) || /\[transfer\]/i.test(responseText)
         const cleanText = responseText.replace(/\[transferir\]/gi, '').replace(/\[transfer\]/gi, '').trim()
         if (!cleanText) {
-            if (hasCustomPrompt) {
-                return {
-                    text: 'Desculpe, não consegui formular uma resposta agora. Pode repetir de outra forma?',
-                    shouldTransfer: false,
-                    extractedData
-                }
-            }
-            if (isSimpleGreeting) {
-                const lead = senderName?.trim() || 'tudo bem por aí'
-                return {
-                    text: `Oi! ${lead}. Posso te ajudar a encontrar um imóvel para morar ou investir hoje?`,
-                    shouldTransfer: false,
-                    extractedData
-                }
-            }
             return {
-                text: 'Perfeito. Me conta em uma frase o que você busca: morar ou investir, região e faixa de valor.',
+                text: 'Desculpe, não consegui formular uma resposta agora. Pode repetir de outra forma?',
                 shouldTransfer: false,
                 extractedData
             }
@@ -1243,13 +1223,7 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         return { text: cleanText, shouldTransfer, extractedData }
     } catch (error) {
         console.error('[AI Response Error]', error)
-        if (hasCustomPrompt) {
-            return { text: 'Desculpe, tive uma falha técnica momentânea. Pode enviar novamente?', shouldTransfer: false }
-        }
-        if (isSimpleGreeting) {
-            return { text: 'Oi! Tudo bem? Posso te ajudar com opções de imóveis para morar ou investir.', shouldTransfer: false }
-        }
-        return { text: 'Estou com um problema temporário. Tente novamente em instantes.', shouldTransfer: false }
+        return { text: 'Desculpe, tive uma falha técnica momentânea. Pode enviar novamente?', shouldTransfer: false }
     }
 }
 
@@ -1797,7 +1771,14 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 4: Generate AI response ──
         const aiResponse = await step.run('generate-ai-response', async () => {
-            const updatedMessages = [...(conversation.messages || []), {
+            const legacyAssistantPattern =
+                /(connectyhub|morar ou investir|me conta em uma frase o que você busca)/i
+            const recentHistory = (Array.isArray(conversation.messages) ? conversation.messages : [])
+                .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
+                .filter((m: any) => !(m.role === 'assistant' && legacyAssistantPattern.test(m.content || '')))
+                .slice(-24)
+
+            const updatedMessages = [...recentHistory, {
                 role: 'user',
                 content: inputText,
                 type: isAudio ? 'audio' : 'text',

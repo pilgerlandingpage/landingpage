@@ -460,6 +460,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [qrLoading, setQrLoading] = useState(false)
     const [checkingStatus, setCheckingStatus] = useState(false)
     const [deletingInstance, setDeletingInstance] = useState(false)
+    const [clearingCache, setClearingCache] = useState(false)
     const [qrCode, setQrCode] = useState<string | null>(null)
     const [qrMessage, setQrMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const isConnected = inst.status === 'connected'
@@ -587,6 +588,34 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao excluir instância.' })
         } finally {
             setDeletingInstance(false)
+        }
+    }
+
+    const clearConversationCache = async () => {
+        const confirmed = window.confirm(
+            `Limpar cache de conversas da instância "${inst.instance_name}"?\n\n` +
+            'Isso apaga o histórico/contexto da IA usado nos testes.'
+        )
+        if (!confirmed) return
+
+        setClearingCache(true)
+        setQrMessage(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/ai-conversation', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instance_id: inst.id, hard_reset: true }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.message || 'Falha ao limpar cache das conversas.')
+            }
+            setQrMessage({ type: 'success', text: data?.message || 'Cache de conversas limpo com sucesso.' })
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao limpar cache das conversas.' })
+        } finally {
+            setClearingCache(false)
         }
     }
 
@@ -754,23 +783,42 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                     {isConnected && (
                         <div style={{ padding: '0 20px 12px' }}>
                             <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'flex-end' }}>
-                                <button
-                                    onClick={disconnectInstance}
-                                    disabled={checkingStatus}
-                                    style={{
-                                        padding: '8px 14px',
-                                        borderRadius: '8px',
-                                        border: '1px solid rgba(239,68,68,0.3)',
-                                        background: 'rgba(239,68,68,0.1)',
-                                        color: '#ef4444',
-                                        fontWeight: 700,
-                                        fontSize: '0.8rem',
-                                        cursor: 'pointer',
-                                        opacity: checkingStatus ? 0.7 : 1,
-                                    }}
-                                >
-                                    {checkingStatus ? 'Desconectando...' : 'Desconectar Instância'}
-                                </button>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={clearConversationCache}
+                                        disabled={clearingCache}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(245,158,11,0.3)',
+                                            background: 'rgba(245,158,11,0.1)',
+                                            color: '#f59e0b',
+                                            fontWeight: 700,
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer',
+                                            opacity: clearingCache ? 0.7 : 1,
+                                        }}
+                                    >
+                                        {clearingCache ? 'Limpando cache...' : 'Limpar Cache de Conversas'}
+                                    </button>
+                                    <button
+                                        onClick={disconnectInstance}
+                                        disabled={checkingStatus}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(239,68,68,0.3)',
+                                            background: 'rgba(239,68,68,0.1)',
+                                            color: '#ef4444',
+                                            fontWeight: 700,
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer',
+                                            opacity: checkingStatus ? 0.7 : 1,
+                                        }}
+                                    >
+                                        {checkingStatus ? 'Desconectando...' : 'Desconectar Instância'}
+                                    </button>
+                                </div>
                             </div>
                             <div style={{
                                 padding: '12px 16px', borderRadius: '10px',
