@@ -5,6 +5,8 @@ import {
     sendWhatsAppMessage,
     sendAudioMessage,
     sendMenuMessage,
+    sendCarousel,
+    sendPixButton,
     setPresenceTyping,
     setPresenceRecording,
     setPresenceAvailable,
@@ -322,7 +324,7 @@ async function pickTransferTargetInstance(
 
     const { data: candidates } = await supabase
         .from('whatsapp_instances')
-        .select('id, instance_token, phone_number, status')
+        .select('id, instance_token, phone_number, status, broker_id')
         .in('id', targetIds)
 
     const valid = (candidates || [])
@@ -350,6 +352,85 @@ async function pickTransferTargetInstance(
         }, { onConflict: 'key' })
     } catch {}
     return chosen
+}
+
+function normalizeTextForMatch(value: string): string {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+async function pickTransferTargetByEmpreendimento(
+    supabase: ReturnType<typeof getSupabase>,
+    contextText: string
+) {
+    const normalized = normalizeTextForMatch(contextText)
+    if (!normalized) return null
+
+    const { data: empreendimentos } = await supabase
+        .from('empreendimentos')
+        .select('id, nome, slug, ativo')
+        .eq('ativo', true)
+
+    if (!empreendimentos || empreendimentos.length === 0) return null
+
+    let matched: any = null
+    for (const e of empreendimentos) {
+        const nome = normalizeTextForMatch(String((e as any).nome || ''))
+        const slug = normalizeTextForMatch(String((e as any).slug || ''))
+        if ((nome && normalized.includes(nome)) || (slug && normalized.includes(slug))) {
+            matched = e
+            break
+        }
+    }
+    if (!matched) return null
+
+    const { data: links } = await supabase
+        .from('broker_empreendimentos')
+        .select('prioridade, broker_id')
+        .eq('empreendimento_id', (matched as any).id)
+        .eq('ativo', true)
+        .order('prioridade', { ascending: true })
+        .limit(10)
+
+    if (!links || links.length === 0) return null
+
+    const brokerIds = links.map((l: any) => l.broker_id).filter(Boolean)
+    const { data: brokers } = await supabase
+        .from('virtual_brokers')
+        .select('id, name, is_active')
+        .in('id', brokerIds)
+        .eq('is_active', true)
+
+    const activeBrokerMap = new Map((brokers || []).map((b: any) => [b.id, b]))
+    const orderedActiveBrokerIds = brokerIds.filter((id: string) => activeBrokerMap.has(id))
+    if (orderedActiveBrokerIds.length === 0) return null
+
+    const { data: instances } = await supabase
+        .from('whatsapp_instances')
+        .select('id, instance_token, phone_number, status, broker_id')
+        .in('broker_id', orderedActiveBrokerIds)
+        .eq('status', 'connected')
+
+    if (!instances || instances.length === 0) return null
+
+    // Keep priority order from broker_empreendimentos
+    const first = orderedActiveBrokerIds.find((bid: string) => instances.some((i: any) => i.broker_id === bid))
+    if (!first) return null
+    const inst = instances.find((i: any) => i.broker_id === first)
+    const broker = activeBrokerMap.get(first)
+    if (!inst?.instance_token || !inst?.phone_number || !broker) return null
+
+    return {
+        source: 'empreendimento',
+        empreendimento: matched,
+        broker,
+        instance: inst,
+    }
 }
 
 async function appendConversationMessage(
@@ -404,7 +485,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone',
             'agent_default_instance_id', 'agent_transfer_instance_ids', 'agent_transfer_mode', 'agent_transfer_rr_index',
             'agent_social_instagram', 'agent_social_facebook', 'agent_social_youtube',
-            'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site'
+            'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site', 'agent_link_buttons'
         ])
 
     const map: Record<string, string> = {}
@@ -523,13 +604,40 @@ async function trackBotMessageId(
 interface InteractiveElements {
     cleanText: string
     buttons?: { title: string; options: string[] }
+    urlButtons?: { title: string; items: { text: string; url: string }[] }
     list?: { buttonText: string; sections: { title: string; rows: { title: string; id: string; description?: string }[] }[] }
     poll?: { question: string; options: string[]; multiSelect?: boolean }
     locationRequest?: boolean
+    pix?: { pixKey: string; pixName: string; pixType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP' }
+    carousel?: { text: string; cards: { text: string; image?: string; buttons: { id: string; text: string; type: 'REPLY' | 'URL' | 'CALL' | 'COPY' }[] }[] }
 }
 
 function parseInteractiveElements(text: string): InteractiveElements {
     let cleanText = text
+
+    // ── Parse [BOTOES_URL:titulo|Texto=>https://url|Texto2=>https://url2] ──
+    const btnUrlMatch = cleanText.match(/\[BOTOES_URL:([^\]]+)\]/i)
+    let urlButtons: InteractiveElements['urlButtons'] | undefined
+    if (btnUrlMatch) {
+        const parts = btnUrlMatch[1].split('|').map(s => s.trim()).filter(Boolean)
+        const title = parts[0] || 'Abrir link'
+        const items = parts
+            .slice(1)
+            .map((part) => {
+                const [textPart, urlPart] = part.split('=>').map(s => s.trim())
+                return {
+                    text: (textPart || 'Abrir').substring(0, 20),
+                    url: (urlPart || '').trim(),
+                }
+            })
+            .filter(i => /^https?:\/\//i.test(i.url))
+            .slice(0, 4)
+
+        if (items.length > 0) {
+            urlButtons = { title, items }
+        }
+        cleanText = cleanText.replace(btnUrlMatch[0], '').trim()
+    }
 
     // ── Parse [BOTOES:titulo|op1|op2|op3] ──
     const btnMatch = cleanText.match(/\[BOTOES:([^\]]+)\]/i)
@@ -609,7 +717,52 @@ function parseInteractiveElements(text: string): InteractiveElements {
         cleanText = cleanText.replace(locMatch[0], '').trim()
     }
 
-    return { cleanText, buttons, list, poll, locationRequest }
+    // ── Parse [PIX:pixKey|pixName|pixType] ──
+    const pixMatch = cleanText.match(/\[PIX:([^\]]+)\]/i)
+    let pix: InteractiveElements['pix'] | undefined
+    if (pixMatch) {
+        const [pixKeyRaw, pixNameRaw, pixTypeRaw] = pixMatch[1].split('|').map(s => s.trim())
+        const pixType = ((pixTypeRaw || 'EVP').toUpperCase()) as 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP'
+        if (pixKeyRaw && ['CPF', 'CNPJ', 'EMAIL', 'PHONE', 'EVP'].includes(pixType)) {
+            pix = {
+                pixKey: pixKeyRaw,
+                pixName: pixNameRaw || 'Pagamento',
+                pixType,
+            }
+        }
+        cleanText = cleanText.replace(pixMatch[0], '').trim()
+    }
+
+    // ── Parse [CAROUSEL_JSON:base64(json)] ──
+    const carouselMatch = cleanText.match(/\[CAROUSEL_JSON:([A-Za-z0-9+/=_-]+)\]/i)
+    let carousel: InteractiveElements['carousel'] | undefined
+    if (carouselMatch) {
+        try {
+            const decoded = Buffer.from(carouselMatch[1], 'base64').toString('utf-8')
+            const parsed = JSON.parse(decoded)
+            if (parsed && Array.isArray(parsed.cards) && parsed.cards.length > 0) {
+                carousel = {
+                    text: String(parsed.text || 'Confira as opções'),
+                    cards: parsed.cards.slice(0, 10).map((c: any, idx: number) => ({
+                        text: String(c?.text || `Card ${idx + 1}`).slice(0, 500),
+                        image: c?.image ? String(c.image) : undefined,
+                        buttons: Array.isArray(c?.buttons)
+                            ? c.buttons.slice(0, 3).map((b: any, bIdx: number) => ({
+                                id: String(b?.id || `btn_${idx}_${bIdx}`),
+                                text: String(b?.text || 'Abrir').slice(0, 20),
+                                type: (String(b?.type || 'URL').toUpperCase() as 'REPLY' | 'URL' | 'CALL' | 'COPY'),
+                            }))
+                            : [],
+                    })),
+                }
+            }
+        } catch {
+            // ignore invalid payload
+        }
+        cleanText = cleanText.replace(carouselMatch[0], '').trim()
+    }
+
+    return { cleanText, buttons, urlButtons, list, poll, locationRequest, pix, carousel }
 }
 
 // Keep parseButtons as alias for backward compatibility
@@ -619,7 +772,7 @@ function parseButtons(text: string): { cleanText: string; buttons?: { title: str
 }
 
 function responseRequiresText(text: string): boolean {
-    return /https?:\/\//.test(text) || /\[BOTOES:/i.test(text) || /\[LISTA:/i.test(text) || /\[ENQUETE:/i.test(text) || /\[LOCALIZACAO\]/i.test(text)
+    return /https?:\/\//.test(text) || /\[BOTOES_URL:/i.test(text) || /\[BOTOES:/i.test(text) || /\[LISTA:/i.test(text) || /\[ENQUETE:/i.test(text) || /\[LOCALIZACAO\]/i.test(text) || /\[PIX:/i.test(text) || /\[CAROUSEL_JSON:/i.test(text)
 }
 
 function resolveSocialQuickReply(choiceRaw: string | null | undefined, configs: Record<string, string>): string | null {
@@ -1097,8 +1250,6 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
 
     const companyName = agentConfigs['agent_company_name'] || 'Pilger Imóveis'
     const companyDesc = agentConfigs['agent_company_description'] || 'referência em imóveis de alto padrão em Balneário Camboriú e região'
-    const companyAddress = agentConfigs['agent_company_address'] || ''
-    const companyMapsLink = agentConfigs['agent_company_maps_link'] || ''
     const socialInstagram = agentConfigs['agent_social_instagram'] || ''
     const socialFacebook = agentConfigs['agent_social_facebook'] || ''
     const socialYoutube = agentConfigs['agent_social_youtube'] || ''
@@ -1113,20 +1264,32 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         socialTiktok ? `TikTok: ${socialTiktok}` : '',
         socialSite ? `Site: ${socialSite}` : '',
     ].filter(Boolean).join(' | ')
-    const socialButtonOptions = [
-        socialInstagram ? 'Instagram' : '',
-        socialYoutube ? 'YouTube' : '',
-        socialSite ? 'Site' : '',
-        socialFacebook ? 'Facebook' : '',
-        socialLinkedin ? 'LinkedIn' : '',
-        socialTiktok ? 'TikTok' : '',
-    ].filter(Boolean).slice(0, 3)
-    const locationInstruction = companyMapsLink
-        ? `envie o link da localização: ${companyMapsLink} e mencione o endereço: ${companyAddress}`
-        : companyAddress
-        ? `informe o endereço: ${companyAddress} e peça a localização do cliente com [LOCALIZACAO]`
-        : 'peça a localização com [LOCALIZACAO]'
-
+    const socialUrlButtons = [
+        socialInstagram ? `Instagram=>${socialInstagram}` : '',
+        socialYoutube ? `YouTube=>${socialYoutube}` : '',
+        socialSite ? `Site=>${socialSite}` : '',
+        socialFacebook ? `Facebook=>${socialFacebook}` : '',
+        socialLinkedin ? `LinkedIn=>${socialLinkedin}` : '',
+        socialTiktok ? `TikTok=>${socialTiktok}` : '',
+    ].filter(Boolean).slice(0, 4)
+    let customLinkButtons: Array<{
+        name: string
+        tag: string
+        type?: string
+        url?: string
+        title?: string
+        options?: string[]
+        listButton?: string
+        listChoices?: string[]
+        pixKey?: string
+        pixName?: string
+        pixType?: string
+        carouselJson?: string
+    }> = []
+    try {
+        const parsed = JSON.parse(agentConfigs['agent_link_buttons'] || '[]')
+        if (Array.isArray(parsed)) customLinkButtons = parsed
+    } catch {}
     // Processar tags no prompt
     const tone = (agentConfigs['agent_tone'] || 'amigavel').toLowerCase()
     const toneInstruction = tone === 'formal'
@@ -1135,13 +1298,12 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             ? 'Use tom consultivo, faça perguntas qualificadoras e conduza com clareza.'
             : 'Use tom amigável, humano e próximo, mantendo profissionalismo.'
 
-    const basePromptWithTags = rawPrompt
+    let basePromptWithTags = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
         .replace(/\{nome_lead\}/g, safeLeadName || 'cliente')
         .replace(/\{agendamento\}/g, hasCustomPrompt ? '[BOTOES:Agendar visita|Manhã|Tarde|Noite]' : 'envie botões com [BOTOES:Agendar Visita|Manhã|Tarde|Noite] para o cliente escolher')
         .replace(/\{regioes\}/g, hasCustomPrompt ? regionsForList.split('|').join(', ') : `envie uma lista com [LISTA:Ver Regiões|${regionsForList}]`)
         .replace(/\{transferir\}/g, hasCustomPrompt ? '[TRANSFERIR]' : 'use [TRANSFERIR] para encaminhar ao corretor humano')
-        .replace(/\{localizacao\}/g, hasCustomPrompt ? (companyMapsLink || companyAddress || 'localização não configurada') : locationInstruction)
         .replace(/\{documentos\}/g, hasCustomPrompt ? docsForButtons.split('|').join(', ') : `envie botões com [BOTOES:Enviar Documentos|${docsForButtons}]`)
         .replace(/\{horario\}/g, hasCustomPrompt ? hoursText : `informe que o atendimento é de ${hoursText}`)
         .replace(/\{empresa\}/g, hasCustomPrompt ? `${companyName} — ${companyDesc}` : `mencione que a ${companyName} é ${companyDesc}`)
@@ -1151,11 +1313,61 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         .replace(/\{linkedin\}/g, socialLinkedin || 'linkedin não configurado')
         .replace(/\{tiktok\}/g, socialTiktok || 'tiktok não configurado')
         .replace(/\{site\}/g, socialSite || 'site não configurado')
-        .replace(/\{redes_sociais\}/g, hasCustomPrompt
-            ? (socialLinksList || 'redes sociais não configuradas')
-            : socialButtonOptions.length
-            ? `ofereça botões com [BOTOES:Ver redes sociais|${socialButtonOptions.join('|')}] e envie o link da opção escolhida. Links disponíveis: ${socialLinksList}`
+        .replace(/\{redes_sociais\}/g, socialUrlButtons.length
+            ? `[BOTOES_URL:Redes sociais|${socialUrlButtons.join('|')}]`
             : (socialLinksList || 'redes sociais não configuradas'))
+
+    // Dynamic URL button tags created by admin (e.g. {botao_instagram_vip})
+    for (const btn of customLinkButtons) {
+        const tag = String(btn?.tag || '').trim()
+        const name = String(btn?.name || '').trim()
+        const type = String(btn?.type || 'URL').toUpperCase()
+        if (!tag || !name) continue
+        const safeTag = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        let replacement = ''
+
+        if (type === 'URL') {
+            const url = String(btn?.url || '').trim()
+            if (!url) continue
+            replacement = `[BOTOES_URL:${name}|${name}=>${url}]`
+        } else if (type === 'BUTTON') {
+            const title = String(btn?.title || name).trim()
+            const options = Array.isArray(btn?.options) ? btn.options.map((o: any) => String(o || '').trim()).filter(Boolean) : []
+            if (!options.length) continue
+            replacement = `[BOTOES:${title}|${options.join('|')}]`
+        } else if (type === 'LIST') {
+            const listButton = String(btn?.listButton || 'Ver opções').trim()
+            const choices = Array.isArray(btn?.listChoices) ? btn.listChoices.map((o: any) => String(o || '').trim()).filter(Boolean) : []
+            if (!choices.length) continue
+            replacement = `[LISTA:${listButton}|${choices.join('|')}]`
+        } else if (type === 'POLL') {
+            const question = String(btn?.title || 'Qual opção você prefere?').trim()
+            const options = Array.isArray(btn?.options) ? btn.options.map((o: any) => String(o || '').trim()).filter(Boolean) : []
+            if (options.length < 2) continue
+            replacement = `[ENQUETE:${question}|${options.join('|')}]`
+        } else if (type === 'LOCATION') {
+            replacement = '[LOCALIZACAO]'
+        } else if (type === 'PIX') {
+            const pixKey = String(btn?.pixKey || '').trim()
+            if (!pixKey) continue
+            const pixName = String(btn?.pixName || name || 'Pagamento').trim()
+            const pixType = String(btn?.pixType || 'EVP').trim().toUpperCase()
+            replacement = `[PIX:${pixKey}|${pixName}|${pixType}]`
+        } else if (type === 'CAROUSEL') {
+            const carouselRaw = String(btn?.carouselJson || '').trim()
+            if (!carouselRaw) continue
+            try {
+                const parsed = JSON.parse(carouselRaw)
+                const encoded = Buffer.from(JSON.stringify(parsed), 'utf-8').toString('base64')
+                replacement = `[CAROUSEL_JSON:${encoded}]`
+            } catch {
+                continue
+            }
+        }
+
+        if (!replacement) continue
+        basePromptWithTags = basePromptWithTags.replace(new RegExp(safeTag, 'g'), replacement)
+    }
 
     let systemPrompt = basePromptWithTags
     if (!hasCustomPrompt) {
@@ -1329,13 +1541,14 @@ export const processWhatsAppMessage = inngest.createFunction(
                 .maybeSingle()
 
             if (existing) {
+                // Co-piloto ativo: conversas antigas marcadas como transferred
+                // voltam para active para a IA global seguir atendendo normalmente.
                 if (existing.status === 'transferred') {
-                    const lockMinutes = parseInt(configs['agent_transfer_lock_minutes'] || '1440', 10)
-                    const transferredAt = existing.transferred_at ? new Date(existing.transferred_at).getTime() : 0
-                    const elapsedMinutes = transferredAt > 0 ? (Date.now() - transferredAt) / 60000 : 0
-                    if (lockMinutes > 0 && elapsedMinutes < lockMinutes) {
-                        return existing
-                    }
+                    await supabase
+                        .from('whatsapp_ai_conversations')
+                        .update({ status: 'active', updated_at: new Date().toISOString() })
+                        .eq('id', existing.id)
+                    return { ...existing, status: 'active' }
                 }
                 return existing
             }
@@ -1358,19 +1571,6 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         if (!conversation) {
             return { action: 'error', reason: 'could_not_create_conversation' }
-        }
-
-        if (conversation.status === 'transferred') {
-            if (messageText?.trim()) {
-                await appendConversationMessage(supabase, conversation.id, {
-                    role: 'user',
-                    content: messageText.trim(),
-                    type: isAudio ? 'audio' : 'text',
-                    source: 'lead',
-                }).catch(() => { })
-            }
-            console.log('[WhatsApp Agent] Conversation is transferred/human handling, skipping bot response')
-            return { action: 'skipped', reason: 'human_handling' }
         }
 
         // Check if agent is enabled
@@ -1905,9 +2105,9 @@ export const processWhatsAppMessage = inngest.createFunction(
         // ── Step 6: Send response (Função Espelho + Interactive Messages) ──
         await step.run('send-response', async () => {
             const interactive = parseInteractiveElements(aiResponse.text)
-            const { cleanText, buttons, list, poll, locationRequest } = interactive
+            const { cleanText, buttons, urlButtons, list, poll, locationRequest, pix, carousel } = interactive
             const needsTextFormat = responseRequiresText(aiResponse.text)
-            const hasInteractive = !!(buttons || list || poll || locationRequest)
+            const hasInteractive = !!(buttons || urlButtons || list || poll || locationRequest || pix || carousel)
             const mode = (configs['whatsapp_response_mode'] || '').toLowerCase()
             const audioEnabled = configs['whatsapp_audio_enabled'] === 'true'
             const mirrorModeEnabled = configs['whatsapp_mirror_mode'] === 'true'
@@ -1917,9 +2117,31 @@ export const processWhatsAppMessage = inngest.createFunction(
                 && (shouldAlwaysAudio || (isAudio && shouldMirror))
                 && !needsTextFormat && !hasInteractive
 
-            console.log(`[WhatsApp Agent] 📤 Send decision: mode=${mode || 'legacy'}, isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, shouldSendAudio=${shouldSendAudio}`)
+            console.log(`[WhatsApp Agent] 📤 Send decision: mode=${mode || 'legacy'}, isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, urlButtons=${!!urlButtons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, pix=${!!pix}, carousel=${!!carousel}, shouldSendAudio=${shouldSendAudio}`)
 
-            if (buttons && buttons.options.length > 0) {
+            if (urlButtons && urlButtons.items.length > 0) {
+                try {
+                    const sendResult = await sendCarousel(
+                        cleanPhone,
+                        cleanText || urlButtons.title,
+                        [{
+                            text: cleanText || urlButtons.title,
+                            buttons: urlButtons.items.map(item => ({
+                                id: item.url,
+                                text: item.text,
+                                type: 'URL' as const,
+                            })),
+                        }],
+                        instanceToken
+                    )
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                } catch (e) {
+                    console.warn('[URL Buttons] Failed, falling back to text links:', e)
+                    const linksText = urlButtons.items.map(i => `${i.text}: ${i.url}`).join('\n')
+                    const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: `${cleanText ? cleanText + '\n\n' : ''}${linksText}`, instanceToken })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
+            } else if (buttons && buttons.options.length > 0) {
                 try {
                     const sendResult = await sendMenuMessage({
                         phone: cleanPhone,
@@ -2007,6 +2229,46 @@ export const processWhatsAppMessage = inngest.createFunction(
                         const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: 'Pode nos informar em qual região você está buscando?', instanceToken })
                         botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                     }
+                }
+            } else if (pix) {
+                try {
+                    if (cleanText) {
+                        await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
+                    }
+                    const sendResult = await sendPixButton(
+                        cleanPhone,
+                        pix.pixKey,
+                        pix.pixName,
+                        pix.pixType === 'EVP' ? 'RANDOM' : pix.pixType,
+                        instanceToken
+                    )
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                } catch (e) {
+                    console.warn('[PIX] Failed, falling back to text:', e)
+                    const sendResult = await sendWhatsAppMessage({
+                        phone: cleanPhone,
+                        message: `${cleanText ? cleanText + '\n\n' : ''}Chave PIX: ${pix.pixKey}`,
+                        instanceToken
+                    })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                }
+            } else if (carousel && carousel.cards.length > 0) {
+                try {
+                    const sendResult = await sendCarousel(
+                        cleanPhone,
+                        cleanText || carousel.text,
+                        carousel.cards,
+                        instanceToken
+                    )
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
+                } catch (e) {
+                    console.warn('[Carousel] Failed, falling back to text:', e)
+                    const sendResult = await sendWhatsAppMessage({
+                        phone: cleanPhone,
+                        message: cleanText || aiResponse.text,
+                        instanceToken
+                    })
+                    botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                 }
             } else if (shouldSendAudio) {
                 let audioBuffer: Buffer | null = null
@@ -2106,16 +2368,27 @@ export const processWhatsAppMessage = inngest.createFunction(
                     .map((m: any) => `${m.role === 'user' ? 'Lead' : 'Agente'}: ${m.content}`)
                     .join('\n')
 
-                // Mark conversation as transferred
+                const transferCooldownMinutes = Math.max(1, parseInt(configs['agent_transfer_lock_minutes'] || '1440', 10) || 1440)
+                const lastTransferAt = conversation.transferred_at ? new Date(conversation.transferred_at).getTime() : 0
+                const elapsedMinutes = lastTransferAt > 0 ? (Date.now() - lastTransferAt) / 60000 : Number.POSITIVE_INFINITY
+
+                // Co-piloto ativo: mantém a conversa ativa, apenas registra a transferência.
                 await supabase
                     .from('whatsapp_ai_conversations')
                     .update({
-                        status: 'transferred',
+                        status: 'active',
                         summary,
                         transferred_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', conversation.id)
+
+                // Evita encaminhar repetidamente o mesmo lead para especialista
+                // dentro da janela de cooldown.
+                if (elapsedMinutes < transferCooldownMinutes) {
+                    console.log(`[Transfer] Cooldown ativo (${elapsedMinutes.toFixed(1)}min < ${transferCooldownMinutes}min). Encaminhamento ignorado.`)
+                    return
+                }
 
                 // ═══ NOTIFICAR CORRETOR HUMANO ═══
                 try {
@@ -2127,8 +2400,33 @@ export const processWhatsAppMessage = inngest.createFunction(
 
                     const tCfg: Record<string, string> = {}
                     for (const r of (transferConfigs || [])) tCfg[r.key] = r.value
-                    const targetInstance = await pickTransferTargetInstance(supabase, instanceId, tCfg)
+                    const contextText = [
+                        messageText || '',
+                        aiResponse.text || '',
+                        aiResponse.extractedData?.interest || '',
+                        aiResponse.extractedData?.region || '',
+                        aiResponse.extractedData?.summary || '',
+                        ...aiResponse.updatedMessages.slice(-12).map((m: any) => String(m?.content || '')),
+                    ].join(' ')
+
+                    const specialized = await pickTransferTargetByEmpreendimento(supabase, contextText)
+                    const fallback = await pickTransferTargetInstance(supabase, instanceId, tCfg)
+                    const targetInstance = specialized?.instance || fallback
+                    const selectedBrokerName = specialized?.broker?.name || 'especialista'
+                    const selectedEmpreendimento = specialized?.empreendimento?.nome || ''
+
+                    if (specialized?.instance?.id) {
+                        console.log(`[Transfer] Routing by empreendimento: ${(specialized.empreendimento as any)?.nome} -> ${(specialized.broker as any)?.name}`)
+                    } else {
+                        console.log('[Transfer] No empreendimento specialist matched, using queue fallback')
+                    }
                     if (targetInstance?.phone_number && targetInstance?.instance_token) {
+                        const { data: targetBroker } = await supabase
+                            .from('virtual_brokers')
+                            .select('id, name, handoff_prompt')
+                            .eq('id', targetInstance.broker_id)
+                            .maybeSingle()
+
                         // Extract lead data from conversation context
                         const leadName = senderName || 'Nao informado'
                         const lastMessages = aiResponse.updatedMessages.slice(-6)
@@ -2162,9 +2460,31 @@ export const processWhatsAppMessage = inngest.createFunction(
                         leadMsg = leadMsg
                             .replace(/\{nome_lead\}/g, senderName || 'cliente')
                             .replace(/\{telefone\}/g, cleanPhone)
+                            .replace(/\{nome_corretor\}/g, selectedBrokerName)
+                            .replace(/\{empreendimento\}/g, selectedEmpreendimento || 'seu interesse')
                         await sendWhatsAppMessage({
                             phone: cleanPhone,
                             message: leadMsg,
+                            instanceToken: targetInstance.instance_token
+                        })
+
+                        // Mensagem inicial automática do especialista para o lead.
+                        let specialistFirstMsg = String(targetBroker?.handoff_prompt || '').trim()
+                        if (!specialistFirstMsg) {
+                            specialistFirstMsg = `Oi ${senderName || 'tudo bem'}! Eu sou ${targetBroker?.name || selectedBrokerName}. Vi aqui seu atendimento e vou dar continuidade agora.`
+                        }
+                        specialistFirstMsg = specialistFirstMsg
+                            .replace(/\{nome_lead\}/g, senderName || 'cliente')
+                            .replace(/\{nome_corretor\}/g, targetBroker?.name || selectedBrokerName)
+                            .replace(/\{telefone\}/g, cleanPhone)
+                            .replace(/\{interesse\}/g, aiResponse.extractedData?.interest || 'não identificado')
+                            .replace(/\{orcamento\}/g, aiResponse.extractedData?.budget || 'não informado')
+                            .replace(/\{regiao\}/g, aiResponse.extractedData?.region || 'não informada')
+                            .replace(/\{empreendimento\}/g, selectedEmpreendimento || 'seu interesse')
+
+                        await sendWhatsAppMessage({
+                            phone: cleanPhone,
+                            message: specialistFirstMsg,
                             instanceToken: targetInstance.instance_token
                         })
                     } else {

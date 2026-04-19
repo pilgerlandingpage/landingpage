@@ -23,6 +23,9 @@ interface Broker {
     connectyhub_chat_message?: string
     system_prompt?: string
     voice_id?: string
+    handoff_prompt?: string
+    empreendimento_ids?: string[]
+    empreendimento_names?: string[]
 
     whatsapp_instance_id?: string
 
@@ -37,6 +40,21 @@ interface WhatsAppInstance {
     connected_at: string | null
     broker_id?: string | null
     virtual_brokers?: { name?: string | null } | null
+}
+
+interface Empreendimento {
+    id: string
+    nome: string
+    slug: string
+    ativo?: boolean
+}
+
+interface CustomLinkButtonTag {
+    id?: string
+    name?: string
+    url?: string
+    type?: 'URL' | 'BUTTON' | 'LIST' | 'POLL' | 'LOCATION' | 'PIX' | 'CAROUSEL'
+    tag: string
 }
 
 function getInstancePhone(instance?: WhatsAppInstance | null): string {
@@ -76,9 +94,22 @@ export default function BrokersAdmin() {
     const [availableInstances, setAvailableInstances] = useState<WhatsAppInstance[]>([])
     const [selectedInstanceId, setSelectedInstanceId] = useState('')
     // Voice State
-    const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
+    const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string; preview_url?: string | null }[]>([])
     const [loadingVoices, setLoadingVoices] = useState(false)
     const [ttsConfigs, setTtsConfigs] = useState<Record<string, string>>({})
+    const [previewText, setPreviewText] = useState('Olá! Esta é uma prévia da minha voz para atendimento no WhatsApp.')
+    const [previewLoading, setPreviewLoading] = useState(false)
+    const [previewError, setPreviewError] = useState('')
+    const [previewAudioUrl, setPreviewAudioUrl] = useState('')
+    const [handoffPreviewLeadName, setHandoffPreviewLeadName] = useState('Carlos')
+    const [handoffPreviewInterest, setHandoffPreviewInterest] = useState('Apartamento de luxo')
+    const [handoffPreviewBudget, setHandoffPreviewBudget] = useState('R$ 2.000.000')
+    const [handoffPreviewRegion, setHandoffPreviewRegion] = useState('Balneário Camboriú')
+    const [handoffPreviewEmpreendimento, setHandoffPreviewEmpreendimento] = useState('Empreendimento X')
+    const [handoffPreviewOutput, setHandoffPreviewOutput] = useState('')
+    const [customLinkTags, setCustomLinkTags] = useState<CustomLinkButtonTag[]>([])
+    const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([])
+    const [selectedEmpreendimentoToAdd, setSelectedEmpreendimentoToAdd] = useState('')
 
     // Form State
     const [formData, setFormData] = useState({
@@ -92,6 +123,8 @@ export default function BrokersAdmin() {
         summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
+        handoff_prompt: '',
+        empreendimento_ids: [] as string[],
 
 
     })
@@ -107,6 +140,8 @@ export default function BrokersAdmin() {
         summary_to_phone: '',
         system_prompt: '',
         voice_id: '',
+        handoff_prompt: '',
+        empreendimento_ids: [] as string[],
 
 
     }
@@ -141,7 +176,9 @@ export default function BrokersAdmin() {
     useEffect(() => {
         fetchBrokers()
         fetchLandingPages()
+        loadEmpreendimentos()
         loadAvailableInstances()
+        loadCustomLinkTags()
         // Run migration for new columns
         fetch('/api/admin/migrate-broker-assignment', { method: 'POST' }).catch(() => { })
         // Load TTS configs and voices
@@ -163,6 +200,37 @@ export default function BrokersAdmin() {
             }
         }).catch(() => { })
     }, [])
+
+    useEffect(() => {
+        return () => {
+            if (previewAudioUrl && previewAudioUrl.startsWith('blob:')) URL.revokeObjectURL(previewAudioUrl)
+        }
+    }, [previewAudioUrl])
+
+    async function loadCustomLinkTags() {
+        try {
+            const res = await fetch('/api/admin/whatsapp/agent-config')
+            const data = await res.json()
+            const raw = data?.config?.agent_link_buttons
+            if (!raw) {
+                setCustomLinkTags([])
+                return
+            }
+            const parsed = JSON.parse(raw)
+            if (!Array.isArray(parsed)) {
+                setCustomLinkTags([])
+                return
+            }
+            const valid = parsed.filter((item: unknown) => {
+                if (!item || typeof item !== 'object') return false
+                const maybe = item as { tag?: unknown }
+                return typeof maybe.tag === 'string' && maybe.tag.trim().length > 0
+            }) as CustomLinkButtonTag[]
+            setCustomLinkTags(valid)
+        } catch {
+            setCustomLinkTags([])
+        }
+    }
 
     useEffect(() => {
         const selected = availableInstances.find(i => i.id === selectedInstanceId) || null
@@ -222,13 +290,26 @@ export default function BrokersAdmin() {
         if (data) setLandingPages(data)
     }
 
+    async function loadEmpreendimentos() {
+        try {
+            const res = await fetch('/api/admin/empreendimentos')
+            const json = await res.json()
+            setEmpreendimentos((json?.data || []) as Empreendimento[])
+        } catch {
+            setEmpreendimentos([])
+        }
+    }
+
     async function fetchBrokers() {
         setLoading(true)
-        const { data } = await supabase
-            .from('virtual_brokers')
-            .select('*')
-            .order('name')
-        if (data) setBrokers(data)
+        try {
+            const res = await fetch('/api/admin/brokers')
+            const json = await res.json()
+            if (Array.isArray(json?.data)) setBrokers(json.data as Broker[])
+            else setBrokers([])
+        } catch {
+            setBrokers([])
+        }
         setLoading(false)
     }
 
@@ -313,6 +394,72 @@ export default function BrokersAdmin() {
         } catch (err) {
             console.error('Submit Failed:', err)
         }
+    }
+
+    async function handleVoicePreview() {
+        setPreviewError('')
+        setPreviewLoading(true)
+        try {
+            const selectedEleven = !formData.voice_id.startsWith('openai:')
+                ? elevenLabsVoices.find(v => v.voice_id === formData.voice_id)
+                : null
+
+            // Prefer built-in ElevenLabs demo preview to avoid credit usage.
+            if (selectedEleven?.preview_url) {
+                if (previewAudioUrl && previewAudioUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(previewAudioUrl)
+                }
+                setPreviewAudioUrl(selectedEleven.preview_url)
+                setPreviewLoading(false)
+                return
+            }
+
+            const res = await fetch('/api/admin/voice-preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    voiceId: formData.voice_id,
+                    text: previewText,
+                })
+            })
+
+            if (!res.ok) {
+                let msg = 'Falha ao gerar prévia'
+                try {
+                    const err = await res.json()
+                    msg = err?.error || msg
+                } catch {
+                    // ignore parse error
+                }
+                throw new Error(msg)
+            }
+
+            const blob = await res.blob()
+            if (previewAudioUrl && previewAudioUrl.startsWith('blob:')) URL.revokeObjectURL(previewAudioUrl)
+            const url = URL.createObjectURL(blob)
+            setPreviewAudioUrl(url)
+        } catch (err: any) {
+            setPreviewError(err?.message || 'Falha ao gerar prévia de voz')
+        } finally {
+            setPreviewLoading(false)
+        }
+    }
+
+    function buildHandoffPreview() {
+        const base = (formData.handoff_prompt || '').trim()
+        if (!base) {
+            setHandoffPreviewOutput('Defina primeiro o Prompt Pós-Transferência para testar.')
+            return
+        }
+        const compiled = base
+            .replace(/\{nome_lead\}/g, handoffPreviewLeadName || 'cliente')
+            .replace(/\{nome_corretor\}/g, formData.name || 'corretor')
+            .replace(/\{telefone\}/g, formData.phone || '+55...')
+            .replace(/\{interesse\}/g, handoffPreviewInterest || 'não identificado')
+            .replace(/\{orcamento\}/g, handoffPreviewBudget || 'não informado')
+            .replace(/\{regiao\}/g, handoffPreviewRegion || 'não informada')
+            .replace(/\{empreendimento\}/g, handoffPreviewEmpreendimento || 'seu interesse')
+        setHandoffPreviewOutput(compiled)
     }
 
     async function deleteBroker(id: string) {
@@ -544,18 +691,15 @@ export default function BrokersAdmin() {
                                             { tag: '{agendamento}', desc: 'Botão para agendar visita/reunião', color: '#818cf8' },
                                             { tag: '{regioes}', desc: 'Lista interativa de regiões', color: '#818cf8' },
                                             { tag: '{transferir}', desc: 'Transferir ao corretor humano', color: '#f59e0b' },
-                                            { tag: '{localizacao}', desc: 'Pedir localização do lead', color: '#818cf8' },
                                             { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
                                             { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
                                             { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
-                                            { tag: '{redes_sociais}', desc: 'Lista de redes sociais da empresa', color: '#ec4899' },
-                                            { tag: '{instagram}', desc: 'Link do Instagram da empresa', color: '#ec4899' },
-                                            { tag: '{youtube}', desc: 'Link do YouTube da empresa', color: '#ec4899' },
-                                            { tag: '{facebook}', desc: 'Link do Facebook da empresa', color: '#ec4899' },
-                                            { tag: '{linkedin}', desc: 'Link do LinkedIn da empresa', color: '#ec4899' },
-                                            { tag: '{tiktok}', desc: 'Link do TikTok da empresa', color: '#ec4899' },
-                                            { tag: '{site}', desc: 'Link do site da empresa', color: '#ec4899' },
                                             { tag: '{imoveis}', desc: 'O agente já tem acesso aos imóveis ativos automaticamente', color: '#f59e0b' },
+                                            ...customLinkTags.map(btn => ({
+                                                tag: btn.tag,
+                                                desc: `Ação dinâmica ${btn.type || 'URL'}: ${btn.name || btn.tag}`,
+                                                color: '#0ea5e9'
+                                            }))
                                         ].map(t => (
                                             <button key={t.tag} type="button" title={t.desc}
                                                 onClick={() => {
@@ -639,10 +783,167 @@ export default function BrokersAdmin() {
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                                         Escolha a voz que este corretor usará para responder áudios. Deixe em branco para usar a voz padrão configurada na Sala de Manutenção.
                                     </div>
+                                    {!formData.voice_id.startsWith('openai:') && (
+                                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                                            Prévia tenta usar demo pronta do ElevenLabs (quando disponível) para não consumir créditos.
+                                        </div>
+                                    )}
+                                    <div style={{ marginTop: '10px', display: 'grid', gap: '8px' }}>
+                                        <input
+                                            className="form-input"
+                                            value={previewText}
+                                            onChange={(e) => setPreviewText(e.target.value)}
+                                            placeholder="Texto para testar a voz"
+                                        />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary"
+                                                onClick={handleVoicePreview}
+                                                disabled={previewLoading}
+                                                style={{ padding: '8px 12px' }}
+                                            >
+                                                {previewLoading ? 'Gerando prévia...' : 'Ouvir prévia'}
+                                            </button>
+                                            {previewAudioUrl && (
+                                                <audio controls src={previewAudioUrl} style={{ height: '34px' }} />
+                                            )}
+                                        </div>
+                                        {previewError && (
+                                            <div style={{ fontSize: '0.75rem', color: '#ef4444' }}>{previewError}</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ marginTop: '14px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        Prompt Pós-Transferência (Especialista)
+                                    </label>
+                                    <textarea
+                                        className="form-textarea"
+                                        style={{ minHeight: '110px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.82rem', lineHeight: '1.5' }}
+                                        value={formData.handoff_prompt}
+                                        onChange={(e) => setFormData({ ...formData, handoff_prompt: e.target.value })}
+                                        placeholder={`Oi {nome_lead}, tudo bem?\nSou {nome_corretor}. O time me passou seu atendimento sobre {empreendimento}.\nVi que seu interesse é {interesse} e faixa {orcamento}. Posso te ajudar a avançar agora.`}
+                                    />
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                                        Variáveis: {'{nome_lead}'} {'{nome_corretor}'} {'{telefone}'} {'{interesse}'} {'{orcamento}'} {'{regiao}'} {'{empreendimento}'}
+                                    </div>
+                                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-secondary)' }}>
+                                        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>
+                                            Testar handoff prompt
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                            <input className="form-input" value={handoffPreviewLeadName} onChange={(e) => setHandoffPreviewLeadName(e.target.value)} placeholder="Nome do lead" />
+                                            <input className="form-input" value={handoffPreviewEmpreendimento} onChange={(e) => setHandoffPreviewEmpreendimento(e.target.value)} placeholder="Empreendimento" />
+                                            <input className="form-input" value={handoffPreviewInterest} onChange={(e) => setHandoffPreviewInterest(e.target.value)} placeholder="Interesse" />
+                                            <input className="form-input" value={handoffPreviewBudget} onChange={(e) => setHandoffPreviewBudget(e.target.value)} placeholder="Orçamento" />
+                                            <input className="form-input" value={handoffPreviewRegion} onChange={(e) => setHandoffPreviewRegion(e.target.value)} placeholder="Região" />
+                                        </div>
+                                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <button type="button" className="btn btn-secondary" onClick={buildHandoffPreview} style={{ padding: '8px 12px' }}>
+                                                Testar handoff prompt
+                                            </button>
+                                        </div>
+                                        {handoffPreviewOutput && (
+                                            <div style={{ marginTop: '8px', padding: '10px', borderRadius: '8px', background: 'var(--bg-primary)', border: '1px dashed var(--border)', whiteSpace: 'pre-wrap', fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                                                {handoffPreviewOutput}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
 
+                            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                                    Empreendimentos Atendidos
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '12px' }}>
+                                    Selecione os empreendimentos que este corretor especialista atende. Cadastro global em WhatsApp Web &gt; Config do Agente.
+                                </p>
+                                {empreendimentos.length === 0 ? (
+                                    <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Nenhum empreendimento cadastrado no Agente Global.</span>
+                                ) : (
+                                    <>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', marginBottom: '10px' }}>
+                                            <select
+                                                className="form-input"
+                                                value={selectedEmpreendimentoToAdd}
+                                                onChange={(e) => setSelectedEmpreendimentoToAdd(e.target.value)}
+                                            >
+                                                <option value="">Selecione um empreendimento...</option>
+                                                {empreendimentos.map((emp) => (
+                                                    <option key={emp.id} value={emp.id} disabled={formData.empreendimento_ids.includes(emp.id)}>
+                                                        {emp.nome} ({emp.slug})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary"
+                                                onClick={() => {
+                                                    if (!selectedEmpreendimentoToAdd) return
+                                                    if (formData.empreendimento_ids.includes(selectedEmpreendimentoToAdd)) return
+                                                    setFormData({
+                                                        ...formData,
+                                                        empreendimento_ids: [...formData.empreendimento_ids, selectedEmpreendimentoToAdd],
+                                                    })
+                                                    setSelectedEmpreendimentoToAdd('')
+                                                }}
+                                            >
+                                                Adicionar
+                                            </button>
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {formData.empreendimento_ids.length === 0 && (
+                                                <span style={{ color: '#aaa', fontSize: '0.82rem' }}>Nenhum empreendimento selecionado.</span>
+                                            )}
+                                            {formData.empreendimento_ids.map((empId) => {
+                                                const emp = empreendimentos.find((e) => e.id === empId)
+                                                const label = emp?.nome || empId
+                                                return (
+                                                    <span key={empId} style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        background: 'rgba(201, 169, 110, 0.12)',
+                                                        border: '1px solid rgba(201, 169, 110, 0.35)',
+                                                        color: 'var(--text-primary)',
+                                                        borderRadius: '999px',
+                                                        padding: '6px 10px',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 600,
+                                                    }}>
+                                                        {label}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData({
+                                                                ...formData,
+                                                                empreendimento_ids: formData.empreendimento_ids.filter((id) => id !== empId),
+                                                            })}
+                                                            style={{
+                                                                border: 'none',
+                                                                background: 'transparent',
+                                                                cursor: 'pointer',
+                                                                color: '#b45309',
+                                                                fontWeight: 700,
+                                                                padding: 0,
+                                                                lineHeight: 1,
+                                                            }}
+                                                            title="Remover"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                )
+                                            })}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            
                             {/* Tipo de Atendimento / Page Assignment */}
                             <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                                 <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -834,6 +1135,20 @@ export default function BrokersAdmin() {
                                     </span>
                                 )}
                             </div>
+                            {!!broker.empreendimento_names?.length && (
+                                <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                    {broker.empreendimento_names.slice(0, 4).map((n) => (
+                                        <span key={n} style={{ padding: '2px 8px', background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.3)', borderRadius: '12px', fontSize: '0.65rem', color: '#0ea5e9', fontWeight: 600 }}>
+                                            {n}
+                                        </span>
+                                    ))}
+                                    {broker.empreendimento_names.length > 4 && (
+                                        <span style={{ padding: '2px 8px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                                            +{broker.empreendimento_names.length - 4}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                         </div>
 
@@ -856,6 +1171,8 @@ export default function BrokersAdmin() {
 
                                         system_prompt: broker.system_prompt || '',
                                         voice_id: (broker as any).voice_id || '',
+                                        handoff_prompt: (broker as any).handoff_prompt || '',
+                                        empreendimento_ids: (broker as any).empreendimento_ids || [],
 
 
                                     })

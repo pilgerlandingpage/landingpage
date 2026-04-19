@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Clock, MapPin, FileText, Map, Save, Plus, X, Loader2, Check } from 'lucide-react'
+import { Building2, Clock, FileText, Map, Save, Plus, X, Loader2, Check, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface WorkingHours {
@@ -26,6 +26,43 @@ interface Broker {
     is_active?: boolean
 }
 
+interface Empreendimento {
+    id: string
+    nome: string
+    slug: string
+    ativo?: boolean
+}
+
+interface CustomLinkButton {
+    id: string
+    name: string
+    type: 'URL' | 'BUTTON' | 'LIST' | 'POLL' | 'LOCATION' | 'PIX' | 'CAROUSEL'
+    tag: string
+    // URL
+    url?: string
+    // BUTTON / POLL
+    title?: string
+    options?: string[]
+    // LIST
+    listButton?: string
+    listChoices?: string[]
+    // PIX
+    pixKey?: string
+    pixName?: string
+    pixType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP'
+    // CAROUSEL (JSON free-form)
+    carouselJson?: string
+}
+
+function slugifyTagName(value: string) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+}
+
 export default function AgentConfigPage() {
     const supabase = createClient()
     const [loading, setLoading] = useState(true)
@@ -37,16 +74,14 @@ export default function AgentConfigPage() {
     const [companyCreci, setCompanyCreci] = useState('')
     const [companyPhone, setCompanyPhone] = useState('')
     const [companyDescription, setCompanyDescription] = useState('')
-    const [socialInstagram, setSocialInstagram] = useState('')
-    const [socialFacebook, setSocialFacebook] = useState('')
-    const [socialYoutube, setSocialYoutube] = useState('')
-    const [socialLinkedin, setSocialLinkedin] = useState('')
-    const [socialTiktok, setSocialTiktok] = useState('')
-    const [socialSite, setSocialSite] = useState('')
-
-    // Localização
-    const [companyAddress, setCompanyAddress] = useState('')
-    const [companyMapsLink, setCompanyMapsLink] = useState('')
+    const [linkButtons, setLinkButtons] = useState<CustomLinkButton[]>([])
+    const [newActionName, setNewActionName] = useState('')
+    const [newActionType, setNewActionType] = useState<CustomLinkButton['type']>('URL')
+    const [newActionField1, setNewActionField1] = useState('')
+    const [newActionField2, setNewActionField2] = useState('')
+    const [newActionField3, setNewActionField3] = useState('')
+    const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([])
+    const [newEmpreendimentoName, setNewEmpreendimentoName] = useState('')
 
     // Horários
     const [hours, setHours] = useState<WorkingHours>({
@@ -88,6 +123,7 @@ export default function AgentConfigPage() {
         loadConfig()
         loadBrokers()
         loadInstances()
+        loadEmpreendimentos()
     }, [])
 
     const selectedDefaultInstance = instances.find(i => i.id === defaultInstanceId)
@@ -126,14 +162,14 @@ export default function AgentConfigPage() {
                 if (c.agent_company_creci) setCompanyCreci(c.agent_company_creci)
                 if (c.agent_company_phone) setCompanyPhone(c.agent_company_phone)
                 if (c.agent_company_description) setCompanyDescription(c.agent_company_description)
-                if (c.agent_social_instagram) setSocialInstagram(c.agent_social_instagram)
-                if (c.agent_social_facebook) setSocialFacebook(c.agent_social_facebook)
-                if (c.agent_social_youtube) setSocialYoutube(c.agent_social_youtube)
-                if (c.agent_social_linkedin) setSocialLinkedin(c.agent_social_linkedin)
-                if (c.agent_social_tiktok) setSocialTiktok(c.agent_social_tiktok)
-                if (c.agent_social_site) setSocialSite(c.agent_social_site)
-                if (c.agent_company_address) setCompanyAddress(c.agent_company_address)
-                if (c.agent_company_maps_link) setCompanyMapsLink(c.agent_company_maps_link)
+                if (c.agent_link_buttons) {
+                    try {
+                        const parsed = JSON.parse(c.agent_link_buttons)
+                        if (Array.isArray(parsed)) {
+                            setLinkButtons(parsed.filter(Boolean))
+                        }
+                    } catch {}
+                }
                 if (c.agent_working_hours) {
                     try { setHours(JSON.parse(c.agent_working_hours)) } catch {}
                 }
@@ -175,14 +211,7 @@ export default function AgentConfigPage() {
                         agent_company_creci: companyCreci,
                         agent_company_phone: companyPhone,
                         agent_company_description: companyDescription,
-                        agent_social_instagram: socialInstagram,
-                        agent_social_facebook: socialFacebook,
-                        agent_social_youtube: socialYoutube,
-                        agent_social_linkedin: socialLinkedin,
-                        agent_social_tiktok: socialTiktok,
-                        agent_social_site: socialSite,
-                        agent_company_address: companyAddress,
-                        agent_company_maps_link: companyMapsLink,
+                        agent_link_buttons: JSON.stringify(linkButtons),
                         agent_working_hours: JSON.stringify(hours),
                         agent_regions: JSON.stringify(regions),
                         agent_required_documents: JSON.stringify(documents),
@@ -230,6 +259,141 @@ export default function AgentConfigPage() {
 
     function removeDocument(d: string) {
         setDocuments(documents.filter(x => x !== d))
+    }
+
+    async function loadEmpreendimentos() {
+        try {
+            const res = await fetch('/api/admin/empreendimentos')
+            const data = await res.json()
+            setEmpreendimentos((data?.data || []) as Empreendimento[])
+        } catch {
+            setEmpreendimentos([])
+        }
+    }
+
+    async function createEmpreendimento() {
+        const nome = newEmpreendimentoName.trim()
+        if (!nome) return
+        try {
+            const res = await fetch('/api/admin/empreendimentos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome }),
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao criar empreendimento')
+            setNewEmpreendimentoName('')
+            await loadEmpreendimentos()
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Erro ao criar empreendimento')
+        }
+    }
+
+    async function deleteEmpreendimento(id: string) {
+        const ok = window.confirm('Excluir este empreendimento?')
+        if (!ok) return
+        try {
+            const res = await fetch(`/api/admin/empreendimentos?id=${id}`, { method: 'DELETE' })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data?.error || 'Erro ao excluir empreendimento')
+            await loadEmpreendimentos()
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Erro ao excluir empreendimento')
+        }
+    }
+
+    function addLinkButton() {
+        const name = newActionName.trim()
+        if (!name) return
+        const slug = slugifyTagName(name)
+        if (!slug) return
+        const tag = `{botao_${slug}}`
+        if (linkButtons.some(b => b.tag === tag)) {
+            alert('Já existe uma ação com esse nome/tag.')
+            return
+        }
+
+        const base: CustomLinkButton = {
+            id: `lb_${Date.now()}`,
+            name,
+            type: newActionType,
+            tag,
+        }
+
+        let next: CustomLinkButton = base
+        if (newActionType === 'URL') {
+            const url = newActionField1.trim()
+            if (!/^https?:\/\//i.test(url)) {
+                alert('A URL deve começar com http:// ou https://')
+                return
+            }
+            next = { ...base, url }
+        } else if (newActionType === 'BUTTON') {
+            const title = newActionField1.trim() || name
+            const options = newActionField2.split('|').map(s => s.trim()).filter(Boolean)
+            if (options.length === 0) {
+                alert('Informe as opções separadas por |')
+                return
+            }
+            next = { ...base, title, options }
+        } else if (newActionType === 'LIST') {
+            const listButton = newActionField1.trim() || 'Ver opções'
+            const listChoices = newActionField2.split('|').map(s => s.trim()).filter(Boolean)
+            if (listChoices.length === 0) {
+                alert('Informe os itens da lista separados por |')
+                return
+            }
+            next = { ...base, listButton, listChoices }
+        } else if (newActionType === 'POLL') {
+            const title = newActionField1.trim() || 'Qual opção você prefere?'
+            const options = newActionField2.split('|').map(s => s.trim()).filter(Boolean)
+            if (options.length < 2) {
+                alert('Enquete precisa de ao menos 2 opções')
+                return
+            }
+            next = { ...base, title, options }
+        } else if (newActionType === 'LOCATION') {
+            next = { ...base }
+        } else if (newActionType === 'PIX') {
+            const pixKey = newActionField1.trim()
+            const pixName = newActionField2.trim() || 'Pagamento'
+            const pixTypeRaw = (newActionField3.trim().toUpperCase() || 'EVP') as CustomLinkButton['pixType']
+            const allowed = ['CPF', 'CNPJ', 'EMAIL', 'PHONE', 'EVP']
+            if (!pixKey) {
+                alert('Informe a chave PIX')
+                return
+            }
+            if (!allowed.includes(pixTypeRaw || '')) {
+                alert('Tipo PIX inválido. Use: CPF, CNPJ, EMAIL, PHONE ou EVP')
+                return
+            }
+            next = { ...base, pixKey, pixName, pixType: pixTypeRaw }
+        } else if (newActionType === 'CAROUSEL') {
+            const carouselJson = newActionField1.trim()
+            if (!carouselJson) {
+                alert('Cole o JSON dos cards do carousel')
+                return
+            }
+            try {
+                const parsed = JSON.parse(carouselJson)
+                if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('invalid')
+            } catch {
+                alert('JSON do carousel inválido')
+                return
+            }
+            next = { ...base, carouselJson }
+        }
+
+        setLinkButtons(prev => [...prev, next])
+        setNewActionName('')
+        setNewActionType('URL')
+        setNewActionField1('')
+        setNewActionField2('')
+        setNewActionField3('')
+    }
+
+    function removeLinkButton(id: string) {
+        setLinkButtons(prev => prev.filter(b => b.id !== id))
     }
 
     useEffect(() => {
@@ -458,61 +622,165 @@ export default function AgentConfigPage() {
                 </div>
             </div>
 
-            {/* REDES SOCIAIS */}
+            {/* ACOES INTERATIVAS */}
             <div style={sectionStyle}>
                 <div style={sectionHeaderStyle}>
-                    <Map size={20} color="#ec4899" />
-                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Redes Sociais</h2>
-                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tags: {'{redes_sociais}'} {'{instagram}'} {'{youtube}'}</span>
+                    <Globe size={20} color="#0ea5e9" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Ações Interativas por Tag</h2>
+                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>
+                        O admin define os botões e usa as tags no prompt
+                    </span>
                 </div>
-                <div style={gridStyle}>
-                    <div>
-                        <label style={labelStyle}>Instagram</label>
-                        <input style={inputStyle} value={socialInstagram} onChange={e => setSocialInstagram(e.target.value)} placeholder="https://instagram.com/suaempresa" />
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Facebook</label>
-                        <input style={inputStyle} value={socialFacebook} onChange={e => setSocialFacebook(e.target.value)} placeholder="https://facebook.com/suaempresa" />
-                    </div>
-                    <div>
-                        <label style={labelStyle}>YouTube</label>
-                        <input style={inputStyle} value={socialYoutube} onChange={e => setSocialYoutube(e.target.value)} placeholder="https://youtube.com/@seucanal" />
-                    </div>
-                    <div>
-                        <label style={labelStyle}>LinkedIn</label>
-                        <input style={inputStyle} value={socialLinkedin} onChange={e => setSocialLinkedin(e.target.value)} placeholder="https://linkedin.com/company/suaempresa" />
-                    </div>
-                    <div>
-                        <label style={labelStyle}>TikTok</label>
-                        <input style={inputStyle} value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)} placeholder="https://tiktok.com/@seuusuario" />
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Site</label>
-                        <input style={inputStyle} value={socialSite} onChange={e => setSocialSite(e.target.value)} placeholder="https://pilgerimoveis.com.br" />
-                    </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.8fr 1fr auto', gap: 8, marginBottom: 8 }}>
+                    <input
+                        style={inputStyle}
+                        value={newActionName}
+                        onChange={e => setNewActionName(e.target.value)}
+                        placeholder="Nome da ação (ex: Instagram Premium)"
+                    />
+                    <select style={inputStyle} value={newActionType} onChange={e => setNewActionType(e.target.value as CustomLinkButton['type'])}>
+                        <option value="URL">URL</option>
+                        <option value="BUTTON">Botões</option>
+                        <option value="LIST">Lista</option>
+                        <option value="POLL">Enquete</option>
+                        <option value="LOCATION">Solicitar Localização</option>
+                        <option value="PIX">Botão PIX</option>
+                        <option value="CAROUSEL">Carousel</option>
+                    </select>
+                    <input
+                        style={inputStyle}
+                        value={newActionField1}
+                        onChange={e => setNewActionField1(e.target.value)}
+                        placeholder={
+                            newActionType === 'URL' ? 'https://seu-link.com'
+                                : newActionType === 'BUTTON' ? 'Título dos botões'
+                                : newActionType === 'LIST' ? 'Texto do botão da lista'
+                                : newActionType === 'POLL' ? 'Pergunta da enquete'
+                                : newActionType === 'PIX' ? 'Chave PIX'
+                                : newActionType === 'CAROUSEL' ? 'JSON dos cards'
+                                : 'Não precisa'
+                        }
+                        disabled={newActionType === 'LOCATION'}
+                    />
+                    <button onClick={addLinkButton} style={btnSmall}>
+                        <Plus size={14} /> Criar
+                    </button>
                 </div>
-                <p style={{ fontSize: '0.74rem', color: '#888', marginTop: 10 }}>
-                    O agente pode enviar os links quando fizer sentido na conversa, usando as tags do prompt.
-                </p>
+                {(newActionType === 'BUTTON' || newActionType === 'LIST' || newActionType === 'POLL' || newActionType === 'PIX') && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                        <input
+                            style={inputStyle}
+                            value={newActionField2}
+                            onChange={e => setNewActionField2(e.target.value)}
+                            placeholder={
+                                newActionType === 'PIX'
+                                    ? 'Nome exibido no PIX (ex: Pilger Imóveis)'
+                                    : 'Opções separadas por | (ex: Opção 1|Opção 2)'
+                            }
+                        />
+                        {newActionType === 'PIX' ? (
+                            <input
+                                style={inputStyle}
+                                value={newActionField3}
+                                onChange={e => setNewActionField3(e.target.value)}
+                                placeholder="Tipo PIX: EVP, CPF, CNPJ, EMAIL ou PHONE"
+                            />
+                        ) : (
+                            <div />
+                        )}
+                    </div>
+                )}
+
+                <div style={{ display: 'grid', gap: 8 }}>
+                    {linkButtons.length === 0 && (
+                        <span style={{ color: '#bbb', fontSize: '0.82rem' }}>
+                            Nenhuma ação interativa cadastrada ainda.
+                        </span>
+                    )}
+                    {linkButtons.map(btn => (
+                        <div key={btn.id} style={{
+                            border: '1px solid #e7e4df',
+                            background: '#fafafa',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1.3fr auto',
+                            gap: 8,
+                            alignItems: 'center',
+                        }}>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#444' }}>
+                                {btn.name} <span style={{ fontSize: '0.72rem', color: '#888', marginLeft: 6 }}>({btn.type})</span>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {btn.type === 'URL' ? btn.url :
+                                    btn.type === 'BUTTON' ? `${btn.title} • ${(btn.options || []).join(' | ')}` :
+                                        btn.type === 'LIST' ? `${btn.listButton} • ${(btn.listChoices || []).join(' | ')}` :
+                                            btn.type === 'POLL' ? `${btn.title} • ${(btn.options || []).join(' | ')}` :
+                                                btn.type === 'PIX' ? `${btn.pixType || 'EVP'} • ${btn.pixName || ''}` :
+                                                    btn.type === 'CAROUSEL' ? 'Carousel configurado via JSON' :
+                                                        'Solicita localização do cliente'}
+                            </div>
+                            <button onClick={() => removeLinkButton(btn.id)} style={{ ...btnSmall, background: 'linear-gradient(135deg, #ef4444, #dc2626)', padding: '6px 10px' }}>
+                                <X size={14} /> Remover
+                            </button>
+                            <div style={{ gridColumn: '1 / -1', fontSize: '0.74rem', color: '#8b5cf6' }}>
+                                Tag no prompt: <code>{btn.tag}</code>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {linkButtons.length > 0 && (
+                    <p style={{ fontSize: '0.74rem', color: '#888', marginTop: 10 }}>
+                        Use as tags acima no prompt do agente. Cada tag dispara a ação interativa configurada.
+                    </p>
+                )}
             </div>
 
-            {/* LOCALIZACAO */}
+            {/* EMPREENDIMENTOS (CATÁLOGO GLOBAL) */}
             <div style={sectionStyle}>
                 <div style={sectionHeaderStyle}>
-                    <MapPin size={20} color="#ef4444" />
-                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Localização</h2>
-                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tag: {'{localizacao}'}</span>
+                    <Building2 size={20} color="#0ea5e9" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Empreendimentos (Catálogo Global)</h2>
+                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>
+                        Corretores IA apenas selecionam daqui
+                    </span>
                 </div>
-                <div style={gridStyle}>
-                    <div style={{ gridColumn: '1 / -1' }}>
-                        <label style={labelStyle}>Endereço Completo</label>
-                        <input style={inputStyle} value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} placeholder="Av. Atlântica, 2000 - Balneário Camboriú/SC" />
-                    </div>
-                    <div style={{ gridColumn: '1 / -1' }}>
-                        <label style={labelStyle}>Link do Google Maps</label>
-                        <input style={inputStyle} value={companyMapsLink} onChange={e => setCompanyMapsLink(e.target.value)} placeholder="https://maps.google.com/..." />
-                        <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: 4 }}>Cole o link de compartilhamento do Google Maps do seu escritório</p>
-                    </div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                    <input
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={newEmpreendimentoName}
+                        onChange={e => setNewEmpreendimentoName(e.target.value)}
+                        placeholder="Nome do empreendimento (ex: Brava Concetto)"
+                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), createEmpreendimento())}
+                    />
+                    <button onClick={createEmpreendimento} style={btnSmall}><Plus size={14} /> Criar</button>
+                </div>
+                <div style={{ display: 'grid', gap: 8 }}>
+                    {empreendimentos.length === 0 && (
+                        <span style={{ color: '#bbb', fontSize: '0.82rem' }}>Nenhum empreendimento cadastrado.</span>
+                    )}
+                    {empreendimentos.map(e => (
+                        <div key={e.id} style={{
+                            border: '1px solid #e7e4df',
+                            background: '#fafafa',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            display: 'grid',
+                            gridTemplateColumns: '1fr auto',
+                            gap: 8,
+                            alignItems: 'center',
+                        }}>
+                            <div>
+                                <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#444' }}>{e.nome}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#888' }}>/ {e.slug}</div>
+                            </div>
+                            <button onClick={() => deleteEmpreendimento(e.id)} style={{ ...btnSmall, background: 'linear-gradient(135deg, #ef4444, #dc2626)', padding: '6px 10px' }}>
+                                <X size={14} /> Excluir
+                            </button>
+                        </div>
+                    ))}
                 </div>
             </div>
 
