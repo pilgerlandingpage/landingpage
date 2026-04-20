@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 // ─── Design Tokens (Dark Green Luxury — inspired by AI Studio) ───────────
 const C = {
@@ -105,10 +106,14 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
 
     const openChat = useCallback(() => {
         if (broker?.phone) {
-            const msg = encodeURIComponent(broker.greeting_message || '')
-            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+            openWhatsAppWithLeadCapture({
+                phone: broker.phone,
+                message: broker.greeting_message || '',
+                slug,
+                template: 'brava-concetto',
+            })
         }
-    }, [broker])
+    }, [broker, slug])
 
     const openLightbox = (idx: number) => { setLightboxIdx(idx); setLightboxOpen(true) }
     const closeLightbox = () => setLightboxOpen(false)

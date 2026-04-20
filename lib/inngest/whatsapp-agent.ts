@@ -482,7 +482,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_debounce_seconds',
             'whatsapp_ai_schedule_enabled', 'whatsapp_ai_schedule_start', 'whatsapp_ai_schedule_end', 'whatsapp_ai_schedule_timezone',
             // Agent controls from admin panel
-            'agent_transfer_lock_minutes', 'agent_transfer_score_threshold', 'agent_tone',
+            'agent_transfer_score_threshold', 'agent_tone',
             'agent_default_instance_id', 'agent_transfer_instance_ids', 'agent_transfer_mode', 'agent_transfer_rr_index',
             'agent_social_instagram', 'agent_social_facebook', 'agent_social_youtube',
             'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site', 'agent_link_buttons'
@@ -2367,11 +2367,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const summary = aiResponse.updatedMessages
                     .map((m: any) => `${m.role === 'user' ? 'Lead' : 'Agente'}: ${m.content}`)
                     .join('\n')
-
-                const transferCooldownMinutes = Math.max(1, parseInt(configs['agent_transfer_lock_minutes'] || '1440', 10) || 1440)
-                const lastTransferAt = conversation.transferred_at ? new Date(conversation.transferred_at).getTime() : 0
-                const elapsedMinutes = lastTransferAt > 0 ? (Date.now() - lastTransferAt) / 60000 : Number.POSITIVE_INFINITY
-
                 // Co-piloto ativo: mantém a conversa ativa, apenas registra a transferência.
                 await supabase
                     .from('whatsapp_ai_conversations')
@@ -2382,13 +2377,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', conversation.id)
-
-                // Evita encaminhar repetidamente o mesmo lead para especialista
-                // dentro da janela de cooldown.
-                if (elapsedMinutes < transferCooldownMinutes) {
-                    console.log(`[Transfer] Cooldown ativo (${elapsedMinutes.toFixed(1)}min < ${transferCooldownMinutes}min). Encaminhamento ignorado.`)
-                    return
-                }
 
                 // ═══ NOTIFICAR CORRETOR HUMANO ═══
                 try {
@@ -3073,4 +3061,6 @@ export const whatsappKeepOnline = inngest.createFunction(
         return { action: 'presence_set', count: instances.length, results }
     }
 )
+
+
 

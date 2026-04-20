@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Star, Eye, MapPin, ChevronRight, Quote } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 const testimonials = [
     { name: 'Carlos M.', text: 'Atendimento impecável. Encontraram exatamente o que eu procurava em menos de uma semana.', stars: 5 },
@@ -25,10 +26,14 @@ export default function SocialProofTemplate({ data, slug, landingPageId, agentNa
 
     const openChat = useCallback(() => {
         if (broker?.phone) {
-            const msg = encodeURIComponent(broker.greeting_message || '')
-            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+            openWhatsAppWithLeadCapture({
+                phone: broker.phone,
+                message: broker.greeting_message || '',
+                slug,
+                template: 'social-proof',
+            })
         }
-    }, [broker])
+    }, [broker, slug])
 
     return (
         <div className="sp" style={{ '--pc': primaryColor } as React.CSSProperties}>

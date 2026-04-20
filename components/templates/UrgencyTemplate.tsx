@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Clock, Flame, MapPin, ChevronRight } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function UrgencyTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const { title, heroImage, price, cta, stats, primaryColor } = data
@@ -41,10 +42,14 @@ export default function UrgencyTemplate({ data, slug, landingPageId, agentName, 
     // Open WhatsApp with the assigned AI broker
     const openChat = useCallback(() => {
         if (broker?.phone) {
-            const msg = encodeURIComponent(broker.greeting_message || '')
-            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+            openWhatsAppWithLeadCapture({
+                phone: broker.phone,
+                message: broker.greeting_message || '',
+                slug,
+                template: 'urgency',
+            })
         }
-    }, [broker])
+    }, [broker, slug])
 
     return (
         <div className="urg" style={{ '--pc': primaryColor } as React.CSSProperties}>

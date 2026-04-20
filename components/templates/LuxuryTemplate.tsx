@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function LuxuryTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const {
@@ -74,10 +75,14 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
     // Open WhatsApp with the assigned AI broker
     const openChat = useCallback(() => {
         if (broker?.phone) {
-            const msg = encodeURIComponent(broker.greeting_message || '')
-            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+            openWhatsAppWithLeadCapture({
+                phone: broker.phone,
+                message: broker.greeting_message || '',
+                slug,
+                template: 'luxury',
+            })
         }
-    }, [broker])
+    }, [broker, slug])
 
     // Helper to map icons to amenities (simple round-robin or random for now, since we don't have icon keys in data)
     const getIconForAmenity = (index: number) => {

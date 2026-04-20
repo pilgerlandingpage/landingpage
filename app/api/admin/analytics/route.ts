@@ -16,6 +16,8 @@ export async function GET() {
             { count: partialLeadsCount },
             { count: vipCount },
             { count: whatsappCount },
+            { count: formSubmittedCount },
+            { count: whatsappStartedCount },
             { data: sourceRaw },
             { data: dailyVisitors },
             { data: dailyLeads },
@@ -41,6 +43,12 @@ export async function GET() {
 
             // 4. WhatsApp Enviados
             supabase.from('leads').select('*', { count: 'exact', head: true }).eq('whatsapp_sent', true),
+
+            // 4b. Formulário enviado
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'form_submitted'),
+
+            // 4c. Conversa WhatsApp iniciada
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'whatsapp_conversation_started'),
 
             // 6. Source Distribution
             supabase.from('visitors').select('detected_source'),
@@ -149,7 +157,8 @@ export async function GET() {
             totalLeads: (leadsCount || 0) + (partialLeadsCount || 0),
             conversionRate: visitorsCount ? parseFloat(((leadsCount! / visitorsCount!) * 100).toFixed(1)) : 0,
             vipLeads: vipCount || 0,
-            whatsappConversations: whatsappCount || 0,
+            whatsappConversations: whatsappStartedCount || 0,
+            formSubmissions: formSubmittedCount || 0,
             whatsappSent: whatsappCount || 0,
             pushSubscribers: pushCount || 0,
             cookieConsent: cookieConsentCount || 0,

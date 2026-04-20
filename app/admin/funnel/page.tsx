@@ -55,8 +55,10 @@ export default function FunnelPage() {
                 const steps: FunnelStep[] = [
                     { label: '👁️ Visitaram a Página', count: data.pageViews || 0, percentage: 100 },
                     { label: '🍪 Aceite de Cookies', count: data.cookieConsent || 0, percentage: ((data.cookieConsent || 0) / total) * 100 },
+                    { label: '🧾 Formulário Enviado', count: data.formSubmitted || 0, percentage: ((data.formSubmitted || 0) / total) * 100 },
                     { label: '💬 Abriram o Chat', count: data.chatOpened || 0, percentage: ((data.chatOpened || 0) / total) * 100 },
                     { label: '📝 Enviaram Mensagem', count: data.messageSent || 0, percentage: ((data.messageSent || 0) / total) * 100 },
+                    { label: '📲 Conversa WhatsApp Iniciada', count: data.whatsappConversationStarted || 0, percentage: ((data.whatsappConversationStarted || 0) / total) * 100 },
                     { label: '🔔 Aceitaram Push', count: data.pushSubscribed || 0, percentage: ((data.pushSubscribed || 0) / total) * 100 },
                     { label: '📞 Lead Capturado', count: data.leadCaptured || 0, percentage: ((data.leadCaptured || 0) / total) * 100 },
                     { label: '⭐ Qualificado', count: data.qualified || 0, percentage: ((data.qualified || 0) / total) * 100 },
@@ -113,50 +115,17 @@ export default function FunnelPage() {
                         // Schematic width: reduces by step to preserve funnel shape
                         // e.g. 100%, 85%, 70%, 55%, 40%, 25%
                         const maxSteps = 8
-                        const topWidthPercent = 100 - (index * 12)
-                        const bottomWidthPercent = 100 - ((index + 1) * 12)
+                        const stepDrop = funnelData.length > 1 ? (70 / (funnelData.length - 1)) : 0
+                        const topWidthPercent = Math.max(30, 100 - (index * stepDrop))
 
                         // Vivid colors for high impact on dark background
-                        const colors = [
-                            '#0066FF', // Electric Blue (Awareness)
-                            '#4ade80', // Green (Cookie Consent) - Add a distinctive color
-                            '#9933FF', // Electric Purple (Interest)
-                            '#FF0099', // Hot Pink (Desire)
-                            '#FFAA00', // Amber (Push Notification)
-                            '#FF6600', // Vivid Orange (Action)
-                            '#FFD700', // Gold (Qualification)
-                            '#00CC44'  // Vivid Green (Conversion)
-                        ]
+                        const palette = ['#0066FF', '#4ade80', '#9933FF', '#FF0099', '#FFAA00', '#FF6600', '#FFD700', '#00CC44']
+                        const color = palette[index % palette.length]
 
                         // Overriding with custom hex for "Vivid" request
-                        const vividColors = [
-                            '#0ea5e9', // Sky 500 (Cyan-Blue)
-                            '#d946ef', // Fuchsia 500 (Magenta)
-                            '#f43f5e', // Rose 500 (Red-Pink)
-                            '#f97316', // Orange 500
-                            '#fbbf24', // Amber 400
-                            '#10b981'  // Emerald 500
-                        ]
-
+                        
                         // Let's use the vivid set
-                        const activeColors = [
-                            '#0088FE', // Strong Blue
-                            '#4ade80', // Green (Consent)
-                            '#8884d8', // Purple
-                            '#FF8042', // Orange (Wait, let's stick to the spectrum requested: Blue -> Purple -> Pink -> Orange -> Yellow -> Green)
-
-                            // Blue -> Purple -> Pink -> Orange -> Yellow -> Green
-                            '#2563EB', // Blue 600 (Stronger) -> Let's try #3b82f6 again but maybe the issue is opacity?
-                            // User said "more vivid".
-                            '#0066FF', // Electric Blue
-                            '#4ade80', // Cookie Green
-                            '#9933FF', // Electric Purple
-                            '#FF0099', // Hot Pink
-                            '#FF6600', // Vivid Orange
-                            '#FFD700', // Gold
-                            '#00CC44'  // Vivid Green
-                        ]
-
+                        
                         return (
                             <div key={index} style={{
                                 width: '100%',
@@ -178,9 +147,9 @@ export default function FunnelPage() {
                                     justifyContent: 'flex-end',
                                     whiteSpace: 'nowrap' // Prevent wrapping
                                 }}>
-                                    <span style={{ color: colors[index], marginRight: '8px', fontSize: '1.2em' }}>●</span>
+                                    <span style={{ color: color, marginRight: '8px', fontSize: '1.2em' }}>●</span>
                                     {step.label.replace(/^[^\s]+\s/, '')}
-                                    <div style={{ width: '60px', height: '1px', background: `linear-gradient(to right, transparent, ${colors[index]})`, marginLeft: '10px', opacity: 0.5 }}></div>
+                                    <div style={{ width: '60px', height: '1px', background: `linear-gradient(to right, transparent, ${color})`, marginLeft: '10px', opacity: 0.5 }}></div>
                                 </div>
 
                                 {/* Funnel Trapezoid Shape (Centered) */}
@@ -195,7 +164,7 @@ export default function FunnelPage() {
                                     <div style={{
                                         width: `${topWidthPercent}%`,
                                         height: '100%',
-                                        background: `linear-gradient(to bottom, ${colors[index]}ee, ${colors[index]}99)`,
+                                        background: `linear-gradient(to bottom, ${color}ee, ${color}99)`,
                                         clipPath: `polygon(0 0, 100% 0, ${100 - (7.5)}% 100%, ${7.5}% 100%)`,
                                         display: 'flex',
                                         alignItems: 'center',
@@ -342,3 +311,4 @@ export default function FunnelPage() {
         </div>
     )
 }
+

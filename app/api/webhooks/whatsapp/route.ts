@@ -436,6 +436,40 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Route: AI Broker or Shadow Agent ──
+        try {
+            const { data: leadRow } = await supabase
+                .from('leads')
+                .select('id, visitor_id, landing_page_id')
+                .eq('phone', finalPhone)
+                .order('updated_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+
+            if (leadRow?.visitor_id) {
+                await supabase.from('funnel_events').insert({
+                    visitor_id: leadRow.visitor_id,
+                    lead_id: leadRow.id || null,
+                    landing_page_id: leadRow.landing_page_id || null,
+                    event_type: 'whatsapp_conversation_started',
+                    metadata: {
+                        instance_id: instance.id,
+                        instance_name: instance.instance_name,
+                        message_type: messageType || 'text',
+                    },
+                })
+
+                await supabase
+                    .from('leads')
+                    .update({
+                        conversation_started_at: new Date().toISOString(),
+                    })
+                    .eq('id', leadRow.id)
+                    .is('conversation_started_at', null)
+            }
+        } catch (e) {
+            console.warn('[Webhook] Failed to register whatsapp_conversation_started:', e)
+        }
+
         if (instance.broker_id) {
             // AI Broker path
             await inngest.send({

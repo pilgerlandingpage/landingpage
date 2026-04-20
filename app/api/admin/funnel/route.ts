@@ -12,7 +12,9 @@ export async function GET() {
         const [
             { count: pageViews },
             { count: cookieConsent },
+            { count: formSubmitted },
             { count: chatOpened },
+            { count: whatsappConversationStarted },
             { data: messageSentData },
             { count: pushSubscribed },
             { count: leadCaptured },
@@ -21,7 +23,9 @@ export async function GET() {
         ] = await Promise.all([
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
             supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'cookie_consent'),
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'form_submitted'),
             supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'chat_opened'),
+            supabase.from('funnel_events').select('*', { count: 'exact', head: true }).eq('event_type', 'whatsapp_conversation_started'),
             supabase.from('chat_history').select('visitor_id'),
             supabase.from('push_subscriptions').select('*', { count: 'exact', head: true }).eq('active', true),
             supabase.from('leads').select('*', { count: 'exact', head: true }).not('phone', 'is', null),
@@ -32,7 +36,9 @@ export async function GET() {
         return NextResponse.json({
             pageViews: pageViews || 0,
             cookieConsent: cookieConsent || 0,
+            formSubmitted: formSubmitted || 0,
             chatOpened: chatOpened || 0,
+            whatsappConversationStarted: whatsappConversationStarted || 0,
             messageSent: new Set((messageSentData as any[])?.map(m => m.visitor_id)).size || 0,
             pushSubscribed: pushSubscribed || 0,
             leadCaptured: leadCaptured || 0,

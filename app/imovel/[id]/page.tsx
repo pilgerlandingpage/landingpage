@@ -5,6 +5,7 @@ import Link from 'next/link'
 import HeroCarousel from '@/components/property/HeroCarousel'
 import PropertyGallery from '@/components/property/PropertyGallery'
 import MobileNav from '@/components/marketplace/MobileNav'
+import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,15 +135,16 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 <div className="pd-cta-card">
                     <h3 className="pd-cta-title">Interessado neste imóvel?</h3>
                     <p className="pd-cta-text">Fale diretamente com Guilherme Pilger e agende sua visita exclusiva.</p>
-                    <a
-                        href={`https://wa.me/5548999999999?text=Olá! Tenho interesse no imóvel: ${property.title}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <WhatsAppCaptureLink
+                        phone="5548999999999"
+                        message={`Olá! Tenho interesse no imóvel: ${property.title}`}
+                        slug="imovel"
+                        template="property-detail-cta"
                         className="pd-cta-button"
                     >
                         <Phone size={20} />
                         Falar com Especialista
-                    </a>
+                    </WhatsAppCaptureLink>
                 </div>
             </section>
 

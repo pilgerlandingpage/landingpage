@@ -1,12 +1,31 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Search, MessageSquare } from 'lucide-react'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function MobileNav() {
-    const openChat = () => {
-        window.dispatchEvent(new CustomEvent('open-concierge-chat'))
-    }
+    const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
+
+    useEffect(() => {
+        fetch('/api/broker-for-page?slug=home')
+            .then(r => r.json())
+            .then(d => { if (d?.broker) setBroker(d.broker) })
+            .catch(() => {})
+    }, [])
+
+    const openChat = useCallback(() => {
+        const fallbackPhone = '5547992528080'
+        const phone = broker?.phone || fallbackPhone
+        const message = broker?.greeting_message || 'Olá! Quero falar com um especialista.'
+
+        openWhatsAppWithLeadCapture({
+            phone,
+            message,
+            slug: 'home',
+            template: 'marketplace-home',
+        })
+    }, [broker])
 
     return (
         <div className="mobile-nav" style={{ gap: '0', justifyContent: 'space-evenly', padding: '0 8px' }}>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Crown, Lock, MapPin, ChevronRight, Users } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function VipExclusiveTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const { title, heroImage, price, cta, stats, primaryColor } = data
@@ -24,10 +25,14 @@ export default function VipExclusiveTemplate({ data, slug, landingPageId, agentN
 
     const openChat = useCallback(() => {
         if (broker?.phone) {
-            const msg = encodeURIComponent(broker.greeting_message || '')
-            window.open(`https://wa.me/${broker.phone}?text=${msg}`, '_blank')
+            openWhatsAppWithLeadCapture({
+                phone: broker.phone,
+                message: broker.greeting_message || '',
+                slug,
+                template: 'vip-exclusive',
+            })
         }
-    }, [broker])
+    }, [broker, slug])
 
     const filledSpots = 20 - spotsLeft
     const percentage = (filledSpots / 20) * 100

@@ -108,7 +108,6 @@ export default function AgentConfigPage() {
         '*Lead qualificado transferido!*\n\nNome: {nome_lead}\nTelefone: {telefone}\nInteresse: {interesse}\nOrcamento: {orcamento}\nRegiao: {regiao}\n\nEntre em contato agora!'
     )
     const [agentTone, setAgentTone] = useState('amigavel')
-    const [transferLockMinutes, setTransferLockMinutes] = useState('1440')
     const [transferScoreThreshold, setTransferScoreThreshold] = useState('80')
     const [defaultInstanceId, setDefaultInstanceId] = useState('')
     const [transferInstanceIds, setTransferInstanceIds] = useState<string[]>([])
@@ -182,7 +181,6 @@ export default function AgentConfigPage() {
                 if (c.agent_transfer_message_lead) setTransferMsgLead(c.agent_transfer_message_lead)
                 if (c.agent_transfer_message_broker) setTransferMsgBroker(c.agent_transfer_message_broker)
                 if (c.agent_tone) setAgentTone(c.agent_tone)
-                if (c.agent_transfer_lock_minutes) setTransferLockMinutes(c.agent_transfer_lock_minutes)
                 if (c.agent_transfer_score_threshold) setTransferScoreThreshold(c.agent_transfer_score_threshold)
                 if (c.agent_default_broker_id) setDefaultBrokerId(c.agent_default_broker_id)
                 if (c.agent_default_instance_id) setDefaultInstanceId(c.agent_default_instance_id)
@@ -218,7 +216,6 @@ export default function AgentConfigPage() {
                         agent_transfer_message_lead: transferMsgLead,
                         agent_transfer_message_broker: transferMsgBroker,
                         agent_tone: agentTone,
-                        agent_transfer_lock_minutes: transferLockMinutes,
                         agent_transfer_score_threshold: transferScoreThreshold,
                         agent_default_broker_id: defaultBrokerId,
                         agent_default_instance_id: defaultInstanceId,
@@ -891,7 +888,7 @@ export default function AgentConfigPage() {
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Mensagens de Transferência</h2>
                     <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tag: {'{transferir}'}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     <div>
                         <label style={labelStyle}>Tom de voz</label>
                         <select style={inputStyle} value={agentTone} onChange={e => setAgentTone(e.target.value)}>
@@ -899,17 +896,6 @@ export default function AgentConfigPage() {
                             <option value="formal">Formal</option>
                             <option value="consultivo">Consultivo</option>
                         </select>
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Bloqueio da IA após transferência (min)</label>
-                        <input
-                            type="number"
-                            min={0}
-                            style={inputStyle}
-                            value={transferLockMinutes}
-                            onChange={e => setTransferLockMinutes(e.target.value)}
-                            placeholder="1440"
-                        />
                     </div>
                     <div>
                         <label style={labelStyle}>Score para transferência automática</label>

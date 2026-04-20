@@ -62,3 +62,28 @@ export async function trackEvent(eventType: string, metadata: any = {}) {
         console.error('Track Event Error:', error)
     }
 }
+
+export async function trackChatOpened(landingPageSlug?: string, metadata: any = {}) {
+    const visitorId = getVisitorId()
+    const slug = landingPageSlug || window.location.pathname.split('/')[1] || 'home'
+
+    try {
+        await fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                visitor_cookie_id: visitorId,
+                landing_page_slug: slug,
+                referrer: document.referrer,
+                search_params: window.location.search,
+                event_type: 'chat_opened',
+                metadata: {
+                    channel: 'whatsapp',
+                    ...metadata,
+                },
+            }),
+        })
+    } catch (error) {
+        console.error('Track chat_opened error:', error)
+    }
+}
