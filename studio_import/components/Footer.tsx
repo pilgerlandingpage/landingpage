@@ -9,11 +9,11 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto text-center">
         <div className="mb-20">
           <h2 className="text-5xl md:text-7xl font-serif mb-10 leading-tight">
-            Este é o seu momento. <br />
+            Este ÃƒÆ’Ã‚Â© o seu momento. <br />
             <span className="italic gold-gradient">Garanta seu Legado.</span>
           </h2>
           <p className="text-white/50 text-lg mb-12 max-w-xl mx-auto">
-            Restam apenas 3 unidades disponíveis para aquisição imediata. Antecipe-se ao lançamento oficial.
+            Restam apenas 3 unidades disponÃƒÆ’Ã‚Â­veis para aquisiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o imediata. Antecipe-se ao lanÃƒÆ’Ã‚Â§amento oficial.
           </p>
           <a 
             href={WHATSAPP_LINK}
@@ -29,18 +29,18 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-3 gap-12 text-left items-start pt-20 border-t border-white/10">
           <div className="space-y-6">
             <div className="flex flex-col">
-              <span className="text-2xl font-serif tracking-[0.2em] font-bold">L'HÉRITAGE</span>
+              <span className="text-2xl font-serif tracking-[0.2em] font-bold">Lâ€™HÃ‰RITAGE</span>
               <span className="text-[10px] tracking-[0.4em] text-white/40 uppercase">A Signature Luxury Project</span>
             </div>
             <p className="text-xs text-white/30 leading-relaxed max-w-xs uppercase tracking-widest">
-              Avenida Atlântica, Edifício L'Héritage, <br />
+              Avenida AtlÃƒÆ’Ã‚Â¢ntica, EdifÃƒÆ’Ã‚Â­cio LÃ¢â‚¬â„¢HÃƒÆ’Ã‚Â©ritage, <br />
               Penthouses Collection.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-yellow-500">Navegação</h4>
+              <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-yellow-500">NavegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</h4>
               <ul className="text-xs space-y-3 text-white/50 tracking-widest uppercase">
                 <li><a href="#" className="hover:text-white transition-colors">Home</a></li>
                 <li><a href="#galeria" className="hover:text-white transition-colors">Galeria</a></li>
@@ -68,7 +68,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.5em] text-white/20 uppercase">
-          <span>&copy; 2024 L'Héritage Luxury Living.</span>
+          <span>&copy; 2024 LÃ¢â‚¬â„¢HÃƒÆ’Ã‚Â©ritage Luxury Living.</span>
           <span className="mt-4 md:mt-0">Todos os direitos reservados.</span>
         </div>
       </div>

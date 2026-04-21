@@ -12,23 +12,30 @@ import { grantConsent, hasConsent, getVisitorId } from '@/lib/tracking/client'
 export default function UnifiedConsentBanner() {
     const hasRun = useRef(false)
 
+    function urlBase64ToUint8Array(base64String: string) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+        const rawData = window.atob(base64)
+        const outputArray = new Uint8Array(rawData.length)
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i)
+        }
+        return outputArray
+    }
+
     useEffect(() => {
         if (hasRun.current) return
         hasRun.current = true
 
-        // If consent already granted on a previous visit, just ensure push is set up
-        // If not, grant it silently now
         const runAutoConsent = async () => {
             try {
                 const alreadyConsented = hasConsent()
 
                 if (!alreadyConsented) {
-                    // Silently grant consent (sets cookies + dispatches event)
                     grantConsent()
                     console.log('[AutoConsent] Cookie consent granted automatically')
                 }
 
-                // Register visitor in the database
                 const cookieId = getVisitorId()
                 console.log('[AutoConsent] Visitor ID:', cookieId)
 
@@ -55,8 +62,6 @@ export default function UnifiedConsentBanner() {
                     console.error('[AutoConsent] Failed to register visitor:', err)
                 }
 
-                // Push Notification Flow — only if permission was already granted previously
-                // (we cannot request permission without a user gesture)
                 if (dbVisitorId && vapidPublicKey && 'serviceWorker' in navigator) {
                     const currentPermission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
 
@@ -83,9 +88,9 @@ export default function UnifiedConsentBanner() {
                             })
 
                             if (res.ok) {
-                                console.log('[AutoConsent] ✅ Push subscription saved')
+                                console.log('[AutoConsent] ? Push subscription saved')
                             } else {
-                                console.error('[AutoConsent] ❌ Push subscription save failed')
+                                console.error('[AutoConsent] ? Push subscription save failed')
                             }
 
                             try {
@@ -114,17 +119,5 @@ export default function UnifiedConsentBanner() {
         runAutoConsent()
     }, [])
 
-    const urlBase64ToUint8Array = (base64String: string) => {
-        const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-        const rawData = window.atob(base64)
-        const outputArray = new Uint8Array(rawData.length)
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i)
-        }
-        return outputArray
-    }
-
-    // No UI rendered — consent is silent
     return null
 }

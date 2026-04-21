@@ -36,8 +36,6 @@ export default function HeroCarousel({ images, title, videoUrl, gallerySectionId
     const hasVideo = videoUrl && extractYouTubeId(videoUrl)
     const totalSlides = images.length + (hasVideo ? 1 : 0)
 
-    if (images.length === 0 && !hasVideo) return null
-
     const goTo = useCallback((idx: number) => {
         setCurrent(idx)
         setVideoPlaying(false)
@@ -104,6 +102,8 @@ export default function HeroCarousel({ images, title, videoUrl, gallerySectionId
             document.getElementById(gallerySectionId)?.scrollIntoView({ behavior: 'smooth' })
         }
     }
+
+    if (images.length === 0 && !hasVideo) return null
 
     return (
         <div

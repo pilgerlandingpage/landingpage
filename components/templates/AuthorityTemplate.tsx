@@ -14,7 +14,7 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
             {/* --- Top Bar (Credibility) --- */}
             <div className="bg-slate-900 text-white/80 text-xs py-2 px-4 flex justify-between items-center">
                 <div className="flex gap-4">
-                    <span className="flex items-center gap-1"><Shield size={12} /> Imóvel Verificado</span>
+                    <span className="flex items-center gap-1"><Shield size={12} /> ImÃƒÂ³vel Verificado</span>
                     <span className="flex items-center gap-1"><Award size={12} /> Exclusividade Pilger</span>
                 </div>
                 <div className="uppercase tracking-widest font-semibold">Ref: {slug.toUpperCase().substring(0, 6)}</div>
@@ -26,7 +26,7 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
                 <div className="flex flex-col justify-center p-12 lg:p-24 bg-white">
                     <div className="flex items-center gap-2 mb-6">
                         <div className="h-[1px] w-12 bg-slate-400"></div>
-                        <span className="uppercase tracking-[0.2em] text-sm text-slate-500 font-semibold">Oportunidade Única</span>
+                        <span className="uppercase tracking-[0.2em] text-sm text-slate-500 font-semibold">Oportunidade ÃƒÅ¡nica</span>
                     </div>
 
                     <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-[1.1] tracking-tight">
@@ -35,8 +35,8 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
 
                     <div className="flex gap-4 mb-8 text-slate-600 font-medium">
                         <span>{data.stats.location}</span>
-                        <span>•</span>
-                        <span>{data.stats.area}m² Privativos</span>
+                        <span>Ã¢â‚¬Â¢</span>
+                        <span>{data.stats.area}mÃ‚Â² Privativos</span>
                     </div>
 
                     <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-lg">
@@ -48,7 +48,7 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
                             {data.cta}
                         </button>
                         <button className="border-2 border-slate-200 text-slate-700 px-8 py-4 font-semibold hover:border-slate-900 hover:text-slate-900 transition-all">
-                            Baixar Apresentação PDF
+                            Baixar ApresentaÃƒÂ§ÃƒÂ£o PDF
                         </button>
                     </div>
 
@@ -92,7 +92,7 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
                     <div className="flex-1 text-center md:text-left">
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">Com a palavra, Guilherme Pilger:</h3>
                         <p className="text-slate-600 text-lg italic mb-6">
-                            "Este imóvel representa o que há de mais sólido no mercado atual. A localização estratégica combinada com o padrão construtivo faz desta uma escolha segura não apenas para moradia, mas para compor patrimônio."
+                            &quot;Este imóvel representa o que há de mais sólido no mercado atual. A localização estratégica combinada com o padrão construtivo faz desta uma escolha segura não apenas para moradia, mas para compor patrimônio.&quot;
                         </p>
                         <div className="flex flex-wrap gap-6 justify-center md:justify-start">
                             <div className="text-center">
@@ -113,25 +113,25 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
             <section className="py-24 px-6 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     <div className="md:col-span-1">
-                        <h3 className="text-3xl font-bold mb-6">Ficha Técnica</h3>
-                        <p className="text-slate-600 mb-8">Todos os detalhes foram rigorosamente conferidos para garantir a total transparência da negociação.</p>
+                        <h3 className="text-3xl font-bold mb-6">Ficha TÃƒÂ©cnica</h3>
+                        <p className="text-slate-600 mb-8">Todos os detalhes foram rigorosamente conferidos para garantir a total transparÃƒÂªncia da negociaÃƒÂ§ÃƒÂ£o.</p>
 
                         <div className="space-y-4">
                             <div className="flex justify-between py-3 border-b border-slate-100">
-                                <span className="text-slate-500">Área Privativa</span>
-                                <span className="font-semibold">{data.stats.area}m²</span>
+                                <span className="text-slate-500">ÃƒÂrea Privativa</span>
+                                <span className="font-semibold">{data.stats.area}mÃ‚Â²</span>
                             </div>
                             <div className="flex justify-between py-3 border-b border-slate-100">
-                                <span className="text-slate-500">Dormitórios</span>
-                                <span className="font-semibold">{data.stats.bedrooms} Suítes</span>
+                                <span className="text-slate-500">DormitÃƒÂ³rios</span>
+                                <span className="font-semibold">{data.stats.bedrooms} SuÃƒÂ­tes</span>
                             </div>
                             <div className="flex justify-between py-3 border-b border-slate-100">
                                 <span className="text-slate-500">Vagas</span>
                                 <span className="font-semibold">4</span>
                             </div>
                             <div className="flex justify-between py-3 border-b border-slate-100">
-                                <span className="text-slate-500">Condomínio</span>
-                                <span className="font-semibold">R$ 1.200/mês</span>
+                                <span className="text-slate-500">CondomÃƒÂ­nio</span>
+                                <span className="font-semibold">R$ 1.200/mÃƒÂªs</span>
                             </div>
                         </div>
                     </div>
@@ -161,13 +161,13 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
                         </div>
                         <div className="p-6 border border-slate-700 bg-slate-800/50">
                             <Shield className="mx-auto mb-4 text-slate-400" size={32} />
-                            <h4 className="font-bold mb-2">Segurança Jurídica</h4>
-                            <p className="text-sm text-slate-400">Assessoria completa em toda a documentação e trâmites legais.</p>
+                            <h4 className="font-bold mb-2">SeguranÃƒÂ§a JurÃƒÂ­dica</h4>
+                            <p className="text-sm text-slate-400">Assessoria completa em toda a documentaÃƒÂ§ÃƒÂ£o e trÃƒÂ¢mites legais.</p>
                         </div>
                         <div className="p-6 border border-slate-700 bg-slate-800/50">
                             <Star className="mx-auto mb-4 text-slate-400" size={32} />
                             <h4 className="font-bold mb-2">Curadoria Premium</h4>
-                            <p className="text-sm text-slate-400">Selecionamos apenas imóveis com real potencial de valorização.</p>
+                            <p className="text-sm text-slate-400">Selecionamos apenas imÃƒÂ³veis com real potencial de valorizaÃƒÂ§ÃƒÂ£o.</p>
                         </div>
                     </div>
                 </div>

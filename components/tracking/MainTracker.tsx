@@ -11,12 +11,10 @@ interface MainTrackerProps {
 }
 
 export default function MainTracker({ landingPageSlug }: MainTrackerProps) {
-    const [consent, setConsent] = useState(false)
+    const [consent, setConsent] = useState(() => hasConsent())
     const [visitorId, setVisitorId] = useState<string | undefined>()
 
     useEffect(() => {
-        setConsent(hasConsent())
-
         const handleConsent = () => setConsent(true)
         if (typeof window !== 'undefined') {
             window.addEventListener('pilger_consent_granted', handleConsent)

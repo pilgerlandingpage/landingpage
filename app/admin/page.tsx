@@ -309,7 +309,7 @@ export default function AdminDashboard() {
         <div>
             <div className="admin-header">
                 <h1>Painel do CEO</h1>
-                <p style={{ color: 'var(--text-muted)' }}>"Olho de Deus" - Monitoramento Proativo</p>
+                <p style={{ color: 'var(--text-muted)' }}>&quot;Olho de Deus&quot; - Monitoramento Proativo</p>
             </div>
 
             {/* ═══ Combined Traffic KPIs + General Thermometer ═══ */}

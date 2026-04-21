@@ -15,12 +15,10 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
     const openLightbox = (index: number) => {
         setCurrentIndex(index)
         setIsOpen(true)
-        document.body.style.overflow = 'hidden' // Prevent background scrolling
     }
 
     const closeLightbox = () => {
         setIsOpen(false)
-        document.body.style.overflow = 'auto'
     }
 
     // Handle ESC key to close
@@ -30,6 +28,11 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
         }
         if (isOpen) window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isOpen])
+
+    useEffect(() => {
+        document.body.style.overflow = isOpen ? 'hidden' : 'auto'
+        return () => { document.body.style.overflow = 'auto' }
     }, [isOpen])
 
     return (

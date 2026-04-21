@@ -80,7 +80,7 @@ export default function SectorsPage() {
     }
 
     const handleSave = async () => {
-        if (!form.name.trim()) { showToast('Nome é obrigatório', 'error'); return }
+        if (!form.name.trim()) { showToast('Nome Ã© obrigatÃ³rio', 'error'); return }
         setSaving(true)
         try {
             const method = creating ? 'POST' : 'PUT'
@@ -98,11 +98,11 @@ export default function SectorsPage() {
     }
 
     const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`Excluir o setor "${name}"? Usuários serão desvinculados.`)) return
+        if (!confirm(`Excluir o setor "${name}"? UsuÃ¡rios serÃ£o desvinculados.`)) return
         try {
             const res = await fetch(`/api/admin/sectors?id=${id}`, { method: 'DELETE' })
             if (!res.ok) throw new Error('Erro ao excluir')
-            showToast('Setor excluído', 'success')
+            showToast('Setor excluÃ­do', 'success')
             fetchData()
         } catch (err: any) { showToast(err.message, 'error') }
     }
@@ -114,8 +114,8 @@ export default function SectorsPage() {
     }, {} as Record<string, Permission[]>)
 
     const categoryLabels: Record<string, string> = {
-        principal: '📊 Principal', conteudo: '📝 Conteúdo',
-        automacao: '⚡ Automação', sistema: '⚙️ Sistema'
+        principal: 'ðŸ“Š Principal', conteudo: 'ðŸ“ ConteÃºdo',
+        automacao: 'âš¡ AutomaÃ§Ã£o', sistema: 'âš™ï¸ Sistema'
     }
 
     if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Carregando...</div>
@@ -132,10 +132,10 @@ export default function SectorsPage() {
             <div className="admin-header">
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Shield size={26} /> Gestão de Setores
+                        <Shield size={26} /> GestÃ£o de Setores
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                        Crie setores e defina quais módulos cada um pode acessar
+                        Crie setores e defina quais mÃ³dulos cada um pode acessar
                     </p>
                 </div>
                 <button className="btn btn-gold" onClick={startCreate} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -147,7 +147,7 @@ export default function SectorsPage() {
             {(creating || editing) && (
                 <div className="chart-card" style={{ marginBottom: 24, border: '2px solid var(--gold)' }}>
                     <div className="chart-title" style={{ marginBottom: 16 }}>
-                        {creating ? '✨ Novo Setor' : '✏️ Editar Setor'}
+                        {creating ? 'âœ¨ Novo Setor' : 'âœï¸ Editar Setor'}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -156,7 +156,7 @@ export default function SectorsPage() {
                             <input
                                 type="text" value={form.name}
                                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                                placeholder="Ex: Tráfego, Vendas..."
+                                placeholder="Ex: TrÃ¡fego, Vendas..."
                                 style={{
                                     width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)',
                                     background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem'
@@ -164,11 +164,11 @@ export default function SectorsPage() {
                             />
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Descrição</label>
+                            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>DescriÃ§Ã£o</label>
                             <input
                                 type="text" value={form.description}
                                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                                placeholder="Descrição breve do setor"
+                                placeholder="DescriÃ§Ã£o breve do setor"
                                 style={{
                                     width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)',
                                     background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem'
@@ -195,7 +195,7 @@ export default function SectorsPage() {
                     {/* Permissions */}
                     <div style={{ marginBottom: 16 }}>
                         <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
-                            Permissões ({form.permission_ids.length} selecionadas)
+                            PermissÃµes ({form.permission_ids.length} selecionadas)
                         </label>
                         {Object.entries(groupedPerms).map(([cat, perms]) => (
                             <div key={cat} style={{ marginBottom: 12 }}>
@@ -241,7 +241,7 @@ export default function SectorsPage() {
                     <Shield size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: 8 }}>Nenhum setor criado ainda</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        Clique em "Novo Setor" para criar o primeiro departamento.
+                        Clique em &quot;Novo Setor&quot; para criar o primeiro departamento.
                     </p>
                 </div>
             ) : (
@@ -271,13 +271,13 @@ export default function SectorsPage() {
                                                 </span>
                                             ))}
                                             {s.permissions.length === 0 && (
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem permissões</span>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem permissÃµes</span>
                                             )}
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                            <Users size={14} /> {s.user_count} {s.user_count === 1 ? 'usuário' : 'usuários'}
+                                            <Users size={14} /> {s.user_count} {s.user_count === 1 ? 'usuÃ¡rio' : 'usuÃ¡rios'}
                                         </div>
                                         <div style={{ display: 'flex', gap: 6 }}>
                                             <button onClick={() => startEdit(s)} title="Editar"

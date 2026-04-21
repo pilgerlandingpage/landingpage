@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 
 interface FunnelStep {
@@ -228,7 +229,7 @@ export default function FunnelPage() {
             <div className="chart-card" style={{ marginTop: '24px' }}>
                 <div className="chart-title flex justify-between items-center" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <span>Detalhamento de Tráfego (Topo de Funil)</span>
-                    <a href="/admin/leads" style={{ fontSize: '0.8rem', color: '#c9a96e', textDecoration: 'none' }}>Ver Todos</a>
+                    <Link href="/admin/leads" style={{ fontSize: '0.8rem', color: '#c9a96e', textDecoration: 'none' }}>Ver Todos</Link>
                 </div>
                 <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>

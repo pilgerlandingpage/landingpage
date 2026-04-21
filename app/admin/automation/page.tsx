@@ -42,7 +42,19 @@ export default function AutomationPage() {
         setLoading(false)
     }
 
-    useEffect(() => { fetchRules() }, [])
+    useEffect(() => {
+        let mounted = true
+        supabase
+            .from('lp_automation_rules')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .then(({ data }) => {
+                if (!mounted) return
+                setRules((data as AutomationRule[]) || [])
+                setLoading(false)
+            })
+        return () => { mounted = false }
+    }, [supabase])
 
     const handleSave = async () => {
         await supabase.from('lp_automation_rules').insert({

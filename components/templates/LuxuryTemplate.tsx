@@ -99,12 +99,12 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 py-4 ${isScrolled ? 'bg-black/95 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex flex-col">
-                        <span className="text-2xl font-serif tracking-[0.2em] font-bold text-white">L'HÉRITAGE</span>
+                        <span className="text-2xl font-serif tracking-[0.2em] font-bold text-white">Lâ€™HÃƒâ€°RITAGE</span>
                         <span className="text-[10px] tracking-[0.4em] text-white/50 uppercase">The Pinnacle of Living</span>
                     </div>
 
                     <div className="hidden md:flex space-x-8 text-xs tracking-widest uppercase font-medium text-white">
-                        <a href="#experiencia" className="hover:text-yellow-500 transition-colors">Experiência</a>
+                        <a href="#experiencia" className="hover:text-yellow-500 transition-colors">ExperiÃƒÂªncia</a>
                         <a href="#galeria" className="hover:text-yellow-500 transition-colors">Galeria</a>
                         <a href="#diferenciais" className="hover:text-yellow-500 transition-colors">Diferenciais</a>
                     </div>
@@ -146,7 +146,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     </h1>
 
                     <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-                        {price} • {stats.location}
+                        {price} Ã¢â‚¬Â¢ {stats.location}
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -154,7 +154,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             onClick={openChat}
                             className="group relative px-8 py-4 bg-white text-black font-bold tracking-widest uppercase text-sm w-full sm:w-auto transition-all duration-300 hover:bg-yellow-500 border-none cursor-pointer flex items-center justify-center"
                         >
-                            Solicitar Apresentação
+                            Solicitar ApresentaÃƒÂ§ÃƒÂ£o
                             <ArrowRight className="inline-block ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                         <a
@@ -178,10 +178,10 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                 <section id="posicionamento" className="py-24 md:py-40 px-6 relative">
                     <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
                         <div className="space-y-8">
-                            <span className="text-xs tracking-[0.3em] uppercase text-yellow-500/80">A Essência do Sucesso</span>
+                            <span className="text-xs tracking-[0.3em] uppercase text-yellow-500/80">A EssÃƒÂªncia do Sucesso</span>
                             <h2 className="text-4xl md:text-6xl font-serif leading-tight">
                                 Prepare-se para viver o <br />
-                                <span className="italic text-white/60 font-light">extraordinário.</span>
+                                <span className="italic text-white/60 font-light">extraordinÃƒÂ¡rio.</span>
                             </h2>
                             <p className="text-lg text-white/60 leading-relaxed font-light">
                                 {description}
@@ -189,7 +189,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             <div className="pt-6">
                                 <div className="flex items-center space-x-4 border-l-2 border-yellow-500/50 pl-6 py-2">
                                     <span className="text-4xl font-serif">{stats.area}</span>
-                                    <span className="text-xs uppercase tracking-widest text-white/50">m² de <br /> Área Privativa</span>
+                                    <span className="text-xs uppercase tracking-widest text-white/50">mÃ‚Â² de <br /> ÃƒÂrea Privativa</span>
                                 </div>
                             </div>
                         </div>
@@ -215,10 +215,10 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                         <div className="grid md:grid-cols-2 gap-16 mb-24 items-end">
                             <div>
                                 <span className="text-xs tracking-[0.3em] uppercase text-yellow-500/80 block mb-4">Engenharia de Luxo</span>
-                                <h2 className="text-5xl md:text-7xl font-serif">Onde a Perfeição se torna Padrão.</h2>
+                                <h2 className="text-5xl md:text-7xl font-serif">Onde a PerfeiÃƒÂ§ÃƒÂ£o se torna PadrÃƒÂ£o.</h2>
                             </div>
                             <p className="text-white/50 text-lg font-light leading-relaxed max-w-md">
-                                {stats.bedrooms} Suítes • {stats.bathrooms} Banheiros • Acabamento Premium
+                                {stats.bedrooms} SuÃƒÂ­tes Ã¢â‚¬Â¢ {stats.bathrooms} Banheiros Ã¢â‚¬Â¢ Acabamento Premium
                             </p>
                         </div>
 
@@ -242,7 +242,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                 <section id="galeria" className="py-24 bg-[#0a0a0a]">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-20">
-                            <h2 className="text-4xl md:text-6xl font-serif mb-6">Perspectiva Estética</h2>
+                            <h2 className="text-4xl md:text-6xl font-serif mb-6">Perspectiva EstÃƒÂ©tica</h2>
                             <div className="w-24 h-px bg-yellow-500 mx-auto opacity-50" />
                         </div>
 
@@ -287,17 +287,17 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
                         <h2 className="text-4xl md:text-7xl font-serif mb-12 leading-tight text-white">
                             Sinta a Liberdade do <br />
-                            <span className="italic text-yellow-500/90">Silêncio Absoluto.</span>
+                            <span className="italic text-yellow-500/90">SilÃƒÂªncio Absoluto.</span>
                         </h2>
                         <p className="text-xl md:text-2xl text-white/70 font-light leading-relaxed mb-16 italic">
-                            "Viver aqui é uma experiência transcendente. Cada detalhe foi pensado para elevar sua qualidade de vida a um novo patamar."
+                            &quot;Viver aqui Ã© uma experiÃªncia transcendente. Cada detalhe foi pensado para elevar sua qualidade de vida a um novo patamar.&quot;
                         </p>
                         <div className="w-16 h-px bg-white/30 mx-auto mb-16" />
                         <button
                             onClick={openChat}
                             className="inline-block px-12 py-5 bg-transparent border-2 border-white/50 text-white font-bold tracking-[0.3em] uppercase text-xs hover:bg-white hover:text-black transition-all duration-500 cursor-pointer"
                         >
-                            Solicitar Experiência Presencial
+                            Solicitar ExperiÃƒÂªncia Presencial
                         </button>
                     </div>
                 </section>
@@ -318,7 +318,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                         <div className="flex-1 space-y-8">
                             <div className="inline-flex items-center space-x-2 bg-black text-white px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase font-bold">
                                 <Award size={14} className="text-yellow-500" />
-                                <span>Consultoria de Alto Patrimônio</span>
+                                <span>Consultoria de Alto PatrimÃƒÂ´nio</span>
                             </div>
 
                             <h2 className="text-4xl md:text-5xl font-serif leading-tight">
@@ -326,14 +326,14 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             </h2>
 
                             <p className="text-lg text-black/70 font-light leading-relaxed">
-                                {greetingMessage || "Estou à disposição para apresentar todos os detalhes desta obra-prima."}
+                                {greetingMessage || "Estou ÃƒÂ  disposiÃƒÂ§ÃƒÂ£o para apresentar todos os detalhes desta obra-prima."}
                             </p>
 
                             <div className="grid grid-cols-2 gap-8 pt-4">
                                 <div className="flex items-start space-x-3">
                                     <CheckCircle className="text-black shrink-0" size={20} />
                                     <div>
-                                        <h4 className="font-bold text-xs uppercase tracking-widest mb-1">Aprovação Imediata</h4>
+                                        <h4 className="font-bold text-xs uppercase tracking-widest mb-1">AprovaÃƒÂ§ÃƒÂ£o Imediata</h4>
                                         <p className="text-xs text-black/60">Processos simplificados.</p>
                                     </div>
                                 </div>
@@ -355,7 +355,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                 <div className="max-w-7xl mx-auto text-center">
                     <div className="mb-20">
                         <h2 className="text-5xl md:text-7xl font-serif mb-10 leading-tight">
-                            Este é o seu momento. <br />
+                            Este ÃƒÂ© o seu momento. <br />
                             <span className="italic text-yellow-500">Garanta seu Legado.</span>
                         </h2>
                         <button
@@ -368,7 +368,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     </div>
 
                     <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.5em] text-white/20 uppercase">
-                        <span>&copy; {new Date().getFullYear()} Pilger Imóveis.</span>
+                        <span>&copy; {new Date().getFullYear()} Pilger ImÃƒÂ³veis.</span>
                         <span className="mt-4 md:mt-0">Todos os direitos reservados.</span>
                     </div>
                 </div>

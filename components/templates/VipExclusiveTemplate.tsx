@@ -8,11 +8,7 @@ import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function VipExclusiveTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const { title, heroImage, price, cta, stats, primaryColor } = data
-    const [spotsLeft, setSpotsLeft] = useState(5) // fixed initial to avoid hydration mismatch
-
-    useEffect(() => {
-        setSpotsLeft(Math.floor(Math.random() * 8) + 3)
-    }, [])
+    const [spotsLeft] = useState(() => Math.floor(Math.random() * 8) + 3)
 
     const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
 
