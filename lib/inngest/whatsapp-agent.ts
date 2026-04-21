@@ -2153,11 +2153,21 @@ export const processWhatsAppMessage = inngest.createFunction(
 
             if (urlButtons && urlButtons.items.length > 0) {
                 try {
+                    // O WhatsApp e a UAZAPI permitem no máximo 1 botão de URL por mensagem. Extrair o primeiro.
+                    const primaryUrlBtn = urlButtons.items[0];
+                    const otherUrlBtns = urlButtons.items.slice(1);
+
+                    let finalText = cleanText || urlButtons.title || 'Acesse o link abaixo:';
+                    if (otherUrlBtns.length > 0) {
+                        const extraLinks = otherUrlBtns.map(i => `\n🔗 *${i.text}*: ${i.url}`).join('');
+                        finalText = `${finalText}\n${extraLinks}`;
+                    }
+
                     const sendResult = await sendMenuMessage({
                         phone: cleanPhone,
-                        text: cleanText || urlButtons.title,
+                        text: finalText,
                         type: 'button',
-                        choices: urlButtons.items.map(item => `${item.text}|url:${item.url}`),
+                        choices: [`${primaryUrlBtn.text}|${primaryUrlBtn.url}`], // Uazapi format: "texto|https://link.com"
                         instanceToken,
                     })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
