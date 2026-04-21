@@ -2157,7 +2157,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                         phone: cleanPhone,
                         text: cleanText || urlButtons.title,
                         type: 'button',
-                        choices: urlButtons.items.map(item => `${item.text}|${item.url}`),
+                        choices: urlButtons.items.map(item => `${item.text}|url:${item.url}`),
                         instanceToken,
                     })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
