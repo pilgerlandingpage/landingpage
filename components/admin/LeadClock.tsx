@@ -27,15 +27,15 @@ export default function LeadClock({ recentLeads }: LeadClockProps) {
         const diffDays = Math.floor(diffHours / 24)
 
         if (diffMinutes < 5) {
-            return { lastLeadTime: 'Acabou de chegar! ??', urgencyColor: '#22c55e' }
+            return { lastLeadTime: 'Acabou de chegar!', urgencyColor: '#22c55e' }
         }
         if (diffMinutes < 60) {
-            return { lastLeadTime: `Há ${diffMinutes} min`, urgencyColor: '#4ade80' }
+            return { lastLeadTime: `Ha ${diffMinutes} min`, urgencyColor: '#4ade80' }
         }
         if (diffHours < 24) {
-            return { lastLeadTime: `Há ${diffHours}h e ${diffMinutes % 60}m`, urgencyColor: '#f59e0b' }
+            return { lastLeadTime: `Ha ${diffHours}h e ${diffMinutes % 60}m`, urgencyColor: '#f59e0b' }
         }
-        return { lastLeadTime: `Há ${diffDays} dias`, urgencyColor: '#ef4444' }
+        return { lastLeadTime: `Ha ${diffDays} dias`, urgencyColor: '#ef4444' }
     }, [recentLeads, nowMs])
 
     return (
@@ -67,7 +67,7 @@ export default function LeadClock({ recentLeads }: LeadClockProps) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Último Lead Recebido
+                    Ultimo Lead Recebido
                 </span>
                 <span style={{ fontSize: '1rem', fontWeight: 700, color: urgencyColor }}>
                     {lastLeadTime}
