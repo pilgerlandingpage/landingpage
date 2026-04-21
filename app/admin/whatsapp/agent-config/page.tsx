@@ -54,6 +54,61 @@ interface CustomLinkButton {
     carouselJson?: string
 }
 
+const ACTION_TYPE_HELP: Record<CustomLinkButton['type'], string> = {
+    URL: 'Envia botão com link externo (Instagram, site, YouTube). Use URL completa com https://.',
+    BUTTON: 'Envia até 3 botões de resposta rápida. Ideal para opções simples como "Comprar", "Alugar", "Falar com consultor".',
+    LIST: 'Envia uma lista expandível com várias opções. Melhor para catálogos ou menus com muitos itens.',
+    POLL: 'Envia enquete com votação. Use para coletar preferência rápida do cliente.',
+    LOCATION: 'Envia solicitação para o cliente compartilhar a localização atual no WhatsApp.',
+    PIX: 'Envia botão PIX nativo para facilitar pagamento/copiar chave com um toque.',
+    CAROUSEL: 'Envia carrossel com cards (texto, imagem e botões). Útil para mostrar imóveis/produtos em sequência.',
+}
+
+const CAROUSEL_EXAMPLE = `{
+  "text": "Confira 2 opções",
+  "cards": [
+    {
+      "text": "Apartamento em Balneário Camboriú",
+      "image": "https://seu-site.com/imovel-1.jpg",
+      "buttons": [
+        { "id": "https://seu-site.com/imovel-1", "text": "Ver detalhes", "type": "URL" },
+        { "id": "quero_imovel_1", "text": "Tenho interesse", "type": "REPLY" }
+      ]
+    }
+  ]
+}`
+
+function toDateTimeLocalValue(date: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function parseFollowupScheduleToDateTimes(raw: string | undefined): string[] {
+    if (!raw) return ['']
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+            // Compatibilidade legado: offsets em minutos.
+            const now = Date.now()
+            return parsed
+                .map((m) => Number(m))
+                .filter((m) => Number.isFinite(m) && m > 0)
+                .map((m) => toDateTimeLocalValue(new Date(now + m * 60000)))
+                .sort()
+        }
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.absolute_datetimes)) {
+            return parsed.absolute_datetimes
+                .map((iso: string) => new Date(String(iso || '')))
+                .filter((d: Date) => !Number.isNaN(d.getTime()))
+                .map((d: Date) => toDateTimeLocalValue(d))
+                .sort()
+        }
+    } catch {
+        return ['']
+    }
+    return ['']
+}
+
 function slugifyTagName(value: string) {
     return String(value || '')
         .toLowerCase()
@@ -112,6 +167,17 @@ export default function AgentConfigPage() {
     const [defaultInstanceId, setDefaultInstanceId] = useState('')
     const [transferInstanceIds, setTransferInstanceIds] = useState<string[]>([])
     const [transferMode, setTransferMode] = useState<'round_robin' | 'fixed'>('round_robin')
+    const [whatsappRescueEnabled, setWhatsappRescueEnabled] = useState(false)
+    const [whatsappRescueDelayMinutes, setWhatsappRescueDelayMinutes] = useState('5')
+    const [whatsappRescueMaxAttempts, setWhatsappRescueMaxAttempts] = useState('2')
+    const [whatsappRescueMessageTemplate, setWhatsappRescueMessageTemplate] = useState(
+        'Oi {nome_lead}! Vi seu cadastro e estou por aqui para te ajudar. Se quiser, já te explico tudo rapidinho por aqui.'
+    )
+    const [whatsappFollowupEnabled, setWhatsappFollowupEnabled] = useState(false)
+    const [whatsappFollowupDateTimes, setWhatsappFollowupDateTimes] = useState<string[]>([''])
+    const [whatsappFollowupMessageTemplate, setWhatsappFollowupMessageTemplate] = useState(
+        'Oi {nome_lead}! Passando para saber se posso te ajudar com mais detalhes.'
+    )
     const [instances, setInstances] = useState<AgentInstance[]>([])
     const [brokers, setBrokers] = useState<Broker[]>([])
     const [defaultBrokerId, setDefaultBrokerId] = useState('')
@@ -188,6 +254,18 @@ export default function AgentConfigPage() {
                 if (c.agent_transfer_instance_ids) {
                     try { setTransferInstanceIds(JSON.parse(c.agent_transfer_instance_ids)) } catch {}
                 }
+                if (typeof c.whatsapp_rescue_enabled === 'string') {
+                    setWhatsappRescueEnabled(c.whatsapp_rescue_enabled !== 'false')
+                }
+                if (c.whatsapp_rescue_delay_minutes) setWhatsappRescueDelayMinutes(c.whatsapp_rescue_delay_minutes)
+                if (c.whatsapp_rescue_max_attempts) setWhatsappRescueMaxAttempts(c.whatsapp_rescue_max_attempts)
+                if (c.whatsapp_rescue_message_template) setWhatsappRescueMessageTemplate(c.whatsapp_rescue_message_template)
+                if (typeof c.whatsapp_followup_enabled === 'string') setWhatsappFollowupEnabled(c.whatsapp_followup_enabled !== 'false')
+                if (c.whatsapp_followup_schedule_json) {
+                    const parsedTimes = parseFollowupScheduleToDateTimes(c.whatsapp_followup_schedule_json)
+                    setWhatsappFollowupDateTimes(parsedTimes)
+                }
+                if (c.whatsapp_followup_message_template) setWhatsappFollowupMessageTemplate(c.whatsapp_followup_message_template)
             }
         } catch (err) {
             console.error('Erro ao carregar config:', err)
@@ -200,6 +278,27 @@ export default function AgentConfigPage() {
         setSaving(true)
         setSaved(false)
         try {
+            const validDateCount = whatsappFollowupDateTimes
+                .map(v => String(v || '').trim())
+                .filter(Boolean)
+                .map(v => new Date(v))
+                .filter((d) => !Number.isNaN(d.getTime()))
+                .length
+
+            if (whatsappRescueEnabled && validDateCount === 0) {
+                alert('Para ativar o resgate, selecione ao menos uma data e hora de follow-up.')
+                setSaving(false)
+                return
+            }
+
+            const absoluteDatetimes = whatsappFollowupDateTimes
+                .map(v => String(v || '').trim())
+                .filter(Boolean)
+                .map(v => new Date(v))
+                .filter((d) => !Number.isNaN(d.getTime()))
+                .map((d) => d.toISOString())
+                .sort()
+
             const res = await fetch('/api/admin/whatsapp/agent-config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -221,6 +320,13 @@ export default function AgentConfigPage() {
                         agent_default_instance_id: defaultInstanceId,
                         agent_transfer_mode: transferMode,
                         agent_transfer_instance_ids: JSON.stringify(transferInstanceIds),
+                        whatsapp_rescue_enabled: String(whatsappRescueEnabled),
+                        whatsapp_rescue_delay_minutes: whatsappRescueDelayMinutes,
+                        whatsapp_rescue_max_attempts: whatsappRescueMaxAttempts,
+                        whatsapp_rescue_message_template: whatsappRescueMessageTemplate,
+                        whatsapp_followup_enabled: String(whatsappRescueEnabled),
+                        whatsapp_followup_schedule_json: JSON.stringify({ absolute_datetimes: absoluteDatetimes }),
+                        whatsapp_followup_message_template: whatsappFollowupMessageTemplate,
                     }
                 })
             })
@@ -373,9 +479,10 @@ export default function AgentConfigPage() {
             }
             try {
                 const parsed = JSON.parse(carouselJson)
-                if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('invalid')
+                const cards = Array.isArray(parsed) ? parsed : parsed?.cards
+                if (!Array.isArray(cards) || cards.length === 0) throw new Error('invalid')
             } catch {
-                alert('JSON do carousel inválido')
+                alert('JSON do carousel inválido. Use um array de cards ou objeto com { text, cards }.')
                 return
             }
             next = { ...base, carouselJson }
@@ -655,14 +762,22 @@ export default function AgentConfigPage() {
                                 : newActionType === 'LIST' ? 'Texto do botão da lista'
                                 : newActionType === 'POLL' ? 'Pergunta da enquete'
                                 : newActionType === 'PIX' ? 'Chave PIX'
-                                : newActionType === 'CAROUSEL' ? 'JSON dos cards'
+                                : newActionType === 'CAROUSEL' ? 'Use o campo JSON abaixo'
                                 : 'Não precisa'
                         }
-                        disabled={newActionType === 'LOCATION'}
+                        disabled={newActionType === 'LOCATION' || newActionType === 'CAROUSEL'}
                     />
                     <button onClick={addLinkButton} style={btnSmall}>
                         <Plus size={14} /> Criar
                     </button>
+                </div>
+                <div style={{ marginBottom: 10, fontSize: '0.78rem', color: '#666', background: '#f7fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px' }}>
+                    <strong>Para que serve este tipo:</strong> {ACTION_TYPE_HELP[newActionType]}
+                    {newActionType === 'CAROUSEL' && (
+                        <div style={{ marginTop: 6, color: '#4b5563' }}>
+                            Formato recomendado: objeto JSON com <code>text</code> e <code>cards</code>.
+                        </div>
+                    )}
                 </div>
                 {(newActionType === 'BUTTON' || newActionType === 'LIST' || newActionType === 'POLL' || newActionType === 'PIX') && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
@@ -686,6 +801,19 @@ export default function AgentConfigPage() {
                         ) : (
                             <div />
                         )}
+                    </div>
+                )}
+                {newActionType === 'CAROUSEL' && (
+                    <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: 6 }}>
+                            Exemplo de carousel (copie e ajuste links/textos):
+                        </div>
+                        <textarea
+                            style={{ ...textareaStyle, minHeight: 160, fontFamily: 'monospace', fontSize: '0.76rem' }}
+                            value={newActionField1}
+                            onChange={e => setNewActionField1(e.target.value)}
+                            placeholder={CAROUSEL_EXAMPLE}
+                        />
                     </div>
                 )}
 
@@ -979,6 +1107,133 @@ export default function AgentConfigPage() {
                         ))}
                     </div>
                 </div>
+            </div>
+
+            {/* RESGATE WHATSAPP */}
+            <div style={sectionStyle}>
+                <div style={sectionHeaderStyle}>
+                    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Resgate de Lead no WhatsApp</h2>
+                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Pós-cadastro sem resposta</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+                    <div>
+                        <label style={labelStyle}>Ativar resgate automático</label>
+                        <select
+                            style={inputStyle}
+                            value={whatsappRescueEnabled ? 'true' : 'false'}
+                            onChange={e => {
+                                const active = e.target.value === 'true'
+                                setWhatsappRescueEnabled(active)
+                                setWhatsappFollowupEnabled(active)
+                                if (active && whatsappFollowupDateTimes.every(x => !String(x || '').trim())) {
+                                    setWhatsappFollowupDateTimes([toDateTimeLocalValue(new Date(Date.now() + 5 * 60000)), ''])
+                                }
+                            }}
+                        >
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Aguardar (minutos)</label>
+                        <input
+                            type="number"
+                            min={1}
+                            max={120}
+                            style={inputStyle}
+                            value={whatsappRescueDelayMinutes}
+                            onChange={e => setWhatsappRescueDelayMinutes(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Máximo de tentativas</label>
+                        <input
+                            type="number"
+                            min={1}
+                            max={10}
+                            style={inputStyle}
+                            value={whatsappRescueMaxAttempts}
+                            onChange={e => setWhatsappRescueMaxAttempts(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label style={labelStyle}>Mensagem de resgate</label>
+                    <textarea
+                        style={textareaStyle}
+                        value={whatsappRescueMessageTemplate}
+                        onChange={e => setWhatsappRescueMessageTemplate(e.target.value)}
+                        placeholder="Oi {nome_lead}! Vi seu cadastro e estou por aqui para te ajudar..."
+                    />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        <span style={{ fontSize: '0.7rem', color: '#888' }}>Variáveis disponíveis:</span>
+                        {['{nome_lead}'].map(v => (
+                            <code key={v} style={{ fontSize: '0.7rem', background: '#ecfdf5', padding: '2px 6px', borderRadius: 4, color: '#047857' }}>{v}</code>
+                        ))}
+                    </div>
+                    <p style={{ fontSize: '0.72rem', color: '#888', marginTop: 6 }}>
+                        Esta mensagem só é enviada se o lead não iniciar conversa no WhatsApp dentro do tempo configurado.
+                    </p>
+                </div>
+                {whatsappRescueEnabled && (
+                    <div style={{ marginTop: 16, borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+                        <div>
+                            <label style={labelStyle}>Agenda visual de follow-up</label>
+                        </div>
+                        <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
+                            {whatsappFollowupDateTimes.map((dt, idx) => (
+                                <div key={`${idx}`} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
+                                    <input
+                                        type="datetime-local"
+                                        style={inputStyle}
+                                        value={dt}
+                                        onChange={e => {
+                                            const value = e.target.value
+                                            const next = [...whatsappFollowupDateTimes]
+                                            next[idx] = value
+
+                                            // Sem botão "adicionar": ao preencher a última linha, cria uma nova linha vazia.
+                                            if (idx === next.length - 1 && value.trim()) {
+                                                next.push('')
+                                            }
+
+                                            // Mantém apenas uma linha vazia no final.
+                                            const normalized = next.filter((v, i) => v.trim() || i === next.length - 1)
+                                            setWhatsappFollowupDateTimes(normalized.length ? normalized : [''])
+                                        }}
+                                    />
+                                    {idx < whatsappFollowupDateTimes.length - 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const next = whatsappFollowupDateTimes.filter((_, i) => i !== idx)
+                                                setWhatsappFollowupDateTimes(next.length ? next : [''])
+                                            }}
+                                            style={{ ...btnSmall, background: 'linear-gradient(135deg, #ef4444, #dc2626)', padding: '6px 10px' }}
+                                        >
+                                            <X size={14} /> Remover
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div>
+                            <label style={labelStyle}>Mensagem de follow-up</label>
+                            <textarea
+                                style={textareaStyle}
+                                value={whatsappFollowupMessageTemplate}
+                                onChange={e => setWhatsappFollowupMessageTemplate(e.target.value)}
+                                placeholder="Oi {nome_lead}! Passando para saber se posso te ajudar com mais detalhes."
+                            />
+                        </div>
+                        <p style={{ fontSize: '0.72rem', color: '#888', marginTop: 6 }}>
+                            Com o resgate ativo, você define apenas data e hora. Sem agenda preenchida, o sistema não salva.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Save Button (Bottom) */}

@@ -21,6 +21,24 @@ function getSupabase() {
     )
 }
 
+async function findLeadIdByPhone(
+    supabase: ReturnType<typeof getSupabase>,
+    phone: string
+): Promise<string | null> {
+    const clean = String(phone || '').replace(/\D/g, '')
+    if (!clean) return null
+
+    const { data } = await supabase
+        .from('leads')
+        .select('id')
+        .or(`phone.eq.${clean},phone_e164.eq.${clean}`)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    return data?.id || null
+}
+
 function getSaoPauloTimeContext() {
     const spNow = new Date(
         new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
@@ -1358,7 +1376,10 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             if (!carouselRaw) continue
             try {
                 const parsed = JSON.parse(carouselRaw)
-                const encoded = Buffer.from(JSON.stringify(parsed), 'utf-8').toString('base64')
+                const normalized = Array.isArray(parsed)
+                    ? { text: name, cards: parsed }
+                    : parsed
+                const encoded = Buffer.from(JSON.stringify(normalized), 'utf-8').toString('base64')
                 replacement = `[CAROUSEL_JSON:${encoded}]`
             } catch {
                 continue
@@ -1530,6 +1551,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 2: Find or create conversation ──
         const conversation = await step.run('find-or-create-conversation', async () => {
+            const leadId = await findLeadIdByPhone(supabase, cleanPhone)
             const { data: existing } = await supabase
                 .from('whatsapp_ai_conversations')
                 .select('*')
@@ -1541,6 +1563,13 @@ export const processWhatsAppMessage = inngest.createFunction(
                 .maybeSingle()
 
             if (existing) {
+                if (!existing.lead_id && leadId) {
+                    await supabase
+                        .from('whatsapp_ai_conversations')
+                        .update({ lead_id: leadId, updated_at: new Date().toISOString() })
+                        .eq('id', existing.id)
+                    existing.lead_id = leadId
+                }
                 // Co-piloto ativo: conversas antigas marcadas como transferred
                 // voltam para active para a IA global seguir atendendo normalmente.
                 if (existing.status === 'transferred') {
@@ -1556,6 +1585,7 @@ export const processWhatsAppMessage = inngest.createFunction(
             const { data: newConv } = await supabase
                 .from('whatsapp_ai_conversations')
                 .insert({
+                    lead_id: leadId,
                     broker_id: broker.id,
                     instance_id: instanceId,
                     lead_phone: cleanPhone,
@@ -2087,6 +2117,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         const shouldAlwaysAudio = mode === 'audio'
         const willSendAudio = audioEnabled
             && (shouldAlwaysAudio || (isAudio && shouldMirror))
+            && !isMediaMessage
             && !responseRequiresText(aiResponse.text) && !parseButtons(aiResponse.text).buttons
 
         await step.run('show-presence', async () => {
@@ -2115,25 +2146,20 @@ export const processWhatsAppMessage = inngest.createFunction(
             const shouldAlwaysAudio = mode === 'audio'
             const shouldSendAudio = audioEnabled
                 && (shouldAlwaysAudio || (isAudio && shouldMirror))
+                && !isMediaMessage
                 && !needsTextFormat && !hasInteractive
 
             console.log(`[WhatsApp Agent] 📤 Send decision: mode=${mode || 'legacy'}, isAudio=${isAudio}, audioEnabled=${audioEnabled}, needsTextFormat=${needsTextFormat}, buttons=${!!buttons}, urlButtons=${!!urlButtons}, list=${!!list}, poll=${!!poll}, location=${locationRequest}, pix=${!!pix}, carousel=${!!carousel}, shouldSendAudio=${shouldSendAudio}`)
 
             if (urlButtons && urlButtons.items.length > 0) {
                 try {
-                    const sendResult = await sendCarousel(
-                        cleanPhone,
-                        cleanText || urlButtons.title,
-                        [{
-                            text: cleanText || urlButtons.title,
-                            buttons: urlButtons.items.map(item => ({
-                                id: item.url,
-                                text: item.text,
-                                type: 'URL' as const,
-                            })),
-                        }],
-                        instanceToken
-                    )
+                    const sendResult = await sendMenuMessage({
+                        phone: cleanPhone,
+                        text: cleanText || urlButtons.title,
+                        type: 'button',
+                        choices: urlButtons.items.map(item => `${item.text}|${item.url}`),
+                        instanceToken,
+                    })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
                 } catch (e) {
                     console.warn('[URL Buttons] Failed, falling back to text links:', e)
@@ -2772,9 +2798,11 @@ export const detectHumanTakeover = inngest.createFunction(
                     .maybeSingle()
 
                 if (inst?.broker_id) {
+                    const leadId = await findLeadIdByPhone(supabase, recipientPhone)
                     const { data: created } = await supabase
                         .from('whatsapp_ai_conversations')
                         .insert({
+                            lead_id: leadId,
                             broker_id: inst.broker_id,
                             instance_id: instanceId,
                             lead_phone: recipientPhone,
@@ -2874,6 +2902,7 @@ export const shadowAgentResponse = inngest.createFunction(
 
         // Find or create conversation
         const conversation = await step.run('find-or-create-shadow-conv', async () => {
+            const leadId = await findLeadIdByPhone(supabase, cleanPhone)
             const { data: existing } = await supabase
                 .from('whatsapp_broker_conversations')
                 .select('*')
@@ -2884,11 +2913,20 @@ export const shadowAgentResponse = inngest.createFunction(
                 .limit(1)
                 .maybeSingle()
 
-            if (existing) return existing
+            if (existing) {
+                if (!existing.lead_id && leadId) {
+                    await supabase
+                        .from('whatsapp_broker_conversations')
+                        .update({ lead_id: leadId, updated_at: new Date().toISOString() })
+                        .eq('id', existing.id)
+                    existing.lead_id = leadId
+                }
+                return existing
+            }
 
             const { data: newConv } = await supabase
                 .from('whatsapp_broker_conversations')
-                .insert({ broker_user_id: user.id, lead_phone: cleanPhone, messages: [], is_shadow_agent: true })
+                .insert({ lead_id: leadId, broker_user_id: user.id, lead_phone: cleanPhone, messages: [], is_shadow_agent: true })
                 .select()
                 .single()
             return newConv
