@@ -59,6 +59,8 @@ export default function FunnelPage() {
                     { label: '💬 Abriram o Chat', count: data.chatOpened || 0, percentage: ((data.chatOpened || 0) / total) * 100 },
                     { label: '📝 Enviaram Mensagem', count: data.messageSent || 0, percentage: ((data.messageSent || 0) / total) * 100 },
                     { label: '📲 Conversa WhatsApp Iniciada', count: data.whatsappConversationStarted || 0, percentage: ((data.whatsappConversationStarted || 0) / total) * 100 },
+                    { label: '🔁 Follow-up Enviado', count: data.whatsappFollowupSent || 0, percentage: ((data.whatsappFollowupSent || 0) / total) * 100 },
+                    { label: '✅ Responderam ao Follow-up', count: data.whatsappFollowupReplied || 0, percentage: ((data.whatsappFollowupReplied || 0) / total) * 100 },
                     { label: '🔔 Aceitaram Push', count: data.pushSubscribed || 0, percentage: ((data.pushSubscribed || 0) / total) * 100 },
                     { label: '📞 Lead Capturado', count: data.leadCaptured || 0, percentage: ((data.leadCaptured || 0) / total) * 100 },
                     { label: '⭐ Qualificado', count: data.qualified || 0, percentage: ((data.qualified || 0) / total) * 100 },

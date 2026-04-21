@@ -35,6 +35,13 @@ const AGENT_CONFIG_KEYS = [
     'agent_transfer_instance_ids',
     'agent_transfer_mode',
     'agent_transfer_rr_index',
+    'whatsapp_rescue_enabled',
+    'whatsapp_rescue_delay_minutes',
+    'whatsapp_rescue_max_attempts',
+    'whatsapp_rescue_message_template',
+    'whatsapp_followup_enabled',
+    'whatsapp_followup_schedule_json',
+    'whatsapp_followup_message_template',
 ]
 
 // GET — Load all agent config values

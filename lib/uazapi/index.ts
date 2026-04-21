@@ -652,7 +652,14 @@ export async function downloadMedia(messageId: string, instanceToken: string): P
 
 /** Interpolar variáveis em template de mensagem */
 export function interpolateTemplate(template: string, variables: Record<string, string>): string {
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] || `{{${key}}}`)
+    return template.replace(/\{\{(\w+)\}\}|\{(\w+)\}/g, (_, keyA, keyB) => {
+        const key = keyA || keyB
+        if (!key) return _
+        if (Object.prototype.hasOwnProperty.call(variables, key)) {
+            return variables[key] ?? ''
+        }
+        return keyA ? `{{${key}}}` : `{${key}}`
+    })
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -324,7 +324,7 @@ export default function AgentConfigPage() {
                         whatsapp_rescue_delay_minutes: whatsappRescueDelayMinutes,
                         whatsapp_rescue_max_attempts: whatsappRescueMaxAttempts,
                         whatsapp_rescue_message_template: whatsappRescueMessageTemplate,
-                        whatsapp_followup_enabled: String(whatsappRescueEnabled),
+                        whatsapp_followup_enabled: String(whatsappFollowupEnabled),
                         whatsapp_followup_schedule_json: JSON.stringify({ absolute_datetimes: absoluteDatetimes }),
                         whatsapp_followup_message_template: whatsappFollowupMessageTemplate,
                     }

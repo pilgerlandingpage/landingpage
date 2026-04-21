@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
+import { inngest } from '@/lib/inngest/client'
 
 function getSupabase() {
     return createClient(
@@ -148,6 +149,20 @@ export async function POST(request: NextRequest) {
             },
         })
 
+        if (!leadId) {
+            throw new Error('Lead ID not resolved after capture')
+        }
+
+        // Agenda fluxo completo de follow-up caso o lead não inicie conversa no WhatsApp.
+        await inngest.send({
+            name: 'lead/schedule-whatsapp-followup-flow',
+            data: {
+                lead_id: leadId,
+                phone,
+                name
+            },
+        })
+
         return NextResponse.json({
             success: true,
             lead_id: leadId,
@@ -159,3 +174,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
     }
 }
+

@@ -20,6 +20,21 @@ export const inngest = new Inngest({
                 property_title?: string
             }
         }
+        'lead/schedule-whatsapp-rescue': {
+            data: {
+                lead_id: string
+                phone: string
+                name?: string
+                delay_minutes: number
+            }
+        }
+        'lead/schedule-whatsapp-followup-flow': {
+            data: {
+                lead_id: string
+                phone: string
+                name?: string
+            }
+        }
         'lead/vip-detected': {
             data: {
                 name?: string
