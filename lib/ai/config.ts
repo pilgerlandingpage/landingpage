@@ -42,6 +42,10 @@ export async function getPilgerProvider() {
     return (await getAIConfig('pilger_provider')) || (await getActiveAIProvider())
 }
 
+export async function getCeoProvider() {
+    return (await getAIConfig('ceo_provider')) || (await getPilgerProvider())
+}
+
 export async function getAdsProvider() {
     return (await getAIConfig('ads_provider')) || (await getActiveAIProvider())
 }
@@ -54,10 +58,16 @@ export async function getAdsOpenAIModel() {
     return (await getAIConfig('openai_ads_model')) || 'gpt-4o'
 }
 
-import { LEAD_EXTRACTION_PROMPT } from './prompts'
+export async function getCeoOpenAIModel() {
+    return (await getAIConfig('openai_ceo_model')) || (await getAIConfig('openai_pilger_model')) || (await getAIConfig('openai_model')) || 'gpt-4o-mini'
+}
+
+export async function getCeoGeminiModel() {
+    return (await getAIConfig('gemini_ceo_model')) || (await getAIConfig('gemini_pilger_model')) || (await getAIConfig('gemini_model')) || 'gemini-1.5-flash'
+}
 
 export async function getLeadExtractionPrompt() {
-    return (await getAIConfig('lead_extraction_prompt')) || LEAD_EXTRACTION_PROMPT
+    return await getAIConfig('lead_extraction_prompt')
 }
 
 export async function getSerpApiKey() {

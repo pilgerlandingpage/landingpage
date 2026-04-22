@@ -45,7 +45,7 @@ export default function PropertiesPage() {
     const fetchProps = async () => {
         try {
             const res = await fetch('/api/admin/properties')
-            if (!res.ok) throw new Error('Falha ao carregar imÃƒÂ³veis')
+            if (!res.ok) throw new Error('Falha ao carregar imóveis')
             const data = await res.json()
             setProperties(data)
         } catch (err: any) {
@@ -59,7 +59,7 @@ export default function PropertiesPage() {
 
     const handleSave = async () => {
         if (!form.title.trim()) {
-            showToast('O tÃƒÂ­tulo ÃƒÂ© obrigatÃƒÂ³rio.', 'error')
+            showToast('O título é obrigatório.', 'error')
             return
         }
 
@@ -88,16 +88,16 @@ export default function PropertiesPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: editingProp.id, ...payload }),
                 })
-                if (!res.ok) throw new Error('Erro ao atualizar imÃƒÂ³vel')
-                showToast('ImÃƒÂ³vel atualizado com sucesso!', 'success')
+                if (!res.ok) throw new Error('Erro ao atualizar imóvel')
+                showToast('Imóvel atualizado com sucesso!', 'success')
             } else {
                 const res = await fetch('/api/admin/properties', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                 })
-                if (!res.ok) throw new Error('Erro ao criar imÃƒÂ³vel')
-                showToast('ImÃƒÂ³vel criado com sucesso!', 'success')
+                if (!res.ok) throw new Error('Erro ao criar imóvel')
+                showToast('Imóvel criado com sucesso!', 'success')
             }
             setShowForm(false)
             setEditingProp(null)
@@ -132,11 +132,11 @@ export default function PropertiesPage() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Excluir este imÃƒÂ³vel?')) return
+        if (!confirm('Excluir este imóvel?')) return
         try {
             const res = await fetch(`/api/admin/properties?id=${id}`, { method: 'DELETE' })
-            if (!res.ok) throw new Error('Erro ao excluir imÃƒÂ³vel')
-            showToast('ImÃƒÂ³vel excluÃƒÂ­do com sucesso!', 'success')
+            if (!res.ok) throw new Error('Erro ao excluir imóvel')
+            showToast('Imóvel excluído com sucesso!', 'success')
             fetchProps()
         } catch (err: any) {
             showToast(err.message, 'error')
@@ -160,38 +160,38 @@ export default function PropertiesPage() {
             )}
 
             <div className="admin-header">
-                <h1>ImÃƒÂ³veis</h1>
+                <h1>Imóveis</h1>
                 <button className="btn btn-gold" onClick={() => { setShowForm(!showForm); setEditingProp(null); setForm(emptyForm) }}>
-                    <Plus size={18} /> Novo ImÃƒÂ³vel
+                    <Plus size={18} /> Novo Imóvel
                 </button>
             </div>
 
             {showForm && (
                 <div className="chart-card" style={{ marginBottom: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <div className="chart-title" style={{ marginBottom: 0 }}>{editingProp ? 'Ã¢Å“ÂÃ¯Â¸Â Editar ImÃƒÂ³vel' : 'Ã°Å¸ÂÂ  Novo ImÃƒÂ³vel'}</div>
+                        <div className="chart-title" style={{ marginBottom: 0 }}>{editingProp ? 'Ã¢Å“ÂÃ¯Â¸Â Editar Imóvel' : 'Ã°Å¸ÂÂ  Novo Imóvel'}</div>
                         <button className="btn btn-outline btn-sm" onClick={resetForm}><X size={16} /></button>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                            <label className="form-label">TÃƒÂ­tulo *</label>
+                            <label className="form-label">Título *</label>
                             <input className="form-input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cobertura Duplex Frente Mar" />
                         </div>
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                            <label className="form-label">DescriÃƒÂ§ÃƒÂ£o</label>
-                            <textarea className="form-textarea" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="DescriÃƒÂ§ÃƒÂ£o detalhada do imÃƒÂ³vel..." rows={4} />
+                            <label className="form-label">Descrição</label>
+                            <textarea className="form-textarea" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Descrição detalhada do imóvel..." rows={4} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Cidade</label>
-                            <input className="form-input" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="BalneÃƒÂ¡rio CamboriÃƒÂº" />
+                            <input className="form-input" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Balneário Camboriú" />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Estado</label>
                             <input className="form-input" value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="SC" />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">PreÃƒÂ§o (R$)</label>
+                            <label className="form-label">Preço (R$)</label>
                             <input className="form-input" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="4500000" />
                         </div>
                         <div className="form-group">
@@ -201,7 +201,7 @@ export default function PropertiesPage() {
                                 <option value="apartamento">Apartamento</option>
                                 <option value="casa">Casa</option>
                                 <option value="cobertura">Cobertura</option>
-                                <option value="mansao">MansÃƒÂ£o</option>
+                                <option value="mansao">Mansão</option>
                                 <option value="terreno">Terreno</option>
                                 <option value="sala_comercial">Sala Comercial</option>
                                 <option value="loft">Loft</option>
@@ -216,7 +216,7 @@ export default function PropertiesPage() {
                             <input className="form-input" type="number" value={form.bathrooms} onChange={e => setForm({ ...form, bathrooms: e.target.value })} placeholder="3" />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">ÃƒÂrea (mÃ‚Â²)</label>
+                            <label className="form-label">ÃƒÂrea (m²)</label>
                             <input className="form-input" type="number" value={form.area_m2} onChange={e => setForm({ ...form, area_m2: e.target.value })} placeholder="250" />
                         </div>
                         <div className="form-group">
@@ -242,24 +242,24 @@ export default function PropertiesPage() {
                             <textarea className="form-textarea" value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} placeholder={"https://...\nhttps://..."} rows={4} />
                         </div>
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                            <label className="form-label">Comodidades (separadas por vÃƒÂ­rgula)</label>
+                            <label className="form-label">Comodidades (separadas por vírgula)</label>
                             <textarea className="form-textarea" value={form.amenities} onChange={e => setForm({ ...form, amenities: e.target.value })} placeholder="Piscina, Academia, Vista Mar, Churrasqueira" rows={2} />
                         </div>
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Video size={16} style={{ color: 'var(--gold)' }} /> Link do VÃƒÂ­deo (YouTube)
+                                <Video size={16} style={{ color: 'var(--gold)' }} /> Link do Vídeo (YouTube)
                             </label>
                             <input className="form-input" value={form.video_url} onChange={e => setForm({ ...form, video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
                             {form.video_url && (
                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                    O vÃƒÂ­deo serÃƒÂ¡ exibido no carrossel de imagens do imÃƒÂ³vel.
+                                    O vídeo será exibido no carrossel de imagens do imóvel.
                                 </p>
                             )}
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                         <button className="btn btn-gold" onClick={handleSave} disabled={saving}>
-                            <Save size={16} /> {saving ? 'Salvando...' : 'Salvar ImÃƒÂ³vel'}
+                            <Save size={16} /> {saving ? 'Salvando...' : 'Salvar Imóvel'}
                         </button>
                         <button className="btn btn-outline" onClick={resetForm}>Cancelar</button>
                     </div>
@@ -272,8 +272,8 @@ export default function PropertiesPage() {
                 ) : properties.length === 0 ? (
                     <div className="chart-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 24px' }}>
                         <Image size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '8px' }}>Nenhum imÃƒÂ³vel cadastrado</p>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Clique em &quot;Novo Imóvel&quot; para comeÃƒÂ§ar.</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '8px' }}>Nenhum imóvel cadastrado</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Clique em &quot;Novo Imóvel&quot; para começar.</p>
                     </div>
                 ) : (
                     properties.map(prop => (
@@ -317,7 +317,7 @@ export default function PropertiesPage() {
                                 <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                     {prop.bedrooms && <span>{prop.bedrooms} quartos</span>}
                                     {prop.bathrooms && <span>{prop.bathrooms} banheiros</span>}
-                                    {prop.area_m2 && <span>{prop.area_m2}mÃ‚Â²</span>}
+                                    {prop.area_m2 && <span>{prop.area_m2}m²</span>}
                                 </div>
                                 {prop.amenities && prop.amenities.length > 0 && (
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '10px' }}>

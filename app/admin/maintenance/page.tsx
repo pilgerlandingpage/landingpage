@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2 } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, CalendarDays, Clock3 } from 'lucide-react'
 import Link from 'next/link'
-import { LEAD_EXTRACTION_PROMPT, PILGER_AI_PROMPT, ADS_ANALYSIS_SYSTEM_PROMPT, DAILY_REPORT_PROMPT, WEEKLY_REPORT_PROMPT } from '@/lib/ai/prompts'
 
 interface IntegrationCard {
     id: string
@@ -22,7 +21,7 @@ interface IntegrationCard {
 const INTEGRATIONS: IntegrationCard[] = [
     {
         id: 'uazapi',
-        title: 'ConnectyHub — WhatsApp API',
+        title: 'ConnectyHub - WhatsApp API',
         description: 'API premium para WhatsApp via ConnectyHub: instâncias, mensagens, botões, menus e automações. Cada usuário terá sua própria instância gerenciada no painel.',
         icon: 'whatsapp',
         fields: [
@@ -33,7 +32,7 @@ const INTEGRATIONS: IntegrationCard[] = [
 
     {
         id: 'vapid',
-        title: 'VAPID — Push Notifications',
+        title: 'VAPID - Push Notifications',
         description: 'Chaves VAPID para envio de notificações push para visitantes do site.',
         icon: 'vapid',
         fields: [
@@ -45,7 +44,7 @@ const INTEGRATIONS: IntegrationCard[] = [
 
     {
         id: 'cloudflare',
-        title: 'Cloudflare R2 — Storage',
+        title: 'Cloudflare R2 - Storage',
         description: 'Armazenamento de objetos S3 compatível para imagens da plataforma.',
         icon: 'r2',
         fields: [
@@ -59,7 +58,7 @@ const INTEGRATIONS: IntegrationCard[] = [
 
     {
         id: 'serpapi',
-        title: 'SerpApi — Search Engine Results',
+        title: 'SerpApi - Search Engine Results',
         description: 'API para extrair resultados de busca do Google.',
         icon: 'serpapi',
         fields: [
@@ -68,7 +67,7 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
     {
         id: 'dataforseo',
-        title: 'DataForSEO — Market Trends',
+        title: 'DataForSEO - Market Trends',
         description: 'API de backup para tendências de mercado e palavras-chave.',
         icon: 'dataforseo',
         fields: [
@@ -79,8 +78,8 @@ const INTEGRATIONS: IntegrationCard[] = [
 
     {
         id: 'inngest',
-        title: 'Inngest — Automação & Cron Jobs',
-        description: 'Motor de automação: crons do Radar, relatórios Pilger AI, follow-ups e alertas. ⚠️ Estas chaves também precisam estar nas variáveis de ambiente da Vercel.',
+        title: 'Inngest - Automação & Cron Jobs',
+        description: 'Motor de automação: crons do Radar, relatórios Pilger AI, follow-ups e alertas. Estas chaves também precisam estar nas variáveis de ambiente da Vercel.',
         icon: 'inngest',
         fields: [
             { key: 'inngest_event_key', label: 'Event Key', placeholder: 'nSmu_X6u4f...', isSecret: true },
@@ -90,7 +89,7 @@ const INTEGRATIONS: IntegrationCard[] = [
 
     {
         id: 'elevenlabs',
-        title: 'ElevenLabs — Voice AI & Clonagem',
+        title: 'ElevenLabs - Voice AI & Clonagem',
         description: 'Vozes ultra-realistas e clonagem de voz para os agentes WhatsApp. Clone a voz do corretor para atendimento natural.',
         icon: 'elevenlabs',
         fields: [
@@ -98,6 +97,35 @@ const INTEGRATIONS: IntegrationCard[] = [
         ],
     },
 ]
+
+const WEEK_DAYS = [
+    { value: '0', label: 'Dom' },
+    { value: '1', label: 'Seg' },
+    { value: '2', label: 'Ter' },
+    { value: '3', label: 'Qua' },
+    { value: '4', label: 'Qui' },
+    { value: '5', label: 'Sex' },
+    { value: '6', label: 'Sáb' },
+]
+
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
+
+function parseCsvSet(raw: string | undefined, fallback: string): Set<string> {
+    const source = String(raw || fallback)
+    return new Set(
+        source
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean)
+    )
+}
+
+function toSortedCsv(values: Set<string>, mode: 'hour' | 'day'): string {
+    const arr = Array.from(values)
+    if (mode === 'hour') arr.sort((a, b) => Number(a) - Number(b))
+    if (mode === 'day') arr.sort((a, b) => Number(a) - Number(b))
+    return arr.join(',')
+}
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'error'
 
@@ -134,6 +162,38 @@ export default function MaintenancePage() {
     const [llmCreditLoading, setLlmCreditLoading] = useState(false)
     const [llmCreditCheck, setLlmCreditCheck] = useState<LLMCreditCheck | null>(null)
 
+    const dailyDays = parseCsvSet(configs['pilger_daily_days'], '0,1,2,3,4,5,6')
+    const dailyHours = parseCsvSet(configs['pilger_daily_time'], '23')
+    const weeklyDays = parseCsvSet(configs['pilger_weekly_days'] || configs['pilger_weekly_day'], '1')
+    const weeklyHours = parseCsvSet(configs['pilger_weekly_times'] || configs['pilger_weekly_time'], '23')
+    const radarDays = parseCsvSet(configs['radar_collection_days'], '0,1,2,3,4,5,6')
+    const radarHours = parseCsvSet(configs['radar_collection_times'], '06,12,18')
+
+    const toggleDay = (key: string, value: string, fallback: string) => {
+        const current = parseCsvSet(configs[key], fallback)
+        if (current.has(value)) {
+            if (current.size === 1) return
+            current.delete(value)
+        } else {
+            current.add(value)
+        }
+        setConfigs(prev => ({ ...prev, [key]: toSortedCsv(current, 'day') }))
+    }
+
+    const toggleHour = (key: string, value: string, fallback: string) => {
+        const current = parseCsvSet(configs[key], fallback)
+        if (current.has(value)) {
+            if (current.size === 1) return
+            current.delete(value)
+        } else {
+            current.add(value)
+        }
+        setConfigs(prev => ({ ...prev, [key]: toSortedCsv(current, 'hour') }))
+    }
+
+    const dayLabel = (day: string) => WEEK_DAYS.find(d => d.value === day)?.label || day
+    const formatHourLabel = (h: string) => `${h.padStart(2, '0')}:00`
+
     // Fetch Gemini Models
     useEffect(() => {
         const apiKey = configs['gemini_api_key']
@@ -155,6 +215,7 @@ export default function MaintenancePage() {
                         const next = { ...prev }
                         if (!next['gemini_concierge_model'] && data.models.length > 0) next['gemini_concierge_model'] = 'gemini-1.5-flash'
                         if (!next['gemini_pilger_model'] && data.models.length > 0) next['gemini_pilger_model'] = 'gemini-1.5-flash'
+                        if (!next['gemini_ceo_model'] && data.models.length > 0) next['gemini_ceo_model'] = 'gemini-1.5-flash'
                         return next
                     })
                 }
@@ -189,6 +250,7 @@ export default function MaintenancePage() {
                         const next = { ...prev }
                         if (!next['openai_concierge_model'] && data.models.length > 0) next['openai_concierge_model'] = 'gpt-3.5-turbo'
                         if (!next['openai_pilger_model'] && data.models.length > 0) next['openai_pilger_model'] = 'gpt-3.5-turbo'
+                        if (!next['openai_ceo_model'] && data.models.length > 0) next['openai_ceo_model'] = 'gpt-4o-mini'
                         return next
                     })
                 }
@@ -289,6 +351,10 @@ export default function MaintenancePage() {
                 'gemini_pilger_model',
                 'openai_pilger_model',
                 'pilger_provider',
+                'ceo_provider',
+                'gemini_ceo_model',
+                'openai_ceo_model',
+                'ceo_agent_system_prompt',
                 'lead_extraction_prompt',
                 'ads_provider',
                 'gemini_ads_model',
@@ -321,6 +387,9 @@ export default function MaintenancePage() {
                 'pilger_daily_time',
                 'pilger_weekly_day',
                 'pilger_weekly_time',
+                'pilger_weekly_days',
+                'pilger_weekly_times',
+                'radar_collection_days',
                 'radar_collection_times',
                 'ads_analyst_system_prompt',
                 'pilger_daily_system_prompt',
@@ -328,9 +397,7 @@ export default function MaintenancePage() {
                 'whatsapp_provider',
                 'gemini_whatsapp_model',
                 'openai_whatsapp_model',
-                'whatsapp_audio_enabled',
-                'whatsapp_tts_provider',
-                'whatsapp_tts_voice',
+
                 'elevenlabs_api_key',
                 'ads_provider',
                 'openai_ads_model',
@@ -366,7 +433,7 @@ export default function MaintenancePage() {
     const testConnection = async (integrationId: string) => {
         setTestResults(prev => ({
             ...prev,
-            [integrationId]: { status: 'testing', message: 'Testando conexão...' },
+            [integrationId]: { status: 'testing', message: 'Testando conexo...' },
         }))
 
         try {
@@ -389,7 +456,7 @@ export default function MaintenancePage() {
         } catch {
             setTestResults(prev => ({
                 ...prev,
-                [integrationId]: { status: 'error', message: 'Erro ao testar conexão' },
+                [integrationId]: { status: 'error', message: 'Erro ao testar conexo' },
             }))
         }
     }
@@ -426,7 +493,7 @@ export default function MaintenancePage() {
                     color: hasConfig ? 'var(--text-muted)' : '#ef4444',
                 }}>
                     {hasConfig ? <Wifi size={14} /> : <WifiOff size={14} />}
-                    {hasConfig ? 'Configurado' : 'Não configurado'}
+                    {hasConfig ? 'Configurado' : 'No configurado'}
                 </span>
             )
         }
@@ -477,13 +544,13 @@ export default function MaintenancePage() {
         <div>
             <div className="admin-header">
                 <div>
-                    <h1>🔧 Sala de Manutenção</h1>
+                    <h1>Sala de Manutenção</h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
                         Gerencie as chaves de API e integrações externas do sistema.
                     </p>
                 </div>
                 <div className="admin-header-actions">
-                    {saved && <span style={{ color: 'var(--success)', fontSize: '0.9rem' }}>✓ Salvo com sucesso!</span>}
+                    {saved && <span style={{ color: 'var(--success)', fontSize: '0.9rem' }}>Salvo com sucesso!</span>}
                     <button className="btn btn-gold" onClick={handleSave} disabled={saving}>
                         <Save size={18} /> {saving ? 'Salvando...' : 'Salvar Tudo'}
                     </button>
@@ -649,9 +716,9 @@ export default function MaintenancePage() {
                 ))}
             </div>
 
-            {/* ═══════════════════════════════════════════════ */}
+            {/* ............................................... */}
             {/* CENTRAL DE CONTROLE AI                         */}
-            {/* ═══════════════════════════════════════════════ */}
+            {/* ............................................... */}
             <div className="chart-card" style={{ marginTop: '32px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                     <div style={{
@@ -661,23 +728,23 @@ export default function MaintenancePage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '1.4rem'
                     }}>
-                        🤖
+                        Y-
                     </div>
                     <div>
                         <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.1rem' }}>Central de Controle AI (Multi-Provedor)</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Gerencie provedores e modelos específicos para cada função (Agentes IA WhatsApp e Pilger AI).
+                            Gerencie provedores e modelos especficos para cada funo (Agentes IA WhatsApp e Pilger AI).
                         </div>
                     </div>
                 </div>
 
-                {/* ── Global Default Provider ── */}
+                {/* Global Default Provider */}
                 <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '32px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                         <Zap size={18} style={{ color: 'var(--gold)' }} />
                         <div>
                             <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Provedor Padrão (Global)</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Usado quando uma função não tem provedor específico selecionado.</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Usado quando uma funo no tem provedor especfico selecionado.</div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '16px' }}>
@@ -818,10 +885,10 @@ export default function MaintenancePage() {
                     </div>
                 </div>
 
-                {/* ── 1. PILGER AI (ADMIN) ── */}
+                {/* 1. PILGER AI */}
                 <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#818cf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🧠</span> 1. Pilger AI (Assistente Admin)
+                        <span>Y</span> 1. Pilger AI (Assistente Admin)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -864,19 +931,33 @@ export default function MaintenancePage() {
                             rows={10}
                             value={configs['pilger_ai_system_prompt'] || ''}
                             onChange={e => setConfigs({ ...configs, pilger_ai_system_prompt: e.target.value })}
-                            placeholder={PILGER_AI_PROMPT}
+                            placeholder="Digite o prompt completo do Pilger AI"
                             style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(129, 140, 248, 0.3)' }}
                         />
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Prompt principal do assistente administrativo. Deixe em branco para usar o padrão.
+                            Prompt principal do assistente administrativo.
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Prompt de Regras (Pilger AI)</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={8}
+                            value={configs['pilger_ai_rules_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, pilger_ai_rules_prompt: e.target.value })}
+                            placeholder="Digite as regras complementares do Pilger AI"
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(129, 140, 248, 0.3)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Regras extras que sero aplicadas junto ao prompt principal.
                         </div>
                     </div>
                 </div>
 
-                {/* ── 2. AGENTES IA WHATSAPP ── */}
+                {/* 2. AGENTES IA WHATSAPP */}
                 <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#22c55e', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>📱</span> 2. Agentes IA WhatsApp (Corretores)
+                        <span></span> 2. Agentes IA WhatsApp (Corretores)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -912,48 +993,19 @@ export default function MaintenancePage() {
                         </div>
                     </div>
 
-                    {/* ── Audio Config ── */}
-                    <div style={{ marginTop: '8px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                            <Volume2 size={18} style={{ color: '#22c55e' }} />
-                            <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Função Espelho — Áudio</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Lead envia áudio → agente responde com áudio. Lead envia texto → agente responde com texto.</div>
-                            </div>
-                        </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Áudio Habilitado</label>
-                                <select className="form-input" value={configs['whatsapp_audio_enabled'] || 'false'} onChange={e => setConfigs({ ...configs, whatsapp_audio_enabled: e.target.value })}>
-                                    <option value="false">Desabilitado</option>
-                                    <option value="true">Habilitado (Função Espelho)</option>
-                                </select>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Provedor de Voz (TTS)</label>
-                                <select className="form-input" value={configs['whatsapp_tts_provider'] || 'elevenlabs'} onChange={e => setConfigs({ ...configs, whatsapp_tts_provider: e.target.value })}>
-                                    <option value="elevenlabs">ElevenLabs (Premium + Clonagem)</option>
-                                    <option value="openai">OpenAI TTS</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '12px', padding: '8px 12px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '6px' }}>
-                            💡 A voz de cada agente é configurada na <strong>página de Corretores IA</strong>. Lá você pode escolher vozes do ElevenLabs ou OpenAI TTS para cada corretor individualmente.
-                        </div>
-                    </div>
 
-                    <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.15)' }}>
+                    <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.15)', marginBottom: '20px' }}>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                            💡 O provedor e modelo escolhidos aqui serão usados por <strong>todos os agentes IA de WhatsApp</strong> (corretores). O prompt de cada agente é configurado individualmente na <strong>página de Corretores</strong>.
+                            O provedor e modelo escolhidos aqui serão usados por <strong>todos os agentes IA de WhatsApp</strong> (corretores). O prompt de cada agente é configurado individualmente na <strong>página de Corretores</strong>.
                         </div>
                     </div>
                 </div>
 
-                {/* ── 3. EXTRAÇÃO DE LEADS ── */}
+                {/* 3. EXTRAÇÃO DE LEADS */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>🕵️</span> 3. Extração de Leads (WhatsApp)
+                        <span></span> 3. Extração de Leads (WhatsApp)
                     </h3>
 
                     <div className="form-group">
@@ -963,19 +1015,19 @@ export default function MaintenancePage() {
                             rows={6}
                             value={configs['lead_extraction_prompt'] || ''}
                             onChange={e => setConfigs({ ...configs, lead_extraction_prompt: e.target.value })}
-                            placeholder={LEAD_EXTRACTION_PROMPT}
+                            placeholder="Digite o prompt completo de extração de leads"
                             style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(52, 211, 153, 0.3)' }}
                         />
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Controla como a IA identifica e extrai leads da conversa. Deixe em branco para usar o padrão (exibido acima como placeholder).
+                            Controla como a IA identifica e extrai leads da conversa.
                         </div>
                     </div>
                 </div>
 
-                {/* ── 4. TRÁFEGO (GESTOR IA) ── */}
+                {/* 4. TRÁFEGO (GESTOR IA) */}
                 <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>📈</span> 4. Gestor de Tráfego (Análise Autônoma)
+                        <span></span> 4. Gestor de Tráfego (Análise Autônoma)
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -1009,58 +1061,133 @@ export default function MaintenancePage() {
                             rows={8}
                             value={configs['ads_analyst_system_prompt'] || ''}
                             onChange={e => setConfigs({ ...configs, ads_analyst_system_prompt: e.target.value })}
-                            placeholder={ADS_ANALYSIS_SYSTEM_PROMPT}
+                            placeholder="Digite o prompt completo do Gestor de Tráfego"
                             style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
                         />
                     </div>
                 </div>
 
-                {/* ── 6. AGENDAMENTOS E RELATÓRIOS ── */}
+                {/* 5. AGENDAMENTOS */}
                 <div style={{ paddingBottom: '30px' }}>
                     <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>⏰</span> 5. Agendamento de Relatórios Pilger CEO
+                        <span></span> 5. Agendamento de Relatórios Pilger CEO
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                        {/* Diário */}
-                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Relatório Diário & Análise</div>
-                            <div style={{ color: 'var(--gold)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>23:00 (Brasília)</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                Execução diária automática e fixa para garantir a consistência das métricas.
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '12px', alignItems: 'start' }}>
+                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <CalendarDays size={18} style={{ color: 'var(--gold)' }} />
+                                <div style={{ fontWeight: 700 }}>Relatório Diário & Análise</div>
                             </div>
-                        </div>
-
-                        {/* Semanal */}
-                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Diretriz Semanal Pilger AI</div>
-                            <div style={{ color: '#8b5cf6', fontSize: '1.2rem', fontWeight: 700, marginBottom: '4px' }}>Segunda, 23:00</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                Análise semanal profunda gerada toda segunda-feira à noite.
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                                Selecione os dias e horários em que o relatório deve rodar automaticamente.
                             </div>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
-                        {/* Radar de Mercado */}
-                        <div style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
-                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Radar de Mercado</div>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Horários de Coleta (Horas: 0-23, separados por vírgula)</label>
-                                <input 
-                                    type="text"
-                                    className="form-input" 
-                                    placeholder="Ex: 06,12,18"
-                                    value={configs['radar_collection_times'] || '06,12,18'} 
-                                    onChange={e => setConfigs({ ...configs, radar_collection_times: e.target.value })}
-                                />
-                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '8px', lineHeight: '1.4' }}>
-                                    Determine os horários (dia de São Paulo) para o rastreio automático. 
-                                    Padrão recomendado: <b>06,12,18</b> para cobrir picos de interesse.
+                            <div style={{ marginBottom: '8px' }}>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {WEEK_DAYS.map(day => {
+                                        const selected = dailyDays.has(day.value)
+                                        return (
+                                            <button key={`daily-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('pilger_daily_days', day.value, '0,1,2,3,4,5,6')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
+                                                {day.label}
+                                            </button>
+                                        )
+                                    })}
                                 </div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {HOUR_OPTIONS.map(hour => {
+                                        const selected = dailyHours.has(hour)
+                                        return (
+                                            <button key={`daily-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('pilger_daily_time', hour, '23')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
+                                                {formatHourLabel(hour)}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                Resumo: roda em <b>{Array.from(dailyDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(dailyHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Clock3 size={18} style={{ color: '#8b5cf6' }} />
+                                <div style={{ fontWeight: 700 }}>Diretriz Semanal Pilger AI</div>
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                                Também pode rodar mais de uma vez por semana e em múltiplos horários.
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {WEEK_DAYS.map(day => {
+                                        const selected = weeklyDays.has(day.value)
+                                        return (
+                                            <button key={`weekly-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('pilger_weekly_days', day.value, '1')} style={{ background: selected ? '#8b5cf6' : 'transparent', color: selected ? '#fff' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
+                                                {day.label}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {HOUR_OPTIONS.map(hour => {
+                                        const selected = weeklyHours.has(hour)
+                                        return (
+                                            <button key={`weekly-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('pilger_weekly_times', hour, '23')} style={{ background: selected ? '#8b5cf6' : 'transparent', color: selected ? '#fff' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
+                                                {formatHourLabel(hour)}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                Resumo: roda em <b>{Array.from(weeklyDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(weeklyHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
+                                <div style={{ fontWeight: 700 }}>Radar de Mercado</div>
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                                Configure facilmente quando o radar coleta dados de mercado.
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {WEEK_DAYS.map(day => {
+                                        const selected = radarDays.has(day.value)
+                                        return (
+                                            <button key={`radar-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('radar_collection_days', day.value, '0,1,2,3,4,5,6')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
+                                                {day.label}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {HOUR_OPTIONS.map(hour => {
+                                        const selected = radarHours.has(hour)
+                                        return (
+                                            <button key={`radar-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('radar_collection_times', hour, '06,12,18')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
+                                                {formatHourLabel(hour)}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                Resumo: coleta em <b>{Array.from(radarDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(radarHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
                             </div>
                         </div>
                     </div>
@@ -1068,18 +1195,69 @@ export default function MaintenancePage() {
                     {/* Prompts dos Relatórios */}
                     <div className="form-group" style={{ marginTop: '20px' }}>
                         <label className="form-label">Prompt do Relatório Diário</label>
-                        <textarea className="form-textarea" rows={6} value={configs['pilger_daily_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_daily_system_prompt: e.target.value })} placeholder={DAILY_REPORT_PROMPT} style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
+                        <textarea className="form-textarea" rows={6} value={configs['pilger_daily_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_daily_system_prompt: e.target.value })} placeholder="Digite o prompt completo do relatório diário" style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Prompt da Diretriz Semanal</label>
-                        <textarea className="form-textarea" rows={6} value={configs['pilger_weekly_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_weekly_system_prompt: e.target.value })} placeholder={WEEKLY_REPORT_PROMPT} style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
+                        <textarea className="form-textarea" rows={6} value={configs['pilger_weekly_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_weekly_system_prompt: e.target.value })} placeholder="Digite o prompt completo da diretriz semanal" style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
+                    </div>
+                </div>
+
+                {/* 6. AGENTE CEO IA */}
+                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: '#6366f1', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span></span> 6. Agente CEO IA (WhatsApp + ERP)
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Provedor do CEO IA</label>
+                            <select
+                                className="form-input"
+                                value={configs['ceo_provider'] || ''}
+                                onChange={e => setConfigs({ ...configs, ceo_provider: e.target.value })}
+                            >
+                                <option value="">Usar Padrão do Pilger AI ({configs['pilger_provider'] === 'openai' ? 'OpenAI' : (configs['pilger_provider'] === 'gemini' ? 'Gemini' : (configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'))})</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Modelo do CEO IA</label>
+                            {(configs['ceo_provider'] === 'openai' || (!configs['ceo_provider'] && (configs['pilger_provider'] === 'openai' || (!configs['pilger_provider'] && configs['ai_provider'] === 'openai')))) ? (
+                                <select className="form-input" value={configs['openai_ceo_model'] || ''} onChange={e => setConfigs({ ...configs, openai_ceo_model: e.target.value })}>
+                                    <option value="">Selecione...</option>
+                                    {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                </select>
+                            ) : (
+                                <select className="form-input" value={configs['gemini_ceo_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_ceo_model: e.target.value })}>
+                                    <option value="">Selecione...</option>
+                                    {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                </select>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt Base do Agente CEO IA</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={7}
+                            value={configs['ceo_agent_system_prompt'] || ''}
+                            onChange={e => setConfigs({ ...configs, ceo_agent_system_prompt: e.target.value })}
+                            placeholder="Digite o prompt base do CEO IA"
+                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(99, 102, 241, 0.35)' }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Este prompt define o comportamento executivo do CEO IA e e combinado com os prompts de relatorio diario e semanal.
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Diagnostic Tools */}
             <div className="chart-card" style={{ marginTop: '24px' }}>
-                <div className="chart-title" style={{ marginBottom: '12px' }}>🔬 Ferramentas de Diagnóstico</div>
+                <div className="chart-title" style={{ marginBottom: '12px' }}>Ferramentas de Diagnóstico</div>
                 <div style={{
                     marginBottom: '16px',
                     padding: '12px 14px',
@@ -1198,11 +1376,11 @@ export default function MaintenancePage() {
 
             {/* Info Card */}
             <div className="chart-card" style={{ marginTop: '24px' }}>
-                <div className="chart-title">ℹ️ Sobre a Sala de Manutenção</div>
+                <div className="chart-title">Sobre a Sala de Manutenção</div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
                     <p>As chaves de API configuradas aqui têm <strong>prioridade</strong> sobre as variáveis de ambiente do servidor (<code>.env</code>).</p>
                     <p style={{ marginTop: '8px' }}>
-                        Se uma chave for removida daqui, o sistema automaticamente usará a variável de ambiente como fallback.
+                        Se uma chave for removida daqui, o sistema automaticamente usar a varivel de ambiente como fallback.
                     </p>
                     <p style={{ marginTop: '8px' }}>
                         <strong>Chaves de infraestrutura</strong> (Supabase) são gerenciadas apenas via variáveis de ambiente. O <strong>Inngest</strong> precisa estar configurado tanto aqui quanto nas variáveis de ambiente da Vercel.
@@ -1222,3 +1400,4 @@ export default function MaintenancePage() {
         </div >
     )
 }
+

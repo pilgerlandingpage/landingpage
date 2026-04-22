@@ -4,7 +4,8 @@ import { getOpenAIApiKey, getAIConfig } from './config'
 export async function generateOpenAIChat(
     history: { role: string; content: string }[],
     message: string,
-    systemPrompt: string
+    systemPrompt: string,
+    modelOverride?: string
 ) {
     const apiKey = await getOpenAIApiKey()
 
@@ -12,7 +13,7 @@ export async function generateOpenAIChat(
         throw new Error('OpenAI API Key não configurada. Configure na Sala de Manutenção.')
     }
 
-    const modelName = (await getAIConfig('openai_model')) || 'gpt-3.5-turbo'
+    const modelName = modelOverride || (await getAIConfig('openai_model')) || 'gpt-3.5-turbo'
     console.log('[OpenAI Chat] Usando modelo:', modelName)
 
     try {

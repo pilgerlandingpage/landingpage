@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import {
+    LEAD_EXTRACTION_PROMPT,
+    PILGER_AI_PROMPT,
+    PILGER_AI_RULES_PROMPT,
+    ADS_ANALYSIS_SYSTEM_PROMPT,
+    DAILY_REPORT_PROMPT,
+    WEEKLY_REPORT_PROMPT,
+    CEO_AGENT_SYSTEM_PROMPT,
+} from '@/lib/ai/prompts'
 
 function getSupabase() {
     return createClient(
@@ -12,7 +21,7 @@ const ENV_FALLBACKS: Record<string, string> = {
     uazapi_base_url: 'UAZAPI_BASE_URL',
     uazapi_admin_token: 'UAZAPI_ADMIN_TOKEN',
     gemini_api_key: 'GEMINI_API_KEY',
-    gemini_model: '',  // no env var, default handled in lib
+    gemini_model: '',
     vapid_subject: 'VAPID_SUBJECT',
     vapid_public_key: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY',
     vapid_private_key: 'VAPID_PRIVATE_KEY',
@@ -23,7 +32,16 @@ const ENV_FALLBACKS: Record<string, string> = {
     dataforseo_password: 'DATAFORSEO_PASSWORD',
 }
 
-// GET — Load all configs (database values override env vars)
+const DEFAULT_PROMPTS: Record<string, string> = {
+    pilger_ai_system_prompt: PILGER_AI_PROMPT,
+    pilger_ai_rules_prompt: PILGER_AI_RULES_PROMPT,
+    lead_extraction_prompt: LEAD_EXTRACTION_PROMPT,
+    ads_analyst_system_prompt: ADS_ANALYSIS_SYSTEM_PROMPT,
+    pilger_daily_system_prompt: DAILY_REPORT_PROMPT,
+    pilger_weekly_system_prompt: WEEKLY_REPORT_PROMPT,
+    ceo_agent_system_prompt: CEO_AGENT_SYSTEM_PROMPT,
+}
+
 export async function GET() {
     try {
         const supabase = getSupabase()
@@ -35,15 +53,30 @@ export async function GET() {
             return NextResponse.json({ success: false, message: error.message }, { status: 500 })
         }
 
-        // Start with env var fallbacks
+        const existingKeys = new Set((data || []).map((item: { key: string }) => item.key))
+        const missingPromptEntries = Object.entries(DEFAULT_PROMPTS)
+            .filter(([key]) => !existingKeys.has(key))
+            .map(([key, value]) => ({ key, value, updated_at: new Date().toISOString() }))
+
+        if (missingPromptEntries.length > 0) {
+            await supabase.from('app_config').upsert(missingPromptEntries, { onConflict: 'key' })
+        }
+
+        const { data: finalData, error: finalError } = await supabase
+            .from('app_config')
+            .select('key, value')
+
+        if (finalError) {
+            return NextResponse.json({ success: false, message: finalError.message }, { status: 500 })
+        }
+
         const configMap: Record<string, string> = {}
         for (const [configKey, envName] of Object.entries(ENV_FALLBACKS)) {
             const envVal = process.env[envName]
             if (envVal) configMap[configKey] = envVal
         }
 
-        // Override with database values (DB has priority)
-        data?.forEach((item: { key: string; value: string }) => {
+        finalData?.forEach((item: { key: string; value: string }) => {
             if (item.value) configMap[item.key] = item.value
         })
 
@@ -54,7 +87,6 @@ export async function GET() {
     }
 }
 
-// POST — Save configs
 export async function POST(request: NextRequest) {
     try {
         const { configs } = await request.json() as { configs: Record<string, string> }

@@ -13,8 +13,6 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts'
-
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Types Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 interface Campaign {
     id: string
     name: string
@@ -66,8 +64,6 @@ interface Report {
     performance_score: number | null
     created_at: string
 }
-
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
     draft: { label: 'Rascunho', color: '#94a3b8' },
     pending: { label: 'Publicando...', color: '#f59e0b' },
@@ -105,8 +101,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         </div>
     )
 }
-
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Main Page Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 export default function AdsPage() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([])
     const [alerts, setAlerts] = useState<Alert[]>([])
@@ -193,15 +187,15 @@ export default function AdsPage() {
 
     const handleAnalyze = async () => {
         setAnalyzing(true)
-        showToast('Ã°Å¸Â§Â  Analisando campanhas com IA...', 'success')
+        showToast('Analisando campanhas com IA...', 'success')
         try {
             const res = await fetch('/api/admin/ads/analyze-ai', { method: 'POST' })
             const data = await res.json()
             if (data.success) {
-                showToast(`Ã¢Å“â€¦ ${data.message}`, 'success')
+                showToast(`Sucesso: ${data.message}`, 'success')
                 await fetchData()
             } else {
-                showToast(`Erro: ${data.error || 'Falha na anÃƒÂ¡lise'}`, 'error')
+                showToast(`Erro: ${data.error || 'Falha na análise'}`, 'error')
             }
         } catch { showToast('Erro ao analisar campanhas', 'error') }
         finally { setAnalyzing(false) }
@@ -271,16 +265,16 @@ export default function AdsPage() {
     const getScoreLabel = (score: number) => {
         if (score >= 80) return 'Excelente'
         if (score >= 60) return 'Bom'
-        if (score >= 40) return 'MÃƒÂ©dio'
+        if (score >= 40) return 'Médio'
         if (score >= 20) return 'Ruim'
-        return 'CrÃƒÂ­tico'
+        return 'Crítico'
     }
     const getScoreEmoji = (score: number) => {
-        if (score >= 80) return 'Ã°Å¸Å¸Â¢'
-        if (score >= 60) return 'Ã°Å¸â€Âµ'
-        if (score >= 40) return 'Ã°Å¸Å¸Â¡'
-        if (score >= 20) return 'Ã°Å¸Å¸Â '
-        return 'Ã°Å¸â€Â´'
+        if (score >= 80) return '🟢'
+        if (score >= 60) return '🔵'
+        if (score >= 40) return '🟡'
+        if (score >= 20) return '🟠'
+        return '🔴'
     }
 
     function renderMarkdown(md: string): string {
@@ -304,8 +298,6 @@ export default function AdsPage() {
         (filter === 'active' && c.status === 'active') ||
         (filter === 'paused' && c.status === 'paused')
     )
-
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Metrics Aggregation Ã¢â€â‚¬Ã¢â€â‚¬
     const totalSpend = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.spend || 0), 0)
     const totalImpressions = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.impressions || 0), 0)
     const totalClicks = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.clicks || 0), 0)
@@ -316,7 +308,6 @@ export default function AdsPage() {
     const avgCpa = totalConversions > 0 ? totalSpend / totalConversions : (totalLeads > 0 ? totalSpend / totalLeads : 0)
     const avgCpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Chart Data: Spend by Campaign (Bar) Ã¢â€â‚¬Ã¢â€â‚¬
     const spendBarData = filteredCampaigns
         .filter(c => c.latest_metrics?.spend)
         .sort((a, b) => (b.latest_metrics?.spend || 0) - (a.latest_metrics?.spend || 0))
@@ -324,22 +315,19 @@ export default function AdsPage() {
         .map(c => ({
             name: shortName(c.name),
             'R$ Gasto': c.latest_metrics?.spend || 0,
-            'ConversÃƒÂµes': c.latest_metrics?.conversions || c.latest_metrics?.leads_count || 0,
+            'Conversões': c.latest_metrics?.conversions || c.latest_metrics?.leads_count || 0,
         }))
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Chart Data: Performance by Campaign (Bar) Ã¢â€â‚¬Ã¢â€â‚¬
     const performanceData = filteredCampaigns
         .filter(c => c.latest_metrics)
         .sort((a, b) => (b.latest_metrics?.reach || 0) - (a.latest_metrics?.reach || 0))
         .slice(0, 8)
         .map(c => ({
             name: shortName(c.name),
-            ImpressÃƒÂµes: c.latest_metrics?.impressions || 0,
+            'Impressões': c.latest_metrics?.impressions || 0,
             Alcance: c.latest_metrics?.reach || 0,
             Cliques: c.latest_metrics?.clicks || 0,
         }))
-
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Chart Data: Spend Distribution (Pie) Ã¢â€â‚¬Ã¢â€â‚¬
     const spendPieData = filteredCampaigns
         .filter(c => c.latest_metrics?.spend && c.latest_metrics.spend > 0)
         .sort((a, b) => (b.latest_metrics?.spend || 0) - (a.latest_metrics?.spend || 0))
@@ -347,8 +335,6 @@ export default function AdsPage() {
             name: shortName(c.name, 22),
             value: c.latest_metrics?.spend || 0,
         }))
-
-    // Ã¢â€â‚¬Ã¢â€â‚¬ Chart Data: CPA Comparison (Bar) Ã¢â€â‚¬Ã¢â€â‚¬
     const cpaData = filteredCampaigns
         .filter(c => c.latest_metrics?.cost_per_lead && c.latest_metrics.cost_per_lead > 0)
         .sort((a, b) => (a.latest_metrics?.cost_per_lead || 0) - (b.latest_metrics?.cost_per_lead || 0))
@@ -362,8 +348,8 @@ export default function AdsPage() {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 12 }}>Ã°Å¸â€œÅ </div>
-                    <p>Carregando mÃƒÂ©tricas de trÃƒÂ¡fego...</p>
+                    <div style={{ fontSize: '2rem', marginBottom: 12 }}>📊</div>
+                    <p>Carregando métricas de tráfego...</p>
                 </div>
             </div>
         )
@@ -386,7 +372,7 @@ export default function AdsPage() {
                         <Megaphone size={26} /> Meta Ads
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                        {filteredCampaigns.length} campanha(s) Ã¢â‚¬Â¢ Atualizado em {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {filteredCampaigns.length} campanha(s) • Atualizado em {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -396,11 +382,11 @@ export default function AdsPage() {
                             className="ads-date-select">
                             <option value="today">Hoje</option>
                             <option value="yesterday">Ontem</option>
-                            <option value="last_7d">ÃƒÅ¡ltimos 7 Dias</option>
-                            <option value="last_30d">ÃƒÅ¡ltimos 30 Dias</option>
-                            <option value="this_month">Este MÃƒÂªs</option>
-                            <option value="last_month">MÃƒÂªs Passado</option>
-                            <option value="maximum">VitalÃƒÂ­cio</option>
+                            <option value="last_7d">Últimos 7 Dias</option>
+                            <option value="last_30d">Últimos 30 Dias</option>
+                            <option value="this_month">Este Mês</option>
+                            <option value="last_month">Mês Passado</option>
+                            <option value="maximum">Vitalício</option>
                             <option value="custom">Personalizado</option>
                         </select>
                     </div>
@@ -413,7 +399,7 @@ export default function AdsPage() {
                                 onChange={e => setStartDate(e.target.value)}
                                 className="ads-date-input"
                             />
-                            <span style={{ color: 'var(--text-muted)' }}>atÃƒÂ©</span>
+                            <span style={{ color: 'var(--text-muted)' }}>até</span>
                             <input 
                                 type="date" 
                                 value={endDate} 
@@ -440,7 +426,7 @@ export default function AdsPage() {
                             transition: 'all 0.3s'
                         }}>
                         <Brain size={18} className={analyzing ? 'spin' : ''} />
-                        {analyzing ? 'Analisando...' : 'Ã°Å¸Â§Â  Analisar com IA'}
+                        {analyzing ? 'Analisando...' : 'Analisar com IA'}
                     </button>
                     <Link href="/admin/ads/new" className="btn btn-gold" style={{ textDecoration: 'none' }}>
                         <Plus size={18} /> Nova Campanha
@@ -453,7 +439,7 @@ export default function AdsPage() {
                 <LeadClock recentLeads={internalStats.recentLeads} />
             </div>
 
-            {/* Ã¢â€â‚¬Ã¢â€â‚¬ KPI Cards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+            {/* KPI Cards */}
             <div className="kpi-grid" style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', 
@@ -467,7 +453,7 @@ export default function AdsPage() {
                 </div>
                 <div className="kpi-card">
                     <Eye size={20} color="#6366f1" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">ImpressÃƒÂµes</div>
+                    <div className="kpi-label">Impressões</div>
                     <div className="kpi-value" style={{ fontSize: '1.4rem' }}>{totalImpressions.toLocaleString('pt-BR')}</div>
                 </div>
                 <div className="kpi-card">
@@ -482,7 +468,7 @@ export default function AdsPage() {
                 </div>
                 <div className="kpi-card">
                     <TrendingUp size={20} color="#f59e0b" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">CTR MÃƒÂ©dio</div>
+                    <div className="kpi-label">CTR Médio</div>
                     <div className="kpi-value" style={{ color: '#f59e0b', fontSize: '1.4rem' }}>{avgCtr.toFixed(2)}%</div>
                 </div>
                 <div className="kpi-card" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), transparent)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
@@ -500,11 +486,11 @@ export default function AdsPage() {
                 <div className="kpi-card">
                     <Target size={20} color="#ec4899" style={{ marginBottom: 8 }} />
                     <div className="kpi-label">CPA (Meta)</div>
-                    <div className="kpi-value" style={{ color: '#ec4899', fontSize: '1.4rem' }}>{avgCpa > 0 ? formatCurrency(avgCpa) : 'Ã¢â‚¬â€'}</div>
+                    <div className="kpi-value" style={{ color: '#ec4899', fontSize: '1.4rem' }}>{avgCpa > 0 ? formatCurrency(avgCpa) : '-'}</div>
                 </div>
                 <div className="kpi-card">
                     <DollarSign size={20} color="#0ea5e9" style={{ marginBottom: 8 }} />
-                    <div className="kpi-label">CPM MÃƒÂ©dio</div>
+                    <div className="kpi-label">CPM Médio</div>
                     <div className="kpi-value" style={{ color: '#0ea5e9', fontSize: '1.4rem' }}>{formatCurrency(avgCpm)}</div>
                 </div>
                 {/* Thermometer as compact KPI card */}
@@ -522,7 +508,7 @@ export default function AdsPage() {
                                 <span style={{ fontSize: '1.1rem', fontWeight: 800, color: getScoreColor(latestScore), fontFamily: 'Playfair Display, serif', lineHeight: 1 }}>{latestScore}</span>
                             </div>
                         </div>
-                        <div className="kpi-label">TermÃƒÂ´metro IA</div>
+                        <div className="kpi-label">Termômetro IA</div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: getScoreColor(latestScore), marginTop: 2 }}>
                             {getScoreEmoji(latestScore)} {getScoreLabel(latestScore)}
                         </div>
@@ -536,46 +522,55 @@ export default function AdsPage() {
                     className="btn btn-outline"
                     style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', padding: '8px 16px', borderRadius: 10 }}>
                     <History size={16} color="var(--gold)" />
-                    Ã°Å¸â€œÅ“ HistÃƒÂ³rico de AnÃƒÂ¡lises IA
+                    📜 Histórico de Análises IA
                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: 4 }}>({reports.length})</span>
                 </button>
             </div>
 
-            {/* Ã¢â€â‚¬Ã¢â€â‚¬ Charts Row 1: Spend Bar + Spend Pie Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+            {/* Charts Row 1: Spend Bar + Spend Pie */}
             {spendBarData.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
-                        <div className="chart-title">Ã°Å¸â€™Â° Gasto & ConversÃƒÂµes por Campanha</div>
+                        <div className="chart-title">📊 Gasto e conversões por campanha</div>
                         <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={spendBarData} barGap={4}>
+                            <BarChart data={spendBarData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
                                 <XAxis dataKey="name" stroke="#666" fontSize={11} angle={-20} textAnchor="end" height={60} />
                                 <YAxis yAxisId="left" stroke="#666" fontSize={11} />
                                 <YAxis yAxisId="right" orientation="right" stroke="#666" fontSize={11} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend />
-                                <Bar yAxisId="left" dataKey="R$ Gasto" fill="#c9a96e" radius={[4, 4, 0, 0]} />
-                                <Bar yAxisId="right" dataKey="ConversÃƒÂµes" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                                <Bar yAxisId="left" dataKey="R$ Gasto" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                                <Bar yAxisId="right" dataKey="Conversões" fill="#22c55e" radius={[6, 6, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
 
                     <div className="chart-card">
-                        <div className="chart-title">Ã°Å¸â€œÅ  DistribuiÃƒÂ§ÃƒÂ£o de Gasto</div>
+                        <div className="chart-title">🧩 Distribuição de gasto</div>
                         {spendPieData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <PieChart>
-                                    <Pie data={spendPieData} cx="50%" cy="50%" outerRadius={95} innerRadius={45}
-                                        dataKey="value" paddingAngle={2}
+                                    <Pie
+                                        data={spendPieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={95}
+                                        innerRadius={45}
+                                        dataKey="value"
+                                        paddingAngle={2}
                                         label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                        labelLine={{ stroke: '#555' }}>
+                                        labelLine={{ stroke: '#555' }}
+                                    >
                                         {spendPieData.map((_, index) => (
                                             <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip formatter={(v: any) => formatCurrency(v)}
+                                    <Tooltip
+                                        formatter={(v: any) => formatCurrency(v)}
                                         contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }}
-                                        itemStyle={{ color: '#f5f5f5' }} />
+                                        itemStyle={{ color: '#f5f5f5' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
@@ -587,11 +582,11 @@ export default function AdsPage() {
                 </div>
             )}
 
-            {/* Ã¢â€â‚¬Ã¢â€â‚¬ Charts Row 2: Performance + CPA Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+            {/* Charts Row 2: Performance + CPA */}
             {performanceData.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
-                        <div className="chart-title">Ã°Å¸â€œË† Performance por Campanha</div>
+                        <div className="chart-title">📈 Performance por Campanha</div>
                         <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={performanceData}>
                                 <defs>
@@ -609,7 +604,7 @@ export default function AdsPage() {
                                 <YAxis stroke="#666" fontSize={11} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend />
-                                <Area type="monotone" dataKey="ImpressÃƒÂµes" stroke="#6366f1" fill="url(#gradImpr)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="Impressões" stroke="#6366f1" fill="url(#gradImpr)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="Alcance" stroke="#3b82f6" fill="url(#gradReach)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="Cliques" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} />
                             </AreaChart>
@@ -618,7 +613,7 @@ export default function AdsPage() {
 
                     {cpaData.length > 0 && (
                         <div className="chart-card">
-                            <div className="chart-title">Ã°Å¸Å½Â¯ CPA por Campanha (menor = melhor)</div>
+                            <div className="chart-title">🎯 CPA por Campanha (menor = melhor)</div>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={cpaData} layout="vertical">
                                     <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
@@ -639,12 +634,12 @@ export default function AdsPage() {
                 </div>
             )}
 
-            {/* Ã¢â€â‚¬Ã¢â€â‚¬ Campaign List + Alerts Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */}
+            {/* Campaign List + Alerts */}
             <div style={{ display: 'grid', gridTemplateColumns: campaigns.length > 0 ? '2fr 1fr' : '1fr', gap: 24 }}>
                 {/* Campaigns */}
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                        <div className="chart-title" style={{ marginBottom: 0 }}>Ã°Å¸â€œâ€¹ Campanhas</div>
+                        <div className="chart-title" style={{ marginBottom: 0 }}>📋 Campanhas</div>
                         <div style={{ display: 'flex', gap: 8 }}>
                             {(['all', 'active', 'paused'] as const).map(f => (
                                 <button key={f} onClick={() => setFilter(f)}
@@ -665,7 +660,7 @@ export default function AdsPage() {
                             <Megaphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
                             <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: 8 }}>Nenhuma campanha encontrada</p>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                                {campaigns.length === 0 ? 'Clique em "Nova Campanha" para comeÃƒÂ§ar.' : 'Altere o filtro para ver outras campanhas.'}
+                                {campaigns.length === 0 ? 'Clique em "Nova Campanha" para começar.' : 'Altere o filtro para ver outras campanhas.'}
                             </p>
                         </div>
                     ) : (
@@ -694,7 +689,7 @@ export default function AdsPage() {
                                                                 background: m.quality_ranking.includes('ABOVE') ? 'rgba(34,197,94,0.1)' : m.quality_ranking.includes('BELOW') ? 'rgba(239,68,68,0.1)' : 'rgba(148,163,184,0.1)',
                                                                 color: m.quality_ranking.includes('ABOVE') ? '#22c55e' : m.quality_ranking.includes('BELOW') ? '#ef4444' : '#94a3b8',
                                                             }}>
-                                                                {m.quality_ranking.includes('ABOVE') ? 'Ã¢Ëœâ€¦ Alto' : m.quality_ranking.includes('BELOW') ? 'Ã¢â€“Â¼ Baixo' : 'Ã¢â€“Â  MÃƒÂ©dio'}
+                                                                {m.quality_ranking.includes('ABOVE') ? '★ Alto' : m.quality_ranking.includes('BELOW') ? '▼ Baixo' : '■ Médio'}
                                                             </span>
                                                         )}
                                                     </div>
@@ -702,7 +697,7 @@ export default function AdsPage() {
                                                         {camp.name}
                                                     </div>
                                                     {camp.properties?.title && (
-                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>Ã°Å¸ÂÂ  {camp.properties.title}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>🏷️ {camp.properties.title}</div>
                                                     )}
                                                 </div>
                                                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
@@ -717,11 +712,11 @@ export default function AdsPage() {
                                             {m && (
                                                 <div className="ads-metrics-bar">
                                                     <div><span>Gasto:</span> <strong>{formatCurrency(m.spend)}</strong></div>
-                                                    <div><span>Alcance:</span> <strong>{m.reach?.toLocaleString('pt-BR') || 'Ã¢â‚¬â€'}</strong></div>
+                                                    <div><span>Alcance:</span> <strong>{m.reach?.toLocaleString('pt-BR') || '-'}</strong></div>
                                                     <div><span>Cliques:</span> <strong>{m.clicks?.toLocaleString('pt-BR') || '0'}</strong></div>
                                                     <div><span>Conv:</span> <strong>{m.conversions || m.leads_count || 0}</strong></div>
                                                     <div><span>CTR:</span> <strong>{(m.ctr * 100).toFixed(2)}%</strong></div>
-                                                    <div><span>CPA:</span> <strong>{m.cost_per_lead ? formatCurrency(m.cost_per_lead) : 'Ã¢â‚¬â€'}</strong></div>
+                                                    <div><span>CPA:</span> <strong>{m.cost_per_lead ? formatCurrency(m.cost_per_lead) : '-'}</strong></div>
                                                 </div>
                                             )}
                                         </div>
@@ -736,7 +731,7 @@ export default function AdsPage() {
                 {campaigns.length > 0 && (
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                            <div className="chart-title" style={{ marginBottom: 0 }}>Ã°Å¸Â¤â€“ DiagnÃƒÂ³stico da IA</div>
+                            <div className="chart-title" style={{ marginBottom: 0 }}>🤖 Diagnóstico da IA</div>
                             {alerts.length > 0 && (
                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-secondary)', padding: '3px 10px', borderRadius: 20 }}>
                                     {alerts.length} alerta(s)
@@ -746,22 +741,22 @@ export default function AdsPage() {
                         {alerts.length === 0 ? (
                             <div className="chart-card" style={{ textAlign: 'center', padding: '40px 16px' }}>
                                 <Brain size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhum diagnÃƒÂ³stico ainda</p>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Clique em &quot;🧠 Analisar com IA&quot; para gerar diagnÃƒÂ³sticos</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhum diagnóstico ainda</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Clique em &quot;🧠 Analisar com IA&quot; para gerar diagnósticos</p>
                             </div>
                         ) : (
                             <div style={{ display: 'grid', gap: 8, maxHeight: 600, overflowY: 'auto', paddingRight: 4 }}>
                                 {alerts.slice(0, 15).map(alert => {
                                     const isExpanded = expandedAlert === alert.id
-                                    const actionIcon = alert.action_taken === 'PAUSE_AD' ? 'Ã¢â€ºâ€' :
-                                        alert.action_taken === 'SCALE_BUDGET' ? 'Ã°Å¸â€œË†' :
-                                        alert.action_taken === 'REDUCE_BUDGET' ? 'Ã°Å¸â€œâ€°' :
-                                        alert.action_taken === 'SWAP_CREATIVE' ? 'Ã°Å¸â€â€ž' : null
-                                    const typeIcon = alert.type === 'action' ? 'Ã¢Å¡Â¡' :
-                                        alert.type === 'warning' ? 'Ã¢Å¡Â Ã¯Â¸Â' :
-                                        alert.type === 'budget_alert' ? 'Ã°Å¸â€™Â°' : 'Ã°Å¸â€™Â¡'
+                                    const actionIcon = alert.action_taken === 'PAUSE_AD' ? '⏸️' :
+                                        alert.action_taken === 'SCALE_BUDGET' ? '📈' :
+                                        alert.action_taken === 'REDUCE_BUDGET' ? '📉' :
+                                        alert.action_taken === 'SWAP_CREATIVE' ? '🎨' : null
+                                    const typeIcon = alert.type === 'action' ? '⚡' :
+                                        alert.type === 'warning' ? '⚠️' :
+                                        alert.type === 'budget_alert' ? '💰' : '💡'
                                     const urgencyLabel: Record<string, string> = {
-                                        low: 'Ã°Å¸Å¸Â¢ Baixa', medium: 'Ã°Å¸Å¸Â¡ MÃƒÂ©dia', high: 'Ã°Å¸Å¸Â  Alta', critical: 'Ã°Å¸â€Â´ CrÃƒÂ­tica'
+                                        low: '🟢 Baixa', medium: '🟡 Média', high: '🟠 Alta', critical: '🔴 Crítica'
                                     }
 
                                     return (
@@ -796,7 +791,7 @@ export default function AdsPage() {
                                                     borderRadius: 8, fontSize: '0.78rem',
                                                     color: 'var(--text-muted)', lineHeight: 1.5
                                                 }}>
-                                                    <div style={{ fontWeight: 600, color: '#a78bfa', marginBottom: 4, fontSize: '0.7rem' }}>Ã°Å¸Â§Â  RACIOCÃƒÂNIO DA IA</div>
+                                                    <div style={{ fontWeight: 600, color: '#a78bfa', marginBottom: 4, fontSize: '0.7rem' }}>RACIOCÍNIO DA IA</div>
                                                     {alert.ai_reasoning}
                                                 </div>
                                             )}
@@ -806,7 +801,7 @@ export default function AdsPage() {
                                                 </span>
                                                 {alert.ai_reasoning && (
                                                     <span style={{ fontSize: '0.65rem', color: '#a78bfa' }}>
-                                                        {isExpanded ? 'Ã¢â€“Â² Recolher' : 'Ã¢â€“Â¼ Ver raciocÃƒÂ­nio'}
+                                                        {isExpanded ? 'Recolher' : 'Ver raciocínio'}
                                                     </span>
                                                 )}
                                             </div>
@@ -819,7 +814,7 @@ export default function AdsPage() {
                 )}
             </div>
 
-            {/* Modal de HistÃƒÂ³rico de RelatÃƒÂ³rios */}
+            {/* Modal de Histórico de Relatórios */}
             {showHistory && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -841,7 +836,7 @@ export default function AdsPage() {
                         }}>
                             <h2 style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <History size={22} color="var(--gold)" />
-                                HistÃƒÂ³rico de AnÃƒÂ¡lises IA Ã¢â‚¬â€ Meta Ads
+                                Histórico de Análises IA - Meta Ads
                             </h2>
                             <button onClick={() => setShowHistory(false)}
                                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4, display: 'flex' }}>
@@ -853,8 +848,8 @@ export default function AdsPage() {
                             {reports.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '40px 16px' }}>
                                     <Brain size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: 8 }}>Nenhum relatÃƒÂ³rio gerado ainda</p>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Os relatÃƒÂ³rios sÃƒÂ£o gerados automaticamente pelo Pilger AI.</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: 8 }}>Nenhum relatório gerado ainda</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Os relatórios são gerados automaticamente pelo Pilger AI.</p>
                                 </div>
                             ) : (
                                 <div style={{ display: 'grid', gap: 16 }}>
@@ -865,9 +860,9 @@ export default function AdsPage() {
                                                 style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: 20, cursor: 'pointer', borderLeft: `4px solid ${report.performance_score != null ? getScoreColor(report.performance_score) : 'var(--border-color)'}` }}
                                                 onClick={() => setExpandedReport(isExpanded ? null : report.id)}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: isExpanded ? 16 : 0 }}>
-                                                    <span style={{ fontSize: '1.2rem' }}>{report.type === 'daily' ? 'Ã°Å¸â€œâ€¹' : 'Ã°Å¸â€Â­'}</span>
+                                                    <span style={{ fontSize: '1.2rem' }}>{report.type === 'daily' ? 'Fechamento Diário' : 'Diretriz Semanal'}</span>
                                                     <span style={{ fontSize: '1rem', fontWeight: 600 }}>
-                                                        {report.type === 'daily' ? 'Fechamento DiÃƒÂ¡rio' : 'Diretriz Semanal'}
+                                                        {report.type === 'daily' ? 'Fechamento Diário' : 'Diretriz Semanal'}
                                                     </span>
                                                     {report.performance_score != null && (
                                                         <span style={{ fontSize: '0.8rem', padding: '4px 10px', borderRadius: 20, fontWeight: 700, background: `${getScoreColor(report.performance_score)}15`, color: getScoreColor(report.performance_score) }}>

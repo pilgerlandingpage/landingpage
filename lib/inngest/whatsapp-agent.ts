@@ -2309,23 +2309,22 @@ export const processWhatsAppMessage = inngest.createFunction(
             } else if (shouldSendAudio) {
                 let audioBuffer: Buffer | null = null
                 const rawVoiceId = (broker as any).voice_id || configs['whatsapp_tts_voice'] || ''
-                const ttsProvider = configs['whatsapp_tts_provider'] || 'elevenlabs'
 
                 // Support "openai:voice_name" format from the broker dropdown
                 const isOpenAIVoice = rawVoiceId.startsWith('openai:')
                 const voiceId = isOpenAIVoice ? rawVoiceId.replace('openai:', '') : rawVoiceId
 
                 const debugSteps: string[] = []
-                debugSteps.push(`provider=${ttsProvider}, voiceId=${voiceId}, isOpenAI=${isOpenAIVoice}, textLen=${cleanText.length}`)
+                debugSteps.push(`voiceId=${voiceId}, isOpenAI=${isOpenAIVoice}, textLen=${cleanText.length}`)
 
                 if (isOpenAIVoice && configs['openai_api_key']) {
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], voiceId || 'onyx')
                     debugSteps.push(`openai_tts: ${audioBuffer ? audioBuffer.length + 'b' : 'NULL'}`)
-                } else if (ttsProvider === 'elevenlabs' && configs['elevenlabs_api_key'] && voiceId) {
+                } else if (!isOpenAIVoice && configs['elevenlabs_api_key'] && voiceId) {
                     audioBuffer = await ttsElevenLabs(cleanText, configs['elevenlabs_api_key'], voiceId)
                     debugSteps.push(`elevenlabs_tts: ${audioBuffer ? audioBuffer.length + 'b' : 'NULL'}`)
                 } else {
-                    debugSteps.push(`no_tts_match: provider=${ttsProvider}, hasELKey=${!!configs['elevenlabs_api_key']}, hasOAIKey=${!!configs['openai_api_key']}, voiceId=${voiceId}`)
+                    debugSteps.push(`no_tts_match: hasELKey=${!!configs['elevenlabs_api_key']}, hasOAIKey=${!!configs['openai_api_key']}, voiceId=${voiceId}`)
                 }
                 if (!audioBuffer && configs['openai_api_key']) {
                     audioBuffer = await ttsOpenAI(cleanText, configs['openai_api_key'], configs['whatsapp_tts_voice'] || 'onyx')

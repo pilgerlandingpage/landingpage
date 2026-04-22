@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getGeminiApiKey, getAIConfig } from './config'
 
-export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string) {
+export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string, modelOverride?: string) {
   const apiKey = await getGeminiApiKey()
   if (!apiKey) throw new Error('Gemini API Key not configured. Configure em Admin > Manutenção.')
 
-  const modelName = (await getAIConfig('gemini_model')) || 'gemini-1.5-flash'
+  const modelName = modelOverride || (await getAIConfig('gemini_model')) || 'gemini-1.5-flash'
   console.log('[Gemini Chat] Usando modelo:', modelName)
 
   try {

@@ -153,14 +153,17 @@ export async function extractLeadData(
     const apiKey = await getGeminiApiKey()
     if (!apiKey) return {}
 
-    const extractionPrompt = `Analise a conversa abaixo e extraia os dados do lead, se disponíveis.
-Responda SOMENTE com um JSON válido, sem markdown, sem texto adicional.
-Campos possíveis: name, phone, email, budget, preferences (array de strings), is_vip (boolean).
-Se um campo não foi mencionado, omita-o do JSON.
-Um lead é VIP se mencionar heliponto, cobertura premium, valores acima de R$ 5 milhões, ou demonstrar alto poder aquisitivo.
+    const supabase = getSupabase()
+    const { data: promptConfig } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'lead_extraction_prompt')
+        .maybeSingle()
 
-Conversa:
-${conversationText}`
+    const basePrompt = String(promptConfig?.value || '').trim()
+    if (!basePrompt) return {}
+
+    const extractionPrompt = `${basePrompt}\n\nConversa:\n${conversationText}`
 
     const response = await fetch(
         `${GEMINI_API_BASE}/models/${await getGeminiModel()}:generateContent?key=${apiKey}`,

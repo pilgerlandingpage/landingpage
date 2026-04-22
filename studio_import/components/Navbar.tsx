@@ -18,12 +18,12 @@ const Navbar: React.FC = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 py-4 ${isScrolled ? 'bg-black/80 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-2xl font-serif tracking-[0.2em] font-bold">Lâ€™HÃƒâ€°RITAGE</span>
+          <span className="text-2xl font-serif tracking-[0.2em] font-bold">Lâ€™HÉRITAGE</span>
           <span className="text-[10px] tracking-[0.4em] text-white/50 uppercase">The Pinnacle of Living</span>
         </div>
         
         <div className="hidden md:flex space-x-8 text-xs tracking-widest uppercase font-medium">
-          <a href="#experiencia" className="hover:text-yellow-500 transition-colors">ExperiÃƒÂªncia</a>
+          <a href="#experiencia" className="hover:text-yellow-500 transition-colors">Experiência</a>
           <a href="#galeria" className="hover:text-yellow-500 transition-colors">Galeria</a>
           <a href="#diferenciais" className="hover:text-yellow-500 transition-colors">Diferenciais</a>
         </div>

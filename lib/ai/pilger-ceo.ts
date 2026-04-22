@@ -2,12 +2,54 @@ import { createClient } from '@supabase/supabase-js'
 import { generateChatResponse } from '../ai/generation'
 import { getMarketRadarTrends } from '../market-radar/trends'
 import { sendAlertToAdmins } from '../ads/whatsapp-alerts'
+import { getCeoGeminiModel, getCeoOpenAIModel, getCeoProvider } from './config'
 
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+async function getRequiredPromptFromConfig(key: string): Promise<string> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase
+    .from('app_config')
+    .select('value')
+    .eq('key', key)
+    .maybeSingle()
+
+  if (error) throw new Error(`Erro ao carregar prompt "${key}": ${error.message}`)
+
+  const value = String(data?.value || '').trim()
+  if (!value) throw new Error(`Prompt "${key}" não configurado na Sala de Manutenção`)
+
+  return value
+}
+
+async function getOptionalPromptFromConfig(key: string): Promise<string> {
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('app_config')
+    .select('value')
+    .eq('key', key)
+    .maybeSingle()
+
+  return String(data?.value || '').trim()
+}
+
+async function getCeoRuntimeConfig() {
+  const [provider, openaiModel, geminiModel] = await Promise.all([
+    getCeoProvider(),
+    getCeoOpenAIModel(),
+    getCeoGeminiModel(),
+  ])
+
+  return {
+    provider: provider === 'openai' ? 'openai' : 'gemini',
+    openaiModel,
+    geminiModel,
+  } as const
 }
 
 // ─── Helper: extrair score de 0-100 do markdown gerado pela IA ───
@@ -133,14 +175,10 @@ export async function generateDailyPilgerReport() {
 
   const results = []
 
-  // 3. Obter o prompt customizado do banco ou usar o fallback
-  const { data: configData } = await supabase
-    .from('app_config')
-    .select('value')
-    .eq('key', 'pilger_daily_system_prompt')
-    .single()
-
-  const systemPrompt = configData?.value || "Você é Pilger AI CEO, um gestor de tráfego de elite focado em ROI."
+  const ceoRuntime = await getCeoRuntimeConfig()
+  const ceoBasePrompt = await getOptionalPromptFromConfig('ceo_agent_system_prompt')
+  const dailyPrompt = await getRequiredPromptFromConfig('pilger_daily_system_prompt')
+  const systemPrompt = [ceoBasePrompt, dailyPrompt].filter(Boolean).join('\n\n')
 
   // 4. Gerar relatório para cada plataforma que tenha métricas
   for (const { platform, platformMetrics, platformLabel } of [
@@ -182,7 +220,7 @@ Formato de Saída esperado (Markdown):
 Seja breve e focado em ROI.
 ${SCORE_INSTRUCTION}`
 
-    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt)
+    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt, ceoRuntime)
     const performanceScore = extractPerformanceScore(reportMarkdown)
 
     // Salvar no Supabase com a plataforma
@@ -328,14 +366,10 @@ export async function generateWeeklyPilgerReport() {
       }
   }
 
-  // 4. Obter o prompt customizado
-  const { data: configData } = await supabase
-    .from('app_config')
-    .select('value')
-    .eq('key', 'pilger_weekly_system_prompt')
-    .single()
-
-  const systemPrompt = configData?.value || "Você é Pilger AI CEO, o líder estratégico que alinha mercado, tráfego e metas de negócio."
+  const ceoRuntime = await getCeoRuntimeConfig()
+  const ceoBasePrompt = await getOptionalPromptFromConfig('ceo_agent_system_prompt')
+  const weeklyPrompt = await getRequiredPromptFromConfig('pilger_weekly_system_prompt')
+  const systemPrompt = [ceoBasePrompt, weeklyPrompt].filter(Boolean).join('\n\n')
 
   const results = []
 
@@ -376,7 +410,7 @@ Formato de Saída esperado (Markdown):
 Seja extremamente estratégico e assuma a persona de um Gestor de Elite.
 ${SCORE_INSTRUCTION}`
 
-    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt)
+    const reportMarkdown = await generateChatResponse([], prompt, systemPrompt, ceoRuntime)
     const performanceScore = extractPerformanceScore(reportMarkdown)
 
     await supabase.from('pilger_ai_reports').insert({

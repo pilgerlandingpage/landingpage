@@ -40,6 +40,7 @@ interface WhatsAppInstance {
     connected_at: string | null
     broker_id?: string | null
     virtual_brokers?: { name?: string | null } | null
+    config?: any
 }
 
 interface Empreendimento {
@@ -468,6 +469,11 @@ export default function BrokersAdmin() {
         fetchBrokers()
     }
 
+    const isTextOnlyMode = (() => {
+        const currentInstance = availableInstances.find(inst => inst.id === selectedInstanceId) || whatsappInstance;
+        return currentInstance?.config?.response_mode === 'text';
+    })();
+
     return (
         <div className="admin-page-container">
             <div className="admin-header" style={{ marginBottom: '32px' }}>
@@ -746,7 +752,12 @@ export default function BrokersAdmin() {
                                         className="form-input"
                                         value={formData.voice_id}
                                         onChange={(e) => setFormData({ ...formData, voice_id: e.target.value })}
+                                        disabled={isTextOnlyMode}
+                                        style={{ backgroundColor: isTextOnlyMode ? 'rgba(255,255,255,0.05)' : undefined }}
                                     >
+                                        {isTextOnlyMode && (
+                                            <optgroup label="⚠️ Desabilitado: Modo 'Sempre Texto'"></optgroup>
+                                        )}
                                         <option value="">🔄 Usar voz padrão da Sala de Manutenção</option>
                                         {/* ElevenLabs voices */}
                                         {elevenLabsVoices.length > 0 && (
@@ -779,6 +790,11 @@ export default function BrokersAdmin() {
                                             </option>
                                         )}
                                     </select>
+                                    {isTextOnlyMode && (
+                                        <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '6px', fontWeight: 600 }}>
+                                            ⚠️ O Modo de Resposta desta instância de WhatsApp está configurado para 'Sempre Texto'. Modifique na aba Instâncias WhatsApp se quiser usar Voz.
+                                        </div>
+                                    )}
                                     {loadingVoices && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>⏳ Carregando vozes do ElevenLabs...</div>}
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                                         Escolha a voz que este corretor usará para responder áudios. Deixe em branco para usar a voz padrão configurada na Sala de Manutenção.

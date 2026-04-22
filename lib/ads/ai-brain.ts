@@ -6,7 +6,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import OpenAI from 'openai'
-import { ADS_ANALYSIS_SYSTEM_PROMPT, buildMetricsAnalysisPrompt, DAILY_REPORT_PROMPT } from './prompts'
+import { buildMetricsAnalysisPrompt } from './prompts'
 import type { AIAnalysisResponse, MetricsSnapshot, AdCampaign } from './types'
 import { getAdsProvider, getAdsGeminiModel, getAdsOpenAIModel, getOpenAIApiKey } from '../ai/config'
 
@@ -26,6 +26,22 @@ function getSupabase() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+async function getRequiredPromptFromConfig(key: string): Promise<string> {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', key)
+        .maybeSingle()
+
+    if (error) throw new Error(`Erro ao carregar prompt "${key}": ${error.message}`)
+
+    const value = String(data?.value || '').trim()
+    if (!value) throw new Error(`Prompt "${key}" não configurado na Sala de Manutenção`)
+
+    return value
 }
 
 // --- Analisar Métricas de uma Campanha ---
@@ -78,15 +94,7 @@ export async function analyzeCampaignMetrics(campaign: {
     try {
         let text = ''
 
-        // Fetch custom prompt from DB
-        const supabase = getSupabase()
-        const { data: configData } = await supabase
-            .from('app_config')
-            .select('value')
-            .eq('key', 'ads_analyst_system_prompt')
-            .single()
-        
-        const systemInstruction = configData?.value || ADS_ANALYSIS_SYSTEM_PROMPT
+        const systemInstruction = await getRequiredPromptFromConfig('ads_analyst_system_prompt')
 
         if (provider === 'openai') {
             const apiKey = await getOpenAIApiKey()
@@ -224,6 +232,7 @@ export function detectCreativeFatigue(metrics: MetricsSnapshot): {
 
 export async function generateDailyReport(campaignsSummary: string): Promise<string> {
     const provider = await getAdsProvider()
+    const dailyReportPrompt = await getRequiredPromptFromConfig('pilger_daily_system_prompt')
 
     try {
         if (provider === 'openai') {
@@ -235,7 +244,7 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
             const completion = await openai.chat.completions.create({
                 model: modelName,
                 messages: [
-                    { role: 'system', content: DAILY_REPORT_PROMPT },
+                    { role: 'system', content: dailyReportPrompt },
                     { role: 'user', content: campaignsSummary }
                 ],
                 temperature: 0.5,
@@ -249,7 +258,7 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
 
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: campaignsSummary }] }],
-                systemInstruction: { role: 'model', parts: [{ text: DAILY_REPORT_PROMPT }] },
+                systemInstruction: { role: 'model', parts: [{ text: dailyReportPrompt }] },
                 generationConfig: { temperature: 0.5 }
             })
 

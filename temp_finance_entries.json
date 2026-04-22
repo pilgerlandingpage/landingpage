@@ -1,0 +1,1244 @@
+[
+    {
+        "description":  "Internet escritório",
+        "entry_type":  "expense",
+        "amount":  179,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Internet | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  17400,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Google Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  32791.42,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Meta Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Revisão contrato",
+        "entry_type":  "expense",
+        "amount":  3000,
+        "category":  "Jurídico",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Contrato | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Aluguel escritório",
+        "entry_type":  "expense",
+        "amount":  32307,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Aluguel | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "av brasil",
+        "entry_type":  "expense",
+        "amount":  3000,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Outdoor | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Erick",
+        "entry_type":  "expense",
+        "amount":  8000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Comercial | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Amanda",
+        "entry_type":  "expense",
+        "amount":  5000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Operacional | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Giovanna",
+        "entry_type":  "expense",
+        "amount":  3500,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Secretária | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Comissoes",
+        "entry_type":  "expense",
+        "amount":  18615,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Comissoes | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Assertiva consultas",
+        "entry_type":  "expense",
+        "amount":  610,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Assertiva consultas | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  1510,
+        "category":  "Consumo despesas",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Tributos",
+        "entry_type":  "expense",
+        "amount":  27589,
+        "category":  "Tributos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Tributos | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Faxineira",
+        "entry_type":  "expense",
+        "amount":  2800,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Faxineira | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Contabilidade",
+        "entry_type":  "expense",
+        "amount":  855,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Contabilidade | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Celular",
+        "entry_type":  "expense",
+        "amount":  499.39,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Celular | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Site",
+        "entry_type":  "expense",
+        "amount":  368,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Site | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Araquari",
+        "entry_type":  "expense",
+        "amount":  25000,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Outdoor | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "carlos dru.",
+        "entry_type":  "expense",
+        "amount":  11500,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Outdoor | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Amanda",
+        "entry_type":  "expense",
+        "amount":  5000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Operacional | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Giovanna",
+        "entry_type":  "expense",
+        "amount":  3500,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Secretária | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Laura",
+        "entry_type":  "expense",
+        "amount":  1550,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Edição | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Internet",
+        "entry_type":  "expense",
+        "amount":  179.9,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Internet | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Site",
+        "entry_type":  "expense",
+        "amount":  368,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Site | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Celular",
+        "entry_type":  "expense",
+        "amount":  499.39,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Celular | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Contabilidade",
+        "entry_type":  "expense",
+        "amount":  855,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Contabilidade | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Faxineira",
+        "entry_type":  "expense",
+        "amount":  2800,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Faxineira | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Erick",
+        "entry_type":  "expense",
+        "amount":  8000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Comercial | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Magno",
+        "entry_type":  "expense",
+        "amount":  10000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-13",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Tec | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Av Brasil",
+        "entry_type":  "expense",
+        "amount":  3000,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: System.Xml.XmlElement | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Araquari",
+        "entry_type":  "expense",
+        "amount":  21823,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Outdoor | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Tributos",
+        "entry_type":  "expense",
+        "amount":  56478,
+        "category":  "Tributos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Tributos | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  3260,
+        "category":  "Consumo despesas",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  807.5,
+        "category":  "Manutencao despesas",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Assertiva consultas",
+        "entry_type":  "expense",
+        "amount":  507,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Assertiva consultas | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Comissoes",
+        "entry_type":  "expense",
+        "amount":  9779,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Comissoes | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  22300,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Google Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  30469.6,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Meta Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Moveis loja",
+        "entry_type":  "expense",
+        "amount":  21761,
+        "category":  "System.Xml.XmlElement",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Moveis loja | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Barco",
+        "entry_type":  "expense",
+        "amount":  1858,
+        "category":  "Life Style",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Barco | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Aluguel escritório",
+        "entry_type":  "expense",
+        "amount":  32307,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Aluguel | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Amanda",
+        "entry_type":  "expense",
+        "amount":  5000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Operacional | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Giovanna",
+        "entry_type":  "expense",
+        "amount":  3500,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Secretária | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Laura",
+        "entry_type":  "expense",
+        "amount":  1550,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Edição | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Internet",
+        "entry_type":  "expense",
+        "amount":  179.9,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Internet | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Site",
+        "entry_type":  "expense",
+        "amount":  368,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Site | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Celular",
+        "entry_type":  "expense",
+        "amount":  499.39,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Celular | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Contabilidade",
+        "entry_type":  "expense",
+        "amount":  855,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Contabilidade | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Faxineira",
+        "entry_type":  "expense",
+        "amount":  2800,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Faxineira | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Erick",
+        "entry_type":  "expense",
+        "amount":  8000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Comercial | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Magno",
+        "entry_type":  "expense",
+        "amount":  10000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-13",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Tec | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Av Brasil",
+        "entry_type":  "expense",
+        "amount":  3000,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: System.Xml.XmlElement | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Araquari",
+        "entry_type":  "expense",
+        "amount":  21823,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Outdoor | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Tributos",
+        "entry_type":  "expense",
+        "amount":  56478,
+        "category":  "Tributos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Tributos | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  3260,
+        "category":  "Consumo despesas",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  807.5,
+        "category":  "Manutencao despesas",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Assertiva consultas",
+        "entry_type":  "expense",
+        "amount":  507,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Assertiva consultas | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Comissoes",
+        "entry_type":  "expense",
+        "amount":  9779,
+        "category":  "Prestadores",
+        "entry_date":  "2026-03-12",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Comissoes | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  20596.41,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Google Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Campanha geração leads",
+        "entry_type":  "expense",
+        "amount":  33934.36,
+        "category":  "Marketing",
+        "entry_date":  "2026-03-11",
+        "payment_method":  "Cartão",
+        "notes":  "Subcategoria: Meta Ads | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Moveis loja",
+        "entry_type":  "expense",
+        "amount":  21761,
+        "category":  "System.Xml.XmlElement",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Moveis loja | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Barco",
+        "entry_type":  "expense",
+        "amount":  1858,
+        "category":  "Life Style",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Barco | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Aluguel escritório",
+        "entry_type":  "expense",
+        "amount":  32307,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-03-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Aluguel | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Amanda",
+        "entry_type":  "expense",
+        "amount":  5000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Operacional | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Giovanna",
+        "entry_type":  "expense",
+        "amount":  3500,
+        "category":  "Prestadores",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Secretária | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Internet",
+        "entry_type":  "expense",
+        "amount":  179.9,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Internet | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Site",
+        "entry_type":  "expense",
+        "amount":  425,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Site | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Celular",
+        "entry_type":  "expense",
+        "amount":  499.39,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Celular | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Contabilidade",
+        "entry_type":  "expense",
+        "amount":  855,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Contabilidade | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Faxineira",
+        "entry_type":  "expense",
+        "amount":  2800,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Faxineira | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Erick",
+        "entry_type":  "expense",
+        "amount":  8000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Gestor Comercial | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Magno",
+        "entry_type":  "expense",
+        "amount":  10000,
+        "category":  "Prestadores",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Tec | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Tributos",
+        "entry_type":  "expense",
+        "amount":  125326,
+        "category":  "Tributos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Tributos | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  2035,
+        "category":  "Consumo despesas",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Administrativo",
+        "entry_type":  "expense",
+        "amount":  2290,
+        "category":  "Manutencao despesas",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Administrativo | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Assertiva consultas",
+        "entry_type":  "expense",
+        "amount":  727,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Assertiva consultas | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Jurídico",
+        "entry_type":  "expense",
+        "amount":  7212,
+        "category":  "Jurídico",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Moveis loja",
+        "entry_type":  "expense",
+        "amount":  21761,
+        "category":  "System.Xml.XmlElement",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Moveis loja | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Barco",
+        "entry_type":  "expense",
+        "amount":  1850,
+        "category":  "Life Style",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Barco | Tipo: Variável | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Aluguel escritório",
+        "entry_type":  "expense",
+        "amount":  32307,
+        "category":  "Custos Fixos",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "PIX",
+        "notes":  "Subcategoria: Aluguel | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Despesa - Porsche 911",
+        "entry_type":  "expense",
+        "amount":  24246,
+        "category":  "Life Style",
+        "entry_date":  "2026-04-10",
+        "payment_method":  "Boleto",
+        "notes":  "Subcategoria: Porsche 911 | Tipo: Fixo | Responsavel: Financeiro"
+    },
+    {
+        "description":  "Comissao - Senna",
+        "entry_type":  "income",
+        "amount":  36713.64,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-30",
+        "payment_method":  null,
+        "notes":  "Origem: Senna | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG North",
+        "entry_type":  "income",
+        "amount":  9850,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-30",
+        "payment_method":  null,
+        "notes":  "Origem: FG North | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG Garden",
+        "entry_type":  "income",
+        "amount":  6658.5,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-30",
+        "payment_method":  null,
+        "notes":  "Origem: FG Garden | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Pasqualloto",
+        "entry_type":  "income",
+        "amount":  158782.5,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-29",
+        "payment_method":  null,
+        "notes":  "Origem: Pasqualloto | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - LD",
+        "entry_type":  "income",
+        "amount":  4925,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-22",
+        "payment_method":  null,
+        "notes":  "Origem: LD | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Recebimento - MAUro Bernardes - matheus ver Moov NF",
+        "entry_type":  "income",
+        "amount":  10500,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-22",
+        "payment_method":  null,
+        "notes":  "Origem: MAUro Bernardes - matheus ver Moov NF | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - N1",
+        "entry_type":  "income",
+        "amount":  1704,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-22",
+        "payment_method":  null,
+        "notes":  "Origem: N1 | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "mensalidade - Monica",
+        "entry_type":  "income",
+        "amount":  2806.45,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-22",
+        "payment_method":  null,
+        "notes":  "Origem: Monica | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Mobilia - Quanta - moveis",
+        "entry_type":  "income",
+        "amount":  20000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-20",
+        "payment_method":  null,
+        "notes":  "Origem: Quanta - moveis | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - senna",
+        "entry_type":  "income",
+        "amount":  102536.13,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-20",
+        "payment_method":  null,
+        "notes":  "Origem: senna | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "mensalidade - matheus",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-13",
+        "payment_method":  null,
+        "notes":  "Origem: matheus | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "mensalidade - Beitiner",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-12",
+        "payment_method":  null,
+        "notes":  "Origem: Beitiner | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "mensalidade - Drieli",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-12",
+        "payment_method":  null,
+        "notes":  "Origem: Drieli | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Emily",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-12",
+        "payment_method":  null,
+        "notes":  "Origem: Emily | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - System.Xml.XmlElement",
+        "entry_type":  "income",
+        "amount":  69600,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-08",
+        "payment_method":  null,
+        "notes":  "Origem: System.Xml.XmlElement | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Celso - Vila Serena",
+        "entry_type":  "income",
+        "amount":  69000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-07",
+        "payment_method":  null,
+        "notes":  "Origem: Celso - Vila Serena | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Carine",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-01-03",
+        "payment_method":  null,
+        "notes":  "Origem: Carine | Mes: jan | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Clarus",
+        "entry_type":  "income",
+        "amount":  5000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-25",
+        "payment_method":  null,
+        "notes":  "Origem: Clarus | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Wert",
+        "entry_type":  "income",
+        "amount":  9850,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-24",
+        "payment_method":  null,
+        "notes":  "Origem: Wert | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Brava Luna",
+        "entry_type":  "income",
+        "amount":  73993.2,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-24",
+        "payment_method":  null,
+        "notes":  "Origem: Brava Luna | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Beitiner",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-20",
+        "payment_method":  null,
+        "notes":  "Origem: Beitiner | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mobilia - Quanta - moveis",
+        "entry_type":  "income",
+        "amount":  20000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-20",
+        "payment_method":  null,
+        "notes":  "Origem: Quanta - moveis | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Phacz Costao",
+        "entry_type":  "income",
+        "amount":  52000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-18",
+        "payment_method":  null,
+        "notes":  "Origem: Phacz Costao | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Reginaldo",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-10",
+        "payment_method":  null,
+        "notes":  "Origem: Reginaldo | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Emily",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-10",
+        "payment_method":  null,
+        "notes":  "Origem: Emily | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Monica",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-10",
+        "payment_method":  null,
+        "notes":  "Origem: Monica | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Drieli",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-10",
+        "payment_method":  null,
+        "notes":  "Origem: Drieli | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Carine",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-10",
+        "payment_method":  null,
+        "notes":  "Origem: Carine | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Luciano Cogo",
+        "entry_type":  "income",
+        "amount":  21240,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-06",
+        "payment_method":  null,
+        "notes":  "Origem: Luciano Cogo | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Diamond",
+        "entry_type":  "income",
+        "amount":  4925,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-02-02",
+        "payment_method":  null,
+        "notes":  "Origem: Diamond | Mes: fev | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - emily",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-17",
+        "payment_method":  null,
+        "notes":  "Origem: emily | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Matheus",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-16",
+        "payment_method":  null,
+        "notes":  "Origem: Matheus | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Incorpora",
+        "entry_type":  "income",
+        "amount":  5000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-16",
+        "payment_method":  null,
+        "notes":  "Origem: Incorpora | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Fernandes Viva",
+        "entry_type":  "income",
+        "amount":  30000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-12",
+        "payment_method":  null,
+        "notes":  "Origem: Fernandes Viva | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Evento - Sergio langer",
+        "entry_type":  "income",
+        "amount":  26478.57,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-13",
+        "payment_method":  null,
+        "notes":  "Origem: Sergio langer | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Gard",
+        "entry_type":  "income",
+        "amount":  4383.25,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-12",
+        "payment_method":  null,
+        "notes":  "Origem: Gard | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Gard",
+        "entry_type":  "income",
+        "amount":  2191,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-12",
+        "payment_method":  null,
+        "notes":  "Origem: Gard | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - gard",
+        "entry_type":  "income",
+        "amount":  2191,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-12",
+        "payment_method":  null,
+        "notes":  "Origem: gard | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Monica",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-11",
+        "payment_method":  null,
+        "notes":  "Origem: Monica | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - bravissima",
+        "entry_type":  "income",
+        "amount":  272707.89,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-06",
+        "payment_method":  null,
+        "notes":  "Origem: bravissima | Mes: mar | Parcela: 46179.0 | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Reginaldo",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-11",
+        "payment_method":  null,
+        "notes":  "Origem: Reginaldo | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Mensalidade - Drieli",
+        "entry_type":  "income",
+        "amount":  3000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-11",
+        "payment_method":  null,
+        "notes":  "Origem: Drieli | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Recebimento - Empreendimento rua 109",
+        "entry_type":  "income",
+        "amount":  8027.75,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-06",
+        "payment_method":  null,
+        "notes":  "Origem: Empreendimento rua 109 | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Recebimento - Mauro Bernardes - matheus ver Moov NF",
+        "entry_type":  "income",
+        "amount":  10500,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-02",
+        "payment_method":  null,
+        "notes":  "Origem: Mauro Bernardes - matheus ver Moov NF | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG North",
+        "entry_type":  "income",
+        "amount":  9850,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-02",
+        "payment_method":  null,
+        "notes":  "Origem: FG North | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG Garden",
+        "entry_type":  "income",
+        "amount":  6658.5,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-02",
+        "payment_method":  null,
+        "notes":  "Origem: FG Garden | Mes: mar | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Detalhe Empreendimentos",
+        "entry_type":  "income",
+        "amount":  105000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-05-24",
+        "payment_method":  null,
+        "notes":  "Origem: Detalhe Empreendimentos | Mes: mai | Status compensacao: 0"
+    },
+    {
+        "description":  "Comissao - Senna",
+        "entry_type":  "income",
+        "amount":  48712,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Senna | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - Senna",
+        "entry_type":  "income",
+        "amount":  17192,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Senna | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG North",
+        "entry_type":  "income",
+        "amount":  9850,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: FG North | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Comissao - FG Garden",
+        "entry_type":  "income",
+        "amount":  6658,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: FG Garden | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Vokkan Evento",
+        "entry_type":  "income",
+        "amount":  9850,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Vokkan Evento | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Clarus",
+        "entry_type":  "income",
+        "amount":  4950,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Clarus | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Recebimento - Quanta - moveis",
+        "entry_type":  "income",
+        "amount":  20000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Quanta - moveis | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - Quanta",
+        "entry_type":  "income",
+        "amount":  4950,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: Quanta | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - BGM",
+        "entry_type":  "income",
+        "amount":  5000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: BGM | Mes: abr | Status compensacao: 1"
+    },
+    {
+        "description":  "Campanha - CLH",
+        "entry_type":  "income",
+        "amount":  5000,
+        "category":  "Recebimentos",
+        "entry_date":  "2026-03-25",
+        "payment_method":  null,
+        "notes":  "Origem: CLH | Mes: abr | Status compensacao: 1"
+    }
+]

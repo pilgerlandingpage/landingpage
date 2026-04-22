@@ -71,7 +71,7 @@ export default function SeductionTemplate({ data, slug, landingPageId, agentName
                     <div className="order-2 md:order-1 space-y-8">
                         <div className="w-16 h-1 bg-[var(--gold)]" />
                         <h2 className="font-playfair text-4xl md:text-5xl font-bold leading-tight">
-                            VocÃƒÂª merece viver o <span className="text-[var(--gold)]">extraordinÃƒÂ¡rio</span>.
+                            Você merece viver o <span className="text-[var(--gold)]">extraordinário</span>.
                         </h2>
                         <p className="text-lg text-zinc-600 leading-relaxed">
                             {data.description}
@@ -139,7 +139,7 @@ export default function SeductionTemplate({ data, slug, landingPageId, agentName
                         &quot;O imóvel perfeito não é apenas um lugar,<br />é um sentimento.&quot;
                     </h2>
                     <p className="text-xl text-zinc-400 mb-12 font-light">
-                        Agende uma visita privada e sinta a experiÃƒÂªncia pessoalmente.
+                        Agende uma visita privada e sinta a experiência pessoalmente.
                     </p>
 
                     <div className="flex flex-col md:flex-row gap-4 justify-center items-center">

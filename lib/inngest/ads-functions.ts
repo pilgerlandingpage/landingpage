@@ -501,22 +501,30 @@ export const radarCollectionCron = inngest.createFunction(
         const config = await step.run('check-radar-schedule', async () => {
             const { data } = await supabase
                 .from('app_config')
-                .select('value')
-                .eq('key', 'radar_collection_times')
-                .single()
+                .select('key, value')
+                .in('key', ['radar_collection_times', 'radar_collection_days'])
             
             // Padrão: 06, 12, 18
-            const targetHours = (data?.value || '06,12,18').split(',')
-            const { hour } = getCurrentTimeSP()
+            const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+            const targetHours = (map.radar_collection_times || '06,12,18')
+                .split(',')
+                .map((v: string) => v.trim().padStart(2, '0'))
+                .filter(Boolean)
+            const targetDays = (map.radar_collection_days || '0,1,2,3,4,5,6')
+                .split(',')
+                .map((v: string) => v.trim())
+                .filter(Boolean)
+            const { hour, dayOfWeek } = getCurrentTimeSP()
 
             return {
-                shouldRun: targetHours.includes(hour),
-                currentSlot: hour
+                shouldRun: targetHours.includes(hour) && targetDays.includes(dayOfWeek),
+                currentSlot: hour,
+                currentDay: dayOfWeek
             }
         })
 
         if (!config.shouldRun) {
-            return { skipped: true, reason: 'hour_not_scheduled', hour: config.currentSlot }
+            return { skipped: true, reason: 'schedule_not_matched', hour: config.currentSlot, day: config.currentDay }
         }
 
         // 2. Executar Coleta
@@ -547,37 +555,50 @@ export const generateDailyPilgerReportCron = inngest.createFunction(
     async ({ step }) => {
         const supabase = getSupabase()
 
-        // 1. Verificar horário (Sempre às 23:00)
-        const shouldRun = await step.run('check-daily-schedule', async () => {
-            const { hour } = getCurrentTimeSP()
-            return hour === '23'
+        // 1. Verificar agendamento dinâmico (dias + horários)
+        const config = await step.run('check-daily-schedule', async () => {
+            const { data } = await supabase
+                .from('app_config')
+                .select('key, value')
+                .in('key', ['pilger_daily_time', 'pilger_daily_days'])
+
+            const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+            const targetHours = (map.pilger_daily_time || '23')
+                .split(',')
+                .map((v: string) => v.trim().padStart(2, '0'))
+                .filter(Boolean)
+            const targetDays = (map.pilger_daily_days || '0,1,2,3,4,5,6')
+                .split(',')
+                .map((v: string) => v.trim())
+                .filter(Boolean)
+            const { hour, dayOfWeek } = getCurrentTimeSP()
+
+            return {
+                shouldRun: targetHours.includes(hour) && targetDays.includes(dayOfWeek),
+                currentSlot: hour,
+                currentDay: dayOfWeek,
+            }
         })
 
-        if (!shouldRun) {
-            return { skipped: true, reason: 'hour_mismatch', current_hour: getCurrentTimeSP().hour }
+        if (!config.shouldRun) {
+            return { skipped: true, reason: 'schedule_mismatch', current_hour: config.currentSlot, current_day: config.currentDay }
         }
 
-        // 2. Extra proteção contra execuções duplas no mesmo dia
+        // 2. Extra proteção contra execuções duplas no mesmo horário do mesmo dia
         const hasRunToday = await step.run('check-already-run', async () => {
-             const { hour } = getCurrentTimeSP()
-             const spTime = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
-             const todayStr = new Date(spTime).toISOString().split('T')[0]
-             
-             // Identificador único para a execução de hoje às 23h
-             const runId = `daily_23_${todayStr}`
-             
              const { data } = await supabase
                 .from('pilger_ai_reports')
                 .select('id')
                 .eq('type', 'daily')
-                .eq('date', todayStr)
+                // Supabase doesn't easily store runId yet in the default schema, so we can just look at created_at for the last 50 minutes.
+                .gte('created_at', new Date(Date.now() - 50 * 60000).toISOString())
                 .limit(1)
                 
              return data && data.length > 0
         })
 
         if (hasRunToday) {
-            return { skipped: true, reason: 'already_run_today' }
+            return { skipped: true, reason: 'already_run_this_hour' }
         }
 
         // 3. Executar Relatório
@@ -594,34 +615,49 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
     async ({ step }) => {
         const supabase = getSupabase()
 
-        // 1. Verificar horário (Fixo: Segunda-feira às 23:00)
-        const shouldRun = await step.run('check-weekly-schedule', async () => {
+        // 1. Verificar agendamento dinâmico (dias + horários)
+        const config = await step.run('check-weekly-schedule', async () => {
+            const { data } = await supabase
+                .from('app_config')
+                .select('key, value')
+                .in('key', ['pilger_weekly_days', 'pilger_weekly_times', 'pilger_weekly_day', 'pilger_weekly_time'])
+
+            const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+            const targetDays = (map.pilger_weekly_days || map.pilger_weekly_day || '1')
+                .split(',')
+                .map((v: string) => v.trim())
+                .filter(Boolean)
+            const targetHours = (map.pilger_weekly_times || map.pilger_weekly_time || '23')
+                .split(',')
+                .map((v: string) => v.trim().padStart(2, '0'))
+                .filter(Boolean)
+
             const { dayOfWeek, hour } = getCurrentTimeSP()
-            // 1 = Segunda-feira, 23 = 23:00
-            return dayOfWeek === '1' && hour === '23'
+            return {
+                shouldRun: targetDays.includes(dayOfWeek) && targetHours.includes(hour),
+                currentDay: dayOfWeek,
+                currentHour: hour,
+            }
         })
 
-        if (!shouldRun) {
-            return { skipped: true, reason: 'schedule_mismatch', ...getCurrentTimeSP() }
+        if (!config.shouldRun) {
+            return { skipped: true, reason: 'schedule_mismatch', current_day: config.currentDay, current_hour: config.currentHour }
         }
 
         // 2. Extra proteção
         const hasRunToday = await step.run('check-already-run', async () => {
-             const spTime = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
-             const todayStr = new Date(spTime).toISOString().split('T')[0]
-             
              const { data } = await supabase
                 .from('pilger_ai_reports')
                 .select('id')
                 .eq('type', 'weekly')
-                .eq('date', todayStr)
+                .gte('created_at', new Date(Date.now() - 50 * 60000).toISOString())
                 .limit(1)
                 
              return data && data.length > 0
         })
 
         if (hasRunToday) {
-            return { skipped: true, reason: 'already_run_today' }
+            return { skipped: true, reason: 'already_run_this_hour' }
         }
 
         // 3. Executar Relatório
@@ -631,3 +667,5 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
         return result
     }
 )
+
+
