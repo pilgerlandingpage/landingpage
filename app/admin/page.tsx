@@ -372,7 +372,7 @@ export default function AdminOverviewPage() {
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
                                 <XAxis dataKey="label" stroke="#9ca3af" />
                                 <YAxis stroke="#9ca3af" />
-                                <Tooltip formatter={(value: number) => formatCurrency(Number(value || 0))} />
+                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
                                 <Legend />
                                 <Line type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" strokeWidth={2} dot={false} />
                                 <Line type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" strokeWidth={2} dot={false} />
@@ -400,7 +400,7 @@ export default function AdminOverviewPage() {
                                         <Cell key={`cell-${idx}`} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => formatCurrency(Number(value || 0))} />
+                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>

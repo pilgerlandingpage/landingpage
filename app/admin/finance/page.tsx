@@ -1004,7 +1004,7 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
                                 <XAxis dataKey="label" stroke="#9ca3af" />
                                 <YAxis stroke="#9ca3af" />
-                                <Tooltip formatter={(value: number) => formatCurrency(Number(value || 0))} />
+                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
                                 <Legend />
                                 <Area type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" fill="url(#incomeGradient)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" fill="url(#expenseGradient)" strokeWidth={2} />
@@ -1030,7 +1030,7 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                                         <Cell key={`cell-${idx}`} fill={EXPENSE_COLORS[idx % EXPENSE_COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => formatCurrency(Number(value || 0))} />
+                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
