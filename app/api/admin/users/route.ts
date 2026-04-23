@@ -1,8 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 
-// Helper: verify master access
-async function verifyMaster() {
+const USERS_SETTINGS_PERMISSION_KEYS = new Set([
+    'settings_users',
+    'gestao_de_usuarios',
+    'usuarios',
+    'users',
+])
+
+// Helper: verify if logged user can manage users
+async function verifyUserManagerAccess() {
     const supabase = await createServerSupabase()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
@@ -10,12 +17,42 @@ async function verifyMaster() {
     const admin = createAdminClient()
     const { data: adminUser } = await admin
         .from('admin_users')
-        .select('id, is_master')
+        .select('id, is_master, is_active')
         .eq('auth_user_id', user.id)
         .single()
 
-    if (!adminUser?.is_master) return null
-    return adminUser
+    if (!adminUser?.is_active) return null
+
+    if (adminUser.is_master) {
+        return {
+            ...adminUser,
+            can_grant_master: true,
+        }
+    }
+
+    const { data: userSectors } = await admin
+        .from('admin_user_sectors')
+        .select('sector_id')
+        .eq('user_id', adminUser.id)
+
+    const sectorIds = (userSectors || []).map((row: any) => row.sector_id)
+    if (sectorIds.length === 0) return null
+
+    const { data: sectorPerms } = await admin
+        .from('admin_sector_permissions')
+        .select('admin_permissions(module_key)')
+        .in('sector_id', sectorIds)
+
+    const hasUsersPermission = (sectorPerms || []).some((row: any) =>
+        USERS_SETTINGS_PERMISSION_KEYS.has(row.admin_permissions?.module_key)
+    )
+
+    if (!hasUsersPermission) return null
+
+    return {
+        ...adminUser,
+        can_grant_master: false,
+    }
 }
 
 // Helper: sync admin_alert_contacts based on sector assignments
@@ -73,11 +110,11 @@ async function syncAlertContacts(admin: any, userId: string, name: string, phone
     }
 }
 
-// GET — list all admin users with sectors
+// GET - list all admin users with sectors
 export async function GET() {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        const access = await verifyUserManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const admin = createAdminClient()
 
@@ -99,7 +136,7 @@ export async function GET() {
             sectors: (userSectors || [])
                 .filter((us: any) => us.user_id === u.id)
                 .map((us: any) => us.admin_sectors)
-                .filter(Boolean)
+                .filter(Boolean),
         }))
 
         return NextResponse.json(enriched)
@@ -108,16 +145,20 @@ export async function GET() {
     }
 }
 
-// POST — create a new user
+// POST - create a new user
 export async function POST(request: NextRequest) {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        const access = await verifyUserManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { email, password, name, phone, sector_ids, is_master: newIsMaster } = await request.json()
 
+        if (!access.can_grant_master && Boolean(newIsMaster)) {
+            return NextResponse.json({ error: 'Somente super admin pode criar usuario master.' }, { status: 403 })
+        }
+
         if (!email || !password) {
-            return NextResponse.json({ error: 'Email e senha são obrigatórios.' }, { status: 400 })
+            return NextResponse.json({ error: 'Email e senha sao obrigatorios.' }, { status: 400 })
         }
         if (password.length < 6) {
             return NextResponse.json({ error: 'Senha deve ter pelo menos 6 caracteres.' }, { status: 400 })
@@ -133,7 +174,7 @@ export async function POST(request: NextRequest) {
             user_metadata: {
                 full_name: name || '',
                 phone: phone || null,
-            }
+            },
         })
 
         if (authError) throw authError
@@ -146,7 +187,7 @@ export async function POST(request: NextRequest) {
                 name: name || email,
                 email,
                 phone: phone || null,
-                is_master: newIsMaster || false,
+                is_master: access.can_grant_master ? Boolean(newIsMaster) : false,
             })
             .select()
             .single()
@@ -165,34 +206,68 @@ export async function POST(request: NextRequest) {
             await syncAlertContacts(admin, adminUser.id, adminUser.name, adminUser.phone)
         }
 
-        return NextResponse.json({
-            message: 'Usuário criado com sucesso',
-            user: adminUser,
-        }, { status: 201 })
+        return NextResponse.json(
+            {
+                message: 'Usuario criado com sucesso',
+                user: adminUser,
+            },
+            { status: 201 }
+        )
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
 
-// PUT — update an existing user
+// PUT - update an existing user
 export async function PUT(request: NextRequest) {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        const access = await verifyUserManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
-        const { id, name, phone, is_active, is_master: newIsMaster, sector_ids,
-            shadow_agent_prompt, shadow_agent_enabled, available_from, available_until, transfer_message
+        const {
+            id,
+            name,
+            phone,
+            is_active,
+            is_master: newIsMaster,
+            sector_ids,
+            shadow_agent_prompt,
+            shadow_agent_enabled,
+            available_from,
+            available_until,
+            transfer_message,
         } = await request.json()
-        if (!id) return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+
+        if (!id) return NextResponse.json({ error: 'ID e obrigatorio' }, { status: 400 })
 
         const admin = createAdminClient()
+        const { data: targetUser, error: targetUserError } = await admin
+            .from('admin_users')
+            .select('id, is_master, is_active')
+            .eq('id', id)
+            .single()
+
+        if (targetUserError || !targetUser) {
+            return NextResponse.json({ error: 'Usuario nao encontrado.' }, { status: 404 })
+        }
+
+        if (!access.can_grant_master) {
+            if (newIsMaster !== undefined) {
+                return NextResponse.json({ error: 'Somente super admin pode alterar perfil master.' }, { status: 403 })
+            }
+
+            // Perfis sem privilegio master nao podem desativar super admin.
+            if (targetUser.is_master && is_active === false) {
+                return NextResponse.json({ error: 'Somente super admin pode desativar outro super admin.' }, { status: 403 })
+            }
+        }
 
         // Update admin_users
         const updateData: any = { updated_at: new Date().toISOString() }
         if (name !== undefined) updateData.name = name
         if (phone !== undefined) updateData.phone = phone
         if (is_active !== undefined) updateData.is_active = is_active
-        if (newIsMaster !== undefined) updateData.is_master = newIsMaster
+        if (newIsMaster !== undefined && access.can_grant_master) updateData.is_master = newIsMaster
         if (shadow_agent_prompt !== undefined) updateData.shadow_agent_prompt = shadow_agent_prompt
         if (shadow_agent_enabled !== undefined) updateData.shadow_agent_enabled = shadow_agent_enabled
         if (available_from !== undefined) updateData.available_from = available_from

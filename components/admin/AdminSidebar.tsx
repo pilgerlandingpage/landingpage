@@ -133,6 +133,8 @@ const GENERAL_DASHBOARD_ITEM: NavItem = {
 }
 
 const SECTION_ORDER = ['PRINCIPAL', 'FINANCEIRO', 'MARKETING', 'SISTEMA', 'CONFIGURACOES']
+const SETTINGS_USERS_PERMISSION_KEYS = ['settings_users', 'gestao_de_usuarios', 'usuarios', 'users']
+const SETTINGS_SECTORS_PERMISSION_KEYS = ['settings_sectors', 'gestao_de_setores', 'setores', 'sectors']
 
 export default function AdminSidebar() {
     const pathname = usePathname()
@@ -214,6 +216,8 @@ export default function AdminSidebar() {
         const sections: Record<string, { href: string; icon: any; label: string; subItems?: SubNavItem[] }[]> = {}
 
         const allowedModules = isMaster ? Object.keys(MODULE_NAV) : permissions
+        const canManageSectors = isMaster || SETTINGS_SECTORS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
+        const canManageUsers = isMaster || SETTINGS_USERS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
 
         const canSeeGeneralDashboard = isMaster || allowedModules.includes('dashboard')
         if (canSeeGeneralDashboard) {
@@ -232,11 +236,14 @@ export default function AdminSidebar() {
             sections[nav.section].push({ href: nav.href, icon: nav.icon, label: nav.label, subItems: nav.subItems })
         }
 
-        if (isMaster) {
-            sections.CONFIGURACOES = [
-                { href: '/admin/settings/sectors', icon: Shield, label: 'Setores' },
-                { href: '/admin/settings/users', icon: UserCog, label: 'Usuarios' },
-            ]
+        if (canManageSectors || canManageUsers) {
+            sections.CONFIGURACOES = []
+            if (canManageSectors) {
+                sections.CONFIGURACOES.push({ href: '/admin/settings/sectors', icon: Shield, label: 'Setores' })
+            }
+            if (canManageUsers) {
+                sections.CONFIGURACOES.push({ href: '/admin/settings/users', icon: UserCog, label: 'Usuarios' })
+            }
         }
 
         return SECTION_ORDER

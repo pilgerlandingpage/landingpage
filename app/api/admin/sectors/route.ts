@@ -1,33 +1,107 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 
-// Helper: verify master access
-async function verifyMaster() {
+const SECTORS_SETTINGS_PERMISSION_KEYS = new Set([
+    'settings_sectors',
+    'gestao_de_setores',
+    'setores',
+    'sectors',
+])
+const PERMISSION_CANONICAL_KEY_MAP: Record<string, string> = {
+    settings_users: 'settings_users',
+    gestao_de_usuarios: 'settings_users',
+    usuarios: 'settings_users',
+    users: 'settings_users',
+    settings_sectors: 'settings_sectors',
+    gestao_de_setores: 'settings_sectors',
+    setores: 'settings_sectors',
+    sectors: 'settings_sectors',
+}
+const CANONICAL_PERMISSION_LABELS: Record<string, string> = {
+    settings_users: 'Usuarios',
+    settings_sectors: 'Setores',
+}
+
+function canonicalPermissionKey(moduleKey: string | null | undefined) {
+    if (!moduleKey) return ''
+    return PERMISSION_CANONICAL_KEY_MAP[moduleKey] || moduleKey
+}
+
+async function ensureSettingsPermissions(admin: any) {
+    await admin.from('admin_permissions').upsert(
+        [
+            {
+                module_key: 'settings_sectors',
+                label: 'Setores',
+                description: 'Gerenciar setores e suas permissoes de acesso',
+                category: 'sistema',
+            },
+            {
+                module_key: 'settings_users',
+                label: 'Usuarios',
+                description: 'Gerenciar usuarios administrativos e vinculacao de setores',
+                category: 'sistema',
+            },
+        ],
+        { onConflict: 'module_key' }
+    )
+}
+
+async function verifySectorManagerAccess() {
     const supabase = await createServerSupabase()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return null
 
     const admin = createAdminClient()
     const { data: adminUser } = await admin
         .from('admin_users')
-        .select('id, is_master')
+        .select('id, is_master, is_active')
         .eq('auth_user_id', user.id)
         .single()
 
-    if (!adminUser?.is_master) return null
-    return adminUser
+    if (!adminUser?.is_active) return null
+
+    if (adminUser.is_master) {
+        return {
+            ...adminUser,
+            can_grant_master: true,
+        }
+    }
+
+    const { data: userSectors } = await admin
+        .from('admin_user_sectors')
+        .select('sector_id')
+        .eq('user_id', adminUser.id)
+
+    const sectorIds = (userSectors || []).map((row: any) => row.sector_id)
+    if (sectorIds.length === 0) return null
+
+    const { data: sectorPerms } = await admin
+        .from('admin_sector_permissions')
+        .select('admin_permissions(module_key)')
+        .in('sector_id', sectorIds)
+
+    const hasSectorsPermission = (sectorPerms || []).some((row: any) =>
+        SECTORS_SETTINGS_PERMISSION_KEYS.has(row.admin_permissions?.module_key)
+    )
+
+    if (!hasSectorsPermission) return null
+
+    return {
+        ...adminUser,
+        can_grant_master: false,
+    }
 }
 
-// GET — listar setores com permissões
+// GET - listar setores com permissoes
 export async function GET() {
     try {
-        const supabase = await createServerSupabase()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const access = await verifySectorManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const admin = createAdminClient()
+        await ensureSettingsPermissions(admin)
 
-        // Buscar setores
         const { data: sectors, error } = await admin
             .from('admin_sectors')
             .select('*')
@@ -35,33 +109,73 @@ export async function GET() {
 
         if (error) throw error
 
-        // Buscar permissões de cada setor
         const { data: sectorPerms } = await admin
             .from('admin_sector_permissions')
             .select('sector_id, permission_id, admin_permissions(module_key, label, category)')
 
-        // Buscar todas as permissões disponíveis
         const { data: allPermissions } = await admin
             .from('admin_permissions')
             .select('*')
             .order('category, label')
 
-        // Contar usuários por setor
         const { data: userCounts } = await admin
             .from('admin_user_sectors')
             .select('sector_id')
 
         const countMap: Record<string, number> = {}
-        for (const uc of (userCounts || [])) {
+        for (const uc of userCounts || []) {
             countMap[uc.sector_id] = (countMap[uc.sector_id] || 0) + 1
         }
 
-        // Montar resposta
+        const canonicalPermissionsMap = new Map<string, any>()
+        for (const permission of allPermissions || []) {
+            const canonicalKey = canonicalPermissionKey(permission.module_key)
+            if (!canonicalKey) continue
+
+            const current = canonicalPermissionsMap.get(canonicalKey)
+            const candidate = {
+                ...permission,
+                module_key: canonicalKey,
+                label: CANONICAL_PERMISSION_LABELS[canonicalKey] || permission.label,
+            }
+            const candidateScore = permission.module_key === canonicalKey ? 2 : 1
+            const currentScore = current?._score || 0
+
+            if (!current || candidateScore > currentScore) {
+                canonicalPermissionsMap.set(canonicalKey, { ...candidate, _score: candidateScore })
+            }
+        }
+
+        const canonicalPermissions = Array.from(canonicalPermissionsMap.values())
+            .map(({ _score, ...permission }) => permission)
+            .sort((a: any, b: any) =>
+                `${a.category || ''} ${a.label || ''}`.localeCompare(`${b.category || ''} ${b.label || ''}`)
+            )
+
+        const canonicalPermissionByKey = new Map<string, any>()
+        for (const permission of canonicalPermissions) {
+            canonicalPermissionByKey.set(permission.module_key, permission)
+        }
+
         const enriched = (sectors || []).map((s: any) => {
-            const perms = (sectorPerms || [])
-                .filter((sp: any) => sp.sector_id === s.id)
-                .map((sp: any) => sp.admin_permissions)
-                .filter(Boolean)
+            const rawPerms = (sectorPerms || []).filter((sp: any) => sp.sector_id === s.id)
+            const seen = new Set<string>()
+            const perms: any[] = []
+
+            for (const sp of rawPerms) {
+                const rawPermission = sp.admin_permissions
+                const canonicalKey = canonicalPermissionKey(rawPermission?.module_key)
+                if (!canonicalKey || seen.has(canonicalKey)) continue
+                seen.add(canonicalKey)
+
+                const canonicalPermission = canonicalPermissionByKey.get(canonicalKey)
+                perms.push({
+                    id: canonicalPermission?.id || sp.permission_id,
+                    module_key: canonicalKey,
+                    label: canonicalPermission?.label || CANONICAL_PERMISSION_LABELS[canonicalKey] || rawPermission?.label,
+                    category: canonicalPermission?.category || rawPermission?.category || 'principal',
+                })
+            }
 
             return {
                 ...s,
@@ -72,26 +186,24 @@ export async function GET() {
 
         return NextResponse.json({
             sectors: enriched,
-            all_permissions: allPermissions || [],
+            all_permissions: canonicalPermissions,
         })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
 
-// POST — criar setor
+// POST - criar setor
 export async function POST(request: NextRequest) {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado — apenas Admin Master' }, { status: 403 })
+        const access = await verifySectorManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { name, description, color, icon, permission_ids } = await request.json()
 
-        if (!name) return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
+        if (!name) return NextResponse.json({ error: 'Nome e obrigatorio' }, { status: 400 })
 
         const admin = createAdminClient()
-
-        // Criar setor
         const { data: sector, error } = await admin
             .from('admin_sectors')
             .insert({ name, description, color, icon })
@@ -100,7 +212,6 @@ export async function POST(request: NextRequest) {
 
         if (error) throw error
 
-        // Vincular permissões
         if (permission_ids && permission_ids.length > 0) {
             const links = permission_ids.map((pid: string) => ({
                 sector_id: sector.id,
@@ -115,18 +226,17 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// PUT — editar setor
+// PUT - editar setor
 export async function PUT(request: NextRequest) {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        const access = await verifySectorManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { id, name, description, color, icon, permission_ids } = await request.json()
-        if (!id) return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+        if (!id) return NextResponse.json({ error: 'ID e obrigatorio' }, { status: 400 })
 
         const admin = createAdminClient()
 
-        // Atualizar setor
         const { error } = await admin
             .from('admin_sectors')
             .update({ name, description, color, icon })
@@ -134,7 +244,6 @@ export async function PUT(request: NextRequest) {
 
         if (error) throw error
 
-        // Atualizar permissões: deletar antigas, inserir novas
         if (permission_ids !== undefined) {
             await admin.from('admin_sector_permissions').delete().eq('sector_id', id)
 
@@ -153,15 +262,15 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// DELETE — excluir setor
+// DELETE - excluir setor
 export async function DELETE(request: NextRequest) {
     try {
-        const master = await verifyMaster()
-        if (!master) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        const access = await verifySectorManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
-        if (!id) return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+        if (!id) return NextResponse.json({ error: 'ID e obrigatorio' }, { status: 400 })
 
         const admin = createAdminClient()
         const { error } = await admin.from('admin_sectors').delete().eq('id', id)

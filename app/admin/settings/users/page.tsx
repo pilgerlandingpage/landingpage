@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import {
@@ -29,6 +29,7 @@ interface WhatsAppUserInstance {
 export default function UsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([])
     const [sectors, setSectors] = useState<Sector[]>([])
+    const [canGrantMaster, setCanGrantMaster] = useState(false)
     const [loading, setLoading] = useState(true)
     const [creating, setCreating] = useState(false)
     const [editing, setEditing] = useState<string | null>(null)
@@ -48,7 +49,7 @@ export default function UsersPage() {
         shadow_agent_enabled: false,
         available_from: '08:00',
         available_until: '20:00',
-        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
+        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
     })
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -57,14 +58,17 @@ export default function UsersPage() {
 
     const fetchData = async () => {
         try {
-            const [usersRes, sectorsRes] = await Promise.all([
+            const [usersRes, sectorsRes, permissionsRes] = await Promise.all([
                 fetch('/api/admin/users'),
-                fetch('/api/admin/sectors')
+                fetch('/api/admin/sectors'),
+                fetch('/api/admin/permissions')
             ])
             const usersData = await usersRes.json()
             const sectorsData = await sectorsRes.json()
+            const permissionsData = permissionsRes.ok ? await permissionsRes.json() : {}
             setUsers(Array.isArray(usersData) ? usersData : [])
             setSectors(sectorsData.sectors || [])
+            setCanGrantMaster(Boolean(permissionsData?.is_master))
         } catch { showToast('Erro ao carregar dados', 'error') }
         finally { setLoading(false) }
     }
@@ -73,7 +77,7 @@ export default function UsersPage() {
 
     const startCreate = () => {
         setCreating(true); setEditing(null)
-        setForm({ name: '', email: '', password: '', phone: '', is_master: false, sector_ids: [], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
+        setForm({ name: '', email: '', password: '', phone: '', is_master: false, sector_ids: [], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
         setUserWhatsapp(null); setUserWhatsappQR(null)
     }
 
@@ -81,7 +85,7 @@ export default function UsersPage() {
         setEditing(u.id); setCreating(false)
         setForm({
             name: u.name, email: u.email, password: '', phone: u.phone || '',
-            is_master: u.is_master, sector_ids: u.sectors.map(s => s.id),
+            is_master: canGrantMaster ? u.is_master : false, sector_ids: u.sectors.map(s => s.id),
             shadow_agent_prompt: u.shadow_agent_prompt || '',
             shadow_agent_enabled: u.shadow_agent_enabled || false,
             available_from: u.available_from || '08:00',
@@ -143,7 +147,7 @@ export default function UsersPage() {
 
     const handleSave = async () => {
         if (creating && (!form.email || !form.password)) {
-            showToast('Email e senha são obrigatórios', 'error'); return
+            showToast('Email e senha sÃ£o obrigatÃ³rios', 'error'); return
         }
         if (creating && form.password.length < 6) {
             showToast('Senha deve ter pelo menos 6 caracteres', 'error'); return
@@ -152,15 +156,26 @@ export default function UsersPage() {
         try {
             const method = creating ? 'POST' : 'PUT'
             const body: any = creating
-                ? { name: form.name, email: form.email, password: form.password, phone: form.phone, is_master: form.is_master, sector_ids: form.sector_ids }
-                : { id: editing, name: form.name, phone: form.phone, is_master: form.is_master, sector_ids: form.sector_ids, shadow_agent_prompt: form.shadow_agent_prompt, shadow_agent_enabled: form.shadow_agent_enabled, available_from: form.available_from, available_until: form.available_until, transfer_message: form.transfer_message }
+                ? { name: form.name, email: form.email, password: form.password, phone: form.phone, is_master: canGrantMaster ? form.is_master : false, sector_ids: form.sector_ids }
+                : {
+                    id: editing,
+                    name: form.name,
+                    phone: form.phone,
+                    ...(canGrantMaster ? { is_master: form.is_master } : {}),
+                    sector_ids: form.sector_ids,
+                    shadow_agent_prompt: form.shadow_agent_prompt,
+                    shadow_agent_enabled: form.shadow_agent_enabled,
+                    available_from: form.available_from,
+                    available_until: form.available_until,
+                    transfer_message: form.transfer_message
+                }
 
             const res = await fetch('/api/admin/users', {
                 method, headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             })
             if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
-            showToast(creating ? 'Usuário criado!' : 'Usuário atualizado!', 'success')
+            showToast(creating ? 'UsuÃ¡rio criado!' : 'UsuÃ¡rio atualizado!', 'success')
             cancel(); fetchData()
         } catch (err: any) { showToast(err.message, 'error') }
         finally { setSaving(false) }
@@ -173,7 +188,7 @@ export default function UsersPage() {
                 body: JSON.stringify({ id: u.id, is_active: !u.is_active })
             })
             if (!res.ok) throw new Error('Erro')
-            showToast(u.is_active ? 'Usuário desativado' : 'Usuário ativado', 'success')
+            showToast(u.is_active ? 'UsuÃ¡rio desativado' : 'UsuÃ¡rio ativado', 'success')
             fetchData()
         } catch (err: any) { showToast(err.message, 'error') }
     }
@@ -197,14 +212,14 @@ export default function UsersPage() {
             <div className="admin-header">
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Users size={26} /> Gestão de Usuários
+                        <Users size={26} /> GestÃ£o de UsuÃ¡rios
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                        Gerencie usuários, setores e permissões de acesso
+                        Gerencie usuÃ¡rios, setores e permissÃµes de acesso
                     </p>
                 </div>
                 <button className="btn btn-gold" onClick={startCreate} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <UserPlus size={18} /> Novo Usuário
+                    <UserPlus size={18} /> Novo UsuÃ¡rio
                 </button>
             </div>
 
@@ -212,7 +227,7 @@ export default function UsersPage() {
             {(creating || editing) && (
                 <div className="chart-card" style={{ marginBottom: 24, border: '2px solid var(--gold)' }}>
                     <div className="chart-title" style={{ marginBottom: 16 }}>
-                        {creating ? '✨ Novo Usuário' : '✏️ Editar Usuário'}
+                        {creating ? 'âœ¨ Novo UsuÃ¡rio' : 'âœï¸ Editar UsuÃ¡rio'}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -254,26 +269,32 @@ export default function UsersPage() {
                                     <Lock size={16} className="rbac-input-icon" />
                                     <input type="password" value={form.password}
                                         onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                                        placeholder="Mínimo 6 caracteres" className="rbac-input" />
+                                        placeholder="MÃ­nimo 6 caracteres" className="rbac-input" />
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Master toggle */}
-                    <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <label className="rbac-toggle">
-                            <input type="checkbox" checked={form.is_master}
-                                onChange={e => setForm(p => ({ ...p, is_master: e.target.checked }))} />
-                            <span className="rbac-toggle-slider" />
-                        </label>
-                        <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Crown size={16} style={{ color: '#f59e0b' }} /> Admin Master
+                                        {/* Master toggle */}
+                    {canGrantMaster ? (
+                        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <label className="rbac-toggle">
+                                <input type="checkbox" checked={form.is_master}
+                                    onChange={e => setForm(p => ({ ...p, is_master: e.target.checked }))} />
+                                <span className="rbac-toggle-slider" />
+                            </label>
+                            <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Crown size={16} style={{ color: '#f59e0b' }} /> Admin Master
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Acesso total a todos os modulos</div>
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Acesso total a todos os módulos</div>
                         </div>
-                    </div>
+                    ) : (
+                        <div style={{ marginBottom: 16, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                            Seu perfil pode gerenciar usuarios, mas nao pode alterar permissao de Admin Master.
+                        </div>
+                    )}
 
                     {/* Sector Assignment */}
                     {!form.is_master && (
@@ -281,7 +302,7 @@ export default function UsersPage() {
                             <label className="rbac-label">Setores ({form.sector_ids.length} selecionados)</label>
                             {sectors.length === 0 ? (
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                    Nenhum setor criado. Crie setores primeiro em Configurações → Setores.
+                                    Nenhum setor criado. Crie setores primeiro em ConfiguraÃ§Ãµes â†’ Setores.
                                 </p>
                             ) : (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -305,14 +326,14 @@ export default function UsersPage() {
                         </div>
                     )}
 
-                    {/* WhatsApp + Shadow Agent — only when editing */}
+                    {/* WhatsApp + Shadow Agent â€” only when editing */}
                     {editing && (
                         <>
                             {/* WhatsApp Connection */}
                             <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)', marginBottom: 16 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                                     <Smartphone size={16} style={{ color: '#22c55e' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>📱 WhatsApp do Corretor</span>
+                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ“± WhatsApp do Corretor</span>
                                 </div>
 
                                 {userWhatsappLoading ? (
@@ -322,8 +343,8 @@ export default function UsersPage() {
                                 ) : userWhatsapp?.status === 'connected' ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px' }}>
                                         <Wifi size={16} style={{ color: '#22c55e' }} />
-                                        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>✅ Conectado</span>
-                                        {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> — {userWhatsapp.phone_number}</span>}
+                                        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>âœ… Conectado</span>
+                                        {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> â€” {userWhatsapp.phone_number}</span>}
                                         <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginLeft: 'auto', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <RefreshCw size={10} /> Verificar
                                         </button>
@@ -333,15 +354,15 @@ export default function UsersPage() {
                                         <div style={{ display: 'inline-block', padding: '12px', background: 'white', borderRadius: '10px', marginBottom: '8px' }}>
                                             <img src={userWhatsappQR} alt="QR" style={{ width: '200px', height: '200px' }} />
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Escaneie com WhatsApp → Dispositivos conectados</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Escaneie com WhatsApp â†’ Dispositivos conectados</div>
                                         <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginTop: '8px', padding: '6px 16px', borderRadius: '8px', fontSize: '0.8rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#22c55e', cursor: 'pointer' }}>
-                                            <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Verificar conexão
+                                            <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Verificar conexÃ£o
                                         </button>
                                     </div>
                                 ) : (
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px', color: '#888', fontSize: '0.85rem' }}>
-                                            <WifiOff size={14} /> Não conectado
+                                            <WifiOff size={14} /> NÃ£o conectado
                                         </div>
                                         <button type="button" onClick={connectUserWhatsApp} disabled={userWhatsappConnecting}
                                             style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none', color: 'white', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: userWhatsappConnecting ? 0.6 : 1 }}>
@@ -356,10 +377,10 @@ export default function UsersPage() {
                             <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                     <Brain size={16} style={{ color: '#6366f1' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🤖 Agente Sombra</span>
+                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ¤– Agente Sombra</span>
                                 </div>
                                 <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
-                                    IA que atende pelo WhatsApp do corretor quando ele está indisponível (fora do horário).
+                                    IA que atende pelo WhatsApp do corretor quando ele estÃ¡ indisponÃ­vel (fora do horÃ¡rio).
                                 </p>
 
                                 {/* Toggle */}
@@ -370,7 +391,7 @@ export default function UsersPage() {
                                         <span className="rbac-toggle-slider" style={{ background: form.shadow_agent_enabled ? '#6366f1' : undefined }} />
                                     </label>
                                     <span style={{ fontSize: '0.85rem', fontWeight: 600, color: form.shadow_agent_enabled ? '#6366f1' : '#888' }}>
-                                        {form.shadow_agent_enabled ? '✅ Ativo' : '⏸️ Desativado'}
+                                        {form.shadow_agent_enabled ? 'âœ… Ativo' : 'â¸ï¸ Desativado'}
                                     </span>
                                 </div>
 
@@ -380,7 +401,7 @@ export default function UsersPage() {
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                                             <div>
                                                 <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> Disponível das
+                                                    <Clock size={12} /> DisponÃ­vel das
                                                 </label>
                                                 <input type="time" value={form.available_from}
                                                     onChange={e => setForm(p => ({ ...p, available_from: e.target.value }))}
@@ -388,7 +409,7 @@ export default function UsersPage() {
                                             </div>
                                             <div>
                                                 <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> Até
+                                                    <Clock size={12} /> AtÃ©
                                                 </label>
                                                 <input type="time" value={form.available_until}
                                                     onChange={e => setForm(p => ({ ...p, available_until: e.target.value }))}
@@ -396,7 +417,7 @@ export default function UsersPage() {
                                             </div>
                                         </div>
                                         <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>
-                                            ⏰ Fora deste horário, o Agente Sombra assume o WhatsApp do corretor automaticamente.
+                                            â° Fora deste horÃ¡rio, o Agente Sombra assume o WhatsApp do corretor automaticamente.
                                         </div>
 
                                         {/* Shadow Agent Prompt */}
@@ -404,10 +425,10 @@ export default function UsersPage() {
                                             <label className="rbac-label">Prompt do Agente Sombra</label>
                                             <textarea value={form.shadow_agent_prompt}
                                                 onChange={e => setForm(p => ({ ...p, shadow_agent_prompt: e.target.value }))}
-                                                placeholder={`Você é o assistente do corretor. Ele está indisponível no momento.\n\nSua missão:\n- Atender o cliente com educação\n- Coletar informações sobre o interesse\n- Informar que o corretor entrará em contato em breve\n\nNunca invente dados sobre imóveis.`}
+                                                placeholder={`VocÃª Ã© o assistente do corretor. Ele estÃ¡ indisponÃ­vel no momento.\n\nSua missÃ£o:\n- Atender o cliente com educaÃ§Ã£o\n- Coletar informaÃ§Ãµes sobre o interesse\n- Informar que o corretor entrarÃ¡ em contato em breve\n\nNunca invente dados sobre imÃ³veis.`}
                                                 style={{ width: '100%', minHeight: '120px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'monospace', resize: 'vertical' }} />
                                             <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                                Define como o agente sombra se comporta quando o corretor está fora do horário.
+                                                Define como o agente sombra se comporta quando o corretor estÃ¡ fora do horÃ¡rio.
                                             </div>
                                         </div>
                                     </>
@@ -416,12 +437,12 @@ export default function UsersPage() {
                         </>
                     )}
 
-                    {/* ── SEÇÃO: MENSAGEM DE TRANSFERÊNCIA ── */}
+                    {/* â”€â”€ SEÃ‡ÃƒO: MENSAGEM DE TRANSFERÃŠNCIA â”€â”€ */}
                     {editing && (
                         <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                 <MessageSquare size={16} style={{ color: '#6366f1' }} />
-                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🔄 Mensagem de Transferência</span>
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ”„ Mensagem de TransferÃªncia</span>
                             </div>
                             <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
                                 Mensagem enviada ao lead quando o agente IA transferir o atendimento para este corretor.
@@ -429,10 +450,10 @@ export default function UsersPage() {
                             <textarea
                                 value={form.transfer_message}
                                 onChange={e => setForm(p => ({ ...p, transfer_message: e.target.value }))}
-                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! 😊"
+                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š"
                                 style={{ width: '100%', minHeight: '100px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', resize: 'vertical' }} />
                             <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                Variáveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
+                                VariÃ¡veis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
                             </div>
                         </div>
                     )}
@@ -443,7 +464,7 @@ export default function UsersPage() {
                         </button>
                         <button onClick={handleSave} disabled={saving} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
-                            {saving ? 'Salvando...' : creating ? 'Criar Usuário' : 'Salvar Alterações'}
+                            {saving ? 'Salvando...' : creating ? 'Criar UsuÃ¡rio' : 'Salvar AlteraÃ§Ãµes'}
                         </button>
                     </div>
                 </div>
@@ -465,7 +486,7 @@ export default function UsersPage() {
             {filtered.length === 0 ? (
                 <div className="chart-card" style={{ textAlign: 'center', padding: '60px 24px' }}>
                     <Users size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum usuário encontrado</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum usuÃ¡rio encontrado</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: 10 }}>
