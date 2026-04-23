@@ -43,6 +43,8 @@ Validate these pages:
 - `/admin/finance`
 - `/admin/finance/contas-a-pagar`
 - `/admin/finance/contas-a-receber`
+- `/admin/finance/fluxo-caixa`
+- `/admin/finance/dre-gerencial`
 - `/admin/finance/comissoes`
 - `/admin/finance/conciliacao-bancaria`
 - `/admin/finance/fechamento-mensal`

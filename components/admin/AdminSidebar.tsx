@@ -51,6 +51,8 @@ const MODULE_NAV: Record<string, NavItem> = {
             { href: '/admin/finance/contas-a-pagar', label: 'Contas a Pagar' },
             { href: '/admin/finance/contas-a-receber', label: 'Contas a Receber' },
             { href: '/admin/finance/conciliacao-bancaria', label: 'Conciliacao Bancaria' },
+            { href: '/admin/finance/fluxo-caixa', label: 'Fluxo de Caixa' },
+            { href: '/admin/finance/dre-gerencial', label: 'DRE Gerencial' },
             { href: '/admin/finance/comissoes', label: 'Comissoes' },
             { href: '/admin/finance/fechamento-mensal', label: 'Fechamento Mensal' },
             { href: '/admin/finance/exportacao-contabil', label: 'Exportacao Contabil' },
