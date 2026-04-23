@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { CircleDollarSign, Percent, Plus, RefreshCw, Trash2, X } from 'lucide-react'
@@ -123,7 +123,7 @@ function statusBadgeStyle(status: CommissionStatus) {
     return { color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }
 }
 
-export default function FinanceCommissionsPage() {
+function FinanceCommissionsPageContent() {
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -942,6 +942,24 @@ export default function FinanceCommissionsPage() {
                 }
             `}</style>
         </div>
+    )
+}
+
+function FinanceCommissionsPageFallback() {
+    return (
+        <div style={{ padding: '24px 18px 36px' }}>
+            <div className="chart-card" style={{ color: 'var(--text-muted)' }}>
+                Carregando comissoes...
+            </div>
+        </div>
+    )
+}
+
+export default function FinanceCommissionsPage() {
+    return (
+        <Suspense fallback={<FinanceCommissionsPageFallback />}>
+            <FinanceCommissionsPageContent />
+        </Suspense>
     )
 }
 

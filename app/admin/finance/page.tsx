@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
     ArrowDownCircle,
@@ -292,7 +292,7 @@ function getReconciliationBadgeStyle(status: ReconciliationStatus) {
     return { color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }
 }
 
-export default function FinancePage({ initialSection }: { initialSection?: string }) {
+function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const [entries, setEntries] = useState<FinanceEntry[]>([])
@@ -2711,5 +2711,23 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                 }
             `}</style>
         </div>
+    )
+}
+
+function FinancePageFallback() {
+    return (
+        <div style={{ padding: '24px 18px 36px' }}>
+            <div className="chart-card" style={{ color: 'var(--text-muted)' }}>
+                Carregando financeiro...
+            </div>
+        </div>
+    )
+}
+
+export default function FinancePage({ initialSection }: { initialSection?: string }) {
+    return (
+        <Suspense fallback={<FinancePageFallback />}>
+            <FinancePageContent initialSection={initialSection} />
+        </Suspense>
     )
 }
