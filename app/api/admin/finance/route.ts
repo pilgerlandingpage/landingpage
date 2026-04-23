@@ -15,6 +15,10 @@ interface FinancePayload {
     counterparty_name?: string | null
     counterparty_type?: 'pessoa_fisica' | 'pessoa_juridica' | null
     reference_company?: string | null
+    due_date?: string | null
+    competence_date?: string | null
+    cost_center_id?: string | null
+    bank_account_id?: string | null
     notes?: string | null
     attachment_url?: string | null
 }
@@ -31,6 +35,12 @@ interface FinanceSchema {
     hasCounterpartyName: boolean
     hasCounterpartyType: boolean
     hasReferenceCompany: boolean
+    hasDueDate: boolean
+    hasCompetenceDate: boolean
+    hasCostCenterId: boolean
+    hasBankAccountId: boolean
+    hasSourceModule: boolean
+    hasExternalReference: boolean
     hasNotes: boolean
     hasAttachmentUrl: boolean
     hasCreatedBy: boolean
@@ -103,6 +113,12 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         hasCounterpartyName,
         hasCounterpartyType,
         hasReferenceCompany,
+        hasDueDate,
+        hasCompetenceDate,
+        hasCostCenterId,
+        hasBankAccountId,
+        hasSourceModule,
+        hasExternalReference,
         hasNotes,
         hasAttachmentUrl,
         hasCreatedBy,
@@ -119,6 +135,12 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         columnExists(admin, 'counterparty_name'),
         columnExists(admin, 'counterparty_type'),
         columnExists(admin, 'reference_company'),
+        columnExists(admin, 'due_date'),
+        columnExists(admin, 'competence_date'),
+        columnExists(admin, 'cost_center_id'),
+        columnExists(admin, 'bank_account_id'),
+        columnExists(admin, 'source_module'),
+        columnExists(admin, 'external_reference'),
         columnExists(admin, 'notes'),
         columnExists(admin, 'attachment_url'),
         columnExists(admin, 'created_by'),
@@ -141,6 +163,12 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         hasCounterpartyName,
         hasCounterpartyType,
         hasReferenceCompany,
+        hasDueDate,
+        hasCompetenceDate,
+        hasCostCenterId,
+        hasBankAccountId,
+        hasSourceModule,
+        hasExternalReference,
         hasNotes,
         hasAttachmentUrl,
         hasCreatedBy,
@@ -176,6 +204,10 @@ function normalizePayload(raw: any): FinancePayload {
             return null
         })(),
         reference_company: String(raw?.reference_company || '').trim() || null,
+        due_date: String(raw?.due_date || '').trim() || null,
+        competence_date: String(raw?.competence_date || '').trim() || null,
+        cost_center_id: String(raw?.cost_center_id || '').trim() || null,
+        bank_account_id: String(raw?.bank_account_id || '').trim() || null,
         notes: String(raw?.notes || '').trim() || null,
         attachment_url: String(raw?.attachment_url || '').trim() || null,
     }
@@ -211,6 +243,12 @@ function mapEntryRow(row: any, schema: FinanceSchema) {
         counterparty_name: schema.hasCounterpartyName ? row.counterparty_name : null,
         counterparty_type: schema.hasCounterpartyType ? row.counterparty_type : null,
         reference_company: schema.hasReferenceCompany ? row.reference_company : null,
+        due_date: schema.hasDueDate ? (row.due_date || rawDate || null) : (rawDate || null),
+        competence_date: schema.hasCompetenceDate ? (row.competence_date || rawDate || null) : (rawDate || null),
+        cost_center_id: schema.hasCostCenterId ? row.cost_center_id : null,
+        bank_account_id: schema.hasBankAccountId ? row.bank_account_id : null,
+        source_module: schema.hasSourceModule ? row.source_module : null,
+        external_reference: schema.hasExternalReference ? row.external_reference : null,
         notes: schema.hasNotes ? row.notes : null,
         attachment_url: schema.hasAttachmentUrl ? row.attachment_url : null,
         created_at: row.created_at,
@@ -228,6 +266,12 @@ function buildSelectColumns(schema: FinanceSchema) {
     if (schema.hasCounterpartyName) columns.push('counterparty_name')
     if (schema.hasCounterpartyType) columns.push('counterparty_type')
     if (schema.hasReferenceCompany) columns.push('reference_company')
+    if (schema.hasDueDate) columns.push('due_date')
+    if (schema.hasCompetenceDate) columns.push('competence_date')
+    if (schema.hasCostCenterId) columns.push('cost_center_id')
+    if (schema.hasBankAccountId) columns.push('bank_account_id')
+    if (schema.hasSourceModule) columns.push('source_module')
+    if (schema.hasExternalReference) columns.push('external_reference')
     if (schema.hasNotes) columns.push('notes')
     if (schema.hasAttachmentUrl) columns.push('attachment_url')
     if (schema.hasCreatedBy) columns.push('created_by')
@@ -318,6 +362,10 @@ export async function POST(request: NextRequest) {
         if (schema.hasCounterpartyName) insertData.counterparty_name = payload.counterparty_name
         if (schema.hasCounterpartyType) insertData.counterparty_type = payload.counterparty_type || null
         if (schema.hasReferenceCompany) insertData.reference_company = payload.reference_company
+        if (schema.hasDueDate) insertData.due_date = payload.due_date || payload.entry_date
+        if (schema.hasCompetenceDate) insertData.competence_date = payload.competence_date || payload.entry_date
+        if (schema.hasCostCenterId) insertData.cost_center_id = payload.cost_center_id || null
+        if (schema.hasBankAccountId) insertData.bank_account_id = payload.bank_account_id || null
         if (schema.hasNotes) insertData.notes = payload.notes
         if (schema.hasAttachmentUrl) insertData.attachment_url = payload.attachment_url
         if (schema.hasCreatedBy) insertData.created_by = access.adminUser!.id
@@ -376,6 +424,10 @@ export async function PUT(request: NextRequest) {
         if (schema.hasCounterpartyName) updateData.counterparty_name = payload.counterparty_name
         if (schema.hasCounterpartyType) updateData.counterparty_type = payload.counterparty_type || null
         if (schema.hasReferenceCompany) updateData.reference_company = payload.reference_company
+        if (schema.hasDueDate) updateData.due_date = payload.due_date || payload.entry_date
+        if (schema.hasCompetenceDate) updateData.competence_date = payload.competence_date || payload.entry_date
+        if (schema.hasCostCenterId) updateData.cost_center_id = payload.cost_center_id || null
+        if (schema.hasBankAccountId) updateData.bank_account_id = payload.bank_account_id || null
         if (schema.hasNotes) updateData.notes = payload.notes
         if (schema.hasAttachmentUrl) updateData.attachment_url = payload.attachment_url
         if (schema.hasUpdatedAt) updateData.updated_at = new Date().toISOString()

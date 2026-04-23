@@ -3,7 +3,7 @@ import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 
 type FinanceType = 'income' | 'expense' | 'both'
 type PartyType = 'pessoa_fisica' | 'pessoa_juridica'
-type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty'
+type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty' | 'cost_center' | 'bank_account'
 
 async function getCurrentAdminUser() {
     const supabase = await createServerSupabase()
@@ -72,17 +72,21 @@ export async function GET() {
 
         const admin = createAdminClient()
 
-        const [categoriesRes, subcategoriesRes, paymentMethodsRes, counterpartiesRes] = await Promise.all([
+        const [categoriesRes, subcategoriesRes, paymentMethodsRes, counterpartiesRes, costCentersRes, bankAccountsRes] = await Promise.all([
             admin.from('finance_categories').select('id, name, entry_type, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_subcategories').select('id, category_id, name, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_payment_methods').select('id, name, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_counterparties').select('id, name, party_type, is_active').eq('is_active', true).order('name', { ascending: true }),
+            admin.from('finance_cost_centers').select('id, name, code, is_active').eq('is_active', true).order('name', { ascending: true }),
+            admin.from('finance_bank_accounts').select('id, name, bank_name, is_active').eq('is_active', true).order('name', { ascending: true }),
         ])
 
         if (categoriesRes.error) throw categoriesRes.error
         if (subcategoriesRes.error) throw subcategoriesRes.error
         if (paymentMethodsRes.error) throw paymentMethodsRes.error
         if (counterpartiesRes.error) throw counterpartiesRes.error
+        if (costCentersRes.error) throw costCentersRes.error
+        if (bankAccountsRes.error) throw bankAccountsRes.error
 
         return NextResponse.json({
             success: true,
@@ -90,6 +94,8 @@ export async function GET() {
             subcategories: subcategoriesRes.data || [],
             payment_methods: paymentMethodsRes.data || [],
             counterparties: counterpartiesRes.data || [],
+            cost_centers: costCentersRes.data || [],
+            bank_accounts: bankAccountsRes.data || [],
         })
     } catch (err: any) {
         console.error('[admin/finance/lookups GET]', err)
@@ -177,6 +183,40 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, entity, item: data }, { status: 201 })
         }
 
+        if (entity === 'cost_center') {
+            const code = String(body?.code || '').trim() || null
+            const { data, error } = await admin
+                .from('finance_cost_centers')
+                .insert({
+                    name,
+                    code,
+                    is_active: true,
+                    updated_at: new Date().toISOString(),
+                })
+                .select('id, name, code, is_active')
+                .single()
+
+            if (error) throw error
+            return NextResponse.json({ success: true, entity, item: data }, { status: 201 })
+        }
+
+        if (entity === 'bank_account') {
+            const bankName = String(body?.bank_name || '').trim() || null
+            const { data, error } = await admin
+                .from('finance_bank_accounts')
+                .insert({
+                    name,
+                    bank_name: bankName,
+                    is_active: true,
+                    updated_at: new Date().toISOString(),
+                })
+                .select('id, name, bank_name, is_active')
+                .single()
+
+            if (error) throw error
+            return NextResponse.json({ success: true, entity, item: data }, { status: 201 })
+        }
+
         return NextResponse.json({ success: false, error: 'Entidade invalida' }, { status: 400 })
     } catch (err: any) {
         console.error('[admin/finance/lookups POST]', err)
@@ -217,6 +257,18 @@ export async function DELETE(request: NextRequest) {
 
         if (entity === 'counterparty') {
             const { error } = await admin.from('finance_counterparties').delete().eq('id', id)
+            if (error) throw error
+            return NextResponse.json({ success: true })
+        }
+
+        if (entity === 'cost_center') {
+            const { error } = await admin.from('finance_cost_centers').delete().eq('id', id)
+            if (error) throw error
+            return NextResponse.json({ success: true })
+        }
+
+        if (entity === 'bank_account') {
+            const { error } = await admin.from('finance_bank_accounts').delete().eq('id', id)
             if (error) throw error
             return NextResponse.json({ success: true })
         }

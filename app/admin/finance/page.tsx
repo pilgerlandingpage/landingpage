@@ -1,13 +1,15 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
     ArrowDownCircle,
     ArrowUpCircle,
     CalendarDays,
     CircleDollarSign,
     Landmark,
+    Link2,
     Plus,
     RefreshCw,
     Trash2,
@@ -31,7 +33,9 @@ import {
 type EntryType = 'income' | 'expense'
 type PaymentStatus = 'paid' | 'pending' | 'cancelled'
 type CounterpartyType = 'pessoa_fisica' | 'pessoa_juridica'
-type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty'
+type SettlementStatus = 'paid' | 'pending' | 'overdue' | 'cancelled'
+type ReconciliationStatus = 'pending' | 'matched' | 'ignored'
+type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty' | 'cost_center' | 'bank_account'
 
 interface FinanceEntry {
     id: string
@@ -41,11 +45,17 @@ interface FinanceEntry {
     category: string | null
     subcategory: string | null
     entry_date: string
+    due_date: string | null
+    competence_date: string | null
     payment_method: string | null
     payment_status: PaymentStatus | null
     counterparty_name: string | null
     counterparty_type: CounterpartyType | null
     reference_company: string | null
+    cost_center_id: string | null
+    bank_account_id: string | null
+    source_module: string | null
+    external_reference: string | null
     notes: string | null
     attachment_url: string | null
     created_at: string
@@ -78,6 +88,87 @@ interface FinanceCounterparty {
     is_active: boolean
 }
 
+interface FinanceCostCenter {
+    id: string
+    name: string
+    code: string | null
+    is_active: boolean
+}
+
+interface FinanceBankAccount {
+    id: string
+    name: string
+    bank_name: string | null
+    is_active: boolean
+}
+
+interface FinanceReconciliation {
+    id: string
+    bank_account_id: string | null
+    statement_date: string
+    description: string | null
+    amount: number
+    external_ref: string | null
+    status: ReconciliationStatus
+    matched_entry_id: string | null
+    notes: string | null
+    created_at: string
+    bank_account?: {
+        id: string
+        name: string
+        bank_name: string | null
+    } | null
+    matched_entry?: {
+        id: string
+        description: string
+        amount: number
+        entry_type: EntryType
+        entry_date: string
+    } | null
+}
+
+interface FinancePayable {
+    id: string
+    description: string
+    amount: number
+    settled_amount: number
+    remaining_amount: number
+    due_date: string | null
+    competence_date: string | null
+    status: string
+    category: string | null
+    subcategory: string | null
+    counterparty_name: string | null
+    counterparty_type: CounterpartyType | null
+    payment_method: string | null
+    cost_center_id: string | null
+    bank_account_id: string | null
+    notes: string | null
+    settled_at: string | null
+    created_at: string
+}
+
+interface FinanceReceivable {
+    id: string
+    description: string
+    amount: number
+    settled_amount: number
+    remaining_amount: number
+    due_date: string | null
+    competence_date: string | null
+    status: string
+    category: string | null
+    subcategory: string | null
+    counterparty_name: string | null
+    counterparty_type: CounterpartyType | null
+    payment_method: string | null
+    cost_center_id: string | null
+    bank_account_id: string | null
+    notes: string | null
+    settled_at: string | null
+    created_at: string
+}
+
 interface ToastState {
     msg: string
     type: 'success' | 'error'
@@ -91,6 +182,9 @@ type FinanceSectionView =
     | 'pagamentos'
     | 'favorecidos'
     | 'novo-lancamento'
+    | 'contas-a-pagar'
+    | 'contas-a-receber'
+    | 'conciliacao-bancaria'
     | 'lancamentos'
 
 const EXPENSE_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#22c55e', '#14b8a6', '#3b82f6', '#8b5cf6']
@@ -105,6 +199,9 @@ function normalizeFinanceSection(value?: string): FinanceSectionView {
         v === 'pagamentos' ||
         v === 'favorecidos' ||
         v === 'novo-lancamento' ||
+        v === 'contas-a-pagar' ||
+        v === 'contas-a-receber' ||
+        v === 'conciliacao-bancaria' ||
         v === 'lancamentos'
     ) {
         return v
@@ -131,30 +228,105 @@ function translatePaymentStatus(status: string | null | undefined) {
     return 'Pago'
 }
 
+function getPayableSettlementStatus(row: FinancePayable, todayDate: string): SettlementStatus {
+    const status = String(row.status || '').trim().toLowerCase()
+    if (status === 'cancelled') return 'cancelled'
+    if (status === 'paid') return 'paid'
+    const remaining = Math.max(0, Number(row.remaining_amount || 0))
+    if (remaining <= 0) return 'paid'
+    const dueDate = String(row.due_date || '').slice(0, 10)
+    if (status === 'overdue' || (dueDate && dueDate < todayDate)) return 'overdue'
+    return 'pending'
+}
+
+function getReceivableSettlementStatus(row: FinanceReceivable, todayDate: string): SettlementStatus {
+    const status = String(row.status || '').trim().toLowerCase()
+    if (status === 'cancelled') return 'cancelled'
+    if (status === 'received') return 'paid'
+    const remaining = Math.max(0, Number(row.remaining_amount || 0))
+    if (remaining <= 0) return 'paid'
+    const dueDate = String(row.due_date || '').slice(0, 10)
+    if (status === 'overdue' || (dueDate && dueDate < todayDate)) return 'overdue'
+    return 'pending'
+}
+
+function translateSettlementStatus(status: SettlementStatus) {
+    if (status === 'paid') return 'Pago'
+    if (status === 'overdue') return 'Vencido'
+    if (status === 'cancelled') return 'Cancelado'
+    return 'Pendente'
+}
+
 function translateCounterpartyType(value: string | null | undefined) {
     if (value === 'pessoa_fisica') return 'Pessoa fisica'
     if (value === 'pessoa_juridica') return 'Pessoa juridica'
     return '-'
 }
 
+function getSettlementBadgeStyle(status: SettlementStatus) {
+    if (status === 'paid') {
+        return { color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)' }
+    }
+    if (status === 'overdue') {
+        return { color: '#ef4444', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }
+    }
+    if (status === 'cancelled') {
+        return { color: '#9ca3af', background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.25)' }
+    }
+    return { color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }
+}
+
+function translateReconciliationStatus(status: ReconciliationStatus) {
+    if (status === 'matched') return 'Conciliado'
+    if (status === 'ignored') return 'Ignorado'
+    return 'Pendente'
+}
+
+function getReconciliationBadgeStyle(status: ReconciliationStatus) {
+    if (status === 'matched') {
+        return { color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)' }
+    }
+    if (status === 'ignored') {
+        return { color: '#9ca3af', background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.25)' }
+    }
+    return { color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }
+}
+
 export default function FinancePage({ initialSection }: { initialSection?: string }) {
     const pathname = usePathname()
+    const searchParams = useSearchParams()
     const [entries, setEntries] = useState<FinanceEntry[]>([])
     const [categories, setCategories] = useState<FinanceCategory[]>([])
     const [subcategories, setSubcategories] = useState<FinanceSubcategory[]>([])
     const [paymentMethods, setPaymentMethods] = useState<FinancePaymentMethod[]>([])
     const [counterparties, setCounterparties] = useState<FinanceCounterparty[]>([])
+    const [costCenters, setCostCenters] = useState<FinanceCostCenter[]>([])
+    const [bankAccounts, setBankAccounts] = useState<FinanceBankAccount[]>([])
+    const [reconciliations, setReconciliations] = useState<FinanceReconciliation[]>([])
+    const [payables, setPayables] = useState<FinancePayable[]>([])
+    const [receivables, setReceivables] = useState<FinanceReceivable[]>([])
 
     const [loading, setLoading] = useState(true)
     const [lookupsLoading, setLookupsLoading] = useState(true)
+    const [reconciliationsLoading, setReconciliationsLoading] = useState(false)
+    const [aparLoading, setAparLoading] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [settlingAparId, setSettlingAparId] = useState<string | null>(null)
+    const [savingReconciliation, setSavingReconciliation] = useState(false)
+    const [deletingReconciliationId, setDeletingReconciliationId] = useState<string | null>(null)
+    const [editingReconciliationId, setEditingReconciliationId] = useState<string | null>(null)
     const [toast, setToast] = useState<ToastState | null>(null)
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [typeFilter, setTypeFilter] = useState<'all' | EntryType>('all')
+    const [settlementFilter, setSettlementFilter] = useState<'all' | SettlementStatus>('all')
     const [categoryFilter, setCategoryFilter] = useState('all')
     const [subcategoryFilter, setSubcategoryFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
+    const [reconciliationStatusFilter, setReconciliationStatusFilter] = useState<'all' | ReconciliationStatus>('all')
+    const [reconciliationBankAccountFilter, setReconciliationBankAccountFilter] = useState('all')
+    const [reconciliationStartDate, setReconciliationStartDate] = useState('')
+    const [reconciliationEndDate, setReconciliationEndDate] = useState('')
 
     const [form, setForm] = useState({
         description: '',
@@ -163,11 +335,15 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         category: '',
         subcategory: '',
         entry_date: todayISO(),
+        due_date: todayISO(),
+        competence_date: todayISO(),
         payment_method: '',
         payment_status: 'paid' as PaymentStatus,
         counterparty_name: '',
         counterparty_type: 'pessoa_juridica' as CounterpartyType,
         reference_company: '',
+        cost_center_id: '',
+        bank_account_id: '',
         notes: '',
     })
 
@@ -178,6 +354,20 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
     const [newPaymentMethodName, setNewPaymentMethodName] = useState('')
     const [newCounterpartyName, setNewCounterpartyName] = useState('')
     const [newCounterpartyType, setNewCounterpartyType] = useState<CounterpartyType>('pessoa_juridica')
+    const [newCostCenterName, setNewCostCenterName] = useState('')
+    const [newCostCenterCode, setNewCostCenterCode] = useState('')
+    const [newBankAccountName, setNewBankAccountName] = useState('')
+    const [newBankAccountBank, setNewBankAccountBank] = useState('')
+    const [reconciliationForm, setReconciliationForm] = useState({
+        bank_account_id: '',
+        statement_date: todayISO(),
+        description: '',
+        amount: '',
+        external_ref: '',
+        status: 'pending' as ReconciliationStatus,
+        matched_entry_id: '',
+        notes: '',
+    })
 
     const activeSection = useMemo(() => {
         if (initialSection) return normalizeFinanceSection(initialSection)
@@ -194,8 +384,16 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
     const showPagamentos = activeSection === 'cadastros' || activeSection === 'pagamentos'
     const showFavorecidos = activeSection === 'cadastros' || activeSection === 'favorecidos'
     const showNovoLancamento = activeSection === 'novo-lancamento'
+    const showContasPagar = activeSection === 'contas-a-pagar'
+    const showContasReceber = activeSection === 'contas-a-receber'
+    const showConciliacaoBancaria = activeSection === 'conciliacao-bancaria'
     const showLancamentos = activeSection === 'lancamentos'
-    const showFiltros = activeSection === 'dashboard' || activeSection === 'lancamentos'
+    const showFiltros = activeSection === 'dashboard' || activeSection === 'lancamentos' || showContasPagar || showContasReceber
+    const todayDate = todayISO()
+    const highlightedEntryId = useMemo(() => {
+        const entryId = String(searchParams?.get('entry_id') || '').trim()
+        return entryId || null
+    }, [searchParams])
 
     const showToast = (msg: string, type: 'success' | 'error') => {
         setToast({ msg, type })
@@ -235,6 +433,8 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
             setSubcategories(data.subcategories || [])
             setPaymentMethods(data.payment_methods || [])
             setCounterparties(data.counterparties || [])
+            setCostCenters(data.cost_centers || [])
+            setBankAccounts(data.bank_accounts || [])
 
             if (!newSubcategoryCategoryId && Array.isArray(data.categories) && data.categories.length > 0) {
                 setNewSubcategoryCategoryId(data.categories[0].id)
@@ -246,54 +446,155 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         }
     }
 
+    const fetchReconciliations = async () => {
+        setReconciliationsLoading(true)
+        try {
+            const params = new URLSearchParams()
+            if (reconciliationStatusFilter !== 'all') params.set('status', reconciliationStatusFilter)
+            if (reconciliationBankAccountFilter !== 'all') params.set('bank_account_id', reconciliationBankAccountFilter)
+            if (reconciliationStartDate) params.set('start_date', reconciliationStartDate)
+            if (reconciliationEndDate) params.set('end_date', reconciliationEndDate)
+            params.set('limit', '2000')
+
+            const res = await fetch(`/api/admin/finance/reconciliations?${params.toString()}`)
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao carregar conciliacao bancaria')
+            }
+
+            setReconciliations(data.reconciliations || [])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao carregar conciliacao bancaria', 'error')
+        } finally {
+            setReconciliationsLoading(false)
+        }
+    }
+
+    const fetchAparData = async () => {
+        setAparLoading(true)
+        try {
+            const payableParams = new URLSearchParams()
+            const receivableParams = new URLSearchParams()
+            payableParams.set('type', 'payable')
+            receivableParams.set('type', 'receivable')
+            payableParams.set('limit', '3000')
+            receivableParams.set('limit', '3000')
+            if (startDate) {
+                payableParams.set('start_date', startDate)
+                receivableParams.set('start_date', startDate)
+            }
+            if (endDate) {
+                payableParams.set('end_date', endDate)
+                receivableParams.set('end_date', endDate)
+            }
+
+            const [payablesRes, receivablesRes] = await Promise.all([
+                fetch(`/api/admin/finance/apar?${payableParams.toString()}`),
+                fetch(`/api/admin/finance/apar?${receivableParams.toString()}`),
+            ])
+
+            const payablesData = await payablesRes.json()
+            const receivablesData = await receivablesRes.json()
+            if (!payablesRes.ok || !payablesData.success) {
+                throw new Error(payablesData.error || 'Erro ao carregar contas a pagar')
+            }
+            if (!receivablesRes.ok || !receivablesData.success) {
+                throw new Error(receivablesData.error || 'Erro ao carregar contas a receber')
+            }
+
+            setPayables(payablesData.items || [])
+            setReceivables(receivablesData.items || [])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao carregar AP/AR', 'error')
+        } finally {
+            setAparLoading(false)
+        }
+    }
+
     useEffect(() => {
         fetchEntries()
         fetchLookups()
+        fetchAparData()
     }, [])
+
+    useEffect(() => {
+        if (!showConciliacaoBancaria) return
+        fetchReconciliations()
+    }, [
+        showConciliacaoBancaria,
+        reconciliationStatusFilter,
+        reconciliationBankAccountFilter,
+        reconciliationStartDate,
+        reconciliationEndDate,
+    ])
 
     const categoryFilterOptions = useMemo(() => {
         const set = new Set<string>()
-        categories.forEach(cat => set.add(cat.name))
-        entries.forEach(entry => {
-            const name = String(entry.category || '').trim()
-            if (name) set.add(name)
-        })
+        if (showContasPagar) {
+            payables.forEach(item => {
+                const name = String(item.category || '').trim()
+                if (name) set.add(name)
+            })
+        } else if (showContasReceber) {
+            receivables.forEach(item => {
+                const name = String(item.category || '').trim()
+                if (name) set.add(name)
+            })
+        } else {
+            categories.forEach(cat => set.add(cat.name))
+            entries.forEach(entry => {
+                const name = String(entry.category || '').trim()
+                if (name) set.add(name)
+            })
+        }
         return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'))
-    }, [categories, entries])
+    }, [categories, entries, payables, receivables, showContasPagar, showContasReceber])
 
     const subcategoryFilterOptions = useMemo(() => {
         const set = new Set<string>()
         const selectedCategoryByName = categories.find(cat => cat.name === categoryFilter)
 
-        if (categoryFilter === 'all') {
-            subcategories.forEach(sub => set.add(sub.name))
-            entries.forEach(entry => {
-                const name = String(entry.subcategory || '').trim()
-                if (name) set.add(name)
+        if (showContasPagar || showContasReceber) {
+            const sourceRows = showContasPagar ? payables : receivables
+            sourceRows.forEach(item => {
+                const categoryName = String(item.category || '').trim()
+                const subName = String(item.subcategory || '').trim()
+                if (!subName) return
+                if (categoryFilter !== 'all' && categoryName !== categoryFilter) return
+                set.add(subName)
             })
         } else {
-            if (selectedCategoryByName) {
-                subcategories
-                    .filter(sub => sub.category_id === selectedCategoryByName.id)
-                    .forEach(sub => set.add(sub.name))
-            }
-
-            entries
-                .filter(entry => String(entry.category || '').trim() === categoryFilter)
-                .forEach(entry => {
+            if (categoryFilter === 'all') {
+                subcategories.forEach(sub => set.add(sub.name))
+                entries.forEach(entry => {
                     const name = String(entry.subcategory || '').trim()
                     if (name) set.add(name)
                 })
+            } else {
+                if (selectedCategoryByName) {
+                    subcategories
+                        .filter(sub => sub.category_id === selectedCategoryByName.id)
+                        .forEach(sub => set.add(sub.name))
+                }
+
+                entries
+                    .filter(entry => String(entry.category || '').trim() === categoryFilter)
+                    .forEach(entry => {
+                        const name = String(entry.subcategory || '').trim()
+                        if (name) set.add(name)
+                    })
+            }
         }
 
         return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'))
-    }, [categories, subcategories, entries, categoryFilter])
+    }, [categories, subcategories, entries, payables, receivables, categoryFilter, showContasPagar, showContasReceber])
 
     const filteredEntries = useMemo(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase()
+        const effectiveTypeFilter: 'all' | EntryType = typeFilter
 
         return entries.filter(entry => {
-            if (typeFilter !== 'all' && entry.entry_type !== typeFilter) return false
+            if (effectiveTypeFilter !== 'all' && entry.entry_type !== effectiveTypeFilter) return false
             if (categoryFilter !== 'all' && String(entry.category || '').trim() !== categoryFilter) return false
             if (subcategoryFilter !== 'all' && String(entry.subcategory || '').trim() !== subcategoryFilter) return false
 
@@ -315,6 +616,59 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         })
     }, [entries, typeFilter, categoryFilter, subcategoryFilter, searchTerm])
 
+    const filteredPayables = useMemo(() => {
+        const normalizedSearch = searchTerm.trim().toLowerCase()
+        return payables.filter(item => {
+            if (categoryFilter !== 'all' && String(item.category || '').trim() !== categoryFilter) return false
+            if (subcategoryFilter !== 'all' && String(item.subcategory || '').trim() !== subcategoryFilter) return false
+            const settlement = getPayableSettlementStatus(item, todayDate)
+            if (settlementFilter !== 'all' && settlement !== settlementFilter) return false
+            if (!normalizedSearch) return true
+
+            const haystack = [
+                item.description,
+                item.category,
+                item.subcategory,
+                item.notes,
+                item.counterparty_name,
+                item.payment_method,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+            return haystack.includes(normalizedSearch)
+        })
+    }, [payables, categoryFilter, subcategoryFilter, settlementFilter, searchTerm, todayDate])
+
+    const filteredReceivables = useMemo(() => {
+        const normalizedSearch = searchTerm.trim().toLowerCase()
+        return receivables.filter(item => {
+            if (categoryFilter !== 'all' && String(item.category || '').trim() !== categoryFilter) return false
+            if (subcategoryFilter !== 'all' && String(item.subcategory || '').trim() !== subcategoryFilter) return false
+            const settlement = getReceivableSettlementStatus(item, todayDate)
+            if (settlementFilter !== 'all' && settlement !== settlementFilter) return false
+            if (!normalizedSearch) return true
+
+            const haystack = [
+                item.description,
+                item.category,
+                item.subcategory,
+                item.notes,
+                item.counterparty_name,
+                item.payment_method,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+            return haystack.includes(normalizedSearch)
+        })
+    }, [receivables, categoryFilter, subcategoryFilter, settlementFilter, searchTerm, todayDate])
+
+    const hasHighlightedEntryInList = useMemo(() => {
+        if (!highlightedEntryId) return false
+        return filteredEntries.some(entry => entry.id === highlightedEntryId)
+    }, [filteredEntries, highlightedEntryId])
+
     const summary = useMemo(() => {
         let income = 0
         let expense = 0
@@ -331,6 +685,76 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
             total: income + expense,
         }
     }, [filteredEntries])
+
+    const payablesSummary = useMemo(() => {
+        let total = 0
+        let paid = 0
+        let pending = 0
+        let overdue = 0
+        let cancelled = 0
+        let paidCount = 0
+        let pendingCount = 0
+        let overdueCount = 0
+        let cancelledCount = 0
+
+        for (const item of filteredPayables) {
+            const amount = Number(item.amount || 0)
+            const settledAmount = Number(item.settled_amount || 0)
+            const remaining = Math.max(0, amount - settledAmount)
+            const settlement = getPayableSettlementStatus(item, todayDate)
+            total += amount
+            paid += settledAmount
+            if (settlement === 'paid') {
+                paidCount += 1
+            } else if (settlement === 'pending') {
+                pending += remaining
+                pendingCount += 1
+            } else if (settlement === 'overdue') {
+                overdue += remaining
+                overdueCount += 1
+            } else {
+                cancelled += remaining
+                cancelledCount += 1
+            }
+        }
+
+        return { total, paid, pending, overdue, cancelled, count: filteredPayables.length, paidCount, pendingCount, overdueCount, cancelledCount }
+    }, [filteredPayables, todayDate])
+
+    const receivablesSummary = useMemo(() => {
+        let total = 0
+        let received = 0
+        let pending = 0
+        let overdue = 0
+        let cancelled = 0
+        let receivedCount = 0
+        let pendingCount = 0
+        let overdueCount = 0
+        let cancelledCount = 0
+
+        for (const item of filteredReceivables) {
+            const amount = Number(item.amount || 0)
+            const settledAmount = Number(item.settled_amount || 0)
+            const remaining = Math.max(0, amount - settledAmount)
+            const settlement = getReceivableSettlementStatus(item, todayDate)
+            total += amount
+            received += settledAmount
+            if (settlement === 'paid') {
+                receivedCount += 1
+            } else if (settlement === 'pending') {
+                pending += remaining
+                pendingCount += 1
+            } else if (settlement === 'overdue') {
+                overdue += remaining
+                overdueCount += 1
+            } else {
+                cancelled += remaining
+                cancelledCount += 1
+            }
+        }
+
+        return { total, received, pending, overdue, cancelled, count: filteredReceivables.length, receivedCount, pendingCount, overdueCount, cancelledCount }
+    }, [filteredReceivables, todayDate])
 
     const monthlySeries = useMemo(() => {
         const map = new Map<string, { month: string; income: number; expense: number }>()
@@ -383,6 +807,57 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         return counterparties.find(counterparty => counterparty.name === form.counterparty_name) || null
     }, [counterparties, form.counterparty_name])
 
+    const costCenterById = useMemo(() => {
+        const map = new Map<string, FinanceCostCenter>()
+        costCenters.forEach(center => map.set(center.id, center))
+        return map
+    }, [costCenters])
+
+    const bankAccountById = useMemo(() => {
+        const map = new Map<string, FinanceBankAccount>()
+        bankAccounts.forEach(account => map.set(account.id, account))
+        return map
+    }, [bankAccounts])
+
+    const entryById = useMemo(() => {
+        const map = new Map<string, FinanceEntry>()
+        entries.forEach(entry => map.set(entry.id, entry))
+        return map
+    }, [entries])
+
+    const reconciliationEntryOptions = useMemo(() => {
+        return entries
+            .slice()
+            .sort((a, b) => String(b.entry_date).localeCompare(String(a.entry_date)))
+            .map(entry => ({
+                id: entry.id,
+                label: `${formatDate(entry.entry_date)} | ${entry.entry_type === 'income' ? 'Receita' : 'Despesa'} | ${formatCurrency(Number(entry.amount || 0))} | ${entry.description}`,
+            }))
+    }, [entries])
+
+    const reconciliationSummary = useMemo(() => {
+        let total = 0
+        let pending = 0
+        let matched = 0
+        let ignored = 0
+
+        for (const row of reconciliations) {
+            const amount = Number(row.amount || 0)
+            total += amount
+            if (row.status === 'matched') matched += amount
+            else if (row.status === 'ignored') ignored += amount
+            else pending += amount
+        }
+
+        return {
+            total,
+            pending,
+            matched,
+            ignored,
+            count: reconciliations.length,
+        }
+    }, [reconciliations])
+
     useEffect(() => {
         if (!selectedCounterparty) return
         setForm(prev => ({
@@ -390,6 +865,18 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
             counterparty_type: selectedCounterparty.party_type,
         }))
     }, [selectedCounterparty])
+
+    useEffect(() => {
+        if (!highlightedEntryId || !showLancamentos || loading || !hasHighlightedEntryInList) return
+
+        const timeout = window.setTimeout(() => {
+            const row = document.getElementById(`finance-entry-row-${highlightedEntryId}`)
+            if (!row) return
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 120)
+
+        return () => window.clearTimeout(timeout)
+    }, [highlightedEntryId, showLancamentos, loading, hasHighlightedEntryInList])
 
     const onCreateEntry = async () => {
         const amount = Number(form.amount)
@@ -452,10 +939,76 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         }
     }
 
+    const onSettleApar = async (type: 'payable' | 'receivable', row: FinancePayable | FinanceReceivable, mode: 'full' | 'partial' | 'reopen') => {
+        setSettlingAparId(row.id)
+        try {
+            let action: 'settle' | 'reopen' = 'settle'
+            let amount: number | null = null
+
+            if (mode === 'reopen') {
+                action = 'reopen'
+            } else {
+                const remaining = Math.max(0, Number(row.remaining_amount || 0))
+                if (remaining <= 0) {
+                    throw new Error('Nao ha saldo em aberto para baixa')
+                }
+
+                if (mode === 'full') {
+                    amount = Number(remaining.toFixed(2))
+                } else {
+                    const defaultValue = String(remaining.toFixed(2)).replace('.', ',')
+                    const rawValue = window.prompt(
+                        type === 'payable' ? 'Valor da baixa parcial (conta a pagar)' : 'Valor do recebimento parcial (conta a receber)',
+                        defaultValue,
+                    )
+                    if (rawValue === null) return
+                    const parsedValue = Number(String(rawValue).replace(',', '.'))
+                    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+                        throw new Error('Valor de baixa invalido')
+                    }
+                    if (parsedValue > remaining + 1e-9) {
+                        throw new Error('Valor informado maior que saldo em aberto')
+                    }
+                    amount = Number(parsedValue.toFixed(2))
+                }
+            }
+
+            const res = await fetch('/api/admin/finance/apar', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: row.id,
+                    type,
+                    action,
+                    amount,
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao atualizar AP/AR')
+            }
+
+            if (mode === 'reopen') {
+                showToast(type === 'payable' ? 'Conta a pagar reaberta' : 'Conta a receber reaberta', 'success')
+            } else if (mode === 'partial') {
+                showToast(type === 'payable' ? 'Baixa parcial registrada' : 'Recebimento parcial registrado', 'success')
+            } else {
+                showToast(type === 'payable' ? 'Conta marcada como paga' : 'Conta marcada como recebida', 'success')
+            }
+
+            await Promise.all([fetchAparData(), fetchEntries()])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao atualizar AP/AR', 'error')
+        } finally {
+            setSettlingAparId(null)
+        }
+    }
+
     const onClearSearchFilters = () => {
         setStartDate('')
         setEndDate('')
         setTypeFilter('all')
+        setSettlementFilter('all')
         setCategoryFilter('all')
         setSubcategoryFilter('all')
         setSearchTerm('')
@@ -551,6 +1104,173 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
         }
     }
 
+    const onCreateCostCenter = async () => {
+        if (!newCostCenterName.trim()) {
+            showToast('Informe o nome do centro de custo', 'error')
+            return
+        }
+        const ok = await createLookup('cost_center', {
+            name: newCostCenterName.trim(),
+            code: newCostCenterCode.trim(),
+        })
+        if (ok) {
+            setNewCostCenterName('')
+            setNewCostCenterCode('')
+            showToast('Centro de custo cadastrado', 'success')
+        }
+    }
+
+    const onCreateBankAccount = async () => {
+        if (!newBankAccountName.trim()) {
+            showToast('Informe o nome da conta bancaria', 'error')
+            return
+        }
+        const ok = await createLookup('bank_account', {
+            name: newBankAccountName.trim(),
+            bank_name: newBankAccountBank.trim(),
+        })
+        if (ok) {
+            setNewBankAccountName('')
+            setNewBankAccountBank('')
+            showToast('Conta bancaria cadastrada', 'success')
+        }
+    }
+
+    const resetReconciliationForm = () => {
+        setEditingReconciliationId(null)
+        setReconciliationForm({
+            bank_account_id: '',
+            statement_date: todayISO(),
+            description: '',
+            amount: '',
+            external_ref: '',
+            status: 'pending',
+            matched_entry_id: '',
+            notes: '',
+        })
+    }
+
+    const onEditReconciliation = (row: FinanceReconciliation) => {
+        setEditingReconciliationId(row.id)
+        setReconciliationForm({
+            bank_account_id: row.bank_account_id || '',
+            statement_date: row.statement_date || todayISO(),
+            description: row.description || '',
+            amount: String(Number(row.amount || 0)),
+            external_ref: row.external_ref || '',
+            status: row.status || 'pending',
+            matched_entry_id: row.matched_entry_id || '',
+            notes: row.notes || '',
+        })
+    }
+
+    const onSaveReconciliation = async () => {
+        const amount = Number(reconciliationForm.amount)
+        if (!reconciliationForm.statement_date) {
+            showToast('Informe a data do extrato', 'error')
+            return
+        }
+        if (!Number.isFinite(amount) || amount === 0) {
+            showToast('Informe um valor de extrato valido', 'error')
+            return
+        }
+        if (reconciliationForm.status === 'matched' && !reconciliationForm.matched_entry_id) {
+            showToast('Selecione um lancamento para status conciliado', 'error')
+            return
+        }
+
+        setSavingReconciliation(true)
+        try {
+            const payload = {
+                id: editingReconciliationId || undefined,
+                bank_account_id: reconciliationForm.bank_account_id || null,
+                statement_date: reconciliationForm.statement_date,
+                description: reconciliationForm.description.trim() || null,
+                amount,
+                external_ref: reconciliationForm.external_ref.trim() || null,
+                status: reconciliationForm.status,
+                matched_entry_id: reconciliationForm.status === 'matched'
+                    ? (reconciliationForm.matched_entry_id || null)
+                    : null,
+                notes: reconciliationForm.notes.trim() || null,
+            }
+
+            const res = await fetch('/api/admin/finance/reconciliations', {
+                method: editingReconciliationId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao salvar conciliacao')
+            }
+
+            showToast(editingReconciliationId ? 'Conciliacao atualizada' : 'Conciliacao cadastrada', 'success')
+            resetReconciliationForm()
+            await Promise.all([fetchReconciliations(), fetchEntries()])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao salvar conciliacao', 'error')
+        } finally {
+            setSavingReconciliation(false)
+        }
+    }
+
+    const onDeleteReconciliation = async (id: string) => {
+        const confirmed = window.confirm('Deseja remover este item de conciliacao?')
+        if (!confirmed) return
+
+        setDeletingReconciliationId(id)
+        try {
+            const res = await fetch(`/api/admin/finance/reconciliations?id=${id}`, { method: 'DELETE' })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao remover conciliacao')
+            }
+
+            showToast('Conciliacao removida', 'success')
+            if (editingReconciliationId === id) resetReconciliationForm()
+            await Promise.all([fetchReconciliations(), fetchEntries()])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao remover conciliacao', 'error')
+        } finally {
+            setDeletingReconciliationId(null)
+        }
+    }
+
+    const onSetReconciliationStatus = async (row: FinanceReconciliation, status: ReconciliationStatus) => {
+        if (status === 'matched' && !row.matched_entry_id) {
+            showToast('Defina um lancamento vinculado para conciliar', 'error')
+            return
+        }
+
+        try {
+            const res = await fetch('/api/admin/finance/reconciliations', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: row.id,
+                    bank_account_id: row.bank_account_id || null,
+                    statement_date: row.statement_date,
+                    description: row.description || null,
+                    amount: Number(row.amount || 0),
+                    external_ref: row.external_ref || null,
+                    status,
+                    matched_entry_id: status === 'matched' ? row.matched_entry_id : null,
+                    notes: row.notes || null,
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao atualizar status de conciliacao')
+            }
+
+            showToast('Status da conciliacao atualizado', 'success')
+            await Promise.all([fetchReconciliations(), fetchEntries()])
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao atualizar status de conciliacao', 'error')
+        }
+    }
+
     return (
         <div>
             {toast && (
@@ -569,8 +1289,15 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                     </p>
                 </div>
                 <div className="admin-header-actions">
-                    <button className="btn btn-outline" onClick={fetchEntries} disabled={loading}>
-                        <RefreshCw size={16} className={loading ? 'spin' : ''} /> Atualizar
+                    <button
+                        className="btn btn-outline"
+                        onClick={async () => {
+                            await Promise.all([fetchEntries(), fetchAparData()])
+                            if (showConciliacaoBancaria) await fetchReconciliations()
+                        }}
+                        disabled={loading || aparLoading || reconciliationsLoading}
+                    >
+                        <RefreshCw size={16} className={loading || aparLoading ? 'spin' : ''} /> Atualizar
                     </button>
                 </div>
             </div>
@@ -587,14 +1314,32 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                             <label className="form-label">Data final</label>
                             <input className="form-input" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </div>
-                        <div>
-                            <label className="form-label">Tipo</label>
-                            <select className="form-input" value={typeFilter} onChange={e => setTypeFilter(e.target.value as 'all' | EntryType)}>
-                                <option value="all">Todos</option>
-                                <option value="income">Receitas</option>
-                                <option value="expense">Despesas</option>
-                            </select>
-                        </div>
+                        {!showContasPagar && !showContasReceber && (
+                            <div>
+                                <label className="form-label">Tipo</label>
+                                <select className="form-input" value={typeFilter} onChange={e => setTypeFilter(e.target.value as 'all' | EntryType)}>
+                                    <option value="all">Todos</option>
+                                    <option value="income">Receitas</option>
+                                    <option value="expense">Despesas</option>
+                                </select>
+                            </div>
+                        )}
+                        {(showContasPagar || showContasReceber) && (
+                            <div>
+                                <label className="form-label">Status financeiro</label>
+                                <select
+                                    className="form-input"
+                                    value={settlementFilter}
+                                    onChange={e => setSettlementFilter(e.target.value as 'all' | SettlementStatus)}
+                                >
+                                    <option value="all">Todos</option>
+                                    <option value="paid">{showContasReceber ? 'Recebido' : 'Pago'}</option>
+                                    <option value="pending">Pendente</option>
+                                    <option value="overdue">Vencido</option>
+                                    <option value="cancelled">Cancelado</option>
+                                </select>
+                            </div>
+                        )}
                         <div>
                             <label className="form-label">Categoria</label>
                             <select className="form-input" value={categoryFilter} onChange={e => {
@@ -626,7 +1371,9 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                             />
                         </div>
                         <div style={{ alignSelf: 'end', display: 'flex', gap: 8 }}>
-                            <button className="btn btn-gold" onClick={fetchEntries}>
+                            <button className="btn btn-gold" onClick={async () => {
+                                await Promise.all([fetchEntries(), fetchAparData()])
+                            }}>
                                 <CalendarDays size={16} /> Atualizar periodo
                             </button>
                             <button className="btn btn-outline" onClick={onClearSearchFilters}>
@@ -784,6 +1531,68 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                             </div>
                             </div>
                         )}
+
+                        <div className="lookup-box">
+                            <div className="lookup-title">Centros de custo</div>
+                            <div className="lookup-row">
+                                <input
+                                    className="form-input"
+                                    placeholder="Nome do centro de custo"
+                                    value={newCostCenterName}
+                                    onChange={e => setNewCostCenterName(e.target.value)}
+                                />
+                                <input
+                                    className="form-input"
+                                    placeholder="Codigo (opcional)"
+                                    value={newCostCenterCode}
+                                    onChange={e => setNewCostCenterCode(e.target.value)}
+                                />
+                                <button className="btn btn-outline" onClick={onCreateCostCenter}>
+                                    <Plus size={14} />
+                                </button>
+                            </div>
+                            <div className="chip-wrap">
+                                {costCenters.map(center => (
+                                    <span key={center.id} className="lookup-chip">
+                                        {center.name}{center.code ? ` (${center.code})` : ''}
+                                        <button onClick={() => deleteLookup('cost_center', center.id)} title="Remover centro de custo">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="lookup-box">
+                            <div className="lookup-title">Contas bancarias</div>
+                            <div className="lookup-row">
+                                <input
+                                    className="form-input"
+                                    placeholder="Nome da conta"
+                                    value={newBankAccountName}
+                                    onChange={e => setNewBankAccountName(e.target.value)}
+                                />
+                                <input
+                                    className="form-input"
+                                    placeholder="Banco (opcional)"
+                                    value={newBankAccountBank}
+                                    onChange={e => setNewBankAccountBank(e.target.value)}
+                                />
+                                <button className="btn btn-outline" onClick={onCreateBankAccount}>
+                                    <Plus size={14} />
+                                </button>
+                            </div>
+                            <div className="chip-wrap">
+                                {bankAccounts.map(account => (
+                                    <span key={account.id} className="lookup-chip">
+                                        {account.name}{account.bank_name ? ` (${account.bank_name})` : ''}
+                                        <button onClick={() => deleteLookup('bank_account', account.id)} title="Remover conta bancaria">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                         </div>
                     )}
                 </div>
@@ -867,7 +1676,33 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                             className="form-input"
                             type="date"
                             value={form.entry_date}
-                            onChange={e => setForm(prev => ({ ...prev, entry_date: e.target.value }))}
+                            onChange={e => {
+                                const nextDate = e.target.value
+                                setForm(prev => ({
+                                    ...prev,
+                                    entry_date: nextDate,
+                                    due_date: prev.due_date || nextDate,
+                                    competence_date: prev.competence_date || nextDate,
+                                }))
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Vencimento</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={form.due_date}
+                            onChange={e => setForm(prev => ({ ...prev, due_date: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Competencia</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={form.competence_date}
+                            onChange={e => setForm(prev => ({ ...prev, competence_date: e.target.value }))}
                         />
                     </div>
                     <div>
@@ -880,6 +1715,36 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                             <option value="">Nao informado</option>
                             {paymentMethods.map(pm => (
                                 <option key={pm.id} value={pm.name}>{pm.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="form-label">Centro de custo</label>
+                        <select
+                            className="form-input"
+                            value={form.cost_center_id}
+                            onChange={e => setForm(prev => ({ ...prev, cost_center_id: e.target.value }))}
+                        >
+                            <option value="">Nao informado</option>
+                            {costCenters.map(center => (
+                                <option key={center.id} value={center.id}>
+                                    {center.name}{center.code ? ` (${center.code})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="form-label">Conta bancaria</label>
+                        <select
+                            className="form-input"
+                            value={form.bank_account_id}
+                            onChange={e => setForm(prev => ({ ...prev, bank_account_id: e.target.value }))}
+                        >
+                            <option value="">Nao informado</option>
+                            {bankAccounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                    {account.name}{account.bank_name ? ` (${account.bank_name})` : ''}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -1039,6 +1904,572 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
             </div>
             )}
 
+            {showContasPagar && (
+            <>
+            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+                <div className="kpi-card">
+                    <div className="kpi-label">Total a pagar</div>
+                    <div className="kpi-value" style={{ color: '#ef4444' }}>{formatCurrency(payablesSummary.total)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{payablesSummary.count} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Pago</div>
+                    <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(payablesSummary.paid)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{payablesSummary.paidCount} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Em aberto</div>
+                    <div className="kpi-value" style={{ color: '#f59e0b' }}>{formatCurrency(payablesSummary.pending)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{payablesSummary.pendingCount} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Vencido</div>
+                    <div className="kpi-value" style={{ color: '#ef4444' }}>{formatCurrency(payablesSummary.overdue)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{payablesSummary.overdueCount} contas</div>
+                </div>
+            </div>
+
+            <div id="finance-contas-pagar" className="chart-card" style={{ marginTop: 18, scrollMarginTop: 96 }}>
+                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CircleDollarSign size={18} /> Contas a Pagar
+                </div>
+                {aparLoading ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>Carregando contas a pagar...</div>
+                ) : filteredPayables.length === 0 ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>
+                        Nenhuma conta a pagar encontrada para o periodo selecionado.
+                    </div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Vencimento</th>
+                                    <th>Competencia</th>
+                                    <th>Descricao</th>
+                                    <th>Favorecido</th>
+                                    <th>Categoria</th>
+                                    <th>Subcategoria</th>
+                                    <th>Valor</th>
+                                    <th>Pago</th>
+                                    <th>Saldo</th>
+                                    <th>Status</th>
+                                    <th>Centro custo</th>
+                                    <th>Conta bancaria</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredPayables.map(entry => {
+                                    const settlement = getPayableSettlementStatus(entry, todayDate)
+                                    const badgeStyle = getSettlementBadgeStyle(settlement)
+                                    const isSettling = settlingAparId === entry.id
+                                    return (
+                                        <tr key={entry.id}>
+                                            <td>{entry.due_date ? formatDate(entry.due_date) : '-'}</td>
+                                            <td>{entry.competence_date ? formatDate(entry.competence_date) : '-'}</td>
+                                            <td>{entry.description}</td>
+                                            <td>{entry.counterparty_name || '-'}</td>
+                                            <td>{entry.category || 'Sem categoria'}</td>
+                                            <td>{entry.subcategory || '-'}</td>
+                                            <td style={{ fontWeight: 700, color: '#ef4444' }}>{formatCurrency(Number(entry.amount || 0))}</td>
+                                            <td style={{ fontWeight: 700, color: '#22c55e' }}>{formatCurrency(Number(entry.settled_amount || 0))}</td>
+                                            <td style={{ fontWeight: 700, color: '#f59e0b' }}>{formatCurrency(Number(entry.remaining_amount || 0))}</td>
+                                            <td>
+                                                <span style={{ borderRadius: 999, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, ...badgeStyle }}>
+                                                    {translateSettlementStatus(settlement)}
+                                                </span>
+                                            </td>
+                                            <td>{entry.cost_center_id ? (costCenterById.get(entry.cost_center_id)?.name || entry.cost_center_id) : '-'}</td>
+                                            <td>{entry.bank_account_id ? (bankAccountById.get(entry.bank_account_id)?.name || entry.bank_account_id) : '-'}</td>
+                                            <td>
+                                                {settlement === 'paid' ? (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline"
+                                                        onClick={() => onSettleApar('payable', entry, 'reopen')}
+                                                        disabled={isSettling}
+                                                        style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                    >
+                                                        {isSettling ? 'Salvando...' : 'Reabrir'}
+                                                    </button>
+                                                ) : (
+                                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline"
+                                                            onClick={() => onSettleApar('payable', entry, 'partial')}
+                                                            disabled={isSettling}
+                                                            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            {isSettling ? 'Salvando...' : 'Baixa parcial'}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-gold"
+                                                            onClick={() => onSettleApar('payable', entry, 'full')}
+                                                            disabled={isSettling}
+                                                            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            {isSettling ? 'Salvando...' : 'Quitar'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+            </>
+            )}
+
+            {showContasReceber && (
+            <>
+            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+                <div className="kpi-card">
+                    <div className="kpi-label">Total a receber</div>
+                    <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(receivablesSummary.total)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{receivablesSummary.count} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Recebido</div>
+                    <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(receivablesSummary.received)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{receivablesSummary.receivedCount} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Em aberto</div>
+                    <div className="kpi-value" style={{ color: '#f59e0b' }}>{formatCurrency(receivablesSummary.pending)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{receivablesSummary.pendingCount} contas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Vencido</div>
+                    <div className="kpi-value" style={{ color: '#ef4444' }}>{formatCurrency(receivablesSummary.overdue)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>{receivablesSummary.overdueCount} contas</div>
+                </div>
+            </div>
+
+            <div id="finance-contas-receber" className="chart-card" style={{ marginTop: 18, scrollMarginTop: 96 }}>
+                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CircleDollarSign size={18} /> Contas a Receber
+                </div>
+                {aparLoading ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>Carregando contas a receber...</div>
+                ) : filteredReceivables.length === 0 ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>
+                        Nenhuma conta a receber encontrada para o periodo selecionado.
+                    </div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Vencimento</th>
+                                    <th>Competencia</th>
+                                    <th>Descricao</th>
+                                    <th>Cliente/Fonte</th>
+                                    <th>Categoria</th>
+                                    <th>Subcategoria</th>
+                                    <th>Valor</th>
+                                    <th>Recebido</th>
+                                    <th>Saldo</th>
+                                    <th>Status</th>
+                                    <th>Centro custo</th>
+                                    <th>Conta bancaria</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredReceivables.map(entry => {
+                                    const settlement = getReceivableSettlementStatus(entry, todayDate)
+                                    const badgeStyle = getSettlementBadgeStyle(settlement)
+                                    const isSettling = settlingAparId === entry.id
+                                    return (
+                                        <tr key={entry.id}>
+                                            <td>{entry.due_date ? formatDate(entry.due_date) : '-'}</td>
+                                            <td>{entry.competence_date ? formatDate(entry.competence_date) : '-'}</td>
+                                            <td>{entry.description}</td>
+                                            <td>{entry.counterparty_name || '-'}</td>
+                                            <td>{entry.category || 'Sem categoria'}</td>
+                                            <td>{entry.subcategory || '-'}</td>
+                                            <td style={{ fontWeight: 700, color: '#22c55e' }}>{formatCurrency(Number(entry.amount || 0))}</td>
+                                            <td style={{ fontWeight: 700, color: '#22c55e' }}>{formatCurrency(Number(entry.settled_amount || 0))}</td>
+                                            <td style={{ fontWeight: 700, color: '#f59e0b' }}>{formatCurrency(Number(entry.remaining_amount || 0))}</td>
+                                            <td>
+                                                <span style={{ borderRadius: 999, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, ...badgeStyle }}>
+                                                    {translateSettlementStatus(settlement)}
+                                                </span>
+                                            </td>
+                                            <td>{entry.cost_center_id ? (costCenterById.get(entry.cost_center_id)?.name || entry.cost_center_id) : '-'}</td>
+                                            <td>{entry.bank_account_id ? (bankAccountById.get(entry.bank_account_id)?.name || entry.bank_account_id) : '-'}</td>
+                                            <td>
+                                                {settlement === 'paid' ? (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline"
+                                                        onClick={() => onSettleApar('receivable', entry, 'reopen')}
+                                                        disabled={isSettling}
+                                                        style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                    >
+                                                        {isSettling ? 'Salvando...' : 'Reabrir'}
+                                                    </button>
+                                                ) : (
+                                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline"
+                                                            onClick={() => onSettleApar('receivable', entry, 'partial')}
+                                                            disabled={isSettling}
+                                                            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            {isSettling ? 'Salvando...' : 'Receber parcial'}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-gold"
+                                                            onClick={() => onSettleApar('receivable', entry, 'full')}
+                                                            disabled={isSettling}
+                                                            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            {isSettling ? 'Salvando...' : 'Marcar como Recebido'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+            </>
+            )}
+
+            {showConciliacaoBancaria && (
+            <>
+            <div className="chart-card" style={{ marginBottom: 18, scrollMarginTop: 96 }}>
+                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Link2 size={18} /> Filtros de conciliacao
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                    <div>
+                        <label className="form-label">Data inicial extrato</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={reconciliationStartDate}
+                            onChange={e => setReconciliationStartDate(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Data final extrato</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={reconciliationEndDate}
+                            onChange={e => setReconciliationEndDate(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Conta bancaria</label>
+                        <select
+                            className="form-input"
+                            value={reconciliationBankAccountFilter}
+                            onChange={e => setReconciliationBankAccountFilter(e.target.value)}
+                        >
+                            <option value="all">Todas contas</option>
+                            {bankAccounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                    {account.name}{account.bank_name ? ` (${account.bank_name})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="form-label">Status</label>
+                        <select
+                            className="form-input"
+                            value={reconciliationStatusFilter}
+                            onChange={e => setReconciliationStatusFilter(e.target.value as 'all' | ReconciliationStatus)}
+                        >
+                            <option value="all">Todos</option>
+                            <option value="pending">Pendente</option>
+                            <option value="matched">Conciliado</option>
+                            <option value="ignored">Ignorado</option>
+                        </select>
+                    </div>
+                    <div style={{ alignSelf: 'end', display: 'flex', gap: 8 }}>
+                        <button className="btn btn-gold" onClick={fetchReconciliations} disabled={reconciliationsLoading}>
+                            <RefreshCw size={16} className={reconciliationsLoading ? 'spin' : ''} /> Atualizar conciliacao
+                        </button>
+                        <button
+                            className="btn btn-outline"
+                            onClick={() => {
+                                setReconciliationStartDate('')
+                                setReconciliationEndDate('')
+                                setReconciliationBankAccountFilter('all')
+                                setReconciliationStatusFilter('all')
+                            }}
+                        >
+                            Limpar filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+                <div className="kpi-card">
+                    <div className="kpi-label">Extratos no periodo</div>
+                    <div className="kpi-value">{reconciliationSummary.count}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>itens de extrato</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Valor total extrato</div>
+                    <div className="kpi-value">{formatCurrency(reconciliationSummary.total)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>soma de entradas</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Pendente</div>
+                    <div className="kpi-value" style={{ color: '#f59e0b' }}>{formatCurrency(reconciliationSummary.pending)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>aguardando conferencia</div>
+                </div>
+                <div className="kpi-card">
+                    <div className="kpi-label">Conciliado</div>
+                    <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(reconciliationSummary.matched)}</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>ja casado com lancamento</div>
+                </div>
+            </div>
+
+            <div id="finance-conciliacao" className="chart-card" style={{ marginBottom: 18, scrollMarginTop: 96 }}>
+                <div className="chart-title" style={{ marginBottom: 12 }}>
+                    {editingReconciliationId ? 'Editar conciliacao' : 'Novo item de conciliacao'}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                    <div>
+                        <label className="form-label">Data do extrato</label>
+                        <input
+                            className="form-input"
+                            type="date"
+                            value={reconciliationForm.statement_date}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, statement_date: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Valor do extrato (R$)</label>
+                        <input
+                            className="form-input"
+                            type="number"
+                            step="0.01"
+                            value={reconciliationForm.amount}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, amount: e.target.value }))}
+                            placeholder="Ex: 1500.00 ou -1500.00"
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Conta bancaria</label>
+                        <select
+                            className="form-input"
+                            value={reconciliationForm.bank_account_id}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, bank_account_id: e.target.value }))}
+                        >
+                            <option value="">Nao informado</option>
+                            {bankAccounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                    {account.name}{account.bank_name ? ` (${account.bank_name})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="form-label">Status</label>
+                        <select
+                            className="form-input"
+                            value={reconciliationForm.status}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, status: e.target.value as ReconciliationStatus }))}
+                        >
+                            <option value="pending">Pendente</option>
+                            <option value="matched">Conciliado</option>
+                            <option value="ignored">Ignorado</option>
+                        </select>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                        <label className="form-label">Lancamento vinculado</label>
+                        <select
+                            className="form-input"
+                            value={reconciliationForm.matched_entry_id}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, matched_entry_id: e.target.value }))}
+                        >
+                            <option value="">Sem vinculo</option>
+                            {reconciliationEntryOptions.map(option => (
+                                <option key={option.id} value={option.id}>{option.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                        <label className="form-label">Descricao do extrato</label>
+                        <input
+                            className="form-input"
+                            value={reconciliationForm.description}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Ex: TED fornecedor XPTO"
+                        />
+                    </div>
+                    <div>
+                        <label className="form-label">Referencia externa</label>
+                        <input
+                            className="form-input"
+                            value={reconciliationForm.external_ref}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, external_ref: e.target.value }))}
+                            placeholder="Ex: NSU, ID banco"
+                        />
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                        <label className="form-label">Observacoes</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={2}
+                            value={reconciliationForm.notes}
+                            onChange={e => setReconciliationForm(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder="Notas internas da conciliacao"
+                        />
+                    </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+                    {editingReconciliationId && (
+                        <button type="button" className="btn btn-outline" onClick={resetReconciliationForm}>
+                            Cancelar edicao
+                        </button>
+                    )}
+                    <button type="button" className="btn btn-gold" onClick={onSaveReconciliation} disabled={savingReconciliation}>
+                        {savingReconciliation ? 'Salvando...' : (editingReconciliationId ? 'Salvar alteracoes' : 'Adicionar conciliacao')}
+                    </button>
+                </div>
+            </div>
+
+            <div className="chart-card" style={{ marginTop: 18, scrollMarginTop: 96 }}>
+                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Link2 size={18} /> Itens de conciliacao
+                </div>
+                {reconciliationsLoading ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>Carregando conciliacoes...</div>
+                ) : reconciliations.length === 0 ? (
+                    <div style={{ padding: 24, color: 'var(--text-muted)' }}>Nenhum item de conciliacao encontrado.</div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data extrato</th>
+                                    <th>Conta bancaria</th>
+                                    <th>Descricao</th>
+                                    <th>Valor extrato</th>
+                                    <th>Lancamento vinculado</th>
+                                    <th>Status</th>
+                                    <th>Ref externa</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {reconciliations.map(row => {
+                                    const statusStyle = getReconciliationBadgeStyle(row.status)
+                                    const entry = row.matched_entry_id ? (entryById.get(row.matched_entry_id) || null) : null
+                                    const matchedEntryLabel = row.matched_entry
+                                        ? `${formatDate(row.matched_entry.entry_date)} | ${formatCurrency(Number(row.matched_entry.amount || 0))} | ${row.matched_entry.description}`
+                                        : (entry
+                                            ? `${formatDate(entry.entry_date)} | ${formatCurrency(Number(entry.amount || 0))} | ${entry.description}`
+                                            : '-')
+
+                                    return (
+                                        <tr key={row.id}>
+                                            <td>{formatDate(row.statement_date)}</td>
+                                            <td>{row.bank_account?.name || (row.bank_account_id ? (bankAccountById.get(row.bank_account_id)?.name || row.bank_account_id) : '-')}</td>
+                                            <td>{row.description || '-'}</td>
+                                            <td style={{ fontWeight: 700, color: Number(row.amount || 0) >= 0 ? '#22c55e' : '#ef4444' }}>
+                                                {formatCurrency(Number(row.amount || 0))}
+                                            </td>
+                                            <td>{matchedEntryLabel}</td>
+                                            <td>
+                                                <span style={{ borderRadius: 999, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, ...statusStyle }}>
+                                                    {translateReconciliationStatus(row.status)}
+                                                </span>
+                                            </td>
+                                            <td>{row.external_ref || '-'}</td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                    {row.status !== 'matched' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-gold"
+                                                            style={{ padding: '6px 10px', fontSize: '0.74rem' }}
+                                                            onClick={() => onSetReconciliationStatus(row, 'matched')}
+                                                            disabled={!row.matched_entry_id}
+                                                            title={!row.matched_entry_id ? 'Defina um lancamento vinculado para conciliar' : 'Marcar como conciliado'}
+                                                        >
+                                                            Conciliar
+                                                        </button>
+                                                    )}
+                                                    {row.status !== 'pending' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline"
+                                                            style={{ padding: '6px 10px', fontSize: '0.74rem' }}
+                                                            onClick={() => onSetReconciliationStatus(row, 'pending')}
+                                                        >
+                                                            Pendente
+                                                        </button>
+                                                    )}
+                                                    {row.status !== 'ignored' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline"
+                                                            style={{ padding: '6px 10px', fontSize: '0.74rem' }}
+                                                            onClick={() => onSetReconciliationStatus(row, 'ignored')}
+                                                        >
+                                                            Ignorar
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline"
+                                                        style={{ padding: '6px 10px', fontSize: '0.74rem' }}
+                                                        onClick={() => onEditReconciliation(row)}
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onDeleteReconciliation(row.id)}
+                                                        disabled={deletingReconciliationId === row.id}
+                                                        style={{
+                                                            border: '1px solid rgba(239,68,68,0.25)',
+                                                            background: 'rgba(239,68,68,0.1)',
+                                                            color: '#ef4444',
+                                                            borderRadius: 8,
+                                                            padding: '6px 8px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                        title="Excluir item de conciliacao"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+            </>
+            )}
+
             {showLancamentos && (
             <div id="finance-lancamentos" className="chart-card" style={{ marginTop: 18, scrollMarginTop: 96 }}>
                 <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1052,10 +2483,32 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                     </div>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
+                        {highlightedEntryId && (
+                            <div style={{
+                                marginBottom: 10,
+                                padding: '8px 10px',
+                                borderRadius: 8,
+                                border: hasHighlightedEntryInList
+                                    ? '1px solid rgba(34,197,94,0.28)'
+                                    : '1px solid rgba(245,158,11,0.28)',
+                                background: hasHighlightedEntryInList
+                                    ? 'rgba(34,197,94,0.08)'
+                                    : 'rgba(245,158,11,0.08)',
+                                color: hasHighlightedEntryInList ? '#16a34a' : '#b45309',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                            }}>
+                                {hasHighlightedEntryInList
+                                    ? 'Lancamento relacionado a comissao destacado abaixo.'
+                                    : 'Lancamento informado nao encontrado nos filtros atuais.'}
+                            </div>
+                        )}
                         <table className="data-table">
                             <thead>
                                 <tr>
                                     <th>Data</th>
+                                    <th>Vencimento</th>
+                                    <th>Competencia</th>
                                     <th>Descricao</th>
                                     <th>Categoria</th>
                                     <th>Subcategoria</th>
@@ -1065,14 +2518,32 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                                     <th>Status</th>
                                     <th>Favorecido</th>
                                     <th>Tipo pessoa</th>
+                                    <th>Centro custo</th>
+                                    <th>Conta bancaria</th>
                                     <th>Empresa/CC</th>
+                                    <th>Origem</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredEntries.map(entry => (
-                                    <tr key={entry.id}>
+                                {filteredEntries.map(entry => {
+                                    const isHighlighted = highlightedEntryId === entry.id
+                                    const sourceModule = String(entry.source_module || '').trim().toLowerCase()
+                                    const linkedCommissionId = sourceModule === 'finance_commissions'
+                                        ? String(entry.external_reference || '').trim()
+                                        : ''
+                                    return (
+                                    <tr
+                                        key={entry.id}
+                                        id={`finance-entry-row-${entry.id}`}
+                                        style={isHighlighted ? {
+                                            background: 'rgba(34,197,94,0.12)',
+                                            boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.35)',
+                                        } : undefined}
+                                    >
                                         <td>{formatDate(entry.entry_date)}</td>
+                                        <td>{entry.due_date ? formatDate(entry.due_date) : '-'}</td>
+                                        <td>{entry.competence_date ? formatDate(entry.competence_date) : '-'}</td>
                                         <td>
                                             <div style={{ fontWeight: 600 }}>{entry.description}</div>
                                             {entry.notes ? (
@@ -1093,7 +2564,20 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                                         <td>{translatePaymentStatus(entry.payment_status)}</td>
                                         <td>{entry.counterparty_name || '-'}</td>
                                         <td>{translateCounterpartyType(entry.counterparty_type)}</td>
+                                        <td>{entry.cost_center_id ? (costCenterById.get(entry.cost_center_id)?.name || entry.cost_center_id) : '-'}</td>
+                                        <td>{entry.bank_account_id ? (bankAccountById.get(entry.bank_account_id)?.name || entry.bank_account_id) : '-'}</td>
                                         <td>{entry.reference_company || '-'}</td>
+                                        <td>
+                                            {linkedCommissionId ? (
+                                                <Link
+                                                    href={`/admin/finance/comissoes?commission_id=${encodeURIComponent(linkedCommissionId)}`}
+                                                    className="btn btn-outline"
+                                                    style={{ padding: '4px 8px', fontSize: '0.72rem', textDecoration: 'none' }}
+                                                >
+                                                    Comissao
+                                                </Link>
+                                            ) : '-'}
+                                        </td>
                                         <td>
                                             <button
                                                 type="button"
@@ -1112,7 +2596,8 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>

@@ -11,6 +11,12 @@ const allowedSections = new Set([
     'pagamentos',
     'favorecidos',
     'novo-lancamento',
+    'contas-a-pagar',
+    'contas-a-receber',
+    'conciliacao-bancaria',
+    'comissoes',
+    'fechamento-mensal',
+    'exportacao-contabil',
     'lancamentos',
 ])
 
