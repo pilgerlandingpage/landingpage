@@ -1,23 +1,42 @@
 # Finance Upgrade Changelog
 
-## 2026-04-23 - Commissions split + period lock safeguards
-- Status: `IMPLEMENTED_PENDING_SMOKE_TEST`
+## 2026-04-23 - Phase 5/6 smoke execution kickoff
+- Status: `COMPLETED`
 - Operator: `connectyhub`
 - Scope:
-  - hard-lock de período em rotas de escrita:
+  - added SQL helper to seed/confirm locked period:
+    - `supabase/sql/finance_phase5_6_lock_seed_and_probe.sql`
+  - standardized execution checklist:
+    - `docs/finance_phase5_6_smoke_test_2026_04_23.md`
+  - added step-by-step execution guide with API probe payloads:
+    - `docs/finance_phase5_6_execution_guide_2026_04_23.md`
+- Notes:
+  - Manual evidence collected.
+  - Lock probes returned expected `409` on all targets:
+    - `/api/admin/finance`
+    - `/api/admin/finance/apar`
+    - `/api/admin/finance/reconciliations`
+    - `/api/admin/finance/commissions`
+
+## 2026-04-23 - Commissions split + period lock safeguards
+- Status: `COMPLETED`
+- Operator: `connectyhub`
+- Scope:
+  - hard-lock de periodo em rotas de escrita:
     - `/api/admin/finance` (`POST/PUT/DELETE`)
     - `/api/admin/finance/apar` (`POST/PUT/DELETE`)
     - `/api/admin/finance/reconciliations` (`POST/PUT/DELETE`)
     - `/api/admin/finance/commissions` (`POST/PUT/DELETE`, entidade `commission`, e `calculate create_record`)
   - helper comum de lock: `app/api/admin/finance/_lib/period-lock.ts`
-  - split de comissão por regra (`split_payload`) com criação automática de múltiplas comissões
+  - split de comissao por regra (`split_payload`) com criacao automatica de multiplas comissoes
   - UI em `/admin/finance/comissoes`:
     - campo `Split (JSON opcional)` no cadastro de regra
     - indicador de split na listagem de regras
-    - prévia exibindo `split_breakdown`
+    - previa exibindo `split_breakdown`
 - Validation:
   - lint local das rotas/UI alteradas: `OK`
-  - smoke manual pendente (fluxo de split + tentativa de alteração em período bloqueado)
+  - smoke manual concluido (fluxo de split + tentativa de alteracao em periodo bloqueado)
+  - resultado de lock: `409` confirmado em todos os endpoints protegidos
 
 ## 2026-04-23 - Finance upgrade validation
 - Status: `GO`
