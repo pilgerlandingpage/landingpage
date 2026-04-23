@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
-import { ensureUnlockedDates, normalizeDateForLock } from '../_lib/period-lock'
+import { ensureUnlockedDates, normalizeDateForLock } from './_lib/period-lock'
 
 type FinanceType = 'income' | 'expense'
 
