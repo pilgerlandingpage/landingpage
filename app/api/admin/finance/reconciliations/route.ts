@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { ensureUnlockedDates, normalizeDateForLock } from '../_lib/period-lock'
 
 type ReconciliationStatus = 'pending' | 'matched' | 'ignored'
 
@@ -186,6 +187,11 @@ export async function POST(request: NextRequest) {
         }
 
         const admin = createAdminClient()
+        const createLockError = await ensureUnlockedDates(admin, [statementDate], 'Conciliacao bancaria')
+        if (createLockError) {
+            return NextResponse.json({ success: false, error: createLockError }, { status: 409 })
+        }
+
         const insertData = {
             bank_account_id: String(body?.bank_account_id || '').trim() || null,
             statement_date: statementDate,
@@ -243,7 +249,7 @@ export async function PUT(request: NextRequest) {
         const admin = createAdminClient()
         const { data: current, error: currentError } = await admin
             .from('finance_reconciliations')
-            .select('id, matched_entry_id, status')
+            .select('id, matched_entry_id, status, statement_date')
             .eq('id', id)
             .single()
 
@@ -274,6 +280,15 @@ export async function PUT(request: NextRequest) {
         }
         if (nextStatus === 'matched' && !nextMatchedEntryId) {
             return NextResponse.json({ success: false, error: 'Selecione um lancamento para conciliar' }, { status: 400 })
+        }
+
+        const updateLockError = await ensureUnlockedDates(
+            admin,
+            [normalizeDateForLock(current.statement_date), normalizeDateForLock(updateData.statement_date)],
+            'Conciliacao bancaria',
+        )
+        if (updateLockError) {
+            return NextResponse.json({ success: false, error: updateLockError }, { status: 409 })
         }
 
         const { data, error } = await admin
@@ -324,12 +339,21 @@ export async function DELETE(request: NextRequest) {
         const admin = createAdminClient()
         const { data: current, error: currentError } = await admin
             .from('finance_reconciliations')
-            .select('id, matched_entry_id')
+            .select('id, matched_entry_id, statement_date')
             .eq('id', id)
             .single()
 
         if (currentError || !current) {
             return NextResponse.json({ success: false, error: 'Conciliacao nao encontrada' }, { status: 404 })
+        }
+
+        const deleteLockError = await ensureUnlockedDates(
+            admin,
+            [normalizeDateForLock(current.statement_date)],
+            'Conciliacao bancaria',
+        )
+        if (deleteLockError) {
+            return NextResponse.json({ success: false, error: deleteLockError }, { status: 409 })
         }
 
         const { error } = await admin

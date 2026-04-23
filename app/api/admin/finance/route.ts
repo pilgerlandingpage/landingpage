@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { ensureUnlockedDates, normalizeDateForLock } from '../_lib/period-lock'
 
 type FinanceType = 'income' | 'expense'
 
@@ -349,6 +350,11 @@ export async function POST(request: NextRequest) {
             }, { status: 400 })
         }
 
+        const createLockError = await ensureUnlockedDates(admin, [payload.entry_date], 'Lancamento financeiro')
+        if (createLockError) {
+            return NextResponse.json({ success: false, error: createLockError }, { status: 409 })
+        }
+
         const insertData: any = {
             description: payload.description,
             entry_type: payload.entry_type,
@@ -411,6 +417,27 @@ export async function PUT(request: NextRequest) {
             }, { status: 400 })
         }
 
+        const { data: currentEntry, error: currentEntryError } = await admin
+            .from('finance_entries')
+            .select(`id, ${schema.dateField}`)
+            .eq('id', id)
+            .single()
+
+        if (currentEntryError || !currentEntry) {
+            return NextResponse.json({ success: false, error: 'Lancamento nao encontrado' }, { status: 404 })
+        }
+
+        const currentEntryDate = normalizeDateForLock(currentEntry[schema.dateField])
+        const nextEntryDate = normalizeDateForLock(payload.entry_date)
+        const updateLockError = await ensureUnlockedDates(
+            admin,
+            [currentEntryDate, nextEntryDate],
+            'Lancamento financeiro',
+        )
+        if (updateLockError) {
+            return NextResponse.json({ success: false, error: updateLockError }, { status: 409 })
+        }
+
         const updateData: any = {
             description: payload.description,
             entry_type: payload.entry_type,
@@ -461,6 +488,33 @@ export async function DELETE(request: NextRequest) {
         if (!id) return NextResponse.json({ success: false, error: 'ID obrigatorio' }, { status: 400 })
 
         const admin = createAdminClient()
+        const schema = await getFinanceSchema(admin)
+        if (!schema) {
+            return NextResponse.json({
+                success: false,
+                error: 'Tabela financeira incompatÃ­vel. Execute o SQL de correÃ§Ã£o.',
+            }, { status: 400 })
+        }
+
+        const { data: currentEntry, error: currentEntryError } = await admin
+            .from('finance_entries')
+            .select(`id, ${schema.dateField}`)
+            .eq('id', id)
+            .single()
+
+        if (currentEntryError || !currentEntry) {
+            return NextResponse.json({ success: false, error: 'Lancamento nao encontrado' }, { status: 404 })
+        }
+
+        const deleteLockError = await ensureUnlockedDates(
+            admin,
+            [normalizeDateForLock(currentEntry[schema.dateField])],
+            'Lancamento financeiro',
+        )
+        if (deleteLockError) {
+            return NextResponse.json({ success: false, error: deleteLockError }, { status: 409 })
+        }
+
         const { error } = await admin
             .from('finance_entries')
             .delete()

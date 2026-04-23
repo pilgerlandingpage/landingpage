@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { ensureUnlockedDates, normalizeDateForLock } from '../_lib/period-lock'
 
 type AparType = 'payable' | 'receivable'
 type SettlementAction = 'settle' | 'reopen'
@@ -405,6 +406,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Valor liquidado nao pode superar o valor total' }, { status: 400 })
         }
 
+        const createLockError = await ensureUnlockedDates(
+            admin,
+            [schema.hasDueDate ? dueDate : null],
+            type === 'receivable' ? 'Contas a receber' : 'Contas a pagar',
+        )
+        if (createLockError) {
+            return NextResponse.json({ success: false, error: createLockError }, { status: 409 })
+        }
+
         const insertData: any = {}
         if (schema.hasDescription) insertData.description = description
         if (schema.hasAmount) insertData.amount = amount
@@ -464,6 +474,16 @@ export async function PUT(request: NextRequest) {
 
         if (currentError || !currentRow) {
             return NextResponse.json({ success: false, error: 'Item AP/AR nao encontrado' }, { status: 404 })
+        }
+
+        const currentDueDate = normalizeDateForLock(currentRow.due_date)
+        const updateLockError = await ensureUnlockedDates(
+            admin,
+            [currentDueDate],
+            type === 'receivable' ? 'Contas a receber' : 'Contas a pagar',
+        )
+        if (updateLockError) {
+            return NextResponse.json({ success: false, error: updateLockError }, { status: 409 })
         }
 
         const totalAmount = Number(currentRow.amount || 0)
@@ -552,6 +572,25 @@ export async function DELETE(request: NextRequest) {
         const admin = createAdminClient()
         const schema = await getAparSchema(admin, type)
 
+        const { data: currentRow, error: currentError } = await admin
+            .from(schema.tableName)
+            .select(buildAparSelectColumns(schema))
+            .eq('id', id)
+            .single()
+
+        if (currentError || !currentRow) {
+            return NextResponse.json({ success: false, error: 'Item AP/AR nao encontrado' }, { status: 404 })
+        }
+
+        const deleteLockError = await ensureUnlockedDates(
+            admin,
+            [normalizeDateForLock(currentRow.due_date)],
+            type === 'receivable' ? 'Contas a receber' : 'Contas a pagar',
+        )
+        if (deleteLockError) {
+            return NextResponse.json({ success: false, error: deleteLockError }, { status: 409 })
+        }
+
         const { error } = await admin
             .from(schema.tableName)
             .delete()
@@ -564,4 +603,3 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ success: false, error: err?.message || 'Erro ao remover item AP/AR' }, { status: 500 })
     }
 }
-

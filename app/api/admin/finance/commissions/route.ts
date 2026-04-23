@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { ensureUnlockedDates, normalizeDateForLock } from '../_lib/period-lock'
 
 type CommissionRuleCalcType = 'percentage' | 'fixed'
 type CommissionRuleBasisType = 'sale_value' | 'net_revenue'
@@ -47,6 +48,110 @@ function isUuid(value: string): boolean {
 function percentageToRatio(rawPercentage: number): number {
     if (!Number.isFinite(rawPercentage) || rawPercentage <= 0) return 0
     return rawPercentage > 1 ? rawPercentage / 100 : rawPercentage
+}
+
+type SplitMode = 'percentage' | 'amount'
+type SplitParticipant = {
+    broker_user_id: string | null
+    broker_name: string | null
+    broker_source: BrokerSource | null
+    participant_type: string | null
+    notes: string | null
+    percentage: number | null
+    amount: number | null
+}
+
+function parseSplitPayload(raw: any): { participants: SplitParticipant[]; mode: SplitMode | null } | { error: string } {
+    if (raw === null || raw === undefined || raw === '') return { participants: [], mode: null }
+
+    let source = raw
+    if (typeof source === 'string') {
+        try {
+            source = JSON.parse(source)
+        } catch {
+            return { error: 'Split da regra invalido: JSON malformado.' }
+        }
+    }
+
+    if (!Array.isArray(source)) {
+        return { error: 'Split da regra invalido: use uma lista de participantes.' }
+    }
+
+    const participants: SplitParticipant[] = []
+    for (let idx = 0; idx < source.length; idx += 1) {
+        const item = source[idx]
+        if (!item || typeof item !== 'object') {
+            return { error: `Split da regra invalido no participante ${idx + 1}.` }
+        }
+
+        const brokerUserId = toNullableText(item.broker_user_id ?? item.user_id ?? item.admin_user_id)
+        const brokerName = toNullableText(item.broker_name ?? item.name ?? item.label)
+        const brokerSourceRaw = String(item.broker_source || '').trim().toLowerCase()
+        const brokerSource: BrokerSource | null = brokerSourceRaw === 'virtual_broker'
+            ? 'virtual_broker'
+            : (brokerSourceRaw === 'admin_user' ? 'admin_user' : null)
+
+        if (!brokerUserId && !brokerName) {
+            return { error: `Split da regra: informe corretor no participante ${idx + 1}.` }
+        }
+
+        const percentage = toNullableNumber(item.share_percent ?? item.percentage ?? item.percent)
+        const amount = toNullableNumber(item.share_amount ?? item.amount)
+        participants.push({
+            broker_user_id: brokerUserId,
+            broker_name: brokerName,
+            broker_source: brokerSource,
+            participant_type: toNullableText(item.participant_type ?? item.role ?? item.type),
+            notes: toNullableText(item.notes),
+            percentage: Number.isFinite(percentage as number) && (percentage as number) > 0 ? Number(percentage) : null,
+            amount: Number.isFinite(amount as number) && (amount as number) > 0 ? Number(amount) : null,
+        })
+    }
+
+    if (participants.length === 0) return { participants: [], mode: null }
+
+    const hasPercentage = participants.some(item => Number.isFinite(item.percentage as number) && (item.percentage as number) > 0)
+    const hasAmount = participants.some(item => Number.isFinite(item.amount as number) && (item.amount as number) > 0)
+
+    if (hasPercentage && hasAmount) {
+        return { error: 'Split da regra invalido: nao misture percentual com valor fixo.' }
+    }
+
+    if (!hasPercentage && !hasAmount) {
+        return { error: 'Split da regra invalido: informe percentual ou valor para cada participante.' }
+    }
+
+    if (hasPercentage && participants.some(item => !Number.isFinite(item.percentage as number) || (item.percentage as number) <= 0)) {
+        return { error: 'Split da regra invalido: todos os participantes devem ter percentual > 0.' }
+    }
+
+    if (hasAmount && participants.some(item => !Number.isFinite(item.amount as number) || (item.amount as number) <= 0)) {
+        return { error: 'Split da regra invalido: todos os participantes devem ter valor > 0.' }
+    }
+
+    return { participants, mode: hasPercentage ? 'percentage' : 'amount' }
+}
+
+function splitCommissionAmount(
+    totalCommission: number,
+    participants: SplitParticipant[],
+    mode: SplitMode,
+): number[] {
+    const sourceValues = participants.map(item => mode === 'percentage' ? Number(item.percentage || 0) : Number(item.amount || 0))
+    const sourceTotal = sourceValues.reduce((sum, value) => sum + value, 0)
+    if (!Number.isFinite(sourceTotal) || sourceTotal <= 0) {
+        return participants.map(() => 0)
+    }
+
+    const provisional = sourceValues.map(value => Number((totalCommission * (value / sourceTotal)).toFixed(2)))
+    const sumProvisional = provisional.reduce((sum, value) => sum + value, 0)
+    const diff = Number((totalCommission - sumProvisional).toFixed(2))
+    if (Math.abs(diff) >= 0.01 && provisional.length > 0) {
+        const lastIndex = provisional.length - 1
+        provisional[lastIndex] = Number((provisional[lastIndex] + diff).toFixed(2))
+    }
+
+    return provisional.map(value => Number(Math.max(0, value).toFixed(2)))
 }
 
 async function columnExistsOnTable(admin: any, tableName: string, columnName: string): Promise<boolean> {
@@ -601,9 +706,37 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: false, error: (calculated as any).error }, { status: 400 })
             }
 
+            const preview = calculated as any
+            const splitParsed = parseSplitPayload(preview?.rule?.split_payload)
+            if ((splitParsed as any).error) {
+                return NextResponse.json({ success: false, error: (splitParsed as any).error }, { status: 400 })
+            }
+
+            const splitInfo = splitParsed as { participants: SplitParticipant[]; mode: SplitMode | null }
+            const splitParticipants = splitInfo.participants || []
+            const splitMode = splitInfo.mode
+            const splitAmounts = splitParticipants.length > 0 && splitMode
+                ? splitCommissionAmount(Number(preview.commission_amount || 0), splitParticipants, splitMode)
+                : []
+            const splitBreakdown = splitParticipants.map((participant, idx) => ({
+                index: idx + 1,
+                broker_user_id: participant.broker_user_id,
+                broker_name: participant.broker_name,
+                broker_source: participant.broker_source,
+                participant_type: participant.participant_type,
+                mode: splitMode,
+                amount: splitAmounts[idx] || 0,
+                percentage: participant.percentage,
+            }))
+
+            const previewWithSplit = {
+                ...preview,
+                split_breakdown: splitBreakdown,
+            }
+
             const shouldCreate = !!body?.create_record
             if (!shouldCreate) {
-                return NextResponse.json({ success: true, preview: calculated })
+                return NextResponse.json({ success: true, preview: previewWithSplit })
             }
 
             const saleReferenceValidation = await validateClosedSaleReference(admin, body?.source_ref_type, body?.source_ref_id)
@@ -611,22 +744,83 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: false, error: saleReferenceValidation.error }, { status: 400 })
             }
 
-            const preview = calculated as any
+            const dueDate = toNullableText(body?.due_date) || new Date().toISOString().slice(0, 10)
+            const createLockError = await ensureUnlockedDates(admin, [dueDate], 'Comissao')
+            if (createLockError) {
+                return NextResponse.json({ success: false, error: createLockError }, { status: 409 })
+            }
+
+            const nowIso = new Date().toISOString()
+            const baseBrokerUserId = toNullableText(body?.broker_user_id)
+            const baseBrokerName = toNullableText(body?.broker_name)
+            const baseNotes = toNullableText(body?.notes)
+
+            if (splitParticipants.length > 0) {
+                const splitRows = splitParticipants.map((participant, idx) => {
+                    const brokerUserId = participant.broker_user_id || baseBrokerUserId
+                    const brokerName = participant.broker_name || baseBrokerName
+                    const splitLabel = `Split ${idx + 1}/${splitParticipants.length}${participant.participant_type ? ` (${participant.participant_type})` : ''}`
+                    const mergedNotes = [baseNotes, participant.notes, splitLabel].filter(Boolean).join(' | ') || null
+
+                    return {
+                        rule_id: preview.rule.id,
+                        source_ref_type: toNullableText(body?.source_ref_type),
+                        source_ref_id: toNullableText(body?.source_ref_id),
+                        broker_user_id: brokerUserId,
+                        broker_name: brokerName,
+                        sale_amount: preview.sale_amount,
+                        commission_base: preview.commission_base,
+                        commission_amount: Number(splitAmounts[idx] || 0),
+                        status: 'calculated' as CommissionStatus,
+                        due_date: dueDate,
+                        cost_center_id: toNullableText(body?.cost_center_id),
+                        notes: mergedNotes,
+                        created_by: access.adminUser?.id || null,
+                        updated_at: nowIso,
+                    }
+                })
+
+                const hasMissingBroker = splitRows.some(row => !row.broker_user_id && !row.broker_name)
+                if (hasMissingBroker) {
+                    return NextResponse.json({ success: false, error: 'Split invalido: todos os participantes precisam de corretor (nome ou usuario admin).' }, { status: 400 })
+                }
+
+                const { data: insertedRows, error: insertError } = await admin
+                    .from('finance_commissions')
+                    .insert(splitRows)
+                    .select(`
+                        *,
+                        rule:finance_commission_rules(id, name, calc_type, basis_type, percentage, fixed_amount),
+                        cost_center:finance_cost_centers(id, name, code)
+                    `)
+
+                if (insertError) throw insertError
+                const enrichedRows = await attachBrokersToCommissionRows(admin, insertedRows || [])
+                const mappedRows = enrichedRows.map((row: any) => mapCommission(row))
+
+                return NextResponse.json({
+                    success: true,
+                    preview: previewWithSplit,
+                    commissions: mappedRows,
+                    commission: mappedRows[0] || null,
+                }, { status: 201 })
+            }
+
             const commissionInsertData = {
                 rule_id: preview.rule.id,
                 source_ref_type: toNullableText(body?.source_ref_type),
                 source_ref_id: toNullableText(body?.source_ref_id),
-                broker_user_id: toNullableText(body?.broker_user_id),
-                broker_name: toNullableText(body?.broker_name),
+                broker_user_id: baseBrokerUserId,
+                broker_name: baseBrokerName,
                 sale_amount: preview.sale_amount,
                 commission_base: preview.commission_base,
                 commission_amount: preview.commission_amount,
                 status: 'calculated' as CommissionStatus,
-                due_date: toNullableText(body?.due_date),
+                due_date: dueDate,
                 cost_center_id: toNullableText(body?.cost_center_id),
-                notes: toNullableText(body?.notes),
+                notes: baseNotes,
                 created_by: access.adminUser?.id || null,
-                updated_at: new Date().toISOString(),
+                updated_at: nowIso,
             }
 
             if (!commissionInsertData.broker_name && !commissionInsertData.broker_user_id) {
@@ -648,7 +842,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
-                preview,
+                preview: previewWithSplit,
                 commission: mapCommission(enrichedData),
             }, { status: 201 })
         }
@@ -662,6 +856,14 @@ export async function POST(request: NextRequest) {
             const saleReferenceValidation = await validateClosedSaleReference(admin, body?.source_ref_type, body?.source_ref_id)
             if (!saleReferenceValidation.ok) {
                 return NextResponse.json({ success: false, error: saleReferenceValidation.error }, { status: 400 })
+            }
+
+            const createDateForLock = toNullableText(body?.due_date)
+                || toNullableText(body?.paid_at)
+                || new Date().toISOString().slice(0, 10)
+            const createLockError = await ensureUnlockedDates(admin, [createDateForLock], 'Comissao')
+            if (createLockError) {
+                return NextResponse.json({ success: false, error: createLockError }, { status: 409 })
             }
 
             const insertData = {
@@ -816,6 +1018,10 @@ export async function PUT(request: NextRequest) {
 
             const hasPaidAtInBody = Object.prototype.hasOwnProperty.call(body, 'paid_at')
             const hasPaymentEntryIdInBody = Object.prototype.hasOwnProperty.call(body, 'payment_entry_id')
+            const hasDueDateInBody = Object.prototype.hasOwnProperty.call(body, 'due_date')
+            const nextDueDate = hasDueDateInBody
+                ? toNullableText(body?.due_date)
+                : toNullableText(currentCommission.due_date)
 
             const updateData: any = {
                 rule_id: toNullableText(body?.rule_id),
@@ -827,7 +1033,7 @@ export async function PUT(request: NextRequest) {
                 commission_base: toNullableNumber(body?.commission_base),
                 commission_amount: toNullableNumber(body?.commission_amount),
                 status: toCommissionStatus(body?.status),
-                due_date: toNullableText(body?.due_date),
+                due_date: nextDueDate,
                 paid_at: hasPaidAtInBody ? toNullableText(body?.paid_at) : currentCommission.paid_at,
                 payment_entry_id: hasPaymentEntryIdInBody ? toNullableText(body?.payment_entry_id) : currentCommission.payment_entry_id,
                 cost_center_id: toNullableText(body?.cost_center_id),
@@ -847,6 +1053,21 @@ export async function PUT(request: NextRequest) {
             const saleReferenceValidation = await validateClosedSaleReference(admin, effectiveSourceRefType, effectiveSourceRefId)
             if (!saleReferenceValidation.ok) {
                 return NextResponse.json({ success: false, error: saleReferenceValidation.error }, { status: 400 })
+            }
+
+            const currentDateForLock = normalizeDateForLock(
+                currentCommission.due_date || currentCommission.paid_at || currentCommission.created_at,
+            )
+            const nextDateForLock = normalizeDateForLock(
+                updateData.due_date || updateData.paid_at || currentCommission.due_date || currentCommission.paid_at || currentCommission.created_at,
+            )
+            const updateLockError = await ensureUnlockedDates(
+                admin,
+                [currentDateForLock, nextDateForLock],
+                'Comissao',
+            )
+            if (updateLockError) {
+                return NextResponse.json({ success: false, error: updateLockError }, { status: 409 })
             }
 
             if (updateData.status === 'paid') {
@@ -911,6 +1132,24 @@ export async function DELETE(request: NextRequest) {
         }
 
         if (entity === 'commission') {
+            const { data: currentCommission, error: currentCommissionError } = await admin
+                .from('finance_commissions')
+                .select('id, due_date, paid_at, created_at')
+                .eq('id', id)
+                .single()
+
+            if (currentCommissionError || !currentCommission) {
+                return NextResponse.json({ success: false, error: 'Comissao nao encontrada' }, { status: 404 })
+            }
+
+            const deleteDateForLock = normalizeDateForLock(
+                currentCommission.due_date || currentCommission.paid_at || currentCommission.created_at,
+            )
+            const deleteLockError = await ensureUnlockedDates(admin, [deleteDateForLock], 'Comissao')
+            if (deleteLockError) {
+                return NextResponse.json({ success: false, error: deleteLockError }, { status: 409 })
+            }
+
             const { error } = await admin.from('finance_commissions').delete().eq('id', id)
             if (error) throw error
             return NextResponse.json({ success: true })

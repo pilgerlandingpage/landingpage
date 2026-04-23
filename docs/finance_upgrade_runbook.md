@@ -50,6 +50,9 @@ Validate these pages:
 - `/admin/finance/fechamento-mensal`
 - `/admin/finance/exportacao-contabil`
 
+Phase-specific checklist:
+- `docs/finance_phase5_6_smoke_test_2026_04_23.md`
+
 ## 6) Evidence to store
 - Screenshot of integrity SQL result
 - Screenshot of go-live report result
