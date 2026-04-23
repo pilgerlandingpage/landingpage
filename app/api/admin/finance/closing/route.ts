@@ -3,6 +3,7 @@ import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 
 type ClosingAction = 'close' | 'lock'
 type ReopenAction = 'reopen'
+type ClosingStatus = 'open' | 'closed' | 'locked'
 
 function toNullableText(value: any): string | null {
     const text = String(value || '').trim()
@@ -110,15 +111,56 @@ export async function POST(request: NextRequest) {
         }
 
         const admin = createAdminClient()
-        const { data, error } = await admin.rpc('finance_close_period', {
-            p_period_month: periodDate,
-            p_actor: access.adminUser?.id || null,
-            p_lock: action === 'lock',
-            p_notes: toNullableText(body?.notes),
-        })
+        const nowIso = new Date().toISOString()
+        const nextStatus: ClosingStatus = action === 'lock' ? 'locked' : 'closed'
+        const inputNotes = toNullableText(body?.notes)
+
+        const { data: current, error: currentError } = await admin
+            .from('finance_closing_periods')
+            .select('id, status, closed_at, locked_at, closed_by, notes')
+            .eq('period_month', periodDate)
+            .maybeSingle()
+
+        if (currentError) throw currentError
+        if (current?.status === 'locked' && action !== 'lock') {
+            return NextResponse.json({ success: false, error: 'Periodo bloqueado nao pode ser apenas fechado' }, { status: 400 })
+        }
+
+        if (current?.id) {
+            const { data, error } = await admin
+                .from('finance_closing_periods')
+                .update({
+                    status: nextStatus,
+                    closed_at: current.closed_at || nowIso,
+                    locked_at: action === 'lock' ? (current.locked_at || nowIso) : current.locked_at,
+                    closed_by: access.adminUser?.id || current.closed_by || null,
+                    notes: inputNotes ?? current.notes ?? null,
+                    updated_at: nowIso,
+                })
+                .eq('id', current.id)
+                .select('*')
+                .single()
+
+            if (error) throw error
+            return NextResponse.json({ success: true, period: data })
+        }
+
+        const { data, error } = await admin
+            .from('finance_closing_periods')
+            .insert({
+                period_month: periodDate,
+                status: nextStatus,
+                closed_at: nowIso,
+                locked_at: action === 'lock' ? nowIso : null,
+                closed_by: access.adminUser?.id || null,
+                notes: inputNotes,
+                updated_at: nowIso,
+            })
+            .select('*')
+            .single()
 
         if (error) throw error
-        return NextResponse.json({ success: true, period: Array.isArray(data) ? data[0] || null : data || null })
+        return NextResponse.json({ success: true, period: data })
     } catch (err: any) {
         console.error('[admin/finance/closing POST]', err)
         return NextResponse.json({ success: false, error: err?.message || 'Erro ao fechar periodo' }, { status: 500 })

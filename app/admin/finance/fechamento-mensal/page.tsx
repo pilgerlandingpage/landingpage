@@ -139,21 +139,21 @@ export default function FinanceClosingPage() {
 
             <div className="chart-card" style={{ marginBottom: 14 }}>
                 <div className="chart-title">Novo Fechamento</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr auto auto', gap: 10 }}>
-                    <div>
-                        <label className="label">Competencia</label>
-                        <input type="month" className="input" value={periodMonth} onChange={e => setPeriodMonth(e.target.value)} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, alignItems: 'end' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <label className="form-label">Competencia</label>
+                        <input type="month" className="form-input" value={periodMonth} onChange={e => setPeriodMonth(e.target.value)} />
                     </div>
-                    <div>
-                        <label className="label">Observacao</label>
-                        <input className="input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Opcional" />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <label className="form-label">Observacao</label>
+                        <input className="form-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Opcional" />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'end' }}>
+                    <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'flex-end' }}>
                         <button className="btn btn-gold" onClick={() => doClose('close')} disabled={saving}>
                             Fechar
                         </button>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'end' }}>
+                    <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'flex-end' }}>
                         <button className="btn btn-outline" onClick={() => doClose('lock')} disabled={saving}>
                             <Lock size={14} style={{ marginRight: 6 }} /> Bloquear
                         </button>
