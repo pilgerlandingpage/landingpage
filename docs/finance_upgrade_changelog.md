@@ -1,5 +1,26 @@
 # Finance Upgrade Changelog
 
+## 2026-04-23 - Real data organization after spreadsheet import
+- Status: `COMPLETED_WITH_PENDING_ENRICHMENT`
+- Operator: `connectyhub`
+- Scope:
+  - executed idempotent real-data organization script:
+    - `supabase/sql/finance_finalize_real_data_organization.sql`
+  - run evidence guide:
+    - `docs/finance_real_data_finalization_2026_04_23.md`
+- Result snapshot:
+  - `entries_total`: `114`
+  - `entries_without_counterparty`: `16`
+  - `entries_without_cost_center`: `57`
+  - `payables_linked_to_entries`: `57`
+  - `receivables_linked_to_entries`: `57`
+  - `categories_total`: `10`
+  - `subcategories_total`: `68`
+  - `counterparties_total`: `57`
+- Notes:
+  - legacy entries were organized into AP/AR without duplication.
+  - remaining blanks are enrichment-only gaps (`counterparty`/`cost_center`) and do not indicate data loss.
+
 ## 2026-04-23 - Phase 5/6 smoke execution kickoff
 - Status: `COMPLETED`
 - Operator: `connectyhub`

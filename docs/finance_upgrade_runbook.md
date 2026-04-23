@@ -17,6 +17,10 @@ Then replace:
 ## 2) Apply migration
 Run the target migration SQL in Supabase SQL Editor.
 
+If imported real spreadsheet data still needs final organization in upgraded AP/AR and lookups, run:
+- `supabase/sql/finance_finalize_real_data_organization.sql`
+- helper notes: `docs/finance_real_data_finalization_2026_04_23.md`
+
 ## 3) After migration
 Run:
 - `supabase/sql/finance_upgrade_integrity_check.sql`

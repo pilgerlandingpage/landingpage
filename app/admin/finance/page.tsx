@@ -380,7 +380,7 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
     const showResumo = activeSection === 'dashboard'
     const showCadastros = activeSection === 'cadastros' || activeSection === 'categorias' || activeSection === 'subcategorias' || activeSection === 'pagamentos' || activeSection === 'favorecidos'
     const showCategorias = activeSection === 'cadastros' || activeSection === 'categorias'
-    const showSubcategorias = activeSection === 'cadastros' || activeSection === 'subcategorias'
+    const showSubcategorias = activeSection === 'cadastros' || activeSection === 'categorias' || activeSection === 'subcategorias'
     const showPagamentos = activeSection === 'cadastros' || activeSection === 'pagamentos'
     const showFavorecidos = activeSection === 'cadastros' || activeSection === 'favorecidos'
     const showNovoLancamento = activeSection === 'novo-lancamento'
@@ -1385,7 +1385,11 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
             )}
 
             {showCadastros && (
-                <div id="finance-cadastros" className="chart-card" style={{ marginBottom: 18, scrollMarginTop: 96 }}>
+                <div
+                    id="finance-cadastros"
+                    className="chart-card"
+                    style={{ marginBottom: 18, scrollMarginTop: 96, minHeight: 'calc(100vh - 220px)' }}
+                >
                     <div className="chart-title" style={{ marginBottom: 12 }}>
                         Cadastros financeiros
                     </div>
@@ -1393,7 +1397,7 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                     {lookupsLoading ? (
                         <div style={{ color: 'var(--text-muted)' }}>Carregando cadastros...</div>
                     ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                        <div className="lookup-grid">
                         {showCategorias && (
                             <div id="finance-categorias" className="lookup-box" style={{ scrollMarginTop: 96 }}>
                             <div className="lookup-title">Categorias</div>
@@ -2630,27 +2634,39 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                 .lookup-box {
                     border: 1px solid rgba(148, 163, 184, 0.2);
                     border-radius: 10px;
-                    padding: 10px;
+                    padding: 14px;
                     background: rgba(15, 23, 42, 0.02);
+                    min-height: 420px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .lookup-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+                    gap: 14px;
+                    align-items: stretch;
                 }
                 .lookup-title {
-                    font-size: 0.88rem;
+                    font-size: 0.94rem;
                     font-weight: 700;
-                    margin-bottom: 8px;
+                    margin-bottom: 10px;
                 }
                 .lookup-row {
                     display: grid;
                     grid-template-columns: 1fr 1fr auto;
-                    gap: 8px;
-                    margin-bottom: 8px;
+                    gap: 10px;
+                    margin-bottom: 12px;
                 }
                 .chip-wrap {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 6px;
-                    max-height: 120px;
+                    min-height: 300px;
+                    max-height: 460px;
+                    flex: 1;
                     overflow: auto;
                     padding-right: 2px;
+                    align-content: flex-start;
                 }
                 .lookup-chip {
                     display: inline-flex;
@@ -2679,8 +2695,18 @@ export default function FinancePage({ initialSection }: { initialSection?: strin
                     to { transform: rotate(360deg); }
                 }
                 @media (max-width: 820px) {
+                    .lookup-grid {
+                        grid-template-columns: 1fr;
+                    }
                     .lookup-row {
                         grid-template-columns: 1fr;
+                    }
+                    .lookup-box {
+                        min-height: 0;
+                    }
+                    .chip-wrap {
+                        min-height: 120px;
+                        max-height: 280px;
                     }
                 }
             `}</style>

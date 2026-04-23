@@ -94,21 +94,6 @@ function todayISO() {
     return new Date().toISOString().slice(0, 10)
 }
 
-function parseSplitPayloadInput(raw: string): { value: unknown; error: string | null } {
-    const trimmed = String(raw || '').trim()
-    if (!trimmed) return { value: null, error: null }
-
-    try {
-        const parsed = JSON.parse(trimmed)
-        if (!Array.isArray(parsed)) {
-            return { value: null, error: 'Split precisa ser um JSON array de participantes.' }
-        }
-        return { value: parsed, error: null }
-    } catch {
-        return { value: null, error: 'Split invalido: JSON malformado.' }
-    }
-}
-
 function splitParticipantsCount(raw: unknown): number {
     if (Array.isArray(raw)) return raw.length
     if (typeof raw === 'string') {
@@ -163,7 +148,6 @@ export default function FinanceCommissionsPage() {
         fixed_amount: '',
         min_sale_amount: '',
         max_sale_amount: '',
-        split_payload: '',
         applies_to: '',
         notes: '',
     })
@@ -285,12 +269,6 @@ export default function FinanceCommissionsPage() {
             return
         }
 
-        const splitParsed = parseSplitPayloadInput(ruleForm.split_payload)
-        if (splitParsed.error) {
-            showToast(splitParsed.error, 'error')
-            return
-        }
-
         setSaving(true)
         try {
             const payload = {
@@ -302,7 +280,7 @@ export default function FinanceCommissionsPage() {
                 fixed_amount: ruleForm.calc_type === 'fixed' ? Number(ruleForm.fixed_amount || 0) : null,
                 min_sale_amount: ruleForm.min_sale_amount ? Number(ruleForm.min_sale_amount) : null,
                 max_sale_amount: ruleForm.max_sale_amount ? Number(ruleForm.max_sale_amount) : null,
-                split_payload: splitParsed.value,
+                split_payload: null,
                 applies_to: ruleForm.applies_to || null,
                 notes: ruleForm.notes || null,
             }
@@ -326,7 +304,6 @@ export default function FinanceCommissionsPage() {
                 fixed_amount: '',
                 min_sale_amount: '',
                 max_sale_amount: '',
-                split_payload: '',
                 applies_to: '',
                 notes: '',
             })
@@ -611,16 +588,6 @@ export default function FinanceCommissionsPage() {
                     <div>
                         <label className="form-label">Aplica-se a</label>
                         <input className="form-input" value={ruleForm.applies_to} onChange={e => setRuleForm(prev => ({ ...prev, applies_to: e.target.value }))} placeholder="Ex: venda, locacao, empreendimento X" />
-                    </div>
-                    <div style={{ gridColumn: '1 / -1' }}>
-                        <label className="form-label">Split (JSON opcional)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={3}
-                            value={ruleForm.split_payload}
-                            onChange={e => setRuleForm(prev => ({ ...prev, split_payload: e.target.value }))}
-                            placeholder='[{"broker_user_id":"uuid","participant_type":"corretor","percentage":60},{"broker_name":"Parceiro","participant_type":"parceiro","percentage":40}]'
-                        />
                     </div>
                     <div style={{ gridColumn: '1 / -1' }}>
                         <label className="form-label">Observações</label>

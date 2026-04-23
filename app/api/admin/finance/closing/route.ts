@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 
 type ClosingAction = 'close' | 'lock'
-type ReopenAction = 'reopen'
+type UpdateAction = 'reopen' | 'unlock'
 type ClosingStatus = 'open' | 'closed' | 'locked'
 
 function toNullableText(value: any): string | null {
@@ -22,8 +22,17 @@ function toClosingAction(raw: any): ClosingAction {
     return String(raw || '').trim().toLowerCase() === 'lock' ? 'lock' : 'close'
 }
 
-function toReopenAction(raw: any): ReopenAction {
-    return String(raw || '').trim().toLowerCase() === 'reopen' ? 'reopen' : 'reopen'
+function toUpdateAction(raw: any): UpdateAction {
+    return String(raw || '').trim().toLowerCase() === 'unlock' ? 'unlock' : 'reopen'
+}
+
+function withUnlockNote(currentNotes: string | null, inputNotes: string | null): string | null {
+    if (inputNotes) return inputNotes
+    const marker = 'desbloqueado manualmente'
+    const base = toNullableText(currentNotes)
+    if (!base) return marker
+    if (base.toLowerCase().includes(marker)) return base
+    return `${base} | ${marker}`
 }
 
 async function getCurrentAdminUser() {
@@ -173,24 +182,48 @@ export async function PUT(request: NextRequest) {
         if (access.error) return access.error
 
         const body = await request.json()
-        toReopenAction(body?.action)
+        const action = toUpdateAction(body?.action)
         const periodDate = normalizePeriodDate(body?.period_month)
         if (!periodDate) {
             return NextResponse.json({ success: false, error: 'Periodo invalido. Use YYYY-MM.' }, { status: 400 })
         }
 
         const admin = createAdminClient()
+        const nowIso = new Date().toISOString()
         const { data: current, error: currentError } = await admin
             .from('finance_closing_periods')
-            .select('id, status')
+            .select('id, status, closed_at, locked_at, notes')
             .eq('period_month', periodDate)
             .single()
 
         if (currentError || !current) {
             return NextResponse.json({ success: false, error: 'Periodo nao encontrado' }, { status: 404 })
         }
+        if (action === 'unlock') {
+            if (current.status !== 'locked') {
+                return NextResponse.json({ success: false, error: 'Apenas periodos bloqueados podem ser desbloqueados' }, { status: 400 })
+            }
+
+            const { data, error } = await admin
+                .from('finance_closing_periods')
+                .update({
+                    status: 'closed',
+                    locked_at: null,
+                    closed_at: current.closed_at || nowIso,
+                    updated_at: nowIso,
+                    notes: withUnlockNote(current.notes, toNullableText(body?.notes)),
+                    closed_by: access.adminUser?.id || null,
+                })
+                .eq('id', current.id)
+                .select('*')
+                .single()
+
+            if (error) throw error
+            return NextResponse.json({ success: true, period: data })
+        }
+
         if (current.status === 'locked') {
-            return NextResponse.json({ success: false, error: 'Periodo bloqueado nao pode ser reaberto' }, { status: 400 })
+            return NextResponse.json({ success: false, error: 'Periodo bloqueado precisa ser desbloqueado antes de reabrir' }, { status: 400 })
         }
 
         const { data, error } = await admin
@@ -198,7 +231,8 @@ export async function PUT(request: NextRequest) {
             .update({
                 status: 'open',
                 closed_at: null,
-                updated_at: new Date().toISOString(),
+                locked_at: null,
+                updated_at: nowIso,
                 notes: toNullableText(body?.notes),
                 closed_by: access.adminUser?.id || null,
             })

@@ -29,7 +29,9 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-type SubNavItem = { href: string; label: string }
+type SubNavLink = { href: string; label: string }
+type SubNavGroup = { label: string; children: SubNavLink[] }
+type SubNavItem = SubNavLink | SubNavGroup
 type NavItem = { href: string; icon: any; label: string; section: string; subItems?: SubNavItem[] }
 
 const MODULE_NAV: Record<string, NavItem> = {
@@ -42,21 +44,41 @@ const MODULE_NAV: Record<string, NavItem> = {
         section: 'FINANCEIRO',
         subItems: [
             { href: '/admin/finance', label: 'Dashboard' },
-            { href: '/admin/finance/cadastros', label: 'Cadastros' },
-            { href: '/admin/finance/categorias', label: 'Categorias' },
-            { href: '/admin/finance/subcategorias', label: 'Subcategorias' },
-            { href: '/admin/finance/pagamentos', label: 'Pagamentos' },
-            { href: '/admin/finance/favorecidos', label: 'Favorecidos' },
-            { href: '/admin/finance/novo-lancamento', label: 'Novo Lancamento' },
-            { href: '/admin/finance/contas-a-pagar', label: 'Contas a Pagar' },
-            { href: '/admin/finance/contas-a-receber', label: 'Contas a Receber' },
-            { href: '/admin/finance/conciliacao-bancaria', label: 'Conciliacao Bancaria' },
-            { href: '/admin/finance/fluxo-caixa', label: 'Fluxo de Caixa' },
-            { href: '/admin/finance/dre-gerencial', label: 'DRE Gerencial' },
+            {
+                label: 'Cadastros',
+                children: [
+                    { href: '/admin/finance/cadastros', label: 'Visao Geral' },
+                    { href: '/admin/finance/categorias', label: 'Categorias' },
+                    { href: '/admin/finance/pagamentos', label: 'Pagamentos' },
+                    { href: '/admin/finance/favorecidos', label: 'Favorecidos' },
+                ],
+            },
+            {
+                label: 'Movimentacoes',
+                children: [
+                    { href: '/admin/finance/novo-lancamento', label: 'Novo Lancamento' },
+                    { href: '/admin/finance/lancamentos', label: 'Lancamentos' },
+                    { href: '/admin/finance/contas-a-pagar', label: 'Contas a Pagar' },
+                    { href: '/admin/finance/contas-a-receber', label: 'Contas a Receber' },
+                ],
+            },
             { href: '/admin/finance/comissoes', label: 'Comissoes' },
-            { href: '/admin/finance/fechamento-mensal', label: 'Fechamento Mensal' },
-            { href: '/admin/finance/exportacao-contabil', label: 'Exportacao Contabil' },
-            { href: '/admin/finance/lancamentos', label: 'Lancamentos' },
+            {
+                label: 'Conciliacao e Fechamento',
+                children: [
+                    { href: '/admin/finance/conciliacao-bancaria', label: 'Conciliacao Bancaria' },
+                    { href: '/admin/finance/fechamento-mensal', label: 'Fechamento Mensal' },
+                    { href: '/admin/finance/exportacao-contabil', label: 'Exportacao Contabil' },
+                ],
+            },
+            {
+                label: 'Relatorios',
+                children: [
+                    { href: '/admin/finance/fluxo-caixa', label: 'Fluxo de Caixa' },
+                    { href: '/admin/finance/dre-gerencial', label: 'DRE Gerencial' },
+                ],
+            },
+            { href: '/admin/finance/manual', label: 'Manual Financeiro' },
         ],
     },
     leads: {
@@ -124,6 +146,14 @@ export default function AdminSidebar() {
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
         '/admin/ads': true,
     })
+    const [expandedSubGroups, setExpandedSubGroups] = useState<Record<string, boolean>>({})
+
+    const subGroupKey = (parentHref: string, groupLabel: string) => `${parentHref}::${groupLabel}`
+
+    const toggleSubGroup = (parentHref: string, groupLabel: string) => {
+        const key = subGroupKey(parentHref, groupLabel)
+        setExpandedSubGroups(prev => ({ ...prev, [key]: !prev[key] }))
+    }
 
     useEffect(() => {
         const fetchPermissions = async () => {
@@ -154,6 +184,17 @@ export default function AdminSidebar() {
         }
         if (pathname.startsWith('/admin/finance')) {
             setExpandedMenus(prev => ({ ...prev, '/admin/finance': true }))
+
+            const financeSubItems = MODULE_NAV.finance.subItems || []
+            for (const subItem of financeSubItems) {
+                if (!('children' in subItem)) continue
+
+                const hasActiveChild = subItem.children.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`))
+                if (!hasActiveChild) continue
+
+                const key = subGroupKey('/admin/finance', subItem.label)
+                setExpandedSubGroups(prev => ({ ...prev, [key]: true }))
+            }
         }
         if (pathname.startsWith('/admin/leads')) {
             setExpandedMenus(prev => ({ ...prev, '/admin/leads': true }))
@@ -262,8 +303,68 @@ export default function AdminSidebar() {
 
                                         {item.subItems && isExpanded && (
                                             <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '28px', marginTop: '4px', marginBottom: '8px', gap: '4px' }}>
-                                                {item.subItems.map(subItem => {
-                                                    const isSubItemActive = pathname === subItem.href
+                                                {item.subItems.map((subItem, index) => {
+                                                    if ('children' in subItem) {
+                                                        const key = subGroupKey(item.href, subItem.label)
+                                                        const isGroupExpanded = expandedSubGroups[key] || false
+                                                        return (
+                                                            <div key={`subgroup-${subItem.label}-${index}`} style={{ marginTop: 6 }}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleSubGroup(item.href, subItem.label)}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'space-between',
+                                                                        background: 'rgba(148, 163, 184, 0.12)',
+                                                                        border: '1px solid rgba(148, 163, 184, 0.22)',
+                                                                        borderRadius: 8,
+                                                                        cursor: 'pointer',
+                                                                        textAlign: 'left',
+                                                                        padding: '6px 10px 6px 12px',
+                                                                        fontSize: '0.73rem',
+                                                                        letterSpacing: '0.06em',
+                                                                        textTransform: 'uppercase',
+                                                                        color: 'var(--text-primary)',
+                                                                        fontWeight: 700,
+                                                                        margin: '0 0 6px 0',
+                                                                    }}
+                                                                >
+                                                                    <span>{subItem.label}</span>
+                                                                    <ChevronDown
+                                                                        size={12}
+                                                                        style={{ transform: isGroupExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                                                                    />
+                                                                </button>
+                                                                {isGroupExpanded && (
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 10 }}>
+                                                                        {subItem.children.map(child => {
+                                                                            const isChildActive = pathname === child.href || pathname.startsWith(`${child.href}/`)
+                                                                            return (
+                                                                                <Link
+                                                                                    key={child.href}
+                                                                                    href={child.href}
+                                                                                    className={`admin-nav-item ${isChildActive ? 'active text-gold' : ''}`}
+                                                                                    style={{
+                                                                                        fontSize: '0.84rem',
+                                                                                        padding: '6px 12px',
+                                                                                        background: isChildActive ? 'var(--bg-card)' : 'transparent',
+                                                                                        color: isChildActive ? 'var(--gold)' : 'var(--text-muted)',
+                                                                                        borderLeft: isChildActive ? '2px solid var(--gold)' : '2px solid transparent',
+                                                                                    }}
+                                                                                >
+                                                                                    {child.label}
+                                                                                </Link>
+                                                                            )
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    }
+
+                                                    const isSubItemActive = pathname === subItem.href || pathname.startsWith(`${subItem.href}/`)
                                                     return (
                                                         <Link
                                                             key={subItem.href}
@@ -272,9 +373,11 @@ export default function AdminSidebar() {
                                                             style={{
                                                                 fontSize: '0.85rem',
                                                                 padding: '6px 12px',
-                                                                background: isSubItemActive ? 'var(--bg-card)' : 'transparent',
-                                                                color: isSubItemActive ? 'var(--gold)' : 'var(--text-muted)',
-                                                                borderLeft: isSubItemActive ? '2px solid var(--gold)' : '2px solid transparent',
+                                                                background: isSubItemActive ? 'var(--bg-card)' : 'rgba(148, 163, 184, 0.1)',
+                                                                color: isSubItemActive ? 'var(--gold)' : 'var(--text-primary)',
+                                                                borderLeft: isSubItemActive ? '2px solid var(--gold)' : '2px solid rgba(100,116,139,0.22)',
+                                                                borderRadius: 8,
+                                                                fontWeight: 600,
                                                             }}
                                                         >
                                                             {subItem.label}

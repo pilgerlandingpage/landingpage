@@ -26,6 +26,9 @@ export default async function FinanceSectionPage({ params }: SectionPageProps) {
     if (section === 'resumo') {
         return <FinancePage initialSection="dashboard" />
     }
+    if (section === 'subcategorias') {
+        return <FinancePage initialSection="categorias" />
+    }
     const normalizedSection = allowedSections.has(section) ? section : 'dashboard'
 
     return <FinancePage initialSection={normalizedSection} />
