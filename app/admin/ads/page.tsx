@@ -108,7 +108,7 @@ export default function AdsPage() {
     const [syncing, setSyncing] = useState(false)
     const [analyzing, setAnalyzing] = useState(false)
     const [filter, setFilter] = useState<'all' | 'active' | 'paused'>('all')
-    const [datePreset, setDatePreset] = useState('maximum')
+    const [datePreset, setDatePreset] = useState('today')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
