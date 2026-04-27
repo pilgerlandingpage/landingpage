@@ -1,12 +1,20 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock, Mail, Phone, ArrowRight, Loader2, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="login-container" />}>
+            <LoginPageContent />
+        </Suspense>
+    )
+}
+
+function LoginPageContent() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [recoveryEmail, setRecoveryEmail] = useState('')

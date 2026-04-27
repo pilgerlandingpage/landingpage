@@ -537,8 +537,10 @@ export async function PUT(request: NextRequest) {
 
             if (currentLinksError) throw currentLinksError
 
-            const currentSectorIds = new Set((currentLinks || []).map((row: any) => row.sector_id))
-            const nextSectorIds = new Set(normalizedSectorIds)
+            const currentSectorIds = new Set<string>(
+                (currentLinks || []).map((row: any) => String(row.sector_id || '').trim()).filter(Boolean)
+            )
+            const nextSectorIds = new Set<string>(normalizedSectorIds)
 
             const toDelete = [...currentSectorIds].filter((sid) => !nextSectorIds.has(sid))
             const toInsert = [...nextSectorIds].filter((sid) => !currentSectorIds.has(sid))
