@@ -51,6 +51,18 @@ function LoginPageContent() {
         return new URLSearchParams(rawHash)
     }
 
+    const getFriendlyAuthError = (params: URLSearchParams) => {
+        const code = params.get('error_code') || params.get('error')
+        const description = params.get('error_description') || params.get('error')
+
+        if (code === 'otp_expired' || /expired|invalid/i.test(description || '')) {
+            return 'Link expirado ou ja utilizado. Solicite um novo link ao administrador.'
+        }
+
+        return String(description || 'Nao foi possivel validar o link. Solicite um novo link ao administrador.')
+            .replace(/\+/g, ' ')
+    }
+
     useEffect(() => {
         if (passwordUpdated && !isPasswordSetupMode) {
             setRecoveryMessageType('success')
@@ -77,7 +89,7 @@ function LoginPageContent() {
                 const hashError = hashParams.get('error_description') || hashParams.get('error')
 
                 if (hashError) {
-                    throw new Error(hashError.replace(/\+/g, ' '))
+                    throw new Error(getFriendlyAuthError(hashParams))
                 }
 
                 if (code) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
-import { getLoginRedirectUrl, sanitizeAuthActionLink } from '@/lib/app-url'
+import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import { buildPasswordResetWhatsAppMessage } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
 
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
 
         const rawResetLink = linkData.properties?.action_link
         const resetLink = rawResetLink
-            ? sanitizeAuthActionLink(rawResetLink, '/login?password_reset=1', request.nextUrl.origin)
+            ? buildAuthActionBridgeLink(rawResetLink, 'password_reset', request.nextUrl.origin)
             : null
         if (!resetLink) {
             console.error('[password-recovery] missing reset link for email:', targetEmail)

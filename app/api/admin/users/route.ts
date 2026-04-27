@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
-import { getLoginRedirectUrl, sanitizeAuthActionLink } from '@/lib/app-url'
+import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
     buildPasswordResetWhatsAppMessage,
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest) {
         const authUserId = linkData.user?.id
         const rawFirstAccessLink = linkData.properties?.action_link
         const firstAccessLink = rawFirstAccessLink
-            ? sanitizeAuthActionLink(rawFirstAccessLink, '/login?first_access=1', request.nextUrl.origin)
+            ? buildAuthActionBridgeLink(rawFirstAccessLink, 'first_access', request.nextUrl.origin)
             : null
         if (!authUserId) throw new Error('Nao foi possivel criar usuario auth.')
         if (!firstAccessLink) throw new Error('Nao foi possivel gerar link de primeiro acesso.')
@@ -712,9 +712,9 @@ export async function PATCH(request: NextRequest) {
 
             const rawFirstAccessLink = linkData?.properties?.action_link
             const firstAccessLink = rawFirstAccessLink
-                ? sanitizeAuthActionLink(
+                ? buildAuthActionBridgeLink(
                     rawFirstAccessLink,
-                    firstAccessLinkType === 'invite' ? '/login?first_access=1' : '/login?password_reset=1',
+                    firstAccessLinkType === 'invite' ? 'first_access' : 'password_reset',
                     request.nextUrl.origin
                 )
                 : null
@@ -779,7 +779,7 @@ export async function PATCH(request: NextRequest) {
 
         const rawResetLink = linkData.properties?.action_link
         const resetLink = rawResetLink
-            ? sanitizeAuthActionLink(rawResetLink, '/login?password_reset=1', request.nextUrl.origin)
+            ? buildAuthActionBridgeLink(rawResetLink, 'password_reset', request.nextUrl.origin)
             : null
         if (!resetLink) throw new Error('Nao foi possivel gerar link de redefinicao.')
 

@@ -55,3 +55,16 @@ export function sanitizeAuthActionLink(actionLink: string, redirectPathQuery: st
         return isLocalUrl(actionLink) ? safeRedirectUrl : actionLink
     }
 }
+
+export function buildAuthActionBridgeLink(
+    actionLink: string,
+    flow: 'first_access' | 'password_reset',
+    origin?: string | null
+): string {
+    const redirectPath = flow === 'first_access' ? '/login?first_access=1' : '/login?password_reset=1'
+    const safeActionLink = sanitizeAuthActionLink(actionLink, redirectPath, origin)
+    const url = new URL('/auth/continue', getPublicAppUrl(origin))
+    url.searchParams.set('flow', flow)
+    url.searchParams.set('link', safeActionLink)
+    return url.toString()
+}
