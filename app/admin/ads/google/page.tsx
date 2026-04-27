@@ -381,7 +381,7 @@ export default function AdsPage() {
                         {filteredCampaigns.length} campanha(s) • Atualizado em {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div className="ads-header-actions" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <Calendar size={16} style={{ position: 'absolute', left: 10, color: 'var(--text-muted)', pointerEvents: 'none' }} />
                         <select value={datePreset} onChange={e => handleDateChange(e.target.value)}
