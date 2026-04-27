@@ -35,11 +35,19 @@ function LoginPageContent() {
     const [supabase] = useState(() => createClient())
 
     const modeType = String(searchParams.get('type') || '').toLowerCase()
+    const passwordUpdated = searchParams.get('password_updated') === '1'
     const isPasswordSetupMode =
         searchParams.get('first_access') === '1' ||
         searchParams.get('password_reset') === '1' ||
         modeType === 'invite' ||
         modeType === 'recovery'
+
+    useEffect(() => {
+        if (passwordUpdated && !isPasswordSetupMode) {
+            setRecoveryMessageType('success')
+            setRecoveryMessage('Senha definida com sucesso. Entre com seu email e nova senha.')
+        }
+    }, [passwordUpdated, isPasswordSetupMode])
 
     useEffect(() => {
         if (!isPasswordSetupMode) return
@@ -143,10 +151,12 @@ function LoginPageContent() {
                 return
             }
 
-            setPasswordFlowMessage('Senha definida com sucesso. Redirecionando...')
+            setPasswordFlowMessage('Senha definida com sucesso. Redirecionando para o login...')
             setTimeout(() => {
-                router.push('/admin')
-                router.refresh()
+                supabase.auth.signOut().finally(() => {
+                    router.replace('/login?password_updated=1')
+                    router.refresh()
+                })
             }, 800)
         } catch {
             setError('Ocorreu um erro ao definir a nova senha.')

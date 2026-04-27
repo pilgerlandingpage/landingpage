@@ -182,9 +182,12 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
     const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
     const message = `${greeting}
 
-Seu acesso ao painel Pilger foi criado.
+Bem-vindo(a) a Pilger!
+Seu acesso ao painel administrativo da empresa foi criado.
 Para definir sua senha de primeiro acesso, use este link:
 ${firstAccessLink}
+
+Depois de definir a senha, voce sera direcionado(a) para a tela de login.
 
 Se voce nao reconhece este cadastro, ignore esta mensagem.`
 
