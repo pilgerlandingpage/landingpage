@@ -43,6 +43,14 @@ function LoginPageContent() {
         modeType === 'recovery'
     const isRecoveryMode = !isPasswordSetupMode && showRecoveryForm
 
+    const getAuthHashParams = () => {
+        if (typeof window === 'undefined') return new URLSearchParams()
+        const rawHash = window.location.hash.startsWith('#')
+            ? window.location.hash.slice(1)
+            : window.location.hash
+        return new URLSearchParams(rawHash)
+    }
+
     useEffect(() => {
         if (passwordUpdated && !isPasswordSetupMode) {
             setRecoveryMessageType('success')
@@ -63,10 +71,24 @@ function LoginPageContent() {
             try {
                 const code = searchParams.get('code')
                 const tokenHash = searchParams.get('token_hash')
+                const hashParams = getAuthHashParams()
+                const accessToken = hashParams.get('access_token')
+                const refreshToken = hashParams.get('refresh_token')
+                const hashError = hashParams.get('error_description') || hashParams.get('error')
+
+                if (hashError) {
+                    throw new Error(hashError.replace(/\+/g, ' '))
+                }
 
                 if (code) {
                     const { error: codeError } = await supabase.auth.exchangeCodeForSession(code)
                     if (codeError) throw codeError
+                } else if (accessToken && refreshToken) {
+                    const { error: sessionError } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    })
+                    if (sessionError) throw sessionError
                 } else if (tokenHash && (modeType === 'invite' || modeType === 'recovery')) {
                     const { error: verifyError } = await supabase.auth.verifyOtp({
                         token_hash: tokenHash,

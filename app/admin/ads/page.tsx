@@ -108,7 +108,7 @@ export default function AdsPage() {
     const [syncing, setSyncing] = useState(false)
     const [analyzing, setAnalyzing] = useState(false)
     const [filter, setFilter] = useState<'all' | 'active' | 'paused'>('all')
-    const [datePreset, setDatePreset] = useState('today')
+    const [datePreset, setDatePreset] = useState('maximum')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -668,6 +668,7 @@ export default function AdsPage() {
                             {filteredCampaigns.map(camp => {
                                 const st = STATUS_MAP[camp.status] || STATUS_MAP.draft
                                 const m = camp.latest_metrics
+                                const periodSpend = m?.spend || 0
                                 return (
                                     <Link key={camp.id} href={`/admin/ads/${camp.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                         <div className="ads-campaign-card">
@@ -701,8 +702,11 @@ export default function AdsPage() {
                                                     )}
                                                 </div>
                                                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'Playfair Display, serif' }}>
-                                                        {formatCurrency(camp.total_budget)}
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                                        Gasto
+                                                    </div>
+                                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: periodSpend > 0 ? 'var(--gold)' : 'var(--text-muted)', fontFamily: 'Playfair Display, serif' }}>
+                                                        {formatCurrency(periodSpend)}
                                                     </div>
                                                     <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
                                                 </div>
