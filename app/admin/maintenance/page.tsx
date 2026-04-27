@@ -1111,6 +1111,9 @@ export default function MaintenancePage() {
                         <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'grid', gap: '8px' }}>
                             <div>Ultima conclusao: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_run_at'])}</b></div>
                             <div>Ultimo inicio: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_started_at'])}</b></div>
+                            {configs['ads_sync_last_error'] && (
+                                <div style={{ color: '#ef4444' }}>Ultimo erro: <b>{configs['ads_sync_last_error']}</b></div>
+                            )}
                             <button
                                 type="button"
                                 className="btn btn-sm btn-secondary"

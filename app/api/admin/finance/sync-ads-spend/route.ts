@@ -79,11 +79,21 @@ export async function POST(request: Request) {
         await Promise.all([
             saveAppConfig(admin, 'ads_sync_last_run_at', now),
             saveAppConfig(admin, 'ads_sync_last_started_at', now),
+            saveAppConfig(admin, 'ads_sync_last_error', ''),
         ])
 
         return NextResponse.json({ success: true, ...result })
     } catch (err: any) {
         console.error('[finance/sync-ads-spend]', err)
+        try {
+            const admin = createAdminClient()
+            await Promise.all([
+                saveAppConfig(admin, 'ads_sync_last_error_at', new Date().toISOString()),
+                saveAppConfig(admin, 'ads_sync_last_error', String(err?.message || 'Erro ao sincronizar gastos de trafego pago').slice(0, 500)),
+            ])
+        } catch (configError) {
+            console.error('[finance/sync-ads-spend] failed to save sync error', configError)
+        }
         return NextResponse.json(
             { success: false, error: err?.message || 'Erro ao sincronizar gastos de trafego pago' },
             { status: 500 }

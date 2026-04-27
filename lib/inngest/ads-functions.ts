@@ -74,6 +74,15 @@ async function markAdsSyncCompleted(supabase: ReturnType<typeof getSupabase>) {
     await Promise.all([
         saveAppConfig(supabase, 'ads_sync_last_run_at', now),
         saveAppConfig(supabase, 'ads_sync_last_started_at', now),
+        saveAppConfig(supabase, 'ads_sync_last_error', ''),
+    ])
+}
+
+async function markAdsSyncFailed(supabase: ReturnType<typeof getSupabase>, error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || 'Erro desconhecido')
+    await Promise.all([
+        saveAppConfig(supabase, 'ads_sync_last_error_at', new Date().toISOString()),
+        saveAppConfig(supabase, 'ads_sync_last_error', message.slice(0, 500)),
     ])
 }
 
@@ -222,9 +231,12 @@ export const pollMetricsCron = inngest.createFunction(
         }
 
         const results = []
+        const pollErrors: { campaign_id: string; campaign_name: string; error: string }[] = []
 
         for (const campaign of campaigns) {
-            const metricsResult = await step.run(`poll-${campaign.id}`, async () => {
+            let metricsResult = null
+            try {
+                metricsResult = await step.run(`poll-${campaign.id}`, async () => {
                 let snapshotData
 
                 if (campaign.platform === 'meta' && campaign.external_campaign_id) {
@@ -257,7 +269,15 @@ export const pollMetricsCron = inngest.createFunction(
                 }
 
                 return snapshotData || null
-            })
+                })
+            } catch (err: any) {
+                pollErrors.push({
+                    campaign_id: campaign.id,
+                    campaign_name: campaign.name,
+                    error: err?.message || 'Erro ao buscar metricas da campanha',
+                })
+                continue
+            }
 
             if (metricsResult) {
                 results.push({ campaign_id: campaign.id, metrics: metricsResult })
@@ -295,9 +315,17 @@ export const pollMetricsCron = inngest.createFunction(
             })
         }
 
-        const financeSync = await step.run('sync-paid-ads-spend-to-finance', async () => {
-            return syncPaidAdsSpendToFinance(supabase)
-        })
+        let financeSync
+        try {
+            financeSync = await step.run('sync-paid-ads-spend-to-finance', async () => {
+                return syncPaidAdsSpendToFinance(supabase)
+            })
+        } catch (error) {
+            await step.run('mark-ads-sync-failed-finance', async () => {
+                await markAdsSyncFailed(supabase, error)
+            })
+            throw error
+        }
 
         await step.run('mark-ads-sync-completed', async () => {
             await markAdsSyncCompleted(supabase)
@@ -305,6 +333,7 @@ export const pollMetricsCron = inngest.createFunction(
 
         return {
             campaigns_polled: results.length,
+            campaign_poll_errors: pollErrors,
             analysis_triggered: shouldTriggerAIAnalysis,
             finance_sync: financeSync,
             sync_interval_minutes: schedule.intervalMinutes,
