@@ -174,6 +174,22 @@ function LoginPageContent() {
                 return
             }
 
+            await fetch('/api/admin/user-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_type: modeType === 'invite' || searchParams.get('first_access') === '1'
+                        ? 'first_access_password_set'
+                        : 'password_reset_completed',
+                    path: '/login',
+                    referrer: document.referrer,
+                    search_params: window.location.search,
+                    metadata: {
+                        flow: modeType || (searchParams.get('first_access') === '1' ? 'first_access' : 'password_reset'),
+                    },
+                }),
+            }).catch(() => {})
+
             setPasswordFlowMessage('Senha definida com sucesso. Redirecionando para o login...')
             setTimeout(() => {
                 supabase.auth.signOut().finally(() => {

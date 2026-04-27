@@ -8,6 +8,15 @@ const ACCESS_EVENT_TYPES = new Set([
     'logout',
     'page_view',
     'session_ping',
+    'password_recovery_requested',
+    'password_recovery_matched',
+    'password_recovery_not_found',
+    'password_recovery_link_sent',
+    'password_recovery_link_failed',
+    'password_reset_link_sent',
+    'first_access_link_sent',
+    'password_reset_completed',
+    'first_access_password_set',
 ])
 
 function cleanText(value: unknown, maxLength = 500) {
@@ -132,6 +141,23 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query
         if (error) throw error
 
+        const [latestResponse, usersResponse] = await Promise.all([
+            admin
+                .from('user_access_logs')
+                .select('admin_user_id, created_at')
+                .not('admin_user_id', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(5000),
+            admin
+                .from('admin_users')
+                .select('id, name, email, is_active')
+                .eq('is_active', true)
+                .order('name'),
+        ])
+
+        if (latestResponse.error) throw latestResponse.error
+        if (usersResponse.error) throw usersResponse.error
+
         const filtered = (data || []).filter((row: any) => {
             if (!q) return true
             const adminUser = normalizeAdminUser(row)
@@ -176,6 +202,35 @@ export async function GET(request: NextRequest) {
             admin_users: undefined,
         }))
 
+        const latestAccessByUser = new Map<string, string>()
+        for (const row of latestResponse.data || []) {
+            if (!row.admin_user_id || latestAccessByUser.has(row.admin_user_id)) continue
+            latestAccessByUser.set(row.admin_user_id, row.created_at)
+        }
+
+        const nowMs = Date.now()
+        const usersAccessSummary = (usersResponse.data || [])
+            .map((userRow: any) => {
+                const lastAccessAt = latestAccessByUser.get(userRow.id) || null
+                const daysSinceLastAccess = lastAccessAt
+                    ? Math.floor((nowMs - new Date(lastAccessAt).getTime()) / 86400000)
+                    : null
+
+                return {
+                    id: userRow.id,
+                    name: userRow.name,
+                    email: userRow.email,
+                    last_access_at: lastAccessAt,
+                    days_since_last_access: daysSinceLastAccess,
+                    never_accessed: !lastAccessAt,
+                }
+            })
+            .sort((a: any, b: any) => {
+                if (a.never_accessed && !b.never_accessed) return -1
+                if (!a.never_accessed && b.never_accessed) return 1
+                return (b.days_since_last_access ?? -1) - (a.days_since_last_access ?? -1)
+            })
+
         const stats = {
             total_events: filtered.length,
             unique_users: userMap.size,
@@ -184,6 +239,17 @@ export async function GET(request: NextRequest) {
             login_failed: filtered.filter((row: any) => row.event_type === 'login_failed').length,
             page_views: filtered.filter((row: any) => row.event_type === 'page_view').length,
             logout: filtered.filter((row: any) => row.event_type === 'logout').length,
+            password_recovery_requested: filtered.filter((row: any) => row.event_type === 'password_recovery_requested').length,
+            password_recovery_link_sent: filtered.filter((row: any) =>
+                row.event_type === 'password_recovery_link_sent' || row.event_type === 'password_reset_link_sent'
+            ).length,
+            password_reset_completed: filtered.filter((row: any) =>
+                row.event_type === 'password_reset_completed' || row.event_type === 'first_access_password_set'
+            ).length,
+            inactive_7_days: usersAccessSummary.filter((user: any) =>
+                user.never_accessed || (user.days_since_last_access ?? 0) >= 7
+            ).length,
+            users_access_summary: usersAccessSummary.slice(0, 20),
             top_users: [...topUsers.values()]
                 .sort((a, b) => b.events - a.events)
                 .slice(0, 8),

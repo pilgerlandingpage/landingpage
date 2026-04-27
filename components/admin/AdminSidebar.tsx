@@ -138,7 +138,7 @@ const ACCESS_AUDIT_ITEM: NavItem = {
     href: '/admin/user-access',
     icon: ShieldAlert,
     label: 'Auditoria de Acessos',
-    section: 'SISTEMA',
+    section: 'CONFIGURACOES',
 }
 
 const SECTION_ORDER = ['PRINCIPAL', 'FINANCEIRO', 'MARKETING', 'SISTEMA', 'CONFIGURACOES']
@@ -264,15 +264,6 @@ export default function AdminSidebar() {
             sections[nav.section].push({ href: nav.href, icon: nav.icon, label: nav.label, subItems: nav.subItems })
         }
 
-        if (isMaster || isDiretoria) {
-            if (!sections[ACCESS_AUDIT_ITEM.section]) sections[ACCESS_AUDIT_ITEM.section] = []
-            sections[ACCESS_AUDIT_ITEM.section].push({
-                href: ACCESS_AUDIT_ITEM.href,
-                icon: ACCESS_AUDIT_ITEM.icon,
-                label: ACCESS_AUDIT_ITEM.label,
-            })
-        }
-
         if (canManageSectors || canManageUsers) {
             sections.CONFIGURACOES = []
             if (canManageSectors) {
@@ -281,6 +272,19 @@ export default function AdminSidebar() {
             if (canManageUsers) {
                 sections.CONFIGURACOES.push({ href: '/admin/settings/users', icon: UserCog, label: 'Usuarios' })
             }
+            if (isMaster || isDiretoria) {
+                sections.CONFIGURACOES.push({
+                    href: ACCESS_AUDIT_ITEM.href,
+                    icon: ACCESS_AUDIT_ITEM.icon,
+                    label: ACCESS_AUDIT_ITEM.label,
+                })
+            }
+        } else if (isMaster || isDiretoria) {
+            sections.CONFIGURACOES = [{
+                href: ACCESS_AUDIT_ITEM.href,
+                icon: ACCESS_AUDIT_ITEM.icon,
+                label: ACCESS_AUDIT_ITEM.label,
+            }]
         }
 
         return SECTION_ORDER

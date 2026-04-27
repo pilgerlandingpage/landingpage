@@ -6,13 +6,16 @@ import {
     Clock,
     Eye,
     Globe2,
+    KeyRound,
     LogIn,
     LogOut,
+    MailCheck,
     MonitorSmartphone,
     RefreshCw,
     Search,
     ShieldAlert,
     Users,
+    UserX,
     XCircle,
 } from 'lucide-react'
 
@@ -46,6 +49,18 @@ type AccessStats = {
     login_failed: number
     page_views: number
     logout: number
+    password_recovery_requested: number
+    password_recovery_link_sent: number
+    password_reset_completed: number
+    inactive_7_days: number
+    users_access_summary: {
+        id: string
+        name: string
+        email: string
+        last_access_at: string | null
+        days_since_last_access: number | null
+        never_accessed: boolean
+    }[]
     top_users: {
         id: string | null
         name: string
@@ -61,6 +76,12 @@ const EVENT_OPTIONS = [
     { value: 'login_failed', label: 'Falha' },
     { value: 'page_view', label: 'Pagina' },
     { value: 'logout', label: 'Saida' },
+    { value: 'password_recovery_requested', label: 'Recuperacao' },
+    { value: 'password_recovery_link_sent', label: 'Link enviado' },
+    { value: 'password_reset_link_sent', label: 'Link redefinicao' },
+    { value: 'first_access_link_sent', label: 'Link primeiro acesso' },
+    { value: 'password_reset_completed', label: 'Senha redefinida' },
+    { value: 'first_access_password_set', label: 'Primeiro acesso' },
 ]
 
 const EVENT_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -69,6 +90,15 @@ const EVENT_CONFIG: Record<string, { label: string; color: string; icon: any }> 
     page_view: { label: 'Pagina', color: '#60a5fa', icon: Eye },
     logout: { label: 'Saida', color: '#f59e0b', icon: LogOut },
     session_ping: { label: 'Sessao', color: '#a78bfa', icon: Activity },
+    password_recovery_requested: { label: 'Recuperacao', color: '#38bdf8', icon: KeyRound },
+    password_recovery_matched: { label: 'Dados confirmados', color: '#22c55e', icon: KeyRound },
+    password_recovery_not_found: { label: 'Recuperacao negada', color: '#ef4444', icon: XCircle },
+    password_recovery_link_sent: { label: 'Link recuperacao', color: '#22c55e', icon: MailCheck },
+    password_recovery_link_failed: { label: 'Falha no link', color: '#ef4444', icon: XCircle },
+    password_reset_link_sent: { label: 'Link redefinicao', color: '#22c55e', icon: MailCheck },
+    first_access_link_sent: { label: 'Link primeiro acesso', color: '#a78bfa', icon: MailCheck },
+    password_reset_completed: { label: 'Senha redefinida', color: '#22c55e', icon: KeyRound },
+    first_access_password_set: { label: 'Primeiro acesso', color: '#22c55e', icon: KeyRound },
 }
 
 function formatDate(value?: string | null) {
@@ -133,6 +163,8 @@ export default function UserAccessPage() {
         { label: 'Usuarios', value: stats?.unique_users || 0, icon: Users, color: '#22c55e' },
         { label: 'IPs', value: stats?.unique_ips || 0, icon: Globe2, color: '#f59e0b' },
         { label: 'Falhas', value: stats?.login_failed || 0, icon: ShieldAlert, color: '#ef4444' },
+        { label: 'Recuperacoes', value: stats?.password_recovery_requested || 0, icon: KeyRound, color: '#38bdf8' },
+        { label: 'Inativos 7d', value: stats?.inactive_7_days || 0, icon: UserX, color: '#f97316' },
     ]), [stats])
 
     return (
@@ -157,7 +189,7 @@ export default function UserAccessPage() {
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
                 {statCards.map(card => (
                     <div key={card.label} className="chart-card" style={{ padding: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -243,7 +275,7 @@ export default function UserAccessPage() {
             {stats?.top_users && stats.top_users.length > 0 && (
                 <div className="chart-card" style={{ marginBottom: 16, padding: 16 }}>
                     <div className="chart-title" style={{ marginBottom: 12 }}>Usuarios mais ativos</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                         {stats.top_users.slice(0, 4).map(user => (
                             <div key={user.id || user.email || user.name} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
                                 <div style={{ fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -255,6 +287,32 @@ export default function UserAccessPage() {
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, fontSize: '0.8rem' }}>
                                     <span style={{ color: 'var(--gold)', fontWeight: 800 }}>{user.events} eventos</span>
                                     <Clock size={14} style={{ color: 'var(--text-muted)' }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {stats?.users_access_summary && stats.users_access_summary.length > 0 && (
+                <div className="chart-card" style={{ marginBottom: 16, padding: 16 }}>
+                    <div className="chart-title" style={{ marginBottom: 12 }}>Dias sem acessar</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+                        {stats.users_access_summary.slice(0, 8).map(user => (
+                            <div key={user.id} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                                <div style={{ fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {user.name}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 4 }}>
+                                    {user.email || '-'}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, fontSize: '0.8rem' }}>
+                                    <span style={{ color: user.never_accessed || (user.days_since_last_access ?? 0) >= 7 ? '#f97316' : '#22c55e', fontWeight: 800 }}>
+                                        {user.never_accessed ? 'Nunca acessou' : `${user.days_since_last_access} dias`}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                                        {user.last_access_at ? formatDate(user.last_access_at) : '-'}
+                                    </span>
                                 </div>
                             </div>
                         ))}

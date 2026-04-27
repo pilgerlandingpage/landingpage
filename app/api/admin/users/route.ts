@@ -6,6 +6,7 @@ import {
     buildFirstAccessWhatsAppMessage,
     buildPasswordResetWhatsAppMessage,
 } from '@/lib/user-whatsapp-messages'
+import { extractTrackingData } from '@/lib/tracking'
 
 const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_users',
@@ -143,6 +144,48 @@ function getFirstAccessRedirectUrl(request: NextRequest) {
 
 function getPasswordResetRedirectUrl(request: NextRequest) {
     return getLoginRedirectUrl('/login?password_reset=1', request.nextUrl.origin)
+}
+
+function auditTrackingPayload(request: NextRequest) {
+    const tracking = extractTrackingData(request.headers, new URLSearchParams(), request.headers.get('referer') || undefined)
+    return {
+        ip_address: tracking.ip_address,
+        user_agent: tracking.user_agent,
+        device_type: tracking.device_type,
+        browser: tracking.browser,
+        os: tracking.os,
+        country: tracking.country,
+        city: tracking.city,
+        region: tracking.region,
+        referrer: tracking.referrer,
+    }
+}
+
+async function logUserAccessEvent(admin: any, request: NextRequest, params: {
+    event_type: string
+    target_admin_user_id?: string | null
+    target_auth_user_id?: string | null
+    target_email?: string | null
+    actor_admin_user_id?: string | null
+    metadata?: Record<string, any>
+}) {
+    try {
+        await admin.from('user_access_logs').insert({
+            admin_user_id: params.target_admin_user_id || null,
+            auth_user_id: params.target_auth_user_id || null,
+            event_type: params.event_type,
+            attempted_email: params.target_email || null,
+            path: request.nextUrl.pathname,
+            method: request.method,
+            ...auditTrackingPayload(request),
+            metadata: {
+                ...(params.metadata || {}),
+                actor_admin_user_id: params.actor_admin_user_id || null,
+            },
+        })
+    } catch (auditErr) {
+        console.error('[users] audit log failed:', auditErr)
+    }
 }
 
 async function resolveGlobalAgentInstanceToken(admin: any) {
@@ -442,6 +485,18 @@ export async function POST(request: NextRequest) {
             inviteWarning = 'Usuario criado, mas houve falha ao enviar o link de primeiro acesso no WhatsApp.'
         }
 
+        await logUserAccessEvent(admin, request, {
+            event_type: 'first_access_link_sent',
+            target_admin_user_id: adminUser.id,
+            target_auth_user_id: authUserId,
+            target_email: normalizedEmail,
+            actor_admin_user_id: access.id,
+            metadata: {
+                whatsapp_sent: whatsappInviteSent,
+                has_warning: Boolean(inviteWarning),
+            },
+        })
+
         return NextResponse.json(
             {
                 message: whatsappInviteSent
@@ -596,7 +651,7 @@ export async function PATCH(request: NextRequest) {
         const admin = createAdminClient()
         const { data: targetUser, error: targetUserError } = await admin
             .from('admin_users')
-            .select('id, name, email, phone, is_master')
+            .select('id, auth_user_id, name, email, phone, is_master')
             .eq('id', id)
             .single()
 
@@ -651,6 +706,18 @@ export async function PATCH(request: NextRequest) {
             console.error('[users][PATCH] password reset whatsapp failed:', sendError)
             resetWarning = 'Link gerado, mas houve falha ao enviar no WhatsApp.'
         }
+
+        await logUserAccessEvent(admin, request, {
+            event_type: 'password_reset_link_sent',
+            target_admin_user_id: targetUser.id,
+            target_auth_user_id: targetUser.auth_user_id,
+            target_email: normalizedEmail,
+            actor_admin_user_id: access.id,
+            metadata: {
+                whatsapp_sent: whatsappResetSent,
+                has_warning: Boolean(resetWarning),
+            },
+        })
 
         return NextResponse.json({
             success: true,

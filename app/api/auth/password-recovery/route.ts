@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
 import { getLoginRedirectUrl } from '@/lib/app-url'
 import { buildPasswordResetWhatsAppMessage } from '@/lib/user-whatsapp-messages'
+import { extractTrackingData } from '@/lib/tracking'
 
 const MATCHED_RECOVERY_MESSAGE =
     'Dados confirmados. Verifique seu WhatsApp ou seu email para continuar a recuperacao.'
@@ -11,6 +12,45 @@ const NOT_FOUND_RECOVERY_MESSAGE =
 
 function getPasswordResetRedirectUrl(request: NextRequest) {
     return getLoginRedirectUrl('/login?password_reset=1', request.nextUrl.origin)
+}
+
+function trackingPayload(request: NextRequest) {
+    const tracking = extractTrackingData(request.headers, new URLSearchParams(), request.headers.get('referer') || undefined)
+
+    return {
+        ip_address: tracking.ip_address,
+        user_agent: tracking.user_agent,
+        device_type: tracking.device_type,
+        browser: tracking.browser,
+        os: tracking.os,
+        country: tracking.country,
+        city: tracking.city,
+        region: tracking.region,
+        referrer: tracking.referrer,
+    }
+}
+
+async function logPasswordRecoveryEvent(admin: any, request: NextRequest, params: {
+    event_type: string
+    attempted_email?: string
+    admin_user_id?: string | null
+    auth_user_id?: string | null
+    metadata?: Record<string, any>
+}) {
+    try {
+        await admin.from('user_access_logs').insert({
+            admin_user_id: params.admin_user_id || null,
+            auth_user_id: params.auth_user_id || null,
+            event_type: params.event_type,
+            attempted_email: params.attempted_email || null,
+            path: '/login',
+            method: request.method,
+            ...trackingPayload(request),
+            metadata: params.metadata || {},
+        })
+    } catch (auditErr) {
+        console.error('[password-recovery] audit log failed:', auditErr)
+    }
 }
 
 async function resolveGlobalAgentInstanceToken(admin: any) {
@@ -112,9 +152,18 @@ export async function POST(request: NextRequest) {
         }
 
         const admin = createAdminClient()
+
+        await logPasswordRecoveryEvent(admin, request, {
+            event_type: 'password_recovery_requested',
+            attempted_email: normalizedEmail,
+            metadata: {
+                phone_last4: onlyDigits(normalizedPhone).slice(-4) || null,
+            },
+        })
+
         const { data: adminUsers, error: adminUserError } = await admin
             .from('admin_users')
-            .select('id, name, email, phone, is_master, is_active')
+            .select('id, auth_user_id, name, email, phone, is_master, is_active')
             .eq('email', normalizedEmail)
             .order('is_master', { ascending: false })
             .order('updated_at', { ascending: false })
@@ -131,7 +180,7 @@ export async function POST(request: NextRequest) {
         if (!adminUser) {
             const { data: phoneUsers, error: phoneUsersError } = await admin
                 .from('admin_users')
-                .select('id, name, email, phone, is_master, is_active')
+                .select('id, auth_user_id, name, email, phone, is_master, is_active')
                 .eq('is_active', true)
                 .not('phone', 'is', null)
                 .order('is_master', { ascending: false })
@@ -151,8 +200,25 @@ export async function POST(request: NextRequest) {
 
         // Nao expor qual campo falhou.
         if (!adminUser) {
+            await logPasswordRecoveryEvent(admin, request, {
+                event_type: 'password_recovery_not_found',
+                attempted_email: normalizedEmail,
+                metadata: {
+                    phone_last4: onlyDigits(normalizedPhone).slice(-4) || null,
+                },
+            })
             return NextResponse.json({ success: false, message: NOT_FOUND_RECOVERY_MESSAGE })
         }
+
+        await logPasswordRecoveryEvent(admin, request, {
+            event_type: 'password_recovery_matched',
+            attempted_email: normalizedEmail,
+            admin_user_id: adminUser.id,
+            auth_user_id: adminUser.auth_user_id,
+            metadata: {
+                phone_last4: onlyDigits(normalizedPhone).slice(-4) || null,
+            },
+        })
 
         const resetRedirectUrl = getPasswordResetRedirectUrl(request)
         const targetEmail = String(adminUser.email || normalizedEmail).trim().toLowerCase()
@@ -215,11 +281,32 @@ export async function POST(request: NextRequest) {
         }
 
         if (!whatsappSent && !emailSent) {
+            await logPasswordRecoveryEvent(admin, request, {
+                event_type: 'password_recovery_link_failed',
+                attempted_email: targetEmail,
+                admin_user_id: adminUser.id,
+                auth_user_id: adminUser.auth_user_id,
+                metadata: {
+                    whatsapp_sent: whatsappSent,
+                    email_sent: emailSent,
+                },
+            })
             return NextResponse.json(
                 { error: 'Dados confirmados, mas nao foi possivel enviar o link agora. Tente novamente em instantes.' },
                 { status: 500 }
             )
         }
+
+        await logPasswordRecoveryEvent(admin, request, {
+            event_type: 'password_recovery_link_sent',
+            attempted_email: targetEmail,
+            admin_user_id: adminUser.id,
+            auth_user_id: adminUser.auth_user_id,
+            metadata: {
+                whatsapp_sent: whatsappSent,
+                email_sent: emailSent,
+            },
+        })
 
         return NextResponse.json({ success: true, message: MATCHED_RECOVERY_MESSAGE })
     } catch (err: any) {

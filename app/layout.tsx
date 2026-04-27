@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import MainTracker from '@/components/tracking/MainTracker'
 import WhatsAppLeadCaptureModal from '@/components/landing/WhatsAppLeadCaptureModal'
+import UserAccessTracker from '@/components/admin/UserAccessTracker'
 
 export const metadata: Metadata = {
   title: 'Pilger Imóveis de Luxo',
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <MainTracker />
+        <UserAccessTracker />
         <WhatsAppLeadCaptureModal />
         {children}
       </body>
