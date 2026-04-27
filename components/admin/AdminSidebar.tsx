@@ -251,6 +251,7 @@ export default function AdminSidebar() {
         )
         const canManageSectors = isMaster || SETTINGS_SECTORS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
         const canManageUsers = isMaster || SETTINGS_USERS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
+        const canSeeAccessAudit = isMaster || isDiretoria || allowedModules.includes('user_access')
 
         const canSeeGeneralDashboard = isMaster || allowedModules.includes('dashboard')
         if (canSeeGeneralDashboard) {
@@ -277,14 +278,14 @@ export default function AdminSidebar() {
             if (canManageUsers) {
                 sections.CONFIGURACOES.push({ href: '/admin/settings/users', icon: UserCog, label: 'Usuarios' })
             }
-            if (isMaster || isDiretoria) {
+            if (canSeeAccessAudit) {
                 sections.CONFIGURACOES.push({
                     href: ACCESS_AUDIT_ITEM.href,
                     icon: ACCESS_AUDIT_ITEM.icon,
                     label: ACCESS_AUDIT_ITEM.label,
                 })
             }
-        } else if (isMaster || isDiretoria) {
+        } else if (canSeeAccessAudit) {
             sections.CONFIGURACOES = [{
                 href: ACCESS_AUDIT_ITEM.href,
                 icon: ACCESS_AUDIT_ITEM.icon,

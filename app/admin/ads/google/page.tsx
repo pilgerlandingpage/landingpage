@@ -440,13 +440,13 @@ export default function AdsPage() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+            <div className="ads-top-cards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                 <AdsCountdown noMargin />
                 <LeadClock recentLeads={internalStats.recentLeads} />
             </div>
 
             {/* KPI Cards */}
-            <div className="kpi-grid" style={{ 
+            <div className="kpi-grid ads-kpi-grid" style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', 
                 gap: '12px', 

@@ -2,6 +2,25 @@
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 
 const DEFAULT_PERMISSION_CATEGORY = 'principal'
+const ADMIN_MENU_PERMISSIONS = [
+    { module_key: 'dashboard', label: 'Dashboards', description: 'Acessar Dashboard Geral e Dashboard Marketing', category: 'principal' },
+    { module_key: 'funnel', label: 'Funil de Conversao', description: 'Acessar funil de conversao dos leads', category: 'marketing' },
+    { module_key: 'finance', label: 'Financeiro', description: 'Acessar gestao financeira da empresa', category: 'financeiro' },
+    { module_key: 'leads', label: 'Leads', description: 'Acessar leads e CRM do agente', category: 'marketing' },
+    { module_key: 'landing_pages', label: 'Landing Pages', description: 'Gerenciar landing pages', category: 'marketing' },
+    { module_key: 'properties', label: 'Imoveis', description: 'Gerenciar catalogo de imoveis', category: 'marketing' },
+    { module_key: 'brokers', label: 'Corretores IA', description: 'Gerenciar corretores IA', category: 'automacao' },
+    { module_key: 'automation', label: 'Automacoes', description: 'Acessar automacoes do sistema', category: 'automacao' },
+    { module_key: 'push', label: 'Notificacoes', description: 'Gerenciar notificacoes push', category: 'automacao' },
+    { module_key: 'ads', label: 'Trafego IA', description: 'Acessar Meta Ads, Google Ads e diagnosticos de IA', category: 'marketing' },
+    { module_key: 'radar', label: 'Radar de Mercado', description: 'Acessar radar de mercado', category: 'marketing' },
+    { module_key: 'whatsapp', label: 'WhatsApp Web', description: 'Gerenciar WhatsApp Web, campanhas, agenda e etiquetas', category: 'comunicacao' },
+    { module_key: 'feedback', label: 'Feedback', description: 'Acessar feedbacks do sistema', category: 'sistema' },
+    { module_key: 'maintenance', label: 'Sala de Manutencao', description: 'Acessar sala de manutencao e diagnosticos tecnicos', category: 'sistema' },
+    { module_key: 'settings_sectors', label: 'Setores', description: 'Gerenciar setores e suas permissoes de acesso', category: 'sistema' },
+    { module_key: 'settings_users', label: 'Usuarios', description: 'Gerenciar usuarios administrativos e vinculacao de setores', category: 'sistema' },
+    { module_key: 'user_access', label: 'Auditoria de Acessos', description: 'Acessar monitoramento de logins, navegacao, IP e dispositivos', category: 'sistema' },
+]
 const SECTORS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_sectors',
     'gestao_de_setores',
@@ -17,6 +36,13 @@ function normalizeModuleKey(input: string) {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_+|_+$/g, '')
+}
+
+async function ensureAdminMenuPermissions(admin: any) {
+    await admin.from('admin_permissions').upsert(
+        ADMIN_MENU_PERMISSIONS,
+        { onConflict: 'module_key' }
+    )
 }
 
 async function verifyPermissionTagManagerAccess() {
@@ -66,6 +92,7 @@ export async function GET() {
         }
 
         const admin = createAdminClient()
+        await ensureAdminMenuPermissions(admin)
 
         // Buscar admin_user
         const { data: adminUser } = await admin
