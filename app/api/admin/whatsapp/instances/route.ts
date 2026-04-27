@@ -25,6 +25,14 @@ function normalizeInstanceStatus(result: any): 'disconnected' | 'connecting' | '
     return 'disconnected'
 }
 
+function normalizeWhatsAppAddress(raw: unknown): string {
+    const text = String(raw || '').trim()
+    if (!text) return ''
+    const beforeAt = text.split('@')[0] || ''
+    const beforeDevice = beforeAt.split(':')[0] || ''
+    return beforeDevice.replace(/\D/g, '')
+}
+
 function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
     const raw =
         result?.instance?.phone ||
@@ -38,13 +46,13 @@ function extractPhoneFromStatus(result: any, fallback?: string | null): string |
         null
 
     if (!raw) return null
-    const digits = String(raw).replace(/\D/g, '')
+    const digits = normalizeWhatsAppAddress(raw)
     return digits || null
 }
 
 function extractPhoneLoose(raw: any): string | null {
     if (!raw) return null
-    const digits = String(raw).replace(/\D/g, '')
+    const digits = normalizeWhatsAppAddress(raw)
     return digits || null
 }
 

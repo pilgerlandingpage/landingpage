@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, Shield, CheckCircle, AlertCircle,
-    Loader2, Save, X, Edit3, Lock, User, Power, Crown, Search,
+    Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
     Smartphone, Wifi, WifiOff, QrCode, Bot, Clock, Brain, RefreshCw, MessageSquare
 } from 'lucide-react'
 
@@ -30,6 +30,7 @@ export default function UsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([])
     const [sectors, setSectors] = useState<Sector[]>([])
     const [canGrantMaster, setCanGrantMaster] = useState(false)
+    const [canCreateUsers, setCanCreateUsers] = useState(false)
     const [loading, setLoading] = useState(true)
     const [creating, setCreating] = useState(false)
     const [editing, setEditing] = useState<string | null>(null)
@@ -41,15 +42,16 @@ export default function UsersPage() {
     const [userWhatsappQR, setUserWhatsappQR] = useState<string | null>(null)
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
     const [userWhatsappConnecting, setUserWhatsappConnecting] = useState(false)
+    const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
 
     const [form, setForm] = useState({
-        name: '', email: '', password: '', phone: '',
+        name: '', email: '', phone: '',
         is_master: false, sector_ids: [] as string[],
         shadow_agent_prompt: '',
         shadow_agent_enabled: false,
         available_from: '08:00',
         available_until: '20:00',
-        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
+        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
     })
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -58,17 +60,23 @@ export default function UsersPage() {
 
     const fetchData = async () => {
         try {
-            const [usersRes, sectorsRes, permissionsRes] = await Promise.all([
-                fetch('/api/admin/users'),
-                fetch('/api/admin/sectors'),
+            const [usersRes, permissionsRes] = await Promise.all([
+                fetch('/api/admin/users?include_sectors=1'),
                 fetch('/api/admin/permissions')
             ])
             const usersData = await usersRes.json()
-            const sectorsData = await sectorsRes.json()
             const permissionsData = permissionsRes.ok ? await permissionsRes.json() : {}
-            setUsers(Array.isArray(usersData) ? usersData : [])
-            setSectors(sectorsData.sectors || [])
-            setCanGrantMaster(Boolean(permissionsData?.is_master))
+            const isMaster = Boolean(permissionsData?.is_master)
+            if (Array.isArray(usersData)) {
+                setUsers(usersData)
+                setSectors([])
+                setCanCreateUsers(isMaster)
+            } else {
+                setUsers(Array.isArray(usersData?.users) ? usersData.users : [])
+                setSectors(Array.isArray(usersData?.sectors) ? usersData.sectors : [])
+                setCanCreateUsers(isMaster || Boolean(usersData?.access?.can_create_users))
+            }
+            setCanGrantMaster(isMaster)
         } catch { showToast('Erro ao carregar dados', 'error') }
         finally { setLoading(false) }
     }
@@ -76,15 +84,19 @@ export default function UsersPage() {
     useEffect(() => { fetchData() }, [])
 
     const startCreate = () => {
+        if (!canCreateUsers) {
+            showToast('Somente Master e Diretoria podem cadastrar novos usuarios.', 'error')
+            return
+        }
         setCreating(true); setEditing(null)
-        setForm({ name: '', email: '', password: '', phone: '', is_master: false, sector_ids: [], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
+        setForm({ name: '', email: '', phone: '', is_master: false, sector_ids: [] as string[], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
         setUserWhatsapp(null); setUserWhatsappQR(null)
     }
 
     const startEdit = (u: AdminUser) => {
         setEditing(u.id); setCreating(false)
         setForm({
-            name: u.name, email: u.email, password: '', phone: u.phone || '',
+            name: u.name, email: u.email, phone: u.phone || '',
             is_master: canGrantMaster ? u.is_master : false, sector_ids: u.sectors.map(s => s.id),
             shadow_agent_prompt: u.shadow_agent_prompt || '',
             shadow_agent_enabled: u.shadow_agent_enabled || false,
@@ -117,21 +129,43 @@ export default function UsersPage() {
                 body: JSON.stringify({ instance_name: `user_${editing}_${Date.now()}`, admin_user_id: editing })
             })
             const data = await res.json()
+            if (!res.ok) throw new Error(data?.message || 'Falha ao gerar QR Code')
             if (data.qrcode) setUserWhatsappQR(data.qrcode)
-        } catch (err) { console.error(err) }
+            await loadUserWhatsApp(editing)
+            if (data?.brokerSyncWarning) {
+                showToast(data.brokerSyncWarning, 'error')
+            } else if (data?.brokerCreated) {
+                showToast('Corretor IA criado e vinculado automaticamente para este usuario.', 'success')
+            } else if (data?.brokerId) {
+                showToast('Corretor IA ja existente foi vinculado automaticamente a este usuario.', 'success')
+            }
+        } catch (err: any) {
+            console.error(err)
+            showToast(err?.message || 'Falha ao gerar QR Code.', 'error')
+        }
         finally { setUserWhatsappConnecting(false) }
     }
 
     async function checkUserWhatsAppStatus() {
         if (!userWhatsapp) return
         try {
-            const res = await fetch(`/api/admin/whatsapp/status?instance_name=${userWhatsapp.instance_name}`)
+            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${userWhatsapp.id}`)
             const data = await res.json()
+            if (!res.ok || data?.success === false) {
+                if (data?.blocked_phone_mismatch) {
+                    showToast(data?.message || 'WhatsApp bloqueado por divergencia com o telefone cadastrado.', 'error')
+                } else if (data?.message) {
+                    showToast(data.message, 'error')
+                }
+            }
             if (data.status) {
                 setUserWhatsapp(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
                 if (data.status === 'connected') setUserWhatsappQR(null)
             }
-        } catch {}
+            if (editing) await loadUserWhatsApp(editing)
+        } catch (err: any) {
+            showToast(err?.message || 'Falha ao verificar status do WhatsApp.', 'error')
+        }
     }
 
     const cancel = () => { setCreating(false); setEditing(null) }
@@ -146,17 +180,18 @@ export default function UsersPage() {
     }
 
     const handleSave = async () => {
-        if (creating && (!form.email || !form.password)) {
-            showToast('Email e senha sÃ£o obrigatÃ³rios', 'error'); return
+        if (creating && !canCreateUsers) {
+            showToast('Somente Master e Diretoria podem cadastrar novos usuarios.', 'error')
+            return
         }
-        if (creating && form.password.length < 6) {
-            showToast('Senha deve ter pelo menos 6 caracteres', 'error'); return
+        if (creating && (!form.email || !form.phone)) {
+            showToast('Email e telefone sao obrigatorios', 'error'); return
         }
         setSaving(true)
         try {
             const method = creating ? 'POST' : 'PUT'
             const body: any = creating
-                ? { name: form.name, email: form.email, password: form.password, phone: form.phone, is_master: canGrantMaster ? form.is_master : false, sector_ids: form.sector_ids }
+                ? { name: form.name, email: form.email, phone: form.phone, is_master: canGrantMaster ? form.is_master : false, sector_ids: form.sector_ids }
                 : {
                     id: editing,
                     name: form.name,
@@ -174,8 +209,18 @@ export default function UsersPage() {
                 method, headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             })
-            if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
-            showToast(creating ? 'UsuÃ¡rio criado!' : 'UsuÃ¡rio atualizado!', 'success')
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
+
+            const successMessage = data?.message || (creating ? 'Usuario criado!' : 'Usuario atualizado!')
+            if (creating && data?.invite_warning) {
+                const warningMessage = data?.first_access_link
+                    ? `${successMessage} Aviso: ${data.invite_warning} Link manual: ${data.first_access_link}`
+                    : `${successMessage} Aviso: ${data.invite_warning}`
+                showToast(warningMessage, 'error')
+            } else {
+                showToast(successMessage, 'success')
+            }
             cancel(); fetchData()
         } catch (err: any) { showToast(err.message, 'error') }
         finally { setSaving(false) }
@@ -188,9 +233,81 @@ export default function UsersPage() {
                 body: JSON.stringify({ id: u.id, is_active: !u.is_active })
             })
             if (!res.ok) throw new Error('Erro')
-            showToast(u.is_active ? 'UsuÃ¡rio desativado' : 'UsuÃ¡rio ativado', 'success')
+            showToast(u.is_active ? 'Usuario desativado' : 'Usuario ativado', 'success')
             fetchData()
         } catch (err: any) { showToast(err.message, 'error') }
+    }
+
+    const deleteUser = async (u: AdminUser) => {
+        if (!canGrantMaster) {
+            showToast('Somente Master pode excluir usuarios.', 'error')
+            return
+        }
+
+        const confirmed = window.confirm(
+            `Excluir o usuario "${u.name}"?\n\nEssa acao remove o cadastro e nao pode ser desfeita.`
+        )
+        if (!confirmed) return
+
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: u.id })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao excluir usuario')
+
+            if (data?.warning) {
+                showToast(`${data.message} ${data.warning}`, 'error')
+            } else {
+                showToast(data?.message || 'Usuario excluido com sucesso.', 'success')
+            }
+            fetchData()
+        } catch (err: any) {
+            showToast(err.message, 'error')
+        }
+    }
+
+    const sendPasswordResetLink = async (u: AdminUser) => {
+        if (!canCreateUsers) {
+            showToast('Somente Master e Diretoria podem enviar redefinicao de senha.', 'error')
+            return
+        }
+
+        if (!u.phone) {
+            showToast('Este usuario nao possui telefone para envio no WhatsApp.', 'error')
+            return
+        }
+
+        const confirmed = window.confirm(
+            `Enviar link de redefinicao de senha para "${u.name}" no WhatsApp?`
+        )
+        if (!confirmed) return
+
+        setSendingResetUserId(u.id)
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'send_password_reset', id: u.id })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao enviar redefinicao')
+
+            if (data?.reset_warning) {
+                const warningMessage = data?.reset_link
+                    ? `${data.message} Aviso: ${data.reset_warning} Link manual: ${data.reset_link}`
+                    : `${data.message} Aviso: ${data.reset_warning}`
+                showToast(warningMessage, 'error')
+            } else {
+                showToast(data?.message || 'Link de redefinicao enviado com sucesso.', 'success')
+            }
+        } catch (err: any) {
+            showToast(err.message, 'error')
+        } finally {
+            setSendingResetUserId(null)
+        }
     }
 
     const filtered = users.filter(u =>
@@ -212,22 +329,28 @@ export default function UsersPage() {
             <div className="admin-header">
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Users size={26} /> GestÃ£o de UsuÃ¡rios
+                        <Users size={26} /> Gestao de Usuarios
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                        Gerencie usuÃ¡rios, setores e permissÃµes de acesso
+                        Gerencie usuarios, setores e permissoes de acesso
                     </p>
                 </div>
-                <button className="btn btn-gold" onClick={startCreate} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <UserPlus size={18} /> Novo UsuÃ¡rio
-                </button>
+                {canCreateUsers ? (
+                    <button className="btn btn-gold" onClick={startCreate} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <UserPlus size={18} /> Novo Usuario
+                    </button>
+                ) : (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right', maxWidth: 280 }}>
+                        Somente Master e Diretoria podem cadastrar novos usuarios.
+                    </div>
+                )}
             </div>
 
             {/* Form */}
             {(creating || editing) && (
                 <div className="chart-card" style={{ marginBottom: 24, border: '2px solid var(--gold)' }}>
                     <div className="chart-title" style={{ marginBottom: 16 }}>
-                        {creating ? 'âœ¨ Novo UsuÃ¡rio' : 'âœï¸ Editar UsuÃ¡rio'}
+                        {creating ? 'Novo Usuario' : 'Editar Usuario'}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -254,7 +377,7 @@ export default function UsersPage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                         <div>
-                            <label className="rbac-label">Telefone</label>
+                            <label className="rbac-label">Telefone {creating && '*'}</label>
                             <div className="rbac-input-wrap">
                                 <Phone size={16} className="rbac-input-icon" />
                                 <input type="tel" value={form.phone}
@@ -262,18 +385,12 @@ export default function UsersPage() {
                                     placeholder="5547999999999" className="rbac-input" />
                             </div>
                         </div>
-                        {creating && (
-                            <div>
-                                <label className="rbac-label">Senha *</label>
-                                <div className="rbac-input-wrap">
-                                    <Lock size={16} className="rbac-input-icon" />
-                                    <input type="password" value={form.password}
-                                        onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                                        placeholder="MÃ­nimo 6 caracteres" className="rbac-input" />
-                                </div>
-                            </div>
-                        )}
                     </div>
+                    {creating && (
+                        <div style={{ marginTop: -8, marginBottom: 16, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                            A senha nao e definida neste cadastro. O novo usuario recebera no WhatsApp um link de primeiro acesso para criar a propria senha.
+                        </div>
+                    )}
 
                                         {/* Master toggle */}
                     {canGrantMaster ? (
@@ -302,7 +419,7 @@ export default function UsersPage() {
                             <label className="rbac-label">Setores ({form.sector_ids.length} selecionados)</label>
                             {sectors.length === 0 ? (
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                    Nenhum setor criado. Crie setores primeiro em ConfiguraÃ§Ãµes â†’ Setores.
+                                    Nenhum setor criado. Crie setores primeiro em Configuracoes para Setores.
                                 </p>
                             ) : (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -326,15 +443,18 @@ export default function UsersPage() {
                         </div>
                     )}
 
-                    {/* WhatsApp + Shadow Agent â€” only when editing */}
+                    {/* WhatsApp + Shadow Agent - only when editing */}
                     {editing && (
                         <>
                             {/* WhatsApp Connection */}
                             <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)', marginBottom: 16 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                                     <Smartphone size={16} style={{ color: '#22c55e' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ“± WhatsApp do Corretor</span>
+                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>WhatsApp do Corretor</span>
                                 </div>
+                                <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
+                                    Ao conectar o WhatsApp, o sistema cria e vincula automaticamente um Corretor IA para este usuario.
+                                </p>
 
                                 {userWhatsappLoading ? (
                                     <div style={{ textAlign: 'center', padding: '12px' }}>
@@ -343,8 +463,8 @@ export default function UsersPage() {
                                 ) : userWhatsapp?.status === 'connected' ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px' }}>
                                         <Wifi size={16} style={{ color: '#22c55e' }} />
-                                        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>âœ… Conectado</span>
-                                        {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> â€” {userWhatsapp.phone_number}</span>}
+                                        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>Conectado</span>
+                                        {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> - {userWhatsapp.phone_number}</span>}
                                         <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginLeft: 'auto', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <RefreshCw size={10} /> Verificar
                                         </button>
@@ -354,15 +474,15 @@ export default function UsersPage() {
                                         <div style={{ display: 'inline-block', padding: '12px', background: 'white', borderRadius: '10px', marginBottom: '8px' }}>
                                             <img src={userWhatsappQR} alt="QR" style={{ width: '200px', height: '200px' }} />
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Escaneie com WhatsApp â†’ Dispositivos conectados</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Escaneie com WhatsApp para Dispositivos conectados</div>
                                         <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginTop: '8px', padding: '6px 16px', borderRadius: '8px', fontSize: '0.8rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#22c55e', cursor: 'pointer' }}>
-                                            <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Verificar conexÃ£o
+                                            <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Verificar conexao
                                         </button>
                                     </div>
                                 ) : (
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px', color: '#888', fontSize: '0.85rem' }}>
-                                            <WifiOff size={14} /> NÃ£o conectado
+                                            <WifiOff size={14} /> Nao conectado
                                         </div>
                                         <button type="button" onClick={connectUserWhatsApp} disabled={userWhatsappConnecting}
                                             style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none', color: 'white', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: userWhatsappConnecting ? 0.6 : 1 }}>
@@ -377,10 +497,10 @@ export default function UsersPage() {
                             <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                     <Brain size={16} style={{ color: '#6366f1' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ¤– Agente Sombra</span>
+                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Agente Sombra</span>
                                 </div>
                                 <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
-                                    IA que atende pelo WhatsApp do corretor quando ele estÃ¡ indisponÃ­vel (fora do horÃ¡rio).
+                                    IA que atende pelo WhatsApp do corretor quando ele esta indisponivel (fora do horario).
                                 </p>
 
                                 {/* Toggle */}
@@ -391,7 +511,7 @@ export default function UsersPage() {
                                         <span className="rbac-toggle-slider" style={{ background: form.shadow_agent_enabled ? '#6366f1' : undefined }} />
                                     </label>
                                     <span style={{ fontSize: '0.85rem', fontWeight: 600, color: form.shadow_agent_enabled ? '#6366f1' : '#888' }}>
-                                        {form.shadow_agent_enabled ? 'âœ… Ativo' : 'â¸ï¸ Desativado'}
+                                        {form.shadow_agent_enabled ? 'Ativo' : 'Desativado'}
                                     </span>
                                 </div>
 
@@ -401,7 +521,7 @@ export default function UsersPage() {
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                                             <div>
                                                 <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> DisponÃ­vel das
+                                                    <Clock size={12} /> Disponivel das
                                                 </label>
                                                 <input type="time" value={form.available_from}
                                                     onChange={e => setForm(p => ({ ...p, available_from: e.target.value }))}
@@ -409,7 +529,7 @@ export default function UsersPage() {
                                             </div>
                                             <div>
                                                 <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> AtÃ©
+                                                    <Clock size={12} /> Ate
                                                 </label>
                                                 <input type="time" value={form.available_until}
                                                     onChange={e => setForm(p => ({ ...p, available_until: e.target.value }))}
@@ -417,7 +537,7 @@ export default function UsersPage() {
                                             </div>
                                         </div>
                                         <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>
-                                            â° Fora deste horÃ¡rio, o Agente Sombra assume o WhatsApp do corretor automaticamente.
+                                            Fora deste horario, o Agente Sombra assume o WhatsApp do corretor automaticamente.
                                         </div>
 
                                         {/* Shadow Agent Prompt */}
@@ -425,10 +545,10 @@ export default function UsersPage() {
                                             <label className="rbac-label">Prompt do Agente Sombra</label>
                                             <textarea value={form.shadow_agent_prompt}
                                                 onChange={e => setForm(p => ({ ...p, shadow_agent_prompt: e.target.value }))}
-                                                placeholder={`VocÃª Ã© o assistente do corretor. Ele estÃ¡ indisponÃ­vel no momento.\n\nSua missÃ£o:\n- Atender o cliente com educaÃ§Ã£o\n- Coletar informaÃ§Ãµes sobre o interesse\n- Informar que o corretor entrarÃ¡ em contato em breve\n\nNunca invente dados sobre imÃ³veis.`}
+                                                placeholder={`Voce e o assistente do corretor. Ele esta indisponivel no momento.\n\nSua missao:\n- Atender o cliente com educacao\n- Coletar informacoes sobre o interesse\n- Informar que o corretor entrara em contato em breve\n\nNunca invente dados sobre imoveis.`}
                                                 style={{ width: '100%', minHeight: '120px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'monospace', resize: 'vertical' }} />
                                             <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                                Define como o agente sombra se comporta quando o corretor estÃ¡ fora do horÃ¡rio.
+                                                Define como o agente sombra se comporta quando o corretor esta fora do horario.
                                             </div>
                                         </div>
                                     </>
@@ -437,12 +557,12 @@ export default function UsersPage() {
                         </>
                     )}
 
-                    {/* â”€â”€ SEÃ‡ÃƒO: MENSAGEM DE TRANSFERÃŠNCIA â”€â”€ */}
+                    {/* SECAO: MENSAGEM DE TRANSFERENCIA */}
                     {editing && (
                         <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                 <MessageSquare size={16} style={{ color: '#6366f1' }} />
-                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>ðŸ”„ Mensagem de TransferÃªncia</span>
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Mensagem de Transferencia</span>
                             </div>
                             <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
                                 Mensagem enviada ao lead quando o agente IA transferir o atendimento para este corretor.
@@ -450,10 +570,10 @@ export default function UsersPage() {
                             <textarea
                                 value={form.transfer_message}
                                 onChange={e => setForm(p => ({ ...p, transfer_message: e.target.value }))}
-                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente! ðŸ˜Š"
+                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!"
                                 style={{ width: '100%', minHeight: '100px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', resize: 'vertical' }} />
                             <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                VariÃ¡veis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
+                                Variaveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
                             </div>
                         </div>
                     )}
@@ -464,7 +584,7 @@ export default function UsersPage() {
                         </button>
                         <button onClick={handleSave} disabled={saving} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
-                            {saving ? 'Salvando...' : creating ? 'Criar UsuÃ¡rio' : 'Salvar AlteraÃ§Ãµes'}
+                            {saving ? 'Salvando...' : creating ? 'Criar Usuario' : 'Salvar Alteracoes'}
                         </button>
                     </div>
                 </div>
@@ -486,7 +606,7 @@ export default function UsersPage() {
             {filtered.length === 0 ? (
                 <div className="chart-card" style={{ textAlign: 'center', padding: '60px 24px' }}>
                     <Users size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum usuÃ¡rio encontrado</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum usuario encontrado</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: 10 }}>
@@ -546,6 +666,32 @@ export default function UsersPage() {
                                         }}>
                                         <Power size={14} />
                                     </button>
+                                    {canCreateUsers && (canGrantMaster || !u.is_master) && (
+                                        <button
+                                            onClick={() => sendPasswordResetLink(u)}
+                                            title="Enviar redefinicao de senha"
+                                            disabled={sendingResetUserId === u.id}
+                                            style={{
+                                                padding: 8, borderRadius: 6, cursor: 'pointer',
+                                                border: '1px solid rgba(59,130,246,0.35)',
+                                                background: 'rgba(59,130,246,0.12)',
+                                                color: '#3b82f6',
+                                                opacity: sendingResetUserId === u.id ? 0.7 : 1
+                                            }}>
+                                            {sendingResetUserId === u.id ? <Loader2 size={14} className="spin" /> : <KeyRound size={14} />}
+                                        </button>
+                                    )}
+                                    {canGrantMaster && !u.is_master && (
+                                        <button onClick={() => deleteUser(u)} title="Excluir usuario"
+                                            style={{
+                                                padding: 8, borderRadius: 6, cursor: 'pointer',
+                                                border: '1px solid rgba(239,68,68,0.35)',
+                                                background: 'rgba(239,68,68,0.12)',
+                                                color: '#ef4444'
+                                            }}>
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -573,3 +719,4 @@ export default function UsersPage() {
         </div>
     )
 }
+

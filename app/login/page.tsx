@@ -1,18 +1,92 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Lock, Mail, ArrowRight, Loader2, ShieldCheck } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Lock, Mail, Phone, ArrowRight, Loader2, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [recoveryEmail, setRecoveryEmail] = useState('')
+    const [recoveryPhone, setRecoveryPhone] = useState('')
+    const [showRecoveryForm, setShowRecoveryForm] = useState(false)
+    const [recoveringPassword, setRecoveringPassword] = useState(false)
+    const [recoveryMessage, setRecoveryMessage] = useState<string | null>(null)
+    const [recoveryMessageType, setRecoveryMessageType] = useState<'success' | 'warning'>('success')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmNewPassword, setConfirmNewPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [passwordFlowLoading, setPasswordFlowLoading] = useState(false)
+    const [passwordFlowReady, setPasswordFlowReady] = useState(false)
+    const [passwordFlowMessage, setPasswordFlowMessage] = useState<string | null>(null)
+
     const router = useRouter()
-    const supabase = createClient()
+    const searchParams = useSearchParams()
+    const [supabase] = useState(() => createClient())
+
+    const modeType = String(searchParams.get('type') || '').toLowerCase()
+    const isPasswordSetupMode =
+        searchParams.get('first_access') === '1' ||
+        searchParams.get('password_reset') === '1' ||
+        modeType === 'invite' ||
+        modeType === 'recovery'
+
+    useEffect(() => {
+        if (!isPasswordSetupMode) return
+
+        let cancelled = false
+
+        const preparePasswordSetup = async () => {
+            setPasswordFlowLoading(true)
+            setPasswordFlowMessage(null)
+            setError(null)
+
+            try {
+                const code = searchParams.get('code')
+                const tokenHash = searchParams.get('token_hash')
+
+                if (code) {
+                    const { error: codeError } = await supabase.auth.exchangeCodeForSession(code)
+                    if (codeError) throw codeError
+                } else if (tokenHash && (modeType === 'invite' || modeType === 'recovery')) {
+                    const { error: verifyError } = await supabase.auth.verifyOtp({
+                        token_hash: tokenHash,
+                        type: modeType as 'invite' | 'recovery',
+                    })
+                    if (verifyError) throw verifyError
+                }
+
+                const {
+                    data: { session },
+                } = await supabase.auth.getSession()
+
+                if (cancelled) return
+
+                if (session?.user) {
+                    setPasswordFlowReady(true)
+                    setPasswordFlowMessage('Sessao validada. Defina sua nova senha.')
+                } else {
+                    setPasswordFlowReady(false)
+                    setPasswordFlowMessage('Nao foi possivel validar o link. Solicite um novo link de acesso.')
+                }
+            } catch (flowErr: any) {
+                if (cancelled) return
+                setPasswordFlowReady(false)
+                setPasswordFlowMessage(flowErr?.message || 'Link invalido ou expirado. Solicite um novo link.')
+            } finally {
+                if (!cancelled) setPasswordFlowLoading(false)
+            }
+        }
+
+        preparePasswordSetup()
+
+        return () => {
+            cancelled = true
+        }
+    }, [isPasswordSetupMode, modeType, searchParams, supabase])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -20,41 +94,112 @@ export default function LoginPage() {
         setError(null)
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error: loginError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             })
 
-            if (error) {
-                setError(error.message)
+            if (loginError) {
+                setError(loginError.message)
             } else {
                 router.push('/admin')
                 router.refresh()
             }
-        } catch (err) {
+        } catch {
             setError('Ocorreu um erro ao tentar fazer login.')
         } finally {
             setLoading(false)
         }
     }
 
+    const handleSetPassword = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        if (newPassword.length < 6) {
+            setError('A senha deve ter pelo menos 6 caracteres.')
+            setLoading(false)
+            return
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            setError('As senhas nao coincidem.')
+            setLoading(false)
+            return
+        }
+
+        try {
+            const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+            if (updateError) {
+                setError(updateError.message)
+                return
+            }
+
+            setPasswordFlowMessage('Senha definida com sucesso. Redirecionando...')
+            setTimeout(() => {
+                router.push('/admin')
+                router.refresh()
+            }, 800)
+        } catch {
+            setError('Ocorreu um erro ao definir a nova senha.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSendRecoveryLink = async () => {
+        setError(null)
+        setRecoveryMessage(null)
+        setRecoveryMessageType('success')
+
+        const normalizedEmail = recoveryEmail.trim().toLowerCase()
+        const normalizedPhone = recoveryPhone.trim()
+        if (!normalizedEmail || !normalizedPhone) {
+            setError('Informe email e telefone para recuperar a senha.')
+            return
+        }
+
+        setRecoveringPassword(true)
+        try {
+            const res = await fetch('/api/auth/password-recovery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: normalizedEmail, phone: normalizedPhone }),
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Nao foi possivel solicitar redefinicao.')
+
+            const responseMessage = data?.message || 'Solicitacao processada.'
+            if (data?.success === false) {
+                setRecoveryMessageType('warning')
+                setRecoveryMessage(responseMessage)
+                return
+            }
+
+            setRecoveryMessageType('success')
+            setRecoveryMessage(responseMessage)
+            setShowRecoveryForm(false)
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setRecoveringPassword(false)
+        }
+    }
+
     return (
         <div className="login-container">
-            {/* Background Effects */}
             <div className="login-bg-glow top" />
             <div className="login-bg-glow bottom" />
 
             <div className="login-content">
-                {/* Logo Section */}
                 <div className="login-header">
-
                     <h1 className="login-title">Bem-vindo de volta</h1>
                     <p className="login-subtitle">Acesse o painel administrativo da Pilger</p>
                 </div>
 
-                {/* Login Card */}
                 <div className="login-card">
-                    <form onSubmit={handleLogin}>
+                    <form onSubmit={isPasswordSetupMode ? handleSetPassword : handleLogin}>
                         {error && (
                             <div className="login-error">
                                 <ShieldCheck size={18} />
@@ -62,60 +207,220 @@ export default function LoginPage() {
                             </div>
                         )}
 
-                        <div className="login-form-group">
-                            <label className="login-label">Email</label>
-                            <div className="login-input-wrapper">
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="login-input"
-                                    placeholder="admin@pilger.com.br"
-                                    required
-                                />
-                                <Mail className="login-input-icon" size={20} />
+                        {isPasswordSetupMode && (
+                            <div className="login-form-group" style={{ marginBottom: 16 }}>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                    {passwordFlowLoading ? 'Validando link de acesso...' : passwordFlowMessage}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="login-form-group">
-                            <label className="login-label">Senha</label>
-                            <div className="login-input-wrapper">
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="login-input"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                                <Lock className="login-input-icon" size={20} />
-                            </div>
-                        </div>
+                        {!isPasswordSetupMode && (
+                            <>
+                                <div className="login-form-group">
+                                    <label className="login-label">Email</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="login-input"
+                                            placeholder="admin@pilger.com.br"
+                                            required
+                                        />
+                                        <Mail className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
+
+                                <div className="login-form-group">
+                                    <label className="login-label">Senha</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="login-input"
+                                            placeholder="********"
+                                            required
+                                        />
+                                        <Lock className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: -8, marginBottom: 12, textAlign: 'right' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowRecoveryForm((prev) => !prev)
+                                            setRecoveryEmail(email || '')
+                                            setRecoveryPhone('')
+                                            setError(null)
+                                            setRecoveryMessage(null)
+                                            setRecoveryMessageType('success')
+                                        }}
+                                        style={{
+                                            fontSize: '0.8rem',
+                                            color: 'var(--gold)',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline'
+                                        }}
+                                    >
+                                        Esqueci minha senha
+                                    </button>
+                                </div>
+
+                                {showRecoveryForm && (
+                                    <div
+                                        style={{
+                                            marginBottom: 14,
+                                            padding: '12px',
+                                            borderRadius: 10,
+                                            border: '1px solid var(--border-color)',
+                                            background: 'rgba(0, 0, 0, 0.2)'
+                                        }}
+                                    >
+                                        <label className="login-label">Email para recuperacao</label>
+                                        <div className="login-input-wrapper" style={{ marginBottom: 10 }}>
+                                            <input
+                                                type="email"
+                                                value={recoveryEmail}
+                                                onChange={(e) => setRecoveryEmail(e.target.value)}
+                                                className="login-input"
+                                                placeholder="admin@pilger.com.br"
+                                                required
+                                            />
+                                            <Mail className="login-input-icon" size={20} />
+                                        </div>
+                                        <label className="login-label">Telefone cadastrado</label>
+                                        <div className="login-input-wrapper" style={{ marginBottom: 10 }}>
+                                            <input
+                                                type="tel"
+                                                value={recoveryPhone}
+                                                onChange={(e) => setRecoveryPhone(e.target.value)}
+                                                className="login-input"
+                                                placeholder="5547999999999"
+                                                required
+                                            />
+                                            <Phone className="login-input-icon" size={20} />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowRecoveryForm(false)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: 8,
+                                                    border: '1px solid var(--border-color)',
+                                                    background: 'transparent',
+                                                    color: 'var(--text-muted)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSendRecoveryLink}
+                                                disabled={recoveringPassword}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: 8,
+                                                    border: '1px solid #b8945f55',
+                                                    background: '#b8945f22',
+                                                    color: '#f5d29a',
+                                                    cursor: 'pointer',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 6,
+                                                    opacity: recoveringPassword ? 0.7 : 1
+                                                }}
+                                            >
+                                                {recoveringPassword && <Loader2 className="animate-spin" size={14} />}
+                                                Enviar link no WhatsApp
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {recoveryMessage && (
+                                    <div className="login-form-group" style={{ marginBottom: 14 }}>
+                                        <div
+                                            style={{
+                                                fontSize: '0.85rem',
+                                                color: recoveryMessageType === 'warning' ? '#f5d29a' : '#c8f5c8'
+                                            }}
+                                        >
+                                            {recoveryMessage}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {isPasswordSetupMode && (
+                            <>
+                                <div className="login-form-group">
+                                    <label className="login-label">Nova Senha</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="login-input"
+                                            placeholder="Minimo 6 caracteres"
+                                            required
+                                            disabled={!passwordFlowReady || passwordFlowLoading}
+                                        />
+                                        <Lock className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
+
+                                <div className="login-form-group">
+                                    <label className="login-label">Confirmar Nova Senha</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="password"
+                                            value={confirmNewPassword}
+                                            onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                            className="login-input"
+                                            placeholder="Repita a nova senha"
+                                            required
+                                            disabled={!passwordFlowReady || passwordFlowLoading}
+                                        />
+                                        <Lock className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || (isPasswordSetupMode && (!passwordFlowReady || passwordFlowLoading))}
                             className="btn-login"
                         >
                             {loading ? (
                                 <>
                                     <Loader2 className="animate-spin" size={20} />
-                                    <span>Autenticando...</span>
+                                    <span>{isPasswordSetupMode ? 'Salvando senha...' : 'Autenticando...'}</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>Entrar no Sistema</span>
+                                    <span>{isPasswordSetupMode ? 'Definir Nova Senha' : 'Entrar no Sistema'}</span>
                                     <ArrowRight size={18} />
                                 </>
                             )}
                         </button>
 
-                        <div className="mt-6 text-center">
-                            <span className="text-gray-500 text-sm">Não tem uma conta? </span>
-                            <Link href="/signup" className="login-link text-sm">
-                                Cadastre-se
-                            </Link>
-                        </div>
+                        {!isPasswordSetupMode && (
+                            <div className="mt-6 text-center">
+                                <span className="text-gray-500 text-sm">Nao tem uma conta? </span>
+                                <Link href="/signup" className="login-link text-sm">
+                                    Cadastre-se
+                                </Link>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>

@@ -1,12 +1,87 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getInstanceStatus, disconnectInstance, setWebhook, getWebhook } from '@/lib/uazapi'
+
+const NULL_ADMIN_USER_ID = '00000000-0000-0000-0000-000000000000'
 
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+function normalizeDigits(value: unknown): string {
+    return String(value || '').replace(/\D/g, '')
+}
+
+function normalizeWhatsAppAddress(raw: unknown): string {
+    const text = String(raw || '').trim()
+    if (!text) return ''
+
+    // Exemplos de payload que queremos normalizar:
+    // 5547999999999@s.whatsapp.net
+    // 5547999999999:79@s.whatsapp.net (sufixo do dispositivo/companion)
+    const beforeAt = text.split('@')[0] || ''
+    const beforeDevice = beforeAt.split(':')[0] || ''
+    return normalizeDigits(beforeDevice)
+}
+
+function phoneCandidates(value: unknown): string[] {
+    const digits = normalizeDigits(value)
+    if (!digits) return []
+
+    const set = new Set<string>()
+    const add = (raw: string) => {
+        const v = normalizeDigits(raw)
+        if (!v) return
+        set.add(v)
+
+        const noLeadingZero = v.replace(/^0+/, '')
+        if (noLeadingZero) set.add(noLeadingZero)
+
+        if (v.startsWith('55') && v.length > 2) {
+            set.add(v.slice(2))
+        }
+
+        if (!v.startsWith('55') && (v.length === 10 || v.length === 11)) {
+            set.add(`55${v}`)
+        }
+    }
+
+    add(digits)
+
+    // Regra BR legada: algumas bases antigas ainda nao tem o 9o digito
+    // (logo apos o DDD). Consideramos equivalentes com e sem esse digito.
+    for (const candidate of [...set]) {
+        if (candidate.startsWith('55')) {
+            const local = candidate.slice(2) // DDD + numero
+            if (local.length === 11 && local[2] === '9') {
+                add(`55${local.slice(0, 2)}${local.slice(3)}`) // remove 9o digito
+            }
+            if (local.length === 10) {
+                add(`55${local.slice(0, 2)}9${local.slice(2)}`) // adiciona 9o digito
+            }
+        } else {
+            if (candidate.length === 11 && candidate[2] === '9') {
+                add(`${candidate.slice(0, 2)}${candidate.slice(3)}`) // remove 9o digito
+            }
+            if (candidate.length === 10) {
+                add(`${candidate.slice(0, 2)}9${candidate.slice(2)}`) // adiciona 9o digito
+            }
+        }
+    }
+
+    return [...set]
+}
+
+function phonesMatch(left: unknown, right: unknown): boolean {
+    const leftSet = new Set(phoneCandidates(left))
+    const rightSet = new Set(phoneCandidates(right))
+    for (const candidate of leftSet) {
+        if (rightSet.has(candidate)) return true
+    }
+    return false
 }
 
 function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
@@ -22,28 +97,154 @@ function extractPhoneFromStatus(result: any, fallback?: string | null): string |
         null
 
     if (!raw) return null
-    const digits = String(raw).replace(/\D/g, '')
+    const digits = normalizeWhatsAppAddress(raw)
     return digits || null
 }
 
-// GET — Verificar status de conexão da instância
+function buildDefaultBrokerPrompt(name: string) {
+    const safeName = String(name || '').trim() || 'Corretor Pilger'
+    return `Voce e ${safeName}, corretor da Pilger. Atenda leads de forma profissional, cordial e objetiva. Nao invente informacoes e, quando faltar contexto, faca perguntas curtas para qualificar o cliente.`
+}
+
+async function ensureAiBrokerForAdminUser(params: {
+    supabase: any
+    adminUserId: string
+    instanceId: string
+    currentBrokerId?: string | null
+}) {
+    const { supabase, adminUserId, instanceId, currentBrokerId } = params
+    if (!adminUserId || !instanceId || adminUserId === NULL_ADMIN_USER_ID) {
+        return { brokerId: null as string | null, brokerCreated: false }
+    }
+
+    let brokerId = String(currentBrokerId || '').trim()
+    let brokerCreated = false
+
+    if (!brokerId) {
+        const { data: previousInstance } = await supabase
+            .from('whatsapp_instances')
+            .select('broker_id')
+            .eq('admin_user_id', adminUserId)
+            .neq('id', instanceId)
+            .not('broker_id', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        if (previousInstance?.broker_id) {
+            brokerId = String(previousInstance.broker_id)
+        }
+    }
+
+    if (!brokerId) {
+        try {
+            const { data: brokerByInstance } = await supabase
+                .from('virtual_brokers')
+                .select('id')
+                .eq('whatsapp_instance_id', instanceId)
+                .limit(1)
+                .maybeSingle()
+
+            if (brokerByInstance?.id) {
+                brokerId = String(brokerByInstance.id)
+            }
+        } catch {
+            // ignore schema/version differences
+        }
+    }
+
+    if (!brokerId) {
+        const { data: adminUser } = await supabase
+            .from('admin_users')
+            .select('id, name, email, phone')
+            .eq('id', adminUserId)
+            .maybeSingle()
+
+        if (!adminUser) {
+            return { brokerId: null as string | null, brokerCreated: false }
+        }
+
+        const brokerName =
+            String(adminUser.name || '').trim() ||
+            String(adminUser.email || '').trim() ||
+            `Corretor ${String(adminUserId).slice(0, 8)}`
+
+        const brokerPayload: any = {
+            name: brokerName,
+            creci: 'N/A',
+            is_active: true,
+            system_prompt: buildDefaultBrokerPrompt(brokerName),
+        }
+
+        const brokerPhone = normalizeDigits(adminUser.phone)
+        if (brokerPhone) brokerPayload.phone = brokerPhone
+
+        const { data: createdBroker, error: createBrokerError } = await supabase
+            .from('virtual_brokers')
+            .insert(brokerPayload)
+            .select('id')
+            .single()
+
+        if (createBrokerError) throw createBrokerError
+
+        brokerId = String(createdBroker?.id || '')
+        brokerCreated = Boolean(brokerId)
+    }
+
+    if (!brokerId) {
+        return { brokerId: null as string | null, brokerCreated }
+    }
+
+    await supabase
+        .from('whatsapp_instances')
+        .update({ broker_id: brokerId, updated_at: new Date().toISOString() })
+        .eq('id', instanceId)
+
+    try {
+        await supabase
+            .from('virtual_brokers')
+            .update({ whatsapp_instance_id: instanceId, updated_at: new Date().toISOString() })
+            .eq('id', brokerId)
+    } catch {
+        // ignore schema/version differences
+    }
+
+    try {
+        await supabase
+            .from('admin_users')
+            .update({ whatsapp_instance_id: instanceId, updated_at: new Date().toISOString() })
+            .eq('id', adminUserId)
+    } catch {
+        // ignore schema/version differences
+    }
+
+    return { brokerId, brokerCreated }
+}
+
+// GET - Verificar status de conexao da instancia
 export async function GET(request: NextRequest) {
     try {
         const supabase = getSupabase()
         const instanceId = request.nextUrl.searchParams.get('instanceId')
+        const instanceName =
+            request.nextUrl.searchParams.get('instance_name') ||
+            request.nextUrl.searchParams.get('instanceName')
 
-        if (!instanceId) {
-            return NextResponse.json({ success: false, message: 'instanceId é obrigatório' }, { status: 400 })
+        if (!instanceId && !instanceName) {
+            return NextResponse.json({ success: false, message: 'instanceId ou instance_name e obrigatorio' }, { status: 400 })
         }
 
-        const { data: instance, error: fetchError } = await supabase
-            .from('whatsapp_instances')
-            .select('*')
-            .eq('id', instanceId)
-            .single()
+        let query = supabase.from('whatsapp_instances').select('*')
+        if (instanceId) {
+            query = query.eq('id', instanceId)
+        } else if (instanceName) {
+            query = query.eq('instance_name', instanceName)
+        }
+
+        const { data: instance, error: fetchError } = await query.single()
 
         if (fetchError || !instance) {
-            return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
+            return NextResponse.json({ success: false, message: 'Instancia nao encontrada' }, { status: 404 })
         }
 
         if (!instance.instance_token) {
@@ -51,55 +252,146 @@ export async function GET(request: NextRequest) {
                 success: true,
                 status: 'disconnected',
                 phone: null,
+                phone_number: null,
             })
         }
 
         // Consultar status na uazapi
         const result = await getInstanceStatus(instance.instance_token)
         console.log('[Status] Resultado uazapi:', JSON.stringify(result).substring(0, 300))
-        
-        // uazapi retorna: { status: { connected, loggedIn }, instance: { qrcode, ... } }
+
         const isConnected = result?.status?.connected === true || result?.connected === true
         const isLoggedIn = result?.status?.loggedIn === true || result?.loggedIn === true
         const phone = extractPhoneFromStatus(result, instance.phone_number)
 
-        // Determinar status
-        const newStatus = (isConnected && isLoggedIn) ? 'connected' :
-                          (isConnected || result?.response?.includes?.('Connecting')) ? 'connecting' : 'disconnected'
+        const newStatus = (isConnected && isLoggedIn)
+            ? 'connected'
+            : (isConnected || result?.response?.includes?.('Connecting'))
+                ? 'connecting'
+                : 'disconnected'
 
-        if (newStatus !== instance.status) {
+        let syncedBrokerId = instance.broker_id ? String(instance.broker_id) : null
+        let brokerCreated = false
+        let brokerSyncWarning: string | null = null
+
+        const isRealAdminUser = Boolean(instance.admin_user_id && instance.admin_user_id !== NULL_ADMIN_USER_ID)
+
+        if (newStatus === 'connected' && isRealAdminUser) {
+            const { data: adminUser } = await supabase
+                .from('admin_users')
+                .select('id, phone')
+                .eq('id', instance.admin_user_id)
+                .maybeSingle()
+
+            const expectedPhone = normalizeDigits(adminUser?.phone)
+
+            if (!expectedPhone) {
+                try {
+                    await disconnectInstance(instance.instance_token)
+                } catch {
+                    // ignore provider disconnect failures
+                }
+
+                await supabase
+                    .from('whatsapp_instances')
+                    .update({
+                        status: 'disconnected',
+                        phone_number: phone,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', instance.id)
+
+                return NextResponse.json({
+                    success: false,
+                    status: 'disconnected',
+                    phone,
+                    phone_number: phone,
+                    blocked_phone_mismatch: true,
+                    message: 'Este usuario nao possui telefone cadastrado para validacao. Atualize o telefone e tente novamente.',
+                })
+            }
+
+            if (!phonesMatch(phone, expectedPhone)) {
+                try {
+                    await disconnectInstance(instance.instance_token)
+                } catch {
+                    // ignore provider disconnect failures
+                }
+
+                await supabase
+                    .from('whatsapp_instances')
+                    .update({
+                        status: 'disconnected',
+                        phone_number: phone,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', instance.id)
+
+                return NextResponse.json({
+                    success: false,
+                    status: 'disconnected',
+                    phone,
+                    phone_number: phone,
+                    blocked_phone_mismatch: true,
+                    message: 'WhatsApp bloqueado: o numero escaneado nao confere com o telefone cadastrado para este usuario.',
+                })
+            }
+
+            if (!syncedBrokerId) {
+                try {
+                    const brokerResult = await ensureAiBrokerForAdminUser({
+                        supabase,
+                        adminUserId: String(instance.admin_user_id),
+                        instanceId: String(instance.id),
+                        currentBrokerId: instance.broker_id || null,
+                    })
+                    if (brokerResult.brokerId) {
+                        syncedBrokerId = brokerResult.brokerId
+                        brokerCreated = Boolean(brokerResult.brokerCreated)
+                    }
+                } catch (error) {
+                    console.error('[Status] Falha ao vincular broker automatico:', error)
+                    brokerSyncWarning = 'Instancia conectada, mas houve falha ao vincular o Corretor IA automaticamente.'
+                }
+            }
+        }
+
+        const phoneChanged = String(phone || '') !== String(instance.phone_number || '')
+        if (newStatus !== instance.status || phoneChanged) {
             await supabase
                 .from('whatsapp_instances')
                 .update({
                     status: newStatus,
                     phone_number: phone,
-                    connected_at: newStatus === 'connected' ? new Date().toISOString() : instance.connected_at,
+                    connected_at: newStatus === 'connected' ? (instance.connected_at || new Date().toISOString()) : instance.connected_at,
                     updated_at: new Date().toISOString(),
                 })
-                .eq('id', instanceId)
+                .eq('id', instance.id)
         }
 
-        // ── AUTO-CONFIGURE WEBHOOK whenever connected ──
-        // Runs every time status is checked and instance is connected (not just on change)
+        // Auto-configure webhook whenever connected
         if (newStatus === 'connected' && instance.instance_token) {
             try {
                 const appUrl = process.env.NEXT_PUBLIC_APP_URL
                     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+
                 if (appUrl) {
                     const webhookUrl = `${appUrl}/api/webhooks/whatsapp`
-                    // Check current webhook to avoid redundant calls
+
                     let currentWebhook = ''
                     try {
                         const whData = await getWebhook(instance.instance_token)
                         currentWebhook = whData?.url || whData?.webhook || ''
-                    } catch { /* ignore */ }
+                    } catch {
+                        // ignore webhook read failures
+                    }
 
                     if (currentWebhook !== webhookUrl) {
                         await setWebhook(webhookUrl, instance.instance_token)
-                        console.log(`[Status] ✅ Webhook configurado: ${webhookUrl}`)
+                        console.log(`[Status] Webhook configurado: ${webhookUrl}`)
                     }
                 } else {
-                    console.warn('[Status] ⚠️ APP_URL não configurada, webhook não pôde ser setado')
+                    console.warn('[Status] APP_URL nao configurada, webhook nao pode ser setado')
                 }
             } catch (e) {
                 console.error('[Status] Erro ao configurar webhook:', e)
@@ -110,6 +402,10 @@ export async function GET(request: NextRequest) {
             success: true,
             status: newStatus,
             phone,
+            phone_number: phone,
+            broker_id: syncedBrokerId,
+            broker_created: brokerCreated,
+            broker_sync_warning: brokerSyncWarning,
         })
     } catch (error) {
         console.error('Error checking status:', error)
@@ -120,7 +416,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST — Desconectar instância
+// POST - Desconectar instancia
 export async function POST(request: NextRequest) {
     try {
         const supabase = getSupabase()
@@ -133,7 +429,7 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (fetchError || !instance) {
-            return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
+            return NextResponse.json({ success: false, message: 'Instancia nao encontrada' }, { status: 404 })
         }
 
         if (instance.instance_token) {
@@ -148,7 +444,7 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', instanceId)
 
-        return NextResponse.json({ success: true, message: 'Instância desconectada' })
+        return NextResponse.json({ success: true, message: 'Instancia desconectada' })
     } catch (error) {
         console.error('Error disconnecting:', error)
         return NextResponse.json({

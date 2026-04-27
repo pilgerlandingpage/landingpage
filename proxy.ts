@@ -44,7 +44,14 @@ export async function proxy(request: NextRequest) {
     }
 
     if (request.nextUrl.pathname === '/login') {
-        if (user) {
+        const hasPasswordFlowParam =
+            request.nextUrl.searchParams.has('first_access') ||
+            request.nextUrl.searchParams.has('password_reset') ||
+            request.nextUrl.searchParams.has('code') ||
+            request.nextUrl.searchParams.has('token_hash') ||
+            request.nextUrl.searchParams.has('type')
+
+        if (user && !hasPasswordFlowParam) {
             const url = request.nextUrl.clone()
             url.pathname = '/admin'
             return NextResponse.redirect(url)

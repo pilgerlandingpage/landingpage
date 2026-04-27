@@ -1,23 +1,31 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 
-// GET — Retorna dados do usuário logado + instância WhatsApp
+// GET - Retorna dados do usuario logado + instancia WhatsApp
 export async function GET(request: NextRequest) {
     try {
         const supabase = await createClient()
 
-        // 1. Verificar quem está logado no Auth
+        // 1. Verificar quem esta logado no Auth
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError || !user) {
-            return NextResponse.json({ success: false, message: 'Não autorizado' }, { status: 401 })
+            return NextResponse.json({ success: false, message: 'Nao autorizado' }, { status: 401 })
         }
 
         // 2. Buscar dados em admin_users
         const { data: adminUser, error: adminError } = await supabase
             .from('admin_users')
             .select(`
-                *,
+                id,
+                name,
+                email,
+                phone,
+                is_master,
+                shadow_agent_prompt,
+                shadow_agent_enabled,
+                available_from,
+                available_until,
+                transfer_message,
                 admin_sectors (
                     sectors (id, name, color, icon)
                 )
@@ -26,13 +34,13 @@ export async function GET(request: NextRequest) {
             .single()
 
         if (adminError || !adminUser) {
-            return NextResponse.json({ success: false, message: 'Usuário não encontrado' }, { status: 404 })
+            return NextResponse.json({ success: false, message: 'Usuario nao encontrado' }, { status: 404 })
         }
 
         // Mapear setores
         const sectors = (adminUser.admin_sectors || []).map((as: any) => as.sectors)
         
-        // 3. Buscar instância WhatsApp vinculada a este Admin User
+        // 3. Buscar instancia WhatsApp vinculada a este Admin User
         const { data: instances } = await supabase
             .from('whatsapp_instances')
             .select('*')
@@ -63,18 +71,18 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// PUT — Atualiza dados do próprio usuário
+// PUT - Atualiza dados do proprio usuario
 export async function PUT(request: NextRequest) {
     try {
         const supabase = await createClient()
         
-        // 1. Verificar quem está logado no Auth
+        // 1. Verificar quem esta logado no Auth
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError || !user) {
-            return NextResponse.json({ success: false, message: 'Não autorizado' }, { status: 401 })
+            return NextResponse.json({ success: false, message: 'Nao autorizado' }, { status: 401 })
         }
 
-        // 2. Buscar ID do usuário na tabela admin_users
+        // 2. Buscar ID do usuario na tabela admin_users
         const { data: adminUser, error: adminError } = await supabase
             .from('admin_users')
             .select('id')
@@ -82,14 +90,14 @@ export async function PUT(request: NextRequest) {
             .single()
 
         if (adminError || !adminUser) {
-            return NextResponse.json({ success: false, message: 'Usuário não encontrado' }, { status: 404 })
+            return NextResponse.json({ success: false, message: 'Usuario nao encontrado' }, { status: 404 })
         }
 
         const body = await request.json()
         const updateData: any = { updated_at: new Date().toISOString() }
 
-        // Campos permitidos para atualização (apenas o próprio usuário pode se editar)
-        // Nota: is_master e email só um admin master pode alterar na página de usuários
+        // Campos permitidos para atualizacao (apenas o proprio usuario pode se editar)
+        // Nota: is_master e email so um admin master pode alterar na pagina de usuarios
         if (body.name !== undefined) updateData.name = body.name
         if (body.phone !== undefined) updateData.phone = body.phone
         if (body.shadow_agent_prompt !== undefined) updateData.shadow_agent_prompt = body.shadow_agent_prompt
@@ -102,7 +110,6 @@ export async function PUT(request: NextRequest) {
         if (body.password && body.password.length >= 6) {
             const { error: pwdErr } = await supabase.auth.updateUser({ password: body.password })
             if (pwdErr) throw new Error(`Erro ao atualizar senha auth: ${pwdErr.message}`)
-            updateData.password_hash = await bcrypt.hash(body.password, 10)
         }
 
         // Fazer update da tabela
@@ -120,3 +127,4 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ success: false, error: err.message }, { status: 500 })
     }
 }
+

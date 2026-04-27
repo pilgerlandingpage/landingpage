@@ -112,6 +112,14 @@ export default function MinhaContaPage() {
             })
             const data = await res.json()
             if (data.qrcode) setQrCode(data.qrcode)
+            if (data?.brokerSyncWarning) {
+                showToast(data.brokerSyncWarning, 'error')
+            } else if (data?.brokerCreated) {
+                showToast('Corretor IA criado e vinculado automaticamente ao seu usuario.', 'success')
+            } else if (data?.brokerId) {
+                showToast('Corretor IA vinculado automaticamente ao seu usuario.', 'success')
+            }
+            await fetchData()
         } catch (err) {
             showToast('Falha ao gerar QR Code', 'error')
         } finally {
@@ -122,13 +130,23 @@ export default function MinhaContaPage() {
     const checkWhatsAppStatus = async () => {
         if (!whatsapp) return
         try {
-            const res = await fetch(`/api/admin/whatsapp/status?instance_name=${whatsapp.instance_name}`)
+            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${whatsapp.id}`)
             const data = await res.json()
+            if (!res.ok || data?.success === false) {
+                if (data?.blocked_phone_mismatch) {
+                    showToast(data?.message || 'WhatsApp bloqueado por divergencia com o telefone cadastrado.', 'error')
+                } else if (data?.message) {
+                    showToast(data.message, 'error')
+                }
+            }
             if (data.status) {
                 setWhatsapp(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
                 if (data.status === 'connected') setQrCode(null)
             }
-        } catch {}
+            await fetchData()
+        } catch {
+            showToast('Falha ao verificar status do WhatsApp.', 'error')
+        }
     }
 
     if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Carregando Meu Perfil...</div>

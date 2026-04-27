@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
+import { sendWhatsAppMessage } from '@/lib/uazapi'
 
 const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_users',
@@ -8,7 +9,24 @@ const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'users',
 ])
 
-// Helper: verify if logged user can manage users
+const ADMIN_USERS_LIST_COLUMNS = [
+    'id',
+    'auth_user_id',
+    'name',
+    'email',
+    'phone',
+    'is_master',
+    'is_active',
+    'created_at',
+    'updated_at',
+    'shadow_agent_prompt',
+    'shadow_agent_enabled',
+    'available_from',
+    'available_until',
+    'transfer_message',
+    'whatsapp_instance_id',
+].join(', ')
+
 async function verifyUserManagerAccess() {
     const supabase = await createServerSupabase()
     const { data: { user } } = await supabase.auth.getUser()
@@ -27,16 +45,22 @@ async function verifyUserManagerAccess() {
         return {
             ...adminUser,
             can_grant_master: true,
+            can_create_users: true,
+            is_diretoria: false,
         }
     }
 
     const { data: userSectors } = await admin
         .from('admin_user_sectors')
-        .select('sector_id')
+        .select('sector_id, admin_sectors(name)')
         .eq('user_id', adminUser.id)
 
     const sectorIds = (userSectors || []).map((row: any) => row.sector_id)
     if (sectorIds.length === 0) return null
+
+    const isDiretoria = (userSectors || []).some((row: any) =>
+        String(row?.admin_sectors?.name || '').toLowerCase().includes('diretoria')
+    )
 
     const { data: sectorPerms } = await admin
         .from('admin_sector_permissions')
@@ -52,27 +76,173 @@ async function verifyUserManagerAccess() {
     return {
         ...adminUser,
         can_grant_master: false,
+        can_create_users: isDiretoria,
+        is_diretoria: isDiretoria,
     }
 }
 
-// Helper: sync admin_alert_contacts based on sector assignments
+function normalizeSectorIds(raw: unknown): string[] {
+    if (!Array.isArray(raw)) return []
+
+    return [
+        ...new Set(
+            raw
+                .map((value) => String(value || '').trim())
+                .filter(Boolean)
+        ),
+    ]
+}
+
+async function ensureValidSectorIds(admin: any, sectorIds: string[]) {
+    if (sectorIds.length === 0) return
+
+    const { data: sectors, error } = await admin
+        .from('admin_sectors')
+        .select('id')
+        .in('id', sectorIds)
+
+    if (error) throw error
+
+    const foundIds = new Set((sectors || []).map((row: any) => row.id))
+    const invalidIds = sectorIds.filter((id) => !foundIds.has(id))
+
+    if (invalidIds.length > 0) {
+        throw new Error('Setor informado e invalido.')
+    }
+}
+
+async function ensureNotRemovingLastActiveMaster(admin: any, targetUser: any, payload: any) {
+    if (!targetUser?.is_master) return
+
+    const removingMasterRole = payload?.is_master === false
+    const deactivatingMaster = targetUser.is_active && payload?.is_active === false
+
+    if (!removingMasterRole && !deactivatingMaster) return
+
+    const { count, error } = await admin
+        .from('admin_users')
+        .select('id', { head: true, count: 'exact' })
+        .eq('is_master', true)
+        .eq('is_active', true)
+
+    if (error) throw error
+
+    if ((count || 0) <= 1) {
+        throw new Error('Nao e permitido remover o ultimo admin master ativo.')
+    }
+}
+
+function getFirstAccessRedirectUrl(request: NextRequest) {
+    const configuredSite = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim()
+    const configuredApp = String(process.env.NEXT_PUBLIC_APP_URL || '').trim()
+    const base = (configuredSite || configuredApp || request.nextUrl.origin).replace(/\/+$/, '')
+    return `${base}/login?first_access=1`
+}
+
+function getPasswordResetRedirectUrl(request: NextRequest) {
+    const configuredSite = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim()
+    const configuredApp = String(process.env.NEXT_PUBLIC_APP_URL || '').trim()
+    const base = (configuredSite || configuredApp || request.nextUrl.origin).replace(/\/+$/, '')
+    return `${base}/login?password_reset=1`
+}
+
+async function resolveGlobalAgentInstanceToken(admin: any) {
+    const { data: configRow, error: configError } = await admin
+        .from('app_config')
+        .select('value')
+        .eq('key', 'agent_default_instance_id')
+        .maybeSingle()
+
+    if (configError) throw configError
+
+    const defaultInstanceId = String(configRow?.value || '').trim()
+    if (!defaultInstanceId) return null
+
+    const { data: instance, error: instanceError } = await admin
+        .from('whatsapp_instances')
+        .select('instance_token, status')
+        .eq('id', defaultInstanceId)
+        .maybeSingle()
+
+    if (instanceError) throw instanceError
+    if (!instance?.instance_token) return null
+    if (instance.status !== 'connected') return null
+
+    return instance.instance_token
+}
+
+async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: string, name: string, firstAccessLink: string }) {
+    const { phone, name, firstAccessLink } = params
+    if (!phone || !firstAccessLink) return { sent: false, reason: 'missing_phone_or_link' }
+
+    const instanceToken = await resolveGlobalAgentInstanceToken(admin)
+    if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
+
+    const safeName = String(name || '').trim()
+    const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
+    const message = `${greeting}
+
+Seu acesso ao painel Pilger foi criado.
+Para definir sua senha de primeiro acesso, use este link:
+${firstAccessLink}
+
+Se voce nao reconhece este cadastro, ignore esta mensagem.`
+
+    await sendWhatsAppMessage({
+        phone,
+        message,
+        instanceToken,
+    })
+
+    return { sent: true, reason: null }
+}
+
+async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: string, name: string, resetLink: string }) {
+    const { phone, name, resetLink } = params
+    if (!phone || !resetLink) return { sent: false, reason: 'missing_phone_or_link' }
+
+    const instanceToken = await resolveGlobalAgentInstanceToken(admin)
+    if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
+
+    const safeName = String(name || '').trim()
+    const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
+    const message = `${greeting}
+
+Recebemos um pedido de redefinicao de senha do painel Pilger.
+Para criar uma nova senha com seguranca, use este link:
+${resetLink}
+
+Se voce nao solicitou esta alteracao, ignore esta mensagem.`
+
+    await sendWhatsAppMessage({
+        phone,
+        message,
+        instanceToken,
+    })
+
+    return { sent: true, reason: null }
+}
+
 async function syncAlertContacts(admin: any, userId: string, name: string, phone: string | null) {
     if (!phone) return
 
-    // Check if user has 'ads' permission through any sector
-    const { data: userSectors } = await admin
+    const { data: userSectors, error: userSectorsError } = await admin
         .from('admin_user_sectors')
         .select('sector_id')
         .eq('user_id', userId)
+
+    if (userSectorsError) throw userSectorsError
 
     const sectorIds = (userSectors || []).map((us: any) => us.sector_id)
 
     let hasAdsPermission = false
     if (sectorIds.length > 0) {
-        const { data: perms } = await admin
+        const { data: perms, error: permsError } = await admin
             .from('admin_sector_permissions')
             .select('admin_permissions(module_key)')
             .in('sector_id', sectorIds)
+
+        if (permsError) throw permsError
 
         hasAdsPermission = (perms || []).some(
             (p: any) => p.admin_permissions?.module_key === 'ads'
@@ -80,19 +250,23 @@ async function syncAlertContacts(admin: any, userId: string, name: string, phone
     }
 
     if (hasAdsPermission) {
-        // Upsert into admin_alert_contacts
-        const { data: existing } = await admin
+        const { data: existing, error: existingError } = await admin
             .from('admin_alert_contacts')
             .select('id')
             .eq('phone', phone)
             .single()
 
+        if (existingError && existingError.code !== 'PGRST116') throw existingError
+
         if (existing) {
-            await admin.from('admin_alert_contacts')
+            const { error: updateError } = await admin
+                .from('admin_alert_contacts')
                 .update({ name, is_active: true })
                 .eq('id', existing.id)
+
+            if (updateError) throw updateError
         } else {
-            await admin.from('admin_alert_contacts').insert({
+            const { error: insertError } = await admin.from('admin_alert_contacts').insert({
                 name,
                 phone,
                 receive_traffic_alerts: true,
@@ -101,17 +275,20 @@ async function syncAlertContacts(admin: any, userId: string, name: string, phone
                 min_urgency: 'medium',
                 is_active: true,
             })
+
+            if (insertError) throw insertError
         }
     } else {
-        // Deactivate if exists
-        await admin.from('admin_alert_contacts')
+        const { error: deactivateError } = await admin
+            .from('admin_alert_contacts')
             .update({ is_active: false })
             .eq('phone', phone)
+
+        if (deactivateError) throw deactivateError
     }
 }
 
-// GET - list all admin users with sectors
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
         const access = await verifyUserManagerAccess()
         if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
@@ -120,17 +297,17 @@ export async function GET() {
 
         const { data: users, error } = await admin
             .from('admin_users')
-            .select('*')
+            .select(ADMIN_USERS_LIST_COLUMNS)
             .order('created_at', { ascending: false })
 
         if (error) throw error
 
-        // Fetch sector assignments for all users
-        const { data: userSectors } = await admin
+        const { data: userSectors, error: userSectorsError } = await admin
             .from('admin_user_sectors')
             .select('user_id, sector_id, admin_sectors(id, name, color, icon)')
 
-        // Map sectors to users
+        if (userSectorsError) throw userSectorsError
+
         const enriched = (users || []).map((u: any) => ({
             ...u,
             sectors: (userSectors || [])
@@ -139,77 +316,150 @@ export async function GET() {
                 .filter(Boolean),
         }))
 
+        const includeSectors = request.nextUrl.searchParams.get('include_sectors') === '1'
+        if (includeSectors) {
+            const { data: sectors, error: sectorsError } = await admin
+                .from('admin_sectors')
+                .select('id, name, color, icon')
+                .order('name')
+
+            if (sectorsError) throw sectorsError
+
+            return NextResponse.json({
+                users: enriched,
+                sectors: sectors || [],
+                access: {
+                    can_grant_master: Boolean(access.can_grant_master),
+                    can_create_users: Boolean(access.can_create_users),
+                    is_diretoria: Boolean(access.is_diretoria),
+                },
+            })
+        }
+
         return NextResponse.json(enriched)
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
 
-// POST - create a new user
 export async function POST(request: NextRequest) {
     try {
         const access = await verifyUserManagerAccess()
         if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
-        const { email, password, name, phone, sector_ids, is_master: newIsMaster } = await request.json()
+        const { email, name, phone, sector_ids, is_master: newIsMaster } = await request.json()
+
+        const normalizedEmail = String(email || '').trim().toLowerCase()
+        const normalizedName = String(name || '').trim()
+        const normalizedPhone = String(phone || '').trim()
+        const normalizedSectorIds = normalizeSectorIds(sector_ids)
 
         if (!access.can_grant_master && Boolean(newIsMaster)) {
             return NextResponse.json({ error: 'Somente super admin pode criar usuario master.' }, { status: 403 })
         }
 
-        if (!email || !password) {
-            return NextResponse.json({ error: 'Email e senha sao obrigatorios.' }, { status: 400 })
+        if (!access.can_grant_master && !access.can_create_users) {
+            return NextResponse.json({ error: 'Somente master e diretoria podem cadastrar novos usuarios.' }, { status: 403 })
         }
-        if (password.length < 6) {
-            return NextResponse.json({ error: 'Senha deve ter pelo menos 6 caracteres.' }, { status: 400 })
+
+        if (!normalizedEmail) {
+            return NextResponse.json({ error: 'Email e obrigatorio.' }, { status: 400 })
+        }
+        if (!normalizedPhone) {
+            return NextResponse.json({ error: 'Telefone e obrigatorio para envio do primeiro acesso.' }, { status: 400 })
         }
 
         const admin = createAdminClient()
+        await ensureValidSectorIds(admin, normalizedSectorIds)
 
-        // 1. Create auth user
-        const { data: authData, error: authError } = await admin.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata: {
-                full_name: name || '',
-                phone: phone || null,
+        const firstAccessRedirectUrl = getFirstAccessRedirectUrl(request)
+        const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+            type: 'invite',
+            email: normalizedEmail,
+            options: {
+                redirectTo: firstAccessRedirectUrl,
+                data: {
+                    full_name: normalizedName || '',
+                    phone: normalizedPhone || null,
+                },
             },
         })
 
-        if (authError) throw authError
+        if (linkError) throw linkError
 
-        // 2. Create admin_users record
+        const authUserId = linkData.user?.id
+        const firstAccessLink = linkData.properties?.action_link
+        if (!authUserId) throw new Error('Nao foi possivel criar usuario auth.')
+        if (!firstAccessLink) throw new Error('Nao foi possivel gerar link de primeiro acesso.')
+
         const { data: adminUser, error: insertErr } = await admin
             .from('admin_users')
             .insert({
-                auth_user_id: authData.user.id,
-                name: name || email,
-                email,
-                phone: phone || null,
+                auth_user_id: authUserId,
+                name: normalizedName || normalizedEmail,
+                email: normalizedEmail,
+                phone: normalizedPhone || null,
                 is_master: access.can_grant_master ? Boolean(newIsMaster) : false,
             })
-            .select()
+            .select(ADMIN_USERS_LIST_COLUMNS)
             .single()
 
-        if (insertErr) throw insertErr
+        if (insertErr) {
+            await admin.auth.admin.deleteUser(authUserId)
+            throw insertErr
+        }
 
-        // 3. Assign sectors
-        if (sector_ids && sector_ids.length > 0) {
-            const links = sector_ids.map((sid: string) => ({
+        if (normalizedSectorIds.length > 0) {
+            const links = normalizedSectorIds.map((sid: string) => ({
                 user_id: adminUser.id,
                 sector_id: sid,
             }))
-            await admin.from('admin_user_sectors').insert(links)
 
-            // 4. Sync alert contacts
-            await syncAlertContacts(admin, adminUser.id, adminUser.name, adminUser.phone)
+            const { error: insertLinksError } = await admin.from('admin_user_sectors').insert(links)
+
+            if (insertLinksError) {
+                await admin.from('admin_users').delete().eq('id', adminUser.id)
+                await admin.auth.admin.deleteUser(authUserId)
+                throw insertLinksError
+            }
+
+            try {
+                await syncAlertContacts(admin, adminUser.id, adminUser.name, adminUser.phone)
+            } catch (syncError) {
+                console.error('[users][POST] syncAlertContacts failed:', syncError)
+            }
+        }
+
+        let whatsappInviteSent = false
+        let inviteWarning: string | null = null
+        try {
+            const sendResult = await sendFirstAccessWhatsAppMessage(admin, {
+                phone: normalizedPhone,
+                name: adminUser.name,
+                firstAccessLink,
+            })
+            whatsappInviteSent = Boolean(sendResult.sent)
+
+            if (!sendResult.sent && sendResult.reason === 'global_instance_not_available') {
+                inviteWarning = 'Usuario criado, mas a instancia global do agente nao esta conectada para envio no WhatsApp.'
+            }
+            if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
+                inviteWarning = 'Usuario criado, mas faltou telefone ou link para enviar o primeiro acesso.'
+            }
+        } catch (sendError) {
+            console.error('[users][POST] first-access whatsapp failed:', sendError)
+            inviteWarning = 'Usuario criado, mas houve falha ao enviar o link de primeiro acesso no WhatsApp.'
         }
 
         return NextResponse.json(
             {
-                message: 'Usuario criado com sucesso',
+                message: whatsappInviteSent
+                    ? 'Usuario criado com sucesso e link de primeiro acesso enviado no WhatsApp.'
+                    : 'Usuario criado com sucesso.',
                 user: adminUser,
+                whatsapp_invite_sent: whatsappInviteSent,
+                invite_warning: inviteWarning,
+                ...(whatsappInviteSent ? {} : { first_access_link: firstAccessLink }),
             },
             { status: 201 }
         )
@@ -218,7 +468,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// PUT - update an existing user
 export async function PUT(request: NextRequest) {
     try {
         const access = await verifyUserManagerAccess()
@@ -251,18 +500,18 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Usuario nao encontrado.' }, { status: 404 })
         }
 
-        if (!access.can_grant_master) {
-            if (newIsMaster !== undefined) {
-                return NextResponse.json({ error: 'Somente super admin pode alterar perfil master.' }, { status: 403 })
-            }
-
-            // Perfis sem privilegio master nao podem desativar super admin.
-            if (targetUser.is_master && is_active === false) {
-                return NextResponse.json({ error: 'Somente super admin pode desativar outro super admin.' }, { status: 403 })
-            }
+        if (!access.can_grant_master && targetUser.is_master) {
+            return NextResponse.json({ error: 'Somente super admin pode editar um admin master.' }, { status: 403 })
         }
 
-        // Update admin_users
+        if (!access.can_grant_master && newIsMaster !== undefined) {
+            return NextResponse.json({ error: 'Somente super admin pode alterar perfil master.' }, { status: 403 })
+        }
+
+        if (access.can_grant_master) {
+            await ensureNotRemovingLastActiveMaster(admin, targetUser, { is_master: newIsMaster, is_active })
+        }
+
         const updateData: any = { updated_at: new Date().toISOString() }
         if (name !== undefined) updateData.name = name
         if (phone !== undefined) updateData.phone = phone
@@ -277,23 +526,56 @@ export async function PUT(request: NextRequest) {
         const { error } = await admin.from('admin_users').update(updateData).eq('id', id)
         if (error) throw error
 
-        // Update sectors
         if (sector_ids !== undefined) {
-            await admin.from('admin_user_sectors').delete().eq('user_id', id)
+            const normalizedSectorIds = normalizeSectorIds(sector_ids)
+            await ensureValidSectorIds(admin, normalizedSectorIds)
 
-            if (sector_ids.length > 0) {
-                const links = sector_ids.map((sid: string) => ({
+            const { data: currentLinks, error: currentLinksError } = await admin
+                .from('admin_user_sectors')
+                .select('sector_id')
+                .eq('user_id', id)
+
+            if (currentLinksError) throw currentLinksError
+
+            const currentSectorIds = new Set((currentLinks || []).map((row: any) => row.sector_id))
+            const nextSectorIds = new Set(normalizedSectorIds)
+
+            const toDelete = [...currentSectorIds].filter((sid) => !nextSectorIds.has(sid))
+            const toInsert = [...nextSectorIds].filter((sid) => !currentSectorIds.has(sid))
+
+            if (toDelete.length > 0) {
+                const { error: deleteError } = await admin
+                    .from('admin_user_sectors')
+                    .delete()
+                    .eq('user_id', id)
+                    .in('sector_id', toDelete)
+
+                if (deleteError) throw deleteError
+            }
+
+            if (toInsert.length > 0) {
+                const links = toInsert.map((sid: string) => ({
                     user_id: id,
                     sector_id: sid,
                 }))
-                await admin.from('admin_user_sectors').insert(links)
+
+                const { error: insertError } = await admin.from('admin_user_sectors').insert(links)
+                if (insertError) throw insertError
             }
         }
 
-        // Fetch updated user to sync alerts
-        const { data: updatedUser } = await admin.from('admin_users').select('*').eq('id', id).single()
+        const { data: updatedUser } = await admin
+            .from('admin_users')
+            .select('id, name, phone')
+            .eq('id', id)
+            .single()
+
         if (updatedUser) {
-            await syncAlertContacts(admin, id, updatedUser.name, updatedUser.phone)
+            try {
+                await syncAlertContacts(admin, id, updatedUser.name, updatedUser.phone)
+            } catch (syncError) {
+                console.error('[users][PUT] syncAlertContacts failed:', syncError)
+            }
         }
 
         return NextResponse.json({ success: true })
@@ -301,3 +583,160 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
+
+export async function PATCH(request: NextRequest) {
+    try {
+        const access = await verifyUserManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+
+        const { action, id } = await request.json()
+        if (action !== 'send_password_reset') {
+            return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })
+        }
+
+        if (!access.can_grant_master && !access.can_create_users) {
+            return NextResponse.json({ error: 'Somente master e diretoria podem enviar redefinicao de senha.' }, { status: 403 })
+        }
+
+        if (!id) return NextResponse.json({ error: 'ID e obrigatorio.' }, { status: 400 })
+
+        const admin = createAdminClient()
+        const { data: targetUser, error: targetUserError } = await admin
+            .from('admin_users')
+            .select('id, name, email, phone, is_master')
+            .eq('id', id)
+            .single()
+
+        if (targetUserError || !targetUser) {
+            return NextResponse.json({ error: 'Usuario nao encontrado.' }, { status: 404 })
+        }
+
+        if (!access.can_grant_master && targetUser.is_master) {
+            return NextResponse.json({ error: 'Somente admin master pode redefinir senha de outro master.' }, { status: 403 })
+        }
+
+        const normalizedEmail = String(targetUser.email || '').trim().toLowerCase()
+        const normalizedPhone = String(targetUser.phone || '').trim()
+        if (!normalizedEmail) {
+            return NextResponse.json({ error: 'Usuario sem email cadastrado para redefinicao de senha.' }, { status: 400 })
+        }
+        if (!normalizedPhone) {
+            return NextResponse.json({ error: 'Usuario sem telefone cadastrado para envio no WhatsApp.' }, { status: 400 })
+        }
+
+        const resetRedirectUrl = getPasswordResetRedirectUrl(request)
+        const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+            type: 'recovery',
+            email: normalizedEmail,
+            options: {
+                redirectTo: resetRedirectUrl,
+            },
+        })
+
+        if (linkError) throw linkError
+
+        const resetLink = linkData.properties?.action_link
+        if (!resetLink) throw new Error('Nao foi possivel gerar link de redefinicao.')
+
+        let whatsappResetSent = false
+        let resetWarning: string | null = null
+        try {
+            const sendResult = await sendPasswordResetWhatsAppMessage(admin, {
+                phone: normalizedPhone,
+                name: targetUser.name,
+                resetLink,
+            })
+            whatsappResetSent = Boolean(sendResult.sent)
+
+            if (!sendResult.sent && sendResult.reason === 'global_instance_not_available') {
+                resetWarning = 'Link gerado, mas a instancia global do agente nao esta conectada para envio no WhatsApp.'
+            }
+            if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
+                resetWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
+            }
+        } catch (sendError) {
+            console.error('[users][PATCH] password reset whatsapp failed:', sendError)
+            resetWarning = 'Link gerado, mas houve falha ao enviar no WhatsApp.'
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: whatsappResetSent
+                ? 'Link de redefinicao enviado no WhatsApp com sucesso.'
+                : 'Link de redefinicao gerado com sucesso.',
+            whatsapp_reset_sent: whatsappResetSent,
+            reset_warning: resetWarning,
+            ...(whatsappResetSent ? {} : { reset_link: resetLink }),
+        })
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 })
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const access = await verifyUserManagerAccess()
+        if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+        if (!access.can_grant_master) {
+            return NextResponse.json({ error: 'Somente admin master pode excluir usuarios.' }, { status: 403 })
+        }
+
+        const { id } = await request.json()
+        if (!id) return NextResponse.json({ error: 'ID e obrigatorio.' }, { status: 400 })
+        if (id === access.id) {
+            return NextResponse.json({ error: 'Nao e permitido excluir o proprio usuario.' }, { status: 400 })
+        }
+
+        const admin = createAdminClient()
+        const { data: targetUser, error: targetUserError } = await admin
+            .from('admin_users')
+            .select('id, auth_user_id, is_master, is_active')
+            .eq('id', id)
+            .single()
+
+        if (targetUserError || !targetUser) {
+            return NextResponse.json({ error: 'Usuario nao encontrado.' }, { status: 404 })
+        }
+
+        await ensureNotRemovingLastActiveMaster(admin, targetUser, {
+            is_master: false,
+            is_active: false,
+        })
+
+        // Remove vinculacoes operacionais para evitar bloqueio por FK.
+        const { error: deleteSectorsLinksError } = await admin
+            .from('admin_user_sectors')
+            .delete()
+            .eq('user_id', id)
+        if (deleteSectorsLinksError) throw deleteSectorsLinksError
+
+        const { error: deleteWhatsappLinksError } = await admin
+            .from('whatsapp_instances')
+            .delete()
+            .eq('admin_user_id', id)
+        if (deleteWhatsappLinksError) throw deleteWhatsappLinksError
+
+        const { error: deleteUserError } = await admin.from('admin_users').delete().eq('id', id)
+        if (deleteUserError) throw deleteUserError
+
+        let authDeletionWarning: string | null = null
+        const authUserId = String(targetUser.auth_user_id || '').trim()
+        if (authUserId) {
+            const { error: authDeleteError } = await admin.auth.admin.deleteUser(authUserId)
+            if (authDeleteError) {
+                authDeletionWarning = 'Usuario removido da base interna, mas houve falha ao remover do Auth.'
+            }
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: authDeletionWarning
+                ? 'Usuario excluido com ressalvas.'
+                : 'Usuario excluido com sucesso.',
+            warning: authDeletionWarning,
+        })
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 })
+    }
+}
+
