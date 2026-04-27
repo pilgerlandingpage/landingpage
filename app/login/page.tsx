@@ -36,6 +36,7 @@ function LoginPageContent() {
 
     const modeType = String(searchParams.get('type') || '').toLowerCase()
     const passwordUpdated = searchParams.get('password_updated') === '1'
+    const authError = searchParams.get('auth_error')
     const isPasswordSetupMode =
         searchParams.get('first_access') === '1' ||
         searchParams.get('password_reset') === '1' ||
@@ -69,6 +70,17 @@ function LoginPageContent() {
             setRecoveryMessage('Senha definida com sucesso. Entre com seu email e nova senha.')
         }
     }, [passwordUpdated, isPasswordSetupMode])
+
+    useEffect(() => {
+        if (!authError || isPasswordSetupMode) return
+
+        if (authError === 'otp_expired') {
+            setError('Link expirado ou ja utilizado. Solicite um novo link ao administrador.')
+            return
+        }
+
+        setError('Nao foi possivel validar o link. Solicite um novo link ao administrador.')
+    }, [authError, isPasswordSetupMode])
 
     useEffect(() => {
         if (!isPasswordSetupMode) return

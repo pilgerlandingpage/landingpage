@@ -5,6 +5,7 @@ import HomeSearchBar from '@/components/marketplace/HomeSearchBar'
 import { Search, Filter, Warehouse, Building2, Palmtree, Mountain, Gem } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
 import GlobalHeader from '@/components/layout/GlobalHeader'
+import AuthErrorRedirect from '@/components/auth/AuthErrorRedirect'
 
 // This is a Server Component
 export default async function MarketplaceHome() {
@@ -38,6 +39,7 @@ export default async function MarketplaceHome() {
 
   return (
     <div className="marketplace-container">
+      <AuthErrorRedirect />
       <GlobalHeader />
 
       {/* === COMPACT HERO STRIP (scrolls away) === */}
