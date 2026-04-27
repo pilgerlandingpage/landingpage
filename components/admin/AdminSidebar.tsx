@@ -14,6 +14,7 @@ import {
     LayoutDashboard,
     Loader2,
     LogOut,
+    Menu,
     Megaphone,
     MessageSquareHeart,
     Radar,
@@ -26,6 +27,7 @@ import {
     UserCog,
     Users,
     Wrench,
+    X,
     Zap,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -159,6 +161,7 @@ export default function AdminSidebar() {
         '/admin/ads': true,
     })
     const [expandedSubGroups, setExpandedSubGroups] = useState<Record<string, boolean>>({})
+    const [mobileOpen, setMobileOpen] = useState(false)
 
     const subGroupKey = (parentHref: string, groupLabel: string) => `${parentHref}::${groupLabel}`
 
@@ -217,6 +220,8 @@ export default function AdminSidebar() {
     const toggleSubmenu = (href: string) => {
         setExpandedMenus(prev => ({ ...prev, [href]: !prev[href] }))
     }
+
+    const closeMobileMenu = () => setMobileOpen(false)
 
     const handleLogout = async () => {
         await fetch('/api/admin/user-access', {
@@ -295,7 +300,17 @@ export default function AdminSidebar() {
     const navSections = buildNavSections()
 
     return (
-        <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <>
+        <button
+            type="button"
+            className="admin-mobile-menu-button"
+            onClick={() => setMobileOpen(prev => !prev)}
+            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+        >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+        {mobileOpen && <div className="admin-mobile-sidebar-backdrop" onClick={closeMobileMenu} />}
+        <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <div className="admin-sidebar-logo">
                 <h2>Pilger Admin</h2>
                 {userName ? (
@@ -328,13 +343,17 @@ export default function AdminSidebar() {
                                         <Link
                                             href={item.href}
                                             onClick={e => {
-                                                if (!item.subItems) return
+                                                if (!item.subItems) {
+                                                    closeMobileMenu()
+                                                    return
+                                                }
 
                                                 if (isParentActive) {
                                                     e.preventDefault()
                                                     toggleSubmenu(item.href)
                                                 } else {
                                                     setExpandedMenus(prev => ({ ...prev, [item.href]: true }))
+                                                    closeMobileMenu()
                                                 }
                                             }}
                                             className={`admin-nav-item ${isParentActive ? 'active' : ''}`}
@@ -393,6 +412,7 @@ export default function AdminSidebar() {
                                                                                 <Link
                                                                                     key={child.href}
                                                                                     href={child.href}
+                                                                                    onClick={closeMobileMenu}
                                                                                     className={`admin-nav-item ${isChildActive ? 'active text-gold' : ''}`}
                                                                                     style={{
                                                                                         fontSize: '0.84rem',
@@ -417,6 +437,7 @@ export default function AdminSidebar() {
                                                         <Link
                                                             key={subItem.href}
                                                             href={subItem.href}
+                                                            onClick={closeMobileMenu}
                                                             className={`admin-nav-item ${isSubItemActive ? 'active text-gold' : ''}`}
                                                             style={{
                                                                 fontSize: '0.85rem',
@@ -445,6 +466,7 @@ export default function AdminSidebar() {
             <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid var(--border-color)' }}>
                 <Link
                     href="/admin/minha-conta"
+                    onClick={closeMobileMenu}
                     className="admin-nav-item"
                     style={{
                         width: '100%',
@@ -476,5 +498,6 @@ export default function AdminSidebar() {
                 </button>
             </div>
         </aside>
+        </>
     )
 }
