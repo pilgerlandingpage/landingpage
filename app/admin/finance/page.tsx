@@ -17,18 +17,9 @@ import {
     X,
 } from 'lucide-react'
 import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts'
+    SimpleDonutChart,
+    SimpleLineChart,
+} from '@/components/admin/SimpleCharts'
 
 type EntryType = 'income' | 'expense'
 type PaymentStatus = 'paid' | 'pending' | 'cancelled'
@@ -776,6 +767,8 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                 label: `${row.month.slice(5, 7)}/${row.month.slice(2, 4)}`,
             }))
     }, [filteredEntries])
+
+    const monthlySeriesChart = useMemo(() => monthlySeries.slice(-12), [monthlySeries])
 
     const expenseByCategory = useMemo(() => {
         const map = new Map<string, number>()
@@ -1850,53 +1843,18 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             <div className="finance-charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Evolucao mensal</div>
-                    <div className="admin-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
-                            <AreaChart data={monthlySeries} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-                                <defs>
-                                    <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.45} />
-                                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0.02} />
-                                    </linearGradient>
-                                    <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.45} />
-                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
-                                <XAxis dataKey="label" stroke="#9ca3af" />
-                                <YAxis stroke="#9ca3af" width={46} />
-                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Area type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" fill="url(#incomeGradient)" strokeWidth={2} />
-                                <Area type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" fill="url(#expenseGradient)" strokeWidth={2} />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <SimpleLineChart
+                        data={monthlySeriesChart}
+                        series={[
+                            { key: 'expense', name: 'Despesas', color: '#ef4444' },
+                            { key: 'income', name: 'Receitas', color: '#22c55e' },
+                        ]}
+                    />
                 </div>
 
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Despesas por categoria</div>
-                    <div className="admin-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
-                            <PieChart>
-                                <Pie
-                                    data={expenseByCategory}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    innerRadius={54}
-                                    outerRadius={92}
-                                    paddingAngle={2}
-                                >
-                                    {expenseByCategory.map((_, idx) => (
-                                        <Cell key={`cell-${idx}`} fill={EXPENSE_COLORS[idx % EXPENSE_COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend wrapperStyle={{ fontSize: 12 }} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <SimpleDonutChart data={expenseByCategory} colors={EXPENSE_COLORS} />
                 </div>
             </div>
             )}

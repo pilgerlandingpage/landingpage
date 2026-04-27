@@ -10,18 +10,9 @@ import {
     UserCheck,
 } from 'lucide-react'
 import {
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts'
+    SimpleDonutChart,
+    SimpleLineChart,
+} from '@/components/admin/SimpleCharts'
 
 type EntryType = 'income' | 'expense'
 
@@ -216,6 +207,8 @@ export default function AdminOverviewPage() {
             .map(item => ({ ...item, label: formatMonthLabel(item.month) }))
     }, [financeEntries])
 
+    const monthlyFinanceChart = useMemo(() => monthlyFinance.slice(-12), [monthlyFinance])
+
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)' }}>
@@ -315,45 +308,20 @@ export default function AdminOverviewPage() {
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <TrendingUp size={18} /> Evolucao financeira mensal
                     </div>
-                    <div className="overview-chart-box admin-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
-                            <LineChart data={monthlyFinance} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
-                                <XAxis dataKey="label" stroke="#9ca3af" />
-                                <YAxis stroke="#9ca3af" width={46} />
-                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Line type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" strokeWidth={2} dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <SimpleLineChart
+                        data={monthlyFinanceChart}
+                        series={[
+                            { key: 'expense', name: 'Despesas', color: '#ef4444' },
+                            { key: 'income', name: 'Receitas', color: '#22c55e' },
+                        ]}
+                    />
                 </div>
 
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <CircleDollarSign size={18} /> Despesas por categoria
                     </div>
-                    <div className="overview-chart-box admin-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
-                            <PieChart>
-                                <Pie
-                                    data={expenseByCategory}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    innerRadius={54}
-                                    outerRadius={92}
-                                    paddingAngle={2}
-                                >
-                                    {expenseByCategory.map((_, idx) => (
-                                        <Cell key={`cell-${idx}`} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend wrapperStyle={{ fontSize: 12 }} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <SimpleDonutChart data={expenseByCategory} colors={CHART_COLORS} />
                 </div>
             </div>
 
