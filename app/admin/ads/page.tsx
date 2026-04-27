@@ -532,7 +532,8 @@ export default function AdsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
                         <div className="chart-title">📊 Gasto e conversões por campanha</div>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="admin-chart-frame ads-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={spendBarData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
                                 <XAxis dataKey="name" stroke="#666" fontSize={11} angle={-20} textAnchor="end" height={60} />
@@ -540,16 +541,18 @@ export default function AdsPage() {
                                 <YAxis yAxisId="right" orientation="right" stroke="#666" fontSize={11} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend />
-                                <Bar yAxisId="left" dataKey="R$ Gasto" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                                <Bar yAxisId="left" dataKey="R$ Gasto" fill="#f59e0b" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
                                 <Bar yAxisId="right" dataKey="Conversões" fill="#22c55e" radius={[6, 6, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
+                        </div>
                     </div>
 
                     <div className="chart-card">
                         <div className="chart-title">🧩 Distribuição de gasto</div>
                         {spendPieData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
+                            <div className="admin-chart-frame ads-chart-frame">
+                            <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
                                         data={spendPieData}
@@ -561,6 +564,8 @@ export default function AdsPage() {
                                         paddingAngle={2}
                                         label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                                         labelLine={{ stroke: '#555' }}
+                                        isAnimationActive
+                                        animationDuration={900}
                                     >
                                         {spendPieData.map((_, index) => (
                                             <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -573,6 +578,7 @@ export default function AdsPage() {
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
+                            </div>
                         ) : (
                             <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                                 Sem dados de gasto
@@ -587,7 +593,8 @@ export default function AdsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
                         <div className="chart-title">📈 Performance por Campanha</div>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="admin-chart-frame ads-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={performanceData}>
                                 <defs>
                                     <linearGradient id="gradImpr" x1="0" y1="0" x2="0" y2="1">
@@ -606,15 +613,17 @@ export default function AdsPage() {
                                 <Legend />
                                 <Area type="monotone" dataKey="Impressões" stroke="#6366f1" fill="url(#gradImpr)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="Alcance" stroke="#3b82f6" fill="url(#gradReach)" strokeWidth={2} />
-                                <Area type="monotone" dataKey="Cliques" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="Cliques" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} animationBegin={200} />
                             </AreaChart>
                         </ResponsiveContainer>
+                        </div>
                     </div>
 
                     {cpaData.length > 0 && (
                         <div className="chart-card">
                             <div className="chart-title">🎯 CPA por Campanha (menor = melhor)</div>
-                            <ResponsiveContainer width="100%" height={300}>
+                            <div className="admin-chart-frame ads-chart-frame">
+                            <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={cpaData} layout="vertical">
                                     <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
                                     <XAxis type="number" stroke="#666" fontSize={11} />
@@ -622,13 +631,14 @@ export default function AdsPage() {
                                     <Tooltip formatter={(v: any) => formatCurrency(v)}
                                         contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }}
                                         itemStyle={{ color: '#f5f5f5' }} />
-                                    <Bar dataKey="CPA" radius={[0, 4, 4, 0]}>
+                                    <Bar dataKey="CPA" radius={[0, 4, 4, 0]} isAnimationActive animationDuration={900}>
                                         {cpaData.map((entry, index) => (
                                             <Cell key={index} fill={entry.CPA < avgCpa ? '#22c55e' : entry.CPA > avgCpa * 1.5 ? '#ef4444' : '#f59e0b'} />
                                         ))}
                                     </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
+                            </div>
                         </div>
                     )}
                 </div>

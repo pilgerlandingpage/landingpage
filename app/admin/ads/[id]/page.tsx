@@ -425,8 +425,8 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                             Nenhuma métrica coletada ainda. Os dados aparecem após o primeiro polling (a cada 1h).
                         </div>
                     ) : (
-                        <div style={{ width: '100%', height: 280 }}>
-                            <ResponsiveContainer>
+                        <div className="admin-chart-frame ads-chart-frame ads-chart-frame-detail">
+                            <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                                     <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
@@ -435,10 +435,10 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                                         contentStyle={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.8rem' }}
                                         labelStyle={{ color: 'var(--text-primary)', fontWeight: 600 }}
                                     />
-                                    {chartTab === 'spend' && <Area type="monotone" dataKey="spend" name="Gasto (R$)" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} />}
-                                    {chartTab === 'leads' && <Area type="monotone" dataKey="leads" name="Leads" stroke="#6366f1" fill="rgba(99,102,241,0.1)" strokeWidth={2} />}
-                                    {chartTab === 'ctr' && <Area type="monotone" dataKey="ctr" name="CTR (%)" stroke="#0ea5e9" fill="rgba(14,165,233,0.1)" strokeWidth={2} />}
-                                    {chartTab === 'cpa' && <Area type="monotone" dataKey="cpa" name="CPA (R$)" stroke="#f59e0b" fill="rgba(245,158,11,0.1)" strokeWidth={2} />}
+                                    {chartTab === 'spend' && <Area type="monotone" dataKey="spend" name="Gasto (R$)" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} />}
+                                    {chartTab === 'leads' && <Area type="monotone" dataKey="leads" name="Leads" stroke="#6366f1" fill="rgba(99,102,241,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} />}
+                                    {chartTab === 'ctr' && <Area type="monotone" dataKey="ctr" name="CTR (%)" stroke="#0ea5e9" fill="rgba(14,165,233,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} />}
+                                    {chartTab === 'cpa' && <Area type="monotone" dataKey="cpa" name="CPA (R$)" stroke="#f59e0b" fill="rgba(245,158,11,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} />}
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
