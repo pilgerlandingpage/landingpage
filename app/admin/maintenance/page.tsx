@@ -161,6 +161,7 @@ export default function MaintenancePage() {
     const [loadingVoices, setLoadingVoices] = useState(false)
     const [llmCreditLoading, setLlmCreditLoading] = useState(false)
     const [llmCreditCheck, setLlmCreditCheck] = useState<LLMCreditCheck | null>(null)
+    const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
 
     const dailyDays = parseCsvSet(configs['pilger_daily_days'], '0,1,2,3,4,5,6')
     const dailyHours = parseCsvSet(configs['pilger_daily_time'], '23')
@@ -317,7 +318,29 @@ export default function MaintenancePage() {
 
     useEffect(() => {
         fetchConfigs()
+        const timer = setInterval(fetchConfigs, 60000)
+        return () => clearInterval(timer)
     }, [fetchConfigs])
+
+    const syncAdsSpendNow = async () => {
+        setSyncingAdsSpend(true)
+        try {
+            const res = await fetch('/api/admin/finance/sync-ads-spend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao sincronizar trafego pago')
+            }
+            await fetchConfigs()
+        } catch (err) {
+            console.error('Error syncing ads spend:', err)
+        } finally {
+            setSyncingAdsSpend(false)
+        }
+    }
 
     const runLLMCreditCheck = useCallback(async () => {
         setLlmCreditLoading(true)
@@ -1085,9 +1108,19 @@ export default function MaintenancePage() {
                                 Minutos entre leituras de metricas e sincronizacao financeira.
                             </div>
                         </div>
-                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'grid', gap: '8px' }}>
                             <div>Ultima conclusao: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_run_at'])}</b></div>
-                            <div style={{ marginTop: '4px' }}>Ultimo inicio: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_started_at'])}</b></div>
+                            <div>Ultimo inicio: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_started_at'])}</b></div>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-secondary"
+                                onClick={syncAdsSpendNow}
+                                disabled={syncingAdsSpend}
+                                style={{ justifySelf: 'start', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            >
+                                <RefreshCw size={14} className={syncingAdsSpend ? 'spin' : ''} />
+                                {syncingAdsSpend ? 'Sincronizando...' : 'Sincronizar agora'}
+                            </button>
                         </div>
                     </div>
 

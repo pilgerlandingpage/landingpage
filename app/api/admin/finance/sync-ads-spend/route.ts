@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 import { syncHistoricalPaidAdsSpendToFinance, syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
 
+async function saveAppConfig(admin: any, key: string, value: string) {
+    const { error } = await admin
+        .from('app_config')
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+
+    if (error) throw new Error(`Erro ao salvar ${key}: ${error.message}`)
+}
+
 async function getCurrentAdminUser() {
     const supabase = await createServerSupabase()
     const { data: authData, error: authError } = await supabase.auth.getUser()
@@ -61,9 +69,17 @@ export async function POST(request: Request) {
             : undefined
 
         const admin = createAdminClient()
+        await saveAppConfig(admin, 'ads_sync_last_started_at', new Date().toISOString())
+
         const result = body?.historical
             ? await syncHistoricalPaidAdsSpendToFinance(admin)
             : await syncPaidAdsSpendToFinance(admin, { month })
+
+        const now = new Date().toISOString()
+        await Promise.all([
+            saveAppConfig(admin, 'ads_sync_last_run_at', now),
+            saveAppConfig(admin, 'ads_sync_last_started_at', now),
+        ])
 
         return NextResponse.json({ success: true, ...result })
     } catch (err: any) {
