@@ -13,30 +13,17 @@ import {
     markAsRead,
     downloadMedia
 } from '../uazapi'
+import {
+    appendLeadConversationLog,
+    ensureWhatsAppLead,
+    syncWhatsAppLeadSnapshot,
+} from '../whatsapp/lead-sync'
 
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-}
-
-async function findLeadIdByPhone(
-    supabase: ReturnType<typeof getSupabase>,
-    phone: string
-): Promise<string | null> {
-    const clean = String(phone || '').replace(/\D/g, '')
-    if (!clean) return null
-
-    const { data } = await supabase
-        .from('leads')
-        .select('id')
-        .or(`phone.eq.${clean},phone_e164.eq.${clean}`)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-    return data?.id || null
 }
 
 function getSaoPauloTimeContext() {
@@ -292,7 +279,7 @@ async function sendShiftConsolidatedSummaryIfNeeded(
     const windowStart = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
     const { data: conversations } = await supabase
         .from('whatsapp_ai_conversations')
-        .select('id, lead_phone, lead_data_extracted, qualification_score, updated_at')
+        .select('id, lead_phone, messages, updated_at')
         .eq('instance_id', instanceId)
         .eq('broker_id', brokerId)
         .gte('updated_at', windowStart)
@@ -1551,7 +1538,14 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 2: Find or create conversation ──
         const conversation = await step.run('find-or-create-conversation', async () => {
-            const leadId = await findLeadIdByPhone(supabase, cleanPhone)
+            await ensureWhatsAppLead(supabase, {
+                phone: cleanPhone,
+                senderName,
+                instanceId,
+                instanceName,
+                brokerId: broker.id,
+                acquiredVia: 'whatsapp',
+            }).catch(() => null)
             const { data: existing } = await supabase
                 .from('whatsapp_ai_conversations')
                 .select('*')
@@ -1563,13 +1557,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                 .maybeSingle()
 
             if (existing) {
-                if (!existing.lead_id && leadId) {
-                    await supabase
-                        .from('whatsapp_ai_conversations')
-                        .update({ lead_id: leadId, updated_at: new Date().toISOString() })
-                        .eq('id', existing.id)
-                    existing.lead_id = leadId
-                }
                 // Co-piloto ativo: conversas antigas marcadas como transferred
                 // voltam para active para a IA global seguir atendendo normalmente.
                 if (existing.status === 'transferred') {
@@ -1585,7 +1572,6 @@ export const processWhatsAppMessage = inngest.createFunction(
             const { data: newConv } = await supabase
                 .from('whatsapp_ai_conversations')
                 .insert({
-                    lead_id: leadId,
                     broker_id: broker.id,
                     instance_id: instanceId,
                     lead_phone: cleanPhone,
@@ -2041,6 +2027,10 @@ export const processWhatsAppMessage = inngest.createFunction(
                 role: 'user',
                 content: inputText,
                 type: isAudio ? 'audio' : 'text',
+                source: 'lead',
+                message_id: messageId || null,
+                instance_id: instanceId,
+                broker_id: broker.id,
                 timestamp: new Date().toISOString()
             }]
 
@@ -2053,6 +2043,9 @@ export const processWhatsAppMessage = inngest.createFunction(
                 role: 'assistant',
                 content: response.text,
                 type: 'text',
+                source: quickSocialReply ? 'quick_reply' : 'agent',
+                instance_id: instanceId,
+                broker_id: broker.id,
                 timestamp: new Date().toISOString()
             })
 
@@ -2060,9 +2053,6 @@ export const processWhatsAppMessage = inngest.createFunction(
             const updateData: any = {
                 messages: updatedMessages,
                 updated_at: new Date().toISOString()
-            }
-            if (response.extractedData) {
-                updateData.lead_data_extracted = response.extractedData
             }
             await supabase
                 .from('whatsapp_ai_conversations')
@@ -2087,6 +2077,20 @@ export const processWhatsAppMessage = inngest.createFunction(
         if (!aiResponse.shouldTransfer && transferThreshold > 0 && thresholdScore >= transferThreshold) {
             aiResponse.shouldTransfer = true
         }
+
+        await step.run('sync-lead-snapshot', async () => {
+            await syncWhatsAppLeadSnapshot(supabase, {
+                phone: cleanPhone,
+                senderName,
+                instanceId,
+                instanceName,
+                brokerId: broker.id,
+                acquiredVia: 'whatsapp',
+                messages: aiResponse.updatedMessages,
+                extractedData: aiResponse.extractedData || null,
+                shouldTransfer: aiResponse.shouldTransfer,
+            })
+        })
 
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
         await step.run('ensure-online', async () => {
@@ -2407,8 +2411,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                     .from('whatsapp_ai_conversations')
                     .update({
                         status: 'active',
-                        summary,
-                        transferred_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', conversation.id)
@@ -2807,11 +2809,15 @@ export const detectHumanTakeover = inngest.createFunction(
                     .maybeSingle()
 
                 if (inst?.broker_id) {
-                    const leadId = await findLeadIdByPhone(supabase, recipientPhone)
+                    await ensureWhatsAppLead(supabase, {
+                        phone: recipientPhone,
+                        instanceId,
+                        brokerId: inst.broker_id,
+                        acquiredVia: 'whatsapp',
+                    }).catch(() => null)
                     const { data: created } = await supabase
                         .from('whatsapp_ai_conversations')
                         .insert({
-                            lead_id: leadId,
                             broker_id: inst.broker_id,
                             instance_id: instanceId,
                             lead_phone: recipientPhone,
@@ -2849,6 +2855,23 @@ export const detectHumanTakeover = inngest.createFunction(
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', currentConv.id)
+
+                if (cleanHumanText) {
+                    const lead = await ensureWhatsAppLead(supabase, {
+                        phone: recipientPhone,
+                        instanceId,
+                        brokerId: currentConv.broker_id || null,
+                        acquiredVia: 'whatsapp',
+                    }).catch(() => null)
+                    await appendLeadConversationLog(supabase, lead?.id, {
+                        role: 'assistant',
+                        content: cleanHumanText,
+                        type: 'text',
+                        source: 'human',
+                        instance_id: instanceId,
+                        broker_id: currentConv.broker_id || null,
+                    }).catch(() => { })
+                }
 
                 // Send shift handoff summary to broker phone (if configured)
                 if (currentConv.broker_id) {
@@ -2911,7 +2934,13 @@ export const shadowAgentResponse = inngest.createFunction(
 
         // Find or create conversation
         const conversation = await step.run('find-or-create-shadow-conv', async () => {
-            const leadId = await findLeadIdByPhone(supabase, cleanPhone)
+            await ensureWhatsAppLead(supabase, {
+                phone: cleanPhone,
+                senderName: null,
+                instanceId,
+                acquiredVia: 'whatsapp',
+            }).catch(() => null)
+
             const { data: existing } = await supabase
                 .from('whatsapp_broker_conversations')
                 .select('*')
@@ -2923,19 +2952,12 @@ export const shadowAgentResponse = inngest.createFunction(
                 .maybeSingle()
 
             if (existing) {
-                if (!existing.lead_id && leadId) {
-                    await supabase
-                        .from('whatsapp_broker_conversations')
-                        .update({ lead_id: leadId, updated_at: new Date().toISOString() })
-                        .eq('id', existing.id)
-                    existing.lead_id = leadId
-                }
                 return existing
             }
 
             const { data: newConv } = await supabase
                 .from('whatsapp_broker_conversations')
-                .insert({ lead_id: leadId, broker_user_id: user.id, lead_phone: cleanPhone, messages: [], is_shadow_agent: true })
+                .insert({ broker_user_id: user.id, lead_phone: cleanPhone, messages: [], is_shadow_agent: true })
                 .select()
                 .single()
             return newConv
@@ -2946,7 +2968,11 @@ export const shadowAgentResponse = inngest.createFunction(
         // Generate AI response
         const responseText = await step.run('generate-shadow-response', async () => {
             const updatedMessages = [...(conversation.messages || []), {
-                role: 'user', content: messageText, timestamp: new Date().toISOString()
+                role: 'user',
+                content: messageText,
+                source: 'lead',
+                instance_id: instanceId,
+                timestamp: new Date().toISOString()
             }]
 
             const configs = await loadAIConfigs(supabase)
@@ -2989,12 +3015,28 @@ export const shadowAgentResponse = inngest.createFunction(
             }
 
             const finalText = text || 'O corretor está indisponível. Retornaremos em breve.'
-            updatedMessages.push({ role: 'assistant', content: finalText, timestamp: new Date().toISOString() })
+            updatedMessages.push({
+                role: 'assistant',
+                content: finalText,
+                source: 'shadow_agent',
+                instance_id: instanceId,
+                timestamp: new Date().toISOString()
+            })
 
             await supabase
                 .from('whatsapp_broker_conversations')
                 .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
                 .eq('id', conversation.id)
+
+            await syncWhatsAppLeadSnapshot(supabase, {
+                phone: cleanPhone,
+                senderName: null,
+                instanceId,
+                acquiredVia: 'whatsapp',
+                messages: updatedMessages,
+                extractedData: null,
+                shouldTransfer: false,
+            }).catch(() => null)
 
             return finalText
         })
@@ -3108,6 +3150,3 @@ export const whatsappKeepOnline = inngest.createFunction(
         return { action: 'presence_set', count: instances.length, results }
     }
 )
-
-
-

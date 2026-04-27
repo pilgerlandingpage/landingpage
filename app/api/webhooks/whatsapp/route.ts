@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
 import { markAsRead, setPresenceAvailable } from '@/lib/uazapi'
 import { uploadImageToR2 } from '@/lib/storage/r2'
+import { appendLeadConversationLog, ensureWhatsAppLead } from '@/lib/whatsapp/lead-sync'
 
 function getSupabase() {
     return createClient(
@@ -287,6 +288,21 @@ export async function POST(request: NextRequest) {
             : 'text'
         auditMessageType = messageType
 
+        let storedMessageContent = messageText || ''
+        if (!storedMessageContent && isButtonResponse) {
+            storedMessageContent = buttonResponseTitle || `[botao: ${buttonResponseId}]`
+        } else if (!storedMessageContent && isPollResponse) {
+            storedMessageContent = `[enquete: ${Array.isArray(pollVotes) ? pollVotes.join(', ') : pollVotes}]`
+        } else if (!storedMessageContent && isLocation) {
+            storedMessageContent = `[localizacao: ${receivedLatitude}, ${receivedLongitude}]`
+        } else if (!storedMessageContent && isAudio) {
+            storedMessageContent = '[audio]'
+        } else if (!storedMessageContent && isDocument) {
+            storedMessageContent = `[${mediaType || 'midia'}${mediaFilename ? `: ${mediaFilename}` : ''}]`
+        } else if (!storedMessageContent && isReaction) {
+            storedMessageContent = `[reacao: ${reactionEmoji}]`
+        }
+
         // â”€â”€ Extract media decryption data (WhatsApp E2EE media keys) â”€â”€
         const audioMediaKey = messageData.content?.mediaKey || messageData.message?.audioMessage?.mediaKey || null
         const audioDirectPath = messageData.content?.directPath || messageData.message?.audioMessage?.directPath || null
@@ -483,6 +499,34 @@ export async function POST(request: NextRequest) {
             console.warn('[Webhook] Anti-loop check failed (non-fatal):', e)
         }
 
+        let syncedLead: any = null
+        if (!isFromMe) {
+            try {
+                syncedLead = await ensureWhatsAppLead(supabase, {
+                    phone: finalPhone,
+                    senderName,
+                    instanceId: instance.id,
+                    instanceName: instance.instance_name,
+                    brokerId: instance.broker_id || null,
+                    acquiredVia: 'whatsapp',
+                })
+                if (syncedLead?.id) {
+                    auditLeadId = syncedLead.id
+                    await appendLeadConversationLog(supabase, syncedLead.id, {
+                        role: 'user',
+                        content: storedMessageContent,
+                        type: messageType,
+                        source: 'lead',
+                        message_id: messageId,
+                        instance_id: instance.id,
+                        broker_id: instance.broker_id || null,
+                    })
+                }
+            } catch (e) {
+                console.warn('[Webhook] Lead sync failed:', e)
+            }
+        }
+
         // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // DISPATCH TO INNGEST (async processing)
         // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -493,6 +537,31 @@ export async function POST(request: NextRequest) {
             const recipientPhone = messageData.to?.replace(/@.+$/, '').replace(/\D/g, '')
                 || messageData.chatid?.replace(/@.+$/, '').replace(/\D/g, '')
                 || ''
+
+            try {
+                const outboundLead = await ensureWhatsAppLead(supabase, {
+                    phone: recipientPhone || finalPhone,
+                    senderName: null,
+                    instanceId: instance.id,
+                    instanceName: instance.instance_name,
+                    brokerId: instance.broker_id || null,
+                    acquiredVia: 'whatsapp',
+                })
+                if (outboundLead?.id && storedMessageContent) {
+                    auditLeadId = outboundLead.id
+                    await appendLeadConversationLog(supabase, outboundLead.id, {
+                        role: 'assistant',
+                        content: storedMessageContent,
+                        type: messageType,
+                        source: 'human',
+                        message_id: botMsgId || messageId,
+                        instance_id: instance.id,
+                        broker_id: instance.broker_id || null,
+                    })
+                }
+            } catch (e) {
+                console.warn('[Webhook] Outbound lead sync failed:', e)
+            }
 
             if (botMsgId) {
                 await inngest.send({
@@ -567,16 +636,7 @@ export async function POST(request: NextRequest) {
         // 2) Queue message for debounce batching (atomic INSERT, no race condition)
         try {
             // Build content from various message types
-            let msgContent = messageText || ''
-            if (!msgContent && isButtonResponse) {
-                msgContent = buttonResponseTitle || `[botÃ£o: ${buttonResponseId}]`
-            } else if (!msgContent && isPollResponse) {
-                msgContent = `[enquete: ${Array.isArray(pollVotes) ? pollVotes.join(', ') : pollVotes}]`
-            } else if (!msgContent && isLocation) {
-                msgContent = `[localizaÃ§Ã£o: ${receivedLatitude}, ${receivedLongitude}]`
-            } else if (!msgContent && isAudio) {
-                msgContent = '[audio]'
-            }
+            const msgContent = storedMessageContent
 
             if (msgContent && !isAudio) {
                 await supabase.from('app_config').insert({
