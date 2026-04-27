@@ -813,6 +813,15 @@ h6 {
   color: var(--text-primary);
 }
 
+.admin-chart-frame {
+  width: 100%;
+  min-width: 0;
+  height: 300px;
+  min-height: 260px;
+  position: relative;
+  overflow: hidden;
+}
+
 /* Data Table */
 .data-table {
   width: 100%;
@@ -1222,6 +1231,21 @@ h6 {
   .admin-content .recharts-wrapper,
   .admin-content .recharts-surface {
     max-width: 100% !important;
+  }
+
+  .admin-content .admin-chart-frame {
+    width: 100%;
+    min-width: 0;
+    height: 260px;
+    min-height: 240px;
+    overflow: hidden;
+  }
+
+  .admin-content .admin-chart-frame .recharts-responsive-container {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 260px !important;
+    min-height: 240px !important;
   }
 
   .admin-content table {

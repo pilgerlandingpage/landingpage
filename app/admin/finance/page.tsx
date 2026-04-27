@@ -1850,8 +1850,8 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             <div className="finance-charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Evolucao mensal</div>
-                    <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer width="100%" height={280}>
+                    <div className="admin-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                             <AreaChart data={monthlySeries} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                                 <defs>
                                     <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1877,8 +1877,8 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Despesas por categoria</div>
-                    <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer width="100%" height={280}>
+                    <div className="admin-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                             <PieChart>
                                 <Pie
                                     data={expenseByCategory}

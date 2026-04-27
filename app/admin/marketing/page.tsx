@@ -489,7 +489,8 @@ export default function AdminDashboard() {
                 {/* Daily Chart */}
                 <div className="chart-card">
                     <div className="chart-title">Visitantes & Leads — Últimos 7 dias</div>
-                    <ResponsiveContainer width="100%" height={280}>
+                    <div className="admin-chart-frame">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                         <LineChart data={dailyData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.28)" />
                             <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
@@ -504,19 +505,21 @@ export default function AdminDashboard() {
                             <Line type="monotone" dataKey="leads" stroke="#4ade80" strokeWidth={2} name="Leads" dot={{ r: 4 }} />
                         </LineChart>
                     </ResponsiveContainer>
+                    </div>
                 </div>
 
                 {/* Source Pie Chart */}
                 <div className="chart-card">
                     <div className="chart-title">Origens de Tráfego</div>
                     {sourceData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={280}>
+                        <div className="admin-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                             <PieChart>
                                 <Pie
                                     data={sourceData}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={100}
+                                    outerRadius={90}
                                     dataKey="value"
                                     label={({ name, percent }: { name?: string; percent?: number }) => `${name || ''} ${((percent || 0) * 100).toFixed(0)}%`}
                                     labelLine={{ stroke: '#94a3b8' }}
@@ -531,6 +534,7 @@ export default function AdminDashboard() {
                                 />
                             </PieChart>
                         </ResponsiveContainer>
+                        </div>
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 280, color: 'var(--text-muted)' }}>
                             Nenhum dado disponível
@@ -543,7 +547,8 @@ export default function AdminDashboard() {
             <div className="marketing-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                 <div className="chart-card">
                     <div className="chart-title">Visitantes por Fonte</div>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <div className="admin-chart-frame">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                         <BarChart data={sourceData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.28)" />
                             <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
@@ -556,11 +561,13 @@ export default function AdminDashboard() {
                             <Bar dataKey="value" fill="#c9a96e" radius={[4, 4, 0, 0]} name="Visitantes" />
                         </BarChart>
                     </ResponsiveContainer>
+                    </div>
                 </div>
 
                 <div className="chart-card">
                     <div className="chart-title">Páginas Mais Visitadas (Top 10)</div>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <div className="admin-chart-frame">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                         <BarChart data={topPages} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.28)" />
                             <XAxis type="number" stroke="#64748b" fontSize={12} />
@@ -573,6 +580,7 @@ export default function AdminDashboard() {
                             <Bar dataKey="value" fill="#4ade80" radius={[0, 4, 4, 0]} name="Acessos" />
                         </BarChart>
                     </ResponsiveContainer>
+                    </div>
                 </div>
             </div>
 

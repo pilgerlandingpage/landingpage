@@ -315,8 +315,8 @@ export default function AdminOverviewPage() {
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <TrendingUp size={18} /> Evolucao financeira mensal
                     </div>
-                    <div className="overview-chart-box">
-                        <ResponsiveContainer width="100%" height={280}>
+                    <div className="overview-chart-box admin-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                             <LineChart data={monthlyFinance} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
                                 <XAxis dataKey="label" stroke="#9ca3af" />
@@ -334,8 +334,8 @@ export default function AdminOverviewPage() {
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <CircleDollarSign size={18} /> Despesas por categoria
                     </div>
-                    <div className="overview-chart-box">
-                        <ResponsiveContainer width="100%" height={280}>
+                    <div className="overview-chart-box admin-chart-frame">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={240}>
                             <PieChart>
                                 <Pie
                                     data={expenseByCategory}
