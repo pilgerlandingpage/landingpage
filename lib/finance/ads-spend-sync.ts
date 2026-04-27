@@ -86,6 +86,10 @@ function platformReference(platform: Platform, month: string) {
     return `paid_ads_monthly:${platform}:${month}`
 }
 
+function paymentStatusForMonth(month: string) {
+    return month === currentMonthInSaoPaulo() ? 'pending' : 'paid'
+}
+
 async function getMarketingCostCenterId(admin: any) {
     const { data, error } = await admin
         .from('finance_cost_centers')
@@ -142,6 +146,7 @@ async function upsertPaidAdsFinanceEntry(
 
     const label = platformLabel(spend.platform)
     const entryDate = cappedMonthEnd(month)
+    const paymentStatus = paymentStatusForMonth(month)
     const externalReference = platformReference(spend.platform, month)
     const payload: Record<string, any> = {
         description: `Trafego pago - ${label} - ${monthLabel(month)}`,
@@ -152,14 +157,14 @@ async function upsertPaidAdsFinanceEntry(
         entry_date: entryDate,
         occurred_at: `${entryDate}T12:00:00.000Z`,
         payment_method: 'Cartao',
-        payment_status: 'paid',
+        payment_status: paymentStatus,
         counterparty_name: label,
         counterparty_type: 'pessoa_juridica',
         reference_company: label,
         due_date: entryDate,
         competence_date: monthStart(month),
         cost_center_id: costCenterId,
-        notes: `Sincronizado automaticamente do ${label}. Competencia ${monthLabel(month)}. Fonte: ${spend.source}.`,
+        notes: `Sincronizado automaticamente do ${label}. Competencia ${monthLabel(month)}. Fonte: ${spend.source}. Status: ${paymentStatus === 'paid' ? 'pago' : 'pendente ate fechamento do cartao'}.`,
         source_module: 'paid_ads_monthly',
         external_reference: externalReference,
         updated_at: new Date().toISOString(),
