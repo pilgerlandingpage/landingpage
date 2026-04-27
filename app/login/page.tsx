@@ -435,6 +435,29 @@ function LoginPageContent() {
                                         <Lock className="login-input-icon" size={20} />
                                     </div>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        supabase.auth.signOut().finally(() => {
+                                            router.replace('/login')
+                                            router.refresh()
+                                        })
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        marginBottom: 12,
+                                        padding: '10px 14px',
+                                        borderRadius: 10,
+                                        border: '1px solid var(--border-color)',
+                                        background: 'transparent',
+                                        color: 'var(--text-muted)',
+                                        cursor: 'pointer',
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Voltar para o login
+                                </button>
                             </>
                         )}
 
