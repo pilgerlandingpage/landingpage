@@ -391,6 +391,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const showConciliacaoBancaria = activeSection === 'conciliacao-bancaria'
     const showLancamentos = activeSection === 'lancamentos'
     const showFiltros = activeSection === 'dashboard' || activeSection === 'lancamentos' || showContasPagar || showContasReceber
+    const showTextSearchFilter = showLancamentos || showContasPagar || showContasReceber
     const todayDate = todayISO()
     const highlightedEntryId = useMemo(() => {
         const entryId = String(searchParams?.get('entry_id') || '').trim()
@@ -641,7 +642,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     }, [categories, subcategories, entries, payables, receivables, categoryFilter, showContasPagar, showContasReceber])
 
     const filteredEntries = useMemo(() => {
-        const normalizedSearch = searchTerm.trim().toLowerCase()
+        const normalizedSearch = showTextSearchFilter ? searchTerm.trim().toLowerCase() : ''
         const effectiveTypeFilter: 'all' | EntryType = typeFilter
 
         return entries.filter(entry => {
@@ -665,7 +666,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
             return haystack.includes(normalizedSearch)
         })
-    }, [entries, typeFilter, categoryFilter, subcategoryFilter, searchTerm])
+    }, [entries, typeFilter, categoryFilter, subcategoryFilter, searchTerm, showTextSearchFilter])
 
     const filteredPayables = useMemo(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase()
@@ -1385,7 +1386,9 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
             {showFiltros && (
                 <div className="chart-card" style={{ marginBottom: 18 }}>
-                    <div className="chart-title" style={{ marginBottom: 12 }}>Filtro de periodo e pesquisa</div>
+                    <div className="chart-title" style={{ marginBottom: 12 }}>
+                        {showTextSearchFilter ? 'Filtro de periodo e pesquisa' : 'Filtros do periodo'}
+                    </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
                         <div>
                             <label className="form-label">Data inicial</label>
@@ -1442,15 +1445,17 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 ))}
                             </select>
                         </div>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                            <label className="form-label">Busca textual</label>
-                            <input
-                                className="form-input"
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                placeholder="Pesquise por descricao, categoria, subcategoria, favorecido ou observacoes"
-                            />
-                        </div>
+                        {showTextSearchFilter && (
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label className="form-label">Busca textual</label>
+                                <input
+                                    className="form-input"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    placeholder="Pesquise por descricao, categoria, subcategoria, favorecido ou observacoes"
+                                />
+                            </div>
+                        )}
                         <div style={{ alignSelf: 'end', display: 'flex', gap: 8 }}>
                             <button className="btn btn-gold" onClick={async () => {
                                 await Promise.all([fetchEntries(), fetchAparData()])
@@ -1458,7 +1463,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 <CalendarDays size={16} /> Atualizar periodo
                             </button>
                             <button className="btn btn-outline" onClick={onClearSearchFilters}>
-                                Limpar pesquisa
+                                Limpar filtros
                             </button>
                         </div>
                     </div>
