@@ -121,11 +121,32 @@ export async function POST(request: NextRequest) {
 
         if (adminUserError) throw adminUserError
 
-        const adminUser = (adminUsers || []).find((user: any) =>
+        let adminUser = (adminUsers || []).find((user: any) =>
             user?.is_active &&
             user?.phone &&
             phoneMatches(normalizedPhone, String(user.phone || ''))
         )
+
+        if (!adminUser) {
+            const { data: phoneUsers, error: phoneUsersError } = await admin
+                .from('admin_users')
+                .select('id, name, email, phone, is_master, is_active')
+                .eq('is_active', true)
+                .not('phone', 'is', null)
+                .order('is_master', { ascending: false })
+                .order('updated_at', { ascending: false })
+                .limit(200)
+
+            if (phoneUsersError) throw phoneUsersError
+
+            const phoneMatchesOnly = (phoneUsers || []).filter((user: any) =>
+                user?.phone && phoneMatches(normalizedPhone, String(user.phone || ''))
+            )
+
+            if (phoneMatchesOnly.length === 1) {
+                adminUser = phoneMatchesOnly[0]
+            }
+        }
 
         // Nao expor qual campo falhou.
         if (!adminUser) {

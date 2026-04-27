@@ -41,6 +41,7 @@ function LoginPageContent() {
         searchParams.get('password_reset') === '1' ||
         modeType === 'invite' ||
         modeType === 'recovery'
+    const isRecoveryMode = !isPasswordSetupMode && showRecoveryForm
 
     useEffect(() => {
         if (passwordUpdated && !isPasswordSetupMode) {
@@ -216,7 +217,20 @@ function LoginPageContent() {
                 </div>
 
                 <div className="login-card">
-                    <form onSubmit={isPasswordSetupMode ? handleSetPassword : handleLogin}>
+                    <form
+                        onSubmit={(event) => {
+                            if (isPasswordSetupMode) {
+                                handleSetPassword(event)
+                                return
+                            }
+                            if (isRecoveryMode) {
+                                event.preventDefault()
+                                handleSendRecoveryLink()
+                                return
+                            }
+                            handleLogin(event)
+                        }}
+                    >
                         {error && (
                             <div className="login-error">
                                 <ShieldCheck size={18} />
@@ -232,7 +246,7 @@ function LoginPageContent() {
                             </div>
                         )}
 
-                        {!isPasswordSetupMode && (
+                        {!isPasswordSetupMode && !showRecoveryForm && (
                             <>
                                 <div className="login-form-group">
                                     <label className="login-label">Email</label>
@@ -288,78 +302,58 @@ function LoginPageContent() {
                                     </button>
                                 </div>
 
-                                {showRecoveryForm && (
-                                    <div
-                                        style={{
-                                            marginBottom: 14,
-                                            padding: '12px',
-                                            borderRadius: 10,
-                                            border: '1px solid var(--border-color)',
-                                            background: 'rgba(0, 0, 0, 0.2)'
-                                        }}
-                                    >
-                                        <label className="login-label">Email para recuperacao</label>
-                                        <div className="login-input-wrapper" style={{ marginBottom: 10 }}>
-                                            <input
-                                                type="email"
-                                                value={recoveryEmail}
-                                                onChange={(e) => setRecoveryEmail(e.target.value)}
-                                                className="login-input"
-                                                placeholder="admin@pilger.com.br"
-                                                required
-                                            />
-                                            <Mail className="login-input-icon" size={20} />
-                                        </div>
-                                        <label className="login-label">Telefone cadastrado</label>
-                                        <div className="login-input-wrapper" style={{ marginBottom: 10 }}>
-                                            <input
-                                                type="tel"
-                                                value={recoveryPhone}
-                                                onChange={(e) => setRecoveryPhone(e.target.value)}
-                                                className="login-input"
-                                                placeholder="5547999999999"
-                                                required
-                                            />
-                                            <Phone className="login-input-icon" size={20} />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowRecoveryForm(false)}
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    borderRadius: 8,
-                                                    border: '1px solid var(--border-color)',
-                                                    background: 'transparent',
-                                                    color: 'var(--text-muted)',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Cancelar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleSendRecoveryLink}
-                                                disabled={recoveringPassword}
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    borderRadius: 8,
-                                                    border: '1px solid #b8945f55',
-                                                    background: '#b8945f22',
-                                                    color: '#f5d29a',
-                                                    cursor: 'pointer',
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: 6,
-                                                    opacity: recoveringPassword ? 0.7 : 1
-                                                }}
-                                            >
-                                                {recoveringPassword && <Loader2 className="animate-spin" size={14} />}
-                                                Enviar link no WhatsApp
-                                            </button>
+                                {recoveryMessage && (
+                                    <div className="login-form-group" style={{ marginBottom: 14 }}>
+                                        <div
+                                            style={{
+                                                fontSize: '0.85rem',
+                                                color: recoveryMessageType === 'warning' ? '#f5d29a' : '#c8f5c8'
+                                            }}
+                                        >
+                                            {recoveryMessage}
                                         </div>
                                     </div>
                                 )}
+                            </>
+                        )}
+
+                        {isRecoveryMode && (
+                            <>
+                                <div className="login-form-group" style={{ marginBottom: 16 }}>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                        Informe o email e o telefone cadastrados para receber o link de redefinicao no WhatsApp.
+                                    </div>
+                                </div>
+
+                                <div className="login-form-group">
+                                    <label className="login-label">Email para recuperacao</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="email"
+                                            value={recoveryEmail}
+                                            onChange={(e) => setRecoveryEmail(e.target.value)}
+                                            className="login-input"
+                                            placeholder="admin@pilger.com.br"
+                                            required
+                                        />
+                                        <Mail className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
+
+                                <div className="login-form-group">
+                                    <label className="login-label">Telefone cadastrado</label>
+                                    <div className="login-input-wrapper">
+                                        <input
+                                            type="tel"
+                                            value={recoveryPhone}
+                                            onChange={(e) => setRecoveryPhone(e.target.value)}
+                                            className="login-input"
+                                            placeholder="5547999999999"
+                                            required
+                                        />
+                                        <Phone className="login-input-icon" size={20} />
+                                    </div>
+                                </div>
 
                                 {recoveryMessage && (
                                     <div className="login-form-group" style={{ marginBottom: 14 }}>
@@ -373,6 +367,38 @@ function LoginPageContent() {
                                         </div>
                                     </div>
                                 )}
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowRecoveryForm(false)
+                                            setError(null)
+                                            setRecoveryMessage(null)
+                                        }}
+                                        className="btn-login"
+                                        style={{ background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={recoveringPassword}
+                                        className="btn-login"
+                                    >
+                                        {recoveringPassword ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={20} />
+                                                <span>Enviando...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Enviar Link</span>
+                                                <ArrowRight size={18} />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </>
                         )}
 
@@ -412,23 +438,25 @@ function LoginPageContent() {
                             </>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={loading || (isPasswordSetupMode && (!passwordFlowReady || passwordFlowLoading))}
-                            className="btn-login"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin" size={20} />
-                                    <span>{isPasswordSetupMode ? 'Salvando senha...' : 'Autenticando...'}</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>{isPasswordSetupMode ? 'Definir Nova Senha' : 'Entrar no Sistema'}</span>
-                                    <ArrowRight size={18} />
-                                </>
-                            )}
-                        </button>
+                        {!isRecoveryMode && (
+                            <button
+                                type="submit"
+                                disabled={loading || (isPasswordSetupMode && (!passwordFlowReady || passwordFlowLoading))}
+                                className="btn-login"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={20} />
+                                        <span>{isPasswordSetupMode ? 'Salvando senha...' : 'Autenticando...'}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>{isPasswordSetupMode ? 'Definir Nova Senha' : 'Entrar no Sistema'}</span>
+                                        <ArrowRight size={18} />
+                                    </>
+                                )}
+                            </button>
+                        )}
 
                     </form>
                 </div>
