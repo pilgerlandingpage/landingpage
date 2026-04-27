@@ -1504,14 +1504,35 @@ h6 {
     padding: 14px 12px;
   }
 
-  .admin-content .ads-top-cards-grid,
-  .admin-content .ads-kpi-grid {
+  .admin-content .ads-top-cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
 
+  .admin-content .ads-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
   .admin-content .ads-kpi-grid .kpi-card {
-    min-height: 112px;
+    min-height: 104px;
+    padding: 12px 10px !important;
+  }
+
+  .admin-content .ads-kpi-grid .kpi-label {
+    font-size: 0.6rem;
+    line-height: 1.12;
+  }
+
+  .admin-content .ads-kpi-grid .kpi-value {
+    font-size: clamp(0.92rem, 3.4vw, 1.18rem) !important;
+    line-height: 1.12;
+  }
+
+  .admin-content .ads-kpi-grid svg {
+    width: 16px;
+    height: 16px;
+    margin-bottom: 5px !important;
   }
 
   .admin-content .kpi-label {
@@ -1745,26 +1766,41 @@ h6 {
     grid-template-columns: 1fr !important;
   }
 
-  .admin-content .ads-top-cards-grid,
-  .admin-content .ads-kpi-grid {
+  .admin-content .ads-top-cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
   }
 
+  .admin-content .ads-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
   .admin-content .ads-kpi-grid .kpi-card {
     min-width: 0;
-    min-height: 118px;
-    padding: 12px 10px !important;
+    min-height: 98px;
+    padding: 10px 7px !important;
   }
 
   .admin-content .ads-kpi-grid .kpi-label {
-    font-size: 0.62rem;
-    line-height: 1.15;
+    font-size: 0.52rem;
+    line-height: 1.1;
   }
 
   .admin-content .ads-kpi-grid .kpi-value {
-    font-size: clamp(1rem, 5vw, 1.25rem) !important;
-    line-height: 1.15;
+    font-size: clamp(0.76rem, 4vw, 1.02rem) !important;
+    line-height: 1.1;
+  }
+
+  .admin-content .ads-kpi-grid svg {
+    width: 15px;
+    height: 15px;
+    margin-bottom: 4px !important;
+  }
+
+  .admin-content .ads-kpi-grid .kpi-card div[style*="0.65rem"] {
+    font-size: 0.48rem !important;
+    line-height: 1.1;
   }
 
   .admin-content .chart-card {
