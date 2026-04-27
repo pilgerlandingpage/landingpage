@@ -42,6 +42,19 @@ const DEFAULT_PROMPTS: Record<string, string> = {
     ceo_agent_system_prompt: CEO_AGENT_SYSTEM_PROMPT,
 }
 
+const DEFAULT_CONFIGS: Record<string, string> = {
+    ads_sync_interval_minutes: '60',
+}
+
+function normalizeConfigValue(key: string, value: string) {
+    if (key !== 'ads_sync_interval_minutes') return value
+
+    const parsed = Number.parseInt(String(value || ''), 10)
+    if (!Number.isFinite(parsed)) return DEFAULT_CONFIGS.ads_sync_interval_minutes
+
+    return String(Math.min(1440, Math.max(1, parsed)))
+}
+
 export async function GET() {
     try {
         const supabase = getSupabase()
@@ -57,9 +70,14 @@ export async function GET() {
         const missingPromptEntries = Object.entries(DEFAULT_PROMPTS)
             .filter(([key]) => !existingKeys.has(key))
             .map(([key, value]) => ({ key, value, updated_at: new Date().toISOString() }))
+        const missingConfigEntries = Object.entries(DEFAULT_CONFIGS)
+            .filter(([key]) => !existingKeys.has(key))
+            .map(([key, value]) => ({ key, value, updated_at: new Date().toISOString() }))
 
-        if (missingPromptEntries.length > 0) {
-            await supabase.from('app_config').upsert(missingPromptEntries, { onConflict: 'key' })
+        if (missingPromptEntries.length > 0 || missingConfigEntries.length > 0) {
+            await supabase
+                .from('app_config')
+                .upsert([...missingPromptEntries, ...missingConfigEntries], { onConflict: 'key' })
         }
 
         const { data: finalData, error: finalError } = await supabase
@@ -95,10 +113,11 @@ export async function POST(request: NextRequest) {
         const results: { key: string; success: boolean; error?: string }[] = []
 
         for (const [key, value] of Object.entries(configs)) {
+            const normalizedValue = normalizeConfigValue(key, value)
             const { error } = await supabase
                 .from('app_config')
                 .upsert(
-                    { key, value, updated_at: new Date().toISOString() },
+                    { key, value: normalizedValue, updated_at: new Date().toISOString() },
                     { onConflict: 'key' }
                 )
 

@@ -193,6 +193,20 @@ export default function MaintenancePage() {
 
     const dayLabel = (day: string) => WEEK_DAYS.find(d => d.value === day)?.label || day
     const formatHourLabel = (h: string) => `${h.padStart(2, '0')}:00`
+    const formatConfigDateTime = (value?: string) => {
+        if (!value) return 'Ainda nao executou'
+        const date = new Date(value)
+        if (!Number.isFinite(date.getTime())) return 'Data invalida'
+
+        return new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date)
+    }
 
     // Fetch Gemini Models
     useEffect(() => {
@@ -391,6 +405,7 @@ export default function MaintenancePage() {
                 'pilger_weekly_times',
                 'radar_collection_days',
                 'radar_collection_times',
+                'ads_sync_interval_minutes',
                 'ads_analyst_system_prompt',
                 'pilger_daily_system_prompt',
                 'pilger_weekly_system_prompt',
@@ -1051,6 +1066,28 @@ export default function MaintenancePage() {
                                 <option value="">Selecione...</option>
                                 {configs['ads_provider'] === 'openai' ? openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>) : geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                             </select>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px', alignItems: 'end' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Intervalo da sincronizacao Ads</label>
+                            <input
+                                className="form-input"
+                                type="number"
+                                min={1}
+                                max={1440}
+                                step={1}
+                                value={configs['ads_sync_interval_minutes'] || '60'}
+                                onChange={e => setConfigs({ ...configs, ads_sync_interval_minutes: e.target.value })}
+                            />
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                Minutos entre leituras de metricas e sincronizacao financeira.
+                            </div>
+                        </div>
+                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                            <div>Ultima conclusao: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_run_at'])}</b></div>
+                            <div style={{ marginTop: '4px' }}>Ultimo inicio: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_started_at'])}</b></div>
                         </div>
                     </div>
 

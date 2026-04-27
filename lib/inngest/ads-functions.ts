@@ -18,6 +18,65 @@ function getSupabase() {
     )
 }
 
+const DEFAULT_ADS_SYNC_INTERVAL_MINUTES = 60
+const MIN_ADS_SYNC_INTERVAL_MINUTES = 1
+const MAX_ADS_SYNC_INTERVAL_MINUTES = 1440
+
+function parseAdsSyncInterval(value?: string | null) {
+    const parsed = Number.parseInt(String(value || ''), 10)
+    if (!Number.isFinite(parsed)) return DEFAULT_ADS_SYNC_INTERVAL_MINUTES
+    return Math.min(MAX_ADS_SYNC_INTERVAL_MINUTES, Math.max(MIN_ADS_SYNC_INTERVAL_MINUTES, parsed))
+}
+
+function parseConfigDate(value?: string | null) {
+    if (!value) return null
+    const ms = new Date(value).getTime()
+    return Number.isFinite(ms) ? ms : null
+}
+
+async function getAdsSyncSchedule(supabase: ReturnType<typeof getSupabase>) {
+    const { data } = await supabase
+        .from('app_config')
+        .select('key, value')
+        .in('key', ['ads_sync_interval_minutes', 'ads_sync_last_run_at', 'ads_sync_last_started_at'])
+
+    const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    const intervalMinutes = parseAdsSyncInterval(config.ads_sync_interval_minutes)
+    const lastRunMs = parseConfigDate(config.ads_sync_last_run_at)
+    const lastStartedMs = parseConfigDate(config.ads_sync_last_started_at)
+    const lastActivityMs = Math.max(lastRunMs || 0, lastStartedMs || 0)
+    const nowMs = Date.now()
+    const elapsedMinutes = lastActivityMs ? Math.floor((nowMs - lastActivityMs) / 60000) : null
+
+    return {
+        shouldRun: !lastActivityMs || nowMs - lastActivityMs >= intervalMinutes * 60000,
+        intervalMinutes,
+        elapsedMinutes,
+        lastRunAt: config.ads_sync_last_run_at || null,
+        lastStartedAt: config.ads_sync_last_started_at || null,
+    }
+}
+
+async function saveAppConfig(supabase: ReturnType<typeof getSupabase>, key: string, value: string) {
+    const { error } = await supabase
+        .from('app_config')
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+
+    if (error) throw new Error(`Erro ao salvar ${key}: ${error.message}`)
+}
+
+async function markAdsSyncStarted(supabase: ReturnType<typeof getSupabase>) {
+    await saveAppConfig(supabase, 'ads_sync_last_started_at', new Date().toISOString())
+}
+
+async function markAdsSyncCompleted(supabase: ReturnType<typeof getSupabase>) {
+    const now = new Date().toISOString()
+    await Promise.all([
+        saveAppConfig(supabase, 'ads_sync_last_run_at', now),
+        saveAppConfig(supabase, 'ads_sync_last_started_at', now),
+    ])
+}
+
 // =============================================
 // 1. Publicar Campanha nas Plataformas
 // =============================================
@@ -116,9 +175,28 @@ export const publishCampaign = inngest.createFunction(
 
 export const pollMetricsCron = inngest.createFunction(
     { id: 'ads-poll-metrics', name: 'Buscar Métricas de Campanhas' },
-    { cron: '0 * * * *' }, // A cada hora para snapshot, mas análise IA às 23h
+    { cron: '* * * * *' }, // Checa a cada minuto; o intervalo real fica em app_config.ads_sync_interval_minutes
     async ({ step }) => {
         const supabase = getSupabase()
+
+        const schedule = await step.run('check-ads-sync-schedule', async () => {
+            return getAdsSyncSchedule(supabase)
+        })
+
+        if (!schedule.shouldRun) {
+            return {
+                skipped: true,
+                reason: 'interval_not_reached',
+                sync_interval_minutes: schedule.intervalMinutes,
+                elapsed_minutes: schedule.elapsedMinutes,
+                last_run_at: schedule.lastRunAt,
+                last_started_at: schedule.lastStartedAt,
+            }
+        }
+
+        await step.run('mark-ads-sync-started', async () => {
+            await markAdsSyncStarted(supabase)
+        })
 
         // Buscar campanhas ativas
         const campaigns = await step.run('fetch-active-campaigns', async () => {
@@ -133,7 +211,14 @@ export const pollMetricsCron = inngest.createFunction(
         })
 
         if (!campaigns || campaigns.length === 0) {
-            return { message: 'Nenhuma campanha ativa para monitorar' }
+            await step.run('mark-ads-sync-completed-no-campaigns', async () => {
+                await markAdsSyncCompleted(supabase)
+            })
+
+            return {
+                message: 'Nenhuma campanha ativa para monitorar',
+                sync_interval_minutes: schedule.intervalMinutes,
+            }
         }
 
         const results = []
@@ -181,7 +266,20 @@ export const pollMetricsCron = inngest.createFunction(
 
         // Disparar análise da IA apenas às 23 horas (Horário de Brasília)
         const { hour } = getCurrentTimeSP()
-        if (hour === '23') {
+        const shouldTriggerAIAnalysis = await step.run('check-daily-ads-ai-analysis', async () => {
+            if (hour !== '23') return false
+
+            const today = getCurrentDateSP()
+            const { data } = await supabase
+                .from('app_config')
+                .select('value')
+                .eq('key', 'ads_ai_analysis_last_date')
+                .maybeSingle()
+
+            return String(data?.value || '') !== today
+        })
+
+        if (shouldTriggerAIAnalysis) {
             for (const result of results) {
                 await step.sendEvent('trigger-ai-analysis', {
                     name: 'ads/ai-analyze',
@@ -191,16 +289,25 @@ export const pollMetricsCron = inngest.createFunction(
                     }
                 })
             }
+
+            await step.run('mark-daily-ads-ai-analysis', async () => {
+                await saveAppConfig(supabase, 'ads_ai_analysis_last_date', getCurrentDateSP())
+            })
         }
 
         const financeSync = await step.run('sync-paid-ads-spend-to-finance', async () => {
             return syncPaidAdsSpendToFinance(supabase)
         })
 
+        await step.run('mark-ads-sync-completed', async () => {
+            await markAdsSyncCompleted(supabase)
+        })
+
         return {
             campaigns_polled: results.length,
-            analysis_triggered: hour === '23',
+            analysis_triggered: shouldTriggerAIAnalysis,
             finance_sync: financeSync,
+            sync_interval_minutes: schedule.intervalMinutes,
         }
     }
 )
@@ -556,6 +663,15 @@ function getCurrentTimeSP() {
     const dayOfWeek = dateObj.getDay().toString();
     
     return { dayOfWeek, hour }
+}
+
+function getCurrentDateSP() {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date())
 }
 
 export const generateDailyPilgerReportCron = inngest.createFunction(
