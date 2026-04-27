@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
 import { getLoginRedirectUrl } from '@/lib/app-url'
+import {
+    buildFirstAccessWhatsAppMessage,
+    buildPasswordResetWhatsAppMessage,
+} from '@/lib/user-whatsapp-messages'
 
 const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_users',
@@ -173,18 +177,11 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
     const instanceToken = await resolveGlobalAgentInstanceToken(admin)
     if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
 
-    const safeName = String(name || '').trim()
-    const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
-    const message = `${greeting}
-
-Bem-vindo(a) a Pilger!
-Seu acesso ao painel administrativo da empresa foi criado.
-Para definir sua senha de primeiro acesso, use este link:
-${firstAccessLink}
-
-Depois de definir a senha, voce sera direcionado(a) para a tela de login.
-
-Se voce nao reconhece este cadastro, ignore esta mensagem.`
+    const message = await buildFirstAccessWhatsAppMessage(admin, {
+        name,
+        phone,
+        link: firstAccessLink,
+    })
 
     await sendWhatsAppMessage({
         phone,
@@ -202,15 +199,11 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
     const instanceToken = await resolveGlobalAgentInstanceToken(admin)
     if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
 
-    const safeName = String(name || '').trim()
-    const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
-    const message = `${greeting}
-
-Recebemos um pedido de redefinicao de senha do painel Pilger.
-Para criar uma nova senha com seguranca, use este link:
-${resetLink}
-
-Se voce nao solicitou esta alteracao, ignore esta mensagem.`
+    const message = await buildPasswordResetWhatsAppMessage(admin, {
+        name,
+        phone,
+        link: resetLink,
+    })
 
     await sendWhatsAppMessage({
         phone,

@@ -1,8 +1,12 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Clock, FileText, Map, Save, Plus, X, Loader2, Check, Globe } from 'lucide-react'
+import { Building2, Clock, FileText, Map, Save, Plus, X, Loader2, Check, Globe, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import {
+    DEFAULT_FIRST_ACCESS_MESSAGE,
+    DEFAULT_PASSWORD_RESET_MESSAGE,
+} from '@/lib/user-whatsapp-messages'
 
 interface WorkingHours {
     seg_sex_inicio: string
@@ -178,6 +182,8 @@ export default function AgentConfigPage() {
     const [whatsappFollowupMessageTemplate, setWhatsappFollowupMessageTemplate] = useState(
         'Oi {nome_lead}! Passando para saber se posso te ajudar com mais detalhes.'
     )
+    const [firstAccessMessageTemplate, setFirstAccessMessageTemplate] = useState(DEFAULT_FIRST_ACCESS_MESSAGE)
+    const [passwordResetMessageTemplate, setPasswordResetMessageTemplate] = useState(DEFAULT_PASSWORD_RESET_MESSAGE)
     const [instances, setInstances] = useState<AgentInstance[]>([])
     const [brokers, setBrokers] = useState<Broker[]>([])
     const [defaultBrokerId, setDefaultBrokerId] = useState('')
@@ -266,6 +272,8 @@ export default function AgentConfigPage() {
                     setWhatsappFollowupDateTimes(parsedTimes)
                 }
                 if (c.whatsapp_followup_message_template) setWhatsappFollowupMessageTemplate(c.whatsapp_followup_message_template)
+                if (c.user_first_access_whatsapp_message) setFirstAccessMessageTemplate(c.user_first_access_whatsapp_message)
+                if (c.user_password_reset_whatsapp_message) setPasswordResetMessageTemplate(c.user_password_reset_whatsapp_message)
             }
         } catch (err) {
             console.error('Erro ao carregar config:', err)
@@ -327,6 +335,8 @@ export default function AgentConfigPage() {
                         whatsapp_followup_enabled: String(whatsappFollowupEnabled),
                         whatsapp_followup_schedule_json: JSON.stringify({ absolute_datetimes: absoluteDatetimes }),
                         whatsapp_followup_message_template: whatsappFollowupMessageTemplate,
+                        user_first_access_whatsapp_message: firstAccessMessageTemplate,
+                        user_password_reset_whatsapp_message: passwordResetMessageTemplate,
                     }
                 })
             })
@@ -724,6 +734,61 @@ export default function AgentConfigPage() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* MENSAGENS DE USUARIOS */}
+            <div style={sectionStyle}>
+                <div style={sectionHeaderStyle}>
+                    <MessageSquare size={20} color="#16a34a" />
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Mensagens para Usuários</h2>
+                    <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Primeiro acesso e senha</span>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#777', margin: '0 0 14px' }}>
+                    Estas mensagens são enviadas pelo WhatsApp quando um novo usuário é cadastrado ou quando um usuário solicita redefinição de senha.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                        <label style={labelStyle}>Mensagem para novo usuário</label>
+                        <textarea
+                            style={{ ...textareaStyle, minHeight: 210 }}
+                            value={firstAccessMessageTemplate}
+                            onChange={e => setFirstAccessMessageTemplate(e.target.value)}
+                            placeholder={DEFAULT_FIRST_ACCESS_MESSAGE}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setFirstAccessMessageTemplate(DEFAULT_FIRST_ACCESS_MESSAGE)}
+                            style={{ ...btnSmall, background: '#f3f4f6', color: '#444', marginTop: 8 }}
+                        >
+                            Restaurar padrão
+                        </button>
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Mensagem para redefinição de senha</label>
+                        <textarea
+                            style={{ ...textareaStyle, minHeight: 210 }}
+                            value={passwordResetMessageTemplate}
+                            onChange={e => setPasswordResetMessageTemplate(e.target.value)}
+                            placeholder={DEFAULT_PASSWORD_RESET_MESSAGE}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setPasswordResetMessageTemplate(DEFAULT_PASSWORD_RESET_MESSAGE)}
+                            style={{ ...btnSmall, background: '#f3f4f6', color: '#444', marginTop: 8 }}
+                        >
+                            Restaurar padrão
+                        </button>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+                    <span style={{ fontSize: '0.7rem', color: '#888' }}>Variáveis disponíveis:</span>
+                    {['{nome}', '{email}', '{telefone}', '{link}', '{empresa}'].map(v => (
+                        <code key={v} style={{ fontSize: '0.7rem', background: '#ecfdf5', padding: '2px 6px', borderRadius: 4, color: '#047857' }}>{v}</code>
+                    ))}
+                </div>
+                <p style={{ fontSize: '0.72rem', color: '#888', marginTop: 8 }}>
+                    Mantenha a variável {'{link}'} no texto para que o usuário receba o acesso correto.
+                </p>
             </div>
 
             {/* ACOES INTERATIVAS */}

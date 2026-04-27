@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
 import { getLoginRedirectUrl } from '@/lib/app-url'
+import { buildPasswordResetWhatsAppMessage } from '@/lib/user-whatsapp-messages'
 
 const MATCHED_RECOVERY_MESSAGE =
     'Dados confirmados. Verifique seu WhatsApp ou seu email para continuar a recuperacao.'
@@ -154,9 +155,10 @@ export async function POST(request: NextRequest) {
         }
 
         const resetRedirectUrl = getPasswordResetRedirectUrl(request)
+        const targetEmail = String(adminUser.email || normalizedEmail).trim().toLowerCase()
         const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
             type: 'recovery',
-            email: normalizedEmail,
+            email: targetEmail,
             options: {
                 redirectTo: resetRedirectUrl,
             },
@@ -172,7 +174,7 @@ export async function POST(request: NextRequest) {
 
         const resetLink = linkData.properties?.action_link
         if (!resetLink) {
-            console.error('[password-recovery] missing reset link for email:', normalizedEmail)
+            console.error('[password-recovery] missing reset link for email:', targetEmail)
             return NextResponse.json(
                 { error: 'Dados confirmados, mas nao foi possivel gerar o link de redefinicao agora.' },
                 { status: 500 }
@@ -183,15 +185,12 @@ export async function POST(request: NextRequest) {
         try {
             const instanceToken = await resolveGlobalAgentInstanceToken(admin)
             if (instanceToken) {
-                const safeName = String(adminUser.name || '').trim()
-                const greeting = safeName ? `Ola ${safeName}!` : 'Ola!'
-                const message = `${greeting}
-
-Recebemos um pedido de redefinicao de senha do painel Pilger.
-Para criar uma nova senha com seguranca, use este link:
-${resetLink}
-
-Se voce nao solicitou esta alteracao, ignore esta mensagem.`
+                const message = await buildPasswordResetWhatsAppMessage(admin, {
+                    name: adminUser.name,
+                    email: targetEmail,
+                    phone: adminUser.phone,
+                    link: resetLink,
+                })
 
                 await sendWhatsAppMessage({
                     phone: String(adminUser.phone || ''),
@@ -206,7 +205,7 @@ Se voce nao solicitou esta alteracao, ignore esta mensagem.`
 
         let emailSent = false
         try {
-            const { error: emailError } = await admin.auth.resetPasswordForEmail(normalizedEmail, {
+            const { error: emailError } = await admin.auth.resetPasswordForEmail(targetEmail, {
                 redirectTo: resetRedirectUrl,
             })
             if (!emailError) emailSent = true

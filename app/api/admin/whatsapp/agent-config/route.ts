@@ -42,6 +42,8 @@ const AGENT_CONFIG_KEYS = [
     'whatsapp_followup_enabled',
     'whatsapp_followup_schedule_json',
     'whatsapp_followup_message_template',
+    'user_first_access_whatsapp_message',
+    'user_password_reset_whatsapp_message',
 ]
 
 // GET — Load all agent config values
