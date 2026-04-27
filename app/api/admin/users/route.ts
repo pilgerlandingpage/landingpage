@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { getLoginRedirectUrl } from '@/lib/app-url'
 
 const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_users',
@@ -133,17 +134,11 @@ async function ensureNotRemovingLastActiveMaster(admin: any, targetUser: any, pa
 }
 
 function getFirstAccessRedirectUrl(request: NextRequest) {
-    const configuredSite = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-    const configuredApp = String(process.env.NEXT_PUBLIC_APP_URL || '').trim()
-    const base = (configuredSite || configuredApp || request.nextUrl.origin).replace(/\/+$/, '')
-    return `${base}/login?first_access=1`
+    return getLoginRedirectUrl('/login?first_access=1', request.nextUrl.origin)
 }
 
 function getPasswordResetRedirectUrl(request: NextRequest) {
-    const configuredSite = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-    const configuredApp = String(process.env.NEXT_PUBLIC_APP_URL || '').trim()
-    const base = (configuredSite || configuredApp || request.nextUrl.origin).replace(/\/+$/, '')
-    return `${base}/login?password_reset=1`
+    return getLoginRedirectUrl('/login?password_reset=1', request.nextUrl.origin)
 }
 
 async function resolveGlobalAgentInstanceToken(admin: any) {

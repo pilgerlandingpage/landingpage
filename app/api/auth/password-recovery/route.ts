@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { getLoginRedirectUrl } from '@/lib/app-url'
 
 const MATCHED_RECOVERY_MESSAGE =
     'Dados confirmados. Verifique seu WhatsApp ou seu email para continuar a recuperacao.'
@@ -8,10 +9,7 @@ const NOT_FOUND_RECOVERY_MESSAGE =
     'Email ou telefone nao encontrados.'
 
 function getPasswordResetRedirectUrl(request: NextRequest) {
-    const configuredSite = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-    const configuredApp = String(process.env.NEXT_PUBLIC_APP_URL || '').trim()
-    const base = (configuredSite || configuredApp || request.nextUrl.origin).replace(/\/+$/, '')
-    return `${base}/login?password_reset=1`
+    return getLoginRedirectUrl('/login?password_reset=1', request.nextUrl.origin)
 }
 
 async function resolveGlobalAgentInstanceToken(admin: any) {
@@ -113,20 +111,24 @@ export async function POST(request: NextRequest) {
         }
 
         const admin = createAdminClient()
-        const { data: adminUser, error: adminUserError } = await admin
+        const { data: adminUsers, error: adminUserError } = await admin
             .from('admin_users')
-            .select('id, name, email, phone, is_active')
+            .select('id, name, email, phone, is_master, is_active')
             .eq('email', normalizedEmail)
-            .maybeSingle()
+            .order('is_master', { ascending: false })
+            .order('updated_at', { ascending: false })
+            .limit(10)
 
         if (adminUserError) throw adminUserError
 
-        // Nao expor qual campo falhou.
-        if (!adminUser?.is_active || !adminUser.phone) {
-            return NextResponse.json({ success: false, message: NOT_FOUND_RECOVERY_MESSAGE })
-        }
+        const adminUser = (adminUsers || []).find((user: any) =>
+            user?.is_active &&
+            user?.phone &&
+            phoneMatches(normalizedPhone, String(user.phone || ''))
+        )
 
-        if (!phoneMatches(normalizedPhone, String(adminUser.phone || ''))) {
+        // Nao expor qual campo falhou.
+        if (!adminUser) {
             return NextResponse.json({ success: false, message: NOT_FOUND_RECOVERY_MESSAGE })
         }
 
