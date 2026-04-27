@@ -116,8 +116,30 @@ function LoginPageContent() {
             })
 
             if (loginError) {
+                fetch('/api/admin/user-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'login_failed',
+                        attempted_email: email.trim().toLowerCase(),
+                        path: '/login',
+                        referrer: document.referrer,
+                        search_params: window.location.search,
+                        metadata: { reason: loginError.message },
+                    }),
+                }).catch(() => {})
                 setError(loginError.message)
             } else {
+                await fetch('/api/admin/user-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'login_success',
+                        path: '/login',
+                        referrer: document.referrer,
+                        search_params: window.location.search,
+                    }),
+                }).catch(() => {})
                 router.push('/admin')
                 router.refresh()
             }

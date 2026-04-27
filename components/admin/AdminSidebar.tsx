@@ -19,6 +19,7 @@ import {
     Radar,
     Send,
     Shield,
+    ShieldAlert,
     ShieldCheck,
     Smartphone,
     Tag,
@@ -33,6 +34,7 @@ type SubNavLink = { href: string; label: string }
 type SubNavGroup = { label: string; children: SubNavLink[] }
 type SubNavItem = SubNavLink | SubNavGroup
 type NavItem = { href: string; icon: any; label: string; section: string; subItems?: SubNavItem[] }
+type UserSector = { id?: string; name?: string; color?: string; icon?: string }
 
 const MODULE_NAV: Record<string, NavItem> = {
     dashboard: { href: '/admin/marketing', icon: Megaphone, label: 'Dashboard Marketing', section: 'MARKETING' },
@@ -132,6 +134,13 @@ const GENERAL_DASHBOARD_ITEM: NavItem = {
     section: 'PRINCIPAL',
 }
 
+const ACCESS_AUDIT_ITEM: NavItem = {
+    href: '/admin/user-access',
+    icon: ShieldAlert,
+    label: 'Auditoria de Acessos',
+    section: 'SISTEMA',
+}
+
 const SECTION_ORDER = ['PRINCIPAL', 'FINANCEIRO', 'MARKETING', 'SISTEMA', 'CONFIGURACOES']
 const SETTINGS_USERS_PERMISSION_KEYS = ['settings_users', 'gestao_de_usuarios', 'usuarios', 'users']
 const SETTINGS_SECTORS_PERMISSION_KEYS = ['settings_sectors', 'gestao_de_setores', 'setores', 'sectors']
@@ -142,6 +151,7 @@ export default function AdminSidebar() {
     const supabase = createClient()
 
     const [permissions, setPermissions] = useState<string[]>([])
+    const [sectors, setSectors] = useState<UserSector[]>([])
     const [isMaster, setIsMaster] = useState(false)
     const [userName, setUserName] = useState('')
     const [loading, setLoading] = useState(true)
@@ -164,6 +174,7 @@ export default function AdminSidebar() {
                 if (res.ok) {
                     const data = await res.json()
                     setPermissions(data.permissions || [])
+                    setSectors(Array.isArray(data.sectors) ? data.sectors : [])
                     setIsMaster(data.is_master || false)
                     setUserName(data.user_name || '')
                 }
@@ -208,6 +219,16 @@ export default function AdminSidebar() {
     }
 
     const handleLogout = async () => {
+        await fetch('/api/admin/user-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'logout',
+                path: pathname,
+                referrer: document.referrer,
+                search_params: window.location.search,
+            }),
+        }).catch(() => {})
         await supabase.auth.signOut()
         router.push('/login')
     }
@@ -216,6 +237,13 @@ export default function AdminSidebar() {
         const sections: Record<string, { href: string; icon: any; label: string; subItems?: SubNavItem[] }[]> = {}
 
         const allowedModules = isMaster ? Object.keys(MODULE_NAV) : permissions
+        const isDiretoria = sectors.some(sector =>
+            String(sector?.name || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .includes('diretoria')
+        )
         const canManageSectors = isMaster || SETTINGS_SECTORS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
         const canManageUsers = isMaster || SETTINGS_USERS_PERMISSION_KEYS.some(key => allowedModules.includes(key))
 
@@ -234,6 +262,15 @@ export default function AdminSidebar() {
             if (!nav) continue
             if (!sections[nav.section]) sections[nav.section] = []
             sections[nav.section].push({ href: nav.href, icon: nav.icon, label: nav.label, subItems: nav.subItems })
+        }
+
+        if (isMaster || isDiretoria) {
+            if (!sections[ACCESS_AUDIT_ITEM.section]) sections[ACCESS_AUDIT_ITEM.section] = []
+            sections[ACCESS_AUDIT_ITEM.section].push({
+                href: ACCESS_AUDIT_ITEM.href,
+                icon: ACCESS_AUDIT_ITEM.icon,
+                label: ACCESS_AUDIT_ITEM.label,
+            })
         }
 
         if (canManageSectors || canManageUsers) {
