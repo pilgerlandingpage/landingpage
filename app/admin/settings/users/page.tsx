@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import {
-    Users, UserPlus, Mail, Phone, Shield, CheckCircle, AlertCircle,
+    Users, UserPlus, Mail, Phone, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
-    Smartphone, Wifi, WifiOff, QrCode, Bot, Clock, Brain, RefreshCw, MessageSquare
+    Smartphone, Wifi, WifiOff, RefreshCw
 } from 'lucide-react'
 
 interface Sector { id: string; name: string; color: string; icon: string }
@@ -12,11 +12,6 @@ interface AdminUser {
     id: string; auth_user_id: string; name: string; email: string; phone: string
     is_master: boolean; is_active: boolean; created_at: string
     sectors: Sector[]
-    shadow_agent_prompt?: string
-    shadow_agent_enabled?: boolean
-    available_from?: string
-    available_until?: string
-    whatsapp_instance_id?: string
 }
 
 interface WhatsAppUserInstance {
@@ -37,21 +32,14 @@ export default function UsersPage() {
     const [saving, setSaving] = useState(false)
     const [search, setSearch] = useState('')
     const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
-    // Shadow Agent / WhatsApp state
+    // WhatsApp status state
     const [userWhatsapp, setUserWhatsapp] = useState<WhatsAppUserInstance | null>(null)
-    const [userWhatsappQR, setUserWhatsappQR] = useState<string | null>(null)
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
-    const [userWhatsappConnecting, setUserWhatsappConnecting] = useState(false)
     const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
 
     const [form, setForm] = useState({
         name: '', email: '', phone: '',
         is_master: false, sector_ids: [] as string[],
-        shadow_agent_prompt: '',
-        shadow_agent_enabled: false,
-        available_from: '08:00',
-        available_until: '20:00',
-        transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!\n\n{{conversation_summary}}\n\nComo posso te ajudar?'
     })
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -89,8 +77,8 @@ export default function UsersPage() {
             return
         }
         setCreating(true); setEditing(null)
-        setForm({ name: '', email: '', phone: '', is_master: false, sector_ids: [] as string[], shadow_agent_prompt: '', shadow_agent_enabled: false, available_from: '08:00', available_until: '20:00', transfer_message: 'Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!\n\n{{conversation_summary}}\n\nComo posso te ajudar?' })
-        setUserWhatsapp(null); setUserWhatsappQR(null)
+        setForm({ name: '', email: '', phone: '', is_master: false, sector_ids: [] as string[] })
+        setUserWhatsapp(null)
     }
 
     const startEdit = (u: AdminUser) => {
@@ -98,13 +86,8 @@ export default function UsersPage() {
         setForm({
             name: u.name, email: u.email, phone: u.phone || '',
             is_master: canGrantMaster ? u.is_master : false, sector_ids: u.sectors.map(s => s.id),
-            shadow_agent_prompt: u.shadow_agent_prompt || '',
-            shadow_agent_enabled: u.shadow_agent_enabled || false,
-            available_from: u.available_from || '08:00',
-            available_until: u.available_until || '20:00',
-            transfer_message: (u as any).transfer_message || ''
         })
-        setUserWhatsapp(null); setUserWhatsappQR(null)
+        setUserWhatsapp(null)
         loadUserWhatsApp(u.id)
     }
 
@@ -117,33 +100,6 @@ export default function UsersPage() {
             else setUserWhatsapp(null)
         } catch { setUserWhatsapp(null) }
         finally { setUserWhatsappLoading(false) }
-    }
-
-    async function connectUserWhatsApp() {
-        if (!editing) return
-        setUserWhatsappConnecting(true)
-        try {
-            const res = await fetch('/api/admin/whatsapp/qrcode', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ instance_name: `user_${editing}_${Date.now()}`, admin_user_id: editing })
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data?.message || 'Falha ao gerar QR Code')
-            if (data.qrcode) setUserWhatsappQR(data.qrcode)
-            await loadUserWhatsApp(editing)
-            if (data?.brokerSyncWarning) {
-                showToast(data.brokerSyncWarning, 'error')
-            } else if (data?.brokerCreated) {
-                showToast('Corretor IA criado e vinculado automaticamente para este usuario.', 'success')
-            } else if (data?.brokerId) {
-                showToast('Corretor IA ja existente foi vinculado automaticamente a este usuario.', 'success')
-            }
-        } catch (err: any) {
-            console.error(err)
-            showToast(err?.message || 'Falha ao gerar QR Code.', 'error')
-        }
-        finally { setUserWhatsappConnecting(false) }
     }
 
     async function checkUserWhatsAppStatus() {
@@ -160,7 +116,6 @@ export default function UsersPage() {
             }
             if (data.status) {
                 setUserWhatsapp(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
-                if (data.status === 'connected') setUserWhatsappQR(null)
             }
             if (editing) await loadUserWhatsApp(editing)
         } catch (err: any) {
@@ -198,11 +153,6 @@ export default function UsersPage() {
                     phone: form.phone,
                     ...(canGrantMaster ? { is_master: form.is_master } : {}),
                     sector_ids: form.sector_ids,
-                    shadow_agent_prompt: form.shadow_agent_prompt,
-                    shadow_agent_enabled: form.shadow_agent_enabled,
-                    available_from: form.available_from,
-                    available_until: form.available_until,
-                    transfer_message: form.transfer_message
                 }
 
             const res = await fetch('/api/admin/users', {
@@ -443,138 +393,38 @@ export default function UsersPage() {
                         </div>
                     )}
 
-                    {/* WhatsApp + Shadow Agent - only when editing */}
+                    {/* WhatsApp status - canonical setup stays in WhatsApp Web > Conectados */}
                     {editing && (
-                        <>
-                            {/* WhatsApp Connection */}
-                            <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)', marginBottom: 16 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                    <Smartphone size={16} style={{ color: '#22c55e' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>WhatsApp do Corretor</span>
-                                </div>
-                                <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
-                                    Ao conectar o WhatsApp, o sistema cria e vincula automaticamente um Corretor IA para este usuario.
-                                </p>
-
-                                {userWhatsappLoading ? (
-                                    <div style={{ textAlign: 'center', padding: '12px' }}>
-                                        <Loader2 size={20} className="spin" style={{ color: '#22c55e' }} />
-                                    </div>
-                                ) : userWhatsapp?.status === 'connected' ? (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px' }}>
-                                        <Wifi size={16} style={{ color: '#22c55e' }} />
-                                        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>Conectado</span>
-                                        {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> - {userWhatsapp.phone_number}</span>}
-                                        <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginLeft: 'auto', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <RefreshCw size={10} /> Verificar
-                                        </button>
-                                    </div>
-                                ) : userWhatsappQR ? (
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ display: 'inline-block', padding: '12px', background: 'white', borderRadius: '10px', marginBottom: '8px' }}>
-                                            <img src={userWhatsappQR} alt="QR" style={{ width: '200px', height: '200px' }} />
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Escaneie com WhatsApp para Dispositivos conectados</div>
-                                        <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginTop: '8px', padding: '6px 16px', borderRadius: '8px', fontSize: '0.8rem', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#22c55e', cursor: 'pointer' }}>
-                                            <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Verificar conexao
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px', color: '#888', fontSize: '0.85rem' }}>
-                                            <WifiOff size={14} /> Nao conectado
-                                        </div>
-                                        <button type="button" onClick={connectUserWhatsApp} disabled={userWhatsappConnecting}
-                                            style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none', color: 'white', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: userWhatsappConnecting ? 0.6 : 1 }}>
-                                            {userWhatsappConnecting ? <Loader2 size={14} className="spin" /> : <QrCode size={14} />}
-                                            {userWhatsappConnecting ? 'Gerando...' : 'Conectar WhatsApp'}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Shadow Agent */}
-                            <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                    <Brain size={16} style={{ color: '#6366f1' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Agente Sombra</span>
-                                </div>
-                                <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
-                                    IA que atende pelo WhatsApp do corretor quando ele esta indisponivel (fora do horario).
-                                </p>
-
-                                {/* Toggle */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                                    <label className="rbac-toggle">
-                                        <input type="checkbox" checked={form.shadow_agent_enabled}
-                                            onChange={e => setForm(p => ({ ...p, shadow_agent_enabled: e.target.checked }))} />
-                                        <span className="rbac-toggle-slider" style={{ background: form.shadow_agent_enabled ? '#6366f1' : undefined }} />
-                                    </label>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: form.shadow_agent_enabled ? '#6366f1' : '#888' }}>
-                                        {form.shadow_agent_enabled ? 'Ativo' : 'Desativado'}
-                                    </span>
-                                </div>
-
-                                {form.shadow_agent_enabled && (
-                                    <>
-                                        {/* Availability Schedule */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                                            <div>
-                                                <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> Disponivel das
-                                                </label>
-                                                <input type="time" value={form.available_from}
-                                                    onChange={e => setForm(p => ({ ...p, available_from: e.target.value }))}
-                                                    className="rbac-input" style={{ paddingLeft: '12px' }} />
-                                            </div>
-                                            <div>
-                                                <label className="rbac-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Clock size={12} /> Ate
-                                                </label>
-                                                <input type="time" value={form.available_until}
-                                                    onChange={e => setForm(p => ({ ...p, available_until: e.target.value }))}
-                                                    className="rbac-input" style={{ paddingLeft: '12px' }} />
-                                            </div>
-                                        </div>
-                                        <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>
-                                            Fora deste horario, o Agente Sombra assume o WhatsApp do corretor automaticamente.
-                                        </div>
-
-                                        {/* Shadow Agent Prompt */}
-                                        <div>
-                                            <label className="rbac-label">Prompt do Agente Sombra</label>
-                                            <textarea value={form.shadow_agent_prompt}
-                                                onChange={e => setForm(p => ({ ...p, shadow_agent_prompt: e.target.value }))}
-                                                placeholder={`Voce e o assistente do corretor. Ele esta indisponivel no momento.\n\nSua missao:\n- Atender o cliente com educacao\n- Coletar informacoes sobre o interesse\n- Informar que o corretor entrara em contato em breve\n\nNunca invente dados sobre imoveis.`}
-                                                style={{ width: '100%', minHeight: '120px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'monospace', resize: 'vertical' }} />
-                                            <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                                Define como o agente sombra se comporta quando o corretor esta fora do horario.
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </>
-                    )}
-
-                    {/* SECAO: MENSAGEM DE TRANSFERENCIA */}
-                    {editing && (
-                        <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                <MessageSquare size={16} style={{ color: '#6366f1' }} />
-                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Mensagem de Transferencia</span>
+                        <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)', marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <Smartphone size={16} style={{ color: '#22c55e' }} />
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Status do WhatsApp</span>
                             </div>
                             <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '12px' }}>
-                                Mensagem enviada ao lead quando o agente IA transferir o atendimento para este corretor.
+                                A conexão e as regras do agente são gerenciadas em WhatsApp Web &gt; Conectados e Config do Agente.
                             </p>
-                            <textarea
-                                value={form.transfer_message}
-                                onChange={e => setForm(p => ({ ...p, transfer_message: e.target.value }))}
-                                placeholder="Oi {{lead_name}}! Sou o {{broker_name}}, recebi seus dados e quero te ajudar pessoalmente!"
-                                style={{ width: '100%', minHeight: '100px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', resize: 'vertical' }} />
-                            <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>
-                                Variaveis: {'{{lead_name}}'}, {'{{broker_name}}'} e {'{{conversation_summary}}'}
-                            </div>
+
+                            {userWhatsappLoading ? (
+                                <div style={{ textAlign: 'center', padding: '12px' }}>
+                                    <Loader2 size={20} className="spin" style={{ color: '#22c55e' }} />
+                                </div>
+                            ) : userWhatsapp?.status === 'connected' ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px' }}>
+                                    <Wifi size={16} style={{ color: '#22c55e' }} />
+                                    <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '0.85rem' }}>Conectado</span>
+                                    {userWhatsapp.phone_number && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> - {userWhatsapp.phone_number}</span>}
+                                    <button type="button" onClick={checkUserWhatsAppStatus} style={{ marginLeft: 'auto', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <RefreshCw size={10} /> Verificar
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(148, 163, 184, 0.08)', borderRadius: '8px' }}>
+                                    <WifiOff size={16} style={{ color: '#888' }} />
+                                    <span style={{ color: '#888', fontWeight: 600, fontSize: '0.85rem' }}>
+                                        {userWhatsapp?.status === 'connecting' ? 'Conectando' : 'Sem WhatsApp vinculado'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
 
