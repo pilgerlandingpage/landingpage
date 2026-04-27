@@ -1290,6 +1290,11 @@ h6 {
     padding-right: 10px;
   }
 
+  .admin-content {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
   .admin-content .kpi-grid,
   .admin-content [class*="kpi-grid"] {
     grid-template-columns: 1fr !important;
@@ -1310,6 +1315,42 @@ h6 {
   .admin-content .btn-primary,
   .admin-content .btn-secondary {
     width: 100%;
+  }
+
+  .admin-content .overview-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .admin-content .overview-kpi-grid .kpi-card {
+    min-height: 48px;
+    padding: 5px 6px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 2px;
+  }
+
+  .admin-content .overview-kpi-grid .kpi-label {
+    font-size: 0.48rem;
+    line-height: 1.05;
+    margin-bottom: 0;
+    letter-spacing: 0.2px;
+    gap: 3px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-content .overview-kpi-grid .kpi-label svg {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 auto;
+  }
+
+  .admin-content .overview-kpi-grid .kpi-value {
+    font-size: clamp(0.72rem, 3vw, 0.94rem);
+    line-height: 1.05;
+    text-align: left;
+    overflow-wrap: anywhere;
   }
 }
 

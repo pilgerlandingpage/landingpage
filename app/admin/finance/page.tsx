@@ -311,8 +311,6 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [reconciliationsLoading, setReconciliationsLoading] = useState(false)
     const [aparLoading, setAparLoading] = useState(false)
     const [saving, setSaving] = useState(false)
-    const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
-    const [syncingHistoricalAdsSpend, setSyncingHistoricalAdsSpend] = useState(false)
     const [settlingAparId, setSettlingAparId] = useState<string | null>(null)
     const [savingReconciliation, setSavingReconciliation] = useState(false)
     const [deletingReconciliationId, setDeletingReconciliationId] = useState<string | null>(null)
@@ -420,55 +418,6 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             showToast(err.message || 'Erro ao carregar financeiro', 'error')
         } finally {
             setLoading(false)
-        }
-    }
-
-    const syncAdsSpend = async () => {
-        setSyncingAdsSpend(true)
-        try {
-            const res = await fetch('/api/admin/finance/sync-ads-spend', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}),
-            })
-            const data = await res.json()
-            if (!res.ok || !data.success) {
-                throw new Error(data.error || 'Erro ao sincronizar trafego pago')
-            }
-
-            await fetchEntries()
-            const syncedAmount = (data.entries || [])
-                .reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0)
-            showToast(`Gasto mensal de trafego sincronizado: ${formatCurrency(syncedAmount)}`, 'success')
-        } catch (err: any) {
-            showToast(err.message || 'Erro ao sincronizar trafego pago', 'error')
-        } finally {
-            setSyncingAdsSpend(false)
-        }
-    }
-
-    const syncHistoricalAdsSpend = async () => {
-        setSyncingHistoricalAdsSpend(true)
-        try {
-            const res = await fetch('/api/admin/finance/sync-ads-spend', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ historical: true }),
-            })
-            const data = await res.json()
-            if (!res.ok || !data.success) {
-                throw new Error(data.error || 'Erro ao sincronizar historico de trafego pago')
-            }
-
-            await fetchEntries()
-            showToast(
-                `Historico Ads sincronizado: Meta ${formatCurrency(Number(data.meta_total || 0))}, Google ${formatCurrency(Number(data.google_total || 0))}, total ${formatCurrency(Number(data.combined_total || 0))}`,
-                'success'
-            )
-        } catch (err: any) {
-            showToast(err.message || 'Erro ao sincronizar historico de trafego pago', 'error')
-        } finally {
-            setSyncingHistoricalAdsSpend(false)
         }
     }
 
@@ -1340,66 +1289,24 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                         Cadastre receitas e despesas com categorias, subcategorias e rastreio financeiro detalhado.
                     </p>
                 </div>
-                <div className="admin-header-actions">
-                    <button
-                        className="btn btn-outline"
-                        onClick={syncAdsSpend}
-                        disabled={syncingAdsSpend}
-                    >
-                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Atualizar Ads do mes
-                    </button>
-                    <button
-                        className="btn btn-outline"
-                        onClick={async () => {
-                            await Promise.all([fetchEntries(), fetchAparData()])
-                            if (showConciliacaoBancaria) await fetchReconciliations()
-                        }}
-                        disabled={loading || aparLoading || reconciliationsLoading}
-                    >
-                        <RefreshCw size={16} className={loading || aparLoading ? 'spin' : ''} /> Atualizar
-                    </button>
-                </div>
             </div>
 
-            {showResumo && (
-                <div className="chart-card" style={{ marginBottom: 18, border: '1px solid rgba(201, 169, 110, 0.35)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                        <div>
-                            <div className="chart-title" style={{ marginBottom: 4 }}>Ponte com trafego pago</div>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: 0 }}>
-                                Busca Meta Ads e Google Ads, separa por plataforma e lanca no financeiro por competencia mensal sem duplicar.
-                            </p>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                            <button className="btn btn-outline" onClick={syncHistoricalAdsSpend} disabled={syncingHistoricalAdsSpend || syncingAdsSpend}>
-                                <RefreshCw size={16} className={syncingHistoricalAdsSpend ? 'spin' : ''} />
-                                {syncingHistoricalAdsSpend ? 'Sincronizando...' : 'Sincronizar historico mensal'}
-                            </button>
-                            <button className="btn btn-gold" onClick={syncAdsSpend} disabled={syncingAdsSpend || syncingHistoricalAdsSpend}>
-                                <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} />
-                                {syncingAdsSpend ? 'Atualizando...' : 'Atualizar mes atual'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {showFiltros && (
-                <div className="chart-card" style={{ marginBottom: 18 }}>
+                <div className="chart-card finance-filter-card" style={{ marginBottom: 18 }}>
                     <div className="chart-title" style={{ marginBottom: 12 }}>
                         {showTextSearchFilter ? 'Filtro de periodo e pesquisa' : 'Filtros do periodo'}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-                        <div>
+                    <div className="finance-filter-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                        <div className="finance-filter-field">
                             <label className="form-label">Data inicial</label>
                             <input className="form-input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                         </div>
-                        <div>
+                        <div className="finance-filter-field">
                             <label className="form-label">Data final</label>
                             <input className="form-input" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </div>
                         {!showContasPagar && !showContasReceber && (
-                            <div>
+                            <div className="finance-filter-field">
                                 <label className="form-label">Tipo</label>
                                 <select className="form-input" value={typeFilter} onChange={e => setTypeFilter(e.target.value as 'all' | EntryType)}>
                                     <option value="all">Todos</option>
@@ -1409,7 +1316,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                             </div>
                         )}
                         {(showContasPagar || showContasReceber) && (
-                            <div>
+                            <div className="finance-filter-field">
                                 <label className="form-label">Status financeiro</label>
                                 <select
                                     className="form-input"
@@ -1424,7 +1331,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 </select>
                             </div>
                         )}
-                        <div>
+                        <div className="finance-filter-field">
                             <label className="form-label">Categoria</label>
                             <select className="form-input" value={categoryFilter} onChange={e => {
                                 setCategoryFilter(e.target.value)
@@ -1436,7 +1343,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 ))}
                             </select>
                         </div>
-                        <div>
+                        <div className="finance-filter-field">
                             <label className="form-label">Subcategoria</label>
                             <select className="form-input" value={subcategoryFilter} onChange={e => setSubcategoryFilter(e.target.value)}>
                                 <option value="all">Todas subcategorias</option>
@@ -1446,7 +1353,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                             </select>
                         </div>
                         {showTextSearchFilter && (
-                            <div style={{ gridColumn: '1 / -1' }}>
+                            <div className="finance-filter-field finance-filter-search" style={{ gridColumn: '1 / -1' }}>
                                 <label className="form-label">Busca textual</label>
                                 <input
                                     className="form-input"
@@ -1456,7 +1363,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 />
                             </div>
                         )}
-                        <div style={{ alignSelf: 'end', display: 'flex', gap: 8 }}>
+                        <div className="finance-filter-actions" style={{ alignSelf: 'end', display: 'flex', gap: 8 }}>
                             <button className="btn btn-gold" onClick={async () => {
                                 await Promise.all([fetchEntries(), fetchAparData()])
                             }}>
@@ -1905,7 +1812,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             )}
 
             {showResumo && (
-            <div id="finance-resumo" className="kpi-grid" style={{ gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))', marginBottom: 18, scrollMarginTop: 96 }}>
+            <div id="finance-resumo" className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))', marginBottom: 18, scrollMarginTop: 96 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Receitas</div>
                     <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(summary.income)}</div>
@@ -1940,12 +1847,12 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             )}
 
             {showResumo && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
+            <div className="finance-charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Evolucao mensal</div>
                     <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer>
-                            <AreaChart data={monthlySeries}>
+                        <ResponsiveContainer width="100%" height={280}>
+                            <AreaChart data={monthlySeries} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                                 <defs>
                                     <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#22c55e" stopOpacity={0.45} />
@@ -1958,9 +1865,9 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
                                 <XAxis dataKey="label" stroke="#9ca3af" />
-                                <YAxis stroke="#9ca3af" />
+                                <YAxis stroke="#9ca3af" width={46} />
                                 <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
                                 <Area type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" fill="url(#incomeGradient)" strokeWidth={2} />
                                 <Area type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" fill="url(#expenseGradient)" strokeWidth={2} />
                             </AreaChart>
@@ -1971,14 +1878,14 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12 }}>Despesas por categoria</div>
                     <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer>
+                        <ResponsiveContainer width="100%" height={280}>
                             <PieChart>
                                 <Pie
                                     data={expenseByCategory}
                                     dataKey="value"
                                     nameKey="name"
-                                    innerRadius={62}
-                                    outerRadius={110}
+                                    innerRadius={54}
+                                    outerRadius={92}
                                     paddingAngle={2}
                                 >
                                     {expenseByCategory.map((_, idx) => (
@@ -1986,7 +1893,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                     ))}
                                 </Pie>
                                 <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -1996,7 +1903,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
             {showContasPagar && (
             <>
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+            <div className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Total a pagar</div>
                     <div className="kpi-value" style={{ color: '#ef4444' }}>{formatCurrency(payablesSummary.total)}</div>
@@ -2119,7 +2026,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
             {showContasReceber && (
             <>
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+            <div className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Total a receber</div>
                     <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(receivablesSummary.total)}</div>
@@ -2312,7 +2219,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                 </div>
             </div>
 
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
+            <div className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 18 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Extratos no periodo</div>
                     <div className="kpi-value">{reconciliationSummary.count}</div>
@@ -2779,6 +2686,107 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                 }
                 @keyframes financeSpin {
                     to { transform: rotate(360deg); }
+                }
+                @media (max-width: 768px) {
+                    .admin-content .finance-filter-card {
+                        padding: 10px !important;
+                        margin-bottom: 10px !important;
+                        overflow: hidden;
+                    }
+                    .admin-content .finance-filter-card .chart-title {
+                        font-size: 0.86rem;
+                        margin-bottom: 8px !important;
+                    }
+                    .admin-content .finance-filter-grid {
+                        display: flex !important;
+                        flex-wrap: nowrap;
+                        gap: 6px !important;
+                        overflow-x: auto;
+                        padding-bottom: 2px;
+                        scrollbar-width: thin;
+                    }
+                    .admin-content .finance-filter-field {
+                        flex: 0 0 112px;
+                        min-width: 112px;
+                    }
+                    .admin-content .finance-filter-field.finance-filter-search {
+                        flex-basis: 180px;
+                        min-width: 180px;
+                    }
+                    .admin-content .finance-filter-field .form-label {
+                        font-size: 0.58rem;
+                        line-height: 1;
+                        margin-bottom: 3px;
+                        white-space: nowrap;
+                    }
+                    .admin-content .finance-filter-field .form-input {
+                        height: 34px;
+                        min-height: 34px;
+                        padding: 6px 8px;
+                        font-size: 0.72rem;
+                        border-radius: 8px;
+                    }
+                    .admin-content .finance-filter-actions {
+                        flex: 0 0 auto;
+                        align-self: flex-end !important;
+                        gap: 6px !important;
+                    }
+                    .admin-content .finance-filter-actions .btn {
+                        width: auto;
+                        min-width: 42px;
+                        height: 34px;
+                        padding: 6px 8px;
+                        font-size: 0.68rem;
+                        line-height: 1;
+                        white-space: nowrap;
+                    }
+                    .admin-content .finance-filter-actions .btn svg {
+                        width: 12px;
+                        height: 12px;
+                    }
+                    .admin-content .finance-kpi-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                        gap: 5px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .admin-content .finance-kpi-grid .kpi-card {
+                        min-height: 48px;
+                        padding: 5px 6px !important;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                        gap: 2px;
+                    }
+                    .admin-content .finance-kpi-grid .kpi-label {
+                        font-size: 0.48rem;
+                        line-height: 1.05;
+                        margin-bottom: 0;
+                        letter-spacing: 0.2px;
+                        overflow-wrap: anywhere;
+                    }
+                    .admin-content .finance-kpi-grid .kpi-value {
+                        font-size: clamp(0.72rem, 3vw, 0.94rem);
+                        line-height: 1.05;
+                        overflow-wrap: anywhere;
+                    }
+                    .admin-content .finance-kpi-grid .kpi-change {
+                        font-size: 0.5rem;
+                        margin-top: 0;
+                        line-height: 1.1;
+                        gap: 3px !important;
+                        overflow-wrap: anywhere;
+                    }
+                    .admin-content .finance-kpi-grid .kpi-change svg {
+                        width: 10px;
+                        height: 10px;
+                        flex: 0 0 auto;
+                    }
+                    .finance-charts-grid {
+                        grid-template-columns: minmax(0, 1fr) !important;
+                        gap: 12px !important;
+                    }
                 }
                 @media (max-width: 820px) {
                     .lookup-grid {

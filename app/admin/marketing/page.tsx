@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone, Calendar, Search, CheckCircle, AlertCircle } from 'lucide-react'
+import { Users, Eye, MessageCircle, TrendingUp, UserCheck, Star, Brain, DollarSign, Target, Thermometer, Megaphone, Search, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import {
     BarChart,
@@ -309,19 +309,18 @@ export default function AdminDashboard() {
         <div>
             <div className="admin-header">
                 <h1>Painel do CEO</h1>
-                <p style={{ color: 'var(--text-muted)' }}>&quot;Olho de Deus&quot; - Monitoramento Proativo</p>
+                <p className="marketing-subtitle" style={{ color: 'var(--text-muted)' }}>Monitoramento proativo</p>
             </div>
 
             {/* ═══ Combined Traffic KPIs + General Thermometer ═══ */}
             <div style={{ marginBottom: 32 }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="marketing-traffic-header" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, justifyContent: 'space-between' }}>
+                        <div className="marketing-traffic-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <Megaphone size={22} color="var(--gold)" />
                             <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Tráfego Pago — Visão Geral</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Calendar size={14} color="var(--text-muted)" />
+                        <div className="marketing-period-filter" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <select
                                 value={adDatePreset}
                                 onChange={e => handleAdDateChange(e.target.value)}
@@ -361,7 +360,7 @@ export default function AdminDashboard() {
                         )}
 
                     </div>
-                    <div className="kpi-grid" style={{ gridTemplateColumns: `repeat(${generalScore != null ? 5 : 4}, 1fr)`, marginBottom: 0 }}>
+                    <div className="kpi-grid marketing-kpi-grid" style={{ gridTemplateColumns: `repeat(${generalScore != null ? 5 : 4}, 1fr)`, marginBottom: 0 }}>
                         <div className="kpi-card">
                             <DollarSign size={20} color="#22c55e" style={{ marginBottom: 8 }} />
                             <div className="kpi-label">Gasto Total {adDateLabels[adDatePreset] && `(${adDateLabels[adDatePreset]})`}</div>
@@ -420,7 +419,7 @@ export default function AdminDashboard() {
 
 
             {/* KPI Cards */}
-            <div className="kpi-grid">
+            <div className="kpi-grid marketing-kpi-grid">
                 <div className="kpi-card">
                     <Eye size={20} color="#c9a96e" style={{ marginBottom: 8 }} />
                     <div className="kpi-label">Visitantes</div>
@@ -486,7 +485,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Charts Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+            <div className="marketing-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                 {/* Daily Chart */}
                 <div className="chart-card">
                     <div className="chart-title">Visitantes & Leads — Últimos 7 dias</div>
@@ -541,7 +540,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Source Bar Chart & Top Pages Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+            <div className="marketing-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                 <div className="chart-card">
                     <div className="chart-title">Visitantes por Fonte</div>
                     <ResponsiveContainer width="100%" height={300}>
@@ -631,7 +630,7 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style jsx global>{`
                 .ads-date-input {
                     background: transparent;
                     border: none;
@@ -642,6 +641,85 @@ export default function AdminDashboard() {
                 .ads-date-input::-webkit-calendar-picker-indicator {
                     filter: none;
                     cursor: pointer;
+                }
+                @media (max-width: 768px) {
+                    .admin-content .marketing-subtitle {
+                        font-size: 0.78rem !important;
+                        line-height: 1.2;
+                        margin-top: 3px !important;
+                    }
+                    .admin-content .marketing-traffic-header {
+                        align-items: flex-start !important;
+                        gap: 6px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .admin-content .marketing-traffic-title {
+                        gap: 6px !important;
+                        min-width: 0;
+                    }
+                    .admin-content .marketing-traffic-title svg {
+                        width: 16px;
+                        height: 16px;
+                        flex: 0 0 auto;
+                    }
+                    .admin-content .marketing-traffic-title span {
+                        font-size: 0.96rem !important;
+                        line-height: 1.1;
+                    }
+                    .admin-content .marketing-period-filter {
+                        flex: 0 0 108px;
+                    }
+                    .admin-content .marketing-period-filter .form-input {
+                        min-width: 0 !important;
+                        width: 108px;
+                        height: 30px;
+                        padding: 4px 8px !important;
+                        font-size: 0.72rem !important;
+                    }
+                    .admin-content .marketing-kpi-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                        gap: 5px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .admin-content .marketing-kpi-grid .kpi-card {
+                        min-height: 48px;
+                        padding: 5px 6px !important;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                        gap: 2px;
+                    }
+                    .admin-content .marketing-kpi-grid .kpi-card > svg,
+                    .admin-content .marketing-kpi-grid .kpi-card > div:first-child:not(.kpi-label):not(.kpi-value) {
+                        width: 12px !important;
+                        height: 12px !important;
+                        margin-bottom: 1px !important;
+                        font-size: 0.72rem !important;
+                    }
+                    .admin-content .marketing-kpi-grid .kpi-label {
+                        font-size: 0.48rem;
+                        line-height: 1.05;
+                        margin-bottom: 0;
+                        letter-spacing: 0.2px;
+                        overflow-wrap: anywhere;
+                    }
+                    .admin-content .marketing-kpi-grid .kpi-value {
+                        font-size: clamp(0.72rem, 3vw, 0.94rem);
+                        line-height: 1.05;
+                        overflow-wrap: anywhere;
+                    }
+                    .admin-content .marketing-kpi-grid .kpi-card > div:not(.kpi-label):not(.kpi-value) {
+                        font-size: 0.5rem !important;
+                        margin-top: 0 !important;
+                        line-height: 1.1;
+                    }
+                    .marketing-charts-grid {
+                        grid-template-columns: minmax(0, 1fr) !important;
+                        gap: 12px !important;
+                        margin-bottom: 12px !important;
+                    }
                 }
             `}</style>
         </div>

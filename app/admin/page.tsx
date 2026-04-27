@@ -1,19 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
-    ArrowRight,
-    BarChart3,
     Bell,
-    Building2,
     CircleDollarSign,
-    Landmark,
     Megaphone,
-    MessageSquare,
     Smartphone,
     TrendingUp,
-    Users,
     UserCheck,
 } from 'lucide-react'
 import {
@@ -223,14 +216,6 @@ export default function AdminOverviewPage() {
             .map(item => ({ ...item, label: formatMonthLabel(item.month) }))
     }, [financeEntries])
 
-    const quickLinks = [
-        { href: '/admin/marketing', label: 'Dashboard Marketing', description: 'Leads, trafego e conversao', icon: Megaphone },
-        { href: '/admin/finance', label: 'Dashboard Financeiro', description: 'Receitas, despesas e caixa', icon: Landmark },
-        { href: '/admin/leads', label: 'Leads', description: 'Gestao comercial e funil', icon: Users },
-        { href: '/admin/properties', label: 'Imoveis', description: 'Catalogo e oportunidades', icon: Building2 },
-        { href: '/admin/whatsapp', label: 'WhatsApp Web', description: 'Conversas e operacao', icon: MessageSquare },
-    ]
-
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)' }}>
@@ -246,7 +231,7 @@ export default function AdminOverviewPage() {
                 <p style={{ color: 'var(--text-muted)' }}>Visao consolidada do sistema (periodo completo)</p>
             </div>
 
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 20 }}>
+            <div className="kpi-grid overview-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 24 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Visitantes totais</div>
                     <div className="kpi-value">{marketingStats.totalVisitors.toLocaleString('pt-BR')}</div>
@@ -267,9 +252,6 @@ export default function AdminOverviewPage() {
                     <div className="kpi-label">Lancamentos financeiros</div>
                     <div className="kpi-value">{financeSummary.totalEntries.toLocaleString('pt-BR')}</div>
                 </div>
-            </div>
-
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 24 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Receitas</div>
                     <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(financeSummary.income)}</div>
@@ -292,9 +274,6 @@ export default function AdminOverviewPage() {
                     <div className="kpi-label">Conversas WhatsApp</div>
                     <div className="kpi-value">{marketingStats.whatsappConversations.toLocaleString('pt-BR')}</div>
                 </div>
-            </div>
-
-            <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: 24 }}>
                 <div className="kpi-card">
                     <div className="kpi-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <UserCheck size={14} /> Corretores IA
@@ -331,49 +310,19 @@ export default function AdminOverviewPage() {
                 </div>
             </div>
 
-            <div className="chart-card" style={{ marginBottom: 24 }}>
-                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <BarChart3 size={18} /> Modulos principais
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12 }}>
-                    {quickLinks.map(link => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            style={{
-                                border: '1px solid var(--border-color)',
-                                borderRadius: 12,
-                                padding: 14,
-                                textDecoration: 'none',
-                                color: 'inherit',
-                                background: 'var(--bg-card)',
-                                transition: 'all .2s ease'
-                            }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <link.icon size={16} color="var(--gold)" />
-                                <ArrowRight size={14} color="var(--text-muted)" />
-                            </div>
-                            <div style={{ fontWeight: 700, marginBottom: 4 }}>{link.label}</div>
-                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{link.description}</div>
-                        </Link>
-                    ))}
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18 }}>
+            <div className="overview-charts-grid">
                 <div className="chart-card">
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <TrendingUp size={18} /> Evolucao financeira mensal
                     </div>
-                    <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer>
-                            <LineChart data={monthlyFinance}>
+                    <div className="overview-chart-box">
+                        <ResponsiveContainer width="100%" height={280}>
+                            <LineChart data={monthlyFinance} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.2)" />
                                 <XAxis dataKey="label" stroke="#9ca3af" />
-                                <YAxis stroke="#9ca3af" />
+                                <YAxis stroke="#9ca3af" width={46} />
                                 <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
                                 <Line type="monotone" dataKey="income" name="Receitas" stroke="#22c55e" strokeWidth={2} dot={false} />
                                 <Line type="monotone" dataKey="expense" name="Despesas" stroke="#ef4444" strokeWidth={2} dot={false} />
                             </LineChart>
@@ -385,15 +334,15 @@ export default function AdminOverviewPage() {
                     <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <CircleDollarSign size={18} /> Despesas por categoria
                     </div>
-                    <div style={{ width: '100%', height: 320 }}>
-                        <ResponsiveContainer>
+                    <div className="overview-chart-box">
+                        <ResponsiveContainer width="100%" height={280}>
                             <PieChart>
                                 <Pie
                                     data={expenseByCategory}
                                     dataKey="value"
                                     nameKey="name"
-                                    innerRadius={62}
-                                    outerRadius={110}
+                                    innerRadius={54}
+                                    outerRadius={92}
                                     paddingAngle={2}
                                 >
                                     {expenseByCategory.map((_, idx) => (
@@ -401,12 +350,92 @@ export default function AdminOverviewPage() {
                                     ))}
                                 </Pie>
                                 <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
-                                <Legend />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    .overview-kpi-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                        gap: 5px !important;
+                        margin-bottom: 10px !important;
+                    }
+
+                    .overview-kpi-grid .kpi-card {
+                        min-height: 48px;
+                        padding: 5px 6px !important;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                        gap: 2px;
+                    }
+
+                    .overview-kpi-grid .kpi-label {
+                        font-size: 0.48rem;
+                        line-height: 1.05;
+                        margin-bottom: 0;
+                        letter-spacing: 0.2px;
+                        gap: 3px !important;
+                        overflow-wrap: anywhere;
+                    }
+
+                    .overview-kpi-grid .kpi-label svg {
+                        width: 10px;
+                        height: 10px;
+                        flex: 0 0 auto;
+                    }
+
+                    .overview-kpi-grid .kpi-value {
+                        font-size: clamp(0.72rem, 3vw, 0.94rem);
+                        line-height: 1.05;
+                        text-align: left;
+                        overflow-wrap: anywhere;
+                    }
+
+                    .overview-kpi-grid .kpi-change {
+                        font-size: 0.5rem;
+                        margin-top: 0;
+                        line-height: 1.1;
+                        overflow-wrap: anywhere;
+                    }
+
+                    .overview-charts-grid {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr);
+                        gap: 12px;
+                        min-width: 0;
+                    }
+
+                    .overview-chart-box {
+                        width: 100%;
+                        min-width: 0;
+                        height: 280px;
+                    }
+
+                    .overview-chart-box .recharts-legend-wrapper {
+                        font-size: 0.72rem;
+                    }
+                }
+
+                @media (min-width: 769px) {
+                    .overview-charts-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+                        gap: 18px;
+                    }
+
+                    .overview-chart-box {
+                        width: 100%;
+                        height: 280px;
+                    }
+                }
+            `}</style>
         </div>
     )
 }
