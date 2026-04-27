@@ -310,6 +310,7 @@ export default function AdminOverviewPage() {
                     </div>
                     <SimpleLineChart
                         data={monthlyFinanceChart}
+                        valueFormatter={formatCurrency}
                         series={[
                             { key: 'expense', name: 'Despesas', color: '#ef4444' },
                             { key: 'income', name: 'Receitas', color: '#22c55e' },

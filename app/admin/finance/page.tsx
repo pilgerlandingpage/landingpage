@@ -1845,6 +1845,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     <div className="chart-title" style={{ marginBottom: 12 }}>Evolucao mensal</div>
                     <SimpleLineChart
                         data={monthlySeriesChart}
+                        valueFormatter={formatCurrency}
                         series={[
                             { key: 'expense', name: 'Despesas', color: '#ef4444' },
                             { key: 'income', name: 'Receitas', color: '#22c55e' },
