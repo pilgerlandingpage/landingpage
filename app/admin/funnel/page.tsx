@@ -106,28 +106,13 @@ export default function FunnelPage() {
                 <h1>Funil de Conversão</h1>
             </div>
 
-            <div className="chart-card">
-                <div className="funnel-container" style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '2px', // Tighter gap for connected feel
-                    padding: '40px 0'
-                }}>
+            <div className="chart-card funnel-card">
+                <div className="funnel-visual">
                     {funnelData.map((step, index) => {
-                        // Schematic width: reduces by step to preserve funnel shape
-                        // e.g. 100%, 85%, 70%, 55%, 40%, 25%
-                        const maxSteps = 8
                         const stepDrop = funnelData.length > 1 ? (70 / (funnelData.length - 1)) : 0
                         const topWidthPercent = Math.max(30, 100 - (index * stepDrop))
-
-                        // Vivid colors for high impact on dark background
                         const palette = ['#0066FF', '#4ade80', '#9933FF', '#FF0099', '#FFAA00', '#FF6600', '#FFD700', '#00CC44']
                         const color = palette[index % palette.length]
-
-                        // Overriding with custom hex for "Vivid" request
-                        
-                        // Let's use the vivid set
                         
                         return (
                             <div key={index} style={{

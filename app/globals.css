@@ -1296,6 +1296,33 @@ h6 {
   margin-left: auto;
 }
 
+.funnel-card {
+  overflow: hidden;
+}
+
+.funnel-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 34px 0;
+}
+
+.funnel-visual .funnel-segment {
+  animation: funnelSegmentIn 520ms ease both;
+}
+
+@keyframes funnelSegmentIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scaleX(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
 /* Exit Intent Modal */
 .exit-modal-overlay {
   position: fixed;
@@ -1515,6 +1542,86 @@ h6 {
   .admin-content .simple-donut-legend {
     font-size: 0.68rem;
     gap: 7px;
+  }
+
+  .admin-content .funnel-card {
+    padding: 10px !important;
+    overflow: hidden;
+  }
+
+  .admin-content .funnel-visual {
+    gap: 8px !important;
+    padding: 6px 0 10px !important;
+    max-width: 100%;
+  }
+
+  .admin-content .funnel-visual > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+    align-items: stretch !important;
+  }
+
+  .admin-content .funnel-visual > div > div:first-child {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    color: var(--text-primary) !important;
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    padding: 0 4px;
+  }
+
+  .admin-content .funnel-visual > div > div:first-child span {
+    margin-right: 5px !important;
+    font-size: 0.9em !important;
+    flex: 0 0 auto;
+  }
+
+  .admin-content .funnel-visual > div > div:first-child div {
+    display: none !important;
+  }
+
+  .admin-content .funnel-visual > div > div:nth-child(2) {
+    width: 100% !important;
+    height: 38px !important;
+    justify-content: center !important;
+    display: flex !important;
+    position: relative !important;
+  }
+
+  .admin-content .funnel-visual .funnel-segment {
+    min-width: 42px;
+    height: 38px !important;
+    filter: saturate(1.08);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18) !important;
+  }
+
+  .admin-content .funnel-visual .funnel-segment > div {
+    transform: none !important;
+  }
+
+  .admin-content .funnel-visual .funnel-segment span:first-child {
+    font-size: 1rem !important;
+    line-height: 1 !important;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.55) !important;
+  }
+
+  .admin-content .funnel-visual .funnel-segment span:last-child {
+    font-size: 0.63rem !important;
+    line-height: 1 !important;
+    color: rgba(255,255,255,0.95) !important;
+  }
+
+  .admin-content .funnel-visual > div > div:nth-child(3) {
+    display: none !important;
   }
 
   .admin-content table {
