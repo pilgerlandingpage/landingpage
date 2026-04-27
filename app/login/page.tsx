@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock, Mail, Phone, ArrowRight, Loader2, ShieldCheck } from 'lucide-react'
-import Link from 'next/link'
 
 export default function LoginPage() {
     return (
@@ -421,14 +420,6 @@ function LoginPageContent() {
                             )}
                         </button>
 
-                        {!isPasswordSetupMode && (
-                            <div className="mt-6 text-center">
-                                <span className="text-gray-500 text-sm">Nao tem uma conta? </span>
-                                <Link href="/signup" className="login-link text-sm">
-                                    Cadastre-se
-                                </Link>
-                            </div>
-                        )}
                     </form>
                 </div>
             </div>
