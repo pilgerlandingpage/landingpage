@@ -11,7 +11,6 @@ import {
     LogOut,
     MailCheck,
     MonitorSmartphone,
-    RefreshCw,
     Search,
     ShieldAlert,
     Users,
@@ -178,15 +177,6 @@ export default function UserAccessPage() {
                         Monitoramento de logins, navegacao interna, IP, localizacao e dispositivos.
                     </p>
                 </div>
-                <button
-                    className="btn btn-gold"
-                    onClick={fetchAccess}
-                    disabled={loading}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                >
-                    <RefreshCw size={16} className={loading ? 'spin' : ''} />
-                    Atualizar
-                </button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
