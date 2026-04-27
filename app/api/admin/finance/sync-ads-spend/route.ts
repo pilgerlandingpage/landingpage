@@ -56,12 +56,12 @@ export async function POST(request: Request) {
         if (access.error) return access.error
 
         const body = await request.json().catch(() => ({}))
-        const month = typeof body?.month === 'string' && /^\d{4}-\d{2}$/.test(body.month)
-            ? body.month
+        const date = typeof body?.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.date)
+            ? body.date
             : undefined
 
         const admin = createAdminClient()
-        const result = await syncPaidAdsSpendToFinance(admin, { month })
+        const result = await syncPaidAdsSpendToFinance(admin, { date })
 
         return NextResponse.json({ success: true, ...result })
     } catch (err: any) {

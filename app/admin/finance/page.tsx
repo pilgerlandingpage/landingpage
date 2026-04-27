@@ -437,7 +437,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             await fetchEntries()
             const syncedAmount = (data.entries || [])
                 .reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0)
-            showToast(`Trafego pago sincronizado no financeiro: ${formatCurrency(syncedAmount)}`, 'success')
+            showToast(`Gasto diario de trafego sincronizado: ${formatCurrency(syncedAmount)}`, 'success')
         } catch (err: any) {
             showToast(err.message || 'Erro ao sincronizar trafego pago', 'error')
         } finally {
@@ -1319,7 +1319,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                         onClick={syncAdsSpend}
                         disabled={syncingAdsSpend}
                     >
-                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Sincronizar trafego pago
+                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Sincronizar gasto diario Ads
                     </button>
                     <button
                         className="btn btn-outline"
@@ -1333,6 +1333,23 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     </button>
                 </div>
             </div>
+
+            {showResumo && (
+                <div className="chart-card" style={{ marginBottom: 18, border: '1px solid rgba(201, 169, 110, 0.35)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                        <div>
+                            <div className="chart-title" style={{ marginBottom: 4 }}>Ponte com trafego pago</div>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: 0 }}>
+                                Atualiza no financeiro o gasto de hoje do Meta Ads e Google Ads sem duplicar lancamentos.
+                            </p>
+                        </div>
+                        <button className="btn btn-gold" onClick={syncAdsSpend} disabled={syncingAdsSpend}>
+                            <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} />
+                            {syncingAdsSpend ? 'Sincronizando...' : 'Sincronizar gasto diario'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {showFiltros && (
                 <div className="chart-card" style={{ marginBottom: 18 }}>

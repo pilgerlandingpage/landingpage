@@ -12,7 +12,7 @@ interface PlatformSpend {
 }
 
 export interface AdsSpendSyncResult {
-    month: string
+    date: string
     synced: number
     skipped: number
     entries: Array<{
@@ -38,21 +38,17 @@ function todayInSaoPaulo() {
     }).format(new Date())
 }
 
-function monthLabel(month: string) {
-    const [year, monthNumber] = month.split('-')
-    return `${monthNumber}/${year}`
+function dateLabel(date: string) {
+    const [year, month, day] = date.split('-')
+    return `${day}/${month}/${year}`
 }
 
 function platformLabel(platform: Platform) {
     return platform === 'meta' ? 'Meta Ads' : 'Google Ads'
 }
 
-function platformReference(platform: Platform, month: string) {
-    return `paid_ads:${platform}:${month}`
-}
-
-function getMonthStart(month: string) {
-    return `${month}-01`
+function platformReference(platform: Platform, date: string) {
+    return `paid_ads:${platform}:${date}`
 }
 
 async function getMarketingCostCenterId(admin: any) {
@@ -67,46 +63,47 @@ async function getMarketingCostCenterId(admin: any) {
     return data?.id || null
 }
 
-async function getLiveMonthSpend(): Promise<{ spends: PlatformSpend[]; errors: string[] }> {
+async function getLiveDailySpend(): Promise<{ spends: PlatformSpend[]; errors: string[] }> {
     const errors: string[] = []
     const spends: PlatformSpend[] = []
 
     try {
-        const metaInsights = await metaAds.getAccountInsightsByCampaign('this_month')
+        const metaInsights = await metaAds.getAccountInsightsByCampaign('today')
         const metaSpend = Object.values(metaInsights || {}).reduce(
             (sum, row: any) => sum + Number.parseFloat(String(row?.spend || '0')),
             0
         )
         spends.push({ platform: 'meta', amount: roundCurrency(metaSpend), source: 'live' })
     } catch (err: any) {
-        errors.push(`Meta Ads: ${err?.message || 'falha ao buscar gasto mensal'}`)
+        errors.push(`Meta Ads: ${err?.message || 'falha ao buscar gasto diario'}`)
     }
 
     try {
-        const googleInsights = await googleAds.getAllCampaignsWithMetrics('this_month')
+        const googleInsights = await googleAds.getAllCampaignsWithMetrics('today')
         const googleSpend = Object.values(googleInsights || {}).reduce(
             (sum, row: any) => sum + Number(row?.metrics?.spend || 0),
             0
         )
         spends.push({ platform: 'google', amount: roundCurrency(googleSpend), source: 'live' })
     } catch (err: any) {
-        errors.push(`Google Ads: ${err?.message || 'falha ao buscar gasto mensal'}`)
+        errors.push(`Google Ads: ${err?.message || 'falha ao buscar gasto diario'}`)
     }
 
     return { spends, errors }
 }
 
-async function getSnapshotMonthSpend(admin: any, month: string): Promise<PlatformSpend[]> {
-    const monthStart = `${month}-01T00:00:00.000Z`
-    const [year, monthNumber] = month.split('-').map(Number)
-    const nextMonth = new Date(Date.UTC(year, monthNumber, 1, 0, 0, 0))
-    const monthEnd = nextMonth.toISOString()
+async function getSnapshotDailySpend(admin: any, date: string): Promise<PlatformSpend[]> {
+    const dayStartDate = new Date(`${date}T00:00:00-03:00`)
+    const dayStart = dayStartDate.toISOString()
+    const nextDay = new Date(dayStartDate)
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1)
+    const dayEnd = nextDay.toISOString()
 
     const { data, error } = await admin
         .from('ad_metrics_snapshots')
         .select('campaign_id, spend, snapshot_at, ad_campaigns(platform)')
-        .gte('snapshot_at', monthStart)
-        .lt('snapshot_at', monthEnd)
+        .gte('snapshot_at', dayStart)
+        .lt('snapshot_at', dayEnd)
 
     if (error || !data) return []
 
@@ -137,21 +134,21 @@ async function getSnapshotMonthSpend(admin: any, month: string): Promise<Platfor
     }))
 }
 
-export async function syncPaidAdsSpendToFinance(admin: any, options?: { month?: string }) {
+export async function syncPaidAdsSpendToFinance(admin: any, options?: { date?: string }) {
     const today = todayInSaoPaulo()
-    const month = options?.month || today.slice(0, 7)
+    const date = options?.date || today
     const result: AdsSpendSyncResult = {
-        month,
+        date,
         synced: 0,
         skipped: 0,
         entries: [],
         errors: [],
     }
 
-    const live = await getLiveMonthSpend()
+    const live = await getLiveDailySpend()
     result.errors.push(...live.errors)
 
-    const snapshotSpends = await getSnapshotMonthSpend(admin, month)
+    const snapshotSpends = await getSnapshotDailySpend(admin, date)
     const spends = (['meta', 'google'] as Platform[]).map(platform => {
         const liveSpend = live.spends.find(item => item.platform === platform)
         if (liveSpend && liveSpend.amount > 0) return liveSpend
@@ -162,7 +159,6 @@ export async function syncPaidAdsSpendToFinance(admin: any, options?: { month?: 
         return liveSpend || snapshotSpend || { platform, amount: 0, source: 'snapshot' as const }
     })
     const costCenterId = await getMarketingCostCenterId(admin)
-    const monthStart = getMonthStart(month)
 
     for (const spend of spends) {
         const amount = roundCurrency(spend.amount)
@@ -173,24 +169,24 @@ export async function syncPaidAdsSpendToFinance(admin: any, options?: { month?: 
         }
 
         const label = platformLabel(spend.platform)
-        const externalReference = platformReference(spend.platform, month)
+        const externalReference = platformReference(spend.platform, date)
         const payload: Record<string, any> = {
-            description: `Trafego pago - ${label} - ${monthLabel(month)}`,
+            description: `Trafego pago - ${label} - ${dateLabel(date)}`,
             entry_type: 'expense',
             amount,
             category: 'Marketing',
             subcategory: label,
-            entry_date: today,
-            occurred_at: `${today}T12:00:00.000Z`,
+            entry_date: date,
+            occurred_at: `${date}T12:00:00.000Z`,
             payment_method: 'Cartao',
             payment_status: 'paid',
             counterparty_name: label,
             counterparty_type: 'pessoa_juridica',
             reference_company: label,
-            due_date: today,
-            competence_date: monthStart,
+            due_date: date,
+            competence_date: date,
             cost_center_id: costCenterId,
-            notes: `Sincronizado automaticamente do ${label}. Competencia ${monthLabel(month)}. Fonte: ${spend.source}.`,
+            notes: `Sincronizado automaticamente do ${label}. Dia ${dateLabel(date)}. Fonte: ${spend.source}.`,
             source_module: 'paid_ads',
             external_reference: externalReference,
             updated_at: new Date().toISOString(),
