@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
-import { syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
+import { syncHistoricalPaidAdsSpendToFinance, syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
 
 async function getCurrentAdminUser() {
     const supabase = await createServerSupabase()
@@ -56,12 +56,14 @@ export async function POST(request: Request) {
         if (access.error) return access.error
 
         const body = await request.json().catch(() => ({}))
-        const date = typeof body?.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.date)
-            ? body.date
+        const month = typeof body?.month === 'string' && /^\d{4}-\d{2}$/.test(body.month)
+            ? body.month
             : undefined
 
         const admin = createAdminClient()
-        const result = await syncPaidAdsSpendToFinance(admin, { date })
+        const result = body?.historical
+            ? await syncHistoricalPaidAdsSpendToFinance(admin)
+            : await syncPaidAdsSpendToFinance(admin, { month })
 
         return NextResponse.json({ success: true, ...result })
     } catch (err: any) {

@@ -312,6 +312,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [aparLoading, setAparLoading] = useState(false)
     const [saving, setSaving] = useState(false)
     const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
+    const [syncingHistoricalAdsSpend, setSyncingHistoricalAdsSpend] = useState(false)
     const [settlingAparId, setSettlingAparId] = useState<string | null>(null)
     const [savingReconciliation, setSavingReconciliation] = useState(false)
     const [deletingReconciliationId, setDeletingReconciliationId] = useState<string | null>(null)
@@ -437,11 +438,36 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             await fetchEntries()
             const syncedAmount = (data.entries || [])
                 .reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0)
-            showToast(`Gasto diario de trafego sincronizado: ${formatCurrency(syncedAmount)}`, 'success')
+            showToast(`Gasto mensal de trafego sincronizado: ${formatCurrency(syncedAmount)}`, 'success')
         } catch (err: any) {
             showToast(err.message || 'Erro ao sincronizar trafego pago', 'error')
         } finally {
             setSyncingAdsSpend(false)
+        }
+    }
+
+    const syncHistoricalAdsSpend = async () => {
+        setSyncingHistoricalAdsSpend(true)
+        try {
+            const res = await fetch('/api/admin/finance/sync-ads-spend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ historical: true }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao sincronizar historico de trafego pago')
+            }
+
+            await fetchEntries()
+            showToast(
+                `Historico Ads sincronizado: Meta ${formatCurrency(Number(data.meta_total || 0))}, Google ${formatCurrency(Number(data.google_total || 0))}, total ${formatCurrency(Number(data.combined_total || 0))}`,
+                'success'
+            )
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao sincronizar historico de trafego pago', 'error')
+        } finally {
+            setSyncingHistoricalAdsSpend(false)
         }
     }
 
@@ -1319,7 +1345,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                         onClick={syncAdsSpend}
                         disabled={syncingAdsSpend}
                     >
-                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Sincronizar gasto diario Ads
+                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Atualizar Ads do mes
                     </button>
                     <button
                         className="btn btn-outline"
@@ -1340,13 +1366,19 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                         <div>
                             <div className="chart-title" style={{ marginBottom: 4 }}>Ponte com trafego pago</div>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: 0 }}>
-                                Atualiza no financeiro o gasto de hoje do Meta Ads e Google Ads sem duplicar lancamentos.
+                                Busca Meta Ads e Google Ads, separa por plataforma e lanca no financeiro por competencia mensal sem duplicar.
                             </p>
                         </div>
-                        <button className="btn btn-gold" onClick={syncAdsSpend} disabled={syncingAdsSpend}>
-                            <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} />
-                            {syncingAdsSpend ? 'Sincronizando...' : 'Sincronizar gasto diario'}
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                            <button className="btn btn-outline" onClick={syncHistoricalAdsSpend} disabled={syncingHistoricalAdsSpend || syncingAdsSpend}>
+                                <RefreshCw size={16} className={syncingHistoricalAdsSpend ? 'spin' : ''} />
+                                {syncingHistoricalAdsSpend ? 'Sincronizando...' : 'Sincronizar historico mensal'}
+                            </button>
+                            <button className="btn btn-gold" onClick={syncAdsSpend} disabled={syncingAdsSpend || syncingHistoricalAdsSpend}>
+                                <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} />
+                                {syncingAdsSpend ? 'Atualizando...' : 'Atualizar mes atual'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

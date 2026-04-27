@@ -423,3 +423,55 @@ export async function getAllCampaignsWithMetrics(
 
     return result
 }
+
+// --- Buscar gasto mensal da conta inteira (historico financeiro) ---
+
+export async function getAccountMonthlySpend(): Promise<Record<string, number>> {
+    const config = await getGoogleConfig()
+    const headers = await getHeaders(config)
+    const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date())
+
+    const query = `
+        SELECT
+            segments.month,
+            metrics.cost_micros
+        FROM customer
+        WHERE segments.date BETWEEN '2000-01-01' AND '${today}'
+    `
+
+    const res = await fetch(
+        `${getApiUrl(config.customerId)}/googleAds:searchStream`,
+        {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ query })
+        }
+    )
+
+    if (!res.ok) {
+        const errText = await res.text()
+        throw new Error(`Google Ads monthly spend API error: ${errText}`)
+    }
+
+    const data = await res.json()
+    const monthly: Record<string, number> = {}
+
+    if (data && data.length > 0) {
+        for (const chunk of data) {
+            for (const row of (chunk.results || [])) {
+                const month = String(row?.segments?.month || '').slice(0, 7)
+                if (!month) continue
+
+                const costMicros = Number.parseInt(String(row?.metrics?.costMicros || '0'), 10)
+                monthly[month] = (monthly[month] || 0) + (costMicros / 1_000_000)
+            }
+        }
+    }
+
+    return monthly
+}

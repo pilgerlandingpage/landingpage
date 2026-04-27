@@ -352,6 +352,33 @@ export async function getAccountInsightsByCampaign(
     return map
 }
 
+export async function getAccountMonthlySpend(): Promise<Record<string, number>> {
+    const conf = await getMetaConfig()
+    const fields = ['spend', 'date_start', 'date_stop'].join(',')
+    const map: Record<string, number> = {}
+
+    let url = `${getBaseUrl()}/${conf.adAccountId}/insights?fields=${fields}&level=account&date_preset=maximum&time_increment=monthly&limit=500&access_token=${conf.accessToken}`
+
+    while (url) {
+        const res = await fetch(url)
+        const data = await res.json()
+
+        if (data.error) {
+            throw new Error(`Erro ao buscar gasto mensal Meta: ${data.error.message}`)
+        }
+
+        for (const row of (data.data || [])) {
+            const month = String(row.date_start || '').slice(0, 7)
+            if (!month) continue
+            map[month] = (map[month] || 0) + parseFloat(row.spend || '0')
+        }
+
+        url = data.paging?.next || ''
+    }
+
+    return map
+}
+
 // --- Converter Insights para nosso formato ---
 
 export function parseInsightsToSnapshot(
