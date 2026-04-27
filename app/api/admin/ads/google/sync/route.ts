@@ -104,6 +104,7 @@ export async function POST() {
             const { data: existingCamp } = await supabase
                 .from('ad_campaigns')
                 .select('id')
+                .eq('platform', 'google')
                 .eq('external_campaign_id', extId)
                 .maybeSingle()
 
@@ -159,21 +160,6 @@ export async function POST() {
             const conversions = parseFloat(gc.metrics.conversions || '0')
             const ctr = impressions > 0 ? (clicks / impressions) : 0
             const cpa = conversions > 0 ? (costUsd / conversions) : null
-
-            // Update latest_metrics directly on the campaign record to match the page expectations
-            await supabase
-                .from('ad_campaigns')
-                .update({
-                    latest_metrics: {
-                        impressions,
-                        clicks,
-                        spend: costUsd,
-                        conversions,
-                        ctr,
-                        cost_per_lead: cpa
-                    }
-                })
-                .eq('id', dbCampId)
 
             await supabase
                 .from('ad_metrics_snapshots')

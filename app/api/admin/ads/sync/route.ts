@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
             const { data: existingCamp, error: searchError } = await supabase
                 .from('ad_campaigns')
                 .select('id, external_campaign_id')
+                .eq('platform', 'meta')
                 .eq('external_campaign_id', extCamp.id)
                 .maybeSingle()
 

@@ -336,11 +336,16 @@ export async function getAllCampaignsWithMetrics(
 
     let dateClause = ''
     if (datePreset === 'custom' && customRange) {
-        dateClause = `AND segments.date BETWEEN '${customRange.startDate}' AND '${customRange.endDate}'`
+        dateClause = `segments.date BETWEEN '${customRange.startDate}' AND '${customRange.endDate}'`
     } else {
         const dateFilter = mapDatePreset(datePreset === 'custom' ? 'maximum' : datePreset)
-        dateClause = dateFilter ? `AND segments.date DURING ${dateFilter}` : ''
+        dateClause = dateFilter ? `segments.date DURING ${dateFilter}` : ''
     }
+    const whereParts = [
+        datePreset === 'maximum' ? '' : `campaign.status != 'REMOVED'`,
+        dateClause,
+    ].filter(Boolean)
+    const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : ''
 
     const query = `
         SELECT
@@ -358,8 +363,7 @@ export async function getAllCampaignsWithMetrics(
             metrics.video_views,
             metrics.video_quartile_p25_rate
         FROM campaign
-        WHERE campaign.status != 'REMOVED'
-        ${dateClause}
+        ${whereClause}
     `
 
     const res = await fetch(

@@ -291,19 +291,25 @@ export async function getInsights(
 export async function getAllCampaigns(): Promise<any[]> {
     const conf = await getMetaConfig();
     const fields = ['id', 'name', 'status', 'objective', 'daily_budget', 'lifetime_budget', 'start_time', 'stop_time'].join(',');
+    const campaigns: any[] = []
 
     // We fetch campaigns that are active or paused
-    const res = await fetch(
-        `${getBaseUrl()}/${conf.adAccountId}/campaigns?fields=${fields}&effective_status=['ACTIVE','PAUSED']&access_token=${conf.accessToken}`
-    );
-    const data = await res.json();
+    let url = `${getBaseUrl()}/${conf.adAccountId}/campaigns?fields=${fields}&effective_status=['ACTIVE','PAUSED']&limit=500&access_token=${conf.accessToken}`
 
-    if (data.error) {
-        console.error(`Erro ao buscar campanhas: ${data.error.message}`);
-        return [];
+    while (url) {
+        const res = await fetch(url)
+        const data = await res.json()
+
+        if (data.error) {
+            console.error(`Erro ao buscar campanhas: ${data.error.message}`)
+            return campaigns
+        }
+
+        campaigns.push(...(data.data || []))
+        url = data.paging?.next || ''
     }
 
-    return data.data || [];
+    return campaigns;
 }
 
 // --- Buscar Insights de TODAS as campanhas de uma só vez ---
@@ -331,24 +337,28 @@ export async function getAccountInsightsByCampaign(
     
     if (datePreset === 'custom' && timeRange) {
         const tr = JSON.stringify({ since: timeRange.since, until: timeRange.until });
-        url += `&time_range=${tr}`;
+        url += `&time_range=${encodeURIComponent(tr)}`;
     } else {
         url += `&date_preset=${datePreset === 'custom' ? 'maximum' : datePreset}`;
     }
+    const map: Record<string, MetaInsightsResponse> = {}
 
-    const res = await fetch(url)
-    const data = await res.json()
+    while (url) {
+        const res = await fetch(url)
+        const data = await res.json()
 
     if (data.error) {
         console.error(`Erro ao buscar insights da conta: ${data.error.message}`)
-        return {}
+        return map
     }
 
     // Mapear por campaign_id para fácil lookup
-    const map: Record<string, MetaInsightsResponse> = {}
     for (const row of (data.data || [])) {
         map[row.campaign_id] = row
     }
+        url = data.paging?.next || ''
+    }
+
     return map
 }
 

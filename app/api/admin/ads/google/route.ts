@@ -42,17 +42,53 @@ export async function GET(request: Request) {
             .order('created_at', { ascending: false })
 
         if (error) throw error
+        let campaignRows = campaigns || []
 
         // Try to fetch live metrics from Google Ads API
         let liveMetricsMap: Record<string, { campaign: any; metrics: any }> = {}
         try {
-            liveMetricsMap = await googleAds.getAllCampaignsWithMetrics(datePreset)
+            liveMetricsMap = await googleAds.getAllCampaignsWithMetrics(
+                datePreset,
+                (datePreset as string) === 'custom' && startDate && endDate
+                    ? { startDate, endDate }
+                    : undefined
+            )
         } catch (err) {
             console.error('Erro ao buscar métricas ao vivo do Google Ads:', err)
         }
 
+        const existingExternalIds = new Set(campaignRows.map((camp: any) => String(camp.external_campaign_id || '')).filter(Boolean))
+        const missingLiveCampaigns = Object.values(liveMetricsMap)
+            .filter((row: any) => row?.campaign?.id && Number(row?.metrics?.spend || 0) > 0)
+            .filter((row: any) => !existingExternalIds.has(String(row.campaign.id)))
+
+        if (missingLiveCampaigns.length > 0) {
+            const statusMap: Record<string, string> = { ENABLED: 'active', PAUSED: 'paused' }
+            const inserts = missingLiveCampaigns.map((row: any) => ({
+                name: row.campaign.name || `Google Ads ${row.campaign.id}`,
+                platform: 'google',
+                status: statusMap[row.campaign.status] || 'active',
+                total_budget: 0,
+                duration_days: 30,
+                external_campaign_id: String(row.campaign.id),
+                ai_auto_manage: false,
+                start_date: new Date().toISOString().split('T')[0],
+            }))
+
+            const { data: insertedCampaigns, error: insertMissingError } = await supabase
+                .from('ad_campaigns')
+                .insert(inserts)
+                .select('*')
+
+            if (insertMissingError) {
+                console.error('Erro ao importar campanhas Google com gasto ao vivo:', insertMissingError)
+            } else {
+                campaignRows = [...(insertedCampaigns || []), ...campaignRows]
+            }
+        }
+
         // Enrich campaigns with live metrics
-        const enriched = (campaigns || []).map((camp: any) => {
+        const enriched = campaignRows.map((camp: any) => {
             // Match by external_campaign_id
             const liveData = camp.external_campaign_id
                 ? liveMetricsMap[camp.external_campaign_id]

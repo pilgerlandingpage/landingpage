@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
             .order('created_at', { ascending: false })
 
         if (error) throw error
+        let campaignRows = campaigns || []
 
         // Try to fetch live insights from both Meta and Google grouped by campaign
         let metaInsightsMap: Record<string, any> = {}
@@ -68,8 +69,37 @@ export async function GET(request: NextRequest) {
             console.error('Erro ao buscar insights ao vivo:', err)
         }
 
+        const existingExternalIds = new Set(campaignRows.map((camp: any) => String(camp.external_campaign_id || '')).filter(Boolean))
+        const missingLiveCampaigns = Object.values(metaInsightsMap)
+            .filter((row: any) => row?.campaign_id && Number.parseFloat(String(row?.spend || '0')) > 0)
+            .filter((row: any) => !existingExternalIds.has(String(row.campaign_id)))
+
+        if (missingLiveCampaigns.length > 0) {
+            const inserts = missingLiveCampaigns.map((row: any) => ({
+                name: row.campaign_name || `Meta Ads ${row.campaign_id}`,
+                platform: 'meta',
+                status: 'active',
+                total_budget: 0,
+                duration_days: 30,
+                external_campaign_id: String(row.campaign_id),
+                ai_auto_manage: false,
+                start_date: new Date().toISOString().split('T')[0],
+            }))
+
+            const { data: insertedCampaigns, error: insertMissingError } = await supabase
+                .from('ad_campaigns')
+                .insert(inserts)
+                .select('*')
+
+            if (insertMissingError) {
+                console.error('Erro ao importar campanhas Meta com gasto ao vivo:', insertMissingError)
+            } else {
+                campaignRows = [...(insertedCampaigns || []), ...campaignRows]
+            }
+        }
+
         // Enrich campaigns with metrics
-        const enriched = (campaigns || []).map((camp: any) => {
+        const enriched = campaignRows.map((camp: any) => {
             if (camp.platform === 'meta') {
                 const liveInsights = camp.external_campaign_id ? metaInsightsMap[camp.external_campaign_id] : null
                 if (liveInsights) {
