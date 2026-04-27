@@ -375,11 +375,13 @@ function LoginPageContent() {
                                             setShowRecoveryForm(false)
                                             setError(null)
                                             setRecoveryMessage(null)
+                                            setRecoveryEmail('')
+                                            setRecoveryPhone('')
                                         }}
                                         className="btn-login"
                                         style={{ background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}
                                     >
-                                        Cancelar
+                                        Voltar para o login
                                     </button>
                                     <button
                                         type="submit"
