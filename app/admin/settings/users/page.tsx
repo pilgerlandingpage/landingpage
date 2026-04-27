@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
-    Smartphone, Wifi, WifiOff, RefreshCw
+    Smartphone, Wifi, WifiOff, RefreshCw, Send
 } from 'lucide-react'
 
 interface Sector { id: string; name: string; color: string; icon: string }
@@ -36,6 +36,7 @@ export default function UsersPage() {
     const [userWhatsapp, setUserWhatsapp] = useState<WhatsAppUserInstance | null>(null)
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
     const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
+    const [sendingFirstAccessUserId, setSendingFirstAccessUserId] = useState<string | null>(null)
 
     const [form, setForm] = useState({
         name: '', email: '', phone: '',
@@ -257,6 +258,47 @@ export default function UsersPage() {
             showToast(err.message, 'error')
         } finally {
             setSendingResetUserId(null)
+        }
+    }
+
+    const resendFirstAccessLink = async (u: AdminUser) => {
+        if (!canCreateUsers) {
+            showToast('Somente Master e Diretoria podem reenviar primeiro acesso.', 'error')
+            return
+        }
+
+        if (!u.phone) {
+            showToast('Este usuario nao possui telefone para envio no WhatsApp.', 'error')
+            return
+        }
+
+        const confirmed = window.confirm(
+            `Reenviar link de primeiro acesso para "${u.name}" no WhatsApp?`
+        )
+        if (!confirmed) return
+
+        setSendingFirstAccessUserId(u.id)
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'resend_first_access', id: u.id })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao reenviar primeiro acesso')
+
+            if (data?.invite_warning) {
+                const warningMessage = data?.first_access_link
+                    ? `${data.message} Aviso: ${data.invite_warning} Link manual: ${data.first_access_link}`
+                    : `${data.message} Aviso: ${data.invite_warning}`
+                showToast(warningMessage, 'error')
+            } else {
+                showToast(data?.message || 'Link de primeiro acesso reenviado com sucesso.', 'success')
+            }
+        } catch (err: any) {
+            showToast(err.message, 'error')
+        } finally {
+            setSendingFirstAccessUserId(null)
         }
     }
 
@@ -516,6 +558,21 @@ export default function UsersPage() {
                                         }}>
                                         <Power size={14} />
                                     </button>
+                                    {canCreateUsers && (canGrantMaster || !u.is_master) && (
+                                        <button
+                                            onClick={() => resendFirstAccessLink(u)}
+                                            title="Reenviar primeiro acesso"
+                                            disabled={sendingFirstAccessUserId === u.id}
+                                            style={{
+                                                padding: 8, borderRadius: 6, cursor: 'pointer',
+                                                border: '1px solid rgba(34,197,94,0.35)',
+                                                background: 'rgba(34,197,94,0.12)',
+                                                color: '#22c55e',
+                                                opacity: sendingFirstAccessUserId === u.id ? 0.7 : 1
+                                            }}>
+                                            {sendingFirstAccessUserId === u.id ? <Loader2 size={14} className="spin" /> : <Send size={14} />}
+                                        </button>
+                                    )}
                                     {canCreateUsers && (canGrantMaster || !u.is_master) && (
                                         <button
                                             onClick={() => sendPasswordResetLink(u)}

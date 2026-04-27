@@ -32,3 +32,26 @@ export function getLoginRedirectUrl(pathQuery: string, origin?: string | null): 
     const suffix = pathQuery.startsWith('/') ? pathQuery : `/${pathQuery}`
     return `${getPublicAppUrl(origin)}${suffix}`
 }
+
+export function sanitizeAuthActionLink(actionLink: string, redirectPathQuery: string, origin?: string | null): string {
+    const safeRedirectUrl = getLoginRedirectUrl(redirectPathQuery, origin)
+
+    try {
+        const url = new URL(actionLink)
+
+        const redirectTo = url.searchParams.get('redirect_to') || url.searchParams.get('redirectTo')
+        if (redirectTo && isLocalUrl(redirectTo)) {
+            url.searchParams.set(url.searchParams.has('redirect_to') ? 'redirect_to' : 'redirectTo', safeRedirectUrl)
+        }
+
+        if (isLocalUrl(url.toString())) {
+            const safeBase = new URL(getPublicAppUrl(origin))
+            url.protocol = safeBase.protocol
+            url.host = safeBase.host
+        }
+
+        return url.toString()
+    } catch {
+        return isLocalUrl(actionLink) ? safeRedirectUrl : actionLink
+    }
+}

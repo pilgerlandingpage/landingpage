@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
-import { getLoginRedirectUrl } from '@/lib/app-url'
+import { getLoginRedirectUrl, sanitizeAuthActionLink } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
     buildPasswordResetWhatsAppMessage,
@@ -422,7 +422,10 @@ export async function POST(request: NextRequest) {
         if (linkError) throw linkError
 
         const authUserId = linkData.user?.id
-        const firstAccessLink = linkData.properties?.action_link
+        const rawFirstAccessLink = linkData.properties?.action_link
+        const firstAccessLink = rawFirstAccessLink
+            ? sanitizeAuthActionLink(rawFirstAccessLink, '/login?first_access=1', request.nextUrl.origin)
+            : null
         if (!authUserId) throw new Error('Nao foi possivel criar usuario auth.')
         if (!firstAccessLink) throw new Error('Nao foi possivel gerar link de primeiro acesso.')
 
@@ -638,12 +641,12 @@ export async function PATCH(request: NextRequest) {
         if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { action, id } = await request.json()
-        if (action !== 'send_password_reset') {
+        if (!['send_password_reset', 'resend_first_access'].includes(action)) {
             return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })
         }
 
         if (!access.can_grant_master && !access.can_create_users) {
-            return NextResponse.json({ error: 'Somente master e diretoria podem enviar redefinicao de senha.' }, { status: 403 })
+            return NextResponse.json({ error: 'Somente master e diretoria podem enviar links de acesso.' }, { status: 403 })
         }
 
         if (!id) return NextResponse.json({ error: 'ID e obrigatorio.' }, { status: 400 })
@@ -672,6 +675,97 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: 'Usuario sem telefone cadastrado para envio no WhatsApp.' }, { status: 400 })
         }
 
+        if (action === 'resend_first_access') {
+            const firstAccessRedirectUrl = getFirstAccessRedirectUrl(request)
+            let firstAccessLinkType: 'invite' | 'recovery' = 'invite'
+            let linkData: any = null
+
+            const { data: inviteLinkData, error: inviteLinkError } = await admin.auth.admin.generateLink({
+                type: 'invite',
+                email: normalizedEmail,
+                options: {
+                    redirectTo: firstAccessRedirectUrl,
+                    data: {
+                        full_name: targetUser.name || '',
+                        phone: normalizedPhone || null,
+                    },
+                },
+            })
+
+            if (inviteLinkError) {
+                console.warn('[users][PATCH] invite resend failed, falling back to recovery:', inviteLinkError)
+                firstAccessLinkType = 'recovery'
+                const resetRedirectUrl = getPasswordResetRedirectUrl(request)
+                const { data: recoveryLinkData, error: recoveryLinkError } = await admin.auth.admin.generateLink({
+                    type: 'recovery',
+                    email: normalizedEmail,
+                    options: {
+                        redirectTo: resetRedirectUrl,
+                    },
+                })
+
+                if (recoveryLinkError) throw recoveryLinkError
+                linkData = recoveryLinkData
+            } else {
+                linkData = inviteLinkData
+            }
+
+            const rawFirstAccessLink = linkData?.properties?.action_link
+            const firstAccessLink = rawFirstAccessLink
+                ? sanitizeAuthActionLink(
+                    rawFirstAccessLink,
+                    firstAccessLinkType === 'invite' ? '/login?first_access=1' : '/login?password_reset=1',
+                    request.nextUrl.origin
+                )
+                : null
+            if (!firstAccessLink) throw new Error('Nao foi possivel gerar link de primeiro acesso.')
+
+            let whatsappInviteSent = false
+            let inviteWarning: string | null = null
+            try {
+                const sendResult = await sendFirstAccessWhatsAppMessage(admin, {
+                    phone: normalizedPhone,
+                    name: targetUser.name,
+                    firstAccessLink,
+                })
+                whatsappInviteSent = Boolean(sendResult.sent)
+
+                if (!sendResult.sent && sendResult.reason === 'global_instance_not_available') {
+                    inviteWarning = 'Link gerado, mas a instancia global do agente nao esta conectada para envio no WhatsApp.'
+                }
+                if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
+                    inviteWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
+                }
+            } catch (sendError) {
+                console.error('[users][PATCH] first-access resend whatsapp failed:', sendError)
+                inviteWarning = 'Link gerado, mas houve falha ao enviar no WhatsApp.'
+            }
+
+            await logUserAccessEvent(admin, request, {
+                event_type: 'first_access_link_sent',
+                target_admin_user_id: targetUser.id,
+                target_auth_user_id: targetUser.auth_user_id,
+                target_email: normalizedEmail,
+                actor_admin_user_id: access.id,
+                metadata: {
+                    resent: true,
+                    link_type: firstAccessLinkType,
+                    whatsapp_sent: whatsappInviteSent,
+                    has_warning: Boolean(inviteWarning),
+                },
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: whatsappInviteSent
+                    ? 'Link de primeiro acesso reenviado no WhatsApp com sucesso.'
+                    : 'Link de primeiro acesso gerado com sucesso.',
+                whatsapp_invite_sent: whatsappInviteSent,
+                invite_warning: inviteWarning,
+                ...(whatsappInviteSent ? {} : { first_access_link: firstAccessLink }),
+            })
+        }
+
         const resetRedirectUrl = getPasswordResetRedirectUrl(request)
         const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
             type: 'recovery',
@@ -683,7 +777,10 @@ export async function PATCH(request: NextRequest) {
 
         if (linkError) throw linkError
 
-        const resetLink = linkData.properties?.action_link
+        const rawResetLink = linkData.properties?.action_link
+        const resetLink = rawResetLink
+            ? sanitizeAuthActionLink(rawResetLink, '/login?password_reset=1', request.nextUrl.origin)
+            : null
         if (!resetLink) throw new Error('Nao foi possivel gerar link de redefinicao.')
 
         let whatsappResetSent = false
