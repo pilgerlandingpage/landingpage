@@ -8,6 +8,7 @@ import * as metaAds from '../ads/meta'
 import * as googleAds from '../ads/google'
 import { analyzeCampaignMetrics, calculateBudgetPacing, generateDailyReport } from '../ads/ai-brain'
 import { sendAlertToAdmins, sendDailyReport } from '../ads/whatsapp-alerts'
+import { syncPaidAdsSpendToFinance } from '../finance/ads-spend-sync'
 import type { AdCampaign, MetricsSnapshot, AlertUrgency } from '../ads/types'
 
 function getSupabase() {
@@ -192,7 +193,15 @@ export const pollMetricsCron = inngest.createFunction(
             }
         }
 
-        return { campaigns_polled: results.length, analysis_triggered: hour === '23' }
+        const financeSync = await step.run('sync-paid-ads-spend-to-finance', async () => {
+            return syncPaidAdsSpendToFinance(supabase)
+        })
+
+        return {
+            campaigns_polled: results.length,
+            analysis_triggered: hour === '23',
+            finance_sync: financeSync,
+        }
     }
 )
 

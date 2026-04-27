@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
 
 // We will fetch Google Ads directly here or using google.ts
 export async function POST() {
     try {
-        const supabase = await createClient()
+        const supabase = createAdminClient()
 
         // 1. Get credentials from app_config
         const { data: configRows } = await supabase.from('app_config').select('key, value').in('key', [
@@ -13,7 +14,7 @@ export async function POST() {
         ])
         
         const cm: Record<string, string> = {}
-        ;(configRows || []).forEach(r => { cm[r.key] = r.value })
+        ;(configRows || []).forEach((r: any) => { cm[r.key] = r.value })
 
         const clientId = cm['google_ads_client_id']?.trim()
         const clientSecret = cm['google_ads_client_secret']?.trim()
@@ -174,13 +175,31 @@ export async function POST() {
                 })
                 .eq('id', dbCampId)
 
+            await supabase
+                .from('ad_metrics_snapshots')
+                .insert({
+                    campaign_id: dbCampId,
+                    impressions,
+                    clicks,
+                    ctr,
+                    cpm: impressions > 0 ? (costUsd / impressions) * 1000 : 0,
+                    cpc: clicks > 0 ? costUsd / clicks : 0,
+                    spend: costUsd,
+                    leads_count: Math.round(conversions),
+                    cost_per_lead: cpa,
+                    conversions: Math.round(conversions),
+                })
+
             syncedCount++
         }
+
+        const financeSync = await syncPaidAdsSpendToFinance(supabase)
 
         return NextResponse.json({ 
             success: true, 
             message: `${syncedCount} campanhas do Google Ads sincronizadas com sucesso.`,
-            synced: syncedCount 
+            synced: syncedCount,
+            financeSync,
         })
 
     } catch (error: any) {

@@ -792,7 +792,7 @@ export default function BrokersAdmin() {
                                     </select>
                                     {isTextOnlyMode && (
                                         <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '6px', fontWeight: 600 }}>
-                                            ⚠️ O Modo de Resposta desta instância de WhatsApp está configurado para 'Sempre Texto'. Modifique na aba Instâncias WhatsApp se quiser usar Voz.
+                                            ⚠️ O Modo de Resposta desta instância de WhatsApp está configurado para &apos;Sempre Texto&apos;. Modifique na aba Instâncias WhatsApp se quiser usar Voz.
                                         </div>
                                     )}
                                     {loadingVoices && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>⏳ Carregando vozes do ElevenLabs...</div>}
@@ -1253,4 +1253,3 @@ export default function BrokersAdmin() {
         </div>
     )
 }
-

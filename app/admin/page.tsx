@@ -104,8 +104,8 @@ export default function AdminOverviewPage() {
                     fetch('/api/admin/brokers'),
                     fetch('/api/admin/whatsapp/instances'),
                     fetch('/api/admin/push/stats'),
-                    fetch('/api/admin/ads?date_preset=last_30d'),
-                    fetch('/api/admin/ads/google?date_preset=last_30d'),
+                    fetch('/api/admin/ads?date_preset=this_month'),
+                    fetch('/api/admin/ads/google?date_preset=this_month'),
                 ])
 
                 if (analyticsRes.ok) {
@@ -321,10 +321,10 @@ export default function AdminOverviewPage() {
                         <Megaphone size={14} /> Campanhas Trafego
                     </div>
                     <div className="kpi-value">{ecosystemStats.adsCampaignsActive}/{ecosystemStats.adsCampaignsTotal}</div>
-                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>ativas / total (30d)</div>
+                    <div className="kpi-change" style={{ color: 'var(--text-muted)' }}>ativas / total no mes</div>
                 </div>
                 <div className="kpi-card">
-                    <div className="kpi-label">Gasto Trafego (30d)</div>
+                    <div className="kpi-label">Gasto Trafego (mes)</div>
                     <div className="kpi-value" style={{ color: '#ef4444' }}>
                         {formatCurrency(ecosystemStats.adsSpend30d)}
                     </div>

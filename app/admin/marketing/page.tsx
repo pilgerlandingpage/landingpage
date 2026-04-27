@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     const [metaReport, setMetaReport] = useState<any>(null)
     const [googleReport, setGoogleReport] = useState<any>(null)
     const [adMetrics, setAdMetrics] = useState<{ totalSpend: number; totalLeads: number; avgCpa: number; activeCampaigns: number }>({ totalSpend: 0, totalLeads: 0, avgCpa: 0, activeCampaigns: 0 })
-    const [adDatePreset, setAdDatePreset] = useState('today')
+    const [adDatePreset, setAdDatePreset] = useState('this_month')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [metaReports, setMetaReports] = useState<any[]>([])
@@ -185,11 +185,11 @@ export default function AdminDashboard() {
             let allCampaigns: any[] = []
             if (metaRes.ok) {
                 const data = await metaRes.json()
-                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : (Array.isArray(data?.campaigns) ? data.campaigns : []))
             }
             if (googleRes.ok) {
                 const data = await googleRes.json()
-                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : [])
+                allCampaigns = allCampaigns.concat(Array.isArray(data) ? data : (Array.isArray(data?.campaigns) ? data.campaigns : []))
             }
             const active = allCampaigns.filter(c => c.status === 'active')
             const spend = allCampaigns.reduce((s: number, c: any) => s + (c.latest_metrics?.spend || 0), 0)

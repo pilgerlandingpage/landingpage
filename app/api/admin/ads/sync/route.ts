@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as metaAds from '@/lib/ads/meta'
+import { syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
 
 export async function POST(request: NextRequest) {
     try {
@@ -108,10 +109,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, message: 'Nenhuma campanha encontrada na Meta para sincronizar.', syncedCount: 0 })
         }
 
+        const financeSync = await syncPaidAdsSpendToFinance(supabase)
+
         return NextResponse.json({
             success: true,
             message: `Sincronização concluída. ${syncedCount} campanhas atualizadas.`,
             syncedCount,
+            financeSync,
             errors: errors.length > 0 ? errors : undefined
         })
 

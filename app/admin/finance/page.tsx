@@ -311,6 +311,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [reconciliationsLoading, setReconciliationsLoading] = useState(false)
     const [aparLoading, setAparLoading] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
     const [settlingAparId, setSettlingAparId] = useState<string | null>(null)
     const [savingReconciliation, setSavingReconciliation] = useState(false)
     const [deletingReconciliationId, setDeletingReconciliationId] = useState<string | null>(null)
@@ -417,6 +418,30 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             showToast(err.message || 'Erro ao carregar financeiro', 'error')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const syncAdsSpend = async () => {
+        setSyncingAdsSpend(true)
+        try {
+            const res = await fetch('/api/admin/finance/sync-ads-spend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao sincronizar trafego pago')
+            }
+
+            await fetchEntries()
+            const syncedAmount = (data.entries || [])
+                .reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0)
+            showToast(`Trafego pago sincronizado no financeiro: ${formatCurrency(syncedAmount)}`, 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao sincronizar trafego pago', 'error')
+        } finally {
+            setSyncingAdsSpend(false)
         }
     }
 
@@ -1289,6 +1314,13 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     </p>
                 </div>
                 <div className="admin-header-actions">
+                    <button
+                        className="btn btn-outline"
+                        onClick={syncAdsSpend}
+                        disabled={syncingAdsSpend}
+                    >
+                        <Link2 size={16} className={syncingAdsSpend ? 'spin' : ''} /> Sincronizar trafego pago
+                    </button>
                     <button
                         className="btn btn-outline"
                         onClick={async () => {
