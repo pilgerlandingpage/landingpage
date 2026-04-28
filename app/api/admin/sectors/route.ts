@@ -7,6 +7,7 @@ const SECTORS_SETTINGS_PERMISSION_KEYS = new Set([
     'setores',
     'sectors',
 ])
+const HIDDEN_PERMISSION_KEYS = new Set(['openai_diagnostic', 'gemini_diagnostic'])
 const PERMISSION_CANONICAL_KEY_MAP: Record<string, string> = {
     settings_users: 'settings_users',
     gestao_de_usuarios: 'settings_users',
@@ -110,18 +111,6 @@ const ADMIN_MENU_PERMISSIONS = [
         module_key: 'maintenance',
         label: 'Sala de Manutencao',
         description: 'Acessar sala de manutencao e diagnosticos tecnicos',
-        category: 'sistema',
-    },
-    {
-        module_key: 'openai_diagnostic',
-        label: 'Diagnostico OpenAI',
-        description: 'Acessar diagnostico da integracao OpenAI',
-        category: 'sistema',
-    },
-    {
-        module_key: 'gemini_diagnostic',
-        label: 'Diagnostico Gemini',
-        description: 'Acessar diagnostico da integracao Gemini',
         category: 'sistema',
     },
     {
@@ -233,6 +222,8 @@ export async function GET() {
 
         const canonicalPermissionsMap = new Map<string, any>()
         for (const permission of allPermissions || []) {
+            if (HIDDEN_PERMISSION_KEYS.has(permission.module_key)) continue
+
             const canonicalKey = canonicalPermissionKey(permission.module_key)
             if (!canonicalKey) continue
 
@@ -268,6 +259,8 @@ export async function GET() {
 
             for (const sp of rawPerms) {
                 const rawPermission = sp.admin_permissions
+                if (HIDDEN_PERMISSION_KEYS.has(rawPermission?.module_key)) continue
+
                 const canonicalKey = canonicalPermissionKey(rawPermission?.module_key)
                 if (!canonicalKey || seen.has(canonicalKey)) continue
                 seen.add(canonicalKey)

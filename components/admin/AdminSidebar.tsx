@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
     Bell,
-    Bot,
     Building2,
     ChevronDown,
     Crown,
@@ -23,7 +22,6 @@ import {
     Shield,
     ShieldAlert,
     ShieldCheck,
-    Sparkles,
     Smartphone,
     Tag,
     UserCog,
@@ -130,8 +128,6 @@ const MODULE_NAV: Record<string, NavItem> = {
     },
     feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
     maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutencao', section: 'SISTEMA' },
-    openai_diagnostic: { href: '/admin/openai-diagnostic', icon: Bot, label: 'Diagnostico OpenAI', section: 'SISTEMA' },
-    gemini_diagnostic: { href: '/admin/gemini-diagnostic', icon: Sparkles, label: 'Diagnostico Gemini', section: 'SISTEMA' },
 }
 
 const GENERAL_DASHBOARD_ITEM: NavItem = {

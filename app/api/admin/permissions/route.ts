@@ -2,6 +2,7 @@
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 
 const DEFAULT_PERMISSION_CATEGORY = 'principal'
+const HIDDEN_PERMISSION_KEYS = new Set(['openai_diagnostic', 'gemini_diagnostic'])
 const ADMIN_MENU_PERMISSIONS = [
     { module_key: 'dashboard', label: 'Dashboards', description: 'Acessar Dashboard Geral e Dashboard Marketing', category: 'principal' },
     { module_key: 'funnel', label: 'Funil de Conversao', description: 'Acessar funil de conversao dos leads', category: 'marketing' },
@@ -17,8 +18,6 @@ const ADMIN_MENU_PERMISSIONS = [
     { module_key: 'whatsapp', label: 'WhatsApp Web', description: 'Gerenciar WhatsApp Web, agente, campanhas, agenda e etiquetas', category: 'comunicacao' },
     { module_key: 'feedback', label: 'Feedback', description: 'Acessar feedbacks do sistema', category: 'sistema' },
     { module_key: 'maintenance', label: 'Sala de Manutencao', description: 'Acessar sala de manutencao e diagnosticos tecnicos', category: 'sistema' },
-    { module_key: 'openai_diagnostic', label: 'Diagnostico OpenAI', description: 'Acessar diagnostico da integracao OpenAI', category: 'sistema' },
-    { module_key: 'gemini_diagnostic', label: 'Diagnostico Gemini', description: 'Acessar diagnostico da integracao Gemini', category: 'sistema' },
     { module_key: 'settings_sectors', label: 'Setores', description: 'Gerenciar setores e suas permissoes de acesso', category: 'sistema' },
     { module_key: 'settings_users', label: 'Usuarios', description: 'Gerenciar usuarios administrativos e vinculacao de setores', category: 'sistema' },
     { module_key: 'user_access', label: 'Auditoria de Acessos', description: 'Acessar monitoramento de logins, navegacao, IP e dispositivos', category: 'sistema' },
@@ -128,8 +127,10 @@ export async function GET() {
             return NextResponse.json({
                 is_master: true,
                 is_active: true,
-                permissions: (allPerms || []).map((p: any) => p.module_key),
-                permissions_detail: allPerms || [],
+                permissions: (allPerms || [])
+                    .map((p: any) => p.module_key)
+                    .filter((key: string) => !HIDDEN_PERMISSION_KEYS.has(key)),
+                permissions_detail: (allPerms || []).filter((p: any) => !HIDDEN_PERMISSION_KEYS.has(p.module_key)),
                 sectors: [],
                 user_name: adminUser.name,
                 user_phone: adminUser.phone,
@@ -162,7 +163,9 @@ export async function GET() {
             .in('sector_id', sectorIds)
 
         const permissions = [...new Set(
-            (sectorPerms || []).map((sp: any) => sp.admin_permissions?.module_key).filter(Boolean)
+            (sectorPerms || [])
+                .map((sp: any) => sp.admin_permissions?.module_key)
+                .filter((key: string | undefined) => key && !HIDDEN_PERMISSION_KEYS.has(key))
         )]
 
         const sectors = (userSectors || []).map((us: any) => ({
