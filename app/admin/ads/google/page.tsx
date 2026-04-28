@@ -564,6 +564,7 @@ export default function AdsPage() {
                                 {({ width, height, isCompact }) => (
                                 <PieChart width={width} height={height}>
                                     <Pie
+                                        key={`spend-pie-${width}-${spendPieData.map(item => item.value).join('-')}`}
                                         data={spendPieData}
                                         cx="50%"
                                         cy="50%"
@@ -574,7 +575,9 @@ export default function AdsPage() {
                                         label={isCompact ? false : ({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                                         labelLine={{ stroke: '#555' }}
                                         isAnimationActive
-                                        animationDuration={900}
+                                        animationBegin={120}
+                                        animationDuration={1300}
+                                        animationEasing="ease-out"
                                     >
                                         {spendPieData.map((_, index) => (
                                             <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
