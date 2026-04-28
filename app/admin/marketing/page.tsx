@@ -9,6 +9,7 @@ import {
     SimpleDonutChart,
     SimpleLineChart,
 } from '@/components/admin/SimpleCharts'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface DashboardStats {
     totalVisitors: number
@@ -210,14 +211,7 @@ export default function AdminDashboard() {
     }
 
     if (loading) {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📊</div>
-                    <p>Carregando métricas...</p>
-                </div>
-            </div>
-        )
+        return <AdminLoadingState message="Carregando métricas..." />
     }
 
     const getScoreColor = (score: number) => {

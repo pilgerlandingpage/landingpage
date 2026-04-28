@@ -836,6 +836,7 @@ h6 {
   height: 100% !important;
 }
 
+.admin-loading-state,
 .ads-loading-state {
   display: flex;
   align-items: center;
@@ -843,6 +844,7 @@ h6 {
   min-height: 60vh;
 }
 
+.admin-loading-card,
 .ads-loading-card {
   display: grid;
   justify-items: center;
@@ -851,12 +853,14 @@ h6 {
   text-align: center;
 }
 
+.admin-loading-card p,
 .ads-loading-card p {
   margin: 0;
   font-size: 0.95rem;
   animation: adsLoadingText 1.8s ease-in-out infinite;
 }
 
+.admin-loading-chart,
 .ads-loading-chart {
   position: relative;
   display: flex;
@@ -872,6 +876,7 @@ h6 {
   animation: adsLoadingFloat 2.2s ease-in-out infinite;
 }
 
+.admin-loading-chart::after,
 .ads-loading-chart::after {
   content: '';
   position: absolute;
@@ -881,6 +886,7 @@ h6 {
   animation: adsLoadingRing 1.8s ease-out infinite;
 }
 
+.admin-loading-chart span,
 .ads-loading-chart span {
   width: 6px;
   border-radius: 4px 4px 2px 2px;
@@ -888,17 +894,20 @@ h6 {
   animation: adsLoadingBar 1s ease-in-out infinite;
 }
 
+.admin-loading-chart span:nth-child(1),
 .ads-loading-chart span:nth-child(1) {
   height: 16px;
   background: #22c55e;
 }
 
+.admin-loading-chart span:nth-child(2),
 .ads-loading-chart span:nth-child(2) {
   height: 24px;
   background: #f59e0b;
   animation-delay: 120ms;
 }
 
+.admin-loading-chart span:nth-child(3),
 .ads-loading-chart span:nth-child(3) {
   height: 28px;
   background: #6366f1;

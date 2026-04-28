@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 
 interface FunnelStep {
@@ -93,11 +94,7 @@ export default function FunnelPage() {
     }, [])
 
     if (loading) {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-                <p style={{ color: 'var(--text-muted)' }}>Carregando funil...</p>
-            </div>
-        )
+        return <AdminLoadingState message="Carregando funil..." />
     }
 
     return (

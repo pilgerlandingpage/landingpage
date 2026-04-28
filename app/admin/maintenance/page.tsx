@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, CalendarDays, Clock3 } from 'lucide-react'
 import Link from 'next/link'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface IntegrationCard {
     id: string
@@ -575,7 +576,7 @@ export default function MaintenancePage() {
     }
 
     if (loading) {
-        return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Carregando...</div>
+        return <AdminLoadingState message="Carregando configurações..." />
     }
 
     return (

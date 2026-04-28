@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Save, X, CheckCircle, AlertCircle, Image, Video } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Property {
     id: string
@@ -268,7 +269,9 @@ export default function PropertiesPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
                 {loading ? (
-                    <p style={{ color: 'var(--text-muted)', padding: '40px' }}>Carregando...</p>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                        <AdminLoadingState message="Carregando imóveis..." minHeight="320px" />
+                    </div>
                 ) : properties.length === 0 ? (
                     <div className="chart-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 24px' }}>
                         <Image size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />

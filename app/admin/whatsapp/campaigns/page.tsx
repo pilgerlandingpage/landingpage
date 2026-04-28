@@ -7,6 +7,7 @@ import {
     Tag, RefreshCw, MessageSquare, Calendar, ChevronDown, ChevronUp,
     Smartphone, Search
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Instance {
     id: string
@@ -166,11 +167,7 @@ export default function CampaignsPage() {
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const parsedNumbers = parseNumbers()
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando...
-        </div>
-    )
+    if (loading) return <AdminLoadingState minHeight="400px" />
 
     return (
         <div>

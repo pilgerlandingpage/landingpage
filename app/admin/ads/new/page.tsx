@@ -6,6 +6,7 @@ import {
     ArrowLeft, Save, Rocket, Building2, DollarSign, Calendar, Target,
     Image as ImageIcon, Brain, CheckCircle, AlertCircle
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Property {
     id: string
@@ -161,7 +162,7 @@ export default function NewCampaignPage() {
     }
 
     if (loading) {
-        return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Carregando...</div>
+        return <AdminLoadingState message="Carregando dados da campanha..." />
     }
 
     return (

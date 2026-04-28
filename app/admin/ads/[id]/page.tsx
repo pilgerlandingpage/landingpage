@@ -10,6 +10,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, AreaChart, Area
 } from 'recharts'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 // ─── Types ────────────────────────────────────────────────────
 interface Campaign {
@@ -181,7 +182,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
         }
     }
 
-    if (loading) return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Carregando...</div>
+    if (loading) return <AdminLoadingState message="Carregando campanha..." />
     if (!campaign) return <div style={{ padding: '40px', color: 'var(--danger)' }}>Campanha não encontrada</div>
 
     const st = STATUS_MAP[campaign.status] || STATUS_MAP.draft

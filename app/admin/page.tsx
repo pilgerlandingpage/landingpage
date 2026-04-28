@@ -13,6 +13,7 @@ import {
     SimpleDonutChart,
     SimpleLineChart,
 } from '@/components/admin/SimpleCharts'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 type EntryType = 'income' | 'expense'
 
@@ -210,11 +211,7 @@ export default function AdminOverviewPage() {
     const monthlyFinanceChart = useMemo(() => monthlyFinance.slice(-12), [monthlyFinance])
 
     if (loading) {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)' }}>
-                Carregando dashboard geral...
-            </div>
-        )
+        return <AdminLoadingState message="Carregando dashboard geral..." minHeight="50vh" />
     }
 
     return (

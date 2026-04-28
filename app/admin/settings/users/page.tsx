@@ -6,6 +6,7 @@ import {
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
     Smartphone, Wifi, WifiOff, RefreshCw, Send
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Sector { id: string; name: string; color: string; icon: string }
 interface AdminUser {
@@ -307,7 +308,7 @@ export default function UsersPage() {
         u.email.toLowerCase().includes(search.toLowerCase())
     )
 
-    if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Carregando...</div>
+    if (loading) return <AdminLoadingState message="Carregando usuários..." />
 
     return (
         <div>

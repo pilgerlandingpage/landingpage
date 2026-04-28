@@ -5,6 +5,7 @@ import {
     MessageSquare, Loader2, Plus, Trash2, Edit3, Save,
     Smartphone, Zap, Search
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Instance {
     id: string; instance_name: string; instance_token: string; status: string
@@ -122,11 +123,7 @@ export default function QuickRepliesPage() {
         ? replies.filter(r => r.shortCut.toLowerCase().includes(searchQuery.toLowerCase()) || r.text.toLowerCase().includes(searchQuery.toLowerCase()))
         : replies
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando...
-        </div>
-    )
+    if (loading) return <AdminLoadingState minHeight="400px" />
 
     return (
         <div>

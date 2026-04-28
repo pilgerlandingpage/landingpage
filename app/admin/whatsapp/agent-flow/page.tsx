@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { AgentFlowConfig, AgentFlowStep } from '@/lib/ai/prompt-builder'
 import { DEFAULT_FLOW_CONFIG, buildAgentPrompt } from '@/lib/ai/prompt-builder'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 const TONE_OPTIONS = [
     { value: 'formal', label: '🏢 Formal', desc: '"Bom dia, como posso ajudá-lo?"' },
@@ -168,11 +169,7 @@ export default function AgentFlowPage() {
         setExpandedSection(prev => prev === section ? null : section)
     }
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando configurações...
-        </div>
-    )
+    if (loading) return <AdminLoadingState message="Carregando configurações..." minHeight="400px" />
 
     const generatedPrompt = buildAgentPrompt(config, 'Corretor')
 

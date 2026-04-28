@@ -8,6 +8,7 @@ import {
     ChevronDown, ChevronUp, Save, Power, Eye, Plus,
     SplitSquareVertical, Users, Timer
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface LiveData {
     phone?: string; pushName?: string; platform?: string
@@ -241,11 +242,7 @@ export default function WhatsAppInstancesPage() {
     const agentInstances = instances.filter(i => i.broker_id)
     const userInstances = instances.filter(i => !i.broker_id)
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando instâncias...
-        </div>
-    )
+    if (loading) return <AdminLoadingState message="Carregando instâncias..." minHeight="400px" />
 
     if (error) return (
         <div style={{ textAlign: 'center', padding: '60px 24px' }}>

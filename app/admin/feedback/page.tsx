@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { MessageSquareHeart, CheckCircle2, Eye, Filter, ChevronDown, ChevronUp, Clock, User, Tag } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Feedback {
     id: string
@@ -86,7 +87,7 @@ export default function FeedbackPage() {
     }
 
     if (loading) {
-        return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Carregando...</div>
+        return <AdminLoadingState />
     }
 
     return (

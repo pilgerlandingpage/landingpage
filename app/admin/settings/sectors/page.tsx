@@ -14,6 +14,7 @@ import {
     Users,
     Loader2,
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 const ICON_MAP: Record<string, any> = {
     Briefcase,
@@ -253,7 +254,7 @@ export default function SectorsPage() {
         return ai - bi
     })
 
-    if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Carregando...</div>
+    if (loading) return <AdminLoadingState message="Carregando setores..." />
 
     return (
         <div>

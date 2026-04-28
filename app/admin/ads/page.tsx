@@ -10,6 +10,7 @@ import {
 import AdsCountdown from '@/components/admin/AdsCountdown'
 import LeadClock from '@/components/admin/LeadClock'
 import AdsChartFrame from '@/components/admin/AdsChartFrame'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -346,18 +347,7 @@ export default function AdsPage() {
         }))
 
     if (loading) {
-        return (
-            <div className="ads-loading-state">
-                <div className="ads-loading-card">
-                    <div className="ads-loading-chart" aria-hidden="true">
-                        <span />
-                        <span />
-                        <span />
-                    </div>
-                    <p>Carregando métricas de tráfego...</p>
-                </div>
-            </div>
-        )
+        return <AdminLoadingState message="Carregando métricas de tráfego..." />
     }
 
     return (

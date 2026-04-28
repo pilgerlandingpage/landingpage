@@ -5,6 +5,7 @@ import {
     Tag, Loader2, Plus, Trash2, Edit3, RefreshCw,
     CheckCircle2, Smartphone, Save
 } from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Instance {
     id: string; instance_name: string; instance_token: string; status: string
@@ -137,11 +138,7 @@ export default function LabelsPage() {
         finally { setActionLoading(null) }
     }
 
-    if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '12px', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" /> Carregando...
-        </div>
-    )
+    if (loading) return <AdminLoadingState minHeight="400px" />
 
     return (
         <div>
