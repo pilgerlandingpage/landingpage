@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
     Bell,
+    Bot,
     Building2,
     ChevronDown,
     Crown,
@@ -22,6 +23,7 @@ import {
     Shield,
     ShieldAlert,
     ShieldCheck,
+    Sparkles,
     Smartphone,
     Tag,
     UserCog,
@@ -119,6 +121,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/whatsapp', label: 'Conectados' },
             { href: '/admin/whatsapp/agent-config', label: 'Config do Agente' },
+            { href: '/admin/whatsapp/agent-flow', label: 'Fluxo do Agente' },
             { href: '/admin/whatsapp/agenda', label: 'Agenda' },
             { href: '/admin/whatsapp/campaigns', label: 'Campanhas' },
             { href: '/admin/whatsapp/labels', label: 'Etiquetas' },
@@ -127,6 +130,8 @@ const MODULE_NAV: Record<string, NavItem> = {
     },
     feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
     maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutencao', section: 'SISTEMA' },
+    openai_diagnostic: { href: '/admin/openai-diagnostic', icon: Bot, label: 'Diagnostico OpenAI', section: 'SISTEMA' },
+    gemini_diagnostic: { href: '/admin/gemini-diagnostic', icon: Sparkles, label: 'Diagnostico Gemini', section: 'SISTEMA' },
 }
 
 const GENERAL_DASHBOARD_ITEM: NavItem = {

@@ -85,7 +85,7 @@ const ADMIN_MENU_PERMISSIONS = [
     {
         module_key: 'ads',
         label: 'Trafego IA',
-        description: 'Acessar Meta Ads, Google Ads e diagnosticos de IA',
+        description: 'Acessar Meta Ads e Google Ads',
         category: 'marketing',
     },
     {
@@ -97,7 +97,7 @@ const ADMIN_MENU_PERMISSIONS = [
     {
         module_key: 'whatsapp',
         label: 'WhatsApp Web',
-        description: 'Gerenciar WhatsApp Web, campanhas, agenda e etiquetas',
+        description: 'Gerenciar WhatsApp Web, agente, campanhas, agenda e etiquetas',
         category: 'comunicacao',
     },
     {
@@ -110,6 +110,18 @@ const ADMIN_MENU_PERMISSIONS = [
         module_key: 'maintenance',
         label: 'Sala de Manutencao',
         description: 'Acessar sala de manutencao e diagnosticos tecnicos',
+        category: 'sistema',
+    },
+    {
+        module_key: 'openai_diagnostic',
+        label: 'Diagnostico OpenAI',
+        description: 'Acessar diagnostico da integracao OpenAI',
+        category: 'sistema',
+    },
+    {
+        module_key: 'gemini_diagnostic',
+        label: 'Diagnostico Gemini',
+        description: 'Acessar diagnostico da integracao Gemini',
         category: 'sistema',
     },
     {
