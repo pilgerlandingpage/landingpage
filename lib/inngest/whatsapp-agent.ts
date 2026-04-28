@@ -629,7 +629,9 @@ function parseInteractiveElements(text: string): InteractiveElements {
         const items = parts
             .slice(1)
             .map((part) => {
-                const [textPart, urlPart] = part.split('=>').map(s => s.trim())
+                const separatorIndex = part.indexOf('=>')
+                const textPart = separatorIndex >= 0 ? part.slice(0, separatorIndex).trim() : ''
+                const urlPart = separatorIndex >= 0 ? part.slice(separatorIndex + 2).trim() : part.trim()
                 return {
                     text: (textPart || 'Abrir').substring(0, 20),
                     url: (urlPart || '').trim(),
@@ -2157,21 +2159,13 @@ export const processWhatsAppMessage = inngest.createFunction(
 
             if (urlButtons && urlButtons.items.length > 0) {
                 try {
-                    // O WhatsApp e a UAZAPI permitem no máximo 1 botão de URL por mensagem. Extrair o primeiro.
-                    const primaryUrlBtn = urlButtons.items[0];
-                    const otherUrlBtns = urlButtons.items.slice(1);
-
-                    let finalText = cleanText || urlButtons.title || 'Acesse o link abaixo:';
-                    if (otherUrlBtns.length > 0) {
-                        const extraLinks = otherUrlBtns.map(i => `\n🔗 *${i.text}*: ${i.url}`).join('');
-                        finalText = `${finalText}\n${extraLinks}`;
-                    }
-
+                    // UAZAPI expects URL buttons as choices: "texto|url:https://..."
+                    const finalText = cleanText || urlButtons.title || 'Acesse o link abaixo:'
                     const sendResult = await sendMenuMessage({
                         phone: cleanPhone,
                         text: finalText,
                         type: 'button',
-                        choices: [`${primaryUrlBtn.text}|${primaryUrlBtn.url}`], // Uazapi format: "texto|https://link.com"
+                        choices: urlButtons.items.map(item => `${item.text}|url:${item.url}`),
                         instanceToken,
                     })
                     botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
