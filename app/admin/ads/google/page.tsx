@@ -9,8 +9,9 @@ import {
 } from 'lucide-react'
 import AdsCountdown from '@/components/admin/AdsCountdown'
 import LeadClock from '@/components/admin/LeadClock'
+import AdsChartFrame from '@/components/admin/AdsChartFrame'
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts'
 
@@ -540,37 +541,37 @@ export default function AdsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
                         <div className="chart-title">📊 Gasto e conversões por campanha</div>
-                        <div className="admin-chart-frame ads-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={spendBarData}>
+                        <AdsChartFrame>
+                            {({ width, height, isCompact }) => (
+                            <BarChart width={width} height={height} data={spendBarData} margin={{ top: 8, right: isCompact ? 6 : 16, left: isCompact ? -22 : 0, bottom: isCompact ? 4 : 8 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                                <XAxis dataKey="name" stroke="#666" fontSize={11} angle={-20} textAnchor="end" height={60} />
-                                <YAxis yAxisId="left" stroke="#666" fontSize={11} />
-                                <YAxis yAxisId="right" orientation="right" stroke="#666" fontSize={11} />
+                                <XAxis dataKey="name" stroke="#666" fontSize={isCompact ? 9 : 11} angle={isCompact ? 0 : -20} textAnchor={isCompact ? 'middle' : 'end'} height={isCompact ? 36 : 60} interval={0} />
+                                <YAxis yAxisId="left" stroke="#666" fontSize={isCompact ? 9 : 11} width={isCompact ? 42 : 60} />
+                                <YAxis yAxisId="right" orientation="right" stroke="#666" fontSize={isCompact ? 9 : 11} width={isCompact ? 32 : 60} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Legend />
+                                <Legend wrapperStyle={{ fontSize: isCompact ? 10 : 12 }} />
                                 <Bar yAxisId="left" dataKey="R$ Gasto" fill="#f59e0b" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                                <Bar yAxisId="right" dataKey="Conversões" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                                <Bar yAxisId="right" dataKey="Conversões" fill="#22c55e" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} animationBegin={120} />
                             </BarChart>
-                        </ResponsiveContainer>
-                        </div>
+                            )}
+                        </AdsChartFrame>
                     </div>
 
                     <div className="chart-card">
                         <div className="chart-title">🧩 Distribuição de gasto</div>
                         {spendPieData.length > 0 ? (
-                            <div className="admin-chart-frame ads-chart-frame">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
+                            <AdsChartFrame>
+                                {({ width, height, isCompact }) => (
+                                <PieChart width={width} height={height}>
                                     <Pie
                                         data={spendPieData}
                                         cx="50%"
                                         cy="50%"
-                                        outerRadius={95}
-                                        innerRadius={45}
+                                        outerRadius={isCompact ? Math.min(78, width * 0.28) : 95}
+                                        innerRadius={isCompact ? Math.min(34, width * 0.12) : 45}
                                         dataKey="value"
                                         paddingAngle={2}
-                                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        label={isCompact ? false : ({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                                         labelLine={{ stroke: '#555' }}
                                         isAnimationActive
                                         animationDuration={900}
@@ -585,8 +586,8 @@ export default function AdsPage() {
                                         itemStyle={{ color: '#f5f5f5' }}
                                     />
                                 </PieChart>
-                            </ResponsiveContainer>
-                            </div>
+                                )}
+                            </AdsChartFrame>
                         ) : (
                             <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                                 Sem dados de gasto
@@ -601,9 +602,9 @@ export default function AdsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
                     <div className="chart-card">
                         <div className="chart-title">📈 Performance por Campanha</div>
-                        <div className="admin-chart-frame ads-chart-frame">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={performanceData}>
+                        <AdsChartFrame>
+                            {({ width, height, isCompact }) => (
+                            <AreaChart width={width} height={height} data={performanceData} margin={{ top: 8, right: isCompact ? 8 : 16, left: isCompact ? -18 : 0, bottom: isCompact ? 4 : 8 }}>
                                 <defs>
                                     <linearGradient id="gradImpr" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -615,27 +616,27 @@ export default function AdsPage() {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                                <XAxis dataKey="name" stroke="#666" fontSize={11} angle={-20} textAnchor="end" height={60} />
-                                <YAxis stroke="#666" fontSize={11} />
+                                <XAxis dataKey="name" stroke="#666" fontSize={isCompact ? 9 : 11} angle={isCompact ? 0 : -20} textAnchor={isCompact ? 'middle' : 'end'} height={isCompact ? 36 : 60} interval={0} />
+                                <YAxis stroke="#666" fontSize={isCompact ? 9 : 11} width={isCompact ? 42 : 60} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Legend />
-                                <Area type="monotone" dataKey="Impressões" stroke="#6366f1" fill="url(#gradImpr)" strokeWidth={2} />
-                                <Area type="monotone" dataKey="Alcance" stroke="#3b82f6" fill="url(#gradReach)" strokeWidth={2} />
+                                <Legend wrapperStyle={{ fontSize: isCompact ? 10 : 12 }} />
+                                <Area type="monotone" dataKey="Impressões" stroke="#6366f1" fill="url(#gradImpr)" strokeWidth={2} isAnimationActive animationDuration={950} />
+                                <Area type="monotone" dataKey="Alcance" stroke="#3b82f6" fill="url(#gradReach)" strokeWidth={2} isAnimationActive animationDuration={950} animationBegin={100} />
                                 <Area type="monotone" dataKey="Cliques" stroke="#22c55e" fill="rgba(34,197,94,0.1)" strokeWidth={2} isAnimationActive animationDuration={950} animationBegin={200} />
                             </AreaChart>
-                        </ResponsiveContainer>
-                        </div>
+                            )}
+                        </AdsChartFrame>
                     </div>
 
                     {cpaData.length > 0 && (
                         <div className="chart-card">
                             <div className="chart-title">🎯 CPA por Campanha (menor = melhor)</div>
-                            <div className="admin-chart-frame ads-chart-frame">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={cpaData} layout="vertical">
+                            <AdsChartFrame>
+                                {({ width, height, isCompact }) => (
+                                <BarChart width={width} height={height} data={cpaData} layout="vertical" margin={{ top: 8, right: isCompact ? 8 : 16, left: isCompact ? 0 : 8, bottom: 8 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                                    <XAxis type="number" stroke="#666" fontSize={11} />
-                                    <YAxis dataKey="name" type="category" stroke="#666" fontSize={11} width={130} />
+                                    <XAxis type="number" stroke="#666" fontSize={isCompact ? 9 : 11} />
+                                    <YAxis dataKey="name" type="category" stroke="#666" fontSize={isCompact ? 9 : 11} width={isCompact ? 82 : 130} />
                                     <Tooltip formatter={(v: any) => formatCurrency(v)}
                                         contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }}
                                         itemStyle={{ color: '#f5f5f5' }} />
@@ -645,8 +646,8 @@ export default function AdsPage() {
                                         ))}
                                     </Bar>
                                 </BarChart>
-                            </ResponsiveContainer>
-                            </div>
+                                )}
+                            </AdsChartFrame>
                         </div>
                     )}
                 </div>
