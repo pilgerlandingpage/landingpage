@@ -836,6 +836,119 @@ h6 {
   height: 100% !important;
 }
 
+.ads-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.ads-loading-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.ads-loading-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  animation: adsLoadingText 1.8s ease-in-out infinite;
+}
+
+.ads-loading-chart {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  box-shadow: 0 12px 30px rgba(201, 169, 110, 0.2);
+  animation: adsLoadingFloat 2.2s ease-in-out infinite;
+}
+
+.ads-loading-chart::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 14px;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  animation: adsLoadingRing 1.8s ease-out infinite;
+}
+
+.ads-loading-chart span {
+  width: 6px;
+  border-radius: 4px 4px 2px 2px;
+  transform-origin: bottom;
+  animation: adsLoadingBar 1s ease-in-out infinite;
+}
+
+.ads-loading-chart span:nth-child(1) {
+  height: 16px;
+  background: #22c55e;
+}
+
+.ads-loading-chart span:nth-child(2) {
+  height: 24px;
+  background: #f59e0b;
+  animation-delay: 120ms;
+}
+
+.ads-loading-chart span:nth-child(3) {
+  height: 28px;
+  background: #6366f1;
+  animation-delay: 240ms;
+}
+
+@keyframes adsLoadingBar {
+  0%, 100% {
+    transform: scaleY(0.55);
+    opacity: 0.62;
+  }
+
+  45% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes adsLoadingFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes adsLoadingRing {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.78);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.16);
+  }
+}
+
+@keyframes adsLoadingText {
+  0%, 100% {
+    opacity: 0.62;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 .simple-chart-frame,
 .simple-donut-frame {
   width: 100%;
