@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Clock, FileText, Map, Save, Plus, X, Loader2, Check, Globe, MessageSquare } from 'lucide-react'
+import { Building2, Clock, FileText, Map, Save, Plus, X, Loader2, Check, Globe, MessageSquare, Link2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
     DEFAULT_FIRST_ACCESS_MESSAGE,
@@ -56,6 +56,13 @@ interface CustomLinkButton {
     pixType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP'
     // CAROUSEL (JSON free-form)
     carouselJson?: string
+}
+
+interface UserAccessExtraButton {
+    id: string
+    name: string
+    tag: string
+    url: string
 }
 
 const ACTION_TYPE_HELP: Record<CustomLinkButton['type'], string> = {
@@ -184,6 +191,9 @@ export default function AgentConfigPage() {
     )
     const [firstAccessMessageTemplate, setFirstAccessMessageTemplate] = useState(DEFAULT_FIRST_ACCESS_MESSAGE)
     const [passwordResetMessageTemplate, setPasswordResetMessageTemplate] = useState(DEFAULT_PASSWORD_RESET_MESSAGE)
+    const [userAccessButtons, setUserAccessButtons] = useState<UserAccessExtraButton[]>([])
+    const [newUserAccessButtonName, setNewUserAccessButtonName] = useState('')
+    const [newUserAccessButtonUrl, setNewUserAccessButtonUrl] = useState('')
     const [instances, setInstances] = useState<AgentInstance[]>([])
     const [brokers, setBrokers] = useState<Broker[]>([])
     const [defaultBrokerId, setDefaultBrokerId] = useState('')
@@ -274,6 +284,14 @@ export default function AgentConfigPage() {
                 if (c.whatsapp_followup_message_template) setWhatsappFollowupMessageTemplate(c.whatsapp_followup_message_template)
                 if (c.user_first_access_whatsapp_message) setFirstAccessMessageTemplate(c.user_first_access_whatsapp_message)
                 if (c.user_password_reset_whatsapp_message) setPasswordResetMessageTemplate(c.user_password_reset_whatsapp_message)
+                if (c.user_access_extra_buttons) {
+                    try {
+                        const parsed = JSON.parse(c.user_access_extra_buttons)
+                        if (Array.isArray(parsed)) {
+                            setUserAccessButtons(parsed.filter((button: any) => button?.name && button?.tag && button?.url))
+                        }
+                    } catch {}
+                }
             }
         } catch (err) {
             console.error('Erro ao carregar config:', err)
@@ -337,6 +355,7 @@ export default function AgentConfigPage() {
                         whatsapp_followup_message_template: whatsappFollowupMessageTemplate,
                         user_first_access_whatsapp_message: firstAccessMessageTemplate,
                         user_password_reset_whatsapp_message: passwordResetMessageTemplate,
+                        user_access_extra_buttons: JSON.stringify(userAccessButtons),
                     }
                 })
             })
@@ -508,6 +527,37 @@ export default function AgentConfigPage() {
 
     function removeLinkButton(id: string) {
         setLinkButtons(prev => prev.filter(b => b.id !== id))
+    }
+
+    function addUserAccessButton() {
+        const name = newUserAccessButtonName.trim()
+        const url = newUserAccessButtonUrl.trim()
+        if (!name) return
+        if (!/^https?:\/\//i.test(url)) {
+            alert('A URL deve começar com http:// ou https://')
+            return
+        }
+
+        const slug = slugifyTagName(name)
+        if (!slug) return
+        const tag = `{botao_usuario_${slug}}`
+        if (userAccessButtons.some(button => button.tag === tag)) {
+            alert('Ja existe um botao de usuario com esse nome/tag.')
+            return
+        }
+
+        setUserAccessButtons(prev => [...prev, {
+            id: `uab_${Date.now()}`,
+            name,
+            tag,
+            url,
+        }])
+        setNewUserAccessButtonName('')
+        setNewUserAccessButtonUrl('')
+    }
+
+    function removeUserAccessButton(id: string) {
+        setUserAccessButtons(prev => prev.filter(button => button.id !== id))
     }
 
     useEffect(() => {
@@ -782,13 +832,71 @@ export default function AgentConfigPage() {
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
                     <span style={{ fontSize: '0.7rem', color: '#888' }}>Variáveis disponíveis:</span>
-                    {['{nome}', '{email}', '{telefone}', '{link}', '{empresa}'].map(v => (
+                    {['{nome}', '{email}', '{telefone}', '{botao_link}', '{empresa}'].map(v => (
                         <code key={v} style={{ fontSize: '0.7rem', background: '#ecfdf5', padding: '2px 6px', borderRadius: 4, color: '#047857' }}>{v}</code>
                     ))}
                 </div>
                 <p style={{ fontSize: '0.72rem', color: '#888', marginTop: 8 }}>
-                    Mantenha a variável {'{link}'} no texto para que o usuário receba o acesso correto.
+                    Use {'{botao_link}'} onde o botao de primeiro acesso ou redefinicao deve aparecer. Templates antigos com {'{link}'} tambem serao enviados como botao.
                 </p>
+
+                <div style={{ marginTop: 16, borderTop: '1px solid #eee', paddingTop: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                        <Link2 size={16} color="#0ea5e9" />
+                        <strong style={{ fontSize: '0.86rem', color: '#333' }}>Botões extras para estas mensagens</strong>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr auto', gap: 8, marginBottom: 10 }}>
+                        <input
+                            style={inputStyle}
+                            value={newUserAccessButtonName}
+                            onChange={e => setNewUserAccessButtonName(e.target.value)}
+                            placeholder="Nome do botão (ex: Falar com suporte)"
+                        />
+                        <input
+                            style={inputStyle}
+                            value={newUserAccessButtonUrl}
+                            onChange={e => setNewUserAccessButtonUrl(e.target.value)}
+                            placeholder="https://seu-link.com"
+                        />
+                        <button type="button" onClick={addUserAccessButton} style={btnSmall}>
+                            <Plus size={14} /> Criar
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: 8 }}>
+                        {userAccessButtons.length === 0 && (
+                            <span style={{ color: '#bbb', fontSize: '0.82rem' }}>
+                                Nenhum botão extra cadastrado para mensagens de usuários.
+                            </span>
+                        )}
+                        {userAccessButtons.map(button => (
+                            <div key={button.id} style={{
+                                border: '1px solid #e7e4df',
+                                background: '#fafafa',
+                                borderRadius: 10,
+                                padding: '10px 12px',
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1.3fr auto',
+                                gap: 8,
+                                alignItems: 'center',
+                            }}>
+                                <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#444' }}>{button.name}</div>
+                                <div style={{ fontSize: '0.8rem', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{button.url}</div>
+                                <button type="button" onClick={() => removeUserAccessButton(button.id)} style={{ ...btnSmall, background: 'linear-gradient(135deg, #ef4444, #dc2626)', padding: '6px 10px' }}>
+                                    <X size={14} /> Remover
+                                </button>
+                                <div style={{ gridColumn: '1 / -1', fontSize: '0.74rem', color: '#8b5cf6' }}>
+                                    Tag na mensagem: <code>{button.tag}</code>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {userAccessButtons.length > 0 && (
+                        <p style={{ fontSize: '0.74rem', color: '#888', marginTop: 10 }}>
+                            Coloque a tag do botão extra dentro da mensagem de primeiro acesso ou redefinição para ele ser enviado junto.
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* ACOES INTERATIVAS */}

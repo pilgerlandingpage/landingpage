@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
-import { buildPasswordResetWhatsAppMessage } from '@/lib/user-whatsapp-messages'
+import { buildPasswordResetWhatsAppMessage, type UserAccessWhatsAppPayload } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
 
 const MATCHED_RECOVERY_MESSAGE =
@@ -76,6 +76,24 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
     if (instance.status !== 'connected') return null
 
     return instance.instance_token
+}
+
+async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
+    if (payload.buttons.length > 0) {
+        return sendMenuMessage({
+            phone,
+            text: payload.text || 'Acesse pelo botao abaixo:',
+            type: 'button',
+            choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
+            instanceToken,
+        })
+    }
+
+    return sendWhatsAppMessage({
+        phone,
+        message: payload.text,
+        instanceToken,
+    })
 }
 
 function onlyDigits(value: string) {
@@ -254,18 +272,14 @@ export async function POST(request: NextRequest) {
         try {
             const instanceToken = await resolveGlobalAgentInstanceToken(admin)
             if (instanceToken) {
-                const message = await buildPasswordResetWhatsAppMessage(admin, {
+                const payload = await buildPasswordResetWhatsAppMessage(admin, {
                     name: adminUser.name,
                     email: targetEmail,
                     phone: adminUser.phone,
                     link: resetLink,
                 })
 
-                await sendWhatsAppMessage({
-                    phone: String(adminUser.phone || ''),
-                    message,
-                    instanceToken,
-                })
+                await sendUserAccessWhatsAppPayload(String(adminUser.phone || ''), payload, instanceToken)
                 whatsappSent = true
             }
         } catch (whatsappErr) {

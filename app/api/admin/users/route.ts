@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
     buildPasswordResetWhatsAppMessage,
+    type UserAccessWhatsAppPayload,
 } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
 
@@ -213,6 +214,24 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
     return instance.instance_token
 }
 
+async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
+    if (payload.buttons.length > 0) {
+        return sendMenuMessage({
+            phone,
+            text: payload.text || 'Acesse pelo botao abaixo:',
+            type: 'button',
+            choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
+            instanceToken,
+        })
+    }
+
+    return sendWhatsAppMessage({
+        phone,
+        message: payload.text,
+        instanceToken,
+    })
+}
+
 async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: string, name: string, firstAccessLink: string }) {
     const { phone, name, firstAccessLink } = params
     if (!phone || !firstAccessLink) return { sent: false, reason: 'missing_phone_or_link' }
@@ -220,17 +239,13 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
     const instanceToken = await resolveGlobalAgentInstanceToken(admin)
     if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
 
-    const message = await buildFirstAccessWhatsAppMessage(admin, {
+    const payload = await buildFirstAccessWhatsAppMessage(admin, {
         name,
         phone,
         link: firstAccessLink,
     })
 
-    await sendWhatsAppMessage({
-        phone,
-        message,
-        instanceToken,
-    })
+    await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
 
     return { sent: true, reason: null }
 }
@@ -242,17 +257,13 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
     const instanceToken = await resolveGlobalAgentInstanceToken(admin)
     if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
 
-    const message = await buildPasswordResetWhatsAppMessage(admin, {
+    const payload = await buildPasswordResetWhatsAppMessage(admin, {
         name,
         phone,
         link: resetLink,
     })
 
-    await sendWhatsAppMessage({
-        phone,
-        message,
-        instanceToken,
-    })
+    await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
 
     return { sent: true, reason: null }
 }
