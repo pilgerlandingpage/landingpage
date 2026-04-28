@@ -568,11 +568,14 @@ export default function AdsPage() {
                                         data={spendPieData}
                                         cx="50%"
                                         cy="50%"
-                                        outerRadius={isCompact ? Math.min(78, width * 0.28) : 95}
-                                        innerRadius={isCompact ? Math.min(34, width * 0.12) : 45}
+                                        outerRadius={isCompact ? Math.min(64, width * 0.22) : 95}
+                                        innerRadius={isCompact ? Math.min(28, width * 0.1) : 45}
                                         dataKey="value"
                                         paddingAngle={2}
-                                        label={isCompact ? false : ({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        label={({ name, percent }: any) => {
+                                            if (isCompact && percent < 0.035) return ''
+                                            return `${shortName(name, isCompact ? 10 : 22)} ${(percent * 100).toFixed(0)}%`
+                                        }}
                                         labelLine={{ stroke: '#555' }}
                                         isAnimationActive
                                         animationBegin={120}
