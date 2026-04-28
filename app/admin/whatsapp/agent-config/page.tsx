@@ -173,8 +173,6 @@ export default function AgentConfigPage() {
     const [transferMsgBroker, setTransferMsgBroker] = useState(
         '*Lead qualificado transferido!*\n\nNome: {nome_lead}\nTelefone: {telefone}\nInteresse: {interesse}\nOrcamento: {orcamento}\nRegiao: {regiao}\n\nEntre em contato agora!'
     )
-    const [agentTone, setAgentTone] = useState('amigavel')
-    const [transferScoreThreshold, setTransferScoreThreshold] = useState('80')
     const [defaultInstanceId, setDefaultInstanceId] = useState('')
     const [transferInstanceIds, setTransferInstanceIds] = useState<string[]>([])
     const [transferMode, setTransferMode] = useState<'round_robin' | 'fixed'>('round_robin')
@@ -262,8 +260,6 @@ export default function AgentConfigPage() {
                 }
                 if (c.agent_transfer_message_lead) setTransferMsgLead(c.agent_transfer_message_lead)
                 if (c.agent_transfer_message_broker) setTransferMsgBroker(c.agent_transfer_message_broker)
-                if (c.agent_tone) setAgentTone(c.agent_tone)
-                if (c.agent_transfer_score_threshold) setTransferScoreThreshold(c.agent_transfer_score_threshold)
                 if (c.agent_default_broker_id) setDefaultBrokerId(c.agent_default_broker_id)
                 if (c.agent_default_instance_id) setDefaultInstanceId(c.agent_default_instance_id)
                 if (c.agent_transfer_mode) setTransferMode(c.agent_transfer_mode)
@@ -340,8 +336,6 @@ export default function AgentConfigPage() {
                         agent_required_documents: JSON.stringify(documents),
                         agent_transfer_message_lead: transferMsgLead,
                         agent_transfer_message_broker: transferMsgBroker,
-                        agent_tone: agentTone,
-                        agent_transfer_score_threshold: transferScoreThreshold,
                         agent_default_broker_id: defaultBrokerId,
                         agent_default_instance_id: defaultInstanceId,
                         agent_transfer_mode: transferMode,
@@ -1189,28 +1183,9 @@ export default function AgentConfigPage() {
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Mensagens de Transferência</h2>
                     <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>Tag: {'{transferir}'}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                    <div>
-                        <label style={labelStyle}>Tom de voz</label>
-                        <select style={inputStyle} value={agentTone} onChange={e => setAgentTone(e.target.value)}>
-                            <option value="amigavel">Amigável</option>
-                            <option value="formal">Formal</option>
-                            <option value="consultivo">Consultivo</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Score para transferência automática</label>
-                        <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            style={inputStyle}
-                            value={transferScoreThreshold}
-                            onChange={e => setTransferScoreThreshold(e.target.value)}
-                            placeholder="80"
-                        />
-                    </div>
-                </div>
+                <p style={{ fontSize: '0.78rem', color: '#777', margin: '0 0 14px' }}>
+                    A IA so transfere quando o prompt do corretor usar a tag {'{transferir}'}. O score do lead continua sendo calculado apenas para CRM e organizacao interna.
+                </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     <div>
                         <label style={labelStyle}>Instancia de triagem (definida no topo)</label>

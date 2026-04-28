@@ -486,8 +486,7 @@ async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, instanceI
             'whatsapp_agent_enabled', 'whatsapp_split_messages',
             'whatsapp_debounce_seconds',
             'whatsapp_ai_schedule_enabled', 'whatsapp_ai_schedule_start', 'whatsapp_ai_schedule_end', 'whatsapp_ai_schedule_timezone',
-            // Agent controls from admin panel
-            'agent_transfer_score_threshold', 'agent_tone',
+            // Agent operational settings from admin panel
             'agent_default_instance_id', 'agent_transfer_instance_ids', 'agent_transfer_mode', 'agent_transfer_rr_index',
             'agent_social_instagram', 'agent_social_facebook', 'agent_social_youtube',
             'agent_social_linkedin', 'agent_social_tiktok', 'agent_social_site', 'agent_link_buttons'
@@ -1298,13 +1297,6 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         if (Array.isArray(parsed)) customLinkButtons = parsed
     } catch {}
     // Processar tags no prompt
-    const tone = (agentConfigs['agent_tone'] || 'amigavel').toLowerCase()
-    const toneInstruction = tone === 'formal'
-        ? 'Use um tom formal, objetivo e respeitoso, sem gírias.'
-        : tone === 'consultivo'
-            ? 'Use tom consultivo, faça perguntas qualificadoras e conduza com clareza.'
-            : 'Use tom amigável, humano e próximo, mantendo profissionalismo.'
-
     let basePromptWithTags = rawPrompt
         .replace(/\{nome_corretor\}/g, brokerName)
         .replace(/\{nome_lead\}/g, safeLeadName || 'cliente')
@@ -1381,8 +1373,7 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
 
     let systemPrompt = basePromptWithTags
     if (!hasCustomPrompt) {
-        systemPrompt += `\n\n${toneInstruction}`
-        + '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
+        systemPrompt += '\n\nIMPORTANTE: Nunca envie mais de 1 elemento interativo por mensagem. Use botões/listas SOMENTE quando fizer sentido na conversa — nunca como roteiro.'
         + `\n\nCONTEXTO DE TEMPO (America/Sao_Paulo): agora sao ${spTime.time} de ${spTime.date}. Saudacao correta neste momento: "${spTime.greeting}".`
         + '\nREGRAS DE SAUDACAO:'
         + '\n- Sempre valide a saudacao pelo horario atual antes de responder.'
@@ -1460,8 +1451,12 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
         }
 
+        const conversationText = messages
+            .filter((m: any) => typeof m?.content === 'string' && m.content.trim())
+            .map((m: any) => `${m.role === 'assistant' ? 'Agente' : 'Lead'}: ${m.content}`)
+            .join('\n')
         const extractedData = extractLeadDataFromText(
-            messages[messages.length - 1]?.content || '',
+            conversationText || messages[messages.length - 1]?.content || '',
             responseText,
             senderName
         )
@@ -2063,22 +2058,6 @@ export const processWhatsAppMessage = inngest.createFunction(
 
             return { ...response, updatedMessages }
         })
-
-        const transferThreshold = parseInt(configs['agent_transfer_score_threshold'] || '80', 10)
-        const extractedForThreshold = aiResponse.extractedData || {}
-        const thresholdLead: Record<string, unknown> = {
-            lead_name: extractedForThreshold.name || senderName || null,
-            interest: extractedForThreshold.interest || null,
-            region: extractedForThreshold.region || null,
-            budget_max: parseBudgetToNumber(extractedForThreshold.budget),
-            bedrooms_wanted: extractedForThreshold.bedrooms ? parseInt(extractedForThreshold.bedrooms, 10) : null,
-            property_type: extractedForThreshold.property_type || null,
-            timeline: extractedForThreshold.timeframe || null,
-        }
-        const thresholdScore = computeLeadScore(thresholdLead)
-        if (!aiResponse.shouldTransfer && transferThreshold > 0 && thresholdScore >= transferThreshold) {
-            aiResponse.shouldTransfer = true
-        }
 
         await step.run('sync-lead-snapshot', async () => {
             await syncWhatsAppLeadSnapshot(supabase, {

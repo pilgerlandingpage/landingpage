@@ -119,7 +119,6 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/whatsapp', label: 'Conectados' },
             { href: '/admin/whatsapp/agent-config', label: 'Config do Agente' },
-            { href: '/admin/whatsapp/agent-flow', label: 'Fluxo do Agente' },
             { href: '/admin/whatsapp/agenda', label: 'Agenda' },
             { href: '/admin/whatsapp/campaigns', label: 'Campanhas' },
             { href: '/admin/whatsapp/labels', label: 'Etiquetas' },

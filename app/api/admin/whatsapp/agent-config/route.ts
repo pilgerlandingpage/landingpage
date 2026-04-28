@@ -28,8 +28,6 @@ const AGENT_CONFIG_KEYS = [
     'agent_required_documents',
     'agent_transfer_message_lead',
     'agent_transfer_message_broker',
-    'agent_tone',
-    'agent_transfer_score_threshold',
     'agent_default_broker_id',
     'agent_default_instance_id',
     'agent_transfer_instance_ids',
