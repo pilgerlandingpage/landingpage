@@ -9,9 +9,9 @@ import WhatsAppFloatingButton from '@/components/common/WhatsAppFloatingButton'
 import AuthErrorRedirect from '@/components/auth/AuthErrorRedirect'
 import MarketplaceHomeStyles from '@/components/marketplace/MarketplaceHomeStyles'
 import HomepageSection from '@/components/marketplace/HomepageSection'
-import CategoriesCarousel from '@/components/marketplace/CategoriesCarousel'
-import MarketTicker from '@/components/marketplace/MarketTicker'
-import MarketIntelligencePanel from '@/components/marketplace/MarketIntelligencePanel'
+import AboutGuilhermeSection from '@/components/marketplace/AboutGuilhermeSection'
+import YoutubeFeedSection from '@/components/marketplace/YoutubeFeedSection'
+import SocialProofSection from '@/components/marketplace/SocialProofSection'
 import { getPublicMarketRadarFeed } from '@/lib/market-radar/public-feed'
 // This is a Server Component
 export default async function MarketplaceHome() {
@@ -133,18 +133,15 @@ export default async function MarketplaceHome() {
         />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <span className="hero-eyebrow">— Bem-vindo ao —</span>
-          <h2 className="hero-title-new">O Maior Portal Imobiliário do <span className="hero-gold">Brasil</span></h2>
+          <h1 className="hero-subtitle-top">Bem-vindo à Imobiliária em Balneário Camboriú<br/>Guilherme Pilger Corretor de Imóveis</h1>
+          <h2 className="hero-title-script">experiência única!</h2>
         </div>
       </div>
 
-      {/* === STICKY SEARCH + CATEGORIES === */}
+      {/* === STICKY SEARCH === */}
       <div className="sticky-bar">
         <HomeSearchBar />
-        <CategoriesCarousel />
       </div>
-
-      <MarketTicker feed={marketFeed} />
 
       {/* === HOMEPAGE SECTIONS (admin controlled) === */}
       <main className="listings-section">
@@ -170,8 +167,6 @@ export default async function MarketplaceHome() {
           />
         )}
 
-        <MarketIntelligencePanel feed={marketFeed} />
-
         {sectionsEnabled.includes('by_city') && citySections.map(({ city, items }) => (
           <HomepageSection
             key={city}
@@ -193,6 +188,10 @@ export default async function MarketplaceHome() {
         )}
 
       </main>
+      
+      <AboutGuilhermeSection />
+      <YoutubeFeedSection />
+      <SocialProofSection />
 
       <Footer />
       <WhatsAppFloatingButton />

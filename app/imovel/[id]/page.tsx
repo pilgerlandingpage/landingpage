@@ -1,11 +1,12 @@
-﻿import { createServerSupabase } from '@/lib/supabase/server'
+import { createServerSupabase } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Bed, Bath, Move, MapPin, Phone, ArrowLeft, Gem, Ruler } from 'lucide-react'
+import { Bed, Bath, MapPin, Phone, ArrowLeft, Gem, Ruler, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import HeroCarousel from '@/components/property/HeroCarousel'
 import PropertyGallery from '@/components/property/PropertyGallery'
 import MobileNav from '@/components/marketplace/MobileNav'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import PropertyRadarPanel from '@/components/property/PropertyRadarPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,550 +35,452 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         : 'Sob Consulta'
 
     return (
-        <div className="pd-page">
-            {/* Back Nav */}
-            <Link href="/" className="pd-back-btn">
-                <ArrowLeft size={20} />
-                <span>Voltar</span>
+        <div className="lp-page">
+            {/* Top Back Navigation (Glassmorphic) */}
+            <Link href="/" className="lp-back-btn">
+                <ArrowLeft size={18} />
+                <span>Voltar ao portfólio</span>
             </Link>
 
-            {/* Hero Carousel */}
-            <section className="pd-hero">
+            {/* ========== CINEMATIC HERO (Full Viewport) ========== */}
+            <section className="lp-hero">
                 <HeroCarousel
                     images={gallery}
                     title={property.title}
                     videoUrl={property.video_url}
-                    gallerySectionId="gallery-section"
+                    gallerySectionId="story-gallery"
                 />
-                <div className="pd-hero-overlay" />
-                <div className="pd-hero-content">
-                    <span className="pd-badge"><Gem size={14} /> Exclusivo</span>
-                    <h1 className="pd-hero-title">{property.title}</h1>
-                    <div className="pd-hero-location">
-                        <MapPin size={16} />
+                <div className="lp-hero-overlay" />
+                <div className="lp-hero-content">
+                    <div className="lp-badge">
+                        <Gem size={14} /> Exclusividade Pilger
+                    </div>
+                    <h1 className="lp-hero-title">{property.title}</h1>
+                    <div className="lp-hero-location">
+                        <MapPin size={18} />
                         {property.city}{property.state ? `, ${property.state}` : ''}
                     </div>
                 </div>
             </section>
 
-            {/* Price Strip */}
-            <div className="pd-price-strip">
-                <div className="pd-price">{formattedPrice}</div>
-                <span className="pd-price-label">{property.property_type || 'Imóvel de Luxo'}</span>
-            </div>
-
-            {/* Stats */}
-            <section className="pd-stats-section">
-                <div className="pd-stats-grid">
-                    {property.bedrooms && (
-                        <div className="pd-stat-card">
-                            <Bed size={28} className="pd-stat-icon" />
-                            <span className="pd-stat-value">{property.bedrooms}</span>
-                            <span className="pd-stat-label">Quartos</span>
-                        </div>
-                    )}
-                    {property.bathrooms && (
-                        <div className="pd-stat-card">
-                            <Bath size={28} className="pd-stat-icon" />
-                            <span className="pd-stat-value">{property.bathrooms}</span>
-                            <span className="pd-stat-label">Banheiros</span>
-                        </div>
-                    )}
-                    {property.area_m2 && (
-                        <div className="pd-stat-card">
-                            <Ruler size={28} className="pd-stat-icon" />
-                            <span className="pd-stat-value">{property.area_m2}m²</span>
-                            <span className="pd-stat-label">Área</span>
-                        </div>
-                    )}
-                    <div className="pd-stat-card">
-                        <MapPin size={28} className="pd-stat-icon" />
-                        <span className="pd-stat-value" style={{ fontSize: '1rem' }}>{property.city}</span>
-                        <span className="pd-stat-label">Localização</span>
+            {/* ========== STICKY CTA BAR ========== */}
+            <div className="lp-sticky-bar">
+                <div className="lp-sticky-content">
+                    <div className="lp-sticky-info">
+                        <div className="lp-sticky-price">{formattedPrice}</div>
+                        <div className="lp-sticky-type">{property.property_type || 'Imóvel de Luxo'}</div>
                     </div>
-                </div>
-            </section>
-
-            {/* Description */}
-            <section className="pd-section">
-                <h2 className="pd-section-title">Sobre o Imóvel</h2>
-                <div className="pd-gold-line" />
-                <p className="pd-description">
-                    {property.description || 'Descrição detalhada do imóvel indisponível no momento. Entre em contato para mais informações.'}
-                </p>
-            </section>
-
-            {/* Amenities */}
-            {amenities.length > 0 && (
-                <section className="pd-section">
-                    <h2 className="pd-section-title">Diferenciais</h2>
-                    <div className="pd-gold-line" />
-                    <ul className="pd-amenities-grid">
-                        {amenities.map((item: string, i: number) => (
-                            <li key={i} className="pd-amenity-item">
-                                <div className="pd-amenity-check">✓</div>
-                                <span>{item}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            )}
-
-            {/* Gallery Grid */}
-            <section id="gallery-section" className="pd-section">
-                <h2 className="pd-section-title">Galeria de Fotos</h2>
-                <div className="pd-gold-line" />
-                <PropertyGallery images={gallery} title={property.title} />
-            </section>
-
-            {/* CTA */}
-            <section className="pd-cta-section">
-                <div className="pd-cta-card">
-                    <h3 className="pd-cta-title">Interessado neste Imóvel?</h3>
-                    <p className="pd-cta-text">Fale diretamente com Guilherme Pilger e agende sua visita exclusiva.</p>
                     <WhatsAppCaptureLink
                         phone="5548999999999"
-                        message={`Olá! Tenho interesse no imóvel: ${property.title}`}
+                        message={`Olá! Quero agendar uma visita ou saber mais sobre o imóvel: ${property.title} (${property.city})`}
                         slug="imovel"
                         template="property-detail-cta"
-                        className="pd-cta-button"
+                        className="lp-sticky-btn"
                     >
-                        <Phone size={20} />
+                        <Phone size={18} />
                         Falar com Especialista
                     </WhatsAppCaptureLink>
                 </div>
-            </section>
+            </div>
 
-            {/* Footer */}
-            <footer className="pd-footer">
-                <p>© {new Date().getFullYear()} Pilger Imóveis. Todos os direitos reservados.</p>
+            <div className="lp-container">
+                {/* ========== STORYTELLING: A ESSÊNCIA ========== */}
+                <section className="lp-section">
+                    <div className="lp-section-header">
+                        <span className="lp-kicker">O Estilo de Vida</span>
+                        <h2 className="lp-title">A Essência do Imóvel</h2>
+                    </div>
+                    <p className="lp-description">
+                        {property.description || 'Uma obra-prima da arquitetura projetada para elevar o seu padrão de vida. Cada detalhe deste imóvel foi rigorosamente pensado para proporcionar uma experiência única de conforto, exclusividade e bem-estar. Descubra o verdadeiro significado de morar com excelência.'}
+                    </p>
+                </section>
+
+                {/* ========== HIGH-END INFOGRAPHICS ========== */}
+                <section className="lp-section">
+                    <div className="lp-stats-grid">
+                        {property.area_m2 && (
+                            <div className="lp-stat-box">
+                                <Ruler size={32} className="lp-stat-icon" />
+                                <div className="lp-stat-data">
+                                    <strong>{property.area_m2}m²</strong>
+                                    <span>Área Privativa</span>
+                                </div>
+                            </div>
+                        )}
+                        {property.bedrooms && (
+                            <div className="lp-stat-box">
+                                <Bed size={32} className="lp-stat-icon" />
+                                <div className="lp-stat-data">
+                                    <strong>{property.bedrooms}</strong>
+                                    <span>Suítes Master</span>
+                                </div>
+                            </div>
+                        )}
+                        {property.bathrooms && (
+                            <div className="lp-stat-box">
+                                <Bath size={32} className="lp-stat-icon" />
+                                <div className="lp-stat-data">
+                                    <strong>{property.bathrooms}</strong>
+                                    <span>Banheiros</span>
+                                </div>
+                            </div>
+                        )}
+                        <div className="lp-stat-box">
+                            <Navigation size={32} className="lp-stat-icon" />
+                            <div className="lp-stat-data">
+                                <strong>{property.city}</strong>
+                                <span>Localização Prime</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ========== RADAR: POTENCIAL DE INVESTIMENTO ========== */}
+                <section className="lp-section">
+                    <div className="lp-section-header">
+                        <span className="lp-kicker">Visão Bloomberg</span>
+                        <h2 className="lp-title">Potencial de Investimento</h2>
+                    </div>
+                    <PropertyRadarPanel
+                        propertyName={property.title}
+                        city={property.city || 'Região'}
+                        price={property.price}
+                    />
+                </section>
+
+                {/* ========== DIFERENCIAIS ========== */}
+                {amenities.length > 0 && (
+                    <section className="lp-section">
+                        <div className="lp-section-header">
+                            <span className="lp-kicker">Exclusividade</span>
+                            <h2 className="lp-title">Diferenciais Notáveis</h2>
+                        </div>
+                        <ul className="lp-amenities">
+                            {amenities.map((item: string, i: number) => (
+                                <li key={i} className="lp-amenity-item">
+                                    <div className="lp-amenity-dot" />
+                                    <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
+
+                {/* ========== EDITORIAL GALLERY ========== */}
+                <section id="story-gallery" className="lp-section">
+                    <div className="lp-section-header">
+                        <span className="lp-kicker">A Arquitetura</span>
+                        <h2 className="lp-title">Galeria Editorial</h2>
+                    </div>
+                    <PropertyGallery images={gallery} title={property.title} />
+                </section>
+            </div>
+
+            {/* ========== FOOTER ========== */}
+            <footer className="lp-footer">
+                <p>© {new Date().getFullYear()} Pilger Imóveis. O Maior Portal Imobiliário do Brasil.</p>
             </footer>
 
             <MobileNav />
 
             <style>{`
-                .pd-page {
+                /* ============================================
+                   CINEMATIC LANDING PAGE — PROPERTY DETAIL
+                   ============================================ */
+                .lp-page {
                     min-height: 100vh;
-                    background: #f7f7f5;
+                    background: #fdfdfc;
                     color: #1a1a1a;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                    overflow-x: hidden;
                 }
 
-                /* === BACK BUTTON === */
-                .pd-back-btn {
+                /* === BACK BUTTON (Glass on dark hero) === */
+                .lp-back-btn {
                     position: fixed;
-                    top: 20px;
-                    left: 20px;
+                    top: 24px;
+                    left: 24px;
                     z-index: 100;
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    padding: 10px 18px;
-                    background: rgba(255, 255, 255, 0.9);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border: 1px solid #e8e5e0;
+                    padding: 12px 20px;
+                    background: rgba(0, 0, 0, 0.25);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
                     border-radius: 50px;
-                    color: #1a1a1a;
+                    color: #fff;
                     text-decoration: none;
-                    font-size: 0.85rem;
+                    font-size: 0.8rem;
                     font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
                     transition: all 0.3s ease;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
                 }
-                .pd-back-btn:hover {
-                    background: rgba(184, 148, 95, 0.1);
-                    border-color: rgba(184, 148, 95, 0.4);
-                    color: #8a6d3b;
+                .lp-back-btn:hover {
+                    background: rgba(0, 0, 0, 0.45);
+                    transform: translateX(-4px);
                 }
 
-                /* === HERO === */
-                .pd-hero {
+                /* === CINEMATIC HERO === */
+                .lp-hero {
                     position: relative;
-                    height: 65vh;
-                    min-height: 400px;
-                    overflow: hidden;
+                    height: 100vh;
+                    min-height: 600px;
+                    width: 100%;
                     display: flex;
                     align-items: flex-end;
-                    margin-top: 0;
-                    border-radius: 0;
-                    animation: pd-hero-enter 0.8s ease-out;
+                    animation: lp-fade-up 1s ease-out;
                 }
-                .pd-hero-top-fade {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 220px;
-                    background: linear-gradient(
-                        to bottom,
-                        #f7f7f5 0%,
-                        rgba(247, 247, 245, 0.85) 20%,
-                        rgba(247, 247, 245, 0.5) 45%,
-                        rgba(247, 247, 245, 0.2) 70%,
-                        rgba(247, 247, 245, 0) 100%
-                    );
-                    z-index: 3;
-                    pointer-events: none;
+                @keyframes lp-fade-up {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
-                .pd-hero-img {
-                    position: absolute;
-                    inset: 0;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 8s ease;
-                }
-                .pd-hero:hover .pd-hero-img {
-                    transform: scale(1.03);
-                }
-                .pd-hero-overlay {
+                .lp-hero-overlay {
                     position: absolute;
                     inset: 0;
                     background: linear-gradient(
                         to top,
-                        rgba(10, 10, 10, 0.9) 0%,
-                        rgba(10, 10, 10, 0.35) 40%,
-                        rgba(10, 10, 10, 0.05) 100%
+                        rgba(0, 0, 0, 0.92) 0%,
+                        rgba(0, 0, 0, 0.45) 40%,
+                        rgba(0, 0, 0, 0.08) 100%
                     );
                     z-index: 1;
                     pointer-events: none;
                 }
-                @keyframes pd-hero-enter {
-                    from {
-                        opacity: 0;
-                        transform: translateY(12px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                .pd-hero-content {
+                .lp-hero-content {
                     position: relative;
                     z-index: 2;
-                    padding: 40px 32px;
-                    max-width: 900px;
+                    padding: 80px 48px;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    width: 100%;
+                    animation: lp-slide-up 0.8s 0.3s ease-out both;
                 }
-                .pd-badge {
+                @keyframes lp-slide-up {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .lp-badge {
                     display: inline-flex;
                     align-items: center;
-                    gap: 6px;
-                    padding: 6px 16px;
-                    background: linear-gradient(135deg, #b8945f 0%, #d4b87a 50%, #8a6d3b 100%);
+                    gap: 8px;
+                    padding: 8px 18px;
+                    background: rgba(255, 255, 255, 0.08);
+                    backdrop-filter: blur(8px);
+                    border: 1px solid rgba(255, 255, 255, 0.18);
                     color: #fff;
-                    border-radius: 4px;
+                    border-radius: 50px;
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 2.5px;
+                    margin-bottom: 24px;
+                }
+                .lp-hero-title {
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(2.5rem, 6vw, 5rem);
+                    font-weight: 600;
+                    line-height: 1.05;
+                    margin: 0 0 16px 0;
+                    color: #fff;
+                    text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+                }
+                .lp-hero-location {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: rgba(255, 255, 255, 0.75);
+                    font-size: 1.15rem;
+                    font-weight: 300;
+                    letter-spacing: 0.5px;
+                }
+
+                /* === STICKY CTA BAR === */
+                .lp-sticky-bar {
+                    position: sticky;
+                    top: 0;
+                    background: rgba(255, 255, 255, 0.92);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border-bottom: 1px solid rgba(0,0,0,0.04);
+                    z-index: 90;
+                    padding: 16px 0;
+                    box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+                }
+                .lp-sticky-content {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 0 48px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .lp-sticky-info {}
+                .lp-sticky-price {
+                    font-family: 'Playfair Display', serif;
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    line-height: 1;
+                }
+                .lp-sticky-type {
+                    font-size: 0.78rem;
+                    color: #737373;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-top: 4px;
+                }
+                .lp-sticky-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #1a1a1a;
+                    color: #fff;
+                    padding: 14px 32px;
+                    border-radius: 50px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                }
+                .lp-sticky-btn:hover {
+                    background: #b8945f;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(184, 148, 95, 0.3);
+                }
+
+                /* === MAIN CONTAINER === */
+                .lp-container {
+                    max-width: 1000px;
+                    margin: 0 auto;
+                    padding: 80px 48px;
+                }
+
+                /* === SECTIONS === */
+                .lp-section {
+                    margin-bottom: 100px;
+                }
+                .lp-section:last-child {
+                    margin-bottom: 0;
+                }
+                .lp-section-header {
+                    margin-bottom: 40px;
+                    text-align: center;
+                }
+                .lp-kicker {
+                    display: block;
                     font-size: 0.72rem;
                     font-weight: 700;
+                    color: #b8945f;
                     text-transform: uppercase;
-                    letter-spacing: 1.5px;
-                    margin-bottom: 16px;
+                    letter-spacing: 2.5px;
+                    margin-bottom: 12px;
                 }
-                .pd-hero-title {
+                .lp-title {
                     font-family: 'Playfair Display', Georgia, serif;
-                    font-size: clamp(2rem, 5vw, 3.5rem);
+                    font-size: 2.5rem;
                     font-weight: 600;
-                    line-height: 1.1;
-                    margin: 0 0 12px 0;
-                    background: linear-gradient(135deg, #fff 0%, #e8d5a8 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
+                    color: #1a1a1a;
+                    margin: 0;
                 }
-                .pd-hero-location {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    color: rgba(255,255,255,0.7);
-                    font-size: 1rem;
-                    font-weight: 400;
-                }
-
-                /* === PRICE STRIP === */
-                .pd-price-strip {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 24px 32px;
-                    background: #ffffff;
-                    border-bottom: 1px solid #e8e5e0;
-                }
-                .pd-price {
-                    font-family: 'Playfair Display', serif;
-                    font-size: clamp(1.5rem, 3vw, 2.2rem);
-                    font-weight: 700;
-                    color: #8a6d3b;
-                }
-                .pd-price-label {
-                    font-size: 0.9rem;
-                    color: #5a5a5a;
-                    text-transform: capitalize;
-                    padding: 6px 16px;
-                    border: 1px solid #e8e5e0;
-                    border-radius: 50px;
-                }
-
-                /* === STATS === */
-                .pd-stats-section {
-                    padding: 32px;
-                }
-                .pd-stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                    gap: 16px;
+                .lp-description {
+                    font-size: 1.2rem;
+                    line-height: 1.85;
+                    color: #525252;
+                    text-align: center;
                     max-width: 800px;
                     margin: 0 auto;
+                    font-weight: 300;
+                    white-space: pre-line;
                 }
-                .pd-stat-card {
+
+                /* === HIGH-END INFOGRAPHIC STATS === */
+                .lp-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 24px;
+                    background: #fff;
+                    padding: 48px;
+                    border-radius: 24px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.04);
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .lp-stat-box {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 8px;
-                    padding: 24px 16px;
-                    background: #ffffff;
-                    border: 1px solid #e8e5e0;
+                    text-align: center;
+                    gap: 16px;
+                    padding: 16px 8px;
                     border-radius: 16px;
                     transition: all 0.3s ease;
-                    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
                 }
-                .pd-stat-card:hover {
-                    border-color: rgba(184, 148, 95, 0.3);
-                    box-shadow: 0 4px 16px rgba(184, 148, 95, 0.1);
-                    transform: translateY(-2px);
+                .lp-stat-box:hover {
+                    background: rgba(184, 148, 95, 0.04);
+                    transform: translateY(-4px);
                 }
-                .pd-stat-icon {
+                .lp-stat-icon {
                     color: #b8945f;
+                    stroke-width: 1.5;
                 }
-                .pd-stat-value {
-                    font-size: 1.4rem;
+                .lp-stat-data strong {
+                    display: block;
+                    font-size: 1.5rem;
                     font-weight: 700;
                     color: #1a1a1a;
+                    margin-bottom: 4px;
                 }
-                .pd-stat-label {
-                    font-size: 0.75rem;
-                    color: #999;
+                .lp-stat-data span {
+                    font-size: 0.72rem;
+                    color: #737373;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                 }
 
-                /* === SECTIONS === */
-                .pd-section {
-                    max-width: 900px;
-                    margin: 0 auto;
-                    padding: 48px 32px;
-                }
-                .pd-section-title {
-                    font-family: 'Playfair Display', serif;
-                    font-size: 1.8rem;
-                    margin-bottom: 8px;
-                    color: #1a1a1a;
-                }
-                .pd-gold-line {
-                    width: 50px;
-                    height: 2px;
-                    background: linear-gradient(90deg, #b8945f, transparent);
-                    margin-bottom: 24px;
-                }
-                .pd-description {
-                    font-size: 1.05rem;
-                    line-height: 1.85;
-                    color: #5a5a5a;
-                    white-space: pre-line;
-                }
-
                 /* === AMENITIES === */
-                .pd-amenities-grid {
+                .lp-amenities {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                    gap: 12px;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 20px;
                     list-style: none;
                     padding: 0;
+                    margin: 0;
                 }
-                .pd-amenity-item {
+                .lp-amenity-item {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    padding: 14px 18px;
-                    background: #ffffff;
-                    border: 1px solid #e8e5e0;
-                    border-radius: 12px;
-                    font-size: 0.92rem;
-                    color: #5a5a5a;
-                    transition: all 0.25s ease;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+                    gap: 16px;
+                    font-size: 1rem;
+                    color: #404040;
+                    font-weight: 400;
+                    padding: 14px 0;
+                    border-bottom: 1px solid rgba(0,0,0,0.04);
+                    transition: color 0.2s;
                 }
-                .pd-amenity-item:hover {
-                    border-color: rgba(184, 148, 95, 0.3);
+                .lp-amenity-item:hover {
                     color: #1a1a1a;
                 }
-                .pd-amenity-check {
-                    color: #b8945f;
-                    font-weight: 700;
-                    font-size: 1rem;
+                .lp-amenity-dot {
+                    width: 6px;
+                    height: 6px;
+                    background: #b8945f;
+                    border-radius: 50%;
                     flex-shrink: 0;
                 }
 
-                /* === GALLERY === */
-                .pd-gallery-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 12px;
-                }
-                .pd-gallery-item {
-                    aspect-ratio: 16/11;
-                    border-radius: 14px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    position: relative;
-                }
-                .pd-gallery-item img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.5s ease;
-                }
-                .pd-gallery-item:hover img {
-                    transform: scale(1.06);
-                }
-
-                /* === CTA === */
-                .pd-cta-section {
-                    padding: 48px 32px 64px;
-                }
-                .pd-cta-card {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    text-align: center;
-                    padding: 48px 32px;
-                    background: #ffffff;
-                    border: 1px solid #e8e5e0;
-                    border-radius: 20px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-                }
-                .pd-cta-title {
-                    font-family: 'Playfair Display', serif;
-                    font-size: 1.6rem;
-                    margin-bottom: 12px;
-                }
-                .pd-cta-text {
-                    color: #5a5a5a;
-                    margin-bottom: 28px;
-                    font-size: 0.95rem;
-                }
-                .pd-cta-button {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 16px 40px;
-                    background: linear-gradient(135deg, #25D366, #128C7E);
-                    color: #fff;
-                    border: none;
-                    border-radius: 50px;
-                    font-size: 1rem;
-                    font-weight: 600;
-                    text-decoration: none;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-                }
-                .pd-cta-button:hover {
-                    transform: translateY(-2px) scale(1.02);
-                    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
-                }
-
                 /* === FOOTER === */
-                .pd-footer {
+                .lp-footer {
+                    background: #0a0a0a;
+                    color: #737373;
                     text-align: center;
-                    padding: 32px;
-                    color: #999;
-                    font-size: 0.85rem;
-                    border-top: 1px solid #e8e5e0;
-                }
-
-                /* === RESPONSIVE === */
-                @media (max-width: 768px) {
-                    .pd-hero { height: 50vh; min-height: 320px; }
-                    .pd-hero-content { padding: 24px 20px; }
-                    .pd-price-strip { flex-direction: column; gap: 10px; align-items: flex-start; padding: 20px; }
-                    .pd-stats-section { padding: 20px; }
-                    .pd-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-                    .pd-section { padding: 32px 20px; }
-                    .pd-gallery-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-                    .pd-amenities-grid { grid-template-columns: 1fr; }
-                    .pd-cta-section { padding: 32px 20px; }
-                    .pd-cta-card { padding: 32px 20px; }
-                    .pd-cta-button { padding: 14px 28px; font-size: 0.9rem; }
-                    .pd-back-btn { top: 12px; left: 12px; padding: 8px 14px; font-size: 0.8rem; }
-                }
-
-                /* === DESKTOP ENHANCEMENTS === */
-                @media (min-width: 1024px) {
-                    .pd-hero { height: 75vh; min-height: 520px; }
-                    .pd-hero-content { padding: 50px 48px; max-width: 1000px; }
-                    .pd-hero-title { font-size: 3rem; }
-                    .pd-hero-location { font-size: 1.1rem; }
-                    .pd-price-strip {
-                        max-width: 1100px;
-                        margin: 0 auto;
-                        padding: 28px 48px;
-                    }
-                    .pd-price { font-size: 2rem; }
-                    .pd-stats-section { padding: 40px 48px; }
-                    .pd-stats-grid {
-                        grid-template-columns: repeat(4, 1fr);
-                        max-width: 1000px;
-                        margin: 0 auto;
-                        gap: 20px;
-                    }
-                    .pd-stat-card { padding: 28px 20px; }
-                    .pd-stat-value { font-size: 1.6rem; }
-                    .pd-section {
-                        max-width: 1000px;
-                        padding: 56px 48px;
-                    }
-                    .pd-section-title { font-size: 2rem; }
-                    .pd-description { font-size: 1.1rem; }
-                    .pd-amenities-grid {
-                        grid-template-columns: repeat(3, 1fr);
-                        gap: 14px;
-                    }
-                    .pd-gallery-grid {
-                        grid-template-columns: repeat(3, 1fr);
-                        gap: 16px;
-                    }
-                    .pd-cta-section { padding: 64px 48px; }
-                    .pd-cta-card {
-                        max-width: 700px;
-                        padding: 56px 40px;
-                    }
-                    .pd-cta-title { font-size: 1.8rem; }
-                    .pd-footer {
-                        max-width: 1100px;
-                        margin: 0 auto;
-                    }
-                }
-
-                @media (min-width: 1440px) {
-                    .pd-hero { height: 80vh; min-height: 600px; }
-                    .pd-hero-content { padding: 60px 64px; max-width: 1100px; }
-                    .pd-hero-title { font-size: 3.5rem; }
-                    .pd-price-strip {
-                        max-width: 1200px;
-                        padding: 32px 64px;
-                    }
-                    .pd-stats-section { padding: 48px 64px; }
-                    .pd-stats-grid { max-width: 1100px; }
-                    .pd-section {
-                        max-width: 1100px;
-                        padding: 64px 64px;
-                    }
-                    .pd-amenities-grid {
-                        grid-template-columns: repeat(4, 1fr);
-                    }
-                    .pd-gallery-grid {
-                        grid-template-columns: repeat(4, 1fr);
-                    }
-                    .pd-cta-card { max-width: 800px; padding: 64px 48px; }
+                    padding: 64px 20px;
+                    font-size: 0.8rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1.5px;
                 }
 
                 /* ====== BOTTOM NAV ====== */
@@ -614,14 +517,75 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 .nav-item.active { color: var(--gold, #b8945f); }
                 .nav-icon { margin-bottom: 1px; }
 
+                /* === RESPONSIVE === */
+                @media (max-width: 768px) {
+                    .lp-back-btn {
+                        top: 16px;
+                        left: 16px;
+                        padding: 8px 16px;
+                        font-size: 0.72rem;
+                    }
+                    .lp-hero { height: 75vh; min-height: 450px; }
+                    .lp-hero-content { padding: 40px 24px; }
+                    .lp-hero-title { font-size: 2.2rem; }
+                    .lp-hero-location { font-size: 1rem; }
+
+                    .lp-sticky-content {
+                        padding: 0 20px;
+                        flex-direction: column;
+                        gap: 12px;
+                        align-items: stretch;
+                    }
+                    .lp-sticky-btn {
+                        width: 100%;
+                        justify-content: center;
+                        padding: 12px 24px;
+                    }
+
+                    .lp-container { padding: 48px 20px; }
+                    .lp-section { margin-bottom: 64px; }
+                    .lp-title { font-size: 1.8rem; }
+                    .lp-description { font-size: 1.05rem; text-align: left; }
+
+                    .lp-stats-grid {
+                        grid-template-columns: 1fr 1fr;
+                        padding: 28px 20px;
+                        gap: 16px;
+                    }
+                    .lp-stat-box {
+                        flex-direction: column;
+                        text-align: center;
+                    }
+
+                    .lp-amenities { grid-template-columns: 1fr; }
+
+                    .lp-page { padding-bottom: 60px; }
+                }
+
                 @media (min-width: 768px) {
                     .mobile-nav { display: none; }
                 }
-                @media (max-width: 768px) {
-                    .pd-page { padding-bottom: 70px; }
+
+                @media (min-width: 1024px) {
+                    .lp-hero { height: 100vh; min-height: 650px; }
+                    .lp-hero-content { padding: 80px 64px; }
+                    .lp-container { padding: 100px 48px; }
+                    .lp-section { margin-bottom: 120px; }
+                    .lp-title { font-size: 2.8rem; }
+                    .lp-stats-grid {
+                        padding: 56px;
+                        gap: 32px;
+                    }
+                    .lp-stat-data strong { font-size: 1.7rem; }
+                }
+
+                @media (min-width: 1440px) {
+                    .lp-hero-content { padding: 100px 80px; max-width: 1400px; }
+                    .lp-container { max-width: 1100px; padding: 120px 64px; }
+                    .lp-title { font-size: 3rem; }
+                    .lp-amenities { grid-template-columns: repeat(3, 1fr); }
                 }
             `}</style>
         </div>
     )
 }
-

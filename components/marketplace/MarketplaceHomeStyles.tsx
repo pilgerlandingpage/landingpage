@@ -519,13 +519,21 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         /* ====== HERO ====== */
         .hero-strip {
           position: relative;
-          height: 220px;
+          width: 100%;
+          height: 480px;
           overflow: hidden;
           display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          padding-bottom: 16px;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          padding-bottom: 24px;
           background: linear-gradient(180deg, #f0ede8 0%, #f7f7f5 100%);
+        }
+        @media (max-width: 768px) {
+          .hero-strip {
+            height: 420px;
+            padding-bottom: 16px;
+          }
         }
         .hero-top-fade {
           position: absolute;
@@ -598,33 +606,13 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           margin-bottom: 4px;
           text-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 0 8px rgba(0,0,0,0.2);
         }
-        .hero-title-new {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-size: clamp(0.85rem, 3.4vw, 2rem);
-          font-weight: 700;
-          margin: 0;
-          line-height: 1.2;
-          color: #1a1a1a;
-          -webkit-text-fill-color: #1a1a1a;
-          text-align: center;
-          white-space: nowrap;
-          text-shadow: 0 1px 6px rgba(255,255,255,0.5);
-        }
-        .hero-gold {
-          color: #FFD700;
-          -webkit-text-fill-color: #FFD700;
-          text-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 0 8px rgba(0,0,0,0.2);
-        }
         @media (min-width: 768px) {
           .hero-content {
             padding: 0 24px;
           }
-          .hero-eyebrow {
-            font-size: 1rem;
-            margin-bottom: 8px;
-          }
-          .hero-title-new {
-            font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+          .hero-subtitle-top {
+            font-size: clamp(1.2rem, 1.8vw, 1.8rem);
+            margin-bottom: 0px;
           }
         }
 
@@ -648,7 +636,6 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           pointer-events: none;
           opacity: 0.8;
           filter: grayscale(20%);
-        }
         }
 
         /* ====== STICKY SEARCH + CATEGORIES ====== */
