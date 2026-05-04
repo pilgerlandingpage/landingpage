@@ -167,8 +167,8 @@ export default function UserAccessPage() {
     ]), [stats])
 
     return (
-        <div>
-            <div className="admin-header">
+        <div className="access-audit-page">
+            <div className="admin-header access-audit-header">
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <ShieldAlert size={26} /> Auditoria de Acessos
@@ -179,24 +179,24 @@ export default function UserAccessPage() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div className="access-audit-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
                 {statCards.map(card => (
-                    <div key={card.label} className="chart-card" style={{ padding: 16 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <div key={card.label} className="chart-card access-audit-stat-card" style={{ padding: 16 }}>
+                        <div className="access-audit-stat-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>
                                 {card.label}
                             </span>
                             <card.icon size={18} style={{ color: card.color }} />
                         </div>
-                        <div style={{ color: 'var(--text-primary)', fontSize: '1.7rem', fontWeight: 800 }}>
+                        <div className="access-audit-stat-value" style={{ color: 'var(--text-primary)', fontSize: '1.7rem', fontWeight: 800 }}>
                             {card.value}
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="chart-card" style={{ marginBottom: 16, padding: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 150px 180px auto', gap: 10, alignItems: 'center' }}>
+            <div className="chart-card access-audit-filter-card" style={{ marginBottom: 16, padding: 16 }}>
+                <div className="access-audit-filters" style={{ display: 'grid', gridTemplateColumns: '1fr 150px 180px auto', gap: 10, alignItems: 'center' }}>
                     <div style={{ position: 'relative' }}>
                         <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
@@ -263,11 +263,11 @@ export default function UserAccessPage() {
             )}
 
             {stats?.top_users && stats.top_users.length > 0 && (
-                <div className="chart-card" style={{ marginBottom: 16, padding: 16 }}>
+                <div className="chart-card access-audit-user-panel" style={{ marginBottom: 16, padding: 16 }}>
                     <div className="chart-title" style={{ marginBottom: 12 }}>Usuarios mais ativos</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+                    <div className="access-audit-user-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                         {stats.top_users.slice(0, 4).map(user => (
-                            <div key={user.id || user.email || user.name} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                            <div className="access-audit-user-card" key={user.id || user.email || user.name} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
                                 <div style={{ fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {user.name}
                                 </div>
@@ -285,11 +285,11 @@ export default function UserAccessPage() {
             )}
 
             {stats?.users_access_summary && stats.users_access_summary.length > 0 && (
-                <div className="chart-card" style={{ marginBottom: 16, padding: 16 }}>
+                <div className="chart-card access-audit-user-panel" style={{ marginBottom: 16, padding: 16 }}>
                     <div className="chart-title" style={{ marginBottom: 12 }}>Dias sem acessar</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+                    <div className="access-audit-user-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                         {stats.users_access_summary.slice(0, 8).map(user => (
-                            <div key={user.id} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                            <div className="access-audit-user-card" key={user.id} style={{ padding: 12, borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
                                 <div style={{ fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {user.name}
                                 </div>
@@ -310,11 +310,11 @@ export default function UserAccessPage() {
                 </div>
             )}
 
-            <div className="chart-card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div className="chart-card access-audit-table-card" style={{ padding: 0, overflow: 'hidden' }}>
                 <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 1080 }}>
-                        <thead style={{ background: '#1a1a1a' }}>
-                            <tr style={{ borderBottom: '1px solid #2a2a2a', color: '#777', fontSize: '0.72rem', textTransform: 'uppercase' }}>
+                        <thead className="access-audit-table-head" style={{ background: '#f8f6f2' }}>
+                            <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>
                                 <th style={{ padding: 12, fontWeight: 700 }}>Quando</th>
                                 <th style={{ padding: 12, fontWeight: 700 }}>Evento</th>
                                 <th style={{ padding: 12, fontWeight: 700 }}>Usuario</th>
@@ -340,7 +340,7 @@ export default function UserAccessPage() {
                                 const userEmail = log.admin_user?.email || log.attempted_email || ''
 
                                 return (
-                                    <tr key={log.id} style={{ borderBottom: '1px solid #2a2a2a', fontSize: '0.84rem' }}>
+                                    <tr key={log.id} style={{ borderBottom: '1px solid var(--border)', fontSize: '0.84rem' }}>
                                         <td style={{ padding: 12, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                                             {formatDate(log.created_at)}
                                         </td>

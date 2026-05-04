@@ -136,9 +136,9 @@ export default function AgendaPage() {
     }
 
     return (
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div className="agenda-page" style={{ maxWidth: 1100, margin: '0 auto' }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div className="agenda-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
                         📅 Agenda de Visitas
@@ -149,7 +149,7 @@ export default function AgendaPage() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                     {stats.pending > 0 && (
-                        <span style={{
+                        <span className="agenda-pending-pill" style={{
                             padding: '6px 14px', borderRadius: 20,
                             background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
                             fontSize: '0.8rem', fontWeight: 600, color: '#f59e0b'
@@ -161,17 +161,18 @@ export default function AgendaPage() {
             </div>
 
             {/* Week Navigation */}
-            <div style={{
+            <div className="agenda-week-nav" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 background: '#fff', padding: '12px 20px', borderRadius: 12,
                 border: '1px solid #e8e5e0', marginBottom: 16
             }}>
-                <button onClick={prevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                <button className="agenda-nav-btn" onClick={prevWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                     <ChevronLeft size={20} color="#888" />
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>{weekLabel}</span>
+                <div className="agenda-week-center" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span className="agenda-week-label" style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>{weekLabel}</span>
                     <button
+                        className="agenda-today-btn"
                         onClick={goToday}
                         style={{
                             padding: '4px 12px', borderRadius: 6,
@@ -183,8 +184,9 @@ export default function AgendaPage() {
                         Hoje
                     </button>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="agenda-filter-controls" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <select
+                        className="agenda-status-select"
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
                         style={{
@@ -197,7 +199,7 @@ export default function AgendaPage() {
                             <option key={k} value={k}>{v.icon} {v.label}</option>
                         ))}
                     </select>
-                    <button onClick={nextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                    <button className="agenda-nav-btn" onClick={nextWeek} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                         <ChevronRight size={20} color="#888" />
                     </button>
                 </div>
@@ -205,13 +207,13 @@ export default function AgendaPage() {
 
             {/* Week Grid */}
             {loading ? (
-                <div style={{ textAlign: 'center', padding: 60, color: '#aaa' }}>
+                <div className="agenda-loading" style={{ textAlign: 'center', padding: 60, color: '#aaa' }}>
                     <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
                     <p style={{ marginTop: 8 }}>Carregando agenda...</p>
                     <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
+                <div className="agenda-week-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
                     {weekDays.map(day => {
                         const dateStr = day.toISOString().split('T')[0]
                         const dayApps = appointments.filter(a => a.appointment_date === dateStr)
@@ -220,37 +222,37 @@ export default function AgendaPage() {
                         const today = isToday(day)
 
                         return (
-                            <div key={dateStr} style={{
+                            <div key={dateStr} className={`agenda-day-card ${today ? 'today' : ''} ${dayApps.length ? 'has-appointments' : ''}`} style={{
                                 background: '#fff', borderRadius: 10,
                                 border: today ? '2px solid #b8945f' : '1px solid #e8e5e0',
                                 minHeight: 160, overflow: 'hidden'
                             }}>
                                 {/* Day Header */}
-                                <div style={{
+                                <div className="agenda-day-header" style={{
                                     padding: '8px 10px',
                                     background: today ? 'linear-gradient(135deg, #b8945f, #d4b87a)' : '#fafaf7',
                                     borderBottom: '1px solid #f0ede8',
                                     textAlign: 'center'
                                 }}>
-                                    <div style={{ fontSize: '0.68rem', fontWeight: 600, color: today ? '#fff' : '#aaa', textTransform: 'uppercase' }}>
+                                    <div className="agenda-day-label" style={{ fontSize: '0.68rem', fontWeight: 600, color: today ? '#fff' : '#aaa', textTransform: 'uppercase' }}>
                                         {dayLabel}
                                     </div>
-                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: today ? '#fff' : '#333' }}>
+                                    <div className="agenda-day-num" style={{ fontSize: '1.1rem', fontWeight: 700, color: today ? '#fff' : '#333' }}>
                                         {dayNum}
                                     </div>
                                 </div>
 
                                 {/* Appointments */}
-                                <div style={{ padding: 6 }}>
+                                <div className="agenda-day-body" style={{ padding: 6 }}>
                                     {dayApps.length === 0 && (
-                                        <div style={{ padding: 8, textAlign: 'center', color: '#ddd', fontSize: '0.7rem' }}>
+                                        <div className="agenda-empty-day" style={{ padding: 8, textAlign: 'center', color: '#ddd', fontSize: '0.7rem' }}>
                                             Sem agendamentos
                                         </div>
                                     )}
                                     {dayApps.map(app => {
                                         const sCfg = STATUS_CONFIG[app.status] || STATUS_CONFIG.pending
                                         return (
-                                            <div key={app.id} style={{
+                                            <div key={app.id} className="agenda-appointment-chip" style={{
                                                 background: sCfg.bg,
                                                 borderRadius: 8,
                                                 padding: '8px 10px',
@@ -321,16 +323,16 @@ export default function AgendaPage() {
 
             {/* List View (below calendar) */}
             {!loading && appointments.length > 0 && (
-                <div style={{
+                <div className="agenda-detail-list" style={{
                     marginTop: 20, background: '#fff', borderRadius: 12,
                     border: '1px solid #e8e5e0', overflow: 'hidden'
                 }}>
-                    <div style={{ padding: '14px 20px', borderBottom: '1px solid #f0ede8' }}>
+                    <div className="agenda-detail-header" style={{ padding: '14px 20px', borderBottom: '1px solid #f0ede8' }}>
                         <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#333', margin: 0 }}>
                             📋 Lista Detalhada — {appointments.length} agendamento{appointments.length > 1 ? 's' : ''}
                         </h3>
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="agenda-detail-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: '#fafaf7' }}>
                                 {['Status', 'Data', 'Horário', 'Lead', 'Telefone', 'Imóvel', 'Ações'].map(h => (

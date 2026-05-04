@@ -452,7 +452,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                             }}>
                                 <div style={{ position: 'relative' }}>
                                     <div className="gallery-card" onClick={() => setUnitLightboxIdx(i)} style={{ cursor: 'pointer', position: 'relative' }}>
-                                        <img src={u.img} alt={u.title} style={{
+                                        <img src={u.img} alt={u.title} loading="lazy" style={{
                                             width: '100%', height: 200, objectFit: 'cover',
                                             transition: 'transform 0.7s',
                                         }}
@@ -538,7 +538,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                             const fwIdx = flatPlans.findIndex(p => p.image === subPlan.image)
                                             if (fwIdx !== -1) setPlanLightboxIdx(fwIdx)
                                         }} style={{ cursor: 'pointer', position: 'relative' }}>
-                                            <img src={subPlan.image} alt={`${planGrp.title} - ${subPlan.name}`} style={{
+                                            <img src={subPlan.image} alt={`${planGrp.title} - ${subPlan.name}`} loading="lazy" style={{
                                                 width: '100%', height: 200, objectFit: 'cover',
                                                 transition: 'transform 0.7s',
                                             }}
@@ -626,7 +626,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                                 border: `1px solid ${C.border}`,
                                 cursor: 'pointer', position: 'relative'
                             }}>
-                                <img src={img} alt={`Imagem ${i + 1}`} style={{
+                                <img src={img} alt={`Imagem ${i + 1}`} loading="lazy" style={{
                                     width: '100%', height: 280, objectFit: 'cover',
                                     transition: 'transform 0.5s',
                                 }}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, CalendarDays, Clock3 } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, CalendarDays, Clock3, Activity, AlertTriangle, Bug } from 'lucide-react'
 import Link from 'next/link'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -146,6 +146,166 @@ interface LLMCreditCheck {
     gemini?: { configured: boolean; status: LLMProviderStatus; message: string }
 }
 
+type AgentLogSeverity = 'info' | 'success' | 'warning' | 'error'
+
+interface AgentLogEntry {
+    id: string
+    created_at: string
+    instance_name?: string | null
+    event_type?: string | null
+    message_type?: string | null
+    action: string
+    status_code?: number | null
+    from_phone?: string | null
+    sender_name?: string | null
+    payload?: Record<string, unknown> | null
+    error?: string | null
+    severity: AgentLogSeverity
+    summary?: string
+}
+
+type AgentLogSummary = Record<AgentLogSeverity | 'total', number>
+
+interface GeminiUsageTotals {
+    calls: number
+    prompt_tokens: number
+    output_tokens: number
+    total_tokens: number
+    estimated_usd: number
+    estimated_brl: number
+}
+
+interface GeminiOfficialBillingRow {
+    service: string
+    sku: string
+    project_id: string
+    project_name: string
+    currency: string
+    month_cost: number
+    today_cost: number
+    last_24h_cost: number
+    month_cost_brl: number
+    today_cost_brl: number
+    last_24h_cost_brl: number
+    latest_usage_end_time?: string | null
+}
+
+interface GeminiOfficialBillingSummary {
+    configured: boolean
+    status: 'ok' | 'not_configured' | 'error'
+    source: 'cloud_billing_bigquery' | 'not_configured'
+    message: string
+    month: string
+    generated_at: string
+    cache_updated_at?: string | null
+    billing_project_id?: string | null
+    gemini_project_id?: string | null
+    table?: string | null
+    currency?: string
+    month_cost: number
+    today_cost: number
+    last_24h_cost: number
+    month_cost_brl: number
+    today_cost_brl: number
+    last_24h_cost_brl: number
+    latest_usage_end_time?: string | null
+    rows: GeminiOfficialBillingRow[]
+}
+
+interface GeminiCostSummary {
+    month: string
+    generated_at: string
+    usd_to_brl: number
+    month_total: GeminiUsageTotals
+    today_total: GeminiUsageTotals
+    last_24h_total: GeminiUsageTotals
+    by_model: Array<GeminiUsageTotals & { model: string }>
+    by_feature: Array<GeminiUsageTotals & { feature: string }>
+    official_billing?: GeminiOfficialBillingSummary
+}
+
+const WHATSAPP_SYSTEM_PROMPT_PREVIEW = `CAMADA GLOBAL DOS AGENTES WHATSAPP
+
+Este bloco e aplicado automaticamente a todos os corretores IA no WhatsApp.
+Ele nao substitui o prompt individual do corretor; ele entra junto com o prompt configurado em Corretores IA.
+
+ORDEM DO PROMPT FINAL
+1. Prompt individual do agente/corretor.
+2. Tags processadas: {nome_lead}, {nome_corretor}, {agendamento}, {regioes}, {transferir}, {documentos}, {horario}, {empresa}, {imoveis}, botoes e redes sociais.
+3. Contexto interno do lead, gerado dinamicamente pelo banco.
+4. Diretrizes globais de qualificacao e comportamento.
+5. Catalogo de imoveis, somente quando o prompt usa {imoveis} ou quando o agente nao tem prompt customizado.
+
+CONTEXTO INTERNO DO LEAD
+- Nome, telefone e dados ja cadastrados.
+- Origem principal: Instagram, Google, YouTube, TikTok, Facebook, acesso direto ou formulario.
+- UTM/campanha quando existir.
+- Landing page por onde o lead entrou.
+- Dispositivo, navegador e localizacao aproximada.
+- Status atual no funil, score, classificacao e resumo anterior.
+- Finalidade, orcamento e prazo ja conhecidos.
+
+REGRAS DE USO DO CONTEXTO
+- Nunca revelar esses dados internos ao cliente.
+- Nao perguntar de novo uma informacao que ja esta conhecida.
+- Confirmar com naturalidade quando precisar validar algo.
+- Fazer uma pergunta por vez.
+- Nunca transformar a conversa em formulario.
+- Detectar o idioma do cliente e responder no mesmo idioma.
+- Se a origem do lead nao estiver clara, perguntar uma unica vez no decorrer da conversa como ele conheceu a Pilger, sem parecer pesquisa.
+
+DIRETRIZES DE QUALIFICACAO
+- O objetivo e filtrar e amadurecer o lead, nao apenas responder perguntas.
+- Descobrir aos poucos se busca investimento, moradia ou os dois.
+- Descobrir valor disponivel, prazo de compra, regiao, tipo de imovel, objecoes e urgencia.
+- Antes de falar de valor, reforcar beneficio, posicionamento, seguranca e adequacao ao objetivo.
+- Quando houver intencao real, aproximar de corretor humano, visita ou imovel especifico.
+- Usar botao de agendamento somente quando o cliente pedir, aceitar ou demonstrar claramente que quer marcar visita/reuniao agora.
+- Nao enviar botoes Manha/Tarde/Noite junto com explicacao de imovel, investimento ou curadoria se o cliente ainda nao pediu agendamento.
+
+NATURALIDADE NO USO DO NOME
+- Usar o nome do lead somente de vez em quando: abertura importante, retomada depois de pausa, fechamento ou momento de proximidade.
+- Nao comecar toda resposta chamando pelo nome.
+- Nao repetir o nome mais de uma vez na mesma resposta.
+- Se o nome cadastrado parecer nome de plataforma, empresa, sistema ou bot, nao usar como nome da pessoa.
+- Se o nome estiver nao informado ou nao confiavel, perguntar uma unica vez e de forma leve como pode chamar a pessoa.
+- Se ja perguntou o nome antes ou o cliente ignorou, nao insistir; continuar ajudando normalmente.
+
+REDES SOCIAIS POR ORIGEM
+- Instagram: se o lead veio do Instagram, nao chamar para seguir Instagram como primeira opcao.
+- Google: construir autoridade, clareza e seguranca antes de oferecer rede social.
+- YouTube: priorizar prova em video quando configurado.
+- TikTok: respostas curtas e dinamicas; oferecer TikTok/Instagram apenas se fizer sentido.
+- Facebook: linguagem proxima e prova social quando fizer sentido.
+- Origem desconhecida: usar Instagram como primeira prova social, sempre um link por vez.
+- Se o cliente mencionar Facebook, Instagram, Google, YouTube ou trafego como origem/desconfianca, tratar a objecao primeiro; nao enviar link automaticamente se ele nao pediu.
+
+RAPPORT ADAPTATIVO (quando habilitado na instancia)
+- Espelhar primeiro o jeito real que o lead escreve/fala: idioma, formalidade, energia, tamanho das mensagens e vocabulario.
+- Usar DDD, localizacao e historico apenas como pistas secundarias.
+- Nao fingir ser da mesma regiao do lead.
+- Modo suave: regionalismo raro, leve, natural e nunca caricatural.
+- Modo forte: regionalismo com mais presenca quando a regiao e o jeito do lead combinarem.
+- Se o lead fala formal, responder formal mesmo que a localizacao sugira uma regiao especifica.
+- Se o lead usar expressoes regionais, acompanhar com moderacao para gerar proximidade.
+
+CATALOGO DE IMOVEIS
+- Quando usar {imoveis}, o sistema injeta imoveis ativos e paginas publicadas.
+- Se o cliente informar orcamento, o sistema ordena por proximidade de valor.
+- O agente deve recomendar no maximo 1 imovel por resposta, ou 2 se o cliente pedir comparacao.
+- Ao recomendar um imovel, deve enviar o botao "Ver imovel" daquele imovel.
+- Links de imoveis enviados pelo WhatsApp recebem UTM e referencia do lead para rastrear clique, IP, dispositivo, origem e associar a visita a ficha do CRM.
+
+REGRAS PARA AUDIO E VALORES
+- Quando mencionar valores, metragem ou numeros importantes, escrever de forma falada e natural.
+- Exemplo: "vinte e dois milhoes de reais" em vez de "R$ 22.000.000" quando a resposta puder virar audio.
+- Exemplo: "duzentos metros quadrados" em vez de "200m2".
+- O pipeline de audio tambem normaliza dinheiro, percentuais e metragens antes do TTS.
+
+LIMITACOES DE MIDIA
+- Gemini: texto, audio transcrito, imagens, documentos e videos.
+- OpenAI no fluxo atual: texto, audio transcrito, imagens e documentos. Videos recebem resposta pedindo foto, print ou descricao.`
+
 export default function MaintenancePage() {
     const [configs, setConfigs] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(true)
@@ -163,6 +323,15 @@ export default function MaintenancePage() {
     const [llmCreditLoading, setLlmCreditLoading] = useState(false)
     const [llmCreditCheck, setLlmCreditCheck] = useState<LLMCreditCheck | null>(null)
     const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
+    const [agentLogs, setAgentLogs] = useState<AgentLogEntry[]>([])
+    const [agentLogSummary, setAgentLogSummary] = useState<AgentLogSummary>({ total: 0, info: 0, success: 0, warning: 0, error: 0 })
+    const [agentLogsLoading, setAgentLogsLoading] = useState(false)
+    const [agentLogsError, setAgentLogsError] = useState<string | null>(null)
+    const [agentLogHours, setAgentLogHours] = useState(24)
+    const [geminiCostSummary, setGeminiCostSummary] = useState<GeminiCostSummary | null>(null)
+    const [geminiCostsLoading, setGeminiCostsLoading] = useState(false)
+    const [geminiCostsError, setGeminiCostsError] = useState<string | null>(null)
+    const [syncingGeminiFinance, setSyncingGeminiFinance] = useState(false)
 
     const dailyDays = parseCsvSet(configs['pilger_daily_days'], '0,1,2,3,4,5,6')
     const dailyHours = parseCsvSet(configs['pilger_daily_time'], '23')
@@ -170,6 +339,8 @@ export default function MaintenancePage() {
     const weeklyHours = parseCsvSet(configs['pilger_weekly_times'] || configs['pilger_weekly_time'], '23')
     const radarDays = parseCsvSet(configs['radar_collection_days'], '0,1,2,3,4,5,6')
     const radarHours = parseCsvSet(configs['radar_collection_times'], '06,12,18')
+    const isWhatsAppOpenAI = configs['whatsapp_provider'] === 'openai'
+        || (!configs['whatsapp_provider'] && configs['ai_provider'] === 'openai')
 
     const toggleDay = (key: string, value: string, fallback: string) => {
         const current = parseCsvSet(configs[key], fallback)
@@ -208,6 +379,30 @@ export default function MaintenancePage() {
             hour: '2-digit',
             minute: '2-digit',
         }).format(date)
+    }
+    const formatCurrency = (value: number, currency = 'BRL') => {
+        return Number(value || 0).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency,
+            minimumFractionDigits: currency === 'BRL' ? 2 : 4,
+            maximumFractionDigits: currency === 'BRL' ? 2 : 6,
+        })
+    }
+    const formatCompactNumber = (value: number) => {
+        return Number(value || 0).toLocaleString('pt-BR')
+    }
+
+    const formatTokenBreakdown = (total?: GeminiUsageTotals) => {
+        const prompt = formatCompactNumber(total?.prompt_tokens || 0)
+        const output = formatCompactNumber(total?.output_tokens || 0)
+        const all = formatCompactNumber(total?.total_tokens || 0)
+        return `Entrada ${prompt} | Saida ${output} | Total ${all}`
+    }
+
+    const getOfficialBillingColor = (status?: GeminiOfficialBillingSummary['status']) => {
+        if (status === 'ok') return '#22c55e'
+        if (status === 'error') return '#ef4444'
+        return '#f59e0b'
     }
 
     // Fetch Gemini Models
@@ -323,6 +518,77 @@ export default function MaintenancePage() {
         return () => clearInterval(timer)
     }, [fetchConfigs])
 
+    const fetchAgentLogs = useCallback(async () => {
+        setAgentLogsLoading(true)
+        setAgentLogsError(null)
+        try {
+            const res = await fetch(`/api/admin/whatsapp/agent-logs?hours=${agentLogHours}&limit=120`)
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Erro ao carregar logs')
+            }
+            setAgentLogs(data.logs || [])
+            setAgentLogSummary(data.summary || { total: 0, info: 0, success: 0, warning: 0, error: 0 })
+        } catch (err) {
+            console.error('Error loading agent logs:', err)
+            setAgentLogsError('Nao foi possivel carregar os logs dos agentes.')
+        } finally {
+            setAgentLogsLoading(false)
+        }
+    }, [agentLogHours])
+
+    useEffect(() => {
+        fetchAgentLogs()
+        const timer = setInterval(fetchAgentLogs, 30000)
+        return () => clearInterval(timer)
+    }, [fetchAgentLogs])
+
+    const fetchGeminiCosts = useCallback(async (refreshOfficial = false) => {
+        setGeminiCostsLoading(true)
+        setGeminiCostsError(null)
+        try {
+            const res = await fetch(`/api/admin/ai-costs/gemini${refreshOfficial ? '?refresh_official=1' : ''}`)
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao carregar custos Gemini')
+            }
+            setGeminiCostSummary(data.summary || null)
+        } catch (err) {
+            console.error('Error loading Gemini costs:', err)
+            setGeminiCostsError('Nao foi possivel carregar o consumo Gemini.')
+        } finally {
+            setGeminiCostsLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchGeminiCosts()
+        const timer = setInterval(fetchGeminiCosts, 30000)
+        return () => clearInterval(timer)
+    }, [fetchGeminiCosts])
+
+    const syncGeminiCostsToFinance = useCallback(async () => {
+        setSyncingGeminiFinance(true)
+        setGeminiCostsError(null)
+        try {
+            const res = await fetch('/api/admin/ai-costs/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ month: geminiCostSummary?.month }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Erro ao lancar Gemini no financeiro')
+            }
+            await fetchGeminiCosts()
+        } catch (err) {
+            console.error('Error syncing Gemini costs:', err)
+            setGeminiCostsError('Nao foi possivel lancar o custo Gemini no financeiro.')
+        } finally {
+            setSyncingGeminiFinance(false)
+        }
+    }, [fetchGeminiCosts, geminiCostSummary?.month])
+
     const syncAdsSpendNow = async () => {
         setSyncingAdsSpend(true)
         try {
@@ -376,6 +642,67 @@ export default function MaintenancePage() {
         return 'Erro'
     }
 
+    const getAgentSeverityColor = (severity: AgentLogSeverity) => {
+        if (severity === 'error') return '#ef4444'
+        if (severity === 'warning') return '#f59e0b'
+        if (severity === 'success') return '#22c55e'
+        return '#60a5fa'
+    }
+
+    const getAgentSeverityLabel = (severity: AgentLogSeverity) => {
+        if (severity === 'error') return 'Erro'
+        if (severity === 'warning') return 'Alerta'
+        if (severity === 'success') return 'OK'
+        return 'Info'
+    }
+
+    const getAgentActionLabel = (action: string) => {
+        const labels: Record<string, string> = {
+            agent_skip_stale_queue: 'Fila antiga ignorada',
+            agent_no_queue_work: 'Fila vazia',
+            agent_batch_read: 'Lote lido',
+            agent_no_pending_after_debounce: 'Sem fila apos espera',
+            agent_empty_input: 'Entrada vazia',
+            agent_response_sent: 'Resposta enviada',
+            dispatched: 'Webhook despachado',
+            responded_fast_webhook: 'Resposta rapida',
+            ignored_empty: 'Evento vazio',
+            ignored_no_phone: 'Sem telefone',
+            error: 'Erro no webhook',
+        }
+        return labels[action] || action.replace(/_/g, ' ')
+    }
+
+    const getPayloadString = (payload: AgentLogEntry['payload'], key: string) => {
+        const value = payload?.[key]
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+        return ''
+    }
+
+    const getAgentLogDetail = (log: AgentLogEntry) => {
+        if (log.error) return log.error
+        const reason = getPayloadString(log.payload, 'reason') || getPayloadString(log.payload, 'queueReason')
+        if (reason) return reason
+        return log.summary || ''
+    }
+
+    const getGeminiFeatureLabel = (feature: string) => {
+        const labels: Record<string, string> = {
+            whatsapp_agent_response: 'WhatsApp - resposta',
+            whatsapp_audio_transcription: 'WhatsApp - audio',
+            whatsapp_image_analysis: 'WhatsApp - imagem',
+            whatsapp_video_analysis: 'WhatsApp - video',
+            whatsapp_document_analysis: 'WhatsApp - documento',
+            whatsapp_shadow_agent: 'WhatsApp - co-piloto',
+            ads_campaign_analysis: 'Trafego - analise',
+            ads_daily_report: 'Relatorio diario',
+            lead_extraction: 'Extracao de lead',
+            gemini_chat: 'Chat Gemini',
+            gemini_chat_rest: 'Chat Gemini',
+        }
+        return labels[feature] || feature.replace(/_/g, ' ')
+    }
+
     const handleSave = async () => {
         setSaving(true)
         try {
@@ -416,6 +743,13 @@ export default function MaintenancePage() {
                 'google_ads_refresh_token',
                 'google_ads_manager_id',
                 'google_ads_customer_id',
+                'gemini_billing_bigquery_project_id',
+                'gemini_billing_bigquery_dataset',
+                'gemini_billing_bigquery_table',
+                'gemini_billing_google_project_id',
+                'gemini_billing_service_account_json',
+                'gemini_billing_client_email',
+                'gemini_billing_private_key',
                 'serpapi_api_key',
                 'dataforseo_login',
                 'dataforseo_password',
@@ -429,6 +763,11 @@ export default function MaintenancePage() {
                 'pilger_weekly_times',
                 'radar_collection_days',
                 'radar_collection_times',
+                'radar_ai_enabled',
+                'radar_ai_min_opportunity_score',
+                'radar_ai_max_insights_per_run',
+                'radar_opportunity_alert_threshold',
+                'radar_analyst_system_prompt',
                 'ads_sync_interval_minutes',
                 'ads_analyst_system_prompt',
                 'pilger_daily_system_prompt',
@@ -870,6 +1209,86 @@ export default function MaintenancePage() {
                             </div>
                         )}
 
+                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('gemini')) && (
+                            <details style={{ marginTop: '18px', padding: '14px', border: '1px solid var(--border-color)', borderRadius: '10px', background: 'var(--bg-primary)' }}>
+                                <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                                    Faturamento oficial Gemini / Google Billing
+                                </summary>
+                                <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                    Use estes campos quando a exportacao do Cloud Billing para BigQuery estiver ativa. O painel usa essa fonte para mostrar o valor oficial ja apurado pelo Google.
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '14px' }}>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Projeto BigQuery</label>
+                                        <input
+                                            className="form-input"
+                                            value={configs['gemini_billing_bigquery_project_id'] || ''}
+                                            onChange={e => setConfigs({ ...configs, gemini_billing_bigquery_project_id: e.target.value })}
+                                            placeholder="pilger-billing"
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Dataset</label>
+                                        <input
+                                            className="form-input"
+                                            value={configs['gemini_billing_bigquery_dataset'] || ''}
+                                            onChange={e => setConfigs({ ...configs, gemini_billing_bigquery_dataset: e.target.value })}
+                                            placeholder="billing_export"
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Tabela</label>
+                                        <input
+                                            className="form-input"
+                                            value={configs['gemini_billing_bigquery_table'] || ''}
+                                            onChange={e => setConfigs({ ...configs, gemini_billing_bigquery_table: e.target.value })}
+                                            placeholder="gcp_billing_export_v1_..."
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Projeto Gemini</label>
+                                        <input
+                                            className="form-input"
+                                            value={configs['gemini_billing_google_project_id'] || ''}
+                                            onChange={e => setConfigs({ ...configs, gemini_billing_google_project_id: e.target.value })}
+                                            placeholder="gen-lang-client-..."
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginTop: '12px' }}>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Client email da service account</label>
+                                        <input
+                                            className="form-input"
+                                            value={configs['gemini_billing_client_email'] || ''}
+                                            onChange={e => setConfigs({ ...configs, gemini_billing_client_email: e.target.value })}
+                                            placeholder="billing-reader@projeto.iam.gserviceaccount.com"
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Private key</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <input
+                                                className="form-input"
+                                                type={!visibleFields['gemini_billing_private_key'] ? 'password' : 'text'}
+                                                value={configs['gemini_billing_private_key'] || ''}
+                                                onChange={e => setConfigs({ ...configs, gemini_billing_private_key: e.target.value })}
+                                                placeholder="-----BEGIN PRIVATE KEY-----"
+                                                style={{ fontFamily: 'monospace', paddingRight: '40px', fontSize: '0.82rem' }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleVisibility('gemini_billing_private_key')}
+                                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                            >
+                                                {visibleFields['gemini_billing_private_key'] ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        )}
+
                         {/* OpenAI Key */}
                         {(configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['pilger_provider']].includes('openai')) && (
                             <div className="form-group" style={{ marginBottom: 0 }}>
@@ -1014,7 +1433,7 @@ export default function MaintenancePage() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Modelo dos Agentes WhatsApp</label>
-                            {(configs['whatsapp_provider'] === 'openai' || (!configs['whatsapp_provider'] && configs['ai_provider'] === 'openai')) ? (
+                            {isWhatsAppOpenAI ? (
                                 <div style={{ position: 'relative' }}>
                                     <select className="form-input" value={configs['openai_whatsapp_model'] || ''} onChange={e => setConfigs({ ...configs, openai_whatsapp_model: e.target.value })}>
                                         <option value="">Selecione...</option>
@@ -1034,12 +1453,40 @@ export default function MaintenancePage() {
 
 
 
+                    {isWhatsAppOpenAI && (
+                        <div style={{ padding: '12px 16px', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.25)', marginBottom: '20px' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                <strong>Atencao:</strong> usando OpenAI nos agentes WhatsApp, fotos/prints continuam sendo analisados, mas videos nao serao interpretados automaticamente. Quando um cliente enviar video, o agente vai pedir foto, print ou uma descricao para continuar o atendimento.
+                            </div>
+                        </div>
+                    )}
+
                     <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.15)', marginBottom: '20px' }}>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                             O provedor e modelo escolhidos aqui serão usados por <strong>todos os agentes IA de WhatsApp</strong> (corretores). O prompt de cada agente é configurado individualmente na <strong>página de Corretores</strong>.
                         </div>
                     </div>
                 </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Prompt Global Automático dos Agentes WhatsApp</label>
+                        <textarea
+                            className="form-textarea"
+                            rows={22}
+                            value={WHATSAPP_SYSTEM_PROMPT_PREVIEW}
+                            readOnly
+                            style={{
+                                fontFamily: 'monospace',
+                                fontSize: '0.82rem',
+                                borderColor: 'rgba(34, 197, 94, 0.3)',
+                                background: 'rgba(34, 197, 94, 0.03)',
+                                lineHeight: 1.55,
+                            }}
+                        />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Visualização técnica da camada global aplicada automaticamente. O conteúdo real recebe dados dinâmicos de cada lead, agente, tags e catálogo no momento da resposta.
+                        </div>
+                    </div>
 
                 {/* 3. EXTRAÇÃO DE LEADS */}
                 <div style={{ paddingBottom: '30px' }}>
@@ -1266,6 +1713,56 @@ export default function MaintenancePage() {
                         </div>
                     </div>
 
+                    <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(201, 169, 110, 0.25)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                            <Brain size={18} style={{ color: 'var(--gold)' }} />
+                            <div>
+                                <div style={{ fontWeight: 800 }}>Inteligencia IA do Radar</div>
+                                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                                    Controla quando o radar gera analises comerciais, score Pilger e recomendacoes para blog, campanhas e vitrines.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Analise IA</label>
+                                <select
+                                    className="form-input"
+                                    value={configs['radar_ai_enabled'] || 'true'}
+                                    onChange={e => setConfigs({ ...configs, radar_ai_enabled: e.target.value })}
+                                >
+                                    <option value="true">Ativada</option>
+                                    <option value="false">Desativada (apenas regras)</option>
+                                </select>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Score minimo para chamar IA</label>
+                                <input className="form-input" type="number" min={0} max={100} value={configs['radar_ai_min_opportunity_score'] || '70'} onChange={e => setConfigs({ ...configs, radar_ai_min_opportunity_score: e.target.value })} />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Maximo de analises IA por coleta</label>
+                                <input className="form-input" type="number" min={0} max={50} value={configs['radar_ai_max_insights_per_run'] || '6'} onChange={e => setConfigs({ ...configs, radar_ai_max_insights_per_run: e.target.value })} />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Alerta de oportunidade acima de</label>
+                                <input className="form-input" type="number" min={0} max={100} value={configs['radar_opportunity_alert_threshold'] || '75'} onChange={e => setConfigs({ ...configs, radar_opportunity_alert_threshold: e.target.value })} />
+                            </div>
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Prompt do Analista de Radar de Mercado</label>
+                            <textarea
+                                className="form-textarea"
+                                rows={7}
+                                value={configs['radar_analyst_system_prompt'] || ''}
+                                onChange={e => setConfigs({ ...configs, radar_analyst_system_prompt: e.target.value })}
+                                placeholder="Digite o prompt do Analista de Radar de Mercado"
+                                style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                            />
+                        </div>
+                    </div>
+
                     {/* Prompts dos Relatórios */}
                     <div className="form-group" style={{ marginTop: '20px' }}>
                         <label className="form-label">Prompt do Relatório Diário</label>
@@ -1326,6 +1823,144 @@ export default function MaintenancePage() {
                             Este prompt define o comportamento executivo do CEO IA e e combinado com os prompts de relatorio diario e semanal.
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Agent Logs */}
+            <div className="chart-card" style={{ marginTop: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                    <div className="chart-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 0 }}>
+                        <Activity size={20} style={{ color: 'var(--gold)' }} />
+                        Logs dos Agentes WhatsApp
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <select
+                            className="form-input"
+                            value={agentLogHours}
+                            onChange={e => setAgentLogHours(Number(e.target.value))}
+                            style={{ width: '130px', height: '36px', fontSize: '0.8rem' }}
+                        >
+                            <option value={1}>1 hora</option>
+                            <option value={6}>6 horas</option>
+                            <option value={24}>24 horas</option>
+                            <option value={72}>72 horas</option>
+                        </select>
+                        <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            onClick={fetchAgentLogs}
+                            disabled={agentLogsLoading}
+                            style={{ minWidth: '110px' }}
+                        >
+                            <RefreshCw size={15} className={agentLogsLoading ? 'spin' : ''} />
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+                    {[
+                        { label: 'Erros', value: agentLogSummary.error || 0, severity: 'error' as AgentLogSeverity, icon: <Bug size={16} /> },
+                        { label: 'Alertas', value: agentLogSummary.warning || 0, severity: 'warning' as AgentLogSeverity, icon: <AlertTriangle size={16} /> },
+                        { label: 'Respondidos', value: agentLogSummary.success || 0, severity: 'success' as AgentLogSeverity, icon: <MessageSquare size={16} /> },
+                        { label: 'Total', value: agentLogSummary.total || 0, severity: 'info' as AgentLogSeverity, icon: <Clock3 size={16} /> },
+                    ].map(item => {
+                        const color = getAgentSeverityColor(item.severity)
+                        return (
+                            <div key={item.label} style={{
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                padding: '10px 12px',
+                                background: 'var(--bg-primary)',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', color }}>
+                                    {item.icon}
+                                    <strong style={{ fontSize: '1.15rem' }}>{item.value}</strong>
+                                </div>
+                                <div style={{ marginTop: '5px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.label}</div>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                {agentLogsError && (
+                    <div style={{ marginBottom: '12px', color: '#ef4444', fontSize: '0.82rem' }}>
+                        {agentLogsError}
+                    </div>
+                )}
+
+                <div style={{ display: 'grid', gap: '8px', maxHeight: '430px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {agentLogs.length === 0 && !agentLogsLoading ? (
+                        <div style={{ border: '1px dashed var(--border-color)', borderRadius: '8px', padding: '14px', color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+                            Nenhum evento de agente encontrado nesse periodo.
+                        </div>
+                    ) : agentLogs.slice(0, 18).map(log => {
+                        const color = getAgentSeverityColor(log.severity)
+                        const detail = getAgentLogDetail(log)
+                        return (
+                            <div key={log.id} style={{
+                                display: 'grid',
+                                gridTemplateColumns: '130px 1fr',
+                                gap: '10px',
+                                border: '1px solid var(--border-color)',
+                                borderLeft: `3px solid ${color}`,
+                                borderRadius: '8px',
+                                padding: '10px 12px',
+                                background: 'var(--bg-primary)',
+                            }}>
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                    <div>{formatConfigDateTime(log.created_at)}</div>
+                                    <span style={{
+                                        display: 'inline-flex',
+                                        marginTop: '6px',
+                                        padding: '3px 8px',
+                                        borderRadius: '999px',
+                                        color,
+                                        background: `${color}22`,
+                                        border: `1px solid ${color}55`,
+                                        fontWeight: 700,
+                                    }}>
+                                        {getAgentSeverityLabel(log.severity)}
+                                    </span>
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                                        <strong style={{ fontSize: '0.86rem' }}>{getAgentActionLabel(log.action)}</strong>
+                                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                            {log.from_phone || 'sem telefone'} {log.message_type ? `- ${log.message_type}` : ''}
+                                        </span>
+                                    </div>
+                                    {detail && (
+                                        <div style={{ marginTop: '4px', fontSize: '0.78rem', color: 'var(--text-secondary)', wordBreak: 'break-word' }}>
+                                            {detail}
+                                        </div>
+                                    )}
+                                    {(log.instance_name || log.sender_name) && (
+                                        <div style={{ marginTop: '4px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                            {log.instance_name || 'Instancia'} {log.sender_name ? `- ${log.sender_name}` : ''}
+                                        </div>
+                                    )}
+                                    <details style={{ marginTop: '6px' }}>
+                                        <summary style={{ cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-muted)' }}>Detalhes</summary>
+                                        <pre style={{
+                                            marginTop: '6px',
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                            fontSize: '0.7rem',
+                                            color: 'var(--text-muted)',
+                                            background: 'rgba(0,0,0,0.16)',
+                                            borderRadius: '6px',
+                                            padding: '8px',
+                                            maxHeight: '180px',
+                                            overflow: 'auto',
+                                        }}>
+                                            {JSON.stringify(log.payload || {}, null, 2).slice(0, 1400)}
+                                        </pre>
+                                    </details>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
 
@@ -1395,6 +2030,155 @@ export default function MaintenancePage() {
                             <div style={{ marginTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                                 {llmCreditCheck?.gemini?.message || 'Sem verificação ainda.'}
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-primary)',
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>
+                            Gasto Gemini em Tempo Real
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                Estimativa por tokens do nosso sistema. Cambio USD/BRL: <strong>{geminiCostSummary?.usd_to_brl || 5}</strong>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                onClick={() => fetchGeminiCosts(true)}
+                                disabled={geminiCostsLoading}
+                            >
+                                <RefreshCw size={15} className={geminiCostsLoading ? 'spin' : ''} />
+                                Atualizar gasto
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-gold btn-sm"
+                                onClick={syncGeminiCostsToFinance}
+                                disabled={syncingGeminiFinance || !geminiCostSummary || geminiCostSummary.month_total.estimated_brl <= 0}
+                            >
+                                {syncingGeminiFinance ? 'Lancando...' : 'Lancar no financeiro'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {geminiCostsError && (
+                        <div style={{ color: '#ef4444', fontSize: '0.78rem', marginBottom: '10px' }}>{geminiCostsError}</div>
+                    )}
+
+                    <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                            <div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>Google Billing oficial</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                    {geminiCostSummary?.official_billing?.message || 'Aguardando leitura do faturamento oficial.'}
+                                </div>
+                            </div>
+                            <span style={{
+                                fontSize: '0.72rem',
+                                padding: '3px 8px',
+                                borderRadius: '999px',
+                                background: `${getOfficialBillingColor(geminiCostSummary?.official_billing?.status)}22`,
+                                color: getOfficialBillingColor(geminiCostSummary?.official_billing?.status),
+                                border: `1px solid ${getOfficialBillingColor(geminiCostSummary?.official_billing?.status)}55`,
+                                fontWeight: 700,
+                            }}>
+                                {geminiCostSummary?.official_billing?.status === 'ok'
+                                    ? 'Conectado'
+                                    : geminiCostSummary?.official_billing?.status === 'error'
+                                        ? 'Erro'
+                                        : 'Nao configurado'}
+                            </span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px' }}>
+                            <div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Hoje apurado</div>
+                                <strong>{formatCurrency(geminiCostSummary?.official_billing?.today_cost_brl || 0)}</strong>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ultimas 24h apuradas</div>
+                                <strong>{formatCurrency(geminiCostSummary?.official_billing?.last_24h_cost_brl || 0)}</strong>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Mes a pagar</div>
+                                <strong>{formatCurrency(geminiCostSummary?.official_billing?.month_cost_brl || 0)}</strong>
+                            </div>
+                        </div>
+                        {geminiCostSummary?.official_billing?.latest_usage_end_time && (
+                            <div style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                Ultimo uso no Billing: {formatConfigDateTime(geminiCostSummary.official_billing.latest_usage_end_time)}
+                            </div>
+                        )}
+                        {(geminiCostSummary?.official_billing?.rows || []).length > 0 && (
+                            <div style={{ marginTop: '8px', display: 'grid', gap: '5px' }}>
+                                {(geminiCostSummary?.official_billing?.rows || []).slice(0, 3).map((row, index) => (
+                                    <div key={`${row.project_id}-${row.sku}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', fontSize: '0.72rem' }}>
+                                        <span style={{ color: 'var(--text-muted)', wordBreak: 'break-word' }}>{row.sku || row.service || row.project_id}</span>
+                                        <strong>{formatCurrency(row.month_cost_brl)}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, marginBottom: '8px' }}>Uso em tempo real capturado pelo sistema</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px' }}>
+                        {[
+                            { label: 'Hoje', total: geminiCostSummary?.today_total },
+                            { label: 'Ultimas 24h', total: geminiCostSummary?.last_24h_total },
+                            { label: `Mes ${geminiCostSummary?.month || ''}`.trim(), total: geminiCostSummary?.month_total },
+                        ].map(item => (
+                            <div key={item.label} style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.label}</div>
+                                <div style={{ marginTop: '4px', fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                                    {formatCurrency(item.total?.estimated_brl || 0)}
+                                </div>
+                                <div style={{ marginTop: '4px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                    {formatTokenBreakdown(item.total)}
+                                </div>
+                                <div style={{ marginTop: '3px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                    {item.total?.calls || 0} chamadas
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '10px', marginTop: '10px' }}>
+                        <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 700, marginBottom: '8px' }}>Por modelo</div>
+                            {(geminiCostSummary?.by_model || []).slice(0, 4).map(row => (
+                                <div key={row.model} style={{ display: 'grid', gap: '2px', fontSize: '0.74rem', marginTop: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                                        <span style={{ color: 'var(--text-muted)', wordBreak: 'break-word' }}>{row.model}</span>
+                                        <strong>{formatCurrency(row.estimated_brl)}</strong>
+                                    </div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{formatTokenBreakdown(row)}</div>
+                                </div>
+                            ))}
+                            {(!geminiCostSummary?.by_model || geminiCostSummary.by_model.length === 0) && (
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Sem consumo registrado apos o deploy.</div>
+                            )}
+                        </div>
+                        <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 700, marginBottom: '8px' }}>Por uso</div>
+                            {(geminiCostSummary?.by_feature || []).slice(0, 4).map(row => (
+                                <div key={row.feature} style={{ display: 'grid', gap: '2px', fontSize: '0.74rem', marginTop: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                                        <span style={{ color: 'var(--text-muted)' }}>{getGeminiFeatureLabel(row.feature)}</span>
+                                        <strong>{formatCurrency(row.estimated_brl)}</strong>
+                                    </div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{formatTokenBreakdown(row)}</div>
+                                </div>
+                            ))}
+                            {(!geminiCostSummary?.by_feature || geminiCostSummary.by_feature.length === 0) && (
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>As proximas chamadas Gemini ja entram aqui.</div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -9,6 +9,7 @@ import OpenAI from 'openai'
 import { buildMetricsAnalysisPrompt } from './prompts'
 import type { AIAnalysisResponse, MetricsSnapshot, AdCampaign } from './types'
 import { getAdsProvider, getAdsGeminiModel, getAdsOpenAIModel, getOpenAIApiKey } from '../ai/config'
+import { recordGeminiUsage } from '../ai/gemini-costs'
 
 // --- Inicializar Gemini ---
 
@@ -126,6 +127,12 @@ export async function analyzeCampaignMetrics(campaign: {
                 }
             })
 
+            await recordGeminiUsage({
+                model: modelName,
+                feature: 'ads_campaign_analysis',
+                usageMetadata: (result.response as any).usageMetadata || (result as any).response?.usageMetadata,
+                metadata: { campaign_name: campaign.name, platform: campaign.platform },
+            })
             text = result.response.text()
         }
 
@@ -262,6 +269,11 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
                 generationConfig: { temperature: 0.5 }
             })
 
+            await recordGeminiUsage({
+                model: modelName,
+                feature: 'ads_daily_report',
+                usageMetadata: (result.response as any).usageMetadata || (result as any).response?.usageMetadata,
+            })
             return result.response.text()
         }
     } catch (err) {

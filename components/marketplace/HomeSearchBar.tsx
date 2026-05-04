@@ -84,13 +84,27 @@ export default function HomeSearchBar() {
                     width: 100%;
                     border: none;
                     background: transparent;
-                    font-size: 0.88rem;
-                    font-weight: 600;
+                    font-size: 0.75rem;
+                    font-weight: 500;
                     color: #1a1a1a;
                     outline: none;
                     padding: 0;
                     margin-bottom: 2px;
                     font-family: inherit;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+                @media (min-width: 480px) {
+                    .search-input-field {
+                        font-size: 0.82rem;
+                    }
+                }
+                @media (min-width: 768px) {
+                    .search-input-field {
+                        font-size: 0.88rem;
+                        font-weight: 600;
+                    }
                 }
                 .search-input-field::placeholder {
                     color: #1a1a1a;

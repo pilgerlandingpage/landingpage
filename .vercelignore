@@ -1,0 +1,7 @@
+.git
+.next
+node_modules
+.env*
+*.tsbuildinfo
+supabase/.temp
+dados dos imoveis.txt

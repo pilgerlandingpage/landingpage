@@ -29,6 +29,20 @@ interface RadarData {
     time_slot?: string;
     collected_at?: string;
   }>
+  market_radar_insights?: Array<{
+    date: string
+    time_slot?: string
+    opportunity_score: number
+    market_temperature: string
+    summary: string
+    recommended_actions?: string[]
+    related_properties_count?: number
+    content_opportunities?: string[]
+    campaign_recommendation?: string
+    risk_notes?: string
+    ai_analysis?: string
+    generated_by?: string
+  }>
 }
 
 function getTrendBadge(score: number) {
@@ -65,6 +79,11 @@ function timeAgo(dateStr: string): string {
 function formatScore(score: number | null): string {
   if (score === null) return '--'
   return String(score)
+}
+
+function getLatestInsight(radar: RadarData | null) {
+  if (!radar?.market_radar_insights?.length) return null
+  return radar.market_radar_insights[radar.market_radar_insights.length - 1]
 }
 
 export default function MarketRadarPage() {
@@ -434,6 +453,7 @@ export default function MarketRadarPage() {
           ) : sortedRadars.map((radar, index) => {
             const hasData = radar.market_radar_data && radar.market_radar_data.length > 0
             const latestData = hasData ? radar.market_radar_data[radar.market_radar_data.length - 1] : null
+            const latestInsight = getLatestInsight(radar)
             const latestScore = latestData?.trend_score ?? null
             const trend = getTrendDirection(radar.market_radar_data)
             const isSelected = selectedId === radar.id
@@ -472,9 +492,22 @@ export default function MarketRadarPage() {
                 <div>
                   <div style={{ 
                     fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)',
-                    display: 'flex', alignItems: 'center', gap: '6px'
+                    display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap'
                   }}>
                     {radar.keyword}
+                    {latestInsight && (
+                      <span style={{
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        padding: '2px 6px',
+                        borderRadius: '10px',
+                        background: latestInsight.opportunity_score >= 85 ? 'rgba(220, 38, 38, 0.12)' : latestInsight.opportunity_score >= 70 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(148, 163, 184, 0.14)',
+                        color: latestInsight.opportunity_score >= 85 ? '#dc2626' : latestInsight.opportunity_score >= 70 ? '#059669' : 'var(--text-muted)',
+                        border: '1px solid rgba(0,0,0,0.06)',
+                      }}>
+                        Pilger {latestInsight.opportunity_score}
+                      </span>
+                    )}
                     {isSelected && <ChevronRight size={14} style={{ color: 'var(--gold)' }} />}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '1px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -553,6 +586,7 @@ export default function MarketRadarPage() {
           const hasData = selectedRadar.market_radar_data && selectedRadar.market_radar_data.length > 0
           const latestData = hasData ? selectedRadar.market_radar_data[selectedRadar.market_radar_data.length - 1] : null
           const latestScore = latestData?.trend_score ?? null
+          const latestInsight = getLatestInsight(selectedRadar)
           const badge = latestScore !== null ? getTrendBadge(latestScore) : null
           const trend = getTrendDirection(selectedRadar.market_radar_data)
           const daysMonitored = Math.floor((Date.now() - new Date(selectedRadar.created_at).getTime()) / 86400000)
@@ -700,6 +734,40 @@ export default function MarketRadarPage() {
                       {latestScore}
                       <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>/100</span>
                     </span>
+                  </div>
+                )}
+
+                {latestInsight && (
+                  <div style={{
+                    padding: '14px 16px',
+                    background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.12), rgba(0,0,0,0.02))',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(201, 169, 110, 0.28)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 800 }}>
+                        Score Pilger
+                      </span>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 900, color: latestInsight.opportunity_score >= 85 ? '#dc2626' : 'var(--gold)' }}>
+                        {latestInsight.opportunity_score}/100
+                      </span>
+                    </div>
+                    <p style={{ margin: '0 0 10px', fontSize: '0.82rem', lineHeight: 1.45, color: 'var(--text-primary)' }}>
+                      {latestInsight.summary}
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {(latestInsight.recommended_actions || []).slice(0, 3).map((action, actionIndex) => (
+                        <div key={`${selectedRadar.id}-action-${actionIndex}`} style={{ display: 'flex', gap: '6px', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                          <span style={{ color: 'var(--gold)', fontWeight: 900 }}>-</span>
+                          <span>{action}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      <span>{latestInsight.related_properties_count || 0} imoveis relacionados</span>
+                      <span>-</span>
+                      <span>{latestInsight.generated_by === 'radar_ai' ? 'Analise IA' : 'Analise por regras'}</span>
+                    </div>
                   </div>
                 )}
 

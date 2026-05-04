@@ -15,12 +15,42 @@ const DEFAULT_CONFIG: Record<string, any> = {
     media_image_enabled: true,
     media_document_enabled: true,
     media_video_enabled: true,
+    media_batch_image_limit: 8,
+    media_batch_video_limit: 2,
+    media_batch_document_limit: 3,
     split_messages: true,
+    adaptive_rapport_enabled: false,
+    adaptive_rapport_mode: 'off', // off | soft | strong
     mirror_mode: false,
     audio_response: true,
     audio_transcription: true,
     human_intervention: true,
+    bot_loop_protection_enabled: true,
+    allow_internal_instance_messages: false,
+    detect_human_request_enabled: true,
+    detect_reschedule_cancel_enabled: true,
+    detect_property_capture_enabled: true,
+    detect_location_enabled: true,
+    detect_opt_out_enabled: true,
+    analyze_links_enabled: true,
+    quoted_reply_context_enabled: true,
+    lead_file_storage_enabled: true,
     debounce_seconds: 15,
+    smart_timing_enabled: true,
+    timing_text_seconds: 6,
+    timing_text_burst_seconds: 9,
+    timing_media_caption_seconds: 10,
+    timing_media_then_text_seconds: 14,
+    timing_media_only_seconds: 16,
+    timing_audio_seconds: 10,
+    timing_audio_then_text_seconds: 14,
+    timing_video_caption_seconds: 14,
+    timing_video_only_seconds: 18,
+    timing_document_caption_seconds: 14,
+    timing_document_only_seconds: 18,
+    timing_document_seconds: 18,
+    timing_video_document_seconds: 18,
+    timing_button_delay_seconds: 2,
     human_intervention_minutes: 60,
     ai_schedule_enabled: false,
     ai_schedule_start: '18:00',
@@ -87,6 +117,10 @@ export async function POST(req: NextRequest) {
         } else {
             mergedConfig.response_mode = mergedConfig.mirror_mode ? 'mirror' : (mergedConfig.audio_response ? 'audio' : 'text')
         }
+        if (!['off', 'soft', 'strong'].includes(String(mergedConfig.adaptive_rapport_mode || ''))) {
+            mergedConfig.adaptive_rapport_mode = mergedConfig.adaptive_rapport_enabled ? 'soft' : 'off'
+        }
+        mergedConfig.adaptive_rapport_enabled = mergedConfig.adaptive_rapport_mode !== 'off'
 
         const { error } = await supabase
             .from('whatsapp_instances')

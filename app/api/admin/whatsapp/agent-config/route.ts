@@ -14,6 +14,7 @@ const AGENT_CONFIG_KEYS = [
     'agent_company_creci',
     'agent_company_phone',
     'agent_company_description',
+    'agent_company_location_url',
     'agent_social_instagram',
     'agent_social_facebook',
     'agent_social_youtube',

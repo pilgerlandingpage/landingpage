@@ -17,15 +17,48 @@ function getSupabase() {
 }
 
 function normalizeInstanceStatus(result: any): 'disconnected' | 'connecting' | 'connected' {
-    const isConnected = result?.status?.connected === true || result?.connected === true
-    const isLoggedIn = result?.status?.loggedIn === true || result?.loggedIn === true
-    const isConnecting = result?.response?.includes?.('Connecting') || result?.instance?.qrcode || result?.qrcode
-    if (isConnected && isLoggedIn) return 'connected'
+    const statusValue = result?.status
+    const statusText = String(
+        result?.instance?.status ||
+        (typeof statusValue === 'string' ? statusValue : '') ||
+        result?.state ||
+        ''
+    ).toLowerCase()
+    const loggedInExplicitFalse =
+        result?.status?.loggedIn === false ||
+        result?.loggedIn === false
+    const isConnected =
+        result?.status?.connected === true ||
+        result?.connected === true ||
+        statusText === 'connected'
+    const isLoggedIn =
+        result?.status?.loggedIn === true ||
+        result?.loggedIn === true ||
+        statusText === 'connected'
+    const isConnecting =
+        statusText === 'connecting' ||
+        result?.response?.includes?.('Connecting') ||
+        Boolean(result?.instance?.qrcode || result?.instance?.qr || result?.qrcode || result?.qr)
+    if (isConnected && isLoggedIn && !loggedInExplicitFalse) return 'connected'
     if (isConnected || isConnecting) return 'connecting'
     return 'disconnected'
 }
 
 function normalizeWhatsAppAddress(raw: unknown): string {
+    if (raw && typeof raw === 'object') {
+        const value = raw as Record<string, unknown>
+        return normalizeWhatsAppAddress(
+            value.user ||
+            value.id ||
+            value.phone ||
+            value.number ||
+            value.jid ||
+            value.owner ||
+            value.ownerJid ||
+            ''
+        )
+    }
+
     const text = String(raw || '').trim()
     if (!text) return ''
     const beforeAt = text.split('@')[0] || ''
@@ -34,20 +67,35 @@ function normalizeWhatsAppAddress(raw: unknown): string {
 }
 
 function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
-    const raw =
-        result?.instance?.phone ||
-        result?.phone ||
-        result?.number ||
-        result?.jid ||
-        result?.status?.jid ||
-        result?.me?.id ||
-        result?.instance?.me?.id ||
-        fallback ||
-        null
+    const candidates = [
+        result?.status?.jid?.user,
+        result?.status?.jid?.id,
+        result?.status?.jid,
+        result?.instance?.jid?.user,
+        result?.instance?.jid?.id,
+        result?.instance?.jid,
+        result?.jid?.user,
+        result?.jid?.id,
+        result?.jid,
+        result?.me?.id,
+        result?.me?.user,
+        result?.instance?.me?.id,
+        result?.instance?.me?.user,
+        result?.instance?.owner,
+        result?.instance?.ownerJid,
+        result?.instance?.phone,
+        result?.phone,
+        result?.number,
+        fallback,
+    ]
 
-    if (!raw) return null
-    const digits = normalizeWhatsAppAddress(raw)
-    return digits || null
+    for (const raw of candidates) {
+        if (!raw) continue
+        const digits = normalizeWhatsAppAddress(raw)
+        if (digits) return digits
+    }
+
+    return null
 }
 
 function extractPhoneLoose(raw: any): string | null {
@@ -339,7 +387,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         const supabase = getSupabase()
-        const { instanceId, forceLocalDelete = false } = await request.json()
+        const { instanceId } = await request.json()
 
         const { data: instance, error: fetchError } = await supabase
             .from('whatsapp_instances')
@@ -351,23 +399,22 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
         }
 
-        if (!forceLocalDelete) {
-            if (!instance.instance_token) {
-                return NextResponse.json({
-                    success: false,
-                    message: 'Instancia sem token na base local. Nao foi possivel excluir no servidor da API.',
-                }, { status: 400 })
-            }
-            try {
-                await deleteInstance(instance.instance_token, instance.instance_name)
-            } catch (e) {
-                console.warn('Falha ao deletar na uazapi:', e)
-                return NextResponse.json({
-                    success: false,
-                    message: 'Nao foi possivel excluir no servidor da API. A instancia nao foi removida localmente.',
-                    details: e instanceof Error ? e.message : String(e),
-                }, { status: 502 })
-            }
+        if (!instance.instance_token) {
+            return NextResponse.json({
+                success: false,
+                message: 'Instancia sem token na base local. Nao foi possivel excluir no servidor da API.',
+            }, { status: 400 })
+        }
+
+        try {
+            await deleteInstance(instance.instance_token, instance.instance_name)
+        } catch (e) {
+            console.warn('Falha ao deletar na uazapi:', e)
+            return NextResponse.json({
+                success: false,
+                message: 'Nao foi possivel excluir no servidor da API. A instancia nao foi removida localmente.',
+                details: e instanceof Error ? e.message : String(e),
+            }, { status: 502 })
         }
 
         // Delete linked AI broker as requested (best-effort for schema differences)
@@ -397,9 +444,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: forceLocalDelete
-                ? 'Instancia removida localmente (forcado).'
-                : 'Instancia removida no servidor da API e no banco local.',
+            message: 'Instancia removida no servidor da API e no banco local.',
         })
     } catch (error) {
         console.error('Error deleting instance:', error)

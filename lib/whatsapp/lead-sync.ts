@@ -1,3 +1,5 @@
+import { getChatDetails, getContactAvatar } from '../uazapi'
+
 type SupabaseClientLike = any
 
 export type WhatsAppLeadMessage = {
@@ -16,6 +18,7 @@ export type WhatsAppLeadContext = {
     senderName?: string | null
     instanceId?: string | null
     instanceName?: string | null
+    instanceToken?: string | null
     brokerId?: string | null
     acquiredVia?: string | null
 }
@@ -72,6 +75,55 @@ function mergeMetadata(current: unknown, patch: Record<string, unknown>) {
     }
 }
 
+function extractAvatarUrl(payload: any): string | null {
+    const candidates = [
+        payload?.imagePreview,
+        payload?.image,
+        payload?.profilePicUrl,
+        payload?.profile_pic_url,
+        payload?.avatar,
+        payload?.url,
+        payload?.picture,
+        payload?.data?.imagePreview,
+        payload?.data?.image,
+        payload?.data?.url,
+        payload?.response?.imagePreview,
+        payload?.response?.image,
+        payload?.response?.url,
+    ]
+    const found = candidates.find((value) => {
+        const text = String(value || '').trim()
+        return /^https?:\/\//i.test(text)
+    })
+    return found ? String(found).trim() : null
+}
+
+async function fetchWhatsAppAvatar(phone: string, instanceToken?: string | null): Promise<{
+    url: string | null
+    source: string
+    raw?: any
+}> {
+    if (!instanceToken) return { url: null, source: 'missing_instance_token' }
+
+    try {
+        const details = await getChatDetails(phone, instanceToken, true)
+        const url = extractAvatarUrl(details)
+        if (url) return { url, source: 'chat_details', raw: details }
+    } catch (err) {
+        console.warn('[WhatsApp Lead Sync] chat details avatar lookup failed:', err)
+    }
+
+    try {
+        const avatar = await getContactAvatar(phone, instanceToken)
+        const url = extractAvatarUrl(avatar)
+        if (url) return { url, source: 'contact_avatar', raw: avatar }
+    } catch (err) {
+        console.warn('[WhatsApp Lead Sync] contact avatar lookup failed:', err)
+    }
+
+    return { url: null, source: 'not_available' }
+}
+
 function toConversationEntry(message: WhatsAppLeadMessage) {
     return {
         role: message.role,
@@ -120,7 +172,7 @@ export async function findLeadByPhone(supabase: SupabaseClientLike, phone: strin
 
     const { data, error } = await supabase
         .from('leads')
-        .select('id, name, email, phone, phone_e164, metadata, conversation_log, funnel_stage, acquired_via, conversation_started_at')
+        .select('id, name, email, phone, phone_e164, avatar_url, avatar_source, avatar_updated_at, metadata, conversation_log, funnel_stage, acquired_via, conversation_started_at')
         .or(buildPhoneOrFilter(candidates))
         .order('updated_at', { ascending: false })
         .limit(1)
@@ -143,6 +195,13 @@ export async function ensureWhatsAppLead(
     const now = new Date().toISOString()
     const existing = await findLeadByPhone(supabase, phone)
     const senderName = String(context.senderName || '').trim()
+    const avatarCheckedAt = (existing?.metadata as any)?.whatsapp?.avatar_checked_at
+    const avatarCheckedMs = avatarCheckedAt ? new Date(String(avatarCheckedAt)).getTime() : 0
+    const shouldRefreshAvatar = Boolean(context.instanceToken)
+        && (!existing?.avatar_url || !Number.isFinite(avatarCheckedMs) || Date.now() - avatarCheckedMs > 24 * 60 * 60 * 1000)
+    const avatar = shouldRefreshAvatar
+        ? await fetchWhatsAppAvatar(phone, context.instanceToken)
+        : { url: existing?.avatar_url || null, source: 'cached' }
     const metadata = mergeMetadata(existing?.metadata, {
         first_contact_channel: 'whatsapp',
         last_contact_channel: 'whatsapp',
@@ -150,6 +209,9 @@ export async function ensureWhatsAppLead(
         instance_id: context.instanceId || null,
         instance_name: context.instanceName || null,
         broker_id: context.brokerId || null,
+        avatar_checked_at: shouldRefreshAvatar ? now : avatarCheckedAt || null,
+        avatar_status: avatar.url ? 'available' : (shouldRefreshAvatar ? avatar.source : 'cached'),
+        avatar_source: avatar.source,
     })
 
     if (existing?.id) {
@@ -159,6 +221,11 @@ export async function ensureWhatsAppLead(
             metadata,
             conversation_started_at: existing.conversation_started_at || now,
             updated_at: now,
+        }
+        if (avatar.url) {
+            updateData.avatar_url = avatar.url
+            updateData.avatar_source = avatar.source
+            updateData.avatar_updated_at = now
         }
 
         if (senderName && (!existing.name || /^whatsapp\s/i.test(String(existing.name)))) {
@@ -173,7 +240,7 @@ export async function ensureWhatsAppLead(
             .from('leads')
             .update(updateData)
             .eq('id', existing.id)
-            .select('id, name, email, phone, phone_e164, metadata, conversation_log, funnel_stage')
+            .select('id, name, email, phone, phone_e164, avatar_url, avatar_source, avatar_updated_at, metadata, conversation_log, funnel_stage, acquired_via')
             .single()
 
         if (error) {
@@ -192,11 +259,14 @@ export async function ensureWhatsAppLead(
             phone_e164: phone,
             funnel_stage: 'lead',
             acquired_via: context.acquiredVia || 'whatsapp',
+            avatar_url: avatar.url || null,
+            avatar_source: avatar.url ? avatar.source : null,
+            avatar_updated_at: avatar.url ? now : null,
             metadata,
             conversation_log: [],
             conversation_started_at: now,
         })
-        .select('id, name, email, phone, phone_e164, metadata, conversation_log, funnel_stage')
+        .select('id, name, email, phone, phone_e164, avatar_url, avatar_source, avatar_updated_at, metadata, conversation_log, funnel_stage, acquired_via')
         .single()
 
     if (error) {
@@ -243,12 +313,16 @@ export async function appendLeadConversationLog(
 function parseBudgetToNumber(value: unknown): number | null {
     const raw = String(value || '')
     if (!raw.trim()) return null
+    const lower = raw.toLowerCase()
     const cleaned = raw
         .replace(/[^\d,\.]/g, '')
         .replace(/\.(?=\d{3}(\D|$))/g, '')
         .replace(',', '.')
-    const parsed = Number(cleaned)
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+    let parsed = Number(cleaned)
+    if (!Number.isFinite(parsed) || parsed <= 0) return null
+    if (/(milh|milhao|milhoes|mi\b)/i.test(lower) && parsed < 1000) parsed *= 1000000
+    else if (/(^|\s)(mil|k)(\s|$)/i.test(lower) && parsed < 10000) parsed *= 1000
+    return parsed
 }
 
 function scoreCollectedLead(data: Record<string, unknown>) {
@@ -329,6 +403,46 @@ export async function syncWhatsAppLeadSnapshot(
     if (extracted.budget || extracted.orcamento) leadUpdate.lead_budget = extracted.budget || extracted.orcamento
     if (scoreSeed.timeline) leadUpdate.lead_timeframe = scoreSeed.timeline
     if (typeof extracted.is_partner === 'boolean') leadUpdate.is_partner = extracted.is_partner
+    const baseMetadata = lead.metadata && typeof lead.metadata === 'object' && !Array.isArray(lead.metadata)
+        ? lead.metadata as Record<string, unknown>
+        : {}
+    const currentTracking = baseMetadata.tracking && typeof baseMetadata.tracking === 'object'
+        ? baseMetadata.tracking as Record<string, unknown>
+        : {}
+    let nextMetadata: Record<string, unknown> = mergeMetadata(lead.metadata, {
+        qualification: {
+            updated_at: now,
+            source: 'whatsapp_agent',
+            lead_name: scoreSeed.lead_name || null,
+            interest: scoreSeed.interest || null,
+            region: scoreSeed.region || null,
+            budget: extracted.budget || extracted.orcamento || null,
+            budget_number: extracted.budget_number || scoreSeed.budget_max || null,
+            property_type: scoreSeed.property_type || null,
+            bedrooms: extracted.bedrooms || null,
+            timeline: scoreSeed.timeline || null,
+            classification,
+            score,
+            objections: Array.isArray(extracted.objections) ? extracted.objections : [],
+        },
+    })
+    if (extracted.self_reported_source || extracted.lead_source) {
+        const reportedSource = String(extracted.self_reported_source || extracted.lead_source)
+        nextMetadata = {
+            ...nextMetadata,
+            tracking: {
+                ...currentTracking,
+                self_reported_source: reportedSource,
+                detected_source: currentTracking.detected_source || reportedSource,
+                source_collected_by: 'whatsapp_agent',
+                source_collected_at: now,
+            },
+        }
+        if (!lead.acquired_via || String(lead.acquired_via).toLowerCase() === 'whatsapp') {
+            leadUpdate.acquired_via = reportedSource
+        }
+    }
+    leadUpdate.metadata = nextMetadata
 
     const { error: leadError } = await supabase
         .from('leads')

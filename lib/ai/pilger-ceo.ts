@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import { generateChatResponse } from '../ai/generation'
 import { getMarketRadarTrends } from '../market-radar/trends'
+import {
+  generateMarketRadarInsight,
+  getRadarInsightRuntimeConfig,
+  loadRadarPropertyIndex,
+} from '../market-radar/insights'
 import { sendAlertToAdmins } from '../ads/whatsapp-alerts'
 import { getCeoGeminiModel, getCeoOpenAIModel, getCeoProvider } from './config'
 
@@ -270,13 +275,15 @@ export async function collectMarketRadarData(timeSlot?: string) {
     .select('*')
     .eq('is_active', true)
 
+  const insightConfig = await getRadarInsightRuntimeConfig(supabase)
+  const propertyIndex = await loadRadarPropertyIndex(supabase)
+  let aiInsightsUsed = 0
   const results = []
   if (radars && radars.length > 0) {
     for (const radar of radars) {
       try {
         const trend = await getMarketRadarTrends(radar.keyword, radar.location)
         if (trend) {
-          results.push(trend)
           await supabase.from('market_radar_data').upsert({
             radar_id: radar.id,
             date: todayStr,
@@ -284,6 +291,20 @@ export async function collectMarketRadarData(timeSlot?: string) {
             trend_score: trend.currentScore,
             collected_at: new Date().toISOString()
           }, { onConflict: 'radar_id, date, time_slot' })
+
+          const insight = await generateMarketRadarInsight({
+            supabase,
+            radar,
+            trend,
+            date: todayStr,
+            timeSlot,
+            propertyIndex,
+            config: insightConfig,
+            allowAi: aiInsightsUsed < insightConfig.maxAiInsightsPerRun,
+          })
+
+          if (insight.ai_used) aiInsightsUsed += 1
+          results.push({ ...trend, insight })
         }
       } catch (err) {
         console.error(`[Radar] Erro ao coletar keyword "${radar.keyword}":`, err)

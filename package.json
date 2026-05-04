@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "monitor:vercel": "node scripts/monitor-vercel-traffic.mjs",
+    "import:properties:dry-run": "node scripts/property-import-dry-run.mjs",
+    "import:properties:check-db": "node scripts/property-import-check-db.mjs",
+    "import:properties:apply": "node scripts/property-import-apply.mjs",
+    "import:properties:batches": "powershell -ExecutionPolicy Bypass -File scripts/property-import-run-batches.ps1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.988.0",
@@ -42,6 +47,7 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "supabase": "^2.95.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

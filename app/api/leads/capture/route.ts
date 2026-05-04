@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
             .maybeSingle()
 
         let leadId: string | null = existingByPhone?.id || null
+        let existingMetadata = existingByPhone?.metadata || {}
 
         if (!leadId) {
             const { data: existingByVisitor } = await supabase
@@ -86,12 +87,31 @@ export async function POST(request: NextRequest) {
                 .limit(1)
                 .maybeSingle()
             leadId = existingByVisitor?.id || null
+            existingMetadata = existingByVisitor?.metadata || existingMetadata
         }
 
         const metadataPatch = {
-            ...(existingByPhone?.metadata || {}),
+            ...existingMetadata,
             form_submitted_at: new Date().toISOString(),
             consent_lgpd: consentLgpd,
+            capture_source: 'site_form',
+            landing_page_slug: landingPageSlug,
+            visitor_cookie_id: visitorCookieId,
+            tracking: {
+                detected_source: trackingData.detected_source || null,
+                utm_source: trackingData.utm_source || null,
+                utm_medium: trackingData.utm_medium || null,
+                utm_campaign: trackingData.utm_campaign || null,
+                utm_term: trackingData.utm_term || null,
+                utm_content: trackingData.utm_content || null,
+                referrer: trackingData.referrer || null,
+                device_type: trackingData.device_type || null,
+                browser: trackingData.browser || null,
+                os: trackingData.os || null,
+                country: trackingData.country || null,
+                city: trackingData.city || null,
+                region: trackingData.region || null,
+            },
         }
 
         if (leadId) {
@@ -146,6 +166,9 @@ export async function POST(request: NextRequest) {
                 name,
                 phone,
                 consent_lgpd: consentLgpd,
+                landing_page_slug: landingPageSlug,
+                visitor_cookie_id: visitorCookieId,
+                tracking: metadataPatch.tracking,
             },
         })
 
@@ -162,6 +185,35 @@ export async function POST(request: NextRequest) {
                 name
             },
         })
+
+        // Fase 2: dispara workflows visuais ativos para novos leads.
+        // Best-effort para manter compatibilidade caso a migration ainda nao tenha sido aplicada.
+        try {
+            const { data: workflows } = await supabase
+                .from('agent_workflows')
+                .select('id, trigger_type')
+                .eq('is_active', true)
+                .in('trigger_type', ['lead_created', 'lead_no_reply'])
+
+            for (const workflow of workflows || []) {
+                await inngest.send({
+                    name: 'automation/run-agent-workflow',
+                    data: {
+                        workflow_id: workflow.id,
+                        lead_id: leadId,
+                        phone,
+                        name,
+                        trigger_type: workflow.trigger_type || 'lead_created',
+                        context: {
+                            landing_page_slug: landingPageSlug,
+                            visitor_cookie_id: visitorCookieId,
+                        },
+                    },
+                })
+            }
+        } catch (workflowErr) {
+            console.warn('[Lead Capture] agent workflow trigger skipped:', workflowErr)
+        }
 
         return NextResponse.json({
             success: true,

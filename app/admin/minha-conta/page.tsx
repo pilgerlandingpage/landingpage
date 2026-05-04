@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import {
     User, Mail, Phone, Lock, CheckCircle, AlertCircle, Loader2,
-    Smartphone, Wifi, WifiOff, QrCode, Brain, RefreshCw, Save, MessageSquare, Bot
+    Smartphone, Wifi, WifiOff, QrCode, Brain, RefreshCw, Save, MessageSquare, Bot,
+    CalendarDays, Clock
 } from 'lucide-react'
 
 interface WhatsAppInstance {
@@ -48,6 +49,32 @@ interface AgentReport {
     }
 }
 
+interface AgendaAvailability {
+    id?: string | null
+    weekday: number
+    label: string
+    start_time: string
+    end_time: string
+    slot_minutes: number
+    is_active: boolean
+}
+
+interface AgendaAppointment {
+    id: string
+    lead_phone: string
+    lead_name: string | null
+    appointment_date: string
+    appointment_time: string | null
+    property_title: string | null
+    status: string
+}
+
+interface AgendaState {
+    broker_id: string | null
+    availability: AgendaAvailability[]
+    appointments: AgendaAppointment[]
+}
+
 type AccountFieldProps = {
     id: string
     label: string
@@ -81,8 +108,13 @@ export default function MinhaContaPage() {
 
     const [whatsapp, setWhatsapp] = useState<WhatsAppInstance | null>(null)
     const [agentReport, setAgentReport] = useState<AgentReport | null>(null)
+    const [agenda, setAgenda] = useState<AgendaState | null>(null)
+    const [agendaLoading, setAgendaLoading] = useState(false)
+    const [agendaSaving, setAgendaSaving] = useState(false)
     const [qrCode, setQrCode] = useState<string | null>(null)
     const [qrLoading, setQrLoading] = useState(false)
+    const [qrInstanceId, setQrInstanceId] = useState<string | null>(null)
+    const [autoCheckingStatus, setAutoCheckingStatus] = useState(false)
 
     const showToast = (msg: string, type: 'success' | 'error') => {
         setToast({ msg, type })
@@ -102,17 +134,77 @@ export default function MinhaContaPage() {
                     phone: data.user.phone || '',
                 }))
                 if (data.whatsapp_instances && data.whatsapp_instances.length > 0) {
-                    setWhatsapp(data.whatsapp_instances[0])
+                    const primaryWhatsapp = data.whatsapp_instances[0]
+                    setWhatsapp(primaryWhatsapp)
+                    if (primaryWhatsapp?.status === 'connected') {
+                        setQrCode(null)
+                        setQrInstanceId(null)
+                    }
                 } else {
                     setWhatsapp(null)
                 }
                 setAgentReport(data.agent_report || null)
+                await fetchAgenda()
             }
         } catch (err) {
             showToast('Erro ao carregar dados', 'error')
         } finally {
             setLoading(false)
         }
+    }
+
+    const fetchAgenda = async () => {
+        setAgendaLoading(true)
+        try {
+            const res = await fetch('/api/admin/me/agenda')
+            const data = await res.json()
+            if (data?.success) {
+                setAgenda(data.agenda)
+            }
+        } catch (err) {
+            console.error('Erro ao carregar agenda:', err)
+        } finally {
+            setAgendaLoading(false)
+        }
+    }
+
+    const updateAgendaDay = (weekday: number, patch: Partial<AgendaAvailability>) => {
+        setAgenda(prev => {
+            if (!prev) return prev
+            return {
+                ...prev,
+                availability: prev.availability.map(day =>
+                    day.weekday === weekday ? { ...day, ...patch } : day
+                )
+            }
+        })
+    }
+
+    const saveAgenda = async () => {
+        if (!agenda) return
+        setAgendaSaving(true)
+        try {
+            const res = await fetch('/api/admin/me/agenda', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ availability: agenda.availability })
+            })
+            const data = await res.json()
+            if (!res.ok || data?.success === false) {
+                throw new Error(data?.message || 'Erro ao salvar agenda.')
+            }
+            showToast('Agenda salva com sucesso!', 'success')
+            await fetchAgenda()
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao salvar agenda.', 'error')
+        } finally {
+            setAgendaSaving(false)
+        }
+    }
+
+    const formatAppointmentDate = (date: string) => {
+        const d = new Date(`${date}T12:00:00`)
+        return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
     }
 
     useEffect(() => { fetchData() }, [])
@@ -168,6 +260,7 @@ export default function MinhaContaPage() {
             })
             const data = await res.json()
             if (data.qrcode) setQrCode(data.qrcode)
+            if (data.instanceId) setQrInstanceId(data.instanceId)
             if (data?.brokerSyncWarning) {
                 showToast(data.brokerSyncWarning, 'error')
             } else if (data?.brokerCreated) {
@@ -183,27 +276,65 @@ export default function MinhaContaPage() {
         }
     }
 
-    const checkWhatsAppStatus = async () => {
-        if (!whatsapp) return
+    const checkWhatsAppStatus = async (options?: { silent?: boolean; instanceId?: string | null }) => {
+        const instanceId = options?.instanceId || whatsapp?.id
+        if (!instanceId) return null
         try {
-            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${whatsapp.id}`)
+            const res = await fetch(`/api/admin/whatsapp/status?instanceId=${instanceId}`)
             const data = await res.json()
             if (!res.ok || data?.success === false) {
                 if (data?.blocked_phone_mismatch) {
                     showToast(data?.message || 'WhatsApp bloqueado por divergência com o telefone cadastrado.', 'error')
-                } else if (data?.message) {
+                } else if (data?.message && !options?.silent) {
                     showToast(data.message, 'error')
                 }
             }
             if (data.status) {
                 setWhatsapp(prev => prev ? { ...prev, status: data.status, phone_number: data.phone_number || prev.phone_number } : null)
-                if (data.status === 'connected') setQrCode(null)
+                if (data.status === 'connected') {
+                    setQrCode(null)
+                    setQrInstanceId(null)
+                }
             }
-            await fetchData()
+            if (data.status === 'connected' || !options?.silent) {
+                await fetchData()
+            }
+            return data
         } catch {
-            showToast('Falha ao verificar status do WhatsApp.', 'error')
+            if (!options?.silent) {
+                showToast('Falha ao verificar status do WhatsApp.', 'error')
+            }
+            return null
         }
     }
+
+    useEffect(() => {
+        const instanceId = qrInstanceId || whatsapp?.id
+        if (!qrCode || !instanceId || whatsapp?.status === 'connected') return
+
+        let stopped = false
+
+        const pollStatus = async () => {
+            setAutoCheckingStatus(true)
+            try {
+                const data = await checkWhatsAppStatus({ silent: true, instanceId })
+                if (!stopped && data?.status === 'connected') {
+                    showToast('WhatsApp conectado com sucesso!', 'success')
+                }
+            } finally {
+                if (!stopped) setAutoCheckingStatus(false)
+            }
+        }
+
+        const firstCheck = window.setTimeout(pollStatus, 1800)
+        const intervalId = window.setInterval(pollStatus, 4000)
+
+        return () => {
+            stopped = true
+            window.clearTimeout(firstCheck)
+            window.clearInterval(intervalId)
+        }
+    }, [qrCode, qrInstanceId, whatsapp?.id, whatsapp?.status])
 
     if (loading) return <div className="account-loading">Carregando meu perfil...</div>
 
@@ -300,17 +431,28 @@ export default function MinhaContaPage() {
                                         {whatsapp.phone_number ? ` Número: ${whatsapp.phone_number}` : ''}
                                     </span>
                                 </div>
-                                <button type="button" className="btn btn-outline btn-sm" onClick={checkWhatsAppStatus}>
+                                <button type="button" className="btn btn-outline btn-sm" onClick={() => checkWhatsAppStatus()}>
                                     <RefreshCw size={14} /> Verificar
                                 </button>
                             </div>
                         ) : qrCode ? (
                             <div className="account-qr-state">
                                 <strong>Escaneie o QR Code com seu WhatsApp</strong>
+                                <span className="account-qr-status">
+                                    {autoCheckingStatus ? (
+                                        <>
+                                            <Loader2 size={14} className="spin" /> Verificando conexão automaticamente...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <RefreshCw size={14} /> Aguardando leitura do QR Code...
+                                        </>
+                                    )}
+                                </span>
                                 <div className="account-qr-frame">
                                     <img src={qrCode} alt="WhatsApp QR Code" />
                                 </div>
-                                <button type="button" className="account-success-button" onClick={checkWhatsAppStatus}>
+                                <button type="button" className="account-success-button" onClick={() => checkWhatsAppStatus()}>
                                     <RefreshCw size={16} /> Já escaneei, verificar agora
                                 </button>
                             </div>
@@ -328,6 +470,110 @@ export default function MinhaContaPage() {
                             </div>
                         )}
                     </div>
+                </section>
+
+                <section className="chart-card account-section account-section-blue">
+                    <div className="account-section-title">
+                        <CalendarDays size={20} />
+                        <div>
+                            <h2>Agenda do corretor</h2>
+                            <p>Horários que o agente IA pode consultar antes de sugerir visitas aos leads.</p>
+                        </div>
+                    </div>
+
+                    {agendaLoading ? (
+                        <div className="account-agent-empty compact">
+                            <Loader2 size={22} className="spin" />
+                            <strong>Carregando agenda...</strong>
+                        </div>
+                    ) : agenda ? (
+                        <div className="account-agenda-panel">
+                            <div className="account-agenda-grid">
+                                {agenda.availability.map((day) => (
+                                    <div className={`account-agenda-day ${day.is_active ? 'active' : ''}`} key={day.weekday}>
+                                        <label className="account-agenda-toggle">
+                                            <input
+                                                type="checkbox"
+                                                checked={day.is_active}
+                                                onChange={e => updateAgendaDay(day.weekday, { is_active: e.target.checked })}
+                                            />
+                                            <span>{day.label}</span>
+                                        </label>
+                                        <div className="account-agenda-times">
+                                            <label>
+                                                Início
+                                                <input
+                                                    type="time"
+                                                    value={day.start_time}
+                                                    disabled={!day.is_active}
+                                                    onChange={e => updateAgendaDay(day.weekday, { start_time: e.target.value })}
+                                                />
+                                            </label>
+                                            <label>
+                                                Fim
+                                                <input
+                                                    type="time"
+                                                    value={day.end_time}
+                                                    disabled={!day.is_active}
+                                                    onChange={e => updateAgendaDay(day.weekday, { end_time: e.target.value })}
+                                                />
+                                            </label>
+                                            <label>
+                                                Slot
+                                                <select
+                                                    value={day.slot_minutes}
+                                                    disabled={!day.is_active}
+                                                    onChange={e => updateAgendaDay(day.weekday, { slot_minutes: Number(e.target.value) })}
+                                                >
+                                                    <option value={30}>30 min</option>
+                                                    <option value={45}>45 min</option>
+                                                    <option value={60}>60 min</option>
+                                                    <option value={90}>90 min</option>
+                                                    <option value={120}>120 min</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="account-agenda-footer">
+                                <div>
+                                    <strong>Próximos agendamentos</strong>
+                                    <span>{agenda.appointments.length ? `${agenda.appointments.length} visita(s) nos próximos dias` : 'Nenhuma visita agendada ainda.'}</span>
+                                </div>
+                                <button type="button" className="btn btn-gold" onClick={saveAgenda} disabled={agendaSaving}>
+                                    {agendaSaving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+                                    {agendaSaving ? 'Salvando...' : 'Salvar agenda'}
+                                </button>
+                            </div>
+
+                            {agenda.appointments.length ? (
+                                <div className="account-appointment-list">
+                                    {agenda.appointments.slice(0, 5).map((appointment) => (
+                                        <div className="account-appointment-item" key={appointment.id}>
+                                            <Clock size={16} />
+                                            <div>
+                                                <strong>{appointment.lead_name || appointment.lead_phone}</strong>
+                                                <span>
+                                                    {formatAppointmentDate(appointment.appointment_date)}
+                                                    {appointment.appointment_time ? ` às ${appointment.appointment_time}` : ''}
+                                                    {appointment.property_title ? ` · ${appointment.property_title}` : ''}
+                                                </span>
+                                            </div>
+                                            <small>{appointment.status}</small>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : (
+                        <div className="account-agent-empty compact">
+                            <CalendarDays size={22} />
+                            <strong>Agenda não carregada</strong>
+                            <span>Atualize a página para tentar novamente.</span>
+                        </div>
+                    )}
                 </section>
 
                 <section className="chart-card account-section account-section-indigo">
@@ -455,12 +701,16 @@ export default function MinhaContaPage() {
 
                 .account-page {
                     max-width: 1040px;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 }
 
                 .account-header h1 {
                     display: flex;
                     align-items: center;
                     gap: 10px;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-weight: 800;
+                    letter-spacing: 0;
                     margin: 0;
                 }
 
@@ -493,6 +743,10 @@ export default function MinhaContaPage() {
                     border-top-color: #22c55e;
                 }
 
+                .account-section-blue {
+                    border-top-color: #0ea5e9;
+                }
+
                 .account-section-indigo {
                     border-top-color: #6366f1;
                 }
@@ -505,7 +759,10 @@ export default function MinhaContaPage() {
                 }
 
                 .account-section-title h2 {
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                     font-size: 1.05rem;
+                    font-weight: 800;
+                    letter-spacing: 0;
                     line-height: 1.2;
                     margin: 0 0 4px;
                 }
@@ -656,6 +913,17 @@ export default function MinhaContaPage() {
                 .account-qr-state strong,
                 .account-empty-state strong {
                     color: var(--text-primary);
+                }
+
+                .account-qr-status {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    color: #16a34a;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    line-height: 1.3;
                 }
 
                 .account-qr-frame {
@@ -831,6 +1099,158 @@ export default function MinhaContaPage() {
                     padding: 18px;
                 }
 
+                .account-agenda-panel {
+                    display: grid;
+                    gap: 16px;
+                }
+
+                .account-agenda-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 12px;
+                }
+
+                .account-agenda-day {
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    padding: 14px;
+                    display: grid;
+                    gap: 12px;
+                }
+
+                .account-agenda-day.active {
+                    border-color: rgba(14, 165, 233, 0.38);
+                    background: rgba(14, 165, 233, 0.06);
+                }
+
+                .account-agenda-toggle {
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    color: var(--text-primary);
+                    font-weight: 700;
+                    font-size: 0.88rem;
+                }
+
+                .account-agenda-toggle input {
+                    accent-color: #0ea5e9;
+                    width: 16px;
+                    height: 16px;
+                }
+
+                .account-agenda-times {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 10px;
+                }
+
+                .account-agenda-times label {
+                    display: grid;
+                    gap: 5px;
+                    color: var(--text-muted);
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                }
+
+                .account-agenda-times input,
+                .account-agenda-times select {
+                    width: 100%;
+                    min-height: 36px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: var(--bg-card);
+                    color: var(--text-primary);
+                    padding: 0 9px;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 0.84rem;
+                    outline: none;
+                }
+
+                .account-agenda-times input:disabled,
+                .account-agenda-times select:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                }
+
+                .account-agenda-footer {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 14px;
+                    background: rgba(14, 165, 233, 0.05);
+                    border: 1px solid rgba(14, 165, 233, 0.18);
+                    border-radius: 8px;
+                    padding: 14px;
+                }
+
+                .account-agenda-footer div {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 0;
+                }
+
+                .account-agenda-footer strong {
+                    color: var(--text-primary);
+                    font-size: 0.9rem;
+                }
+
+                .account-agenda-footer span {
+                    color: var(--text-muted);
+                    font-size: 0.78rem;
+                }
+
+                .account-appointment-list {
+                    display: grid;
+                    gap: 8px;
+                }
+
+                .account-appointment-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    padding: 11px 12px;
+                }
+
+                .account-appointment-item > svg {
+                    color: #0ea5e9;
+                    flex: 0 0 auto;
+                }
+
+                .account-appointment-item div {
+                    display: grid;
+                    gap: 3px;
+                    min-width: 0;
+                    flex: 1;
+                }
+
+                .account-appointment-item strong {
+                    color: var(--text-primary);
+                    font-size: 0.86rem;
+                }
+
+                .account-appointment-item span {
+                    color: var(--text-muted);
+                    font-size: 0.76rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .account-appointment-item small {
+                    border-radius: 999px;
+                    border: 1px solid var(--border);
+                    color: var(--text-muted);
+                    font-size: 0.7rem;
+                    padding: 4px 8px;
+                    text-transform: uppercase;
+                }
+
                 .account-conversations {
                     display: grid;
                     gap: 14px;
@@ -1001,30 +1421,220 @@ export default function MinhaContaPage() {
                     .account-header {
                         align-items: stretch;
                         flex-direction: column;
-                        gap: 16px;
+                        gap: 10px;
+                        margin-bottom: 12px;
+                    }
+
+                    .account-header h1 {
+                        font-size: 1.18rem;
+                        gap: 7px;
+                        line-height: 1.18;
+                    }
+
+                    .account-header h1 svg {
+                        width: 18px;
+                        height: 18px;
+                    }
+
+                    .account-header p {
+                        font-size: 0.72rem;
+                        line-height: 1.35;
+                        margin-top: 4px;
                     }
 
                     .account-save {
+                        min-height: 36px;
+                        padding: 0 12px;
+                        font-size: 0.78rem;
                         width: 100%;
                         justify-content: center;
+                    }
+
+                    .account-save svg {
+                        width: 15px;
+                        height: 15px;
+                    }
+
+                    .account-sections {
+                        gap: 12px;
+                    }
+
+                    .account-section {
+                        border-radius: 10px;
+                        border-top-width: 3px;
+                        padding: 13px;
+                    }
+
+                    .account-section-title {
+                        gap: 8px;
+                        margin-bottom: 12px;
+                    }
+
+                    .account-section-title > svg {
+                        width: 16px;
+                        height: 16px;
+                    }
+
+                    .account-section-title h2 {
+                        font-size: 0.9rem;
+                        line-height: 1.16;
+                        margin-bottom: 2px;
+                    }
+
+                    .account-section-title p {
+                        font-size: 0.68rem;
+                        line-height: 1.32;
                     }
 
                     .account-form-grid {
                         grid-template-columns: 1fr;
+                        gap: 10px;
+                    }
+
+                    .account-field label,
+                    .account-textarea-field label {
+                        font-size: 0.7rem;
+                        margin-bottom: 5px;
+                    }
+
+                    .account-input-icon {
+                        left: 11px;
+                        width: 14px;
+                        height: 14px;
+                    }
+
+                    .account-input-shell input {
+                        border-radius: 7px;
+                        font-size: 0.8rem;
+                        height: 36px;
+                        padding-left: 34px;
+                    }
+
+                    .account-field-hint {
+                        font-size: 0.65rem;
+                        margin-top: 4px;
+                    }
+
+                    .account-whatsapp-panel {
+                        padding: 12px;
+                    }
+
+                    .account-status-icon {
+                        width: 38px;
+                        height: 38px;
+                    }
+
+                    .account-status-icon svg {
+                        width: 18px;
+                        height: 18px;
                     }
 
                     .account-status-row {
-                        align-items: flex-start;
-                        flex-direction: column;
+                        align-items: center;
+                        flex-direction: row;
+                        gap: 10px;
                     }
 
                     .account-status-row .btn {
-                        width: 100%;
+                        min-height: 30px;
+                        padding: 0 10px;
+                        font-size: 0.72rem;
+                        width: auto;
                         justify-content: center;
+                    }
+
+                    .account-status-copy strong,
+                    .account-empty-state strong {
+                        font-size: 0.82rem;
+                    }
+
+                    .account-status-copy span,
+                    .account-empty-state span {
+                        font-size: 0.68rem;
+                        line-height: 1.3;
                     }
 
                     .account-agent-summary {
                         grid-template-columns: 1fr;
+                    }
+
+                    .account-agenda-panel {
+                        gap: 10px;
+                    }
+
+                    .account-agenda-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                    }
+
+                    .account-agenda-day {
+                        border-radius: 8px;
+                        gap: 7px;
+                        padding: 9px;
+                    }
+
+                    .account-agenda-toggle {
+                        gap: 6px;
+                        font-size: 0.74rem;
+                    }
+
+                    .account-agenda-toggle input {
+                        width: 13px;
+                        height: 13px;
+                    }
+
+                    .account-agenda-times {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 5px;
+                    }
+
+                    .account-agenda-times label {
+                        font-size: 0.56rem;
+                        gap: 3px;
+                        letter-spacing: 0;
+                    }
+
+                    .account-agenda-times input,
+                    .account-agenda-times select {
+                        border-radius: 7px;
+                        font-size: 0.68rem;
+                        min-height: 30px;
+                        padding: 0 5px;
+                    }
+
+                    .account-agenda-footer {
+                        align-items: stretch;
+                        flex-direction: column;
+                        gap: 9px;
+                        padding: 10px;
+                    }
+
+                    .account-agenda-footer strong {
+                        font-size: 0.78rem;
+                    }
+
+                    .account-agenda-footer span {
+                        font-size: 0.66rem;
+                    }
+
+                    .account-agenda-footer .btn {
+                        min-height: 34px;
+                        font-size: 0.74rem;
+                        width: 100%;
+                        justify-content: center;
+                    }
+
+                    .account-appointment-item {
+                        gap: 8px;
+                        padding: 8px 9px;
+                    }
+
+                    .account-appointment-item strong {
+                        font-size: 0.76rem;
+                    }
+
+                    .account-appointment-item span {
+                        font-size: 0.66rem;
                     }
 
                     .account-conversations-header,

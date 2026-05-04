@@ -56,35 +56,38 @@ export default function PushAdminPage() {
     }
 
     return (
-        <div className="space-y-8">
-            <div className="admin-header">
-                <h1>Notificações Push</h1>
+        <div className="push-page">
+            <div className="admin-header push-header">
+                <div>
+                    <h1>Notificações Push</h1>
+                    <p className="push-header-subtitle">Envie avisos rápidos para leads inscritos.</p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="push-stats-grid">
                 {/* Stats Card */}
-                <div className="chart-card flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-[#c9a96e]/20 flex items-center justify-center text-[#c9a96e]">
+                <div className="chart-card push-stat-card">
+                    <div className="push-stat-icon">
                         <Users size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Inscritos Ativos</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+                        <p>Inscritos ativos</p>
+                        <strong>{stats.active}</strong>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="push-layout-grid">
                 {/* Send Form */}
-                <div className="chart-card">
-                    <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <div className="chart-card push-panel">
+                    <h2 className="push-panel-title">
                         <Send size={20} className="text-[#c9a96e]" />
-                        Nova Notificação
+                        Nova notificação
                     </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="push-form">
                         <div>
-                            <label className="block text-sm text-gray-500 mb-2">Título</label>
+                            <label>Título</label>
                             <input
                                 type="text"
                                 className="form-input w-full"
@@ -96,7 +99,7 @@ export default function PushAdminPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm text-gray-500 mb-2">Mensagem</label>
+                            <label>Mensagem</label>
                             <textarea
                                 className="form-textarea w-full h-32"
                                 value={form.message}
@@ -107,7 +110,7 @@ export default function PushAdminPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm text-gray-500 mb-2">Link de Destino</label>
+                            <label>Link de destino</label>
                             <input
                                 type="url"
                                 className="form-input w-full"
@@ -115,13 +118,13 @@ export default function PushAdminPage() {
                                 onChange={e => setForm({ ...form, url: e.target.value })}
                                 placeholder="https://seusite.com.br/promocao"
                             />
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="push-field-help">
                                 O endereço completo para onde o usuário será levado ao clicar na notificação.
                             </p>
                         </div>
 
                         {status && (
-                            <div className={`p-4 rounded-lg flex items-center gap-2 text-sm ${status.type === 'success' ? 'bg-green-900/20 text-green-400 border border-green-900/50' : 'bg-red-900/20 text-red-400 border border-red-900/50'
+                            <div className={`push-status ${status.type === 'success' ? 'success' : 'error'
                                 }`}>
                                 {status.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
                                 {status.message}
@@ -139,44 +142,44 @@ export default function PushAdminPage() {
                 </div>
 
                 {/* Preview Section */}
-                <div className="chart-card flex flex-col">
-                    <h2 className="text-lg font-bold text-gray-900 mb-8 flex items-center gap-2">
+                <div className="chart-card push-panel push-preview-panel">
+                    <h2 className="push-panel-title">
                         <Bell size={20} className="text-[#c9a96e]" />
                         Pré-visualização
                     </h2>
 
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[url('/grid.svg')] bg-center bg-opacity-5 rounded-lg bg-gray-50 border border-gray-100">
+                    <div className="push-preview-stage">
 
                         {/* Windows 11 Style Notification Toast (Light Mode) */}
-                        <div className="w-full max-w-[360px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden transform transition-all hover:scale-[1.02] duration-300">
+                        <div className="push-preview-toast">
                             {/* Header */}
-                            <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full bg-[#c9a96e] flex items-center justify-center">
+                            <div className="push-preview-toast-header">
+                                <div>
+                                    <div className="push-preview-app-icon">
                                         <Bell size={10} className="text-white" />
                                     </div>
-                                    <span className="text-xs font-medium text-gray-700">Pilger Landing Page</span>
-                                    <span className="text-[10px] text-gray-400">• Agora</span>
+                                    <span>Pilger Landing Page</span>
+                                    <small>Agora</small>
                                 </div>
-                                <button className="text-gray-400 hover:text-gray-700">
+                                <button aria-label="Fechar preview">
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                             </div>
 
                             {/* Body */}
-                            <div className="p-4 flex gap-4">
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="text-gray-900 font-semibold text-sm leading-tight mb-1">
-                                        {form.title || 'Título da Notificação'}
+                            <div className="push-preview-toast-body">
+                                <div>
+                                    <h4>
+                                        {form.title || 'Título da notificação'}
                                     </h4>
-                                    <p className="text-gray-600 text-xs leading-relaxed line-clamp-3">
+                                    <p>
                                         {form.message || 'Sua mensagem aparecerá aqui. Digite algo no formulário ao lado para ver como ficará para o usuário.'}
                                     </p>
 
                                     {/* Action / Domain */}
-                                    <div className="mt-3 flex items-center gap-2">
-                                        <div className="px-2 py-1 rounded bg-gray-100 text-[10px] text-gray-500 flex items-center gap-1 max-w-full truncate">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-[#c9a96e]"></div>
+                                    <div className="push-preview-domain">
+                                        <div>
+                                            <span></span>
                                             {(() => {
                                                 try {
                                                     return new URL(form.url).hostname.replace('www.', '')
@@ -189,16 +192,14 @@ export default function PushAdminPage() {
                                 </div>
 
                                 {/* Image Placeholder (if we had one, but we use Logo for now) */}
-                                <div className="w-16 h-16 bg-gray-50 rounded-md flex items-center justify-center border border-gray-200 flex-shrink-0">
-                                    <div className="text-[#c9a96e] opacity-50">
-                                        <Users size={24} />
-                                    </div>
+                                <div className="push-preview-image">
+                                    <Users size={24} />
                                 </div>
                             </div>
                         </div>
 
                         {/* Mobile Android Style Preview (Optional secondary or just stick to one good one) */}
-                        <div className="mt-8 opacity-60 text-xs text-gray-500 text-center w-full px-8">
+                        <div className="push-preview-note">
                             * A aparência pode variar dependendo do sistema operacional (Windows, macOS, Android, iOS).
                         </div>
                     </div>

@@ -29,6 +29,7 @@ interface SendMenuOptions {
     imageButton?: string        // URL de imagem para botões
     delay?: number
     readchat?: boolean
+    readmessages?: boolean
     instanceToken?: string
 }
 
@@ -54,6 +55,14 @@ interface SendAudioOptions {
     phone: string
     audioUrl: string
     ptt?: boolean // voice note (gravado na hora)
+    instanceToken?: string
+}
+
+interface SendVideoOptions {
+    phone: string
+    videoUrl: string
+    caption?: string
+    thumbnail?: string
     instanceToken?: string
 }
 
@@ -284,7 +293,8 @@ export async function sendMenuMessage(options: SendMenuOptions | SendMenuOptions
     if (opts.selectableCount !== undefined) body.selectableCount = opts.selectableCount
     if (opts.imageButton) body.imageButton = opts.imageButton
     if (opts.delay) body.delay = opts.delay
-    if (opts.readchat) body.readchat = opts.readchat
+    body.readchat = opts.readchat ?? true
+    body.readmessages = opts.readmessages ?? true
 
     return uazapiFetch('/send/menu', {
         method: 'POST',
@@ -370,6 +380,23 @@ export async function sendAudioMessage({ phone, audioUrl, ptt, instanceToken }: 
             number: cleanPhone(phone),
             file: audioUrl,           // UAZAPI uses 'file' not 'url'
             type: ptt ? 'ptt' : 'audio',  // 'ptt' for voice note, 'audio' for regular
+        },
+    })
+}
+
+/** Enviar video */
+export async function sendVideoMessage({ phone, videoUrl, caption, thumbnail, instanceToken }: SendVideoOptions) {
+    if (!instanceToken) throw new Error('Token da instÃ¢ncia Ã© obrigatÃ³rio')
+
+    return uazapiFetch('/send/media', {
+        method: 'POST',
+        token: instanceToken,
+        body: {
+            number: cleanPhone(phone),
+            file: videoUrl,
+            type: 'video',
+            ...(caption ? { text: caption } : {}),
+            ...(thumbnail ? { thumbnail } : {}),
         },
     })
 }
@@ -467,6 +494,14 @@ export async function getContactAvatar(phone: string, instanceToken: string) {
     })
 }
 
+export async function getChatDetails(phone: string, instanceToken: string, preview = true) {
+    return uazapiFetch('/chat/details', {
+        method: 'POST',
+        token: instanceToken,
+        body: { number: cleanPhone(phone), preview },
+    })
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  GRUPOS
 // ═══════════════════════════════════════════════════════════════
@@ -521,16 +556,32 @@ export async function setPresenceTyping(phone: string, instanceToken: string) {
 }
 
 /** Marcar mensagens como lidas */
-export async function markAsRead(phoneOrJid: string, instanceToken: string) {
+export async function markAsRead(phoneOrJid: string, instanceToken: string, messageId?: string | null) {
     const raw = (phoneOrJid || '').trim()
     const number = cleanPhone(raw)
     const jid = raw.includes('@') ? raw : `${number}@s.whatsapp.net`
-    return uazapiFetch('/chat/read', {
+
+    const chatRead = await uazapiFetch('/chat/read', {
         method: 'POST',
         token: instanceToken,
-        // Compatibility payload: some providers expect "number", others "id"/"jid"/"chatId".
-        body: { number, id: jid, jid, chatId: jid },
+        body: {
+            number: jid,
+            read: true,
+        },
     })
+
+    if (!messageId) return { chatRead }
+
+    const messageRead = await uazapiFetch('/message/markread', {
+        method: 'POST',
+        token: instanceToken,
+        body: { id: [messageId] },
+    }).catch((err) => {
+        console.warn('[UAZAPI] /message/markread failed:', err)
+        return null
+    })
+
+    return { chatRead, messageRead }
 }
 
 /** Mostrar "gravando áudio..." */

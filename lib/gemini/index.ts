@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const DEFAULT_MODEL = 'gemini-2.0-flash'
@@ -107,9 +108,10 @@ export async function chatWithGemini({
 }: ChatOptions): Promise<string> {
     const apiKey = await getGeminiApiKey()
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
+    const modelName = await getGeminiModel()
 
     const response = await fetch(
-        `${GEMINI_API_BASE}/models/${await getGeminiModel()}:generateContent?key=${apiKey}`,
+        `${GEMINI_API_BASE}/models/${modelName}:generateContent?key=${apiKey}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -135,6 +137,11 @@ export async function chatWithGemini({
     }
 
     const data = await response.json()
+    await recordGeminiUsage({
+        model: modelName,
+        feature: 'gemini_chat_rest',
+        usageMetadata: data.usageMetadata,
+    })
     return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 }
 
@@ -164,9 +171,10 @@ export async function extractLeadData(
     if (!basePrompt) return {}
 
     const extractionPrompt = `${basePrompt}\n\nConversa:\n${conversationText}`
+    const modelName = await getGeminiModel()
 
     const response = await fetch(
-        `${GEMINI_API_BASE}/models/${await getGeminiModel()}:generateContent?key=${apiKey}`,
+        `${GEMINI_API_BASE}/models/${modelName}:generateContent?key=${apiKey}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -180,6 +188,11 @@ export async function extractLeadData(
     if (!response.ok) return {}
 
     const data = await response.json()
+    await recordGeminiUsage({
+        model: modelName,
+        feature: 'lead_extraction',
+        usageMetadata: data.usageMetadata,
+    })
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}'
 
     try {

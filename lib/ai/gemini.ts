@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getGeminiApiKey, getAIConfig } from './config'
+import { recordGeminiUsage } from './gemini-costs'
 
 export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string, modelOverride?: string) {
   const apiKey = await getGeminiApiKey()
@@ -32,6 +33,11 @@ export async function generateGeminiChat(history: { role: string; content: strin
 
     const result = await chat.sendMessage(message)
     const response = result.response
+    await recordGeminiUsage({
+      model: modelName,
+      feature: 'gemini_chat',
+      usageMetadata: (response as any).usageMetadata || (result as any).response?.usageMetadata,
+    })
     return response.text()
   } catch (error: any) {
     console.error('[Gemini Chat] Erro:', error?.message || error)

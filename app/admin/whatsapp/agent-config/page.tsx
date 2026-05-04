@@ -140,6 +140,7 @@ export default function AgentConfigPage() {
     const [companyCreci, setCompanyCreci] = useState('')
     const [companyPhone, setCompanyPhone] = useState('')
     const [companyDescription, setCompanyDescription] = useState('')
+    const [companyLocationUrl, setCompanyLocationUrl] = useState('https://maps.app.goo.gl/javGAuakYTwsQrmLA')
     const [linkButtons, setLinkButtons] = useState<CustomLinkButton[]>([])
     const [newActionName, setNewActionName] = useState('')
     const [newActionType, setNewActionType] = useState<CustomLinkButton['type']>('URL')
@@ -241,6 +242,7 @@ export default function AgentConfigPage() {
                 if (c.agent_company_creci) setCompanyCreci(c.agent_company_creci)
                 if (c.agent_company_phone) setCompanyPhone(c.agent_company_phone)
                 if (c.agent_company_description) setCompanyDescription(c.agent_company_description)
+                if (c.agent_company_location_url) setCompanyLocationUrl(c.agent_company_location_url)
                 if (c.agent_link_buttons) {
                     try {
                         const parsed = JSON.parse(c.agent_link_buttons)
@@ -330,6 +332,7 @@ export default function AgentConfigPage() {
                         agent_company_creci: companyCreci,
                         agent_company_phone: companyPhone,
                         agent_company_description: companyDescription,
+                        agent_company_location_url: companyLocationUrl,
                         agent_link_buttons: JSON.stringify(linkButtons),
                         agent_working_hours: JSON.stringify(hours),
                         agent_regions: JSON.stringify(regions),
@@ -431,7 +434,8 @@ export default function AgentConfigPage() {
     function addLinkButton() {
         const name = newActionName.trim()
         if (!name) return
-        const slug = slugifyTagName(name)
+        let slug = slugifyTagName(name)
+        if (slug.startsWith('botao_')) slug = slug.slice('botao_'.length)
         if (!slug) return
         const tag = `{botao_${slug}}`
         if (linkButtons.some(b => b.tag === tag)) {
@@ -532,7 +536,8 @@ export default function AgentConfigPage() {
             return
         }
 
-        const slug = slugifyTagName(name)
+        let slug = slugifyTagName(name)
+        if (slug.startsWith('botao_')) slug = slug.slice('botao_'.length)
         if (!slug) return
         const tag = `{botao_usuario_${slug}}`
         if (userAccessButtons.some(button => button.tag === tag)) {
@@ -767,6 +772,18 @@ export default function AgentConfigPage() {
                     <div>
                         <label style={labelStyle}>Telefone Principal</label>
                         <input style={inputStyle} value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} placeholder="(47) 9.9252-8080" />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Localização da Imobiliária</label>
+                        <input
+                            style={inputStyle}
+                            value={companyLocationUrl}
+                            onChange={e => setCompanyLocationUrl(e.target.value)}
+                            placeholder="https://maps.app.goo.gl/..."
+                        />
+                        <p style={{ fontSize: '0.72rem', color: '#888', marginTop: 6 }}>
+                            Usado pelas tags {'{botao_localizacao}'} e {'{localizacao_empresa}'}. O clique é rastreado na ficha do lead.
+                        </p>
                     </div>
                     <div style={{ gridColumn: '1 / -1' }}>
                         <label style={labelStyle}>Descrição da Empresa</label>

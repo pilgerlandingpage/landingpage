@@ -8,6 +8,7 @@ import {
     DAILY_REPORT_PROMPT,
     WEEKLY_REPORT_PROMPT,
     CEO_AGENT_SYSTEM_PROMPT,
+    RADAR_ANALYST_SYSTEM_PROMPT,
 } from '@/lib/ai/prompts'
 
 function getSupabase() {
@@ -27,6 +28,13 @@ const ENV_FALLBACKS: Record<string, string> = {
     vapid_private_key: 'VAPID_PRIVATE_KEY',
     google_ads_manager_id: 'GOOGLE_ADS_MANAGER_ID',
     google_ads_customer_id: 'GOOGLE_ADS_CUSTOMER_ID',
+    gemini_billing_bigquery_project_id: 'GEMINI_BILLING_BIGQUERY_PROJECT_ID',
+    gemini_billing_bigquery_dataset: 'GEMINI_BILLING_BIGQUERY_DATASET',
+    gemini_billing_bigquery_table: 'GEMINI_BILLING_BIGQUERY_TABLE',
+    gemini_billing_google_project_id: 'GEMINI_BILLING_GOOGLE_PROJECT_ID',
+    gemini_billing_service_account_json: 'GEMINI_BILLING_SERVICE_ACCOUNT_JSON',
+    gemini_billing_client_email: 'GEMINI_BILLING_CLIENT_EMAIL',
+    gemini_billing_private_key: 'GEMINI_BILLING_PRIVATE_KEY',
     serpapi_api_key: 'SERPAPI_API_KEY',
     dataforseo_login: 'DATAFORSEO_LOGIN',
     dataforseo_password: 'DATAFORSEO_PASSWORD',
@@ -40,19 +48,32 @@ const DEFAULT_PROMPTS: Record<string, string> = {
     pilger_daily_system_prompt: DAILY_REPORT_PROMPT,
     pilger_weekly_system_prompt: WEEKLY_REPORT_PROMPT,
     ceo_agent_system_prompt: CEO_AGENT_SYSTEM_PROMPT,
+    radar_analyst_system_prompt: RADAR_ANALYST_SYSTEM_PROMPT,
 }
 
 const DEFAULT_CONFIGS: Record<string, string> = {
     ads_sync_interval_minutes: '60',
+    radar_ai_enabled: 'true',
+    radar_ai_min_opportunity_score: '70',
+    radar_ai_max_insights_per_run: '6',
+    radar_opportunity_alert_threshold: '75',
 }
 
 function normalizeConfigValue(key: string, value: string) {
-    if (key !== 'ads_sync_interval_minutes') return value
+    const boundedNumberConfigs: Record<string, { fallback: string; min: number; max: number }> = {
+        ads_sync_interval_minutes: { fallback: DEFAULT_CONFIGS.ads_sync_interval_minutes, min: 1, max: 1440 },
+        radar_ai_min_opportunity_score: { fallback: DEFAULT_CONFIGS.radar_ai_min_opportunity_score, min: 0, max: 100 },
+        radar_ai_max_insights_per_run: { fallback: DEFAULT_CONFIGS.radar_ai_max_insights_per_run, min: 0, max: 50 },
+        radar_opportunity_alert_threshold: { fallback: DEFAULT_CONFIGS.radar_opportunity_alert_threshold, min: 0, max: 100 },
+    }
+
+    if (key === 'radar_ai_enabled') return value === 'false' ? 'false' : 'true'
+    if (!boundedNumberConfigs[key]) return value
 
     const parsed = Number.parseInt(String(value || ''), 10)
-    if (!Number.isFinite(parsed)) return DEFAULT_CONFIGS.ads_sync_interval_minutes
+    if (!Number.isFinite(parsed)) return boundedNumberConfigs[key].fallback
 
-    return String(Math.min(1440, Math.max(1, parsed)))
+    return String(Math.min(boundedNumberConfigs[key].max, Math.max(boundedNumberConfigs[key].min, parsed)))
 }
 
 export async function GET() {

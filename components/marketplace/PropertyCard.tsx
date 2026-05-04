@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Heart, ChevronLeft, ChevronRight, Bed, Bath, Maximize } from 'lucide-react'
 import Link from 'next/link'
@@ -376,3 +376,4 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
         </div>
     )
 }
+

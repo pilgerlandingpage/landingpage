@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
-import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { deleteInstance as deleteUazapiInstance, sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
@@ -877,6 +877,30 @@ export async function DELETE(request: NextRequest) {
             .delete()
             .eq('user_id', id)
         if (deleteSectorsLinksError) throw deleteSectorsLinksError
+
+        const { data: userInstances, error: userInstancesError } = await admin
+            .from('whatsapp_instances')
+            .select('id, instance_name, instance_token')
+            .eq('admin_user_id', id)
+        if (userInstancesError) throw userInstancesError
+
+        for (const instance of userInstances || []) {
+            const token = String(instance.instance_token || '').trim()
+            if (!token) {
+                return NextResponse.json({
+                    error: `A instancia "${instance.instance_name || instance.id}" nao possui token local. Ela nao foi removida para evitar deixar dados inconsistentes.`,
+                }, { status: 409 })
+            }
+
+            try {
+                await deleteUazapiInstance(token, instance.instance_name || undefined)
+            } catch (deleteErr) {
+                return NextResponse.json({
+                    error: `Nao foi possivel excluir a instancia "${instance.instance_name || instance.id}" no servidor da UAZAPI. O usuario nao foi removido.`,
+                    details: deleteErr instanceof Error ? deleteErr.message : String(deleteErr),
+                }, { status: 502 })
+            }
+        }
 
         const { error: deleteWhatsappLinksError } = await admin
             .from('whatsapp_instances')

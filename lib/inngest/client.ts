@@ -55,6 +55,16 @@ export const inngest = new Inngest({
             }
         }
         // --- Ads / Tráfego ---
+        'automation/run-agent-workflow': {
+            data: {
+                workflow_id: string
+                lead_id?: string
+                phone?: string
+                name?: string
+                trigger_type?: string
+                context?: Record<string, unknown>
+            }
+        }
         'ads/campaign-created': {
             data: {
                 campaign_id: string
@@ -97,6 +107,7 @@ export const inngest = new Inngest({
                 mediaMimetype?: string | null
                 mediaFilename?: string | null
                 mediaType?: 'image' | 'video' | 'document' | null
+                queuedMessageKey?: string | null
                 instanceId: string
                 instanceToken: string
                 instanceName: string
@@ -126,6 +137,7 @@ export const inngest = new Inngest({
                 instanceToken: string
                 remotePhone?: string | null
                 cleanPhone: string
+                messageId?: string | null
             }
         }
         'whatsapp/instance-setup': {

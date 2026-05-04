@@ -10,12 +10,16 @@ interface Lead {
     name: string | null
     email: string | null
     phone: string | null
+    avatar_url?: string | null
+    avatar_source?: string | null
+    avatar_updated_at?: string | null
     funnel_stage: string
     is_vip: boolean
     lead_classification?: string | null
     whatsapp_sent: boolean
     ai_summary: string | null
     conversation_log: any[] | null
+    metadata?: any
     created_at: string
     lead_purpose?: string | null
     lead_budget?: string | null
@@ -228,17 +232,118 @@ export default function LeadsPage() {
         a.click()
     }
 
+    const formatWhatsAppClick = (click?: any) => {
+        if (!click || typeof click !== 'object') return ''
+        const label = click.link_label || click.link_title || click.link_type || click.event_type || 'Link'
+        const date = click.clicked_at ? new Date(click.clicked_at).toLocaleString('pt-BR') : ''
+        return date ? `${label} em ${date}` : String(label)
+    }
+
+    const cleanConversationContent = (content: string) => {
+        return String(content || '')
+            .replace(/\[BOTOES_URL:[^\]]+\]/gi, '')
+            .replace(/\*\*/g, '')
+            .trim()
+    }
+
+    const extractConversationButtons = (content: string) => {
+        const buttons: { label: string; url: string }[] = []
+        const matches = String(content || '').matchAll(/\[BOTOES_URL:([^\]]+)\]/gi)
+        for (const match of matches) {
+            const parts = String(match[1] || '').split('|').map(p => p.trim()).filter(Boolean)
+            for (const part of parts.slice(1)) {
+                const [label, url] = part.split('=>').map(p => p?.trim())
+                if (label && url) buttons.push({ label, url })
+            }
+        }
+        return buttons
+    }
+
+    const renderChatMessage = (msg: any, idx: number) => {
+        const isLead = msg.role !== 'assistant'
+        const text = cleanConversationContent(msg.content)
+        const buttons = extractConversationButtons(msg.content)
+        const messageTime = msg.timestamp
+            ? new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : ''
+
+        return (
+            <div key={idx} style={{
+                alignSelf: isLead ? 'flex-end' : 'flex-start',
+                maxWidth: '72%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: isLead ? 'flex-end' : 'flex-start',
+                gap: '4px',
+            }}>
+                <div style={{
+                    backgroundColor: isLead ? '#d9fdd3' : '#fff',
+                    color: '#111b21',
+                    borderRadius: isLead ? '8px 0 8px 8px' : '0 8px 8px 8px',
+                    boxShadow: '0 1px 1px rgba(11,20,26,0.13)',
+                    padding: '8px 10px 6px',
+                    fontSize: '14px',
+                    lineHeight: 1.42,
+                    minWidth: '70px',
+                    position: 'relative',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                }}>
+                    {text ? <div>{text}</div> : null}
+                    {buttons.length > 0 && (
+                        <div style={{
+                            borderTop: text ? '1px solid rgba(0,0,0,0.08)' : 'none',
+                            display: 'grid',
+                            gap: '4px',
+                            marginTop: text ? '8px' : 0,
+                            paddingTop: text ? '6px' : 0,
+                        }}>
+                            {buttons.map((button, buttonIndex) => (
+                                <button
+                                    key={`${button.label}-${buttonIndex}`}
+                                    onClick={() => window.open(button.url, '_blank')}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#008069',
+                                        cursor: 'pointer',
+                                        fontSize: '13px',
+                                        fontWeight: 700,
+                                        padding: '6px 8px',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    ↗ {button.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    <span style={{
+                        color: '#667781',
+                        display: 'block',
+                        fontSize: '11px',
+                        marginTop: '4px',
+                        textAlign: 'right',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {messageTime}{isLead ? ' ✓✓' : ''}
+                    </span>
+                </div>
+            </div>
+        )
+    }
+
     // ... (keep existing state/handlers)
 
     return (
         <div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div className="leads-page-header" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
+                <div className="leads-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>Gerenciamento de Leads</h1>
                         <p style={{ color: '#888', fontSize: '14px', marginTop: '4px', margin: 0 }}>Acompanhe e gerencie todos os seus contatos.</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', width: '100%', maxWidth: '400px' }}>
+                    <div className="leads-search-actions" style={{ display: 'flex', gap: '12px', width: '100%', maxWidth: '400px' }}>
                         <div style={{ position: 'relative', flex: 1 }}>
                             <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} size={18} />
                             <input
@@ -259,9 +364,9 @@ export default function LeadsPage() {
             </div>
 
             {/* Navigation & Filters Toolbar */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', marginBottom: '40px' }}>
+            <div className="leads-toolbar" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', marginBottom: '40px' }}>
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '4px', padding: '4px', backgroundColor: '#f5f5f5', border: '1px solid #eee', borderRadius: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                <div className="leads-primary-tabs" style={{ display: 'flex', gap: '4px', padding: '4px', backgroundColor: '#f5f5f5', border: '1px solid #eee', borderRadius: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                     <button
                         onClick={() => setActiveTab('leads')}
                         style={{
@@ -284,7 +389,7 @@ export default function LeadsPage() {
 
                 {/* Filters (Only for Leads tab) */}
                 {activeTab === 'leads' && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', padding: '4px', backgroundColor: '#f5f5f5', border: '1px solid #eee', borderRadius: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                    <div className="leads-stage-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', padding: '4px', backgroundColor: '#f5f5f5', border: '1px solid #eee', borderRadius: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                         <button
                             onClick={() => setStageFilter('')}
                             style={{
@@ -342,7 +447,15 @@ export default function LeadsPage() {
                                 filteredLeads.map(lead => (
                                     <tr key={lead.id}>
                                         <td style={{ fontWeight: 500 }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <div style={{ height: '34px', width: '34px', borderRadius: '50%', overflow: 'hidden', background: '#dfe5e7', color: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+                                                    {lead.avatar_url ? (
+                                                        <img src={lead.avatar_url} alt={lead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <span>{lead.name?.[0]?.toUpperCase() || '?'}</span>
+                                                    )}
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
                                                         {lead.name || <span style={{ color: '#444', fontStyle: 'italic' }}>Anônimo</span>}
@@ -364,6 +477,7 @@ export default function LeadsPage() {
                                                 <div style={{ fontSize: '10px', color: '#555', marginTop: '4px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                     <span style={{ width: '4px', height: '4px', backgroundColor: '#333', borderRadius: '50%' }}></span>
                                                     {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                                                </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -495,52 +609,57 @@ export default function LeadsPage() {
             {/* Details Modal */}
             {selectedLead && (
                 <div
-                    className="animate-in fade-in duration-200"
+                    className="animate-in fade-in duration-200 lead-detail-overlay"
                     style={{ 
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, 
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
-                        backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' 
+                        backgroundColor: 'rgba(17,27,33,0.72)', backdropFilter: 'blur(6px)'
                     }}
                     onClick={closeLeadDetails}
                 >
                     <div
-                        className="animate-in zoom-in-95 duration-200"
+                        className="animate-in zoom-in-95 duration-200 lead-detail-modal"
                         onClick={e => e.stopPropagation()}
                         style={{ 
-                            backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '16px', 
-                            width: '100%', maxWidth: '1024px', maxHeight: '85vh', 
+                            backgroundColor: '#f0f2f5', border: '1px solid rgba(17,27,33,0.12)', borderRadius: '10px',
+                            width: '100%', maxWidth: '1180px', maxHeight: '88vh',
                             display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.6)' 
+                            boxShadow: '0 24px 70px rgba(0,0,0,0.38)'
                         }}
                     >
 
                         {/* Header */}
-                        <div style={{ padding: '24px', borderBottom: '1px solid #2a2a2a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#111' }}>
+                        <div className="lead-detail-header" style={{ padding: '12px 18px', borderBottom: '1px solid #d1d7db', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <div
                                     style={{ 
-                                        height: '56px', width: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        color: '#0a0a0a', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                                        background: 'linear-gradient(135deg, #c9a96e 0%, #dfc18e 50%, #a88b4a 100%)' 
+                                        height: '48px', width: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#111b21',
+                                        background: '#dfe5e7',
+                                        overflow: 'hidden'
                                     }}
                                 >
-                                    <span style={{ fontSize: '24px', fontWeight: 'bold', fontFamily: 'serif' }}>{selectedLead.name?.[0]?.toUpperCase() || '?'}</span>
+                                    {selectedLead.avatar_url ? (
+                                        <img src={selectedLead.avatar_url} alt={selectedLead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span style={{ fontSize: '22px', fontWeight: 700 }}>{selectedLead.name?.[0]?.toUpperCase() || '?'}</span>
+                                    )}
                                 </div>
                                 <div>
-                                    <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#f5f5f5', display: 'flex', alignItems: 'center', gap: '12px', fontFamily: 'serif', margin: 0 }}>
+                                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111b21', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
                                         {selectedLead.name || 'Lead Anônimo'}
                                         <span
                                             style={{
                                                 fontSize: '10px', padding: '4px 12px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 'bold', border: '1px solid',
-                                                backgroundColor: selectedLead.funnel_stage === 'lead' ? 'rgba(45, 157, 92, 0.1)' : 'rgba(201, 169, 110, 0.1)',
-                                                color: selectedLead.funnel_stage === 'lead' ? '#4ade80' : '#c9a96e',
-                                                borderColor: selectedLead.funnel_stage === 'lead' ? 'rgba(45, 157, 92, 0.2)' : 'rgba(201, 169, 110, 0.2)'
+                                                backgroundColor: selectedLead.funnel_stage === 'lead' ? '#d9fdd3' : '#fff7d6',
+                                                color: selectedLead.funnel_stage === 'lead' ? '#008069' : '#9a6b00',
+                                                borderColor: selectedLead.funnel_stage === 'lead' ? '#a8e6bd' : '#f0d27a'
                                             }}
                                         >
                                             {stageLabel[selectedLead.funnel_stage] || selectedLead.funnel_stage}
                                         </span>
                                     </h2>
-                                    <div style={{ color: '#a0a0a0', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', fontWeight: 300 }}>
+                                    <div style={{ color: '#667781', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', fontWeight: 400 }}>
                                         {selectedLead.phone && (
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <span style={{ color: '#c9a96e' }}>📱</span> {selectedLead.phone}
@@ -556,45 +675,45 @@ export default function LeadsPage() {
                             </div>
                             <button
                                 onClick={closeLeadDetails}
-                                style={{ height: '40px', width: '40px', borderRadius: '50%', backgroundColor: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a0a0a0', border: '1px solid #2a2a2a', cursor: 'pointer', transition: 'all 0.2s' }}
-                                onMouseOver={e => { e.currentTarget.style.backgroundColor = '#2a2a2a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#c9a96e'; }}
-                                onMouseOut={e => { e.currentTarget.style.backgroundColor = '#222'; e.currentTarget.style.color = '#a0a0a0'; e.currentTarget.style.borderColor = '#2a2a2a'; }}
+                                style={{ height: '40px', width: '40px', borderRadius: '50%', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#54656f', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}
+                                onMouseOver={e => { e.currentTarget.style.backgroundColor = '#e9edef'; e.currentTarget.style.color = '#111b21'; }}
+                                onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#54656f'; }}
                             >
                                 <span style={{ fontSize: '20px', lineHeight: 1 }}>×</span>
                             </button>
                         </div>
 
-                        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', backgroundColor: '#0a0a0a', flexDirection: 'row', minHeight: 0 }}>
+                        <div className="lead-detail-body" style={{ flex: 1, overflow: 'hidden', display: 'flex', backgroundColor: '#fff', flexDirection: 'row', minHeight: 0 }}>
 
                             {/* Left Sidebar: Summary & Info */}
-                            <div style={{ width: '400px', borderRight: '1px solid #2a2a2a', backgroundColor: '#1a1a1a', padding: '32px', display: 'flex', flexDirection: 'column', gap: '32px', overflowY: 'auto' }}>
+                            <div className="lead-detail-sidebar" style={{ width: '360px', borderRight: '1px solid #d1d7db', backgroundColor: '#fff', padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto' }}>
 
                                 {/* AI Summary */}
                                 <div>
-                                    <h3 style={{ color: '#c9a96e', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'serif' }}>
-                                        <span style={{ fontSize: '18px' }}>✨</span> Resumo Inteligente
+                                    <h3 style={{ color: '#008069', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontSize: '15px' }}>✨</span> Resumo Inteligente
                                     </h3>
                                     {selectedLead.ai_summary ? (
                                         <div
-                                            style={{ padding: '20px', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.08) 0%, rgba(201, 169, 110, 0.02) 100%)' }}
+                                            style={{ padding: '11px 12px', borderRadius: '8px', border: '1px solid #d1d7db', position: 'relative', overflow: 'hidden', background: '#f7f8fa' }}
                                         >
-                                            <p style={{ color: '#d0d0d0', lineHeight: 1.6, fontSize: '14px', fontWeight: 300, position: 'relative', zIndex: 10, margin: 0 }}>
+                                            <p style={{ color: '#111b21', lineHeight: 1.35, fontSize: '12px', fontWeight: 400, position: 'relative', zIndex: 10, margin: 0 }}>
                                                 {selectedLead.ai_summary}
                                             </p>
                                         </div>
                                     ) : (
-                                        <div style={{ padding: '24px', borderRadius: '12px', border: '1px dashed #2a2a2a', textAlign: 'center', backgroundColor: 'rgba(34, 34, 34, 0.5)' }}>
-                                            <p style={{ color: '#666', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>Ainda sem resumo da IA.</p>
+                                        <div style={{ padding: '12px', borderRadius: '8px', border: '1px dashed #d1d7db', textAlign: 'center', backgroundColor: '#f7f8fa' }}>
+                                            <p style={{ color: '#667781', fontSize: '12px', fontStyle: 'italic', margin: 0 }}>Ainda sem resumo da IA.</p>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Persona Details (The Panorama) */}
                                 <div>
-                                    <h3 style={{ color: '#c9a96e', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'serif' }}>
-                                        <span style={{ fontSize: '18px' }}>🎯</span> Panorama de Qualificação
+                                    <h3 style={{ color: '#008069', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontSize: '15px' }}>🎯</span> Panorama de Qualificação
                                     </h3>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
                                         {selectedLead.lead_classification === 'vip' ? (
                                             <span style={{ background: 'linear-gradient(to right, #b8945f, #e8c691)', color: '#000', fontSize: '10px', padding: '4px 12px', borderRadius: '9999px', fontWeight: '900', boxShadow: '0 0 15px rgba(184,148,95,0.3)', textTransform: 'uppercase', letterSpacing: '-0.05em' }}>
                                                 💎 Lead VIP
@@ -609,36 +728,36 @@ export default function LeadsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '12px' }}>
-                                        <div style={{ backgroundColor: '#111', padding: '16px', borderRadius: '12px', border: '1px solid #222' }}>
-                                            <span style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>Finalidade</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', fontWeight: 500 }}>
+                                    <div className="lead-qualification-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+                                        <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
+                                            <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Finalidade</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
                                                 {selectedLead.lead_purpose || 'Não informada'}
                                             </span>
                                         </div>
-                                        <div style={{ backgroundColor: '#111', padding: '16px', borderRadius: '12px', border: '1px solid #222' }}>
-                                            <span style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>Investimento Estimado</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', fontWeight: 500 }}>
+                                        <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
+                                            <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Investimento</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
                                                 {selectedLead.lead_budget || 'Não informado'}
                                             </span>
                                         </div>
-                                        <div style={{ backgroundColor: '#111', padding: '16px', borderRadius: '12px', border: '1px solid #222' }}>
-                                            <span style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>Prazo de Compra</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', fontWeight: 500 }}>
+                                        <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
+                                            <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Prazo</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
                                                 {selectedLead.lead_timeframe || 'Não informado'}
                                             </span>
                                         </div>
-                                        <div style={{ backgroundColor: '#111', padding: '16px', borderRadius: '12px', border: '1px solid #222', display: 'flex', alignItems: 'center', justifyItems: 'space-between' }}>
+                                        <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '58px' }}>
                                             <div style={{ flex: 1 }}>
-                                                <span style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>Inscrito no Push</span>
-                                                <span style={{ color: '#f5f5f5', fontSize: '14px', fontWeight: 500 }}>
+                                                <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Push</span>
+                                                <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
                                                     {selectedLead.push_subscribed_lead ? 'Sim, Ativo' : 'Não'}
                                                 </span>
                                             </div>
-                                            <span style={{ fontSize: '24px' }}>{selectedLead.push_subscribed_lead ? '🔔' : '🔕'}</span>
+                                            <span style={{ fontSize: '18px' }}>{selectedLead.push_subscribed_lead ? '🔔' : '🔕'}</span>
                                         </div>
                                         {selectedLead.is_partner && (
-                                            <div style={{ backgroundColor: 'rgba(201, 169, 110, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)', textAlign: 'center' }}>
+                                            <div style={{ gridColumn: '1 / -1', backgroundColor: 'rgba(201, 169, 110, 0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(201, 169, 110, 0.2)', textAlign: 'center' }}>
                                                 <span style={{ color: '#c9a96e', fontSize: '12px', fontWeight: 'bold', fontFamily: 'serif', textTransform: 'uppercase', letterSpacing: '0.1em', fontStyle: 'italic' }}>🤝 Solicitou Parceria</span>
                                             </div>
                                         )}
@@ -647,52 +766,60 @@ export default function LeadsPage() {
 
                                 {/* Details Grid */}
                                 <div>
-                                    <h3 style={{ color: '#666', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid #2a2a2a', fontFamily: 'serif' }}>
+                                    <h3 style={{ color: '#667781', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #d1d7db' }}>
                                         Ficha Técnica
                                     </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>Origem</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', fontWeight: 500, backgroundColor: '#2a2a2a', padding: '4px 12px', borderRadius: '4px', border: '1px solid #333' }}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Origem</span>
+                                            <span style={{ color: '#8a6d3b', fontSize: '12px', fontWeight: 700, backgroundColor: 'rgba(201, 169, 110, 0.14)', padding: '3px 8px', borderRadius: '999px', border: '1px solid rgba(201, 169, 110, 0.34)' }}>
                                                 {sourceLabel[selectedLead.visitor?.detected_source?.toLowerCase() || ''] || selectedLead.visitor?.detected_source || 'Desconhecido'}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>Dispositivo</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px' }}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Dispositivo</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px' }}>
                                                 {deviceLabel[selectedLead.visitor?.device_type?.toLowerCase() || ''] || selectedLead.visitor?.device_type || '—'}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>Sistema / Nav.</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }} title={`${selectedLead.visitor?.os || ''} / ${selectedLead.visitor?.browser || ''}`}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Sistema / Nav.</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }} title={`${selectedLead.visitor?.os || ''} / ${selectedLead.visitor?.browser || ''}`}>
                                                 {selectedLead.visitor?.os || '?'} / {selectedLead.visitor?.browser || '?'}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>Localização</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px', textAlign: 'right' }}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Localização</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px', textAlign: 'right' }}>
                                                 {[safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', ') || '—'}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>IP</span>
-                                            <span style={{ color: '#888', fontFamily: 'monospace', fontSize: '12px', backgroundColor: '#111', padding: '4px 8px', borderRadius: '4px', border: '1px solid #2a2a2a' }}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>IP</span>
+                                            <span style={{ color: '#54656f', fontFamily: 'monospace', fontSize: '11px', backgroundColor: '#f0f2f5', padding: '3px 6px', borderRadius: '4px', border: '1px solid #d1d7db' }}>
                                                 {selectedLead.visitor?.ip_address || '—'}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px', transition: 'color 0.2s' }}>Data</span>
-                                            <span style={{ color: '#f5f5f5', fontSize: '14px' }}>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Data</span>
+                                            <span style={{ color: '#111b21', fontSize: '12px' }}>
                                                 {new Date(selectedLead.created_at).toLocaleDateString('pt-BR')}
                                             </span>
                                         </div>
+                                        {selectedLead.metadata?.last_whatsapp_click && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                                                <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Último clique</span>
+                                                <span style={{ color: '#008069', fontSize: '11px', fontWeight: 700, textAlign: 'right', lineHeight: 1.25 }}>
+                                                    {formatWhatsAppClick(selectedLead.metadata.last_whatsapp_click)}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Location Map */}
                                 {(selectedLead.visitor?.city || selectedLead.visitor?.region) && (
-                                    <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #2a2a2a', height: '160px', position: 'relative', cursor: 'pointer' }}
+                                    <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #d1d7db', height: '96px', position: 'relative', cursor: 'pointer' }}
                                         onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', '))}`, '_blank')}
                                     >
                                         <iframe
@@ -710,7 +837,7 @@ export default function LeadsPage() {
                                 {/* Action */}
                                 <button
                                     style={{
-                                        width: '100%', padding: '14px', fontWeight: 'bold', borderRadius: '12px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#0a0a0a', border: 'none', cursor: 'pointer',
+                                        width: '100%', padding: '9px', fontWeight: 'bold', borderRadius: '8px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#0a0a0a', border: 'none', cursor: 'pointer',
                                         background: 'linear-gradient(135deg, #c9a96e 0%, #a88b4a 100%)',
                                         boxShadow: '0 4px 20px rgba(201, 169, 110, 0.2)'
                                     }}
@@ -722,41 +849,58 @@ export default function LeadsPage() {
                             </div>
 
                             {/* Right Content: Conversas WhatsApp */}
-                            <div style={{ flex: 1, backgroundColor: '#111', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
+                            <div className="lead-detail-chat" style={{ flex: 1, backgroundColor: '#efeae2', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
                                 {/* Header */}
-                                <div style={{ padding: '16px 24px', borderBottom: '1px solid #2a2a2a', backgroundColor: 'rgba(17, 17, 17, 0.8)', backdropFilter: 'blur(4px)', position: 'sticky', top: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h3 style={{ color: '#666', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'serif', margin: 0 }}>
-                                        Conversas WhatsApp
-                                    </h3>
-                                    <span style={{ backgroundColor: '#1a1a1a', color: '#888', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', fontFamily: 'monospace', border: '1px solid #2a2a2a' }}>
+                                <div style={{ padding: '10px 16px', borderBottom: '1px solid #d1d7db', backgroundColor: '#f0f2f5', position: 'sticky', top: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ height: '40px', width: '40px', borderRadius: '50%', background: '#dfe5e7', color: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, overflow: 'hidden' }}>
+                                            {selectedLead.avatar_url ? (
+                                                <img src={selectedLead.avatar_url} alt={selectedLead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                selectedLead.name?.[0]?.toUpperCase() || '?'
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 style={{ color: '#111b21', fontSize: '15px', fontWeight: 600, margin: 0 }}>
+                                                {selectedLead.name || 'Lead AnÃ´nimo'}
+                                            </h3>
+                                            <span style={{ color: '#667781', fontSize: '12px' }}>
+                                                {selectedLead.phone || 'sem telefone'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span style={{ backgroundColor: '#fff', color: '#667781', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', border: '1px solid #d1d7db' }}>
                                         {selectedLead.conversation_log?.length || 0} mensagens
                                     </span>
                                 </div>
 
                                 {/* Messages Area */}
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div className="lead-detail-messages" style={{
+                                    flex: 1,
+                                    overflowY: 'auto',
+                                    padding: '22px 28px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px',
+                                    backgroundColor: '#efeae2',
+                                    backgroundImage: 'url("https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/8c98994518b575bfd8c949e91d20548b.jpg")',
+                                    backgroundSize: '420px auto',
+                                    backgroundRepeat: 'repeat',
+                                    backgroundPosition: 'center top',
+                                }}>
                                     {selectedLead.conversation_log && selectedLead.conversation_log.length > 0 ? (
-                                        selectedLead.conversation_log.map((msg: any, idx: number) => (
-                                            <div key={idx} style={{
-                                                alignSelf: msg.role === 'assistant' ? 'flex-start' : 'flex-end',
-                                                maxWidth: '75%',
-                                                padding: '10px 14px',
-                                                borderRadius: '12px',
-                                                backgroundColor: msg.role === 'assistant' ? '#1a1a1a' : '#25D366',
-                                                color: msg.role === 'assistant' ? '#ccc' : '#fff',
-                                                fontSize: '0.85rem',
-                                                lineHeight: 1.5,
-                                                border: msg.role === 'assistant' ? '1px solid #2a2a2a' : 'none',
-                                            }}>
-                                                {msg.content}
-                                            </div>
-                                        ))
+                                        selectedLead.conversation_log.map((msg: any, idx: number) => renderChatMessage(msg, idx))
                                     ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#555', gap: '8px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#667781', gap: '8px' }}>
                                             <span style={{ fontSize: '2rem' }}>💬</span>
                                             <span style={{ fontSize: '0.85rem' }}>Nenhuma conversa registrada</span>
                                         </div>
                                     )}
+                                </div>
+                                <div style={{ background: '#f0f2f5', borderTop: '1px solid #d1d7db', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ height: '40px', borderRadius: '999px', background: '#fff', color: '#667781', flex: 1, display: 'flex', alignItems: 'center', padding: '0 16px', fontSize: '14px' }}>
+                                        Histórico espelhado do WhatsApp
+                                    </div>
                                 </div>
                             </div>
                         </div>

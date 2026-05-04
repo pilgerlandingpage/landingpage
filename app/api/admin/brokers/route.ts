@@ -3,6 +3,47 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
+function normalizeAssistantPhone(value: any): string {
+    let digits = String(value || '').replace(/\D/g, '')
+    if ((digits.length === 10 || digits.length === 11) && !digits.startsWith('55')) {
+        digits = `55${digits}`
+    }
+    return digits
+}
+
+async function syncAssistantPhones(supabase: any, brokerId: string, phones: any[]) {
+    if (!Array.isArray(phones)) return
+
+    const rows = phones
+        .map((phone: any) => {
+            const normalized = normalizeAssistantPhone(phone?.phone)
+            if (!normalized) return null
+            return {
+                broker_id: brokerId,
+                phone: normalized,
+                name: String(phone?.name || '').trim() || null,
+                role: String(phone?.role || 'broker'),
+                can_manage_agenda: phone?.can_manage_agenda !== false,
+                can_manage_leads: phone?.can_manage_leads === true,
+                can_send_messages: phone?.can_send_messages === true,
+                can_update_crm: phone?.can_update_crm === true,
+                is_active: phone?.is_active !== false,
+            }
+        })
+        .filter(Boolean)
+
+    await supabase
+        .from('broker_assistant_authorized_phones')
+        .delete()
+        .eq('broker_id', brokerId)
+
+    if (rows.length > 0) {
+        await supabase
+            .from('broker_assistant_authorized_phones')
+            .upsert(rows, { onConflict: 'broker_id,phone' })
+    }
+}
+
 // GET - List brokers
 export async function GET() {
     try {
@@ -47,6 +88,7 @@ export async function GET() {
 
         const brokerIds = brokers.map((b: any) => b.id)
         let links: any[] = []
+        let assistantPhones: any[] = []
         try {
             const { data: linksData, error: linksError } = await supabase
                 .from('broker_empreendimentos')
@@ -62,11 +104,33 @@ export async function GET() {
             console.warn('List broker_empreendimentos exception:', err)
         }
 
+        try {
+            const { data: phonesData, error: phonesError } = await supabase
+                .from('broker_assistant_authorized_phones')
+                .select('id, broker_id, phone, name, role, can_manage_agenda, can_manage_leads, can_send_messages, can_update_crm, is_active')
+                .in('broker_id', brokerIds)
+                .order('created_at')
+            if (!phonesError && Array.isArray(phonesData)) {
+                assistantPhones = phonesData
+            } else if (phonesError) {
+                console.warn('List broker assistant phones warning:', phonesError.message)
+            }
+        } catch (err) {
+            console.warn('List broker assistant phones exception:', err)
+        }
+
         const byBroker: Record<string, any[]> = {}
         for (const l of links) {
             const bid = (l as any).broker_id
             if (!byBroker[bid]) byBroker[bid] = []
             byBroker[bid].push(l)
+        }
+
+        const assistantByBroker: Record<string, any[]> = {}
+        for (const row of assistantPhones) {
+            const bid = (row as any).broker_id
+            if (!assistantByBroker[bid]) assistantByBroker[bid] = []
+            assistantByBroker[bid].push(row)
         }
 
         const enriched = brokers.map((b: any) => {
@@ -75,7 +139,7 @@ export async function GET() {
             const empreendimento_names = rows
                 .map((r: any) => r?.empreendimentos?.nome)
                 .filter(Boolean)
-            return { ...b, empreendimento_ids, empreendimento_names }
+            return { ...b, empreendimento_ids, empreendimento_names, assistant_phones: assistantByBroker[b.id] || [] }
         })
 
         return NextResponse.json({ data: enriched })
@@ -136,6 +200,14 @@ export async function POST(request: NextRequest) {
             await supabase.from('broker_empreendimentos').upsert(links, { onConflict: 'broker_id,empreendimento_id' })
         }
 
+        if (data?.id && Array.isArray(body?.assistant_phones)) {
+            try {
+                await syncAssistantPhones(supabase, data.id, body.assistant_phones)
+            } catch (err) {
+                console.warn('Sync assistant phones warning:', err)
+            }
+        }
+
         return NextResponse.json({ data })
     } catch (err) {
         console.error('API error:', err)
@@ -148,7 +220,7 @@ export async function PUT(request: NextRequest) {
     try {
         const supabase = createAdminClient()
         const body = await request.json()
-        const { id, empreendimento_ids, ...updates } = body
+        const { id, empreendimento_ids, assistant_phones, ...updates } = body
 
         if (!id) {
             return NextResponse.json({ error: 'Missing broker id' }, { status: 400 })
@@ -197,6 +269,14 @@ export async function PUT(request: NextRequest) {
                 await supabase
                     .from('broker_empreendimentos')
                     .upsert(links, { onConflict: 'broker_id,empreendimento_id' })
+            }
+        }
+
+        if (Array.isArray(assistant_phones)) {
+            try {
+                await syncAssistantPhones(supabase, id, assistant_phones)
+            } catch (err) {
+                console.warn('Sync assistant phones warning:', err)
             }
         }
 

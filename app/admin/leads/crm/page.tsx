@@ -21,6 +21,27 @@ interface LeadData {
     latitude: number | null
     longitude: number | null
     broker_id: string | null
+    lead_id?: string | null
+    avatar_url?: string | null
+    avatar_source?: string | null
+    avatar_updated_at?: string | null
+    source?: string | null
+    utm_source?: string | null
+    utm_medium?: string | null
+    utm_campaign?: string | null
+    landing_page_title?: string | null
+    landing_page_slug?: string | null
+    device_type?: string | null
+    browser?: string | null
+    os?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    ai_summary?: string | null
+    lead_classification?: string | null
+    lead_score?: number | null
+    last_whatsapp_click?: any | null
+    whatsapp_clicks?: any[]
     created_at: string
     updated_at: string
 }
@@ -121,6 +142,12 @@ export default function LeadCRMPage() {
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
     }
 
+    function formatClickAction(click: any): string {
+        const type = String(click?.link_type || click?.event_type || 'link').replace(/^whatsapp_/, '').replace(/_click$/, '')
+        const label = click?.link_label || click?.link_title || type
+        return String(label || type)
+    }
+
     // Stats
     const stats = {
         total: leads.length,
@@ -166,7 +193,7 @@ export default function LeadCRMPage() {
             </div>
 
             {/* Stats Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
+            <div className="crm-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
                 {[
                     { label: 'Total', value: stats.total, color: '#333', bg: '#f5f0ea' },
                     { label: 'Novos', value: stats.new, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)' },
@@ -174,7 +201,7 @@ export default function LeadCRMPage() {
                     { label: 'Qualificados', value: stats.qualified, color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)' },
                     { label: 'Transferidos', value: stats.transferred, color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)' },
                 ].map(s => (
-                    <div key={s.label} style={{
+                    <div key={s.label} className="crm-stat-card" style={{
                         background: s.bg, borderRadius: 10, padding: '14px 16px',
                         border: `1px solid ${s.color}22`
                     }}>
@@ -248,6 +275,21 @@ export default function LeadCRMPage() {
                                         cursor: 'pointer', transition: 'background 0.15s'
                                     }}
                                 >
+                                    {/* WhatsApp Avatar */}
+                                    <div style={{
+                                        width: 44, height: 44, borderRadius: '50%',
+                                        background: '#dfe5e7', color: '#111b21',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '0.95rem', fontWeight: 700, flexShrink: 0,
+                                        overflow: 'hidden'
+                                    }}>
+                                        {lead.avatar_url ? (
+                                            <img src={lead.avatar_url} alt={lead.lead_name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            lead.lead_name?.[0]?.toUpperCase() || '?'
+                                        )}
+                                    </div>
+
                                     {/* Score Circle */}
                                     <div style={{
                                         width: 48, height: 48, borderRadius: '50%',
@@ -282,6 +324,11 @@ export default function LeadCRMPage() {
                                             <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
                                                 <Phone size={11} /> {formatPhone(lead.lead_phone)}
                                             </span>
+                                            {lead.source && (
+                                                <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                    <MessageSquare size={11} /> {lead.source}
+                                                </span>
+                                            )}
                                             {lead.region && (
                                                 <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
                                                     <MapPin size={11} /> {lead.region}
@@ -345,6 +392,47 @@ export default function LeadCRMPage() {
                                                 </span>
                                             </div>
                                         </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 12, padding: 12, background: '#fafafa', border: '1px solid #f0ede8', borderRadius: 8 }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>ORIGEM</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.source || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>CAMPANHA</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.utm_campaign || lead.utm_source || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>LANDING PAGE</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.landing_page_title || lead.landing_page_slug || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>DISPOSITIVO</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{[lead.device_type, lead.browser, lead.os].filter(Boolean).join(' / ') || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>CIDADE</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{[lead.city, lead.state, lead.country].filter(Boolean).join(', ') || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>RESUMO IA</label>
+                                                <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.ai_summary || '—'}</span>
+                                            </div>
+                                        </div>
+
+                                        {Array.isArray(lead.whatsapp_clicks) && lead.whatsapp_clicks.length > 0 && (
+                                            <div style={{ marginTop: 12, padding: 12, background: '#f6fffb', border: '1px solid rgba(0,128,105,0.16)', borderRadius: 8 }}>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#008069', display: 'block', marginBottom: 8 }}>CLIQUE DOS BOTÕES</label>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                    {lead.whatsapp_clicks.slice(0, 5).map((click: any, index: number) => (
+                                                        <div key={`${click?.clicked_at || index}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: '0.78rem', color: '#334155' }}>
+                                                            <span style={{ fontWeight: 600 }}>{formatClickAction(click)}</span>
+                                                            <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>{click?.clicked_at ? formatDate(click.clicked_at) : 'agora'}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Status change */}
                                         <div style={{ marginTop: 16 }}>

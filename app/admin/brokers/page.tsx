@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, MessageSquare, Phone, Smartphone, Brain, Mic } from 'lucide-react'
+import { User, Trash2, Edit2, Shield, Search, Upload, X, Check, Loader2, Globe, FileText, MessageSquare, Phone, Smartphone, Brain, Mic } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface LandingPage {
@@ -26,9 +26,22 @@ interface Broker {
     handoff_prompt?: string
     empreendimento_ids?: string[]
     empreendimento_names?: string[]
+    assistant_phones?: AssistantPhone[]
 
     whatsapp_instance_id?: string
 
+}
+
+interface AssistantPhone {
+    id?: string
+    phone: string
+    name?: string | null
+    role?: string
+    can_manage_agenda?: boolean
+    can_manage_leads?: boolean
+    can_send_messages?: boolean
+    can_update_crm?: boolean
+    is_active?: boolean
 }
 
 interface WhatsAppInstance {
@@ -126,6 +139,7 @@ export default function BrokersAdmin() {
         voice_id: '',
         handoff_prompt: '',
         empreendimento_ids: [] as string[],
+        assistant_phones: [] as AssistantPhone[],
 
 
     })
@@ -143,6 +157,7 @@ export default function BrokersAdmin() {
         voice_id: '',
         handoff_prompt: '',
         empreendimento_ids: [] as string[],
+        assistant_phones: [] as AssistantPhone[],
 
 
     }
@@ -476,31 +491,16 @@ export default function BrokersAdmin() {
 
     return (
         <div className="admin-page-container">
-            <div className="admin-header" style={{ marginBottom: '32px' }}>
-                <div className="flex justify-between items-center w-full">
+            <div className="admin-header brokers-page-header" style={{ marginBottom: '32px' }}>
+                <div className="brokers-header-row flex justify-between items-center w-full">
                     <div>
-                        <h1 className="flex items-center gap-3">
+                        <h1 className="brokers-title flex items-center gap-3">
                             <Shield className="text-gold" size={28} /> Gerenciar Corretores IA de Plantão
                         </h1>
-                        <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                            Configure os agentes IA que atendem leads via WhatsApp.
+                        <p className="brokers-subtitle" style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
+                            Configure os agentes IA criados automaticamente a partir dos WhatsApps conectados.
                         </p>
                     </div>
-                    <button
-                        onClick={() => {
-                            setIsAdding(true)
-                            setEditingBroker(null)
-                            setFormData({ ...defaultFormData })
-                            setSelectedInstanceId('')
-                            setWhatsappInstance(null)
-                            setTestStatus('idle')
-                            setTestMessage('')
-                        }}
-                        className="btn btn-primary"
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
-                    >
-                        <Plus size={20} /> Novo Corretor IA
-                    </button>
                 </div>
             </div>
 
@@ -675,6 +675,95 @@ export default function BrokersAdmin() {
                                 </div>
                             </div>
 
+                            <div style={{ padding: '20px', background: 'rgba(14, 165, 233, 0.05)', borderRadius: '12px', border: '1px solid rgba(14, 165, 233, 0.2)', marginBottom: '16px' }}>
+                                <h3 style={{ fontSize: '1rem', color: '#0284c7', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Shield size={18} /> Assistente do Corretor
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '12px' }}>
+                                    Telefones autorizados a falar com este agente como assistente interno. Leads comuns continuam sendo atendidos normalmente.
+                                </p>
+
+                                <div style={{ display: 'grid', gap: '10px' }}>
+                                    {formData.assistant_phones.length === 0 && (
+                                        <div style={{ padding: '12px', borderRadius: '10px', border: '1px dashed rgba(14, 165, 233, 0.35)', color: '#64748b', fontSize: '0.82rem' }}>
+                                            Nenhum telefone autorizado ainda.
+                                        </div>
+                                    )}
+                                    {formData.assistant_phones.map((item, index) => (
+                                        <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', alignItems: 'end', padding: '12px', borderRadius: '10px', border: '1px solid rgba(14, 165, 233, 0.18)', background: '#fff' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Nome</label>
+                                                <input
+                                                    value={item.name || ''}
+                                                    onChange={(e) => {
+                                                        const next = [...formData.assistant_phones]
+                                                        next[index] = { ...next[index], name: e.target.value }
+                                                        setFormData({ ...formData, assistant_phones: next })
+                                                    }}
+                                                    placeholder="Ex: Guilherme humano"
+                                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Telefone autorizado</label>
+                                                <input
+                                                    value={item.phone || ''}
+                                                    onChange={(e) => {
+                                                        const next = [...formData.assistant_phones]
+                                                        next[index] = { ...next[index], phone: e.target.value.replace(/\D/g, '') }
+                                                        setFormData({ ...formData, assistant_phones: next })
+                                                    }}
+                                                    placeholder="5547999999999"
+                                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({
+                                                    ...formData,
+                                                    assistant_phones: formData.assistant_phones.filter((_, i) => i !== index)
+                                                })}
+                                                style={{
+                                                    height: '40px',
+                                                    padding: '0 12px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid rgba(248, 113, 113, 0.25)',
+                                                    color: '#ef4444',
+                                                    background: 'rgba(248, 113, 113, 0.08)',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 700,
+                                                }}
+                                            >
+                                                Remover
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({
+                                        ...formData,
+                                        assistant_phones: [
+                                            ...formData.assistant_phones,
+                                            {
+                                                phone: '',
+                                                name: '',
+                                                role: 'broker',
+                                                can_manage_agenda: true,
+                                                can_manage_leads: false,
+                                                can_send_messages: false,
+                                                can_update_crm: false,
+                                                is_active: true,
+                                            }
+                                        ]
+                                    })}
+                                    style={{ marginTop: '12px', padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(14, 165, 233, 0.25)', color: '#0284c7', background: 'rgba(14, 165, 233, 0.08)', cursor: 'pointer', fontWeight: 700 }}
+                                >
+                                    + Adicionar telefone autorizado
+                                </button>
+                            </div>
+
                             {/* —— SEÇÃO 3: AGENTE IA (PROMPT) —— */}
                             <div style={{ padding: '20px', background: 'rgba(201, 169, 110, 0.05)', borderRadius: '12px', border: '1px solid rgba(201, 169, 110, 0.2)' }}>
                                 <h3 style={{ fontSize: '1rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -700,7 +789,14 @@ export default function BrokersAdmin() {
                                             { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
                                             { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
                                             { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
-                                            { tag: '{imoveis}', desc: 'O agente já tem acesso aos imóveis ativos automaticamente', color: '#f59e0b' },
+                                            { tag: '{localizacao_empresa}', desc: 'Link de localização da imobiliária', color: '#06b6d4' },
+                                            { tag: '{imoveis}', desc: 'Carrega imóveis ativos e permite enviar botão Ver imóvel', color: '#f59e0b' },
+                                            { tag: '{botao_instagram}', desc: 'Botão rastreável para Instagram', color: '#0ea5e9' },
+                                            { tag: '{botao_facebook}', desc: 'Botão rastreável para Facebook', color: '#0ea5e9' },
+                                            { tag: '{botao_tiktok}', desc: 'Botão rastreável para TikTok', color: '#0ea5e9' },
+                                            { tag: '{botao_youtube}', desc: 'Botão rastreável para YouTube', color: '#0ea5e9' },
+                                            { tag: '{botao_site}', desc: 'Botão rastreável para o site', color: '#0ea5e9' },
+                                            { tag: '{botao_localizacao}', desc: 'Botão rastreável para localização da imobiliária', color: '#0ea5e9' },
                                             ...customLinkTags.map(btn => ({
                                                 tag: btn.tag,
                                                 desc: `Ação dinâmica ${btn.type || 'URL'}: ${btn.name || btn.tag}`,
@@ -724,7 +820,7 @@ export default function BrokersAdmin() {
                                         ))}
                                     </div>
                                     <div style={{ marginTop: '8px', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                        💡 O agente usará estas ações no momento certo da conversa — não seguirá roteiro, será natural como uma pessoa real.
+                                        💡 Tags como {'{agendamento}'} e {'{botao_instagram}'} geram ações interativas. A tag {'{imoveis}'} libera imóveis ativos e permite ao agente enviar um botão Ver imóvel quando recomendar uma opção.
                                     </div>
                                 </div>
 
@@ -736,7 +832,7 @@ export default function BrokersAdmin() {
                                         style={{ minHeight: '280px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: '1.6' }}
                                         value={formData.system_prompt}
                                         onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                                        placeholder={`Você é {nome_corretor}, corretor de imóveis da Pilger Imóveis em Balneário Camboriú.\n\nCOMO SE COMPORTAR:\n- Converse naturalmente, como uma pessoa real no WhatsApp\n- Seja simpático, use linguagem informal mas profissional\n- Use frases curtas (é WhatsApp, não email)\n- NUNCA pareça um robô ou siga um roteiro engessado\n- Adapte-se ao estilo do cliente\n\nO QUE COLETAR (naturalmente, durante a conversa):\n- Nome do cliente\n- Se quer comprar pra morar ou investir\n- Região de interesse\n- Faixa de orçamento\n\nQUANDO USAR AS FERRAMENTAS:\n- Quando o lead demonstrar interesse real, ofereça agendar visita com {agendamento}\n- Se perguntar sobre regiões, use {regioes}\n- Quando tiver todas as informações, use {transferir}\n- Sempre chame pelo nome quando souber: {nome_lead}\n\nIMPORTANTE:\n- Nunca invente dados de imóveis\n- Nunca fale preço exato\n- Nunca revele que é IA`}
+                                        placeholder={`Você é {nome_corretor}, corretor de imóveis da Pilger Imóveis em Balneário Camboriú.\n\nCOMO SE COMPORTAR:\n- Converse naturalmente, como uma pessoa real no WhatsApp\n- Seja simpático, use linguagem informal mas profissional\n- Use frases curtas (é WhatsApp, não email)\n- NUNCA pareça um robô ou siga um roteiro engessado\n- Adapte-se ao estilo do cliente\n\nO QUE COLETAR (naturalmente, durante a conversa):\n- Nome do cliente\n- Se quer comprar pra morar ou investir\n- Região de interesse\n- Faixa de orçamento\n\nQUANDO USAR AS FERRAMENTAS:\n- Quando o lead perguntar por opções, consulte {imoveis}\n- Quando o lead demonstrar interesse real, ofereça agendar visita com {agendamento}\n- Se perguntar sobre regiões, use {regioes}\n- Quando tiver todas as informações, use {transferir}\n- Use o nome com moderação quando souber: {nome_lead}\n\nIMPORTANTE:\n- Nunca invente dados de imóveis\n- Nunca fale preço exato\n- Nunca revele que é IA`}
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                                         Escreva como o agente deve conversar. Use as tags acima para dar ações ao agente. Quanto mais contexto, mais natural o atendimento.
@@ -1092,7 +1188,7 @@ export default function BrokersAdmin() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
+            <div className="brokers-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
                 {loading ? (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
                         <Loader2 className="animate-spin" style={{ margin: '0 auto 16px' }} />
@@ -1104,18 +1200,18 @@ export default function BrokersAdmin() {
                         <p>Nenhum corretor cadastrado ainda.</p>
                     </div>
                 ) : brokers.map(broker => (
-                    <div key={broker.id} className="chart-card flex group" style={{ alignItems: 'flex-start', gap: '20px', padding: '24px', position: 'relative', marginBottom: 0, height: '100%' }}>
-                        <div style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--gold)', flexShrink: 0, backgroundColor: 'var(--bg-lighter)' }}>
+                    <div key={broker.id} className="chart-card flex group broker-card" style={{ alignItems: 'flex-start', gap: '20px', padding: '24px', position: 'relative', marginBottom: 0, height: '100%' }}>
+                        <div className="broker-card-avatar" style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--gold)', flexShrink: 0, backgroundColor: 'var(--bg-lighter)' }}>
                             {broker.photo_url ? (
                                 <img src={broker.photo_url} alt={broker.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <User style={{ width: '100%', height: '100%', padding: '16px', color: 'rgba(255,255,255,0.1)' }} />
                             )}
                         </div>
-                        <div style={{ flex: 1, paddingRight: '48px', minWidth: 0 }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{broker.name}</h3>
-                            <p style={{ margin: '4px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{broker.creci}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
+                        <div className="broker-card-content" style={{ flex: 1, paddingRight: '48px', minWidth: 0 }}>
+                            <h3 className="broker-card-name" style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{broker.name}</h3>
+                            <p className="broker-card-creci" style={{ margin: '4px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{broker.creci}</p>
+                            <div className="broker-card-status" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
                                 <div style={{
                                     width: '8px',
                                     height: '8px',
@@ -1133,7 +1229,7 @@ export default function BrokersAdmin() {
                             </div>
 
                             {/* Badge de Tipo de Atendimento */}
-                            <div style={{ marginTop: '8px' }}>
+                            <div className="broker-card-badges" style={{ marginTop: '8px' }}>
                                 {broker.assignment_type === 'landing_pages' ? (
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                                         <span style={{ padding: '2px 8px', background: 'rgba(147, 130, 220, 0.1)', border: '1px solid rgba(147, 130, 220, 0.3)', borderRadius: '12px', fontSize: '0.7rem', color: '#9382dc', fontWeight: 600 }}>
@@ -1169,7 +1265,7 @@ export default function BrokersAdmin() {
                         </div>
 
                         {/* Ações separadas e sempre visíveis dentro do card */}
-                        <div style={{ display: 'flex', gap: '8px', position: 'absolute', top: '24px', right: '24px' }}>
+                        <div className="broker-card-actions" style={{ display: 'flex', gap: '8px', position: 'absolute', top: '24px', right: '24px' }}>
                             <button
                                 onClick={() => {
                                     setEditingBroker(broker)
@@ -1189,6 +1285,7 @@ export default function BrokersAdmin() {
                                         voice_id: (broker as any).voice_id || '',
                                         handoff_prompt: (broker as any).handoff_prompt || '',
                                         empreendimento_ids: (broker as any).empreendimento_ids || [],
+                                        assistant_phones: (broker as any).assistant_phones || [],
 
 
                                     })

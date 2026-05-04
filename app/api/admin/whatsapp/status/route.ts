@@ -16,6 +16,20 @@ function normalizeDigits(value: unknown): string {
 }
 
 function normalizeWhatsAppAddress(raw: unknown): string {
+    if (raw && typeof raw === 'object') {
+        const value = raw as Record<string, unknown>
+        return normalizeWhatsAppAddress(
+            value.user ||
+            value.id ||
+            value.phone ||
+            value.number ||
+            value.jid ||
+            value.owner ||
+            value.ownerJid ||
+            ''
+        )
+    }
+
     const text = String(raw || '').trim()
     if (!text) return ''
 
@@ -84,21 +98,71 @@ function phonesMatch(left: unknown, right: unknown): boolean {
     return false
 }
 
-function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
-    const raw =
-        result?.instance?.phone ||
-        result?.phone ||
-        result?.number ||
-        result?.jid ||
-        result?.status?.jid ||
-        result?.me?.id ||
-        result?.instance?.me?.id ||
-        fallback ||
-        null
+function maskPhone(value: unknown): string {
+    const digits = normalizeDigits(value)
+    if (!digits) return 'empty'
+    return `${digits.slice(0, 4)}...${digits.slice(-4)}`
+}
 
-    if (!raw) return null
-    const digits = normalizeWhatsAppAddress(raw)
-    return digits || null
+function normalizeProviderStatus(result: any): 'disconnected' | 'connecting' | 'connected' {
+    const statusValue = result?.status
+    const statusText = String(
+        result?.instance?.status ||
+        (typeof statusValue === 'string' ? statusValue : '') ||
+        result?.state ||
+        ''
+    ).toLowerCase()
+    const loggedInExplicitFalse =
+        result?.status?.loggedIn === false ||
+        result?.loggedIn === false
+    const isConnected =
+        result?.status?.connected === true ||
+        result?.connected === true ||
+        statusText === 'connected'
+    const isLoggedIn =
+        result?.status?.loggedIn === true ||
+        result?.loggedIn === true ||
+        statusText === 'connected'
+    const isConnecting =
+        statusText === 'connecting' ||
+        result?.response?.includes?.('Connecting') ||
+        Boolean(result?.instance?.qrcode || result?.instance?.qr || result?.qrcode || result?.qr)
+
+    if (isConnected && isLoggedIn && !loggedInExplicitFalse) return 'connected'
+    if (isConnected || isConnecting) return 'connecting'
+    return 'disconnected'
+}
+
+function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
+    const candidates = [
+        result?.status?.jid?.user,
+        result?.status?.jid?.id,
+        result?.status?.jid,
+        result?.instance?.jid?.user,
+        result?.instance?.jid?.id,
+        result?.instance?.jid,
+        result?.jid?.user,
+        result?.jid?.id,
+        result?.jid,
+        result?.me?.id,
+        result?.me?.user,
+        result?.instance?.me?.id,
+        result?.instance?.me?.user,
+        result?.instance?.owner,
+        result?.instance?.ownerJid,
+        result?.instance?.phone,
+        result?.phone,
+        result?.number,
+        fallback,
+    ]
+
+    for (const raw of candidates) {
+        if (!raw) continue
+        const digits = normalizeWhatsAppAddress(raw)
+        if (digits) return digits
+    }
+
+    return null
 }
 
 function buildDefaultBrokerPrompt(name: string) {
@@ -260,19 +324,13 @@ export async function GET(request: NextRequest) {
         const result = await getInstanceStatus(instance.instance_token)
         console.log('[Status] Resultado uazapi:', JSON.stringify(result).substring(0, 300))
 
-        const isConnected = result?.status?.connected === true || result?.connected === true
-        const isLoggedIn = result?.status?.loggedIn === true || result?.loggedIn === true
+        let newStatus = normalizeProviderStatus(result)
         const phone = extractPhoneFromStatus(result, instance.phone_number)
-
-        const newStatus = (isConnected && isLoggedIn)
-            ? 'connected'
-            : (isConnected || result?.response?.includes?.('Connecting'))
-                ? 'connecting'
-                : 'disconnected'
 
         let syncedBrokerId = instance.broker_id ? String(instance.broker_id) : null
         let brokerCreated = false
         let brokerSyncWarning: string | null = null
+        let phoneValidationWarning: string | null = null
 
         const isRealAdminUser = Boolean(instance.admin_user_id && instance.admin_user_id !== NULL_ADMIN_USER_ID)
 
@@ -286,54 +344,27 @@ export async function GET(request: NextRequest) {
             const expectedPhone = normalizeDigits(adminUser?.phone)
 
             if (!expectedPhone) {
-                try {
-                    await disconnectInstance(instance.instance_token)
-                } catch {
-                    // ignore provider disconnect failures
-                }
-
-                await supabase
-                    .from('whatsapp_instances')
-                    .update({
-                        status: 'disconnected',
-                        phone_number: phone,
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', instance.id)
-
-                return NextResponse.json({
-                    success: false,
-                    status: 'disconnected',
-                    phone,
-                    phone_number: phone,
-                    blocked_phone_mismatch: true,
-                    message: 'Este usuario nao possui telefone cadastrado para validacao. Atualize o telefone e tente novamente.',
+                phoneValidationWarning = 'Este usuario nao possui telefone cadastrado para validacao. Atualize o telefone em Minha Conta.'
+                console.warn('[Status] Instancia conectada sem telefone esperado cadastrado:', {
+                    instanceId: instance.id,
+                    adminUserId: instance.admin_user_id,
+                    providerPhone: maskPhone(phone),
                 })
             }
 
-            if (!phonesMatch(phone, expectedPhone)) {
-                try {
-                    await disconnectInstance(instance.instance_token)
-                } catch {
-                    // ignore provider disconnect failures
-                }
-
-                await supabase
-                    .from('whatsapp_instances')
-                    .update({
-                        status: 'disconnected',
-                        phone_number: phone,
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', instance.id)
-
-                return NextResponse.json({
-                    success: false,
-                    status: 'disconnected',
-                    phone,
-                    phone_number: phone,
-                    blocked_phone_mismatch: true,
-                    message: 'WhatsApp bloqueado: o numero escaneado nao confere com o telefone cadastrado para este usuario.',
+            if (!phone) {
+                phoneValidationWarning = 'WhatsApp conectou, mas a API ainda nao retornou o numero. Se persistir, verifique o telefone em Minha Conta.'
+                console.warn('[Status] Instancia conectada sem telefone retornado pela UAZAPI:', {
+                    instanceId: instance.id,
+                    adminUserId: instance.admin_user_id,
+                })
+            } else if (expectedPhone && !phonesMatch(phone, expectedPhone)) {
+                phoneValidationWarning = 'O numero conectado nao confere exatamente com o telefone cadastrado. A conexao foi mantida; confira o telefone em Minha Conta.'
+                console.warn('[Status] Divergencia entre telefone cadastrado e telefone conectado; mantendo a sessao ativa:', {
+                    instanceId: instance.id,
+                    adminUserId: instance.admin_user_id,
+                    providerPhone: maskPhone(phone),
+                    expectedPhone: maskPhone(expectedPhone),
                 })
             }
 
@@ -356,13 +387,14 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        const phoneChanged = String(phone || '') !== String(instance.phone_number || '')
+        const resolvedPhoneNumber = phone || instance.phone_number || null
+        const phoneChanged = Boolean(phone) && String(phone) !== String(instance.phone_number || '')
         if (newStatus !== instance.status || phoneChanged) {
             await supabase
                 .from('whatsapp_instances')
                 .update({
                     status: newStatus,
-                    phone_number: phone,
+                    phone_number: resolvedPhoneNumber,
                     connected_at: newStatus === 'connected' ? (instance.connected_at || new Date().toISOString()) : instance.connected_at,
                     updated_at: new Date().toISOString(),
                 })
@@ -401,11 +433,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             success: true,
             status: newStatus,
-            phone,
-            phone_number: phone,
+            phone: resolvedPhoneNumber,
+            phone_number: resolvedPhoneNumber,
             broker_id: syncedBrokerId,
             broker_created: brokerCreated,
             broker_sync_warning: brokerSyncWarning,
+            phone_validation_warning: phoneValidationWarning,
         })
     } catch (error) {
         console.error('Error checking status:', error)

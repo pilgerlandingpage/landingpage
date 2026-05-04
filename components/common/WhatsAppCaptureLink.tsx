@@ -10,6 +10,7 @@ type Props = {
     template?: string
     className?: string
     style?: CSSProperties
+    onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
     children: ReactNode
 }
 
@@ -20,10 +21,12 @@ export default function WhatsAppCaptureLink({
     template = 'site-global',
     className,
     style,
+    onClick: externalOnClick,
     children,
 }: Props) {
     const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault()
+        if (externalOnClick) externalOnClick(e)
         openWhatsAppWithLeadCapture({ phone, message, slug, template })
     }
 

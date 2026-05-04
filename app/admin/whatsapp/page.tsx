@@ -37,13 +37,43 @@ interface InstanceConfig {
     agent_enabled: boolean; always_online: boolean; mark_as_read: boolean
     response_mode: 'text' | 'audio' | 'mirror'
     media_image_enabled: boolean; media_document_enabled: boolean; media_video_enabled: boolean
+    media_batch_image_limit: number
+    media_batch_video_limit: number
+    media_batch_document_limit: number
     split_messages: boolean; mirror_mode: boolean; audio_response: boolean
+    adaptive_rapport_enabled: boolean; adaptive_rapport_mode: 'off' | 'soft' | 'strong'
     audio_transcription: boolean; human_intervention: boolean
+    bot_loop_protection_enabled: boolean
+    allow_internal_instance_messages: boolean
+    detect_human_request_enabled: boolean
+    detect_reschedule_cancel_enabled: boolean
+    detect_property_capture_enabled: boolean
+    detect_location_enabled: boolean
+    detect_opt_out_enabled: boolean
+    analyze_links_enabled: boolean
+    quoted_reply_context_enabled: boolean
+    lead_file_storage_enabled: boolean
     ai_schedule_enabled: boolean
     ai_schedule_start: string
     ai_schedule_end: string
     ai_schedule_timezone: string
-    debounce_seconds: number; human_intervention_minutes: number
+    debounce_seconds: number
+    smart_timing_enabled: boolean
+    timing_text_seconds: number
+    timing_text_burst_seconds: number
+    timing_media_caption_seconds: number
+    timing_media_then_text_seconds: number
+    timing_media_only_seconds: number
+    timing_audio_seconds: number
+    timing_audio_then_text_seconds: number
+    timing_video_caption_seconds: number
+    timing_video_only_seconds: number
+    timing_document_caption_seconds: number
+    timing_document_only_seconds: number
+    timing_document_seconds: number
+    timing_video_document_seconds: number
+    timing_button_delay_seconds: number
+    human_intervention_minutes: number
 }
 
 type BooleanConfigKey = {
@@ -54,24 +84,65 @@ const AGENT_DEPENDENT_BOOLEAN_KEYS: BooleanConfigKey[] = [
     'always_online',
     'mark_as_read',
     'split_messages',
+    'adaptive_rapport_enabled',
     'mirror_mode',
     'audio_response',
     'audio_transcription',
     'human_intervention',
+    'bot_loop_protection_enabled',
+    'allow_internal_instance_messages',
+    'detect_human_request_enabled',
+    'detect_reschedule_cancel_enabled',
+    'detect_property_capture_enabled',
+    'detect_location_enabled',
+    'detect_opt_out_enabled',
+    'analyze_links_enabled',
+    'quoted_reply_context_enabled',
+    'lead_file_storage_enabled',
     'media_image_enabled',
     'media_document_enabled',
     'media_video_enabled',
     'ai_schedule_enabled',
+    'smart_timing_enabled',
 ]
 
 const DEFAULT_CONFIG: InstanceConfig = {
     agent_enabled: true, always_online: true, mark_as_read: true,
     response_mode: 'mirror',
     media_image_enabled: true, media_document_enabled: true, media_video_enabled: true,
-    split_messages: true, mirror_mode: false, audio_response: true,
+    media_batch_image_limit: 8,
+    media_batch_video_limit: 2,
+    media_batch_document_limit: 3,
+    split_messages: true, adaptive_rapport_enabled: false, adaptive_rapport_mode: 'off', mirror_mode: false, audio_response: true,
     audio_transcription: true, human_intervention: true,
+    bot_loop_protection_enabled: true,
+    allow_internal_instance_messages: false,
+    detect_human_request_enabled: true,
+    detect_reschedule_cancel_enabled: true,
+    detect_property_capture_enabled: true,
+    detect_location_enabled: true,
+    detect_opt_out_enabled: true,
+    analyze_links_enabled: true,
+    quoted_reply_context_enabled: true,
+    lead_file_storage_enabled: true,
     ai_schedule_enabled: false, ai_schedule_start: '18:00', ai_schedule_end: '08:00', ai_schedule_timezone: 'America/Sao_Paulo',
-    debounce_seconds: 15, human_intervention_minutes: 60,
+    debounce_seconds: 15,
+    smart_timing_enabled: true,
+    timing_text_seconds: 6,
+    timing_text_burst_seconds: 9,
+    timing_media_caption_seconds: 10,
+    timing_media_then_text_seconds: 14,
+    timing_media_only_seconds: 16,
+    timing_audio_seconds: 10,
+    timing_audio_then_text_seconds: 14,
+    timing_video_caption_seconds: 14,
+    timing_video_only_seconds: 18,
+    timing_document_caption_seconds: 14,
+    timing_document_only_seconds: 18,
+    timing_document_seconds: 18,
+    timing_video_document_seconds: 18,
+    timing_button_delay_seconds: 2,
+    human_intervention_minutes: 60,
 }
 
 export default function WhatsAppInstancesPage() {
@@ -139,6 +210,10 @@ export default function WhatsAppInstancesPage() {
                 if (!raw.response_mode) {
                     raw.response_mode = raw.mirror_mode ? 'mirror' : (raw.audio_response ? 'audio' : 'text')
                 }
+                if (!raw.adaptive_rapport_mode || (raw.adaptive_rapport_enabled && raw.adaptive_rapport_mode === 'off')) {
+                    raw.adaptive_rapport_mode = raw.adaptive_rapport_enabled ? 'soft' : 'off'
+                }
+                raw.adaptive_rapport_enabled = raw.adaptive_rapport_mode !== 'off'
                 cfgMap[inst.id] = raw
             })
             setConfigs(cfgMap)
@@ -558,25 +633,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             let data = await res.json()
 
             if (!res.ok || !data?.success) {
-                const shouldForce = window.confirm(
-                    `${data?.message || 'Falha ao excluir no servidor da API.'}\n\nDeseja forçar exclusão apenas local?`
-                )
-
-                if (!shouldForce) {
-                    setQrMessage({ type: 'success', text: 'Exclusão cancelada. A instância foi mantida.' })
-                    return
-                }
-
-                res = await fetch('/api/admin/whatsapp/instances', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ instanceId: inst.id, forceLocalDelete: true }),
-                })
-                data = await res.json()
-
-                if (!res.ok || !data?.success) {
-                    throw new Error(data?.message || 'Falha ao excluir instância localmente.')
-                }
+                throw new Error(data?.message || 'Falha ao excluir a instância no servidor da UAZAPI.')
             }
 
             setQrMessage({ type: 'success', text: data?.message || 'Instância excluída com sucesso.' })
@@ -1048,73 +1105,160 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     Agente desativado: todos os recursos automáticos estão desligados.
                                 </div>
                             )}
-                            <div style={{ display: 'grid', gap: '8px' }}>
-                                {/* Behavior Toggles */}
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '8px 0 4px' }}>
-                                    Comportamento
-                                </div>
-                                <ToggleSwitch label="Agente Ativado" icon={<Power size={15} />}
-                                    checked={config.agent_enabled} onChange={() => onUpdateConfig('agent_enabled', !config.agent_enabled)} />
-                                <ToggleSwitch label="Sempre Online" icon={<Wifi size={15} />}
-                                    checked={config.always_online} onChange={() => onUpdateConfig('always_online', !config.always_online)} disabled={agentDisabled} />
-                                <ToggleSwitch label="Marcar como Lido (✓✓)" icon={<Eye size={15} />}
-                                    checked={config.mark_as_read} onChange={() => onUpdateConfig('mark_as_read', !config.mark_as_read)} disabled={agentDisabled} />
-                                <ToggleSwitch label="Dividir Respostas em Partes" icon={<SplitSquareVertical size={15} />}
-                                    checked={config.split_messages} onChange={() => onUpdateConfig('split_messages', !config.split_messages)} disabled={agentDisabled} />
-                                <ResponseModeSelector
-                                    value={config.response_mode}
-                                    onChange={(mode) => onUpdateConfig('response_mode', mode)}
-                                    disabled={agentDisabled}
-                                />
-                                <ToggleSwitch label="Intervenção Humana (parar quando humano intervém)" icon={<Shield size={15} />}
-                                    checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} disabled={agentDisabled} />
-                                <ToggleSwitch label="Horário da IA (atende só na janela configurada)" icon={<Clock size={15} />}
-                                    checked={config.ai_schedule_enabled} onChange={() => onUpdateConfig('ai_schedule_enabled', !config.ai_schedule_enabled)} disabled={agentDisabled} />
+                            <div style={{ display: 'grid', gap: '12px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '12px' }}>
+                                    <SettingsSection title="Base do agente" description="Controles essenciais que determinam se a instância responde e como se comporta no WhatsApp.">
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '8px' }}>
+                                            <ToggleSwitch label="Agente Ativado" icon={<Power size={15} />}
+                                                checked={config.agent_enabled} onChange={() => onUpdateConfig('agent_enabled', !config.agent_enabled)} />
+                                            <ToggleSwitch label="Sempre Online" icon={<Wifi size={15} />}
+                                                checked={config.always_online} onChange={() => onUpdateConfig('always_online', !config.always_online)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Marcar como Lido (✓✓)" icon={<Eye size={15} />}
+                                                checked={config.mark_as_read} onChange={() => onUpdateConfig('mark_as_read', !config.mark_as_read)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Dividir Respostas" icon={<SplitSquareVertical size={15} />}
+                                                checked={config.split_messages} onChange={() => onUpdateConfig('split_messages', !config.split_messages)} disabled={agentDisabled} />
+                                        </div>
+                                    </SettingsSection>
 
-                                {/* Audio Toggles */}
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
-                                    Áudio
+                                    <SettingsSection title="Segurança e testes" description="Intervenção humana, proteção contra loops e permissões especiais para ambiente de teste.">
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '8px' }}>
+                                            <ToggleSwitch label="Intervenção Humana" icon={<Shield size={15} />}
+                                                checked={config.human_intervention} onChange={() => onUpdateConfig('human_intervention', !config.human_intervention)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Proteção bots/loops" icon={<Bot size={15} />}
+                                                checked={config.bot_loop_protection_enabled} onChange={() => onUpdateConfig('bot_loop_protection_enabled', !config.bot_loop_protection_enabled)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Teste entre instâncias" icon={<Users size={15} />}
+                                                checked={config.allow_internal_instance_messages} onChange={() => onUpdateConfig('allow_internal_instance_messages', !config.allow_internal_instance_messages)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Janela da IA ativa" icon={<Clock size={15} />}
+                                                checked={config.ai_schedule_enabled} onChange={() => onUpdateConfig('ai_schedule_enabled', !config.ai_schedule_enabled)} disabled={agentDisabled} />
+                                        </div>
+                                    </SettingsSection>
                                 </div>
-                                <ToggleSwitch label="Transcrição de Áudio Recebido" icon={<Mic size={15} />}
-                                    checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} disabled={agentDisabled} />
-                                {/* Media AI Toggles */}
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
-                                    Mídia com IA
-                                </div>
-                                <ToggleSwitch label="Analisar Imagens" icon={<Eye size={15} />}
-                                    checked={config.media_image_enabled} onChange={() => onUpdateConfig('media_image_enabled', !config.media_image_enabled)} disabled={agentDisabled} />
-                                <ToggleSwitch label="Analisar Documentos" icon={<Eye size={15} />}
-                                    checked={config.media_document_enabled} onChange={() => onUpdateConfig('media_document_enabled', !config.media_document_enabled)} disabled={agentDisabled} />
-                                <ToggleSwitch label="Analisar Vídeos" icon={<Eye size={15} />}
-                                    checked={config.media_video_enabled} onChange={() => onUpdateConfig('media_video_enabled', !config.media_video_enabled)} disabled={agentDisabled} />
-                                {/* Timing */}
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
-                                    Temporizadores
-                                </div>
-                                <NumericInput label="Debounce (segundos)" value={String(config.debounce_seconds)}
-                                    onChange={(v) => onUpdateConfig('debounce_seconds', parseInt(v) || 15)} min={5} max={120} disabled={agentDisabled} />
-                                <NumericInput label="Reativar agente após (minutos)" value={String(config.human_intervention_minutes)}
-                                    onChange={(v) => onUpdateConfig('human_intervention_minutes', parseInt(v) || 60)} min={5} max={1440} disabled={agentDisabled} />
 
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 700, padding: '12px 0 4px' }}>
-                                    Janela da IA
-                                </div>
-                                <TimeRangeInput
-                                    start={config.ai_schedule_start}
-                                    end={config.ai_schedule_end}
-                                    timezone={config.ai_schedule_timezone}
-                                    onChangeStart={(v) => onUpdateConfig('ai_schedule_start', v)}
-                                    onChangeEnd={(v) => onUpdateConfig('ai_schedule_end', v)}
-                                    onChangeTimezone={(v) => onUpdateConfig('ai_schedule_timezone', v)}
-                                    disabled={agentDisabled || !config.ai_schedule_enabled}
-                                />
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '12px' }}>
+                                    <SettingsSection title="Modo de conversa" description="Define se o agente responde por texto, áudio ou espelha o formato recebido.">
+                                        <ResponseModeSelector
+                                            value={config.response_mode}
+                                            onChange={(mode) => onUpdateConfig('response_mode', mode)}
+                                            disabled={agentDisabled}
+                                        />
+                                    </SettingsSection>
 
-                                {/* Save Button */}
+                                    <SettingsSection title="Rapport adaptativo" description="Ajusta linguagem, formalidade e sinais regionais conforme o lead.">
+                                        <RapportModeSelector
+                                            value={config.adaptive_rapport_mode || (config.adaptive_rapport_enabled ? 'soft' : 'off')}
+                                            onChange={(mode) => {
+                                                onUpdateConfig('adaptive_rapport_mode', mode)
+                                                onUpdateConfig('adaptive_rapport_enabled', mode !== 'off')
+                                            }}
+                                            disabled={agentDisabled}
+                                        />
+                                    </SettingsSection>
+                                </div>
+
+                                <SettingsSection title="Cenários especiais do lead" description="Situações em que um humano normalmente ajustaria a conversa: pedido de atendente, remarcação, captação, localização e opt-out." tone="info">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '8px', opacity: agentDisabled ? 0.55 : 1 }}>
+                                        <ToggleSwitch label="Pedido de humano" icon={<User size={15} />}
+                                            checked={config.detect_human_request_enabled} onChange={() => onUpdateConfig('detect_human_request_enabled', !config.detect_human_request_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Cancelar/remarcar" icon={<Clock size={15} />}
+                                            checked={config.detect_reschedule_cancel_enabled} onChange={() => onUpdateConfig('detect_reschedule_cancel_enabled', !config.detect_reschedule_cancel_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Captação de imóvel" icon={<MessageSquare size={15} />}
+                                            checked={config.detect_property_capture_enabled} onChange={() => onUpdateConfig('detect_property_capture_enabled', !config.detect_property_capture_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Localização enviada" icon={<Globe size={15} />}
+                                            checked={config.detect_location_enabled} onChange={() => onUpdateConfig('detect_location_enabled', !config.detect_location_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Opt-out do lead" icon={<Shield size={15} />}
+                                            checked={config.detect_opt_out_enabled} onChange={() => onUpdateConfig('detect_opt_out_enabled', !config.detect_opt_out_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Links do lead" icon={<Link2 size={15} />}
+                                            checked={config.analyze_links_enabled} onChange={() => onUpdateConfig('analyze_links_enabled', !config.analyze_links_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Resposta citada" icon={<MessageSquare size={15} />}
+                                            checked={config.quoted_reply_context_enabled} onChange={() => onUpdateConfig('quoted_reply_context_enabled', !config.quoted_reply_context_enabled)} disabled={agentDisabled} />
+                                        <ToggleSwitch label="Salvar mídia no lead" icon={<Eye size={15} />}
+                                            checked={config.lead_file_storage_enabled} onChange={() => onUpdateConfig('lead_file_storage_enabled', !config.lead_file_storage_enabled)} disabled={agentDisabled} />
+                                    </div>
+                                </SettingsSection>
+
+                                <SettingsSection title="Áudio e mídia com IA" description="O que o agente consegue transcrever, analisar e guardar quando recebe mídia." tone="success">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '12px' }}>
+                                        <div style={{ display: 'grid', gap: '8px' }}>
+                                            <ToggleSwitch label="Transcrever áudio" icon={<Mic size={15} />}
+                                                checked={config.audio_transcription} onChange={() => onUpdateConfig('audio_transcription', !config.audio_transcription)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Analisar imagens" icon={<Eye size={15} />}
+                                                checked={config.media_image_enabled} onChange={() => onUpdateConfig('media_image_enabled', !config.media_image_enabled)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Analisar documentos" icon={<Eye size={15} />}
+                                                checked={config.media_document_enabled} onChange={() => onUpdateConfig('media_document_enabled', !config.media_document_enabled)} disabled={agentDisabled} />
+                                            <ToggleSwitch label="Analisar vídeos" icon={<Eye size={15} />}
+                                                checked={config.media_video_enabled} onChange={() => onUpdateConfig('media_video_enabled', !config.media_video_enabled)} disabled={agentDisabled} />
+                                        </div>
+                                        <div style={{ display: 'grid', gap: '8px', opacity: agentDisabled ? 0.55 : 1 }}>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Lote de mídias</div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '8px' }}>
+                                                <NumericInput label="Imagens" value={String(config.media_batch_image_limit)}
+                                                    onChange={(v) => onUpdateConfig('media_batch_image_limit', parseInt(v) || 8)} min={1} max={20} disabled={agentDisabled} />
+                                                <NumericInput label="Vídeos" value={String(config.media_batch_video_limit)}
+                                                    onChange={(v) => onUpdateConfig('media_batch_video_limit', parseInt(v) || 2)} min={1} max={5} disabled={agentDisabled} />
+                                                <NumericInput label="Documentos" value={String(config.media_batch_document_limit)}
+                                                    onChange={(v) => onUpdateConfig('media_batch_document_limit', parseInt(v) || 3)} min={1} max={8} disabled={agentDisabled} />
+                                            </div>
+                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                                O agente analisa somente o limite configurado quando o lead envia várias mídias juntas; o restante fica no histórico do lead.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </SettingsSection>
+
+                                <SettingsSection title="Temporizadores" description="Controla o tempo de espera por tipo de interação antes de responder o lead." tone="gold">
+                                    <div style={{ display: 'grid', gap: '8px' }}>
+                                        <ToggleSwitch label="Temporização inteligente por cenário" icon={<Timer size={15} />}
+                                            checked={config.smart_timing_enabled} onChange={() => onUpdateConfig('smart_timing_enabled', !config.smart_timing_enabled)} disabled={agentDisabled} />
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '8px', opacity: agentDisabled || !config.smart_timing_enabled ? 0.55 : 1 }}>
+                                            <NumericInput label="Só texto" value={String(config.timing_text_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_text_seconds', parseInt(v) || 6)} min={2} max={60} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Textos seguidos" value={String(config.timing_text_burst_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_text_burst_seconds', parseInt(v) || 9)} min={3} max={90} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Foto legenda" value={String(config.timing_media_caption_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_media_caption_seconds', parseInt(v) || 10)} min={5} max={120} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Foto + texto" value={String(config.timing_media_then_text_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_media_then_text_seconds', parseInt(v) || 14)} min={5} max={120} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Foto só" value={String(config.timing_media_only_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_media_only_seconds', parseInt(v) || 16)} min={5} max={120} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Áudio" value={String(config.timing_audio_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_audio_seconds', parseInt(v) || 10)} min={5} max={120} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Áudio + texto" value={String(config.timing_audio_then_text_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_audio_then_text_seconds', parseInt(v) || 14)} min={5} max={120} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Vídeo legenda" value={String(config.timing_video_caption_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_video_caption_seconds', parseInt(v) || 14)} min={8} max={180} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Só vídeo" value={String(config.timing_video_only_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_video_only_seconds', parseInt(v) || 18)} min={8} max={180} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Doc. + texto" value={String(config.timing_document_caption_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_document_caption_seconds', parseInt(v) || 14)} min={8} max={180} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Só documento" value={String(config.timing_document_only_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_document_only_seconds', parseInt(v) || 18)} min={8} max={180} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Antes botão" value={String(config.timing_button_delay_seconds)}
+                                                onChange={(v) => onUpdateConfig('timing_button_delay_seconds', parseInt(v) || 2)} min={0} max={20} disabled={agentDisabled || !config.smart_timing_enabled} />
+                                            <NumericInput label="Fallback" value={String(config.debounce_seconds)}
+                                                onChange={(v) => onUpdateConfig('debounce_seconds', parseInt(v) || 15)} min={5} max={120} disabled={agentDisabled || config.smart_timing_enabled} />
+                                            <NumericInput label="Reativar agente" value={String(config.human_intervention_minutes)}
+                                                onChange={(v) => onUpdateConfig('human_intervention_minutes', parseInt(v) || 60)} min={5} max={1440} disabled={agentDisabled} />
+                                        </div>
+                                    </div>
+                                </SettingsSection>
+
+                                <SettingsSection title="Janela da IA" description="Use quando quiser que o agente responda somente dentro de uma faixa de horário configurada.">
+                                    <TimeRangeInput
+                                        start={config.ai_schedule_start}
+                                        end={config.ai_schedule_end}
+                                        timezone={config.ai_schedule_timezone}
+                                        onChangeStart={(v) => onUpdateConfig('ai_schedule_start', v)}
+                                        onChangeEnd={(v) => onUpdateConfig('ai_schedule_end', v)}
+                                        onChangeTimezone={(v) => onUpdateConfig('ai_schedule_timezone', v)}
+                                        disabled={agentDisabled || !config.ai_schedule_enabled}
+                                    />
+                                </SettingsSection>
+
                                 <button onClick={onSaveSettings} disabled={savingSettings}
                                     style={{
-                                        marginTop: '8px', padding: '12px 20px', borderRadius: '10px',
+                                        padding: '12px 20px', borderRadius: '10px',
                                         background: 'linear-gradient(135deg, var(--gold), #b8860b)',
-                                        border: 'none', color: '#000', fontWeight: 700, fontSize: '0.9rem',
+                                        border: 'none', color: '#000', fontWeight: 800, fontSize: '0.9rem',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         gap: '8px', opacity: savingSettings ? 0.6 : 1,
                                     }}>
@@ -1144,26 +1288,75 @@ function DetailItem({ icon, label, value, valueColor }: { icon: React.ReactNode;
     )
 }
 
+function SettingsSection({
+    title,
+    description,
+    children,
+    tone = 'neutral',
+}: {
+    title: string
+    description?: string
+    children: React.ReactNode
+    tone?: 'neutral' | 'info' | 'success' | 'gold'
+}) {
+    const toneStyles = {
+        neutral: { background: 'rgba(255,255,255,0.025)', border: 'var(--border)' },
+        info: { background: 'rgba(14,165,233,0.045)', border: 'rgba(14,165,233,0.16)' },
+        success: { background: 'rgba(34,197,94,0.045)', border: 'rgba(34,197,94,0.16)' },
+        gold: { background: 'rgba(201,169,110,0.06)', border: 'rgba(201,169,110,0.18)' },
+    }[tone]
+
+    return (
+        <section style={{
+            display: 'grid',
+            gap: '10px',
+            padding: '12px',
+            borderRadius: '12px',
+            border: `1px solid ${toneStyles.border}`,
+            background: toneStyles.background,
+        }}>
+            <div style={{ display: 'grid', gap: '2px' }}>
+                <div style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    color: 'var(--text-primary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                }}>
+                    {title}
+                </div>
+                {description && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.35 }}>
+                        {description}
+                    </div>
+                )}
+            </div>
+            {children}
+        </section>
+    )
+}
+
 function ToggleSwitch({ label, icon, checked, onChange, disabled = false }: { label: string; icon: React.ReactNode; checked: boolean; onChange: () => void; disabled?: boolean }) {
     return (
         <div onClick={() => !disabled && onChange()} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 14px', borderRadius: '10px', cursor: disabled ? 'not-allowed' : 'pointer',
+            minHeight: '42px',
+            padding: '8px 10px', borderRadius: '9px', cursor: disabled ? 'not-allowed' : 'pointer',
             background: disabled ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.03)',
             border: '1px solid var(--border)', transition: 'all 0.2s', opacity: disabled ? 0.55 : 1,
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
                 <span style={{ color: checked ? 'var(--gold)' : 'var(--text-muted)' }}>{icon}</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.2 }}>{label}</span>
             </div>
             <div style={{
-                width: '40px', height: '22px', borderRadius: '11px',
+                width: '36px', height: '20px', borderRadius: '10px',
                 background: checked ? '#22c55e' : 'rgba(255,255,255,0.12)',
                 position: 'relative', transition: 'background 0.2s', flexShrink: 0,
             }}>
                 <div style={{
-                    width: '16px', height: '16px', borderRadius: '50%', background: 'white',
-                    position: 'absolute', top: '3px', left: checked ? '21px' : '3px',
+                    width: '14px', height: '14px', borderRadius: '50%', background: 'white',
+                    position: 'absolute', top: '3px', left: checked ? '19px' : '3px',
                     transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                 }} />
             </div>
@@ -1179,8 +1372,7 @@ function ResponseModeSelector({ value, onChange, disabled = false }: { value: 't
     ]
 
     return (
-        <div style={{ display: 'grid', gap: '6px' }}>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Modo de resposta</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '8px' }}>
             {options.map((opt) => {
                 const active = value === opt.value
                 return (
@@ -1191,8 +1383,9 @@ function ResponseModeSelector({ value, onChange, disabled = false }: { value: 't
                         disabled={disabled}
                         style={{
                             textAlign: 'left',
-                            padding: '10px 12px',
-                            borderRadius: '10px',
+                            minHeight: '64px',
+                            padding: '9px 10px',
+                            borderRadius: '9px',
                             border: `1px solid ${active ? 'var(--gold)' : 'var(--border)'}`,
                             background: active ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.03)',
                             color: 'var(--text-primary)',
@@ -1200,8 +1393,46 @@ function ResponseModeSelector({ value, onChange, disabled = false }: { value: 't
                             opacity: disabled ? 0.55 : 1,
                         }}
                     >
-                        <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{opt.label}</div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{opt.desc}</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{opt.label}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.25, marginTop: '2px' }}>{opt.desc}</div>
+                    </button>
+                )
+            })}
+        </div>
+    )
+}
+
+function RapportModeSelector({ value, onChange, disabled = false }: { value: 'off' | 'soft' | 'strong'; onChange: (v: 'off' | 'soft' | 'strong') => void; disabled?: boolean }) {
+    const options: Array<{ value: 'off' | 'soft' | 'strong'; label: string; desc: string }> = [
+        { value: 'off', label: 'Desligado', desc: 'Mantém o tom definido no prompt do agente.' },
+        { value: 'soft', label: 'Suave', desc: 'Espelha idioma, formalidade e expressões leves do lead.' },
+        { value: 'strong', label: 'Forte', desc: 'Usa sinais regionais com mais presença quando combinar com o lead.' },
+    ]
+
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '8px' }}>
+            {options.map((opt) => {
+                const active = value === opt.value
+                return (
+                    <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => !disabled && onChange(opt.value)}
+                        disabled={disabled}
+                        style={{
+                            textAlign: 'left',
+                            minHeight: '64px',
+                            padding: '9px 10px',
+                            borderRadius: '9px',
+                            border: `1px solid ${active ? 'var(--gold)' : 'var(--border)'}`,
+                            background: active ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.03)',
+                            color: 'var(--text-primary)',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            opacity: disabled ? 0.55 : 1,
+                        }}
+                    >
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{opt.label}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.25, marginTop: '2px' }}>{opt.desc}</div>
                     </button>
                 )
             })}
@@ -1213,20 +1444,21 @@ function NumericInput({ label, value, onChange, min, max, disabled = false }: { 
     return (
         <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 14px', borderRadius: '10px',
+            minHeight: '42px',
+            padding: '8px 10px', borderRadius: '9px',
             background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', opacity: disabled ? 0.55 : 1,
         }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.2 }}>{label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
                 <button onClick={() => !disabled && onChange(String(Math.max(min || 0, parseInt(value) - 1)))} disabled={disabled}
-                    style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: disabled ? 'not-allowed' : 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: disabled ? 'not-allowed' : 'pointer', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     −
                 </button>
                 <input type="number" value={value} onChange={e => onChange(e.target.value)} min={min} max={max} disabled={disabled}
-                    style={{ width: '50px', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px 6px', color: 'var(--gold)', fontSize: '0.9rem', fontWeight: 600, outline: 'none' }}
+                    style={{ width: '44px', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', borderRadius: '6px', padding: '3px 5px', color: 'var(--gold)', fontSize: '0.84rem', fontWeight: 700, outline: 'none' }}
                 />
                 <button onClick={() => !disabled && onChange(String(Math.min(max || 9999, parseInt(value) + 1)))} disabled={disabled}
-                    style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: disabled ? 'not-allowed' : 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: disabled ? 'not-allowed' : 'pointer', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     +
                 </button>
             </div>

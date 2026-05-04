@@ -1,4 +1,4 @@
-import { createServerSupabase } from '@/lib/supabase/server'
+﻿import { createServerSupabase } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Bed, Bath, Move, MapPin, Phone, ArrowLeft, Gem, Ruler } from 'lucide-react'
 import Link from 'next/link'
@@ -133,7 +133,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             {/* CTA */}
             <section className="pd-cta-section">
                 <div className="pd-cta-card">
-                    <h3 className="pd-cta-title">Interessado neste imóvel?</h3>
+                    <h3 className="pd-cta-title">Interessado neste Imóvel?</h3>
                     <p className="pd-cta-text">Fale diretamente com Guilherme Pilger e agende sua visita exclusiva.</p>
                     <WhatsAppCaptureLink
                         phone="5548999999999"
@@ -624,3 +624,4 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         </div>
     )
 }
+
