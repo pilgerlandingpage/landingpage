@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { Activity, BarChart3, Building2, LineChart, TrendingUp, Zap, Globe, Database, Radio, Wifi, Eye, Search, Layers, Server } from 'lucide-react'
 import type { PublicMarketRadarFeed } from '@/lib/market-radar/public-feed'
@@ -67,6 +70,7 @@ function RowSparkline({ data, color, width = 72, height = 22 }: { data: number[]
 
 // Candlestick chart component (like TradingView / WBNB)
 function CandlestickChart({ candles, score }: { candles: Candle[], score: number }) {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const W = 740, CHART_H = 220, VOL_H = 50, GAP = 4
   const H = CHART_H + VOL_H + GAP
   const PL = 42, PR = 42, PT = 10, PB = 22
@@ -118,11 +122,14 @@ function CandlestickChart({ candles, score }: { candles: Candle[], score: number
   const lastClose = lastCandle.close
   const isBullish = lastCandle.close >= lastCandle.open
 
+  const activeCandle = hoverIdx !== null ? candles[hoverIdx] : lastCandle
+  const activeBullish = activeCandle.close >= activeCandle.open
+
   // Resistance line at the highest point
   const resistanceY = yPos(dataMax)
 
   return (
-    <div className="mi-chart-wrap">
+    <div className="mi-chart-wrap" onMouseLeave={() => setHoverIdx(null)}>
       <div className="mi-chart-tabs">
         <span>5m</span>
         <span>10m</span>
@@ -132,14 +139,14 @@ function CandlestickChart({ candles, score }: { candles: Candle[], score: number
         <span className="mi-tab-active">1D</span>
       </div>
       <div className="mi-chart-ohlc">
-        <span>Open: <b>{lastCandle.open.toFixed(1)}</b></span>
-        <span>High: <b style={{ color: '#19c37d' }}>{lastCandle.high.toFixed(1)}</b></span>
-        <span>Low: <b style={{ color: '#ef4444' }}>{lastCandle.low.toFixed(1)}</b></span>
-        <span>Close: <b style={{ color: isBullish ? '#19c37d' : '#ef4444' }}>{lastCandle.close.toFixed(1)}</b></span>
+        <span>Open: <b>{activeCandle.open.toFixed(1)}</b></span>
+        <span>High: <b style={{ color: '#19c37d' }}>{activeCandle.high.toFixed(1)}</b></span>
+        <span>Low: <b style={{ color: '#ef4444' }}>{activeCandle.low.toFixed(1)}</b></span>
+        <span>Close: <b style={{ color: activeBullish ? '#19c37d' : '#ef4444' }}>{activeCandle.close.toFixed(1)}</b></span>
         <span className="mi-ma-label">
-          <span style={{ color: '#38bdf8' }}>MA5: {ma5[ma5.length - 1]?.toFixed(1)}</span>
-          <span style={{ color: '#f59e0b' }}>MA10: {ma10[ma10.length - 1]?.toFixed(1)}</span>
-          <span style={{ color: '#c084fc' }}>MA30: {ma30[ma30.length - 1]?.toFixed(1)}</span>
+          <span style={{ color: '#38bdf8' }}>MA5: {ma5[hoverIdx !== null ? hoverIdx : ma5.length - 1]?.toFixed(1)}</span>
+          <span style={{ color: '#f59e0b' }}>MA10: {ma10[hoverIdx !== null ? hoverIdx : ma10.length - 1]?.toFixed(1)}</span>
+          <span style={{ color: '#c084fc' }}>MA30: {ma30[hoverIdx !== null ? hoverIdx : ma30.length - 1]?.toFixed(1)}</span>
         </span>
       </div>
       <div className="mi-chart-container">
@@ -191,16 +198,33 @@ function CandlestickChart({ candles, score }: { candles: Candle[], score: number
             const bodyBot = yPos(Math.min(c.open, c.close))
             const bodyHeight = Math.max(1, bodyBot - bodyTop)
             return (
-              <g key={`c${i}`}>
+              <g key={`c${i}`} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: 'crosshair' }}>
+                {/* Invisible wider rect to make hovering easier */}
+                <rect x={x - candleW / 2} y={PT} width={candleW} height={H} fill="transparent" />
                 {/* Wick */}
-                <line x1={x} y1={yPos(c.high)} x2={x} y2={yPos(c.low)} stroke={color} strokeWidth="1" />
+                <line x1={x} y1={yPos(c.high)} x2={x} y2={yPos(c.low)} stroke={color} strokeWidth="1" pointerEvents="none" />
                 {/* Body */}
                 <rect x={x - bodyW / 2} y={bodyTop} width={bodyW} height={bodyHeight}
                   fill={bullish ? color : color} stroke={color} strokeWidth="0.5"
-                  rx="0.5" />
+                  rx="0.5" pointerEvents="none" />
               </g>
             )
           })}
+
+          {/* Crosshair Overlay on Hover */}
+          {hoverIdx !== null && (() => {
+            const x = xPos(hoverIdx)
+            const y = yPos(candles[hoverIdx].close)
+            return (
+              <g pointerEvents="none">
+                <line x1={x} y1={PT} x2={x} y2={volBot} stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" strokeDasharray="2 2" />
+                <line x1={PL} y1={y} x2={W - PR} y2={y} stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" strokeDasharray="2 2" />
+                {/* Y-axis label */}
+                <rect x={W - PR} y={y - 6} width="22" height="12" rx="2" fill="#0d1117" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                <text x={W - PR + 11} y={y + 2.5} fill="#fff" fontSize="6.5" fontWeight="700" textAnchor="middle">{candles[hoverIdx].close.toFixed(1)}</text>
+              </g>
+            )
+          })()}
 
           {/* Current price line + label */}
           {(() => {
@@ -252,7 +276,7 @@ export default function MarketIntelligencePanel({ feed }: { feed: PublicMarketRa
         source: SOURCES[i % SOURCES.length],
         score: s.score,
         temp: s.temperature,
-        delta24h: (s.score > 75 ? '+' : '') + (Math.random() * 3 - 0.5).toFixed(1) + '%',
+        delta24h: (s.score > 75 ? '+' : '') + ((Math.abs(Math.sin(s.score + i)) * 3) - 0.5).toFixed(1) + '%',
         delta7d: (delta7d >= 0 ? '+' : '') + delta7d.toFixed(2) + '%',
         delta30d: (delta30d >= 0 ? '+' : '') + delta30d.toFixed(2) + '%',
         sparkData: data,
@@ -272,7 +296,7 @@ export default function MarketIntelligencePanel({ feed }: { feed: PublicMarketRa
         source: SOURCES[(i + 2) % SOURCES.length],
         score: r.score,
         temp: r.description,
-        delta24h: (r.score > 65 ? '+' : '') + (Math.random() * 4 - 1).toFixed(1) + '%',
+        delta24h: (r.score > 65 ? '+' : '') + ((Math.abs(Math.cos(r.score + i)) * 4) - 1).toFixed(1) + '%',
         delta7d: (delta7d >= 0 ? '+' : '') + delta7d.toFixed(2) + '%',
         delta30d: (delta30d >= 0 ? '+' : '') + delta30d.toFixed(2) + '%',
         sparkData: data,
@@ -289,7 +313,7 @@ export default function MarketIntelligencePanel({ feed }: { feed: PublicMarketRa
       <div className="mi-topbar">
         <div className="mi-topbar-left">
           <span className="mi-kicker">Pilger Market Intelligence</span>
-          <h2>Radar Imobiliário SC</h2>
+          <h2>Radar Imobiliário</h2>
         </div>
         <div className="mi-topbar-right">
           <div className="mi-sources">

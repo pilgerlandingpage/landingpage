@@ -484,7 +484,13 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           .mi-trend-chart { height: 220px; }
           .mi-chart-legend { gap: 3px 8px; padding: 6px 12px; }
           .mi-legend-label { max-width: 90px; font-size: 0.6rem; }
-          .mi-table { min-width: 600px; }
+          .mi-table { min-width: 100%; }
+          .mi-table th:nth-child(5), .mi-table td:nth-child(5), /* 24h */
+          .mi-table th:nth-child(6), .mi-table td:nth-child(6), /* 7d */
+          .mi-table th:nth-child(7), .mi-table td:nth-child(7), /* 30d */
+          .mi-table th:nth-child(8), .mi-table td:nth-child(8), /* Sparkline */
+          .mi-table th:nth-child(9), .mi-table td:nth-child(9)  /* Status */
+          { display: none; }
           .mi-bottom-bar { flex-direction: column; align-items: stretch; gap: 8px; }
           .mi-actions { width: 100%; }
           .mi-action-primary, .mi-action-secondary { flex: 1; justify-content: center; }
