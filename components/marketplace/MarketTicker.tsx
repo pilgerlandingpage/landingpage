@@ -22,30 +22,48 @@ function MiniSparkline({ tone }: { tone: 'up' | 'down' | 'neutral' }) {
 }
 
 export default function MarketTicker({ feed }: { feed: PublicMarketRadarFeed }) {
-  const items = feed.ticker.length > 0 ? feed.ticker.slice(0, 10) : []
+  const dataItems = feed.ticker.length > 0 ? feed.ticker.slice(0, 10) : []
 
-  if (items.length === 0) return null
+  if (dataItems.length === 0) return null
+
+  // Mix the label into the scrolling items
+  const labelObj = { isLabel: true as const }
+  const mixedItems: Array<typeof dataItems[0] | typeof labelObj> = []
+  
+  // Insert a label every 3 items so it appears very frequently
+  dataItems.forEach((item, index) => {
+    if (index % 3 === 0) {
+      mixedItems.push(labelObj)
+    }
+    mixedItems.push(item)
+  })
 
   // Duplicate items 4x for seamless infinite scroll
-  const loopItems = [...items, ...items, ...items, ...items]
+  const loopItems = [...mixedItems, ...mixedItems, ...mixedItems, ...mixedItems]
 
   return (
-    <section className="market-ticker-shell" aria-label="Radar imobiliario Pilger">
-      <div className="market-ticker-label">
-        <span className="market-ticker-pulse" />
-        <span>Radar Pilger</span>
-        <strong>{feed.source === 'live' ? 'ao vivo' : 'preview'}</strong>
-      </div>
+    <section className="market-ticker-shell" aria-label="Radar Imobiliário">
       <div className="market-ticker-track" aria-hidden="true">
         <div className="market-ticker-loop">
-          {loopItems.map((item, i) => (
-            <div className="market-ticker-item" key={`${item.label}-${i}`}>
-              <ToneMark tone={item.tone} />
-              <span className="market-ticker-item-label">{item.label}</span>
-              <MiniSparkline tone={item.tone} />
-              <strong className={`market-ticker-item-value market-ticker-${item.tone}`}>{item.value}</strong>
-            </div>
-          ))}
+          {loopItems.map((item, i) => {
+            if ('isLabel' in item) {
+              return (
+                <div className="market-ticker-label" key={`label-${i}`}>
+                  <span className="market-ticker-pulse" />
+                  <span>Radar Imobiliário</span>
+                  <strong>{feed.source === 'live' ? 'ao vivo' : 'preview'}</strong>
+                </div>
+              )
+            }
+            return (
+              <div className="market-ticker-item" key={`${item.label}-${i}`}>
+                <ToneMark tone={item.tone} />
+                <span className="market-ticker-item-label">{item.label}</span>
+                <MiniSparkline tone={item.tone} />
+                <strong className={`market-ticker-item-value market-ticker-${item.tone}`}>{item.value}</strong>
+              </div>
+            )
+          })}
         </div>
       </div>
       <div className="market-ticker-fade market-ticker-fade-left" />

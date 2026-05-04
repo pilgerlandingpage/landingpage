@@ -77,7 +77,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           gap: 0;
           height: 100%;
           width: max-content;
-          animation: marketTickerScroll 80s linear infinite;
+          animation: marketTickerScroll 160s linear infinite;
           will-change: transform;
         }
         .market-ticker-item {
@@ -132,7 +132,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           pointer-events: none;
         }
         .market-ticker-fade-left {
-          left: 110px;
+          left: 0;
           background: linear-gradient(90deg, #0a0a0a, rgba(10, 10, 10, 0));
         }
         .market-ticker-fade-right {
@@ -493,8 +493,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           .market-ticker-label strong { display: none; }
           .market-ticker-item { font-size: 0.68rem; padding: 0 12px; }
           .market-ticker-sparkline { width: 22px; height: 10px; }
-          .market-ticker-loop { animation-duration: 50s; }
-          .market-ticker-fade-left { left: 80px; }
+          .market-ticker-loop { animation-duration: 100s; }
+          .market-ticker-fade-left { left: 0; }
         }
 
         /* Reset all links inside marketplace — no underlines anywhere */

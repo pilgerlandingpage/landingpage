@@ -3401,12 +3401,24 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
                 .join(' ')
         )
         const appUrl = getPublicAppUrl()
-        const { data: properties } = await supabase
+        let propertiesQuery = supabase
             .from('properties')
             .select('id, title, city, state, price, property_type, bedrooms, bathrooms, area_m2, amenities, description, created_at')
             .eq('status', 'active')
-            .order('price', { ascending: false })
-            .limit(80)
+
+        if (requestedBudget) {
+            propertiesQuery = propertiesQuery
+                .gte('price', requestedBudget * 0.5)
+                .lte('price', requestedBudget * 2.0)
+                .order('price', { ascending: false })
+                .limit(100)
+        } else {
+            propertiesQuery = propertiesQuery
+                .order('created_at', { ascending: false })
+                .limit(80)
+        }
+
+        const { data: properties } = await propertiesQuery
 
         const { data: landingPages } = await supabase
             .from('landing_pages')
