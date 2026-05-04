@@ -71,7 +71,22 @@ export function buildTrackedWhatsAppLink(options: TrackedWhatsAppLinkOptions): s
             linkType === 'property' ? 'property_recommendation' : `${linkType}_button`
         )
         const phone = normalizeWhatsAppPhone(options.leadPhone)
+        const appUrl = new URL(getPublicAppUrl())
 
+        // For internal links, just append UTMs directly to avoid URL length limits in WhatsApp Buttons
+        if (destination.hostname === appUrl.hostname) {
+            destination.searchParams.set('utm_source', source)
+            destination.searchParams.set('utm_medium', medium)
+            destination.searchParams.set('utm_campaign', campaign)
+            if (options.content) destination.searchParams.set('utm_content', String(options.content))
+            if (phone) destination.searchParams.set('lead_phone', phone)
+            // Optional but helps our tracker know what event triggered this
+            destination.searchParams.set('event_type', whatsappClickEventType(linkType))
+            
+            return destination.toString()
+        }
+
+        // For external links, use the redirect wrapper
         destination.searchParams.set('utm_source', source)
         destination.searchParams.set('utm_medium', medium)
         destination.searchParams.set('utm_campaign', campaign)
