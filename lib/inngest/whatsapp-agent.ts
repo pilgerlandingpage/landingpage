@@ -3144,7 +3144,8 @@ Quando o lead demonstrar interesse real e você tiver os dados, ofereça agendar
 Quando tiver todas as informações, use {transferir} para passar ao corretor humano.
 Use o nome do lead com moderacao quando souber: {nome_lead}. Nao chame pelo nome em toda resposta.
 
-NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato.`
+NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato.
+NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda APENAS com o texto final que o cliente deve ver. Nunca use marcações como (pensamento), (análise), (reflexão), <thinking> ou similares.`
     const promptUsesPropertyCatalog = /\{imoveis\}/i.test(rawPrompt)
 
     // ═══ Carregar configs dinâmicas do admin ═══
@@ -3486,11 +3487,22 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             responseText = data.choices?.[0]?.message?.content || ''
         } else {
             const model = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
+            // Gemini 2.5+ models have built-in "thinking" that can leak internal
+            // reasoning into the response. Disable it via thinkingBudget: 0.
+            const isThinkingModel = /gemini-2\.5|gemini-3/i.test(model)
+            const generationConfig: Record<string, any> = {
+                temperature: 0.8,
+                maxOutputTokens: 600,
+            }
+            if (isThinkingModel) {
+                generationConfig.thinkingConfig = { thinkingBudget: 0 }
+            }
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig,
                     contents: chatMessages.map((m: any) => ({
                         role: m.role === 'assistant' ? 'model' : 'user',
                         parts: [{ text: m.content }]
@@ -3508,11 +3520,17 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
                 },
             })
             const parts = data.candidates?.[0]?.content?.parts || []
-            const rawResponse = parts.map((p: any) => p?.text || '').join('\n').trim()
+            // Gemini 2.5 models return thinking/reasoning in separate parts
+            // with thought=true flag — filter them out to avoid leaking to the lead
+            const contentParts = parts.filter((p: any) => !p?.thought)
+            const rawResponse = contentParts.map((p: any) => p?.text || '').join('\n').trim()
             responseText = rawResponse
                 .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
                 .replace(/Thought:[^\n]*\n?/gi, '')
                 .replace(/\[thought\][\s\S]*?\[\/thought\]/gi, '')
+                .replace(/\(pensamento\):?\s*[^\n]+(\n|$)/gi, '')
+                .replace(/\(pensamento\):?\s*[\s\S]*?(?=\n\n|\n[A-Z])/gi, '')
+                .replace(/\(thought\):?\s*[^\n]+(\n|$)/gi, '')
                 .trim()
         }
 
@@ -3532,6 +3550,17 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
         responseText = responseText
             .replace(/Cannot read.*?Inform the user\./gi, '')
             .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+            .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+            .replace(/\[thinking\][\s\S]*?\[\/thinking\]/gi, '')
+            .replace(/\(pensamento\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(thought\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(raciocínio\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(raciocinio\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(análise\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(analise\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(reflexão\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(reflexao\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
+            .replace(/\(internal\):?\s*[\s\S]*?(?=\n\n|\n[A-Z]|$)/gi, '')
             .trim()
 
         const conversationText = messages
@@ -5997,7 +6026,10 @@ export const shadowAgentResponse = inngest.createFunction(
                         usageMetadata: data.usageMetadata,
                         metadata: { admin_user_id: user.id || null },
                     })
-                    text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+                    const allParts = data.candidates?.[0]?.content?.parts || []
+                    const contentOnlyParts = allParts.filter((p: any) => !p?.thought)
+                    text = contentOnlyParts.map((p: any) => p?.text || '').join('\n').trim()
+                        || data.candidates?.[0]?.content?.parts?.[0]?.text || ''
                 }
             } catch {
                 text = 'O corretor está indisponível no momento.'

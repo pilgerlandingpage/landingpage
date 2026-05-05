@@ -50,7 +50,7 @@ export default function AboutGuilhermeSection() {
                     background-size: 60px 60px;
                     color: #fff;
                     margin-top: 40px;
-                    overflow: hidden;
+                    overflow: visible;
                 }
 
                 /* ---- MOBILE (default, stacked) ---- */
@@ -66,6 +66,8 @@ export default function AboutGuilhermeSection() {
                 .about-col-left {
                     text-align: center;
                     position: relative;
+                    z-index: 2;
+                    margin-top: 80px;
                     margin-bottom: 8px;
                 }
                 .watermark-wrap {
@@ -112,6 +114,8 @@ export default function AboutGuilhermeSection() {
                     object-fit: contain;
                     display: block;
                     filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+                    transform: scale(2.3);
+                    transform-origin: bottom center;
                 }
 
                 .about-col-right {
@@ -153,6 +157,7 @@ export default function AboutGuilhermeSection() {
                         justify-content: center;
                         text-align: center;
                         padding: 40px 20px;
+                        margin-top: 0;
                         margin-bottom: 0;
                     }
                     .watermark-wrap {
