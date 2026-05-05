@@ -3507,7 +3507,13 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
                     lead_phone: leadPhone || null,
                 },
             })
-            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+            const parts = data.candidates?.[0]?.content?.parts || []
+            const rawResponse = parts.map((p: any) => p?.text || '').join('\n').trim()
+            responseText = rawResponse
+                .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+                .replace(/Thought:[^\n]*\n?/gi, '')
+                .replace(/\[thought\][\s\S]*?\[\/thought\]/gi, '')
+                .trim()
         }
 
         const appointmentMarkerResult = parseAppointmentMarkers(responseText)
@@ -3521,6 +3527,12 @@ NUNCA revele que é IA. Nunca invente dados de imóveis. Nunca fale preço exato
             })
             responseText = appointmentMarkerResult.cleanedText
         }
+
+        // Remove any leaked internal thoughts or model error hallucinations
+        responseText = responseText
+            .replace(/Cannot read.*?Inform the user\./gi, '')
+            .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+            .trim()
 
         const conversationText = messages
             .filter((m: any) => typeof m?.content === 'string' && m.content.trim())
