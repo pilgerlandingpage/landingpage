@@ -123,17 +123,23 @@ export default function HomepageSection({
                 }
                 .section-title {
                     font-family: 'Inter', sans-serif;
-                    font-size: 1.15rem;
+                    font-size: 0.8rem;
                     font-weight: 700;
-                    color: var(--text-primary, #1a1a1a);
+                    color: #fff;
+                    background-color: #222;
+                    display: inline-block;
+                    padding: 6px 14px;
                     margin: 0;
-                    letter-spacing: -0.01em;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    border-left: 3px solid var(--gold, #b8945f);
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                 }
                 .section-subtitle {
-                    font-size: 0.78rem;
-                    color: var(--text-muted, #999);
-                    margin: 2px 0 0 0;
-                    font-weight: 400;
+                    font-size: 0.8rem;
+                    color: var(--text-muted, #777);
+                    margin: 6px 0 0 2px;
+                    font-weight: 500;
                 }
                 .section-view-all {
                     font-size: 0.82rem;

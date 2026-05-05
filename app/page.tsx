@@ -109,10 +109,9 @@ export default async function MarketplaceHome() {
   // Categories are now managed directly by CategoriesCarousel
 
   return (
-    <>
+    <div className="marketplace-container">
       <AuthErrorRedirect />
       <MarketplaceHomeStyles />
-      <div className="marketplace-container">
       <GlobalHeader />
 
       {/* === COMPACT HERO STRIP === */}
@@ -197,7 +196,6 @@ export default async function MarketplaceHome() {
       <WhatsAppFloatingButton />
       <MobileNav />
     </div>
-    </>
   )
 }
 

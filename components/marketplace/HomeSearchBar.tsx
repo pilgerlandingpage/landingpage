@@ -274,7 +274,8 @@ export default function HomeSearchBar() {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     background: white;
-                    border: 1px solid #ddd;
+                    border: 1px solid #b3b3b3;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
                     overflow: visible;
                     width: 100%;
                     position: relative;
@@ -284,10 +285,10 @@ export default function HomeSearchBar() {
                     display: flex;
                     align-items: center;
                     height: 40px;
-                    border-bottom: 1px solid #eee;
+                    border-bottom: 1px solid #e0e0e0;
                 }
                 .search-select-wrapper:first-of-type {
-                    border-right: 1px solid #eee;
+                    border-right: 1px solid #e0e0e0;
                 }
                 .search-select {
                     width: 100%;
@@ -429,10 +430,10 @@ export default function HomeSearchBar() {
                         border-bottom: none;
                     }
                     .search-select-wrapper:first-of-type {
-                        border-right: 1px solid #eee;
+                        border-right: 1px solid #e0e0e0;
                     }
                     .search-select-wrapper:nth-of-type(2) {
-                        border-right: 1px solid #eee;
+                        border-right: 1px solid #e0e0e0;
                     }
                     .search-input-wrapper {
                         grid-column: auto;

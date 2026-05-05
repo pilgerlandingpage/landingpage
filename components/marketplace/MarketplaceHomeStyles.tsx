@@ -600,11 +600,30 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           font-size: clamp(0.65rem, 2.2vw, 1rem);
           font-weight: 600;
           font-style: italic;
-          color: #FFD700;
-          -webkit-text-fill-color: #FFD700;
+          color: #111;
+          -webkit-text-fill-color: #111;
           letter-spacing: 0.12em;
           margin-bottom: 4px;
-          text-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 0 8px rgba(0,0,0,0.2);
+        }
+        .hero-subtitle-top {
+          font-family: 'Inter', sans-serif;
+          font-size: clamp(0.9rem, 2.5vw, 1.8rem);
+          font-weight: 500;
+          line-height: 1.3;
+          margin: 0 auto;
+          color: #111;
+          text-shadow: 0 1px 15px rgba(255,255,255,0.8);
+          max-width: 800px;
+        }
+        .hero-title-script {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-style: italic;
+          font-size: clamp(3.15rem, 7.2vw, 5.85rem);
+          font-weight: 400;
+          line-height: 1;
+          margin: 0;
+          color: #111;
+          text-shadow: 0 2px 20px rgba(255,255,255,0.8);
         }
         @media (min-width: 768px) {
           .hero-content {
