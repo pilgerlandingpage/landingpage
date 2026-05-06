@@ -179,6 +179,7 @@ export default function HomepageSection({
                 }
                 .carousel-track {
                     display: flex;
+                    align-items: stretch;
                     gap: 16px;
                     overflow-x: auto;
                     scroll-snap-type: x mandatory;
@@ -193,6 +194,7 @@ export default function HomepageSection({
                     flex: 0 0 calc(50% - 8px);
                     scroll-snap-align: start;
                     min-width: 0;
+                    display: flex;
                 }
 
                 @media (min-width: 600px) {

@@ -1,7 +1,3 @@
-'use client'
-
-import { useEffect } from 'react'
-
 const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         .marketplace-container {
           min-height: 100vh;
@@ -825,19 +821,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
 `
 
 export default function MarketplaceHomeStyles() {
-  useEffect(() => {
-    const id = 'marketplace-home-styles'
-    if (document.getElementById(id)) return
-
-    const style = document.createElement('style')
-    style.id = id
-    style.textContent = MARKETPLACE_HOME_CSS
-    document.head.appendChild(style)
-
-    return () => {
-      style.remove()
-    }
-  }, [])
-
-  return null
+  return (
+    <style dangerouslySetInnerHTML={{ __html: MARKETPLACE_HOME_CSS }} />
+  )
 }

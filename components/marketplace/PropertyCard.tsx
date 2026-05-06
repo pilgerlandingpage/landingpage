@@ -1,6 +1,6 @@
 'use client'
 
-import { Heart, ChevronLeft, ChevronRight, Bed, Bath, Maximize } from 'lucide-react'
+import { Heart, ChevronLeft, ChevronRight, Bed, Bath, Maximize, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
@@ -116,34 +116,36 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
             </div>
 
             <Link href={href} className="card-content-link">
-                <div className="info-top-row">
-                    <h3 className="location-text">{property.city}, {property.state}</h3>
-                </div>
-
                 <p className="info-text property-type">{property.property_type || 'Imóvel de Luxo'}</p>
+
+                <div className="location-row">
+                    <MapPin size={13} className="location-pin" />
+                    <h3 className="location-text">{property.city}{property.state ? ` / ${property.state}` : ''}</h3>
+                </div>
 
                 <div className="property-specs">
                     {property.bedrooms && (
                         <span className="spec-item">
-                            <Bed size={12} />
-                            {property.bedrooms}
+                            <Bed size={14} />
+                            {property.bedrooms} {property.bedrooms === 1 ? 'Quarto' : 'Quartos'}
                         </span>
                     )}
                     {property.bathrooms && (
                         <span className="spec-item">
-                            <Bath size={12} />
-                            {property.bathrooms}
+                            <Bath size={14} />
+                            {property.bathrooms} {property.bathrooms === 1 ? 'Banheiro' : 'Banheiros'}
                         </span>
                     )}
                     {property.area_m2 && (
                         <span className="spec-item">
-                            <Maximize size={11} />
-                            {property.area_m2}m²
+                            <Maximize size={13} />
+                            {property.area_m2.toLocaleString('pt-BR')} m²
                         </span>
                     )}
                 </div>
 
                 <div className="price-row">
+                    <span className="price-label">Venda:</span>
                     <span className="price-bold">{formattedPrice}</span>
                 </div>
             </Link>
@@ -152,12 +154,27 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                 .property-card {
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
                     width: 100%;
+                    height: 100%;
                     min-width: 0;
+                    background: #ffffff;
+                    border-radius: 12px;
                     overflow: hidden;
+                    box-shadow: 
+                        0 3px 6px rgba(0, 0, 0, 0.08),
+                        0 10px 24px rgba(0, 0, 0, 0.10),
+                        0 24px 48px rgba(0, 0, 0, 0.06);
+                    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                     cursor: pointer;
+                }
+                .property-card:hover {
+                    transform: translateY(-8px) scale(1.015);
+                    box-shadow: 
+                        0 4px 8px rgba(0, 0, 0, 0.06),
+                        0 16px 32px rgba(0, 0, 0, 0.1),
+                        0 32px 64px rgba(0, 0, 0, 0.08),
+                        0 0 0 1px rgba(201, 169, 110, 0.08);
                 }
 
                 /* --- IMAGE AREA --- */
@@ -165,15 +182,14 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     position: relative;
                     width: 100%;
                     aspect-ratio: 4 / 3;
-                    border-radius: 12px;
+                    border-radius: 12px 12px 0 0;
                     overflow: hidden;
                     background: #e8e5e0;
-                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
+                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
                 .property-card:hover .card-image-container {
                     transform: scale(1.02);
-                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
                 }
 
                 .image-link {
@@ -293,11 +309,15 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                 .card-content-link {
                     display: flex;
                     flex-direction: column;
-                    gap: 1px;
+                    align-items: center;
+                    text-align: center;
+                    gap: 4px;
                     text-decoration: none !important;
                     color: inherit !important;
                     cursor: pointer;
-                    padding: 0 2px;
+                    padding: 18px 16px 22px 16px;
+                    border-top: 1px solid #eee;
+                    flex: 1;
                 }
                 
                 .card-content-link:hover, 
@@ -308,97 +328,122 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     color: inherit !important;
                 }
 
-                .info-top-row {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: 100%;
-                }
-
-                .property-specs {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin: 2px 0;
-                }
-
-                .spec-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 3px;
-                    font-size: 0.75rem;
-                    color: var(--text-secondary, #5a5a5a);
+                .info-text.property-type {
+                    font-size: 1rem;
+                    color: #1a1a1a;
+                    margin: 0 0 2px 0;
+                    line-height: 1.4;
                     font-weight: 400;
+                    text-transform: none;
+                    letter-spacing: 0;
+                }
+
+                .location-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
+                    width: 100%;
+                    margin-bottom: 6px;
+                }
+
+                .location-pin {
+                    flex-shrink: 0;
+                    color: #1a1a1a;
                 }
 
                 .location-text {
                     font-size: 0.88rem;
-                    font-weight: 600;
-                    color: var(--text-primary, #1a1a1a);
+                    font-weight: 700;
+                    color: #1a1a1a;
                     margin: 0;
                     line-height: 1.3;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    max-width: 80%;
+                    max-width: 100%;
                     font-family: 'Inter', sans-serif;
                 }
 
+                .property-specs {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    gap: 6px 16px;
+                    margin: 4px 0 8px 0;
+                    width: 100%;
+                }
 
-
-                .info-text {
-                    font-size: 0.8rem;
-                    color: var(--text-secondary, #5a5a5a);
-                    margin: 0;
-                    line-height: 1.35;
+                .spec-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    font-size: 0.82rem;
+                    color: #444;
                     font-weight: 400;
                 }
 
-
-
                 .price-row {
                     display: flex;
+                    justify-content: center;
                     align-items: baseline;
-                    gap: 3px;
-                    margin-top: 2px;
+                    gap: 6px;
+                    margin-top: auto;
+                    width: 100%;
+                    padding-top: 8px;
+                    border-top: 1px solid #f0ece6;
+                }
+
+                .price-label {
+                    font-size: 0.92rem;
+                    font-weight: 700;
+                    color: #1a1a1a;
                 }
 
                 .price-bold {
-                    font-size: 0.88rem;
-                    font-weight: 700;
-                    color: var(--gold, #b8945f);
+                    font-size: 1.1rem;
+                    font-weight: 800;
+                    color: #1a1a1a;
                 }
 
                 /* === RESPONSIVE ADJUSTMENTS === */
                 @media (max-width: 649px) {
+                    .card-content-link {
+                        padding: 14px 10px 18px 10px;
+                    }
+                    .info-text.property-type {
+                        font-size: 0.85rem;
+                    }
                     .location-text {
                         font-size: 0.78rem;
                     }
-                    .info-text {
+                    .spec-item {
                         font-size: 0.72rem;
                     }
                     .price-bold {
-                        font-size: 0.78rem;
+                        font-size: 0.92rem;
                     }
-                    .spec-item {
-                        font-size: 0.68rem;
+                    .price-label {
+                        font-size: 0.8rem;
                     }
                     .exclusive-badge {
                         font-size: 0.58rem;
                         padding: 2px 7px;
                     }
                     .card-image-container {
-                        border-radius: 10px;
+                        border-radius: 10px 10px 0 0;
                         aspect-ratio: 4 / 3;
                     }
                 }
 
                 /* Desktop enhancements */
                 @media (min-width: 1024px) {
-                    .location-text { font-size: 0.88rem; }
-                    .info-text { font-size: 0.85rem; }
-                    .price-bold { font-size: 0.95rem; }
-                    .card-image-container { border-radius: 12px; }
+                    .info-text.property-type { font-size: 1.05rem; }
+                    .location-text { font-size: 0.92rem; }
+                    .spec-item { font-size: 0.85rem; }
+                    .price-bold { font-size: 1.15rem; }
+                    .card-image-container { border-radius: 12px 12px 0 0; }
                 }
             `}</style>
         </div>

@@ -140,7 +140,7 @@ export default async function MarketplaceHome() {
       </div>
 
       {/* === STICKY SEARCH === */}
-      <div className="sticky-bar">
+      <div className="sticky-bar" style={{ position: 'sticky', top: 0, zIndex: 100, background: '#ffffff', borderBottom: '1px solid #e8e5e0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflow: 'visible' }}>
         <HomeSearchBar />
       </div>
 
