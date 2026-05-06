@@ -45,6 +45,7 @@ export default async function SearchPage({
     const city = firstParam(resolvedParams.city)
     const tag = firstParam(resolvedParams.tag)
     const offer = firstParam(resolvedParams.offer)
+    const price = firstParam(resolvedParams.price)
     const bedrooms = Number(firstParam(resolvedParams.bedrooms) || 0)
     const bedroomsMin = Number(firstParam(resolvedParams.bedroomsMin) || 0)
     const suites = Number(firstParam(resolvedParams.suites) || 0)
@@ -59,11 +60,14 @@ export default async function SearchPage({
 
     if (city) query = query.ilike('city', city)
 
-    if (type === 'apartamento') query = query.ilike('property_type', '%Apartamento%')
-    if (type === 'casa') query = query.ilike('property_type', '%Casa%')
-    if (type === 'terreno') query = query.ilike('property_type', '%Terreno%')
-    if (type === 'comercial') {
-        query = query.or('property_type.ilike.%Comercial%,property_type.ilike.%Galpão%,property_type.ilike.%Prédio%,title.ilike.%Comercial%,title.ilike.%Galpão%')
+    if (type && type !== 'Todos os Imóveis') {
+        if (type.toLowerCase() === 'comercial') {
+            query = query.or('property_type.ilike.%Comercial%,property_type.ilike.%Galpão%,property_type.ilike.%Prédio%,title.ilike.%Comercial%,title.ilike.%Galpão%')
+        } else if (type === 'Duplex / Triplex') {
+            query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
+        } else {
+            query = query.ilike('property_type', `%${type}%`)
+        }
     }
 
     if (subtype === 'garden') query = query.ilike('property_type', '%Garden%')
@@ -74,6 +78,21 @@ export default async function SearchPage({
     if (subtype === 'condominio') query = query.ilike('property_type', '%Condomínio%')
     if (subtype === 'terreno-condominio') query = query.ilike('property_type', '%Terreno em Condomínio%')
     if (subtype === 'terreno-comercial') query = query.ilike('property_type', '%Terreno Comercial%')
+
+    if (price && price !== 'Todos os Valores') {
+        const [minStr, maxStr] = price.split('-')
+        const min = parseInt(minStr, 10)
+        
+        if (!isNaN(min) && min > 0) {
+            query = query.gte('price', min)
+        }
+        if (maxStr) {
+            const max = parseInt(maxStr, 10)
+            if (!isNaN(max)) {
+                query = query.lte('price', max)
+            }
+        }
+    }
 
     if (Number.isFinite(bedrooms) && bedrooms > 0) query = query.eq('bedrooms', bedrooms)
     if (Number.isFinite(bedroomsMin) && bedroomsMin > 0) query = query.gte('bedrooms', bedroomsMin)
