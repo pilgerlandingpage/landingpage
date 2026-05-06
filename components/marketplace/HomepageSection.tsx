@@ -123,17 +123,18 @@ export default function HomepageSection({
                 }
                 .section-title {
                     font-family: 'Inter', sans-serif;
-                    font-size: 0.8rem;
+                    font-size: 0.72rem;
                     font-weight: 700;
-                    color: #fff;
-                    background-color: #222;
+                    color: #0a0a0a;
+                    background: linear-gradient(135deg, #c9a96e 0%, #dfc18e 50%, #a88b4a 100%);
                     display: inline-block;
-                    padding: 6px 14px;
+                    padding: 6px 16px;
                     margin: 0;
                     text-transform: uppercase;
-                    letter-spacing: 0.04em;
-                    border-left: 3px solid var(--gold, #b8945f);
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    letter-spacing: 1.5px;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 8px rgba(201, 169, 110, 0.3);
+                    border: none;
                 }
                 .section-subtitle {
                     font-size: 0.8rem;
@@ -200,7 +201,7 @@ export default function HomepageSection({
                     }
                 }
                 @media (min-width: 768px) {
-                    .section-title { font-size: 1.3rem; }
+                    .section-title { font-size: 0.82rem; padding: 7px 20px; }
                     .card-slide {
                         flex: 0 0 calc(25% - 12px);
                     }

@@ -115,13 +115,14 @@ export default async function MarketplaceHome() {
       <GlobalHeader />
 
       {/* === COMPACT HERO STRIP === */}
-      <div className="hero-strip">
+      <div className="hero-strip" style={{ position: 'relative', width: '100%', height: '480px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '24px', background: 'linear-gradient(180deg, #f0ede8 0%, #f7f7f5 100%)' }}>
         <div className="hero-top-fade" />
-        <div className="hero-video-bg">
+        <div className="hero-video-bg" style={{ position: 'absolute', inset: '0', zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
           <iframe
             src="https://www.youtube.com/embed/rKzkb0onX1Q?autoplay=1&mute=1&controls=0&loop=1&playlist=rKzkb0onX1Q&showinfo=0&rel=0&iv_load_policy=3&disablekb=1&modestbranding=1"
             allow="autoplay; encrypted-media"
             className="hero-video-frame"
+            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', minWidth: '100%', minHeight: '100%', width: '177.78vh', height: '56.25vw', pointerEvents: 'none', opacity: 0.8, border: 'none' }}
           />
         </div>
         <div className="hero-photo-glow" />
@@ -129,6 +130,7 @@ export default async function MarketplaceHome() {
           className="hero-bg-image"
           src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png"
           alt="Guilherme Pilger"
+          style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', height: '100%', width: 'auto', maxWidth: 'none', objectFit: 'contain' as const, zIndex: 1 }}
         />
         <div className="hero-overlay" />
         <div className="hero-content">

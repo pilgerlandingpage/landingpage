@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import { Heart, ChevronLeft, ChevronRight, Bed, Bath, Maximize } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface PropertyCardProps {
     property: {
@@ -30,6 +30,16 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
         ? property.images
         : [property.featured_image || 'https://via.placeholder.com/400x300?text=Sem+Imagem']
 
+    useEffect(() => {
+        if (gallery.length <= 1 || isHovered) return
+
+        const intervalId = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % gallery.length)
+        }, 5000)
+
+        return () => clearInterval(intervalId)
+    }, [gallery.length, isHovered])
+
     const nextImage = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -56,12 +66,20 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
         >
             <div className="card-image-container">
                 <Link href={href} className="image-link" tabIndex={-1}>
-                    <img
-                        src={gallery[currentImageIndex]}
-                        alt={property.title}
-                        className="property-image"
-                        loading="lazy"
-                    />
+                    <div 
+                        className="images-slider" 
+                        style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                    >
+                        {gallery.map((src, idx) => (
+                            <img
+                                key={idx}
+                                src={src}
+                                alt={`${property.title} - Foto ${idx + 1}`}
+                                className="property-image"
+                                loading={idx === 0 ? "eager" : "lazy"}
+                            />
+                        ))}
+                    </div>
                 </Link>
 
                 {/* Heart Icon - Top Right */}
@@ -164,9 +182,19 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                     height: 100%;
                     border: none;
                     outline: none;
+                    overflow: hidden;
+                }
+
+                .images-slider {
+                    display: flex;
+                    width: 100%;
+                    height: 100%;
+                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                    will-change: transform;
                 }
 
                 .property-image {
+                    flex: 0 0 100%;
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
