@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Villa Serenity | AESTHETE ESTATES</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hero-gradient {
+            background: linear-gradient(to bottom, rgba(14, 14, 14, 0.2) 0%, rgba(14, 14, 14, 0.9) 100%);
+        }
+        .text-shadow-premium {
+            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#e4e2e2",
+                        "tertiary-container": "#080a0a",
+                        "surface-container-highest": "#343535",
+                        "on-secondary": "#412d00",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#ffdea5",
+                        "secondary": "#e9c176",
+                        "on-primary-fixed-variant": "#474646",
+                        "inverse-surface": "#e4e2e2",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#e9c176",
+                        "surface-container-low": "#1b1c1c",
+                        "inverse-on-surface": "#303030",
+                        "surface": "#131314",
+                        "primary-fixed-dim": "#c9c6c5",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#2f3131",
+                        "on-tertiary-container": "#78797a",
+                        "tertiary": "#c6c6c7",
+                        "on-secondary-container": "#dab36a",
+                        "error-container": "#93000a",
+                        "surface-bright": "#393939",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "primary": "#c9c6c5",
+                        "surface-tint": "#c9c6c5",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary-fixed": "#1c1b1b",
+                        "secondary-container": "#604403",
+                        "on-surface-variant": "#c4c7c7",
+                        "on-secondary-fixed": "#261900",
+                        "on-primary": "#313030",
+                        "outline-variant": "#444748",
+                        "outline": "#8e9192",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "surface-variant": "#343535",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#131314",
+                        "on-secondary-fixed-variant": "#5d4201",
+                        "surface-container": "#1f2020",
+                        "inverse-primary": "#5f5e5e",
+                        "on-surface": "#e4e2e2",
+                        "background": "#131314",
+                        "on-primary-container": "#7b7979",
+                        "primary-container": "#0a0a0a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "32px",
+                        "margin-edge": "64px",
+                        "section-gap": "160px",
+                        "unit": "8px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Noto Serif"],
+                        "label-caps": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Noto Serif"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "display-xl": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["32px", {"lineHeight": "1.3", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.2em", "fontWeight": "600"}],
+                        "headline-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0.05em", "fontWeight": "300"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0.03em", "fontWeight": "400"}],
+                        "display-xl": ["80px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md selection:bg-secondary selection:text-on-secondary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center w-full px-margin-edge py-6 max-w-container-max mx-auto">
+<span class="font-headline-md text-headline-md tracking-tighter text-on-surface">AESTHETE ESTATES</span>
+<nav class="hidden md:flex gap-8 items-center"><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors duration-300" href="#">Home</a>
+<a class="font-label-caps text-label-caps text-secondary border-b border-secondary pb-1" href="#">The Estate</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors duration-300" href="#">Gallery</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors duration-300" href="#">Amenities</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors duration-300" href="#">Location</a>
+<button class="text-on-surface-variant hover:text-secondary transition-colors duration-300 flex items-center">
+<span class="material-symbols-outlined">search</span>
+</button><button class="ml-4 px-6 py-2 bg-secondary text-on-secondary font-label-caps text-label-caps hover:opacity-80 transition-opacity duration-300">Inquire Now</button>
+</nav>
+<button class="md:hidden text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<main>
+<!-- Fullscreen Hero -->
+<section class="relative h-screen w-full flex items-end pb-32">
+<div class="absolute inset-0 z-0">
+<img alt="Villa Serenity" class="w-full h-full object-cover" data-alt="A breathtaking architectural masterpiece of a modern luxury villa in Balneário Camboriú at dusk. The structure features clean geometric lines, floor-to-ceiling glass walls reflecting a warm golden sunset, and a cantilevered infinity pool. The lighting is dramatic, highlighting the natural stone and dark metal textures against the deep obsidian sky. The atmosphere is quiet, sophisticated, and intensely private, reflecting an ultra-high-end real estate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtqII_cs-yEcRYH2LL4I3DOOKMoZahGu3Opa7oluF8kyFQ9TuULxSkXABMaxA5UDqDVLPjIIdqvVKvqPORC-ACDVby4DcX8grdI_iyoFAmjInO3CWnGOnemVs4LWic3ZD8SjZ1GFJrPnVWpWnk6361PocxB1lZF4O0RRE5nIO5JqhXvALZY8n0PUXasNXMf2SeaCpGxK-MHZSu7y5_v6_bg1adwTEKMciXBux9NxjUGLRFf0sJa-jf9VXd4d2dUvT9T6HTl_5qqVM4"/>
+<div class="absolute inset-0 hero-gradient"></div>
+</div>
+<div class="relative z-10 w-full px-margin-edge max-w-container-max mx-auto">
+<div class="max-w-4xl space-y-6">
+<span class="font-label-caps text-label-caps text-secondary tracking-[0.3em]">RESIDÊNCIA EXCLUSIVA</span>
+<h1 class="font-display-xl text-display-xl text-shadow-premium leading-none">Um refúgio exclusivo entre o mar e a sofisticação.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Onde a arquitetura moderna encontra a tranquilidade absoluta em Balneário Camboriú.</p>
+<div class="flex flex-col sm:flex-row gap-6 pt-8">
+<button class="px-10 py-4 bg-secondary text-on-secondary font-label-caps text-label-caps flex items-center justify-center gap-3 hover:opacity-90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+                            Falar com Especialista
+                        </button>
+<button class="px-10 py-4 border border-secondary text-secondary font-label-caps text-label-caps flex items-center justify-center gap-3 hover:bg-secondary/10 transition-all">
+                            Explorar Galeria
+                        </button>
+</div>
+<div class="pt-12 border-t border-outline-variant/30 flex items-center gap-8">
+<div>
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-1">VALOR DE INVESTIMENTO</p>
+<p class="font-headline-md text-headline-md text-secondary">R$ 12.800.000</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Narrativa -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto text-center">
+<div class="max-w-3xl mx-auto space-y-8">
+<span class="material-symbols-outlined text-secondary text-4xl">auto_awesome</span>
+<h2 class="font-headline-lg text-headline-lg italic">Mais do que um endereço, um legado.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                    Esta villa foi concebida para quem não aceita menos que a perfeição, unindo design biofílico e privacidade total. Cada detalhe foi meticulosamente planejado para oferecer uma experiência sensorial que transcende o simples morar.
+                </p>
+</div>
+</section>
+<!-- Cards de Destaques -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="glass-panel p-10 border border-outline-variant/20 hover:border-secondary/40 transition-colors group">
+<p class="font-headline-lg text-headline-lg text-secondary group-hover:scale-110 transition-transform origin-left">420m²</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">Privativos</p>
+</div>
+<div class="glass-panel p-10 border border-outline-variant/20 hover:border-secondary/40 transition-colors group">
+<p class="font-headline-lg text-headline-lg text-secondary group-hover:scale-110 transition-transform origin-left">5</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">Suítes Master</p>
+</div>
+<div class="glass-panel p-10 border border-outline-variant/20 hover:border-secondary/40 transition-colors group">
+<p class="font-headline-lg text-headline-lg text-secondary group-hover:scale-110 transition-transform origin-left">6</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">Vagas Privativas</p>
+</div>
+<div class="glass-panel p-10 border border-outline-variant/20 hover:border-secondary/40 transition-colors group">
+<span class="material-symbols-outlined text-secondary text-4xl mb-4">tsunami</span>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Vista Infinita</p>
+</div>
+</div>
+</section>
+<!-- Galeria Guiada -->
+<section class="space-y-section-gap py-section-gap overflow-hidden">
+<!-- Section 1 -->
+<div class="flex flex-col md:flex-row items-center gap-20 px-margin-edge max-w-container-max mx-auto">
+<div class="w-full md:w-1/2 order-2 md:order-1">
+<span class="font-label-caps text-label-caps text-on-tertiary-container">01</span>
+<h3 class="font-headline-lg text-headline-lg mt-4 mb-6">A Chegada</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">Um hall de entrada monumental com pé-direito duplo que revela, de imediato, a integração com o horizonte oceânico. O mármore italiano e a madeira nobre ditam o tom da recepção.</p>
+</div>
+<div class="w-full md:w-1/2 order-1 md:order-2">
+<img alt="Entrada da Villa" class="w-full aspect-[4/5] object-cover" data-alt="A monumental entrance hall of a luxury villa featuring double-height ceilings and massive floor-to-ceiling glass windows that frame the sea. The flooring is book-matched Italian Calacatta marble, and the walls are accented with dark warm walnut wood. The lighting is soft and recessed, creating a sophisticated gallery atmosphere with a focus on clean lines and expensive textures. The mood is grand yet welcoming." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDAu7zL3LdSrHeL_gl7nEV_8PM47oeeHINu2ye634_koyob5Qv5SQQhr52ofTep4FOgKKPIqidyAOGDF0zAr2aRthS49wx7EjIgcmSsvWUk-XqbWXE4GqS8R_9q6co2n6HYIIbeYwW5FriAOoRL_V3Er5ti753rjI24BCmaimkR_Z-7Ilo356b3F2TYRwTxm0FLu3XZvK_lN8AGMGGDnVjZlxppnPnlRYaKxZKqYHxLXTbb7E5kqM8GmegS8zkfmTyHGZ0M75udq8Z"/>
+</div>
+</div>
+<!-- Section 2 -->
+<div class="flex flex-col md:flex-row items-center gap-20 px-margin-edge max-w-container-max mx-auto">
+<div class="w-full md:w-1/2">
+<img alt="O Living" class="w-full aspect-[4/5] object-cover" data-alt="A sprawling open-concept living room in a high-end coastal property. Contemporary minimalist furniture in shades of charcoal and pearl white is arranged for both comfort and aesthetic appeal. A large designer chandelier hangs above a custom area rug. The space is flooded with natural light from the panoramic ocean-view windows. The decor is minimal, focusing on high-quality materials and a sense of effortless luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu3Y6Xzos6nz1kko0od5nug_ob0_1pHFxosBoguqWD32zKZI6ThYOkYDLt87JmAVDIuWo6rK2lM_Z8kjKb99i2e3cJShbOVFq2Dvo7yAd-EDsnX101Njt8S-25BNFMqv9H_sOPA6sSMfplZOVfDOvTz0QoX7rwUrWEmx3CRlB0E7je1EF2lKsivd-dXOdCztqZNMCD2oIUDvy2IjzPJfvHhZ82q3mkS4R5KF5zOp5kFroLfw8lyLSPWm6CL8fTMgM-VfueNsKFr7Cp"/>
+</div>
+<div class="w-full md:w-1/2">
+<span class="font-label-caps text-label-caps text-on-tertiary-container">02</span>
+<h3 class="font-headline-lg text-headline-lg mt-4 mb-6">O Living</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">Espaços amplos e fluídos, projetados para a alta socialização. O living se funde à varanda gourmet e à piscina, criando um ambiente único de contemplação e lazer.</p>
+</div>
+</div>
+<!-- Section 3 -->
+<div class="flex flex-col md:flex-row items-center gap-20 px-margin-edge max-w-container-max mx-auto">
+<div class="w-full md:w-1/2 order-2 md:order-1">
+<span class="font-label-caps text-label-caps text-on-tertiary-container">03</span>
+<h3 class="font-headline-lg text-headline-lg mt-4 mb-6">O Refúgio Noturno</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">As suítes master oferecem um santuário de paz. Com closets individuais e salas de banho panorâmicas, o descanso ganha uma nova definição de luxo e privacidade.</p>
+</div>
+<div class="w-full md:w-1/2 order-1 md:order-2">
+<img alt="Suíte Master" class="w-full aspect-[4/5] object-cover" data-alt="An ultra-luxurious master bedroom featuring a minimalist king-sized bed with high-thread-count linens. A massive glass wall overlooks the nighttime city skyline and the dark sea. The room includes a private lounge area and a bathroom visible through a subtle tinted glass divider. The lighting is warm, moody, and integrated into the architectural elements. The color palette is deep greys, blacks, and subtle gold metallic accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSU4U5bYLYOuyjoiY6iJTf82G1qVdBs5pIJT1XSfXZYRDCfcZGK--wvXpe3Dml_Q_-byQRE0YQEmU6YvuR2gmokFl7zxLKX1gEu_g_pxH2zV_hHP__snCE2rOQkcZ9rGQmkMHM5HKPy82_W-ZRkt1AUcPUboZay8GHB0MXGeMELesWHoqTV_gwBiGBt9NKGykxdfsBlZuthqhZfVLpLFRYrussb05GAGDoIDYtmx6F33ZaKzgWZnnRM0g5HM8lobdhr5457JWISKiV"/>
+</div>
+</div>
+</section>
+<!-- Por que se destaca -->
+<section class="py-section-gap bg-surface-container-low border-y border-outline-variant/10">
+<div class="px-margin-edge max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="text-center md:text-left space-y-6">
+<span class="material-symbols-outlined text-secondary text-5xl">location_on</span>
+<h4 class="font-headline-md text-headline-md">Localização Estratégica</h4>
+<p class="font-body-md text-on-tertiary-container">Situada no ponto mais valorizado de Balneário Camboriú, garantindo valorização constante e acesso rápido ao que há de melhor.</p>
+</div>
+<div class="text-center md:text-left space-y-6">
+<span class="material-symbols-outlined text-secondary text-5xl">draw</span>
+<h4 class="font-headline-md text-headline-md">Acabamento Artesanal</h4>
+<p class="font-body-md text-on-tertiary-container">Materiais importados e execução feita por mestres artesãos, garantindo que cada junção e detalhe seja uma obra de arte.</p>
+</div>
+<div class="text-center md:text-left space-y-6">
+<span class="material-symbols-outlined text-secondary text-5xl">eco</span>
+<h4 class="font-headline-md text-headline-md">Tecnologia Sustentável</h4>
+<p class="font-body-md text-on-tertiary-container">Automação residencial completa, energia solar de alta eficiência e sistema de filtragem de água em toda a residência.</p>
+</div>
+</div>
+</div>
+</section><section class="py-section-gap px-margin-edge max-w-container-max mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-20 items-center">
+<div class="space-y-8">
+<span class="font-label-caps text-label-caps text-secondary">LOCALIZAÇÃO</span>
+<h2 class="font-headline-lg text-headline-lg">No epicentro do luxo catarinense.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Barra Sul, Balneário Camboriú — Onde o dinamismo da cidade encontra a serenidade do mar. Uma localização irreplicável para quem busca exclusividade.</p>
+<button class="flex items-center gap-3 font-label-caps text-label-caps text-secondary border-b border-secondary pb-1 hover:opacity-70 transition-opacity">
+                VER NO GOOGLE MAPS <span class="material-symbols-outlined text-sm">open_in_new</span>
+</button>
+</div>
+<div class="lg:col-span-2 relative h-[500px] bg-surface-container rounded-sm overflow-hidden border border-outline-variant/30">
+<div class="absolute inset-0 bg-[#0e0e0e] flex items-center justify-center">
+<div class="text-center space-y-4">
+<span class="material-symbols-outlined text-secondary text-5xl">location_on</span>
+<p class="font-label-caps text-label-caps text-on-tertiary-container">MAPA EDITORIAL — BARRA SUL</p>
+</div>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- Ficha Técnica -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto">
+<h2 class="font-headline-lg text-headline-lg mb-16 border-l-4 border-secondary pl-8">Ficha Técnica</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-gutter">
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">ÁREA TOTAL</p>
+<p class="font-body-lg text-body-lg">420m² Privativos</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">CONFIGURAÇÃO</p>
+<p class="font-body-lg text-body-lg">5 Suítes Master</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">ESTACIONAMENTO</p>
+<p class="font-body-lg text-body-lg">6 Vagas Privativas</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">BAIRRO</p>
+<p class="font-body-lg text-body-lg">Barra Sul, BC</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">IPTU ANUAL</p>
+<p class="font-body-lg text-body-lg">R$ 14.200,00</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">CONDOMÍNIO</p>
+<p class="font-body-lg text-body-lg">R$ 3.850,00</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">CÓDIGO IMÓVEL</p>
+<p class="font-body-lg text-body-lg">VS-7721-BC</p>
+</div>
+<div class="border-b border-outline-variant/30 pb-4">
+<p class="font-label-caps text-[10px] text-on-tertiary-container mb-2">STATUS</p>
+<p class="font-body-lg text-body-lg text-secondary">Disponível</p>
+</div>
+</div>
+</section>
+<!-- Corretor -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto">
+<div class="glass-panel p-12 md:p-20 flex flex-col md:flex-row items-center gap-16">
+<div class="w-48 h-48 md:w-64 md:h-64 flex-shrink-0">
+<img alt="Guilherme Pilger" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" data-alt="A professional portrait of a high-end luxury real estate specialist in a tailored dark suit. He has a confident, welcoming expression. The background is a blurred high-end office with warm ambient lighting. The overall image has a refined, editorial quality, emphasizing professionalism and expertise in the luxury market. Dark obsidian and gold color tones dominate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr9DsGtHO2HC-bOCs2tkk0h54Z2_78o9gTG399PTcZKQmQhf217woND-lurqheUuGzGr3d7SiDjImQWT_oukijZdcOyYlQEloL5OA_jOD44sQ5HSxxvT5R2SCJU9dynBySg9XLcuZg0UVQ9JJT6nU0OpxCuagJ6uNgGrbgKF49LzdK3byxhk-JDs6E8yRXm9U8Wc2EHE2Xq0mZQSa75yzQpKpCmZmXSSZepyi6wNq-kHJz38JAkZYwr7r3JgBp-3AZSUVbcr9WS1LG"/>
+</div>
+<div class="flex-grow space-y-6">
+<span class="font-label-caps text-label-caps text-secondary">APRESENTADO POR</span>
+<h3 class="font-headline-lg text-headline-lg">Guilherme Pilger</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Especialista em investimentos de luxo e curador das propriedades mais exclusivas do Sul do Brasil. Com mais de uma década de experiência no mercado de alto padrão.
+                    </p>
+<button class="px-8 py-4 bg-secondary text-on-secondary font-label-caps text-label-caps inline-flex items-center gap-3 hover:opacity-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+                        Agendar Visita Privada
+                    </button>
+</div>
+</div>
+</section>
+<!-- Qualificação -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto">
+<div class="max-w-4xl">
+<h2 class="font-headline-lg text-headline-lg mb-12">Este imóvel é para você se...</h2>
+<ul class="space-y-8">
+<li class="flex items-start gap-6 group">
+<span class="material-symbols-outlined text-secondary mt-1 group-hover:translate-x-2 transition-transform">arrow_forward</span>
+<p class="font-body-lg text-body-lg">Você busca o auge da privacidade sem abrir mão de uma vista oceânica permanente.</p>
+</li>
+<li class="flex items-start gap-6 group">
+<span class="material-symbols-outlined text-secondary mt-1 group-hover:translate-x-2 transition-transform">arrow_forward</span>
+<p class="font-body-lg text-body-lg">Você valoriza a arquitetura autoral e o uso de materiais naturais de alta qualidade.</p>
+</li>
+<li class="flex items-start gap-6 group">
+<span class="material-symbols-outlined text-secondary mt-1 group-hover:translate-x-2 transition-transform">arrow_forward</span>
+<p class="font-body-lg text-body-lg">Sua família necessita de amplos espaços integrados para receber e celebrar.</p>
+</li>
+<li class="flex items-start gap-6 group">
+<span class="material-symbols-outlined text-secondary mt-1 group-hover:translate-x-2 transition-transform">arrow_forward</span>
+<p class="font-body-lg text-body-lg">Você deseja um ativo imobiliário seguro na região que mais valoriza no país.</p>
+</li>
+</ul>
+</div>
+</section>
+<!-- CTA Final -->
+<section class="py-section-gap px-margin-edge max-w-container-max mx-auto border-t border-outline-variant/20">
+<div class="flex justify-between items-end mb-16">
+<h2 class="font-headline-lg text-headline-lg">Coleções Exclusivas</h2>
+<a class="font-label-caps text-label-caps text-secondary border-b border-secondary pb-1" href="#">VER TODA GALERIA</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="group cursor-pointer">
+<div class="overflow-hidden mb-6 aspect-[16/10]">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDAu7zL3LdSrHeL_gl7nEV_8PM47oeeHINu2ye634_koyob5Qv5SQQhr52ofTep4FOgKKPIqidyAOGDF0zAr2aRthS49wx7EjIgcmSsvWUk-XqbWXE4GqS8R_9q6co2n6HYIIbeYwW5FriAOoRL_V3Er5ti753rjI24BCmaimkR_Z-7Ilo356b3F2TYRwTxm0FLu3XZvK_lN8AGMGGDnVjZlxppnPnlRYaKxZKqYHxLXTbb7E5kqM8GmegS8zkfmTyHGZ0M75udq8Z"/>
+</div>
+<h4 class="font-headline-md text-[24px] mb-2">The Obsidian House</h4>
+<p class="font-label-caps text-[10px] text-on-tertiary-container uppercase mb-4">Praia Brava | 380m² | 4 Suítes</p>
+<p class="font-body-md text-on-surface-variant line-clamp-2">Minimalismo radical em harmonia com a natureza preservada da Praia Brava.</p>
+</div>
+<div class="group cursor-pointer">
+<div class="overflow-hidden mb-6 aspect-[16/10]">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu3Y6Xzos6nz1kko0od5nug_ob0_1pHFxosBoguqWD32zKZI6ThYOkYDLt87JmAVDIuWo6rK2lM_Z8kjKb99i2e3cJShbOVFq2Dvo7yAd-EDsnX101Njt8S-25BNFMqv9H_sOPA6sSMfplZOVfDOvTz0QoX7rwUrWEmx3CRlB0E7je1EF2lKsivd-dXOdCztqZNMCD2oIUDvy2IjzPJfvHhZ82q3mkS4R5KF5zOp5kFroLfw8lyLSPWm6CL8fTMgM-VfueNsKFr7Cp"/>
+</div>
+<h4 class="font-headline-md text-[24px] mb-2">Azure Sky Penthouse</h4>
+<p class="font-label-caps text-[10px] text-on-tertiary-container uppercase mb-4">Centro | 520m² | 5 Suítes</p>
+<p class="font-body-md text-on-surface-variant line-clamp-2">A cobertura definitiva no coração da cidade, com heliponto privativo e vista 360º.</p>
+</div>
+<div class="group cursor-pointer">
+<div class="overflow-hidden mb-6 aspect-[16/10]">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSU4U5bYLYOuyjoiY6iJTf82G1qVdBs5pIJT1XSfXZYRDCfcZGK--wvXpe3Dml_Q_-byQRE0YQEmU6YvuR2gmokFl7zxLKX1gEu_g_pxH2zV_hHP__snCE2rOQkcZ9rGQmkMHM5HKPy82_W-ZRkt1AUcPUboZay8GHB0MXGeMELesWHoqTV_gwBiGBt9NKGykxdfsBlZuthqhZfVLpLFRYrussb05GAGDoIDYtmx6F33ZaKzgWZnnRM0g5HM8lobdhr5457JWISKiV"/>
+</div>
+<h4 class="font-headline-md text-[24px] mb-2">Ethereal Villa</h4>
+<p class="font-label-caps text-[10px] text-on-tertiary-container uppercase mb-4">Estaleiro | 850m² | 6 Suítes</p>
+<p class="font-body-md text-on-surface-variant line-clamp-2">Um refúgio orgânico onde a mata atlântica se funde com a arquitetura contemporânea.</p>
+</div>
+</div>
+</section><section class="relative py-section-gap overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Background CTA" class="w-full h-full object-cover scale-110 blur-sm brightness-50" data-alt="A blurred, cinematic background of a luxury villa's outdoor lounge area at night. The pool is glowing with soft blue light, and warm golden architectural lighting spills onto the stone patio. The mood is tranquil and incredibly high-end, using deep blacks and rich golden highlights to create an atmosphere of ultimate exclusivity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0KHjwDIWUp7dPrnyeB3aFh-6oXlxaUdWJtDAsJvCXSkOWk30hY-CiWMYP5wUB0_CBurEXqXV5QfJ_QiZZjmJBSTkNFmYQ-58bAjDQaYfwR_EBShPBZLufmn3w0VkzOq02SCrQx7EdyeAiX3B3adZBd7jrx9ovgjTEwcmdVMarFTysWkj1tGJRRxzV5-eo8hvruv6uj6U-kNg6nhqg_8zuBJH3HXjvyDWz7z06IK4plD2cglZYh_vBpumpWAu4um8n1CLCkUHZSorZ"/>
+</div>
+<div class="relative z-10 px-margin-edge max-w-container-max mx-auto text-center space-y-10">
+<h2 class="font-display-xl text-display-xl max-w-4xl mx-auto">Pronto para dar o próximo passo rumo à Villa Serenity?</h2>
+<div class="flex flex-col md:flex-row justify-center gap-6">
+<button class="px-12 py-5 bg-secondary text-on-secondary font-label-caps text-label-caps hover:scale-105 transition-transform">Receba a apresentação completa</button>
+<button class="px-12 py-5 border border-white text-white font-label-caps text-label-caps hover:bg-white/10 transition-colors">Solicitar Tour Virtual</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap bg-surface-container-lowest border-t border-outline-variant/20">
+<div class="flex flex-col md:flex-row justify-between items-start w-full px-margin-edge max-w-container-max mx-auto gap-gutter">
+<div class="space-y-6">
+<span class="font-headline-lg text-headline-lg text-on-surface">AESTHETE ESTATES</span>
+<p class="font-label-caps text-label-caps text-on-tertiary-container">© 2024 AESTHETE ESTATES. PRIVACY BY DESIGN.</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+<div class="flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-secondary">PAGES</span>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">Legal Notice</a>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">Concierge</a>
+</div>
+<div class="flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-secondary">VALUES</span>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">Sustainability</a>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">Contact</a>
+</div>
+<div class="flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-secondary">SOCIAL</span>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">Instagram</a>
+<a class="font-body-md text-on-tertiary-container hover:text-on-surface transition-colors" href="#">LinkedIn</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Mobile Fixed Action Button -->
+<div class="md:hidden fixed bottom-6 right-6 z-50">
+<button class="bg-[#25D366] text-white p-4 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+</button>
+</div>
+</body></html>

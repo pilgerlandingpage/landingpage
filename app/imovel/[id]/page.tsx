@@ -1,14 +1,75 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Bed, Bath, MapPin, Phone, ArrowLeft, Gem, Ruler, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import HeroCarousel from '@/components/property/HeroCarousel'
 import PropertyGallery from '@/components/property/PropertyGallery'
 import MobileNav from '@/components/marketplace/MobileNav'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import PropertyRadarPanel from '@/components/property/PropertyRadarPanel'
+import PropertyCard from '@/components/marketplace/PropertyCard'
+import PropertyLandingStyles from './PropertyLandingStyles'
 
 export const dynamic = 'force-dynamic'
+
+/** Clean raw marketing descriptions: strip emojis, remove spec noise, extract narrative only */
+function formatDescription(raw: string): string[] {
+    // Remove ALL emojis and special unicode symbols
+    let text = raw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\u200d\ufe0f]/gu, '')
+    
+    // Remove bullet-point sections entirely (• items are amenity lists)
+    text = text.replace(/•[^•\n.]*/g, '')
+    
+    // Remove section headers (ALL CAPS words or known headers)
+    text = text.replace(/\b(UNIDADE|EMPREENDIMENTO|LAZER|INFRAESTRUTURA|SEGURANÇA|ACABAMENTO|DIFERENCIAIS?)\b/gi, '')
+    text = text.replace(/Características\s*(do|da)?\s*(Apartamento|Imóvel|Casa|Cobertura|Empreendimento)?/gi, '')
+    text = text.replace(/\bLocalização\b/gi, '')
+    text = text.replace(/Valor\s*de\s*Investimento/gi, '')
+    text = text.replace(/Área\s*privativa\s*:?/gi, '')
+    
+    // Remove spec data
+    text = text.replace(/\d+[\s.,]*\d*\s*m[²2]\s*(de\s*área\s*)?(privativa|total|útil|construída)?/gi, '')
+    text = text.replace(/\d+\s*(suítes?|quartos?|banheiros?|vagas?\s*(de\s*garagem)?|salas?\s*de\s*estar|dormitórios?)/gi, '')
+    text = text.replace(/R\$[\s\d.,]+/g, '')
+    
+    // Remove CTAs & contact prompts
+    text = text.replace(/Entre\s*em\s*contato[^.]*\./gi, '')
+    text = text.replace(/Agende\s*(sua|uma)\s*visita[^.]*\./gi, '')
+    text = text.replace(/Fale\s*com[^.]*\./gi, '')
+    
+    // Remove title-like fragments with dashes
+    text = text.replace(/[^.!?]*[–—][^.!?]*/g, '')
+    
+    // Remove short amenity-like fragments (things without verbs)
+    text = text.replace(/\b(Vista\s*mar|Piso\s*aquecido|Fechadura\s*com\s*senha|Acabamento\s*em\s*gesso)\b[^.]*/gi, '')
+    
+    // Clean up
+    text = text.replace(/[,;:]\s*[,;:]/g, '')
+    text = text.replace(/\s+/g, ' ')
+    text = text.replace(/^\s*[,;.:–—\-]\s*/gm, '')
+    text = text.trim()
+    
+    // Split sentences and keep only meaningful narrative ones
+    const sentences = text
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim().replace(/^[,;:\s]+/, ''))
+        .filter(s => {
+            if (s.length < 40) return false
+            if (/^\d/.test(s)) return false
+            // Must contain at least one common verb indicator to be a real sentence
+            if (!/[aeiouáéíóúãõ]{2,}/i.test(s)) return false
+            return true
+        })
+    
+    if (sentences.length === 0) return []
+    
+    // Group into paragraphs
+    const paragraphs: string[] = []
+    for (let i = 0; i < sentences.length; i += 2) {
+        const chunk = sentences.slice(i, i + 2).join(' ').trim()
+        if (chunk.length > 40) paragraphs.push(chunk)
+    }
+    return paragraphs.slice(0, 3)
+}
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createServerSupabase()
@@ -34,558 +95,391 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(property.price)
         : 'Sob Consulta'
 
-    return (
-        <div className="lp-page">
-            {/* Top Back Navigation (Glassmorphic) */}
-            <Link href="/" className="lp-back-btn">
-                <ArrowLeft size={18} />
-                <span>Voltar ao portfólio</span>
-            </Link>
+    // Fetch related properties (same city, excluding current)
+    const { data: relatedProps } = await supabase
+        .from('properties')
+        .select('id, title, city, state, price, bedrooms, bathrooms, area_m2, featured_image, images, property_type, exclusive')
+        .eq('status', 'active')
+        .neq('id', id)
+        .limit(3)
 
-            {/* ========== CINEMATIC HERO (Full Viewport) ========== */}
-            <section className="lp-hero">
+    const related = relatedProps || []
+
+    // Build editorial gallery sections from images
+    const editorialSections = [
+        { num: '01', title: 'A Chegada', text: 'Um hall de entrada que revela, de imediato, a grandiosidade e a integração com o ambiente. Materiais nobres e design sofisticado ditam o tom da recepção.' },
+        { num: '02', title: 'O Living', text: 'Espaços amplos e fluídos, projetados para a alta socialização. Ambientes que se integram harmoniosamente criando uma experiência única de contemplação e lazer.' },
+        { num: '03', title: 'O Refúgio', text: 'Áreas íntimas que oferecem um santuário de paz e privacidade. Cada detalhe foi pensado para proporcionar o máximo conforto e sofisticação.' },
+    ]
+
+    return (
+        <div className="plp-page">
+            <PropertyLandingStyles />
+
+            {/* ===== TOP NAV ===== */}
+            <header className="plp-header">
+                <div className="plp-header-inner">
+                    <Link href="/" className="plp-logo">GUILHERME PILGER</Link>
+                    <nav className="plp-nav">
+                        <a href="#essencia" className="plp-nav-link">O Imóvel</a>
+                        <a href="#galeria" className="plp-nav-link">Galeria</a>
+                        <a href="#ficha" className="plp-nav-link">Ficha Técnica</a>
+                        <a href="#corretor" className="plp-nav-link">Corretor</a>
+                        <WhatsAppCaptureLink
+                            phone="5548999999999"
+                            message={`Olá! Quero saber mais sobre: ${property.title} (${property.city})`}
+                            slug="imovel"
+                            template="property-lp-nav"
+                            className="plp-nav-cta"
+                        >
+                            Falar com Especialista
+                        </WhatsAppCaptureLink>
+                    </nav>
+                </div>
+            </header>
+
+            {/* ===== FULLSCREEN HERO ===== */}
+            <section className="plp-hero">
                 <HeroCarousel
                     images={gallery}
                     title={property.title}
                     videoUrl={property.video_url}
-                    gallerySectionId="story-gallery"
+                    gallerySectionId="galeria"
                 />
-                <div className="lp-hero-overlay" />
-                <div className="lp-hero-content">
-                    <div className="lp-badge">
-                        <Gem size={14} /> Exclusividade Pilger
-                    </div>
-                    <h1 className="lp-hero-title">{property.title}</h1>
-                    <div className="lp-hero-location">
-                        <MapPin size={18} />
-                        {property.city}{property.state ? `, ${property.state}` : ''}
+                <div className="plp-hero-gradient" />
+                <div className="plp-hero-content">
+                    <div className="plp-hero-inner">
+                        {property.exclusive && (
+                            <span className="plp-hero-kicker">RESIDÊNCIA EXCLUSIVA</span>
+                        )}
+                        <h1 className="plp-hero-title">{property.title}</h1>
+                        <p className="plp-hero-subtitle">
+                            {property.city}{property.state ? `, ${property.state}` : ''} — {property.property_type || 'Imóvel de Luxo'}
+                        </p>
+                        <div className="plp-hero-actions">
+                            <WhatsAppCaptureLink
+                                phone="5548999999999"
+                                message={`Olá! Quero agendar uma visita: ${property.title}`}
+                                slug="imovel"
+                                template="property-lp-hero"
+                                className="plp-btn-gold"
+                            >
+                                Falar com Especialista
+                            </WhatsAppCaptureLink>
+                            <a href="#galeria" className="plp-btn-ghost">Explorar Galeria</a>
+                        </div>
+                        <div className="plp-hero-price-bar">
+                            <div>
+                                <p className="plp-price-label">VALOR DE INVESTIMENTO</p>
+                                <p className="plp-price-value">{formattedPrice}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* ========== STICKY CTA BAR ========== */}
-            <div className="lp-sticky-bar">
-                <div className="lp-sticky-content">
-                    <div className="lp-sticky-info">
-                        <div className="lp-sticky-price">{formattedPrice}</div>
-                        <div className="lp-sticky-type">{property.property_type || 'Imóvel de Luxo'}</div>
-                    </div>
-                    <WhatsAppCaptureLink
-                        phone="5548999999999"
-                        message={`Olá! Quero agendar uma visita ou saber mais sobre o imóvel: ${property.title} (${property.city})`}
-                        slug="imovel"
-                        template="property-detail-cta"
-                        className="lp-sticky-btn"
-                    >
-                        <Phone size={18} />
-                        Falar com Especialista
-                    </WhatsAppCaptureLink>
+            {/* ===== NARRATIVA ===== */}
+            <section id="essencia" className="plp-section plp-narrative">
+                <div className="plp-narrow">
+                    <span className="plp-sparkle">✦</span>
+                    <h2 className="plp-headline-lg">Mais do que um endereço, um legado.</h2>
+                    {(() => {
+                        const paragraphs = property.description ? formatDescription(property.description) : []
+                        if (paragraphs.length === 0) {
+                            return (
+                                <p className="plp-body-lg">
+                                    Esta propriedade foi concebida para quem não aceita menos que a perfeição, unindo design contemporâneo e privacidade total. Cada detalhe foi meticulosamente planejado para oferecer uma experiência sensorial que transcende o simples morar.
+                                </p>
+                            )
+                        }
+                        return paragraphs.map((p, i) => (
+                            <p key={i} className="plp-body-lg" style={{ marginBottom: i < paragraphs.length - 1 ? '24px' : 0 }}>{p}</p>
+                        ))
+                    })()}
                 </div>
-            </div>
+            </section>
 
-            <div className="lp-container">
-                {/* ========== STORYTELLING: A ESSÊNCIA ========== */}
-                <section className="lp-section">
-                    <div className="lp-section-header">
-                        <span className="lp-kicker">O Estilo de Vida</span>
-                        <h2 className="lp-title">A Essência do Imóvel</h2>
-                    </div>
-                    <p className="lp-description">
-                        {property.description || 'Uma obra-prima da arquitetura projetada para elevar o seu padrão de vida. Cada detalhe deste imóvel foi rigorosamente pensado para proporcionar uma experiência única de conforto, exclusividade e bem-estar. Descubra o verdadeiro significado de morar com excelência.'}
-                    </p>
-                </section>
-
-                {/* ========== HIGH-END INFOGRAPHICS ========== */}
-                <section className="lp-section">
-                    <div className="lp-stats-grid">
+            {/* ===== STATS CARDS ===== */}
+            <section className="plp-section">
+                <div className="plp-container">
+                    <div className="plp-stats-grid">
                         {property.area_m2 && (
-                            <div className="lp-stat-box">
-                                <Ruler size={32} className="lp-stat-icon" />
-                                <div className="lp-stat-data">
-                                    <strong>{property.area_m2}m²</strong>
-                                    <span>Área Privativa</span>
-                                </div>
+                            <div className="plp-glass-card">
+                                <p className="plp-stat-number">{property.area_m2.toLocaleString('pt-BR')}m²</p>
+                                <p className="plp-stat-label">PRIVATIVOS</p>
                             </div>
                         )}
                         {property.bedrooms && (
-                            <div className="lp-stat-box">
-                                <Bed size={32} className="lp-stat-icon" />
-                                <div className="lp-stat-data">
-                                    <strong>{property.bedrooms}</strong>
-                                    <span>Suítes Master</span>
-                                </div>
+                            <div className="plp-glass-card">
+                                <p className="plp-stat-number">{property.bedrooms}</p>
+                                <p className="plp-stat-label">{property.bedrooms === 1 ? 'SUÍTE' : 'SUÍTES'}</p>
                             </div>
                         )}
                         {property.bathrooms && (
-                            <div className="lp-stat-box">
-                                <Bath size={32} className="lp-stat-icon" />
-                                <div className="lp-stat-data">
-                                    <strong>{property.bathrooms}</strong>
-                                    <span>Banheiros</span>
-                                </div>
+                            <div className="plp-glass-card">
+                                <p className="plp-stat-number">{property.bathrooms}</p>
+                                <p className="plp-stat-label">{property.bathrooms === 1 ? 'BANHEIRO' : 'BANHEIROS'}</p>
                             </div>
                         )}
-                        <div className="lp-stat-box">
-                            <Navigation size={32} className="lp-stat-icon" />
-                            <div className="lp-stat-data">
-                                <strong>{property.city}</strong>
-                                <span>Localização Prime</span>
+                        {property.parking_spaces && (
+                            <div className="plp-glass-card">
+                                <p className="plp-stat-number">{property.parking_spaces}</p>
+                                <p className="plp-stat-label">VAGAS</p>
                             </div>
+                        )}
+                        {!property.parking_spaces && (
+                            <div className="plp-glass-card">
+                                <p className="plp-stat-number">∞</p>
+                                <p className="plp-stat-label">VISTA PRIVILEGIADA</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== EDITORIAL GALLERY ===== */}
+            <section id="galeria" className="plp-section plp-editorial">
+                {editorialSections.map((sec, idx) => {
+                    const img = gallery[idx] || gallery[0]
+                    if (!img) return null
+                    const isReversed = idx % 2 === 0
+                    return (
+                        <div key={idx} className={`plp-editorial-row ${isReversed ? 'reversed' : ''}`}>
+                            <div className="plp-editorial-text">
+                                <span className="plp-editorial-num">{sec.num}</span>
+                                <h3 className="plp-headline-md">{sec.title}</h3>
+                                <p className="plp-body-lg">{sec.text}</p>
+                            </div>
+                            <div className="plp-editorial-img">
+                                <img src={img} alt={`${property.title} - ${sec.title}`} loading="lazy" />
+                            </div>
+                        </div>
+                    )
+                })}
+            </section>
+
+            {/* ===== FULL GALLERY ===== */}
+            {gallery.length > 3 && (
+                <section className="plp-section">
+                    <div className="plp-container">
+                        <div className="plp-section-head">
+                            <span className="plp-kicker">A ARQUITETURA</span>
+                            <h2 className="plp-headline-lg">Galeria Completa</h2>
+                        </div>
+                        <PropertyGallery images={gallery} title={property.title} />
+                    </div>
+                </section>
+            )}
+
+            {/* ===== DIFERENCIAIS ===== */}
+            {amenities.length > 0 && (
+                <section className="plp-section plp-highlights-bg">
+                    <div className="plp-container">
+                        <div className="plp-section-head">
+                            <span className="plp-kicker">EXCLUSIVIDADE</span>
+                            <h2 className="plp-headline-lg">Diferenciais Notáveis</h2>
+                        </div>
+                        <div className="plp-amenities-grid">
+                            {amenities.map((item: string, i: number) => (
+                                <div key={i} className="plp-amenity-item">
+                                    <span className="plp-amenity-arrow">→</span>
+                                    <span>{item}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
+            )}
 
-                {/* ========== RADAR: POTENCIAL DE INVESTIMENTO ========== */}
-                <section className="lp-section">
-                    <div className="lp-section-header">
-                        <span className="lp-kicker">Visão Bloomberg</span>
-                        <h2 className="lp-title">Potencial de Investimento</h2>
+            {/* ===== FICHA TÉCNICA ===== */}
+            <section id="ficha" className="plp-section">
+                <div className="plp-container">
+                    <h2 className="plp-headline-lg plp-ficha-title">Ficha Técnica</h2>
+                    <div className="plp-ficha-grid">
+                        {property.area_m2 && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">ÁREA TOTAL</p>
+                                <p className="plp-ficha-value">{property.area_m2.toLocaleString('pt-BR')}m²</p>
+                            </div>
+                        )}
+                        {property.bedrooms && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">CONFIGURAÇÃO</p>
+                                <p className="plp-ficha-value">{property.bedrooms} {property.bedrooms === 1 ? 'Suíte' : 'Suítes'}</p>
+                            </div>
+                        )}
+                        {property.bathrooms && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">BANHEIROS</p>
+                                <p className="plp-ficha-value">{property.bathrooms}</p>
+                            </div>
+                        )}
+                        {property.parking_spaces && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">ESTACIONAMENTO</p>
+                                <p className="plp-ficha-value">{property.parking_spaces} Vagas</p>
+                            </div>
+                        )}
+                        <div className="plp-ficha-item">
+                            <p className="plp-ficha-label">BAIRRO</p>
+                            <p className="plp-ficha-value">{property.neighborhood || property.city || '—'}{property.state ? `, ${property.state}` : ''}</p>
+                        </div>
+                        {property.iptu && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">IPTU ANUAL</p>
+                                <p className="plp-ficha-value">R$ {Number(property.iptu).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                            </div>
+                        )}
+                        {property.condo_fee && (
+                            <div className="plp-ficha-item">
+                                <p className="plp-ficha-label">CONDOMÍNIO</p>
+                                <p className="plp-ficha-value">R$ {Number(property.condo_fee).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                            </div>
+                        )}
+                        <div className="plp-ficha-item">
+                            <p className="plp-ficha-label">STATUS</p>
+                            <p className="plp-ficha-value plp-gold">{property.status === 'active' ? 'Disponível' : property.status === 'sold' ? 'Vendido' : 'Reservado'}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== LOCALIZAÇÃO / MAPA ===== */}
+            <section id="localizacao" className="plp-section">
+                <div className="plp-container">
+                    <div className="plp-map-layout">
+                        <div className="plp-map-text">
+                            <span className="plp-kicker">LOCALIZAÇÃO</span>
+                            <h2 className="plp-headline-lg">No epicentro do luxo.</h2>
+                            <p className="plp-body-lg">
+                                {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city}{property.state ? ` — ${property.state}` : ''}. Uma localização estratégica que garante valorização constante e acesso ao que há de melhor na região.
+                            </p>
+                            <a
+                                href={`https://www.google.com/maps/search/${encodeURIComponent([property.neighborhood, property.city, property.state].filter(Boolean).join(', '))}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="plp-map-link"
+                            >
+                                VER NO GOOGLE MAPS →
+                            </a>
+                        </div>
+                        <div className="plp-map-embed">
+                            <iframe
+                                src={`https://maps.google.com/maps?q=${encodeURIComponent([property.neighborhood, property.city, property.state].filter(Boolean).join(', '))}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) brightness(0.95) contrast(1.1)' }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title={`Mapa - ${property.title}`}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== RADAR INVESTIMENTO ===== */}
+            <section className="plp-section">
+                <div className="plp-container">
+                    <div className="plp-section-head">
+                        <span className="plp-kicker">VISÃO BLOOMBERG</span>
+                        <h2 className="plp-headline-lg">Potencial de Investimento</h2>
                     </div>
                     <PropertyRadarPanel
                         propertyName={property.title}
                         city={property.city || 'Região'}
                         price={property.price}
                     />
-                </section>
+                </div>
+            </section>
 
-                {/* ========== DIFERENCIAIS ========== */}
-                {amenities.length > 0 && (
-                    <section className="lp-section">
-                        <div className="lp-section-header">
-                            <span className="lp-kicker">Exclusividade</span>
-                            <h2 className="lp-title">Diferenciais Notáveis</h2>
+            {/* ===== CORRETOR ===== */}
+            <section id="corretor" className="plp-section">
+                <div className="plp-container">
+                    <div className="plp-broker-card">
+                        <div className="plp-broker-photo">
+                            <img src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/IMG_2868.jpg" alt="Guilherme Pilger" />
                         </div>
-                        <ul className="lp-amenities">
-                            {amenities.map((item: string, i: number) => (
-                                <li key={i} className="lp-amenity-item">
-                                    <div className="lp-amenity-dot" />
-                                    <span>{item}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                )}
-
-                {/* ========== EDITORIAL GALLERY ========== */}
-                <section id="story-gallery" className="lp-section">
-                    <div className="lp-section-header">
-                        <span className="lp-kicker">A Arquitetura</span>
-                        <h2 className="lp-title">Galeria Editorial</h2>
+                        <div className="plp-broker-info">
+                            <span className="plp-kicker">APRESENTADO POR</span>
+                            <h3 className="plp-headline-lg">Guilherme Pilger</h3>
+                            <p className="plp-body-lg">
+                                Especialista em investimentos de luxo e curador das propriedades mais exclusivas do Sul do Brasil. Com mais de uma década de experiência no mercado de alto padrão.
+                            </p>
+                            <WhatsAppCaptureLink
+                                phone="5548999999999"
+                                message={`Olá Guilherme! Gostaria de agendar uma visita ao imóvel: ${property.title}`}
+                                slug="imovel"
+                                template="property-lp-broker"
+                                className="plp-btn-gold"
+                            >
+                                Agendar Visita Privada
+                            </WhatsAppCaptureLink>
+                        </div>
                     </div>
-                    <PropertyGallery images={gallery} title={property.title} />
-                </section>
-            </div>
+                </div>
+            </section>
 
-            {/* ========== FOOTER ========== */}
-            <footer className="lp-footer">
-                <p>© {new Date().getFullYear()} Pilger Imóveis. O Maior Portal Imobiliário do Brasil.</p>
+            {/* ===== COLEÇÕES ===== */}
+            {related.length > 0 && (
+                <section className="plp-section">
+                    <div className="plp-container">
+                        <div className="plp-collections-head">
+                            <h2 className="plp-headline-lg">Coleções Exclusivas</h2>
+                            <Link href="/" className="plp-see-all">VER TODA GALERIA</Link>
+                        </div>
+                        <div className="plp-collections-grid">
+                            {related.map((prop: any) => (
+                                <PropertyCard key={prop.id} property={prop} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ===== CTA FINAL ===== */}
+            <section className="plp-final-cta">
+                {gallery[0] && (
+                    <img src={gallery[0]} alt="" className="plp-final-cta-bg" />
+                )}
+                <div className="plp-final-cta-overlay" />
+                <div className="plp-final-cta-content">
+                    <h2 className="plp-display">Pronto para dar o próximo passo rumo ao {property.title}?</h2>
+                    <div className="plp-final-cta-actions">
+                        <WhatsAppCaptureLink
+                            phone="5548999999999"
+                            message={`Olá! Quero receber a apresentação completa do ${property.title}`}
+                            slug="imovel"
+                            template="property-lp-final"
+                            className="plp-btn-gold"
+                        >
+                            Receba a apresentação completa
+                        </WhatsAppCaptureLink>
+                        <WhatsAppCaptureLink
+                            phone="5548999999999"
+                            message={`Olá! Gostaria de solicitar um tour virtual do ${property.title}`}
+                            slug="imovel"
+                            template="property-lp-tour"
+                            className="plp-btn-ghost-white"
+                        >
+                            Solicitar Tour Virtual
+                        </WhatsAppCaptureLink>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== FOOTER ===== */}
+            <footer className="plp-footer">
+                <div className="plp-footer-inner">
+                    <div>
+                        <span className="plp-footer-logo">GUILHERME PILGER</span>
+                        <p className="plp-footer-copy">© {new Date().getFullYear()} GUILHERME PILGER. CORRETOR DE IMÓVEIS.</p>
+                    </div>
+                </div>
             </footer>
 
             <MobileNav />
-
-            <style>{`
-                /* ============================================
-                   CINEMATIC LANDING PAGE — PROPERTY DETAIL
-                   ============================================ */
-                .lp-page {
-                    min-height: 100vh;
-                    background: #fdfdfc;
-                    color: #1a1a1a;
-                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                    overflow-x: hidden;
-                }
-
-                /* === BACK BUTTON (Glass on dark hero) === */
-                .lp-back-btn {
-                    position: fixed;
-                    top: 24px;
-                    left: 24px;
-                    z-index: 100;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 12px 20px;
-                    background: rgba(0, 0, 0, 0.25);
-                    backdrop-filter: blur(16px);
-                    -webkit-backdrop-filter: blur(16px);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
-                    border-radius: 50px;
-                    color: #fff;
-                    text-decoration: none;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    transition: all 0.3s ease;
-                }
-                .lp-back-btn:hover {
-                    background: rgba(0, 0, 0, 0.45);
-                    transform: translateX(-4px);
-                }
-
-                /* === CINEMATIC HERO === */
-                .lp-hero {
-                    position: relative;
-                    height: 100vh;
-                    min-height: 600px;
-                    width: 100%;
-                    display: flex;
-                    align-items: flex-end;
-                    animation: lp-fade-up 1s ease-out;
-                }
-                @keyframes lp-fade-up {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                .lp-hero-overlay {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(
-                        to top,
-                        rgba(0, 0, 0, 0.92) 0%,
-                        rgba(0, 0, 0, 0.45) 40%,
-                        rgba(0, 0, 0, 0.08) 100%
-                    );
-                    z-index: 1;
-                    pointer-events: none;
-                }
-                .lp-hero-content {
-                    position: relative;
-                    z-index: 2;
-                    padding: 80px 48px;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    width: 100%;
-                    animation: lp-slide-up 0.8s 0.3s ease-out both;
-                }
-                @keyframes lp-slide-up {
-                    from { opacity: 0; transform: translateY(30px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .lp-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 8px 18px;
-                    background: rgba(255, 255, 255, 0.08);
-                    backdrop-filter: blur(8px);
-                    border: 1px solid rgba(255, 255, 255, 0.18);
-                    color: #fff;
-                    border-radius: 50px;
-                    font-size: 0.7rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 2.5px;
-                    margin-bottom: 24px;
-                }
-                .lp-hero-title {
-                    font-family: 'Playfair Display', Georgia, serif;
-                    font-size: clamp(2.5rem, 6vw, 5rem);
-                    font-weight: 600;
-                    line-height: 1.05;
-                    margin: 0 0 16px 0;
-                    color: #fff;
-                    text-shadow: 0 4px 20px rgba(0,0,0,0.4);
-                }
-                .lp-hero-location {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    color: rgba(255, 255, 255, 0.75);
-                    font-size: 1.15rem;
-                    font-weight: 300;
-                    letter-spacing: 0.5px;
-                }
-
-                /* === STICKY CTA BAR === */
-                .lp-sticky-bar {
-                    position: sticky;
-                    top: 0;
-                    background: rgba(255, 255, 255, 0.92);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
-                    border-bottom: 1px solid rgba(0,0,0,0.04);
-                    z-index: 90;
-                    padding: 16px 0;
-                    box-shadow: 0 4px 30px rgba(0,0,0,0.03);
-                }
-                .lp-sticky-content {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 0 48px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .lp-sticky-info {}
-                .lp-sticky-price {
-                    font-family: 'Playfair Display', serif;
-                    font-size: 1.8rem;
-                    font-weight: 700;
-                    color: #1a1a1a;
-                    line-height: 1;
-                }
-                .lp-sticky-type {
-                    font-size: 0.78rem;
-                    color: #737373;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    margin-top: 4px;
-                }
-                .lp-sticky-btn {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    background: #1a1a1a;
-                    color: #fff;
-                    padding: 14px 32px;
-                    border-radius: 50px;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    text-decoration: none;
-                    transition: all 0.3s ease;
-                }
-                .lp-sticky-btn:hover {
-                    background: #b8945f;
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 24px rgba(184, 148, 95, 0.3);
-                }
-
-                /* === MAIN CONTAINER === */
-                .lp-container {
-                    max-width: 1000px;
-                    margin: 0 auto;
-                    padding: 80px 48px;
-                }
-
-                /* === SECTIONS === */
-                .lp-section {
-                    margin-bottom: 100px;
-                }
-                .lp-section:last-child {
-                    margin-bottom: 0;
-                }
-                .lp-section-header {
-                    margin-bottom: 40px;
-                    text-align: center;
-                }
-                .lp-kicker {
-                    display: block;
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    color: #b8945f;
-                    text-transform: uppercase;
-                    letter-spacing: 2.5px;
-                    margin-bottom: 12px;
-                }
-                .lp-title {
-                    font-family: 'Playfair Display', Georgia, serif;
-                    font-size: 2.5rem;
-                    font-weight: 600;
-                    color: #1a1a1a;
-                    margin: 0;
-                }
-                .lp-description {
-                    font-size: 1.2rem;
-                    line-height: 1.85;
-                    color: #525252;
-                    text-align: center;
-                    max-width: 800px;
-                    margin: 0 auto;
-                    font-weight: 300;
-                    white-space: pre-line;
-                }
-
-                /* === HIGH-END INFOGRAPHIC STATS === */
-                .lp-stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(4, 1fr);
-                    gap: 24px;
-                    background: #fff;
-                    padding: 48px;
-                    border-radius: 24px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.04);
-                    border: 1px solid rgba(0,0,0,0.04);
-                }
-                .lp-stat-box {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    text-align: center;
-                    gap: 16px;
-                    padding: 16px 8px;
-                    border-radius: 16px;
-                    transition: all 0.3s ease;
-                }
-                .lp-stat-box:hover {
-                    background: rgba(184, 148, 95, 0.04);
-                    transform: translateY(-4px);
-                }
-                .lp-stat-icon {
-                    color: #b8945f;
-                    stroke-width: 1.5;
-                }
-                .lp-stat-data strong {
-                    display: block;
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: #1a1a1a;
-                    margin-bottom: 4px;
-                }
-                .lp-stat-data span {
-                    font-size: 0.72rem;
-                    color: #737373;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                }
-
-                /* === AMENITIES === */
-                .lp-amenities {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                    gap: 20px;
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                }
-                .lp-amenity-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;
-                    font-size: 1rem;
-                    color: #404040;
-                    font-weight: 400;
-                    padding: 14px 0;
-                    border-bottom: 1px solid rgba(0,0,0,0.04);
-                    transition: color 0.2s;
-                }
-                .lp-amenity-item:hover {
-                    color: #1a1a1a;
-                }
-                .lp-amenity-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: #b8945f;
-                    border-radius: 50%;
-                    flex-shrink: 0;
-                }
-
-                /* === FOOTER === */
-                .lp-footer {
-                    background: #0a0a0a;
-                    color: #737373;
-                    text-align: center;
-                    padding: 64px 20px;
-                    font-size: 0.8rem;
-                    text-transform: uppercase;
-                    letter-spacing: 1.5px;
-                }
-
-                /* ====== BOTTOM NAV ====== */
-                .mobile-nav {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 58px;
-                    background: rgba(255, 255, 255, 0.95);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border-top: 1px solid var(--border, #e8e5e0);
-                    display: flex;
-                    justify-content: center;
-                    gap: 48px;
-                    align-items: center;
-                    z-index: 1000;
-                    padding-bottom: env(safe-area-inset-bottom);
-                }
-                .nav-item {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 2px;
-                    color: var(--text-muted, #999);
-                    font-size: 0.65rem;
-                    cursor: pointer;
-                    width: 54px;
-                    font-weight: 500;
-                    transition: color 0.2s;
-                }
-                .nav-item:hover { color: var(--text-secondary, #5a5a5a); }
-                .nav-item.active { color: var(--gold, #b8945f); }
-                .nav-icon { margin-bottom: 1px; }
-
-                /* === RESPONSIVE === */
-                @media (max-width: 768px) {
-                    .lp-back-btn {
-                        top: 16px;
-                        left: 16px;
-                        padding: 8px 16px;
-                        font-size: 0.72rem;
-                    }
-                    .lp-hero { height: 75vh; min-height: 450px; }
-                    .lp-hero-content { padding: 40px 24px; }
-                    .lp-hero-title { font-size: 2.2rem; }
-                    .lp-hero-location { font-size: 1rem; }
-
-                    .lp-sticky-content {
-                        padding: 0 20px;
-                        flex-direction: column;
-                        gap: 12px;
-                        align-items: stretch;
-                    }
-                    .lp-sticky-btn {
-                        width: 100%;
-                        justify-content: center;
-                        padding: 12px 24px;
-                    }
-
-                    .lp-container { padding: 48px 20px; }
-                    .lp-section { margin-bottom: 64px; }
-                    .lp-title { font-size: 1.8rem; }
-                    .lp-description { font-size: 1.05rem; text-align: left; }
-
-                    .lp-stats-grid {
-                        grid-template-columns: 1fr 1fr;
-                        padding: 28px 20px;
-                        gap: 16px;
-                    }
-                    .lp-stat-box {
-                        flex-direction: column;
-                        text-align: center;
-                    }
-
-                    .lp-amenities { grid-template-columns: 1fr; }
-
-                    .lp-page { padding-bottom: 60px; }
-                }
-
-                @media (min-width: 768px) {
-                    .mobile-nav { display: none; }
-                }
-
-                @media (min-width: 1024px) {
-                    .lp-hero { height: 100vh; min-height: 650px; }
-                    .lp-hero-content { padding: 80px 64px; }
-                    .lp-container { padding: 100px 48px; }
-                    .lp-section { margin-bottom: 120px; }
-                    .lp-title { font-size: 2.8rem; }
-                    .lp-stats-grid {
-                        padding: 56px;
-                        gap: 32px;
-                    }
-                    .lp-stat-data strong { font-size: 1.7rem; }
-                }
-
-                @media (min-width: 1440px) {
-                    .lp-hero-content { padding: 100px 80px; max-width: 1400px; }
-                    .lp-container { max-width: 1100px; padding: 120px 64px; }
-                    .lp-title { font-size: 3rem; }
-                    .lp-amenities { grid-template-columns: repeat(3, 1fr); }
-                }
-            `}</style>
         </div>
     )
 }

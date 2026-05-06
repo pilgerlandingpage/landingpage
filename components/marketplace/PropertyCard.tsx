@@ -17,6 +17,7 @@ interface PropertyCardProps {
         featured_image: string | null
         images: string[] | null
         property_type?: string
+        exclusive?: boolean
     }
     landingPageSlug?: string
 }
@@ -88,7 +89,7 @@ export default function PropertyCard({ property, landingPageSlug }: PropertyCard
                 </button>
 
                 {/* Exclusive Badge - Top Left */}
-                <div className="exclusive-badge">Exclusivo</div>
+                {property.exclusive && <div className="exclusive-badge">Exclusivo</div>}
 
                 {/* Carousel Controls */}
                 {isHovered && gallery.length > 1 && (
