@@ -90,7 +90,7 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
     // Default center (Florianópolis / Santa Catarina region approx)
     const defaultCenter: [number, number] = [-27.594870, -48.548220]
 
-    // Create marker icon based on hover state
+    // Create marker icon with custom pin image + price label
     const createIcon = useCallback((property: Property, isHovered: boolean) => {
         const priceText = property.price
             ? new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short', style: 'currency', currency: 'BRL' }).format(property.price)
@@ -98,11 +98,12 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
 
         return L.divIcon({
             className: 'custom-price-marker',
-            html: `<div class="price-bubble ${isHovered ? 'price-bubble--active' : ''}">
-                ${priceText}
+            html: `<div class="marker-wrap ${isHovered ? 'marker-wrap--active' : ''}">
+                <img src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png" class="marker-icon" alt="" />
+                <span class="marker-price">${priceText}</span>
             </div>`,
-            iconSize: [80, 36],
-            iconAnchor: [40, 36]
+            iconSize: [56, 72],
+            iconAnchor: [28, 72]
         })
     }, [])
 
@@ -193,31 +194,48 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                     border-bottom: none !important;
                 }
 
-                /* ===== PRICE MARKERS — Premium Dark ===== */
-                .custom-price-marker { background: none; border: none; }
-                .price-bubble {
+                /* ===== CUSTOM ICON MARKERS ===== */
+                .custom-price-marker { background: none !important; border: none !important; }
+                .marker-wrap {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                    cursor: pointer;
+                    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+                    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+                }
+                .marker-icon {
+                    width: 36px;
+                    height: 36px;
+                    object-fit: contain;
+                    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s;
+                }
+                .marker-price {
                     background: rgba(14,14,14,0.92);
-                    border: 1.5px solid rgba(233,193,118,0.5);
+                    border: 1px solid rgba(233,193,118,0.4);
                     color: #e9c176;
-                    padding: 6px 12px;
-                    border-radius: 20px;
-                    font-size: 0.72rem;
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    font-size: 0.65rem;
                     font-weight: 700;
                     font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
                     white-space: nowrap;
-                    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
                     text-align: center;
                     letter-spacing: 0.02em;
-                    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-                    cursor: pointer;
+                    line-height: 1.4;
                 }
-                .price-bubble:hover,
-                .price-bubble--active {
-                    background: #e9c176 !important;
-                    color: #0a0a0a !important;
-                    border-color: #e9c176 !important;
-                    transform: scale(1.15);
-                    box-shadow: 0 6px 24px rgba(233,193,118,0.4);
+                .marker-wrap:hover,
+                .marker-wrap--active {
+                    transform: scale(1.25);
+                    filter: drop-shadow(0 6px 20px rgba(233,193,118,0.5));
+                    z-index: 1000 !important;
+                }
+                .marker-wrap:hover .marker-price,
+                .marker-wrap--active .marker-price {
+                    background: #e9c176;
+                    color: #0a0a0a;
+                    border-color: #e9c176;
                 }
 
                 /* ===== POPUP — Premium Dark ===== */
