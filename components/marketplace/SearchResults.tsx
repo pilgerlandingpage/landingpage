@@ -1,9 +1,16 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
+
+interface MapBounds {
+    north: number
+    south: number
+    east: number
+    west: number
+}
 
 interface SearchResultsProps {
     properties: any[]
@@ -14,6 +21,7 @@ interface SearchResultsProps {
 export default function SearchResults({ properties, propertiesWithCoords, lpMap }: SearchResultsProps) {
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
+    const [mapBounds, setMapBounds] = useState<MapBounds | null>(null)
 
     const handleCardHover = useCallback((id: string | null) => {
         setHoveredPropertyId(id)
@@ -23,6 +31,30 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         setMapHoveredId(id)
     }, [])
 
+    const handleBoundsChange = useCallback((bounds: MapBounds) => {
+        setMapBounds(bounds)
+    }, [])
+
+    // Filter properties to those visible in current map viewport
+    const visibleProperties = useMemo(() => {
+        if (!mapBounds) return properties
+
+        return properties.filter(p => {
+            // If property has no coordinates, always show it
+            if (!p.latitude || !p.longitude) return true
+            // Check if within bounds
+            return (
+                p.latitude >= mapBounds.south &&
+                p.latitude <= mapBounds.north &&
+                p.longitude >= mapBounds.west &&
+                p.longitude <= mapBounds.east
+            )
+        })
+    }, [properties, mapBounds])
+
+    const visibleCount = visibleProperties.length
+    const totalCount = properties.length
+
     return (
         <SearchViews
             map={
@@ -30,22 +62,26 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     properties={propertiesWithCoords}
                     hoveredPropertyId={hoveredPropertyId}
                     onMarkerHover={handleMarkerHover}
+                    onBoundsChange={handleBoundsChange}
                 />
             }
         >
             <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-medium text-[#5a5a5a]">
-                    {properties?.length || 0} imóveis encontrados
+                    {mapBounds && visibleCount < totalCount
+                        ? <><strong style={{ color: '#b8945f', fontSize: '1.1em' }}>{visibleCount}</strong> imóveis nesta área <span style={{ color: '#bbb', fontWeight: 400 }}>({totalCount} total)</span></>
+                        : <><strong style={{ fontSize: '1.1em' }}>{totalCount}</strong> imóveis encontrados</>
+                    }
                 </p>
             </div>
 
-            {!properties || properties.length === 0 ? (
+            {visibleProperties.length === 0 ? (
                 <div className="py-20 text-center text-[#999]">
-                    Nenhum imóvel encontrado com estes critérios.
+                    Nenhum imóvel encontrado nesta área. Tente expandir o mapa.
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                    {properties.map((property: any) => (
+                    {visibleProperties.map((property: any) => (
                         <div
                             key={property.id}
                             onMouseEnter={() => handleCardHover(property.id)}

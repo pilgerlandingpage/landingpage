@@ -28,10 +28,18 @@ interface Property {
     slug?: string
 }
 
+interface MapBounds {
+    north: number
+    south: number
+    east: number
+    west: number
+}
+
 interface PropertyMapProps {
     properties: Property[]
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
+    onBoundsChange?: (bounds: MapBounds) => void
 }
 
 // Component to update map center when properties change
@@ -82,8 +90,40 @@ function MapUpdater({ properties }: { properties: Property[] }) {
     return null
 }
 
+// Component to emit bounds changes on zoom/pan
+function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds) => void }) {
+    const map = useMap()
 
-export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHover }: PropertyMapProps) {
+    useEffect(() => {
+        if (!onBoundsChange) return
+
+        const emitBounds = () => {
+            const b = map.getBounds()
+            onBoundsChange({
+                north: b.getNorth(),
+                south: b.getSouth(),
+                east: b.getEast(),
+                west: b.getWest(),
+            })
+        }
+
+        // Emit initial bounds after map settles
+        setTimeout(emitBounds, 500)
+
+        map.on('moveend', emitBounds)
+        map.on('zoomend', emitBounds)
+
+        return () => {
+            map.off('moveend', emitBounds)
+            map.off('zoomend', emitBounds)
+        }
+    }, [map, onBoundsChange])
+
+    return null
+}
+
+
+export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange }: PropertyMapProps) {
     // Filter properties with valid coordinates
     const validProperties = properties.filter(p => p.latitude && p.longitude)
 
@@ -356,8 +396,18 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#161618' }}
             >
                 <LayersControl position="topright">
-                    {/* Google Maps - Satellite Hybrid — Default */}
-                    <LayersControl.BaseLayer checked name="🛰️ Satélite">
+                    {/* Google Maps - Standard (colorful with POIs) — Default */}
+                    <LayersControl.BaseLayer checked name="🗺️ Padrão">
+                        <TileLayer
+                            attribution='&copy; Google Maps'
+                            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                            maxZoom={21}
+                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                        />
+                    </LayersControl.BaseLayer>
+
+                    {/* Google Maps - Satellite Hybrid */}
+                    <LayersControl.BaseLayer name="🛰️ Satélite">
                         <TileLayer
                             attribution='&copy; Google Maps'
                             url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
@@ -396,6 +446,7 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 </LayersControl>
 
                 <MapUpdater properties={validProperties} />
+                <BoundsEmitter onBoundsChange={onBoundsChange} />
 
                 {validProperties.map(property => {
                     const isHovered = hoveredPropertyId === property.id

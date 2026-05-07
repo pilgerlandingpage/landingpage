@@ -16,11 +16,11 @@ function MapSkeleton() {
         <div style={{
             width: '100%',
             height: '100%',
-            background: '#161618',
+            background: '#f0ede8',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#78797a',
+            color: '#999',
             fontFamily: "'Plus Jakarta Sans', sans-serif",
             fontSize: '0.85rem',
             letterSpacing: '0.1em'
@@ -30,19 +30,28 @@ function MapSkeleton() {
     )
 }
 
+interface MapBounds {
+    north: number
+    south: number
+    east: number
+    west: number
+}
+
 interface MapSearchProps {
     properties: any[]
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
+    onBoundsChange?: (bounds: MapBounds) => void
 }
 
-export default function MapSearch({ properties, hoveredPropertyId, onMarkerHover }: MapSearchProps) {
+export default function MapSearch({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange }: MapSearchProps) {
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             <PropertyMap
                 properties={properties}
                 hoveredPropertyId={hoveredPropertyId}
                 onMarkerHover={onMarkerHover}
+                onBoundsChange={onBoundsChange}
             />
         </div>
     )
