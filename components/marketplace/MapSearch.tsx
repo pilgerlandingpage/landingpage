@@ -13,20 +13,37 @@ const PropertyMap = dynamic(
 
 function MapSkeleton() {
     return (
-        <div className="w-full h-full bg-gray-100 animate-pulse flex items-center justify-center text-gray-400">
-            <span className="text-sm">Carregando mapa...</span>
+        <div style={{
+            width: '100%',
+            height: '100%',
+            background: '#161618',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#78797a',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontSize: '0.85rem',
+            letterSpacing: '0.1em'
+        }}>
+            <span>Carregando mapa...</span>
         </div>
     )
 }
 
 interface MapSearchProps {
     properties: any[]
+    hoveredPropertyId?: string | null
+    onMarkerHover?: (id: string | null) => void
 }
 
-export default function MapSearch({ properties }: MapSearchProps) {
+export default function MapSearch({ properties, hoveredPropertyId, onMarkerHover }: MapSearchProps) {
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-            <PropertyMap properties={properties} />
+            <PropertyMap
+                properties={properties}
+                hoveredPropertyId={hoveredPropertyId}
+                onMarkerHover={onMarkerHover}
+            />
         </div>
     )
 }

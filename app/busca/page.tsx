@@ -1,7 +1,5 @@
 import { createServerSupabase } from '@/lib/supabase/server'
-import MapSearch from '@/components/marketplace/MapSearch'
-import SearchViews from '@/components/marketplace/SearchViews'
-import PropertyCard from '@/components/marketplace/PropertyCard'
+import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 
 function hasCoordinates(p: any) {
@@ -109,9 +107,9 @@ export default async function SearchPage({
         .select('slug, property_id')
         .eq('status', 'published')
 
-    const lpMap = new Map()
+    const lpMap: Record<string, string> = {}
     landingPages?.forEach((lp: any) => {
-        lpMap.set(lp.property_id, lp.slug)
+        lpMap[lp.property_id] = lp.slug
     })
 
     const propertiesWithCoords = properties?.filter(hasCoordinates) || []
@@ -119,34 +117,11 @@ export default async function SearchPage({
     return (
         <div className="flex flex-col overflow-hidden bg-[#f7f7f5]" style={{ height: '100dvh' }}>
             <GlobalHeader />
-
-            <SearchViews map={<MapSearch properties={propertiesWithCoords} />}>
-                <div className="mb-4 flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#5a5a5a]">
-                        {properties?.length || 0} imóveis encontrados
-                    </p>
-                </div>
-
-                {!properties || properties.length === 0 ? (
-                    <div className="py-20 text-center text-[#999]">
-                        Nenhum imóvel encontrado com estes critérios.
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                        {properties.map((property: any) => (
-                            <PropertyCard
-                                key={property.id}
-                                property={property}
-                                landingPageSlug={lpMap.get(property.id)}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                <footer className="mt-12 border-t border-[#e8e5e0] py-8 text-center text-xs text-[#999]">
-                    © {new Date().getFullYear()} Pilger Imóveis. Reais como você.
-                </footer>
-            </SearchViews>
+            <SearchResults
+                properties={properties || []}
+                propertiesWithCoords={propertiesWithCoords}
+                lpMap={lpMap}
+            />
         </div>
     )
 }

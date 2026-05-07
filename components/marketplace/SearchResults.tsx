@@ -1,0 +1,76 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import MapSearch from './MapSearch'
+import SearchViews from './SearchViews'
+import PropertyCard from './PropertyCard'
+
+interface SearchResultsProps {
+    properties: any[]
+    propertiesWithCoords: any[]
+    lpMap: Record<string, string>
+}
+
+export default function SearchResults({ properties, propertiesWithCoords, lpMap }: SearchResultsProps) {
+    const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
+    const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
+
+    const handleCardHover = useCallback((id: string | null) => {
+        setHoveredPropertyId(id)
+    }, [])
+
+    const handleMarkerHover = useCallback((id: string | null) => {
+        setMapHoveredId(id)
+    }, [])
+
+    return (
+        <SearchViews
+            map={
+                <MapSearch
+                    properties={propertiesWithCoords}
+                    hoveredPropertyId={hoveredPropertyId}
+                    onMarkerHover={handleMarkerHover}
+                />
+            }
+        >
+            <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm font-medium text-[#5a5a5a]">
+                    {properties?.length || 0} imóveis encontrados
+                </p>
+            </div>
+
+            {!properties || properties.length === 0 ? (
+                <div className="py-20 text-center text-[#999]">
+                    Nenhum imóvel encontrado com estes critérios.
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    {properties.map((property: any) => (
+                        <div
+                            key={property.id}
+                            onMouseEnter={() => handleCardHover(property.id)}
+                            onMouseLeave={() => handleCardHover(null)}
+                            style={{
+                                transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                                transform: mapHoveredId === property.id ? 'scale(1.02)' : 'scale(1)',
+                                boxShadow: mapHoveredId === property.id ? '0 0 0 2px #e9c176, 0 8px 32px rgba(233,193,118,0.2)' : 'none',
+                                borderRadius: '12px',
+                                zIndex: mapHoveredId === property.id ? 10 : 'auto',
+                                position: 'relative',
+                            }}
+                        >
+                            <PropertyCard
+                                property={property}
+                                landingPageSlug={lpMap[property.id]}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <footer className="mt-12 border-t border-[#e8e5e0] py-8 text-center text-xs text-[#999]">
+                © {new Date().getFullYear()} Guilherme Pilger. Corretor de Imóveis.
+            </footer>
+        </SearchViews>
+    )
+}
