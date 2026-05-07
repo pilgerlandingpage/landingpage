@@ -356,21 +356,21 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#161618' }}
             >
                 <LayersControl position="topright">
-                    {/* Dark Mode — Default */}
-                    <LayersControl.BaseLayer checked name="🌙 Noturno">
-                        <TileLayer
-                            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                        />
-                    </LayersControl.BaseLayer>
-
-                    {/* Google Maps - Satellite Hybrid */}
-                    <LayersControl.BaseLayer name="🛰️ Satélite">
+                    {/* Google Maps - Satellite Hybrid — Default */}
+                    <LayersControl.BaseLayer checked name="🛰️ Satélite">
                         <TileLayer
                             attribution='&copy; Google Maps'
                             url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
                             maxZoom={21}
                             subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                        />
+                    </LayersControl.BaseLayer>
+
+                    {/* Dark Mode */}
+                    <LayersControl.BaseLayer name="🌙 Noturno">
+                        <TileLayer
+                            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                         />
                     </LayersControl.BaseLayer>
 
