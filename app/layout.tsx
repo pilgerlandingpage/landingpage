@@ -3,6 +3,7 @@ import './globals.css'
 import MainTracker from '@/components/tracking/MainTracker'
 import WhatsAppLeadCaptureModal from '@/components/landing/WhatsAppLeadCaptureModal'
 import UserAccessTracker from '@/components/admin/UserAccessTracker'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'Pilger Imóveis de Luxo',
@@ -21,6 +22,7 @@ export default function RootLayout({
         <UserAccessTracker />
         <WhatsAppLeadCaptureModal />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   )
