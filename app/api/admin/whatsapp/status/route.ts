@@ -108,6 +108,7 @@ function normalizeProviderStatus(result: any): 'disconnected' | 'connecting' | '
     const statusValue = result?.status
     const statusText = String(
         result?.instance?.status ||
+        result?.status?.status ||
         (typeof statusValue === 'string' ? statusValue : '') ||
         result?.state ||
         ''

@@ -136,7 +136,7 @@ export default function AgentConfigPage() {
     const [saved, setSaved] = useState(false)
 
     // Empresa
-    const [companyName, setCompanyName] = useState('Pilger Imóveis')
+    const [companyName, setCompanyName] = useState('Imobiliaria Guilherme Pilger')
     const [companyCreci, setCompanyCreci] = useState('')
     const [companyPhone, setCompanyPhone] = useState('')
     const [companyDescription, setCompanyDescription] = useState('')
@@ -749,7 +749,7 @@ export default function AgentConfigPage() {
                 </div>
 
                 <p style={{ fontSize: '0.74rem', color: '#888', marginTop: 14 }}>
-                    A conexao de instancias e feita em <b>WhatsApp Web - Instancias</b> ou dentro de <b>Corretores IA</b>.
+                    A conexao de instancias e feita em <b>WhatsApp Web - Instancias</b> ou dentro de <b>Pilger AI &gt; Agentes</b>.
                 </p>
             </div>
 
@@ -763,7 +763,7 @@ export default function AgentConfigPage() {
                 <div style={gridStyle}>
                     <div>
                         <label style={labelStyle}>Nome da Empresa</label>
-                        <input style={inputStyle} value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Pilger Imóveis" />
+                        <input style={inputStyle} value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Imobiliaria Guilherme Pilger" />
                     </div>
                     <div>
                         <label style={labelStyle}>CRECI</label>
@@ -971,7 +971,7 @@ export default function AgentConfigPage() {
                             onChange={e => setNewActionField2(e.target.value)}
                             placeholder={
                                 newActionType === 'PIX'
-                                    ? 'Nome exibido no PIX (ex: Pilger Imóveis)'
+                                    ? 'Nome exibido no PIX (ex: Imobiliaria Guilherme Pilger)'
                                     : 'Opções separadas por | (ex: Opção 1|Opção 2)'
                             }
                         />
@@ -1053,7 +1053,7 @@ export default function AgentConfigPage() {
                     <Building2 size={20} color="#0ea5e9" />
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#333', margin: 0 }}>Empreendimentos (Catálogo Global)</h2>
                     <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto' }}>
-                        Corretores IA apenas selecionam daqui
+                        Os agentes em Pilger AI apenas selecionam daqui
                     </span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>

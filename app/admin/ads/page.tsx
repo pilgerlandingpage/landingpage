@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
     Plus, Megaphone, DollarSign, Users, Target,
     TrendingUp, AlertTriangle, Brain, CheckCircle, AlertCircle, RefreshCw, Calendar,
-    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X, Search
+    Eye, MousePointerClick, ArrowRight, Thermometer, History, ChevronDown, ChevronUp, X, Search, Sparkles
 } from 'lucide-react'
 import AdsCountdown from '@/components/admin/AdsCountdown'
 import LeadClock from '@/components/admin/LeadClock'
@@ -66,6 +66,44 @@ interface Report {
     performance_score: number | null
     created_at: string
 }
+
+interface PaidAiReport {
+    id: string
+    title: string
+    summary: string | null
+    period_start: string | null
+    period_end: string | null
+    insights: Array<{ title?: string; detail?: string; impact?: string }>
+    recommendations: Array<{ title?: string; action?: string; priority?: string }>
+    metrics: Record<string, unknown>
+    created_at: string
+}
+
+interface LiveAccountStats {
+    spend: number
+    current_insights_spend: number
+    lifetime_insights_spend: number
+    account_amount_spent: number
+    currency?: string
+    timezone_name?: string
+    source: 'insights' | 'account_amount_spent_delta'
+}
+
+interface MetaAccountHealth {
+    account_id?: string
+    name?: string
+    status: number
+    status_label: string
+    disable_reason?: number
+    currency?: string
+    timezone_name?: string
+    amount_spent?: number
+    balance?: number
+    is_active: boolean
+    is_payment_issue: boolean
+    severity: 'ok' | 'warning' | 'error'
+    message: string
+}
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
     draft: { label: 'Rascunho', color: '#94a3b8' },
     pending: { label: 'Publicando...', color: '#f59e0b' },
@@ -87,6 +125,74 @@ function formatCurrency(val: number) {
 
 function shortName(name: string, max = 18) {
     return name.length > max ? name.slice(0, max) + '...' : name
+}
+
+function formatDateOnly(value: string | null | undefined) {
+    if (!value) return '-'
+    return new Date(`${value}T12:00:00`).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    })
+}
+
+function cleanJsonBlock(value: string) {
+    const cleaned = String(value || '')
+        .replace(/```json\n?/gi, '')
+        .replace(/```\n?/g, '')
+        .trim()
+    const firstBrace = cleaned.indexOf('{')
+    const lastBrace = cleaned.lastIndexOf('}')
+    return firstBrace >= 0 && lastBrace > firstBrace ? cleaned.slice(firstBrace, lastBrace + 1) : cleaned
+}
+
+function decodeJsonString(value: string) {
+    try {
+        return JSON.parse(`"${value}"`)
+    } catch {
+        return value
+            .replace(/\\"/g, '"')
+            .replace(/\\n/g, '\n')
+            .replace(/\\u00e1/g, 'á')
+            .replace(/\\u00e9/g, 'é')
+            .replace(/\\u00ed/g, 'í')
+            .replace(/\\u00f3/g, 'ó')
+            .replace(/\\u00fa/g, 'ú')
+            .replace(/\\u00e3/g, 'ã')
+            .replace(/\\u00f5/g, 'õ')
+            .replace(/\\u00e7/g, 'ç')
+    }
+}
+
+function extractJsonField(value: string, field: string) {
+    const match = String(value || '').match(new RegExp(`"${field}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"`))
+    return match?.[1] ? decodeJsonString(match[1]).trim() : ''
+}
+
+function normalizePaidReport(report: PaidAiReport): PaidAiReport {
+    const rawSummary = String(report.summary || '')
+    let parsed: Partial<PaidAiReport> | null = null
+
+    try {
+        parsed = JSON.parse(cleanJsonBlock(rawSummary))
+    } catch {
+        parsed = null
+    }
+
+    const extractedTitle = parsed?.title || extractJsonField(rawSummary, 'title')
+    const extractedSummary = parsed?.summary || extractJsonField(rawSummary, 'summary')
+
+    return {
+        ...report,
+        title: extractedTitle || report.title,
+        summary: extractedSummary || report.summary,
+        insights: (report.insights || []).length > 0
+            ? report.insights
+            : Array.isArray(parsed?.insights) ? parsed.insights : [],
+        recommendations: (report.recommendations || []).length > 0
+            ? report.recommendations
+            : Array.isArray((parsed as any)?.recommendations) ? (parsed as any).recommendations : [],
+    }
 }
 
 // Custom tooltip for charts
@@ -120,6 +226,12 @@ export default function AdsPage() {
     const [expandedReport, setExpandedReport] = useState<string | null>(null)
     const [showHistory, setShowHistory] = useState(false)
     const [internalStats, setInternalStats] = useState<{ totalLeads: number; recentLeads: any[] }>({ totalLeads: 0, recentLeads: [] })
+    const [liveAccountStats, setLiveAccountStats] = useState<LiveAccountStats | null>(null)
+    const [metaAccountHealth, setMetaAccountHealth] = useState<MetaAccountHealth | null>(null)
+    const [paidReports, setPaidReports] = useState<PaidAiReport[]>([])
+    const [paidReportLoading, setPaidReportLoading] = useState(false)
+    const [paidReportError, setPaidReportError] = useState('')
+    const latestPaidReport = paidReports[0] || null
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type })
@@ -145,6 +257,8 @@ export default function AdsPage() {
                 const data = await campRes.json()
                 setCampaigns(data.campaigns || [])
                 setInternalStats(data.internalStats || { totalLeads: 0, recentLeads: [] })
+                setLiveAccountStats(data.liveAccountStats || null)
+                setMetaAccountHealth(data.accountHealth || null)
             }
             if (alertRes.ok) {
                 const data = await alertRes.json()
@@ -203,7 +317,41 @@ export default function AdsPage() {
         finally { setAnalyzing(false) }
     }
 
+    const loadPaidReports = async () => {
+        try {
+            setPaidReportError('')
+            const res = await fetch('/api/admin/paid-traffic/report?limit=5')
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Erro ao carregar relatorios pagos.')
+            setPaidReports((data.reports || []).map(normalizePaidReport))
+        } catch (err) {
+            setPaidReportError(err instanceof Error ? err.message : 'Erro ao carregar relatorios pagos.')
+        }
+    }
+
+    const handlePaidReport = async () => {
+        setPaidReportLoading(true)
+        setPaidReportError('')
+        showToast('Gerando relatorio pago com IA...', 'success')
+
+        try {
+            const res = await fetch('/api/admin/paid-traffic/report?days=30', { method: 'POST' })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Erro ao gerar relatorio pago.')
+            await loadPaidReports()
+            showToast('Relatorio pago gerado com sucesso.', 'success')
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erro ao gerar relatorio pago.'
+            setPaidReportError(message)
+            showToast(message, 'error')
+        } finally {
+            setPaidReportLoading(false)
+        }
+    }
+
     useEffect(() => { fetchData() }, [])
+
+    useEffect(() => { loadPaidReports() }, [])
 
     // Fetch reports for Meta
     useEffect(() => {
@@ -300,7 +448,11 @@ export default function AdsPage() {
         (filter === 'active' && c.status === 'active') ||
         (filter === 'paused' && c.status === 'paused')
     )
-    const totalSpend = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.spend || 0), 0)
+    const campaignSpend = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.spend || 0), 0)
+    const liveTodaySpend = datePreset === 'today' ? liveAccountStats?.spend || 0 : 0
+    const usesLiveSpendFallback = datePreset === 'today' && liveTodaySpend > campaignSpend
+    const totalSpend = usesLiveSpendFallback ? liveTodaySpend : campaignSpend
+    const metaAccountNeedsAttention = Boolean(metaAccountHealth && metaAccountHealth.severity !== 'ok')
     const totalImpressions = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.impressions || 0), 0)
     const totalClicks = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.clicks || 0), 0)
     const totalReach = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.reach || 0), 0)
@@ -423,11 +575,46 @@ export default function AdsPage() {
                         <Brain size={18} className={analyzing ? 'spin' : ''} />
                         {analyzing ? 'Analisando...' : 'Analisar com IA'}
                     </button>
+                    <button onClick={handlePaidReport} disabled={paidReportLoading}
+                        className="btn" style={{
+                            background: '#17120c',
+                            border: '1px solid rgba(201, 169, 110, 0.45)',
+                            color: '#fffaf0',
+                            display: 'flex', alignItems: 'center', gap: 8,
+                        }}>
+                        <Sparkles size={18} className={paidReportLoading ? 'spin' : ''} />
+                        {paidReportLoading ? 'Gerando...' : 'Relatorio IA'}
+                    </button>
                     <Link href="/admin/ads/new" className="btn btn-gold" style={{ textDecoration: 'none' }}>
                         <Plus size={18} /> Nova Campanha
                     </Link>
                 </div>
             </div>
+
+            {metaAccountNeedsAttention && metaAccountHealth && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    marginBottom: 18,
+                    background: metaAccountHealth.severity === 'error' ? 'rgba(239,68,68,.08)' : 'rgba(245,158,11,.09)',
+                    border: `1px solid ${metaAccountHealth.severity === 'error' ? 'rgba(239,68,68,.28)' : 'rgba(245,158,11,.28)'}`,
+                    color: 'var(--text-primary)',
+                }}>
+                    <AlertTriangle size={21} color={metaAccountHealth.severity === 'error' ? '#ef4444' : '#f59e0b'} style={{ marginTop: 2, flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                        <strong style={{ display: 'block', marginBottom: 4 }}>
+                            {metaAccountHealth.is_payment_issue ? 'Conta Meta com pendencia de pagamento' : 'Conta Meta precisa de atencao'}
+                        </strong>
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.86rem', lineHeight: 1.45 }}>
+                            {metaAccountHealth.message} Status: {metaAccountHealth.status_label} ({metaAccountHealth.status}).
+                            {' '}Enquanto isso, a Meta pode pausar entregas, zerar campanhas do dia ou atrasar insights.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <div className="ads-top-cards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                 <AdsCountdown noMargin />
@@ -445,6 +632,11 @@ export default function AdsPage() {
                     <DollarSign size={20} color="#22c55e" style={{ marginBottom: 8 }} />
                     <div className="kpi-label">Gasto Total</div>
                     <div className="kpi-value" style={{ color: '#22c55e', fontSize: '1.4rem' }}>{formatCurrency(totalSpend)}</div>
+                    {usesLiveSpendFallback && (
+                        <div style={{ marginTop: 6, color: 'var(--text-muted)', fontSize: '.68rem', lineHeight: 1.25 }}>
+                            Estimativa ao vivo Meta
+                        </div>
+                    )}
                 </div>
                 <div className="kpi-card">
                     <Eye size={20} color="#6366f1" style={{ marginBottom: 8 }} />
@@ -507,6 +699,83 @@ export default function AdsPage() {
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: getScoreColor(latestScore), marginTop: 2 }}>
                             {getScoreEmoji(latestScore)} {getScoreLabel(latestScore)}
                         </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="chart-card" style={{
+                marginBottom: 24,
+                border: '1px solid rgba(201,169,110,.18)',
+                background: 'radial-gradient(circle at top left, rgba(201,169,110,.12), transparent 32%), linear-gradient(135deg, #fff, #fbfaf7)',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 16 }}>
+                    <div>
+                        <div style={{ color: 'var(--gold)', fontSize: '.68rem', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
+                            Agente pago IA
+                        </div>
+                        <div className="chart-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                            <Sparkles size={18} /> Relatorio de performance paga
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.84rem' }}>
+                            Meta + Google, campanhas, alertas, leads reais e criativos pagos em uma leitura executiva.
+                        </p>
+                    </div>
+                    <button onClick={handlePaidReport} disabled={paidReportLoading} className="btn btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                        <Sparkles size={16} className={paidReportLoading ? 'spin' : ''} />
+                        {paidReportLoading ? 'Analisando...' : 'Nova analise'}
+                    </button>
+                </div>
+
+                {paidReportError && (
+                    <div style={{
+                        marginBottom: 12,
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        color: '#b91c1c',
+                        background: 'rgba(239,68,68,.08)',
+                        border: '1px solid rgba(239,68,68,.18)',
+                        fontSize: '.82rem',
+                        fontWeight: 700,
+                    }}>
+                        {paidReportError}
+                    </div>
+                )}
+
+                {latestPaidReport ? (
+                    <div className="paid-report-content" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,.8fr) minmax(0,1.2fr)', gap: 16 }}>
+                        <div style={{ padding: 16, borderRadius: 14, background: '#17120c', color: '#fffaf0' }}>
+                            <div style={{ color: 'var(--gold)', fontSize: '.72rem', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+                                {formatDateOnly(latestPaidReport.period_start)} a {formatDateOnly(latestPaidReport.period_end)}
+                            </div>
+                            <h3 style={{ margin: '0 0 10px', color: '#fffaf0', fontSize: '1.24rem', lineHeight: 1.08 }}>{latestPaidReport.title}</h3>
+                            <p style={{ margin: 0, color: 'rgba(255,250,240,.78)', fontSize: '.88rem', lineHeight: 1.52 }}>{latestPaidReport.summary}</p>
+                        </div>
+                        <div className="paid-report-lists" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 12 }}>
+                            <div>
+                                <strong style={{ display: 'block', marginBottom: 8 }}>Insights</strong>
+                                {(latestPaidReport.insights || []).slice(0, 3).map((item, index) => (
+                                    <div key={`paid-insight-${index}`} style={{ padding: 12, border: '1px solid rgba(17,24,39,.07)', borderRadius: 12, background: 'rgba(255,255,255,.86)', marginBottom: 8 }}>
+                                        <span style={{ display: 'inline-block', marginBottom: 6, color: 'var(--gold)', fontSize: '.64rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.08em' }}>{item.impact || 'leitura'}</span>
+                                        <b style={{ display: 'block', color: 'var(--text-primary)', fontSize: '.84rem', lineHeight: 1.25, marginBottom: 5 }}>{item.title || 'Insight'}</b>
+                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.77rem', lineHeight: 1.42 }}>{item.detail || '-'}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
+                                <strong style={{ display: 'block', marginBottom: 8 }}>Acoes recomendadas</strong>
+                                {(latestPaidReport.recommendations || []).slice(0, 3).map((item, index) => (
+                                    <div key={`paid-rec-${index}`} style={{ padding: 12, border: '1px solid rgba(17,24,39,.07)', borderRadius: 12, background: 'rgba(255,255,255,.86)', marginBottom: 8 }}>
+                                        <span style={{ display: 'inline-block', marginBottom: 6, color: 'var(--gold)', fontSize: '.64rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.08em' }}>{item.priority || 'prioridade'}</span>
+                                        <b style={{ display: 'block', color: 'var(--text-primary)', fontSize: '.84rem', lineHeight: 1.25, marginBottom: 5 }}>{item.title || 'Acao'}</b>
+                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.77rem', lineHeight: 1.42 }}>{item.action || '-'}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ padding: 18, border: '1px dashed var(--border-color)', borderRadius: 12, color: 'var(--text-muted)', textAlign: 'center', fontSize: '.84rem' }}>
+                        Gere o primeiro relatorio para a IA cruzar campanhas, custo, leads e alertas do trafego pago.
                     </div>
                 )}
             </div>
@@ -961,6 +1230,21 @@ export default function AdsPage() {
                 .ads-date-input::-webkit-calendar-picker-indicator {
                     filter: invert(1);
                     cursor: pointer;
+                }
+                @media (max-width: 760px) {
+                    .paid-report-content,
+                    .paid-report-lists {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .ads-header-actions {
+                        flex-wrap: wrap;
+                        width: 100%;
+                    }
+                    .ads-header-actions .btn,
+                    .ads-header-actions a.btn {
+                        flex: 1 1 160px;
+                        justify-content: center;
+                    }
                 }
             `}</style>
         </div>

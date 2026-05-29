@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export type MarketTickerItem = {
   label: string
@@ -123,7 +123,7 @@ function buildRegionSignals(rows: any[]) {
 
 export async function getPublicMarketRadarFeed(): Promise<PublicMarketRadarFeed> {
   try {
-    const supabase = createAdminClient()
+    const supabase = createSupabaseAdminClient()
     const { data, error } = await supabase
       .from('market_radar_insights')
       .select('keyword,opportunity_score,market_temperature,summary,related_properties_count,trend_delta,created_at')
@@ -144,13 +144,13 @@ export async function getPublicMarketRadarFeed(): Promise<PublicMarketRadarFeed>
     }
 
     const ticker = rows.slice(0, 10).map((row: any) => ({
-      label: String(row.keyword || 'Radar Pilger'),
+      label: String(row.keyword || 'Radar de Mercado'),
       value: getTickerValue(row),
       tone: getTone(row),
     }))
 
     const highlights = rows.slice(0, 3).map((row: any) => ({
-      keyword: String(row.keyword || 'Radar Pilger'),
+      keyword: String(row.keyword || 'Radar de Mercado'),
       score: Number(row.opportunity_score || 0),
       temperature: normalizeTemperature(row.market_temperature),
       summary: String(row.summary || 'Sinal de mercado monitorado pela inteligencia Pilger.'),

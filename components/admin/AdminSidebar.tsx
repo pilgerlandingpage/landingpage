@@ -5,10 +5,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
     Bell,
+    BrainCircuit,
+    BriefcaseBusiness,
     Building2,
+    CalendarDays,
     ChevronDown,
     Crown,
     FileText,
+    FileSearch,
     Filter,
     Home,
     Landmark,
@@ -18,7 +22,9 @@ import {
     Menu,
     Megaphone,
     MessageSquareHeart,
+    Newspaper,
     Radar,
+    Search,
     Send,
     Shield,
     ShieldAlert,
@@ -90,17 +96,29 @@ const MODULE_NAV: Record<string, NavItem> = {
         href: '/admin/leads',
         icon: Users,
         label: 'Leads',
-        section: 'MARKETING',
+        section: 'COMERCIAL',
         subItems: [
             { href: '/admin/leads', label: 'Todos os Leads' },
             { href: '/admin/leads/crm', label: 'CRM do Agente' },
         ],
     },
+    broker_candidates: { href: '/admin/trabalhe-conosco', icon: BriefcaseBusiness, label: 'Trabalhe Conosco', section: 'COMERCIAL' },
     landing_pages: { href: '/admin/landing-pages', icon: FileText, label: 'Landing Pages', section: 'MARKETING' },
-    properties: { href: '/admin/properties', icon: Building2, label: 'Imoveis', section: 'MARKETING' },
-    homepage: { href: '/admin/homepage', icon: Home, label: 'Configurar Homepage', section: 'MARKETING' },
-    brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores IA', section: 'MARKETING' },
-    automation: { href: '/admin/automation', icon: Zap, label: 'Automacoes', section: 'MARKETING' },
+    events: {
+        href: '/admin/eventos',
+        icon: CalendarDays,
+        label: 'Eventos',
+        section: 'MARKETING',
+        subItems: [
+            { href: '/admin/eventos', label: 'Agenda e inscritos' },
+        ],
+    },
+    blog: { href: '/admin/blog', icon: Newspaper, label: 'Blog', section: 'MARKETING' },
+    news: { href: '/admin/noticias', icon: FileText, label: 'Noticias', section: 'MARKETING' },
+    properties: { href: '/admin/properties', icon: Building2, label: 'Imoveis', section: 'OPERACOES' },
+    homepage: { href: '/admin/homepage', icon: Home, label: 'Configurar Homepage', section: 'PRODUTO DIGITAL' },
+    brokers: { href: '/admin/brokers', icon: ShieldCheck, label: 'Corretores IA', section: 'COMERCIAL' },
+    automation: { href: '/admin/automation', icon: Zap, label: 'Automacoes', section: 'TECNOLOGIA' },
     push: { href: '/admin/push', icon: Bell, label: 'Notificacoes', section: 'MARKETING' },
     ads: {
         href: '/admin/ads',
@@ -110,14 +128,21 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/ads', label: 'Meta Ads' },
             { href: '/admin/ads/google', label: 'Google Ads' },
+            { href: '/admin/ads/analytics', label: 'Google Analytics' },
+            { href: '/admin/ads/organic', label: 'Trafego Organico' },
+            { href: '/admin/ads/inbox', label: 'Caixa Meta' },
+            { href: '/admin/ads/creatives', label: 'Criativos' },
         ],
     },
-    radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'MARKETING' },
+    radar: { href: '/admin/radar', icon: Radar, label: 'Radar de Mercado', section: 'INTELIGENCIA' },
+    intelligence: { href: '/admin/intelligence', icon: BrainCircuit, label: 'Central de Inteligencia', section: 'INTELIGENCIA' },
+    research: { href: '/admin/research', icon: Search, label: 'Pesquisa Profunda IA', section: 'INTELIGENCIA' },
+    benchmark_editorial: { href: '/admin/benchmark-editorial', icon: FileSearch, label: 'Benchmark Editorial', section: 'INTELIGENCIA' },
     whatsapp: {
         href: '/admin/whatsapp',
         icon: Smartphone,
         label: 'WhatsApp Web',
-        section: 'MARKETING',
+        section: 'ATENDIMENTO',
         subItems: [
             { href: '/admin/whatsapp', label: 'Conectados' },
             { href: '/admin/whatsapp/agent-config', label: 'Config do Agente' },
@@ -129,6 +154,20 @@ const MODULE_NAV: Record<string, NavItem> = {
     },
     feedback: { href: '/admin/feedback', icon: MessageSquareHeart, label: 'Feedback', section: 'SISTEMA' },
     maintenance: { href: '/admin/maintenance', icon: Wrench, label: 'Sala de Manutencao', section: 'SISTEMA' },
+    pilger_ai: {
+        href: '/admin/pilger-ai',
+        icon: Crown,
+        label: 'Pilger AI',
+        section: 'PILGER AI',
+        subItems: [
+            { href: '/admin/pilger-ai', label: 'Visao Geral' },
+            { href: '/admin/pilger-ai/saude', label: 'Saude dos Agentes' },
+            { href: '/admin/pilger-ai/agentes', label: 'Agentes' },
+            { href: '/admin/pilger-ai/tarefas', label: 'Tarefas' },
+            { href: '/admin/pilger-ai/aprovacoes', label: 'Aprovacoes' },
+            { href: '/admin/pilger-ai/eventos', label: 'Eventos e Logs' },
+        ],
+    },
 }
 
 const GENERAL_DASHBOARD_ITEM: NavItem = {
@@ -145,7 +184,7 @@ const ACCESS_AUDIT_ITEM: NavItem = {
     section: 'CONFIGURACOES',
 }
 
-const SECTION_ORDER = ['PRINCIPAL', 'FINANCEIRO', 'MARKETING', 'SISTEMA', 'CONFIGURACOES']
+const SECTION_ORDER = ['PRINCIPAL', 'PILGER AI', 'FINANCEIRO', 'MARKETING', 'COMERCIAL', 'OPERACOES', 'INTELIGENCIA', 'ATENDIMENTO', 'PRODUTO DIGITAL', 'TECNOLOGIA', 'SISTEMA', 'CONFIGURACOES']
 const SETTINGS_USERS_PERMISSION_KEYS = ['settings_users', 'gestao_de_usuarios', 'usuarios', 'users']
 const SETTINGS_SECTORS_PERMISSION_KEYS = ['settings_sectors', 'gestao_de_setores', 'setores', 'sectors']
 
@@ -166,6 +205,12 @@ export default function AdminSidebar() {
     const [mobileOpen, setMobileOpen] = useState(false)
 
     const subGroupKey = (parentHref: string, groupLabel: string) => `${parentHref}::${groupLabel}`
+
+    const isHrefActive = (href: string) => {
+        if (href === '/admin') return pathname === '/admin'
+        if (href === '/admin/pilger-ai') return pathname === '/admin/pilger-ai'
+        return pathname === href || pathname.startsWith(`${href}/`)
+    }
 
     const toggleSubGroup = (parentHref: string, groupLabel: string) => {
         const key = subGroupKey(parentHref, groupLabel)
@@ -207,7 +252,7 @@ export default function AdminSidebar() {
             for (const subItem of financeSubItems) {
                 if (!('children' in subItem)) continue
 
-                const hasActiveChild = subItem.children.some(child => pathname === child.href || pathname.startsWith(`${child.href}/`))
+                const hasActiveChild = subItem.children.some(child => isHrefActive(child.href))
                 if (!hasActiveChild) continue
 
                 const key = subGroupKey('/admin/finance', subItem.label)
@@ -216,6 +261,15 @@ export default function AdminSidebar() {
         }
         if (pathname.startsWith('/admin/leads')) {
             setExpandedMenus(prev => ({ ...prev, '/admin/leads': true }))
+        }
+        if (pathname.startsWith('/admin/trabalhe-conosco')) {
+            setExpandedMenus(prev => ({ ...prev, '/admin/trabalhe-conosco': true }))
+        }
+        if (pathname.startsWith('/admin/eventos')) {
+            setExpandedMenus(prev => ({ ...prev, '/admin/eventos': true }))
+        }
+        if (pathname.startsWith('/admin/pilger-ai')) {
+            setExpandedMenus(prev => ({ ...prev, '/admin/pilger-ai': true }))
         }
     }, [pathname])
 
@@ -266,6 +320,7 @@ export default function AdminSidebar() {
         }
 
         for (const key of allowedModules) {
+            if (key === 'brokers') continue
             const nav = MODULE_NAV[key]
             if (!nav) continue
             if (!sections[nav.section]) sections[nav.section] = []
@@ -410,7 +465,7 @@ export default function AdminSidebar() {
                                                                 {isGroupExpanded && (
                                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 10 }}>
                                                                         {subItem.children.map(child => {
-                                                                            const isChildActive = pathname === child.href || pathname.startsWith(`${child.href}/`)
+                                                                            const isChildActive = isHrefActive(child.href)
                                                                             return (
                                                                                 <Link
                                                                                     key={child.href}
@@ -435,7 +490,7 @@ export default function AdminSidebar() {
                                                         )
                                                     }
 
-                                                    const isSubItemActive = pathname === subItem.href || pathname.startsWith(`${subItem.href}/`)
+                                                    const isSubItemActive = isHrefActive(subItem.href)
                                                     return (
                                                         <Link
                                                             key={subItem.href}

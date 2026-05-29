@@ -1,6 +1,8 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+const MINIMUM_FIRST_CONTACT_PRICE = 4000000
+
 export async function GET(req: NextRequest) {
     const q = req.nextUrl.searchParams.get('q')?.trim() || ''
 
@@ -12,6 +14,7 @@ export async function GET(req: NextRequest) {
             .from('properties')
             .select('city, neighborhood')
             .eq('status', 'active')
+            .gte('price', MINIMUM_FIRST_CONTACT_PRICE)
             .limit(500)
 
         const cityCount = new Map<string, number>()
@@ -40,6 +43,7 @@ export async function GET(req: NextRequest) {
         .from('properties')
         .select('id, title, city, neighborhood, property_type, price')
         .eq('status', 'active')
+        .gte('price', MINIMUM_FIRST_CONTACT_PRICE)
         .or(`title.ilike.%${term}%,city.ilike.%${term}%,neighborhood.ilike.%${term}%,property_type.ilike.%${term}%`)
         .order('price', { ascending: false })
         .limit(200)

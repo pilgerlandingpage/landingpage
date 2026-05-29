@@ -46,7 +46,7 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
 
                     <div className="modern-hero-stats">
                         <div className="modern-stat">
-                            <span>{stats.bedrooms}</span> <small>Quartos</small>
+                            <span>{stats.bedrooms}</span> <small>Dormitórios</small>
                         </div>
                         <div className="modern-stat-divider" />
                         <div className="modern-stat">
@@ -124,7 +124,7 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
 
             {/* Footer */}
             <footer className="modern-footer">
-                <p>Pilger Imóveis • {new Date().getFullYear()}</p>
+                <p>Imobiliaria Guilherme Pilger • {new Date().getFullYear()}</p>
             </footer>
 
             <style jsx>{`

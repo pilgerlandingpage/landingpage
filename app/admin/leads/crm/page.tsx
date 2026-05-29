@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Phone, MapPin, DollarSign, Home, Clock, User, Filter, RefreshCw, ChevronDown, ChevronUp, Star, MessageSquare, FileText } from 'lucide-react'
+import { Search, Phone, Mail, MapPin, DollarSign, Home, Clock, User, Filter, RefreshCw, ChevronDown, ChevronUp, Star, MessageSquare, FileText } from 'lucide-react'
 
 interface LeadData {
     id: string
@@ -22,6 +22,7 @@ interface LeadData {
     longitude: number | null
     broker_id: string | null
     lead_id?: string | null
+    lead_email?: string | null
     avatar_url?: string | null
     avatar_source?: string | null
     avatar_updated_at?: string | null
@@ -42,6 +43,10 @@ interface LeadData {
     lead_score?: number | null
     last_whatsapp_click?: any | null
     whatsapp_clicks?: any[]
+    site_activity?: any[]
+    behavior_summary?: any | null
+    precise_location?: any | null
+    gps_permission?: any | null
     created_at: string
     updated_at: string
 }
@@ -53,6 +58,48 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
     transferred: { label: 'Transferido', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
     converted: { label: 'Convertido', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
     lost: { label: 'Perdido', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+}
+
+function LeadAvatar({
+    name,
+    avatarUrl,
+    size = 44,
+}: {
+    name?: string | null
+    avatarUrl?: string | null
+    size?: number
+}) {
+    const [imageFailed, setImageFailed] = useState(false)
+    const initial = name?.trim()?.[0]?.toUpperCase() || '?'
+
+    return (
+        <div style={{
+            width: size,
+            height: size,
+            borderRadius: '50%',
+            background: '#dfe5e7',
+            color: '#111b21',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.95rem',
+            fontWeight: 700,
+            flexShrink: 0,
+            overflow: 'hidden',
+        }}>
+            {avatarUrl && !imageFailed ? (
+                <img
+                    src={avatarUrl}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    onError={() => setImageFailed(true)}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+            ) : (
+                initial
+            )}
+        </div>
+    )
 }
 
 export default function LeadCRMPage() {
@@ -125,6 +172,10 @@ export default function LeadCRMPage() {
         return '⚪ Novo'
     }
 
+    function getDisplayScore(lead: LeadData): number {
+        return Math.max(Number(lead.qualification_score || 0), Number(lead.lead_score || 0))
+    }
+
     function formatPhone(phone: string): string {
         if (!phone) return ''
         const clean = phone.replace(/\D/g, '')
@@ -137,6 +188,33 @@ export default function LeadCRMPage() {
         return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
     }
 
+    function getPreciseLocation(lead: LeadData) {
+        const location = lead.precise_location
+        const latitude = Number(location?.latitude)
+        const longitude = Number(location?.longitude)
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
+
+        return {
+            latitude,
+            longitude,
+            accuracy: Number(location?.accuracy_meters || location?.accuracy || 0),
+            capturedAt: location?.captured_at || location?.updated_at || null,
+        }
+    }
+
+    function formatGpsLocation(lead: LeadData): string {
+        const location = getPreciseLocation(lead)
+        if (!location) return ''
+
+        const accuracy = Number.isFinite(location.accuracy) && location.accuracy > 0
+            ? ` +/- ${Math.round(location.accuracy)}m`
+            : ''
+        const capturedAt = location.capturedAt ? ` em ${formatDate(location.capturedAt)}` : ''
+
+        return `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}${accuracy}${capturedAt}`
+    }
+
     function formatCurrency(value: number | null): string {
         if (!value) return ''
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
@@ -146,6 +224,12 @@ export default function LeadCRMPage() {
         const type = String(click?.link_type || click?.event_type || 'link').replace(/^whatsapp_/, '').replace(/_click$/, '')
         const label = click?.link_label || click?.link_title || type
         return String(label || type)
+    }
+
+    function formatActivity(activity: any): string {
+        const detail = activity?.detail ? ` - ${activity.detail}` : ''
+        const title = activity?.property_title ? `: ${activity.property_title}` : ''
+        return `${activity?.label || activity?.event_type || 'Atividade'}${title}${detail}`
     }
 
     // Stats
@@ -219,7 +303,7 @@ export default function LeadCRMPage() {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && loadLeads()}
-                        placeholder="Buscar por nome, telefone ou região..."
+                        placeholder="Buscar por nome, telefone, e-mail ou região..."
                         style={{
                             width: '100%', padding: '10px 10px 10px 34px',
                             border: '1px solid #e0ddd8', borderRadius: 8,
@@ -264,6 +348,7 @@ export default function LeadCRMPage() {
                     {leads.map(lead => {
                         const isExpanded = expandedLead === lead.id
                         const statusCfg = STATUS_CONFIG[lead.status] || STATUS_CONFIG.new
+                        const displayScore = getDisplayScore(lead)
 
                         return (
                             <div key={lead.id} style={cardStyle}>
@@ -276,32 +361,20 @@ export default function LeadCRMPage() {
                                     }}
                                 >
                                     {/* WhatsApp Avatar */}
-                                    <div style={{
-                                        width: 44, height: 44, borderRadius: '50%',
-                                        background: '#dfe5e7', color: '#111b21',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.95rem', fontWeight: 700, flexShrink: 0,
-                                        overflow: 'hidden'
-                                    }}>
-                                        {lead.avatar_url ? (
-                                            <img src={lead.avatar_url} alt={lead.lead_name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            lead.lead_name?.[0]?.toUpperCase() || '?'
-                                        )}
-                                    </div>
+                                    <LeadAvatar name={lead.lead_name} avatarUrl={lead.avatar_url} />
 
                                     {/* Score Circle */}
                                     <div style={{
                                         width: 48, height: 48, borderRadius: '50%',
-                                        background: `conic-gradient(${getScoreColor(lead.qualification_score)} ${lead.qualification_score}%, #f0ede8 0)`,
+                                        background: `conic-gradient(${getScoreColor(displayScore)} ${displayScore}%, #f0ede8 0)`,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                                     }}>
                                         <div style={{
                                             width: 38, height: 38, borderRadius: '50%', background: '#fff',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '0.72rem', fontWeight: 700, color: getScoreColor(lead.qualification_score)
+                                            fontSize: '0.72rem', fontWeight: 700, color: getScoreColor(displayScore)
                                         }}>
-                                            {lead.qualification_score}
+                                            {displayScore}
                                         </div>
                                     </div>
 
@@ -324,6 +397,22 @@ export default function LeadCRMPage() {
                                             <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
                                                 <Phone size={11} /> {formatPhone(lead.lead_phone)}
                                             </span>
+                                            {lead.lead_email && (
+                                                <span style={{
+                                                    fontSize: '0.75rem',
+                                                    color: '#888',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 4,
+                                                    minWidth: 0,
+                                                    maxWidth: 260,
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                }}>
+                                                    <Mail size={11} style={{ flexShrink: 0 }} /> {lead.lead_email}
+                                                </span>
+                                            )}
                                             {lead.source && (
                                                 <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
                                                     <MessageSquare size={11} /> {lead.source}
@@ -349,8 +438,8 @@ export default function LeadCRMPage() {
 
                                     {/* Score Label + Time */}
                                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: getScoreColor(lead.qualification_score) }}>
-                                            {getScoreLabel(lead.qualification_score)}
+                                        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: getScoreColor(displayScore) }}>
+                                            {getScoreLabel(displayScore)}
                                         </div>
                                         <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: 4 }}>
                                             {formatDate(lead.updated_at)}
@@ -363,14 +452,18 @@ export default function LeadCRMPage() {
                                 {/* Expanded Details */}
                                 {isExpanded && (
                                     <div style={{ padding: '0 20px 20px', borderTop: '1px solid #f0ede8' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 16 }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16, marginTop: 16 }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>E-MAIL</label>
+                                                <span style={{ fontSize: '0.85rem', color: '#333', wordBreak: 'break-word' }}>{lead.lead_email || '—'}</span>
+                                            </div>
                                             <div>
                                                 <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>INTERESSE</label>
                                                 <span style={{ fontSize: '0.85rem', color: '#333' }}>{lead.interest || '—'}</span>
                                             </div>
                                             <div>
-                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>QUARTOS</label>
-                                                <span style={{ fontSize: '0.85rem', color: '#333' }}>{lead.bedrooms_wanted ? `${lead.bedrooms_wanted} quartos` : '—'}</span>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>DORMITÓRIOS</label>
+                                                <span style={{ fontSize: '0.85rem', color: '#333' }}>{lead.bedrooms_wanted ? `${lead.bedrooms_wanted} dormitórios` : '—'}</span>
                                             </div>
                                             <div>
                                                 <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>PRAZO</label>
@@ -380,7 +473,7 @@ export default function LeadCRMPage() {
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
                                             <div>
-                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>LOCALIZAÇÃO</label>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>COORDENADAS SALVAS</label>
                                                 <span style={{ fontSize: '0.82rem', color: '#333' }}>
                                                     {lead.latitude && lead.longitude ? `${lead.latitude}, ${lead.longitude}` : '—'}
                                                 </span>
@@ -411,14 +504,65 @@ export default function LeadCRMPage() {
                                                 <span style={{ fontSize: '0.82rem', color: '#333' }}>{[lead.device_type, lead.browser, lead.os].filter(Boolean).join(' / ') || '—'}</span>
                                             </div>
                                             <div>
-                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>CIDADE</label>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>LOCALIZACAO APROX.</label>
                                                 <span style={{ fontSize: '0.82rem', color: '#333' }}>{[lead.city, lead.state, lead.country].filter(Boolean).join(', ') || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>GPS DO LEAD</label>
+                                                {getPreciseLocation(lead) ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const location = getPreciseLocation(lead)
+                                                            if (location) window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, '_blank')
+                                                        }}
+                                                        style={{ border: 'none', background: 'transparent', padding: 0, color: '#008069', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}
+                                                    >
+                                                        {formatGpsLocation(lead)}
+                                                    </button>
+                                                ) : (
+                                                    <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.gps_permission?.status ? `Permissao: ${lead.gps_permission.status}` : '—'}</span>
+                                                )}
                                             </div>
                                             <div>
                                                 <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#aaa', display: 'block', marginBottom: 4 }}>RESUMO IA</label>
                                                 <span style={{ fontSize: '0.82rem', color: '#333' }}>{lead.ai_summary || '—'}</span>
                                             </div>
                                         </div>
+
+                                        {lead.behavior_summary && (
+                                            <div style={{ marginTop: 12, padding: 12, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8 }}>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: 8 }}>INTELIGENCIA DO LEAD</label>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                                                    <div>
+                                                        <span style={{ display: 'block', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700 }}>TEMPERATURA</span>
+                                                        <strong style={{ color: '#1e293b', fontSize: '0.82rem' }}>{lead.behavior_summary.intent_temperature || lead.lead_classification || 'Em analise'}</strong>
+                                                    </div>
+                                                    <div>
+                                                        <span style={{ display: 'block', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700 }}>SCORE DIGITAL</span>
+                                                        <strong style={{ color: '#1e293b', fontSize: '0.82rem' }}>{lead.behavior_summary.engagement_score ?? lead.lead_score ?? 0}/100</strong>
+                                                    </div>
+                                                    <div>
+                                                        <span style={{ display: 'block', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700 }}>ULTIMA PAGINA</span>
+                                                        <strong style={{ color: '#1e293b', fontSize: '0.82rem' }}>{lead.behavior_summary.last_page_path || '---'}</strong>
+                                                    </div>
+                                                </div>
+                                                {Array.isArray(lead.behavior_summary.intent_signals) && lead.behavior_summary.intent_signals.length > 0 && (
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                                                        {lead.behavior_summary.intent_signals.slice(0, 5).map((signal: string, index: number) => (
+                                                            <span key={`${signal}-${index}`} style={{ padding: '4px 8px', borderRadius: 999, background: '#fff', border: '1px solid #e2e8f0', color: '#334155', fontSize: '0.72rem', fontWeight: 700 }}>
+                                                                {signal}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {lead.behavior_summary.next_best_action && (
+                                                    <p style={{ margin: '10px 0 0', color: '#475569', fontSize: '0.78rem', fontWeight: 600 }}>
+                                                        Proxima acao: {lead.behavior_summary.next_best_action}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {Array.isArray(lead.whatsapp_clicks) && lead.whatsapp_clicks.length > 0 && (
                                             <div style={{ marginTop: 12, padding: 12, background: '#f6fffb', border: '1px solid rgba(0,128,105,0.16)', borderRadius: 8 }}>
@@ -428,6 +572,20 @@ export default function LeadCRMPage() {
                                                         <div key={`${click?.clicked_at || index}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: '0.78rem', color: '#334155' }}>
                                                             <span style={{ fontWeight: 600 }}>{formatClickAction(click)}</span>
                                                             <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>{click?.clicked_at ? formatDate(click.clicked_at) : 'agora'}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {Array.isArray(lead.site_activity) && lead.site_activity.length > 0 && (
+                                            <div style={{ marginTop: 12, padding: 12, background: '#fffaf0', border: '1px solid rgba(184,148,95,0.22)', borderRadius: 8 }}>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#8a6d3b', display: 'block', marginBottom: 8 }}>ATIVIDADE NO SITE</label>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                                                    {lead.site_activity.slice(0, 6).map((activity: any, index: number) => (
+                                                        <div key={`${activity?.id || activity?.occurred_at || index}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: '0.78rem', color: '#334155' }}>
+                                                            <span style={{ fontWeight: 600 }}>{formatActivity(activity)}</span>
+                                                            <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>{activity?.occurred_at ? formatDate(activity.occurred_at) : 'agora'}</span>
                                                         </div>
                                                     ))}
                                                 </div>

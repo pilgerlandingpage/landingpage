@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
     Smartphone, RefreshCw, Loader2, AlertCircle, CheckCircle2,
     Wifi, WifiOff, Phone, User, Clock, Globe, Battery, BatteryCharging,
@@ -179,10 +179,10 @@ export default function WhatsAppInstancesPage() {
                     setCreateMessage({ type: 'success', text: 'Instância conectada com sucesso. Você já pode configurar o agente.' })
                     setCreateQrCode(null)
                     setCreateFlowInstanceId(null)
-                    await loadInstances()
+                    await loadInstances(true)
                     setTimeout(() => setCreateModalOpen(false), 900)
                 } else {
-                    await loadInstances()
+                    await loadInstances(true)
                 }
             } catch {
                 // noop: polling resiliente
@@ -194,8 +194,9 @@ export default function WhatsAppInstancesPage() {
         return () => clearInterval(intervalId)
     }, [createModalOpen, createFlowInstanceId, createQrCode])
 
-    const loadInstances = async () => {
-        setLoading(true); setError(null)
+    const loadInstances = async (silent = false) => {
+        if (!silent) setLoading(true)
+        setError(null)
         try {
             const res = await fetch('/api/admin/whatsapp/instances')
             if (!res.ok) throw new Error('Falha ao carregar instâncias')
@@ -219,11 +220,13 @@ export default function WhatsAppInstancesPage() {
             setConfigs(cfgMap)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro desconhecido')
-        } finally { setLoading(false) }
+        } finally {
+            if (!silent) setLoading(false)
+        }
     }
 
     const refreshAll = async () => {
-        setRefreshing(true); await loadInstances(); setRefreshing(false)
+        setRefreshing(true); await loadInstances(true); setRefreshing(false)
     }
 
     const createInstanceAndGetQr = async () => {
@@ -274,7 +277,7 @@ export default function WhatsAppInstancesPage() {
             } else {
                 setCreateMessage({ type: 'error', text: 'A instância foi criada, mas o QR code não retornou. Tente novamente.' })
             }
-            await loadInstances()
+            await loadInstances(true)
         } catch (err) {
             setCreateMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao criar instância.' })
         } finally {
@@ -324,7 +327,7 @@ export default function WhatsAppInstancesPage() {
             <AlertCircle size={48} style={{ color: '#ef4444', marginBottom: 16 }} />
             <p style={{ color: '#ef4444', fontSize: '1.1rem' }}>Falha ao carregar instâncias</p>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 8 }}>{error}</p>
-            <button onClick={loadInstances} style={{ marginTop: 16, padding: '10px 24px', borderRadius: '10px', background: 'var(--gold)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            <button onClick={() => loadInstances()} style={{ marginTop: 16, padding: '10px 24px', borderRadius: '10px', background: 'var(--gold)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                 Tentar Novamente
             </button>
         </div>
@@ -463,7 +466,7 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
-                                onRefresh={loadInstances}
+                                onRefresh={() => loadInstances(true)}
                             />
                         ))}
                     </div>
@@ -487,7 +490,7 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
-                                onRefresh={loadInstances}
+                                onRefresh={() => loadInstances(true)}
                             />
                         ))}
                     </div>
@@ -531,6 +534,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [privacyMessage, setPrivacyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [qrLoading, setQrLoading] = useState(false)
     const [checkingStatus, setCheckingStatus] = useState(false)
+    const [autoCheckingConnection, setAutoCheckingConnection] = useState(false)
     const [deletingInstance, setDeletingInstance] = useState(false)
     const [clearingCache, setClearingCache] = useState(false)
     const [qrCode, setQrCode] = useState<string | null>(null)
@@ -544,6 +548,59 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
         : inst.live_data?.profilePicUrl
     const prompt = type === 'agent' ? inst.virtual_brokers?.system_prompt : null
     const agentDisabled = !config.agent_enabled
+    const onRefreshRef = useRef(onRefresh)
+
+    useEffect(() => {
+        onRefreshRef.current = onRefresh
+    }, [onRefresh])
+
+    useEffect(() => {
+        if (!qrCode || isConnected) {
+            setAutoCheckingConnection(false)
+            return
+        }
+
+        let cancelled = false
+        let inFlight = false
+        let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+        const pollConnectionStatus = async () => {
+            if (cancelled || inFlight) return
+
+            inFlight = true
+            setAutoCheckingConnection(true)
+
+            try {
+                const res = await fetch(`/api/admin/whatsapp/status?instanceId=${inst.id}`, { cache: 'no-store' })
+                const data = await res.json().catch(() => null)
+
+                if (!res.ok || !data?.success) return
+
+                if (data.status === 'connected') {
+                    cancelled = true
+                    setQrCode(null)
+                    setAutoCheckingConnection(false)
+                    setQrMessage({ type: 'success', text: 'Instância conectada com sucesso. Atualizando o painel...' })
+                    await onRefreshRef.current()
+                    return
+                }
+            } catch {
+                // polling silencioso: o botão manual continua disponível
+            } finally {
+                inFlight = false
+                if (!cancelled) {
+                    timeoutId = setTimeout(pollConnectionStatus, 3000)
+                }
+            }
+        }
+
+        pollConnectionStatus()
+
+        return () => {
+            cancelled = true
+            if (timeoutId) clearTimeout(timeoutId)
+        }
+    }, [qrCode, isConnected, inst.id])
 
     const connectAndGetQr = async () => {
         setQrLoading(true)
@@ -560,7 +617,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             }
             if (data?.qrcode) {
                 setQrCode(data.qrcode)
-                setQrMessage({ type: 'success', text: 'QR code gerado. Escaneie no WhatsApp do celular.' })
+                setQrMessage({ type: 'success', text: 'QR code gerado. Escaneie no WhatsApp do celular. O painel vai atualizar automaticamente.' })
             } else {
                 setQrMessage({ type: 'error', text: 'A API nao retornou QR code. Tente novamente em alguns segundos.' })
             }
@@ -813,6 +870,12 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                         <div style={{ background: '#fff', borderRadius: 8, display: 'inline-block', padding: 8 }}>
                                             <img src={qrCode} alt="QR Code WhatsApp" style={{ width: 220, height: 220 }} />
                                         </div>
+                                        {autoCheckingConnection && (
+                                            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                                                <Loader2 size={13} className="animate-spin" />
+                                                Aguardando confirmação da conexão...
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 

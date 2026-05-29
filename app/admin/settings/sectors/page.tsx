@@ -238,13 +238,22 @@ export default function SectorsPage() {
 
     const categoryLabels: Record<string, string> = {
         principal: 'Principal',
+        pilger_ai: 'Pilger AI',
         financeiro: 'Financeiro',
+        marketing: 'Marketing',
+        comercial: 'Comercial',
+        operacoes: 'Operacoes',
+        inteligencia: 'Inteligencia',
+        atendimento: 'Atendimento',
+        produto_digital: 'Produto Digital',
+        tecnologia: 'Tecnologia',
         conteudo: 'Conteudo',
+        comunicacao: 'Comunicacao',
         automacao: 'Automacao',
         sistema: 'Sistema',
     }
 
-    const categoryOrder = ['principal', 'financeiro', 'conteudo', 'automacao', 'sistema']
+    const categoryOrder = ['principal', 'pilger_ai', 'financeiro', 'marketing', 'comercial', 'operacoes', 'inteligencia', 'atendimento', 'produto_digital', 'tecnologia', 'conteudo', 'automacao', 'comunicacao', 'sistema']
     const groupedPermEntries = Object.entries(groupedPerms).sort(([a], [b]) => {
         const ai = categoryOrder.indexOf(a)
         const bi = categoryOrder.indexOf(b)

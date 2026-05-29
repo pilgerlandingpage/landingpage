@@ -12,10 +12,20 @@ import {
     executeAiAction,
     dailyReportCron,
     syncMetaLeadsCron,
+    syncInstagramOrganicCron,
+    organicReportAgentCron,
+    paidReportAgentCron,
+    marketingPublisherCron,
+    blogAgentCron,
+    newsAgentCron,
     generateDailyPilgerReportCron,
     generateWeeklyPilgerReportCron,
-    radarCollectionCron
+    radarCollectionCron,
+    researchPilgerCron,
+    ecosystemIntelligenceCron
 } from './ads-functions'
+import { eventFunctions } from './event-functions'
+import { candidateFunctions } from './candidate-functions'
 import {
     processWhatsAppMessage,
     detectHumanTakeover,
@@ -1429,9 +1439,17 @@ export const functions = [
     executeAiAction,
     dailyReportCron,
     syncMetaLeadsCron,
+    syncInstagramOrganicCron,
+    organicReportAgentCron,
+    paidReportAgentCron,
+    marketingPublisherCron,
+    blogAgentCron,
+    newsAgentCron,
     generateDailyPilgerReportCron,
     generateWeeklyPilgerReportCron,
     radarCollectionCron,
+    researchPilgerCron,
+    ecosystemIntelligenceCron,
     // WhatsApp Agent IA
     processWhatsAppMessage,
     detectHumanTakeover,
@@ -1439,5 +1457,9 @@ export const functions = [
     reliableMarkAsRead,
     whatsappKeepOnline,
     // WhatsApp Instance Setup
-    whatsappInstanceSetup
+    whatsappInstanceSetup,
+    // Eventos
+    ...eventFunctions,
+    // Trabalhe Conosco / Corretores
+    ...candidateFunctions
 ]

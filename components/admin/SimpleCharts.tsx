@@ -28,6 +28,14 @@ function buildPath(points: Array<{ x: number; y: number }>) {
     return points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(' ')
 }
 
+function buildAreaPath(points: Array<{ x: number; y: number }>, baseline: number) {
+    if (points.length === 0) return ''
+    const line = buildPath(points)
+    const last = points[points.length - 1]
+    const first = points[0]
+    return `${line} L ${last.x.toFixed(2)} ${baseline.toFixed(2)} L ${first.x.toFixed(2)} ${baseline.toFixed(2)} Z`
+}
+
 function shortenLabel(value: unknown, maxLength = 16) {
     const label = String(value || '')
     return label.length > maxLength ? `${label.slice(0, maxLength - 1)}...` : label
@@ -99,6 +107,16 @@ export function SimpleLineChart({
                 }}
                 onTouchEnd={() => setActiveIndex(null)}
             >
+                <defs>
+                    {series.map(item => (
+                        <linearGradient key={item.key} id={`line-fill-${item.key}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={item.color} stopOpacity="0.22" />
+                            <stop offset="72%" stopColor={item.color} stopOpacity="0.04" />
+                            <stop offset="100%" stopColor={item.color} stopOpacity="0" />
+                        </linearGradient>
+                    ))}
+                </defs>
+
                 {[0, 0.25, 0.5, 0.75, 1].map(step => {
                     const y = pad.top + plotHeight * step
                     const value = roundedMax * (1 - step)
@@ -122,9 +140,28 @@ export function SimpleLineChart({
                     )
                 })}
 
+                {seriesPoints.map(item => (
+                    <path
+                        key={`${item.key}-area`}
+                        className="simple-chart-area"
+                        d={buildAreaPath(item.points, pad.top + plotHeight)}
+                        fill={`url(#line-fill-${item.key})`}
+                    />
+                ))}
+
                 {seriesPoints.map((item, seriesIndex) => (
+                    <g key={item.key}>
                         <path
-                            key={item.key}
+                            className="simple-chart-line-glow"
+                            d={buildPath(item.points)}
+                            fill="none"
+                            stroke={item.color}
+                            strokeWidth="7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                        />
+                        <path
                             className="simple-chart-line"
                             d={buildPath(item.points)}
                             fill="none"
@@ -135,6 +172,20 @@ export function SimpleLineChart({
                             vectorEffect="non-scaling-stroke"
                             style={{ animationDelay: `${seriesIndex * 90}ms` }}
                         />
+                        {item.points.map((point, index) => (
+                            <circle
+                                key={`${item.key}-${index}`}
+                                className="simple-chart-dot"
+                                cx={point.x}
+                                cy={point.y}
+                                r={index === item.points.length - 1 ? 3.8 : 2.4}
+                                fill="var(--bg-card)"
+                                stroke={item.color}
+                                strokeWidth="2"
+                                vectorEffect="non-scaling-stroke"
+                            />
+                        ))}
+                    </g>
                 ))}
 
                 {activePoint && (
@@ -200,6 +251,7 @@ export function SimpleDonutChart({
 }) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const total = data.reduce((sum, item) => sum + toNumber(item.value), 0)
+    const orderedData = [...data].sort((a, b) => toNumber(b.value) - toNumber(a.value))
     const radius = 52
     const strokeWidth = 24
     const circumference = 2 * Math.PI * radius
@@ -221,14 +273,14 @@ export function SimpleDonutChart({
     }
 
     return (
-        <div className="simple-donut-frame" style={{ height }} onMouseLeave={() => setActiveIndex(null)}>
+        <div className="simple-donut-frame simple-donut-frame-rich" style={{ height }} onMouseLeave={() => setActiveIndex(null)}>
             <div className="simple-donut-wrap">
                 <svg className="simple-donut-svg" viewBox="0 0 160 160">
                     <circle cx="80" cy="80" r={radius} fill="none" stroke="rgba(148,163,184,0.16)" strokeWidth={strokeWidth} />
                     {segments.map(({ item, segment, dashOffset }, index) => {
                         return (
                             <circle
-                                key={item.name}
+                                key={`${item.name}-${index}`}
                                 className="simple-donut-segment"
                                 cx="80"
                                 cy="80"
@@ -251,6 +303,10 @@ export function SimpleDonutChart({
                     })}
                 </svg>
                 <div className="simple-donut-hole" />
+                <div className="simple-donut-center">
+                    <strong>{valueFormatter(total)}</strong>
+                    <span>Total</span>
+                </div>
                 {activeItem && (
                     <div className="simple-donut-tooltip">
                         <strong>{activeItem.name}</strong>
@@ -258,12 +314,19 @@ export function SimpleDonutChart({
                     </div>
                 )}
             </div>
-            <div className="simple-donut-legend">
-                {data.map((item, index) => (
-                    <span key={item.name}>
-                        <i style={{ background: colors[index % colors.length] }} /> {item.name}
+            <div className="simple-donut-legend simple-donut-legend-rich">
+                {orderedData.slice(0, 6).map((item, index) => {
+                    const originalIndex = data.findIndex(row => row.name === item.name)
+                    const color = colors[Math.max(originalIndex, 0) % colors.length]
+                    const percent = Math.round((toNumber(item.value) / Math.max(total, 1)) * 100)
+                    return (
+                    <span key={`${item.name}-${index}`}>
+                        <i style={{ background: color }} />
+                        <b>{shortenLabel(item.name, 14)}</b>
+                        <em>{percent}%</em>
                     </span>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )
@@ -312,12 +375,15 @@ export function SimpleBarChart({
                         const barWidth = (value / maxValue) * plotWidth
                         const y = pad.top + index * rowHeight + (rowHeight - barHeight) / 2
                         return (
-                            <g key={item.name} onMouseEnter={() => setActiveIndex(index)} onTouchStart={() => setActiveIndex(index)}>
+                            <g key={`${item.name}-${index}`} onMouseEnter={() => setActiveIndex(index)} onTouchStart={() => setActiveIndex(index)}>
                                 <text x={pad.left - 8} y={y + barHeight * 0.75} textAnchor="end" fontSize="8.5" fill="#8a8f98">
                                     {shortenLabel(item.name, 18)}
                                 </text>
                                 <rect x={pad.left} y={y} width={plotWidth} height={barHeight} rx="4" fill="rgba(148,163,184,0.12)" />
                                 <rect className="simple-chart-bar simple-chart-bar-horizontal" x={pad.left} y={y} width={barWidth} height={barHeight} rx="4" fill={color} style={{ animationDelay: `${index * 45}ms` }} />
+                                <text x={Math.min(pad.left + barWidth + 8, width - pad.right)} y={y + barHeight * 0.75} fontSize="8.5" fill="#475569" fontWeight="700">
+                                    {valueFormatter(value)}
+                                </text>
                             </g>
                         )
                     })}
@@ -346,8 +412,11 @@ export function SimpleBarChart({
                     const x = pad.left + index * slotWidth + (slotWidth - barWidth) / 2
                     const y = pad.top + plotHeight - barHeight
                     return (
-                        <g key={item.name} onMouseEnter={() => setActiveIndex(index)} onTouchStart={() => setActiveIndex(index)}>
+                        <g key={`${item.name}-${index}`} onMouseEnter={() => setActiveIndex(index)} onTouchStart={() => setActiveIndex(index)}>
                             <rect className="simple-chart-bar" x={x} y={y} width={barWidth} height={barHeight} rx="5" fill={color} style={{ animationDelay: `${index * 45}ms` }} />
+                            <text x={x + barWidth / 2} y={Math.max(10, y - 5)} textAnchor="middle" fontSize="8" fill="#475569" fontWeight="800">
+                                {valueFormatter(value)}
+                            </text>
                             <text x={x + barWidth / 2} y={svgHeight - 14} textAnchor="middle" fontSize="8" fill="#8a8f98">
                                 {shortenLabel(item.name, 8)}
                             </text>

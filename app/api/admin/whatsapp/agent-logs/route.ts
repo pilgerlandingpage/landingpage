@@ -18,6 +18,33 @@ function clampNumber(raw: string | null, fallback: number, min: number, max: num
     return Math.min(max, Math.max(min, parsed))
 }
 
+function safeText(value: unknown, fallback = ''): string {
+    if (value === null || value === undefined) return fallback
+    if (typeof value === 'string') return value || fallback
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+    if (Array.isArray(value)) return value.map(item => safeText(item)).filter(Boolean).join(', ') || fallback
+    if (typeof value === 'object') {
+        const record = value as Record<string, unknown>
+        const preferred = record.name
+            || record.pushName
+            || record.phone
+            || record.message
+            || record.status_message
+            || record.status
+            || record.error
+        const preferredText = safeText(preferred)
+        const statusText = preferred !== record.status ? safeText(record.status) : ''
+        if (preferredText && statusText && !preferredText.includes(statusText)) return `${preferredText} (${statusText})`
+        if (preferredText) return preferredText
+        try {
+            return JSON.stringify(value).slice(0, 220)
+        } catch {
+            return fallback
+        }
+    }
+    return fallback
+}
+
 function isAgentRuntimeRow(row: any) {
     const action = String(row?.action || '').toLowerCase()
     return row?.event_type === 'agent_runtime'
@@ -52,22 +79,32 @@ function getSummary(row: any) {
     if (action === 'agent_no_pending_after_debounce') return 'Fila vazia depois da espera de agrupamento.'
     if (action === 'agent_empty_input') return 'Entrada vazia depois do processamento.'
     if (reason || queueReason) return reason || queueReason
-    if (row?.error) return String(row.error)
+    if (row?.error) return safeText(row.error)
     return action.replace(/_/g, ' ')
 }
 
 async function loadAppConfigAgentLogs(supabase: ReturnType<typeof getSupabase>, since: string, limit: number) {
-    const { data, error } = await supabase
-        .from('app_config')
-        .select('key, value, updated_at')
-        .like('key', '_agentlog_%')
-        .gte('updated_at', since)
-        .order('updated_at', { ascending: false })
-        .limit(limit)
+    const [agentLogs, webhookLogs] = await Promise.all([
+        supabase
+            .from('app_config')
+            .select('key, value, updated_at')
+            .like('key', '_agentlog_%')
+            .gte('updated_at', since)
+            .order('updated_at', { ascending: false })
+            .limit(limit),
+        supabase
+            .from('app_config')
+            .select('key, value, updated_at')
+            .like('key', '_webhooklog_%')
+            .gte('updated_at', since)
+            .order('updated_at', { ascending: false })
+            .limit(limit),
+    ])
 
-    if (error) throw error
+    if (agentLogs.error) throw agentLogs.error
+    if (webhookLogs.error) throw webhookLogs.error
 
-    return (data || [])
+    return ([...(agentLogs.data || []), ...(webhookLogs.data || [])])
         .map((row: any) => {
             try {
                 const parsed = JSON.parse(String(row.value || '{}'))
@@ -136,15 +173,15 @@ export async function GET(request: NextRequest) {
                 return {
                     id: row.id,
                     created_at: row.created_at,
-                    instance_name: row.instance_name,
-                    event_type: row.event_type,
-                    message_type: row.message_type,
-                    action: row.action,
+                    instance_name: safeText(row.instance_name) || null,
+                    event_type: safeText(row.event_type) || null,
+                    message_type: safeText(row.message_type) || null,
+                    action: safeText(row.action, 'agent_runtime'),
                     status_code: row.status_code,
-                    from_phone: row.from_phone,
-                    sender_name: row.sender_name,
+                    from_phone: safeText(row.from_phone) || null,
+                    sender_name: safeText(row.sender_name) || null,
                     payload: row.payload || {},
-                    error: row.error || null,
+                    error: safeText(row.error) || null,
                     severity,
                     summary: getSummary(row),
                 }

@@ -89,6 +89,34 @@ export const inngest = new Inngest({
                 external_adset_id?: string
             }
         }
+        // --- Eventos ---
+        'event/registration-created': {
+            data: {
+                event_id: string
+                registration_id: string
+                reason?: string
+                lead_initiated_first?: boolean
+            }
+        }
+        'event/process-message-queue': {
+            data: {
+                event_id?: string
+                reason?: string
+            }
+        }
+        // --- Trabalhe Conosco / Corretores ---
+        'broker-candidate/created': {
+            data: {
+                candidate_id: string
+                reason?: string
+            }
+        }
+        'broker-candidate/process-message-queue': {
+            data: {
+                candidate_id?: string
+                reason?: string
+            }
+        }
         // --- WhatsApp Agent ---
         'whatsapp/message-received': {
             data: {

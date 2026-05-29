@@ -16,6 +16,13 @@ function buildPhoneOrFilter(candidates: string[]): string {
     return `phone.in.(${safe.join(',')}),phone_e164.in.(${safe.join(',')})`
 }
 
+function buildCollectedPhoneFilter(candidates: string[]): string {
+    const safe = candidates
+        .map(candidate => candidate.replace(/[^0-9]/g, ''))
+        .filter(Boolean)
+    return `lead_phone.in.(${safe.join(',')})`
+}
+
 function metadataValue(source: any, path: string[]): string | null {
     let cursor = source
     for (const key of path) {
@@ -33,6 +40,24 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status')
         const search = searchParams.get('search')
         const limit = parseInt(searchParams.get('limit') || '50')
+        const searchTerm = String(search || '').trim()
+        let emailMatchedPhones: string[] = []
+
+        if (searchTerm) {
+            const { data: emailMatches, error: emailSearchError } = await supabase
+                .from('leads')
+                .select('phone, phone_e164')
+                .ilike('email', `%${searchTerm}%`)
+                .limit(100)
+
+            if (emailSearchError) {
+                console.warn('[Lead CRM] email search failed:', emailSearchError.message)
+            } else {
+                emailMatchedPhones = Array.from(new Set(
+                    (emailMatches || []).flatMap((lead: any) => phoneCandidates(lead.phone_e164 || lead.phone))
+                ))
+            }
+        }
 
         let query = supabase
             .from('lead_collected_data')
@@ -44,8 +69,17 @@ export async function GET(request: NextRequest) {
             query = query.eq('status', status)
         }
 
-        if (search) {
-            query = query.or(`lead_name.ilike.%${search}%,lead_phone.ilike.%${search}%,region.ilike.%${search}%`)
+        if (searchTerm) {
+            const safeSearch = searchTerm.replace(/[,%()]/g, ' ')
+            const filters = [
+                `lead_name.ilike.%${safeSearch}%`,
+                `lead_phone.ilike.%${safeSearch}%`,
+                `region.ilike.%${safeSearch}%`,
+            ]
+            if (emailMatchedPhones.length > 0) {
+                filters.push(buildCollectedPhoneFilter(emailMatchedPhones))
+            }
+            query = query.or(filters.join(','))
         }
 
         const { data, error } = await query
@@ -62,6 +96,7 @@ export async function GET(request: NextRequest) {
                 .select(`
                     id,
                     name,
+                    email,
                     phone,
                     phone_e164,
                     avatar_url,
@@ -117,9 +152,12 @@ export async function GET(request: NextRequest) {
             const visitor = lead?.visitor || {}
             const landingPage = lead?.landing_page || {}
             const selfReportedSource = metadataValue(tracking, ['self_reported_source'])
+            const behaviorSummary = metadata?.behavior_summary || null
+            const behaviorScore = Number(behaviorSummary?.engagement_score || 0)
             return {
                 ...row,
                 lead_id: lead?.id || null,
+                lead_email: lead?.email || null,
                 avatar_url: lead?.avatar_url || null,
                 avatar_source: lead?.avatar_source || null,
                 avatar_updated_at: lead?.avatar_updated_at || null,
@@ -136,12 +174,18 @@ export async function GET(request: NextRequest) {
                 state: visitor.region || metadataValue(tracking, ['region']) || null,
                 country: visitor.country || metadataValue(tracking, ['country']) || null,
                 ai_summary: lead?.ai_summary || null,
-                lead_classification: lead?.lead_classification || null,
-                lead_score: lead?.lead_score || null,
+                lead_classification: lead?.lead_classification || behaviorSummary?.lead_classification || null,
+                lead_score: lead?.lead_score || behaviorScore || null,
                 last_whatsapp_click: metadata?.last_whatsapp_click || null,
                 whatsapp_clicks: Array.isArray(metadata?.whatsapp_clicks)
                     ? metadata.whatsapp_clicks.slice(-10).reverse()
                     : [],
+                site_activity: Array.isArray(metadata?.site_activity)
+                    ? metadata.site_activity.slice(-15).reverse()
+                    : [],
+                behavior_summary: behaviorSummary,
+                precise_location: metadata?.precise_location || metadata?.gps_location || null,
+                gps_permission: metadata?.gps_permission || null,
             }
         })
 

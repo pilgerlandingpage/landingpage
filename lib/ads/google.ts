@@ -96,6 +96,202 @@ function getApiUrl(customerId: string): string {
     return `https://googleads.googleapis.com/v20/customers/${customerId}`
 }
 
+async function googleAdsSearchStream(
+    config: Awaited<ReturnType<typeof getGoogleConfig>>,
+    headers: HeadersInit,
+    query: string
+) {
+    const res = await fetch(
+        `${getApiUrl(config.customerId)}/googleAds:searchStream`,
+        {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ query })
+        }
+    )
+
+    const data = await res.json().catch(() => null)
+    const apiError = data?.error || data?.[0]?.error
+    if (!res.ok || apiError) {
+        const message = apiError?.message || JSON.stringify(data || {})
+        throw new Error(message || `Erro Google Ads (${res.status})`)
+    }
+
+    return Array.isArray(data) ? data : []
+}
+
+function googleCustomerStatusLabel(status: string | null | undefined) {
+    const labels: Record<string, string> = {
+        ENABLED: 'Ativa',
+        CANCELED: 'Cancelada',
+        CANCELLED: 'Cancelada',
+        SUSPENDED: 'Suspensa',
+        CLOSED: 'Fechada',
+        UNKNOWN: 'Desconhecida',
+        UNSPECIFIED: 'Nao especificada',
+    }
+    return labels[String(status || '').toUpperCase()] || String(status || 'desconhecido')
+}
+
+function googleBillingStatusLabel(status: string | null | undefined) {
+    const labels: Record<string, string> = {
+        APPROVED: 'Aprovado',
+        APPROVED_HELD: 'Aprovado com bloqueio',
+        PENDING: 'Pendente',
+        CANCELLED: 'Cancelado',
+        CANCELED: 'Cancelado',
+        UNKNOWN: 'Desconhecido',
+        UNSPECIFIED: 'Nao especificado',
+    }
+    return labels[String(status || '').toUpperCase()] || String(status || 'nao informado')
+}
+
+function looksLikeGooglePaymentIssue(message: string) {
+    const lower = message.toLowerCase()
+    return [
+        'billing',
+        'payment',
+        'payments',
+        'invoice',
+        'invoicing',
+        'balance',
+        'funds',
+        'chargeback',
+        'pagamento',
+        'faturamento',
+        'cobranca',
+        'cobrança',
+        'saldo',
+    ].some(term => lower.includes(term))
+}
+
+function googleAccountHealthMessage(params: {
+    customerStatus?: string | null
+    billingStatus?: string | null
+    apiMessage?: string | null
+}) {
+    const customerStatus = String(params.customerStatus || '').toUpperCase()
+    const billingStatus = String(params.billingStatus || '').toUpperCase()
+    if (params.apiMessage) return params.apiMessage
+    if (customerStatus === 'ENABLED' && (!billingStatus || billingStatus === 'APPROVED')) {
+        return 'Conta Google Ads ativa para veiculacao.'
+    }
+    if (billingStatus === 'APPROVED_HELD') {
+        return 'Configuracao de faturamento Google Ads aprovada, mas com bloqueio. Verifique orcamento, faturamento ou pagamentos no Google Ads.'
+    }
+    if (billingStatus && billingStatus !== 'APPROVED') {
+        return 'Configuracao de faturamento Google Ads nao esta aprovada. A entrega pode ficar pausada ate regularizacao.'
+    }
+    if (customerStatus === 'SUSPENDED') {
+        return 'Conta Google Ads suspensa. Pode ser pagamento, politica ou verificacao; confirme no painel Google Ads antes de avaliar performance.'
+    }
+    return 'Conta Google Ads nao esta ativa. Verifique status, faturamento e politicas no Google Ads.'
+}
+
+export type GoogleAccountHealth = {
+    account_id?: string
+    name?: string
+    customer_status?: string
+    customer_status_label: string
+    billing_status?: string | null
+    billing_status_label?: string | null
+    payments_account?: string | null
+    currency?: string | null
+    timezone_name?: string | null
+    is_active: boolean
+    is_payment_issue: boolean
+    severity: 'ok' | 'warning' | 'error'
+    message: string
+}
+
+export async function getGoogleAccountHealth(): Promise<GoogleAccountHealth> {
+    const config = await getGoogleConfig()
+    const headers = await getHeaders(config)
+
+    try {
+        const customerChunks = await googleAdsSearchStream(config, headers, `
+            SELECT
+                customer.id,
+                customer.descriptive_name,
+                customer.status,
+                customer.currency_code,
+                customer.time_zone
+            FROM customer
+            LIMIT 1
+        `)
+        const customer = customerChunks[0]?.results?.[0]?.customer || {}
+
+        let billingSetup: any = null
+        try {
+            const billingChunks = await googleAdsSearchStream(config, headers, `
+                SELECT
+                    billing_setup.id,
+                    billing_setup.status,
+                    billing_setup.payments_account,
+                    billing_setup.payments_account_info.payments_account_name,
+                    billing_setup.start_date_time,
+                    billing_setup.end_date_time,
+                    billing_setup.end_time_type
+                FROM billing_setup
+                LIMIT 5
+            `)
+            billingSetup = billingChunks
+                .flatMap((chunk: any) => chunk?.results || [])
+                .map((row: any) => row?.billingSetup)
+                .filter(Boolean)
+                .find((setup: any) => !setup.endDateTime || String(setup.endTimeType || '').toUpperCase() === 'FOREVER')
+                || billingChunks[0]?.results?.[0]?.billingSetup
+                || null
+        } catch (billingError) {
+            const message = billingError instanceof Error ? billingError.message : String(billingError)
+            console.warn('[Google Ads Health] billing setup query failed:', message)
+        }
+
+        const customerStatus = String(customer.status || 'UNKNOWN').toUpperCase()
+        const billingStatus = billingSetup?.status ? String(billingSetup.status).toUpperCase() : null
+        const customerActive = customerStatus === 'ENABLED'
+        const billingIssue = Boolean(billingStatus && billingStatus !== 'APPROVED')
+        const unavailableStatus = ['SUSPENDED', 'CLOSED', 'CANCELED', 'CANCELLED'].includes(customerStatus)
+        const severity: GoogleAccountHealth['severity'] = customerActive && !billingIssue
+            ? 'ok'
+            : (billingIssue || unavailableStatus) ? 'error' : 'warning'
+
+        return {
+            account_id: String(customer.id || config.customerId),
+            name: customer.descriptiveName || config.customerId,
+            customer_status: customerStatus,
+            customer_status_label: googleCustomerStatusLabel(customerStatus),
+            billing_status: billingStatus,
+            billing_status_label: billingStatus ? googleBillingStatusLabel(billingStatus) : null,
+            payments_account: billingSetup?.paymentsAccount || billingSetup?.paymentsAccountInfo?.paymentsAccountName || null,
+            currency: customer.currencyCode || null,
+            timezone_name: customer.timeZone || null,
+            is_active: customerActive && !billingIssue,
+            is_payment_issue: billingIssue || customerStatus === 'SUSPENDED',
+            severity,
+            message: googleAccountHealthMessage({ customerStatus, billingStatus }),
+        }
+    } catch (error: any) {
+        const message = error?.message || String(error)
+        const paymentIssue = looksLikeGooglePaymentIssue(message)
+        return {
+            account_id: config.customerId,
+            name: config.customerId,
+            customer_status: 'UNKNOWN',
+            customer_status_label: 'Desconhecida',
+            billing_status: null,
+            billing_status_label: null,
+            payments_account: null,
+            is_active: false,
+            is_payment_issue: paymentIssue,
+            severity: paymentIssue ? 'error' : 'warning',
+            message: paymentIssue
+                ? `Google Ads retornou erro relacionado a pagamento/faturamento: ${message}`
+                : `Nao foi possivel confirmar a saude da conta Google Ads: ${message}`,
+        }
+    }
+}
+
 // --- Teste de Conexão ---
 
 export async function testConnection(): Promise<{ success: boolean; message: string }> {

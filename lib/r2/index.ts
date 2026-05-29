@@ -1,23 +1,95 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID!
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID!
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY!
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME!
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!
+type R2Config = {
+    accountId: string
+    accessKeyId: string
+    secretAccessKey: string
+    bucketName: string
+    publicUrl: string
+}
 
-const s3Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-        accessKeyId: R2_ACCESS_KEY_ID,
-        secretAccessKey: R2_SECRET_ACCESS_KEY,
-    },
-})
+let cachedConfig: R2Config | null = null
+let cachedClient: S3Client | null = null
+let cachedClientKey = ''
 
 export interface UploadResult {
     key: string
     url: string
+}
+
+async function loadR2Config(): Promise<R2Config> {
+    const envConfig = {
+        accountId: process.env.R2_ACCOUNT_ID || '',
+        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        bucketName: process.env.R2_BUCKET_NAME || '',
+        publicUrl: process.env.R2_PUBLIC_URL || '',
+    }
+
+    if (Object.values(envConfig).every(Boolean)) {
+        cachedConfig = {
+            ...envConfig,
+            publicUrl: envConfig.publicUrl.replace(/\/$/, ''),
+        }
+        return cachedConfig
+    }
+
+    if (cachedConfig) return cachedConfig
+
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        throw new Error('R2 nao configurado: variaveis do Supabase ausentes para carregar app_config.')
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
+    const { data, error } = await supabase
+        .from('app_config')
+        .select('key, value')
+        .in('key', ['r2_account_id', 'r2_access_key_id', 'r2_secret_access_key', 'r2_bucket_name', 'r2_public_url'])
+
+    if (error) throw error
+
+    const configMap = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')])) as Record<string, string>
+    const dbConfig = {
+        accountId: configMap.r2_account_id || envConfig.accountId,
+        accessKeyId: configMap.r2_access_key_id || envConfig.accessKeyId,
+        secretAccessKey: configMap.r2_secret_access_key || envConfig.secretAccessKey,
+        bucketName: configMap.r2_bucket_name || envConfig.bucketName,
+        publicUrl: (configMap.r2_public_url || envConfig.publicUrl).replace(/\/$/, ''),
+    }
+
+    const missing = Object.entries(dbConfig)
+        .filter(([, value]) => !value)
+        .map(([key]) => key)
+
+    if (missing.length > 0) {
+        throw new Error(`R2 nao configurado. Campos ausentes: ${missing.join(', ')}`)
+    }
+
+    cachedConfig = dbConfig
+    return cachedConfig
+}
+
+async function getR2Client() {
+    const config = await loadR2Config()
+    const clientKey = `${config.accountId}:${config.accessKeyId}:${config.bucketName}`
+
+    if (!cachedClient || cachedClientKey !== clientKey) {
+        cachedClient = new S3Client({
+            region: 'auto',
+            endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+            credentials: {
+                accessKeyId: config.accessKeyId,
+                secretAccessKey: config.secretAccessKey,
+            },
+        })
+        cachedClientKey = clientKey
+    }
+
+    return { client: cachedClient, config }
 }
 
 /**
@@ -33,12 +105,13 @@ export async function uploadFile(
     folder: string,
     contentType: string
 ): Promise<UploadResult> {
+    const { client, config } = await getR2Client()
     const ext = fileName.split('.').pop() || 'jpg'
     const uniqueName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-    await s3Client.send(
+    await client.send(
         new PutObjectCommand({
-            Bucket: R2_BUCKET_NAME,
+            Bucket: config.bucketName,
             Key: uniqueName,
             Body: buffer,
             ContentType: contentType,
@@ -47,7 +120,7 @@ export async function uploadFile(
 
     return {
         key: uniqueName,
-        url: `${R2_PUBLIC_URL}/${uniqueName}`,
+        url: `${config.publicUrl}/${uniqueName}`,
     }
 }
 
@@ -56,9 +129,10 @@ export async function uploadFile(
  * @param key - Object key to delete
  */
 export async function deleteFile(key: string): Promise<void> {
-    await s3Client.send(
+    const { client, config } = await getR2Client()
+    await client.send(
         new DeleteObjectCommand({
-            Bucket: R2_BUCKET_NAME,
+            Bucket: config.bucketName,
             Key: key,
         })
     )
@@ -69,7 +143,9 @@ export async function deleteFile(key: string): Promise<void> {
  * @param key - Object key
  */
 export function getPublicUrl(key: string): string {
-    return `${R2_PUBLIC_URL}/${key}`
+    const publicUrl = process.env.R2_PUBLIC_URL || cachedConfig?.publicUrl || ''
+    if (!publicUrl) return key
+    return `${publicUrl.replace(/\/$/, '')}/${key}`
 }
 
 /**

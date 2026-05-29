@@ -60,37 +60,272 @@ interface Visitor {
 }
 
 const stageLabel: Record<string, string> = {
-    'lead': 'Novo Lead',
+    'lead': 'Novo lead',
+    'new': 'Novo lead',
+    'engaged': 'Engajado',
+    'qualifying': 'Em qualificação',
+    'qualified': 'Qualificado',
     'contacted': 'Contatado',
     'scheduled': 'Agendado',
+    'appointment': 'Agendado',
+    'scheduled_visit': 'Visita agendada',
     'proposal': 'Proposta',
     'closed': 'Fechado',
-    'lost': 'Perdido'
+    'closed_won': 'Fechado',
+    'converted': 'Convertido',
+    'lost': 'Perdido',
+    'transferred': 'Transferido'
 }
 
 const stageBadge: Record<string, string> = {
     'lead': 'badge-success',
+    'engaged': 'badge-gold',
+    'qualifying': 'badge-info',
+    'qualified': 'badge-warning',
     'contacted': 'badge-info',
     'scheduled': 'badge-warning',
     'proposal': 'badge-primary',
     'closed': 'badge-success',
-    'lost': 'badge-error'
+    'lost': 'badge-error',
+    'transferred': 'badge-primary'
 }
 
-const deviceLabel: Record<string, string> = {
-    'mobile': '📱 Celular',
-    'desktop': '💻 Computador',
-    'tablet': 'ipad Tablet',
+const deviceLabelPt: Record<string, string> = {
+    'mobile': 'Celular',
+    'desktop': 'Computador',
+    'tablet': 'Tablet',
+    'bot': 'Robô',
+    'unknown': 'Desconhecido',
 }
 
-const sourceLabel: Record<string, string> = {
-    'direct': 'Acesso Direto',
+const sourceLabelPt: Record<string, string> = {
+    'direct': 'Acesso direto',
+    'direct_access': 'Acesso direto',
+    'whatsapp': 'WhatsApp',
+    'whatsapp_web': 'WhatsApp Web',
+    'site': 'Site',
+    'website': 'Site',
+    'push': 'Push',
     'google': 'Google',
+    'google_ads': 'Google Ads',
+    'meta': 'Meta',
+    'meta_ads': 'Meta Ads',
     'facebook': 'Facebook',
+    'facebook_ads': 'Facebook Ads',
     'instagram': 'Instagram',
+    'instagram_ads': 'Instagram Ads',
+    'instagram_direct': 'Direct do Instagram',
     'linkedin': 'LinkedIn',
     'organic': 'Orgânico',
-    'referral': 'Referência',
+    'organic_search': 'Busca orgânica',
+    'referral': 'Indicação',
+    'unknown': 'Desconhecido',
+}
+
+const browserLabelPt: Record<string, string> = {
+    'chrome': 'Chrome',
+    'safari': 'Safari',
+    'firefox': 'Firefox',
+    'edge': 'Edge',
+    'opera': 'Opera',
+    'unknown': 'Desconhecido',
+}
+
+const osLabelPt: Record<string, string> = {
+    'windows': 'Windows',
+    'macos': 'macOS',
+    'mac_os': 'macOS',
+    'android': 'Android',
+    'ios': 'iOS',
+    'linux': 'Linux',
+    'unknown': 'Desconhecido',
+}
+
+const canonicalStage: Record<string, string> = {
+    'new': 'lead',
+    'lead': 'lead',
+    'novo_lead': 'lead',
+    'engaged': 'engaged',
+    'qualifying': 'qualifying',
+    'qualified': 'qualified',
+    'contacted': 'contacted',
+    'scheduled': 'scheduled',
+    'appointment': 'scheduled',
+    'scheduled_visit': 'scheduled',
+    'proposal': 'proposal',
+    'converted': 'closed',
+    'closed': 'closed',
+    'closed_won': 'closed',
+    'lost': 'lost',
+    'transferred': 'transferred',
+}
+
+const stageTabs = [
+    ['lead', 'Novo lead'],
+    ['engaged', 'Engajado'],
+    ['qualified', 'Qualificado'],
+    ['contacted', 'Contatado'],
+    ['scheduled', 'Agendado'],
+    ['proposal', 'Proposta'],
+    ['closed', 'Fechado'],
+    ['lost', 'Perdido'],
+] as const
+
+const activityLabelPt: Record<string, string> = {
+    'page_view': 'Visitou página',
+    'page_viewed': 'Visitou página',
+    'property_viewed': 'Visualizou imóvel',
+    'property_liked': 'Curtiu imóvel',
+    'property_disliked': 'Não gostou do imóvel',
+    'property_shared': 'Compartilhou imóvel',
+    'property_map_opened': 'Abriu mapa do imóvel',
+    'property_details_opened': 'Abriu detalhes do imóvel',
+    'home_search_submitted': 'Pesquisou na página inicial',
+    'home_map_search_submitted': 'Pesquisou pelo mapa',
+    'home_map_filter_changed': 'Ajustou filtro do mapa',
+    'home_map_quiz_next_clicked': 'Avançou no quiz de busca',
+    'home_map_quiz_back_clicked': 'Voltou no quiz de busca',
+    'home_map_search_cleared': 'Limpou a busca do mapa',
+    'whatsapp_clicked': 'Clicou no WhatsApp',
+    'share_clicked': 'Clicou em compartilhar',
+    'push_prompt_shown': 'Pedido de push exibido',
+    'push_subscribed': 'Aceitou notificações push',
+    'push_denied': 'Recusou notificações push',
+}
+
+const purposeLabelPt: Record<string, string> = {
+    'investimento': 'Investimento',
+    'investment': 'Investimento',
+    'invest': 'Investimento',
+    'moradia': 'Moradia',
+    'housing': 'Moradia',
+    'home': 'Moradia',
+    'residencial': 'Moradia',
+    'commercial': 'Comercial',
+    'comercial': 'Comercial',
+    'partnership': 'Parceria',
+    'parceria': 'Parceria',
+}
+
+const timeframeLabelPt: Record<string, string> = {
+    'imediato': 'Agora',
+    'agora': 'Agora',
+    'now': 'Agora',
+    'immediate': 'Agora',
+    'this_month': 'Este mês',
+    'este_mes': 'Este mês',
+    '30_days': 'Até 30 dias',
+    '60_days': 'Até 60 dias',
+    '90_days': 'Até 90 dias',
+    'future': 'Futuro',
+    'futuro': 'Futuro',
+}
+
+const normalizeKey = (value?: string | null) => {
+    return String(value || '').trim().toLowerCase().replace(/[\s-]+/g, '_')
+}
+
+const fallbackLabel = (value?: string | null, empty = '—') => {
+    const raw = String(value || '').trim()
+    if (!raw) return empty
+    return raw
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\b\w/g, letter => letter.toUpperCase())
+}
+
+const getCanonicalStage = (stage?: string | null) => {
+    const key = normalizeKey(stage)
+    return canonicalStage[key] || key
+}
+
+const formatStage = (stage?: string | null) => {
+    const key = normalizeKey(stage)
+    const canonical = getCanonicalStage(stage)
+    return stageLabel[canonical] || stageLabel[key] || fallbackLabel(stage)
+}
+
+const formatStageBadge = (stage?: string | null) => {
+    return stageBadge[getCanonicalStage(stage)] || 'badge-gold'
+}
+
+const formatSource = (source?: string | null) => {
+    const key = normalizeKey(source)
+    return sourceLabelPt[key] || fallbackLabel(source, 'Desconhecido')
+}
+
+const formatDevice = (device?: string | null) => {
+    const key = normalizeKey(device)
+    return deviceLabelPt[key] || fallbackLabel(device)
+}
+
+const formatBrowser = (browser?: string | null) => {
+    const key = normalizeKey(browser)
+    return browserLabelPt[key] || fallbackLabel(browser)
+}
+
+const formatOs = (os?: string | null) => {
+    const key = normalizeKey(os)
+    return osLabelPt[key] || fallbackLabel(os)
+}
+
+const formatActivityLabel = (label?: string | null) => {
+    const key = normalizeKey(label)
+    return activityLabelPt[key] || fallbackLabel(label, 'Atividade')
+}
+
+const formatPurpose = (purpose?: string | null) => {
+    const key = normalizeKey(purpose)
+    return purposeLabelPt[key] || fallbackLabel(purpose, 'Não informada')
+}
+
+const formatTimeframe = (timeframe?: string | null) => {
+    const key = normalizeKey(timeframe)
+    return timeframeLabelPt[key] || fallbackLabel(timeframe, 'Não informado')
+}
+
+const isInvestmentPurpose = (purpose?: string | null) => {
+    const key = normalizeKey(purpose)
+    return ['investimento', 'investment', 'invest'].includes(key)
+}
+
+const isHousingPurpose = (purpose?: string | null) => {
+    const key = normalizeKey(purpose)
+    return ['moradia', 'housing', 'home', 'residencial'].includes(key)
+}
+
+const isImmediateTimeframe = (timeframe?: string | null) => {
+    const key = normalizeKey(timeframe)
+    return ['imediato', 'agora', 'now', 'immediate'].includes(key)
+}
+
+function LeadAvatar({
+    name,
+    avatarUrl,
+    size = 34,
+}: {
+    name?: string | null
+    avatarUrl?: string | null
+    size?: number
+}) {
+    const [imageFailed, setImageFailed] = useState(false)
+    const initial = name?.trim()?.[0]?.toUpperCase() || '?'
+
+    return (
+        <div style={{ height: `${size}px`, width: `${size}px`, borderRadius: '50%', overflow: 'hidden', background: '#dfe5e7', color: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+            {avatarUrl && !imageFailed ? (
+                <img
+                    src={avatarUrl}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    onError={() => setImageFailed(true)}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+            ) : (
+                <span style={{ fontSize: size >= 44 ? '22px' : '14px' }}>{initial}</span>
+            )}
+        </div>
+    )
 }
 
 export default function LeadsPage() {
@@ -99,14 +334,18 @@ export default function LeadsPage() {
     const [search, setSearch] = useState('')
     const [stageFilter, setStageFilter] = useState('')
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
-    const [counts, setCounts] = useState({
+    const [counts, setCounts] = useState<Record<string, number>>({
         total: 0,
         lead: 0,
+        engaged: 0,
+        qualifying: 0,
+        qualified: 0,
         contacted: 0,
         scheduled: 0,
         proposal: 0,
         closed: 0,
         lost: 0,
+        transferred: 0,
         purpose_invest: 0,
         purpose_housing: 0,
         timeframe_now: 0,
@@ -130,6 +369,60 @@ export default function LeadsPage() {
         }
     }
 
+    const getPreciseLocation = (lead?: Lead | null) => {
+        const location = lead?.metadata?.precise_location || lead?.metadata?.gps_location
+        const latitude = Number(location?.latitude)
+        const longitude = Number(location?.longitude)
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
+
+        return {
+            latitude,
+            longitude,
+            accuracy: Number(location?.accuracy_meters || location?.accuracy || 0),
+            capturedAt: location?.captured_at || location?.updated_at || null,
+        }
+    }
+
+    const formatGpsLocation = (lead?: Lead | null) => {
+        const location = getPreciseLocation(lead)
+        if (!location) return ''
+
+        const accuracy = Number.isFinite(location.accuracy) && location.accuracy > 0
+            ? ` +/- ${Math.round(location.accuracy)}m`
+            : ''
+        const capturedAt = location.capturedAt
+            ? ` em ${new Date(location.capturedAt).toLocaleString('pt-BR')}`
+            : ''
+
+        return `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}${accuracy}${capturedAt}`
+    }
+
+    const formatGpsPermissionStatus = (lead?: Lead | null) => {
+        const status = String(lead?.metadata?.gps_permission?.status || '').trim()
+        if (!status) return ''
+
+        const labels: Record<string, string> = {
+            granted: 'autorizado',
+            denied: 'recusado',
+            prompt: 'pendente',
+            unavailable: 'indisponivel',
+            unsupported: 'sem suporte',
+            error: 'erro',
+        }
+
+        return labels[status] || status
+    }
+
+    const getLeadMapQuery = (lead?: Lead | null) => {
+        const precise = getPreciseLocation(lead)
+        if (precise) return `${precise.latitude},${precise.longitude}`
+
+        return [safeDecode(lead?.visitor?.city), safeDecode(lead?.visitor?.region), lead?.visitor?.country]
+            .filter(Boolean)
+            .join(', ')
+    }
+
     useEffect(() => {
         const fetchLeads = async () => {
             try {
@@ -140,14 +433,18 @@ export default function LeadsPage() {
                 setLeads(leadsData)
 
                 // Calculate counts
-                const newCounts = {
+                const newCounts: Record<string, number> = {
                     total: leadsData.length,
                     lead: 0,
+                    engaged: 0,
+                    qualifying: 0,
+                    qualified: 0,
                     contacted: 0,
                     scheduled: 0,
                     proposal: 0,
                     closed: 0,
                     lost: 0,
+                    transferred: 0,
                     purpose_invest: 0,
                     purpose_housing: 0,
                     timeframe_now: 0,
@@ -156,12 +453,13 @@ export default function LeadsPage() {
                 }
 
                 leadsData.forEach(lead => {
-                    if (newCounts.hasOwnProperty(lead.funnel_stage)) {
-                        newCounts[lead.funnel_stage as keyof typeof newCounts]++
+                    const stageKey = getCanonicalStage(lead.funnel_stage)
+                    if (Object.prototype.hasOwnProperty.call(newCounts, stageKey)) {
+                        newCounts[stageKey]++
                     }
-                    if (lead.lead_purpose?.toLowerCase().includes('investimento')) newCounts.purpose_invest++
-                    if (lead.lead_purpose?.toLowerCase().includes('moradia')) newCounts.purpose_housing++
-                    if (lead.lead_timeframe?.toLowerCase().includes('imediato')) newCounts.timeframe_now++
+                    if (isInvestmentPurpose(lead.lead_purpose)) newCounts.purpose_invest++
+                    if (isHousingPurpose(lead.lead_purpose)) newCounts.purpose_housing++
+                    if (isImmediateTimeframe(lead.lead_timeframe)) newCounts.timeframe_now++
                     if (lead.push_subscribed_lead) newCounts.has_push++
                     if (lead.is_partner) newCounts.partners++
                 })
@@ -196,7 +494,7 @@ export default function LeadsPage() {
     }
 
     const filteredLeads = leads.filter(lead => {
-        if (stageFilter && lead.funnel_stage !== stageFilter) return false
+        if (stageFilter && getCanonicalStage(lead.funnel_stage) !== stageFilter) return false
 
         if (!search) return true
         const s = search.toLowerCase()
@@ -208,17 +506,18 @@ export default function LeadsPage() {
     })
 
     const exportCSV = () => {
-        const headers = ['Nome', 'Email', 'Telefone', 'Estágio', 'VIP', 'Origem', 'Localização', 'Navegador', 'Dispositivo', 'IP', 'Data']
+        const headers = ['Nome', 'Email', 'Telefone', 'Estágio', 'VIP', 'Origem', 'Localização', 'GPS autorizado', 'Navegador', 'Dispositivo', 'IP', 'Data']
         const rows = filteredLeads.map(l => [
             l.name || '',
             l.email || '',
             l.phone || '',
-            stageLabel[l.funnel_stage] || l.funnel_stage,
+            formatStage(l.funnel_stage),
             l.is_vip ? 'Sim' : 'Não',
-            l.visitor?.detected_source || '',
+            formatSource(l.visitor?.detected_source),
             [safeDecode(l.visitor?.city), safeDecode(l.visitor?.region), l.visitor?.country].filter(Boolean).join(', ') || '',
-            l.visitor?.browser || '',
-            l.visitor?.device_type || '',
+            formatGpsLocation(l),
+            formatBrowser(l.visitor?.browser),
+            formatDevice(l.visitor?.device_type),
             l.visitor?.ip_address || '',
             new Date(l.created_at).toLocaleString('pt-BR'),
         ])
@@ -237,6 +536,18 @@ export default function LeadsPage() {
         const label = click.link_label || click.link_title || click.link_type || click.event_type || 'Link'
         const date = click.clicked_at ? new Date(click.clicked_at).toLocaleString('pt-BR') : ''
         return date ? `${label} em ${date}` : String(label)
+    }
+
+    const getLeadSiteActivity = (lead?: Lead | null) => {
+        const activity = lead?.metadata?.site_activity
+        return Array.isArray(activity) ? activity.slice(-8).reverse() : []
+    }
+
+    const formatSiteActivity = (activity: any) => {
+        const label = formatActivityLabel(activity?.label || activity?.event_type)
+        const title = activity?.property_title ? `: ${activity.property_title}` : ''
+        const detail = activity?.detail ? ` - ${activity.detail}` : ''
+        return `${label}${title}${detail}`
     }
 
     const cleanConversationContent = (content: string) => {
@@ -399,7 +710,7 @@ export default function LeadsPage() {
                         >
                             Todos <span style={{ marginLeft: '4px', opacity: !stageFilter ? 0.4 : 0.3 }}>({counts.total})</span>
                         </button>
-                        {Object.entries(stageLabel).map(([key, label]) => (
+                        {stageTabs.map(([key, label]) => (
                             <button
                                 key={key}
                                 onClick={() => setStageFilter(key)}
@@ -408,7 +719,7 @@ export default function LeadsPage() {
                                     ...(stageFilter === key ? { backgroundColor: '#c9a96e', color: '#000', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', transform: 'scale(1.02)' } : { backgroundColor: 'transparent', color: '#999' })
                                 }}
                             >
-                                {label} <span style={{ marginLeft: '4px', opacity: stageFilter === key ? 0.4 : 0.3 }}>({counts[key as keyof typeof counts] || 0})</span>
+                                {label} <span style={{ marginLeft: '4px', opacity: stageFilter === key ? 0.4 : 0.3 }}>({counts[key] || 0})</span>
                             </button>
                         ))}
                     </div>
@@ -448,13 +759,7 @@ export default function LeadsPage() {
                                     <tr key={lead.id}>
                                         <td style={{ fontWeight: 500 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <div style={{ height: '34px', width: '34px', borderRadius: '50%', overflow: 'hidden', background: '#dfe5e7', color: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
-                                                    {lead.avatar_url ? (
-                                                        <img src={lead.avatar_url} alt={lead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    ) : (
-                                                        <span>{lead.name?.[0]?.toUpperCase() || '?'}</span>
-                                                    )}
-                                                </div>
+                                                <LeadAvatar name={lead.name} avatarUrl={lead.avatar_url} />
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -492,11 +797,11 @@ export default function LeadsPage() {
                                                 ) : (
                                                     <>
                                                         {lead.lead_purpose && (
-                                                            <span className={`badge ${lead.lead_purpose.toLowerCase().includes('investimento') ? 'badge-primary' : 'badge-gold'}`} style={{ fontSize: '9px', width: 'fit-content' }}>
-                                                                {lead.lead_purpose.toUpperCase()}
+                                                            <span className={`badge ${isInvestmentPurpose(lead.lead_purpose) ? 'badge-primary' : 'badge-gold'}`} style={{ fontSize: '9px', width: 'fit-content' }}>
+                                                                {formatPurpose(lead.lead_purpose).toUpperCase()}
                                                             </span>
                                                         )}
-                                                        {lead.lead_timeframe && lead.lead_timeframe.toLowerCase().includes('imediato') && (
+                                                        {lead.lead_timeframe && isImmediateTimeframe(lead.lead_timeframe) && (
                                                             <span className="badge badge-success" style={{ fontSize: '9px', width: 'fit-content', marginLeft: 'auto' }}>⚡ AGORA</span>
                                                         )}
                                                     </>
@@ -511,18 +816,32 @@ export default function LeadsPage() {
                                             )}
                                         </td>
                                         <td>
-                                            <span className={`badge ${stageBadge[lead.funnel_stage] || 'badge-gold'}`}>
-                                                {stageLabel[lead.funnel_stage] || lead.funnel_stage}
+                                            <span className={`badge ${formatStageBadge(lead.funnel_stage)}`}>
+                                                {formatStage(lead.funnel_stage)}
                                             </span>
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
-                                            <div style={{ fontWeight: 500 }}>{lead.visitor?.detected_source || '—'}</div>
+                                            <div style={{ fontWeight: 500 }}>{formatSource(lead.visitor?.detected_source)}</div>
+                                            {getPreciseLocation(lead) ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getLeadMapQuery(lead))}`, '_blank')}
+                                                    style={{ marginTop: '4px', color: '#008069', fontSize: '0.72rem', fontWeight: 700, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                                                    title={formatGpsLocation(lead)}
+                                                >
+                                                    GPS autorizado
+                                                </button>
+                                            ) : formatGpsPermissionStatus(lead) ? (
+                                                <div style={{ marginTop: '4px', color: '#8a6d3b', fontSize: '0.72rem', fontWeight: 700 }}>
+                                                    GPS: {formatGpsPermissionStatus(lead)}
+                                                </div>
+                                            ) : null}
                                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                                 📍 {[safeDecode(lead.visitor?.city), lead.visitor?.country].filter(Boolean).join(', ')}
                                             </div>
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
-                                            {lead.visitor?.browser || '—'} / {lead.visitor?.device_type || '—'}
+                                            {formatBrowser(lead.visitor?.browser)} / {formatDevice(lead.visitor?.device_type)}
                                         </td>
                                         <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                             <div style={{ fontFamily: 'monospace' }}>{lead.visitor?.ip_address || '—'}</div>
@@ -564,7 +883,7 @@ export default function LeadsPage() {
                                     <tr key={visitor.id}>
                                         <td>
                                             {visitor.is_lead ? (
-                                                <span className="badge badge-success">Lead ({stageLabel[visitor.funnel_stage || ''] || visitor.funnel_stage})</span>
+                                                <span className="badge badge-success">Lead ({formatStage(visitor.funnel_stage)})</span>
                                             ) : (
                                                 <span className="badge badge-gold opacity-50">Visitante</span>
                                             )}
@@ -579,7 +898,7 @@ export default function LeadsPage() {
                                             </div>
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
-                                            <div style={{ fontWeight: 500 }}>{visitor.detected_source || '—'}</div>
+                                            <div style={{ fontWeight: 500 }}>{formatSource(visitor.detected_source)}</div>
                                             {(visitor.city || visitor.region || visitor.country) && (
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                                     📍 {[safeDecode(visitor.city), safeDecode(visitor.region), visitor.country].filter(Boolean).join(', ')}
@@ -587,8 +906,8 @@ export default function LeadsPage() {
                                             )}
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>
-                                            {visitor.browser || '—'} <br />
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75em' }}>{visitor.os} • {visitor.device_type}</span>
+                                            {formatBrowser(visitor.browser)} <br />
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75em' }}>{formatOs(visitor.os)} • {formatDevice(visitor.device_type)}</span>
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
                                             <span className="text-[#f5f5f5] font-mono bg-[#2a2a2a] px-2 py-1 rounded text-xs">
@@ -631,32 +950,19 @@ export default function LeadsPage() {
                         {/* Header */}
                         <div className="lead-detail-header" style={{ padding: '12px 18px', borderBottom: '1px solid #d1d7db', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <div
-                                    style={{ 
-                                        height: '48px', width: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: '#111b21',
-                                        background: '#dfe5e7',
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    {selectedLead.avatar_url ? (
-                                        <img src={selectedLead.avatar_url} alt={selectedLead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <span style={{ fontSize: '22px', fontWeight: 700 }}>{selectedLead.name?.[0]?.toUpperCase() || '?'}</span>
-                                    )}
-                                </div>
+                                <LeadAvatar name={selectedLead.name} avatarUrl={selectedLead.avatar_url} size={48} />
                                 <div>
                                     <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111b21', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
                                         {selectedLead.name || 'Lead Anônimo'}
                                         <span
                                             style={{
                                                 fontSize: '10px', padding: '4px 12px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 'bold', border: '1px solid',
-                                                backgroundColor: selectedLead.funnel_stage === 'lead' ? '#d9fdd3' : '#fff7d6',
-                                                color: selectedLead.funnel_stage === 'lead' ? '#008069' : '#9a6b00',
-                                                borderColor: selectedLead.funnel_stage === 'lead' ? '#a8e6bd' : '#f0d27a'
+                                                backgroundColor: getCanonicalStage(selectedLead.funnel_stage) === 'lead' ? '#d9fdd3' : '#fff7d6',
+                                                color: getCanonicalStage(selectedLead.funnel_stage) === 'lead' ? '#008069' : '#9a6b00',
+                                                borderColor: getCanonicalStage(selectedLead.funnel_stage) === 'lead' ? '#a8e6bd' : '#f0d27a'
                                             }}
                                         >
-                                            {stageLabel[selectedLead.funnel_stage] || selectedLead.funnel_stage}
+                                            {formatStage(selectedLead.funnel_stage)}
                                         </span>
                                     </h2>
                                     <div style={{ color: '#667781', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', fontWeight: 400 }}>
@@ -732,7 +1038,7 @@ export default function LeadsPage() {
                                         <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
                                             <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Finalidade</span>
                                             <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
-                                                {selectedLead.lead_purpose || 'Não informada'}
+                                                {formatPurpose(selectedLead.lead_purpose)}
                                             </span>
                                         </div>
                                         <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
@@ -744,7 +1050,7 @@ export default function LeadsPage() {
                                         <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', minHeight: '58px' }}>
                                             <span style={{ color: '#667781', fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', display: 'block', marginBottom: '3px' }}>Prazo</span>
                                             <span style={{ color: '#111b21', fontSize: '12px', fontWeight: 500, lineHeight: 1.25 }}>
-                                                {selectedLead.lead_timeframe || 'Não informado'}
+                                                {formatTimeframe(selectedLead.lead_timeframe)}
                                             </span>
                                         </div>
                                         <div style={{ backgroundColor: '#f7f8fa', padding: '10px', borderRadius: '8px', border: '1px solid #e9edef', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '58px' }}>
@@ -773,27 +1079,48 @@ export default function LeadsPage() {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Origem</span>
                                             <span style={{ color: '#8a6d3b', fontSize: '12px', fontWeight: 700, backgroundColor: 'rgba(201, 169, 110, 0.14)', padding: '3px 8px', borderRadius: '999px', border: '1px solid rgba(201, 169, 110, 0.34)' }}>
-                                                {sourceLabel[selectedLead.visitor?.detected_source?.toLowerCase() || ''] || selectedLead.visitor?.detected_source || 'Desconhecido'}
+                                                {formatSource(selectedLead.visitor?.detected_source)}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Dispositivo</span>
                                             <span style={{ color: '#111b21', fontSize: '12px' }}>
-                                                {deviceLabel[selectedLead.visitor?.device_type?.toLowerCase() || ''] || selectedLead.visitor?.device_type || '—'}
+                                                {formatDevice(selectedLead.visitor?.device_type)}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Sistema / Nav.</span>
-                                            <span style={{ color: '#111b21', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }} title={`${selectedLead.visitor?.os || ''} / ${selectedLead.visitor?.browser || ''}`}>
-                                                {selectedLead.visitor?.os || '?'} / {selectedLead.visitor?.browser || '?'}
+                                            <span style={{ color: '#111b21', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }} title={`${formatOs(selectedLead.visitor?.os)} / ${formatBrowser(selectedLead.visitor?.browser)}`}>
+                                                {formatOs(selectedLead.visitor?.os)} / {formatBrowser(selectedLead.visitor?.browser)}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Localização</span>
+                                            <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>Localização aprox.</span>
                                             <span style={{ color: '#111b21', fontSize: '12px', textAlign: 'right' }}>
                                                 {[safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', ') || '—'}
                                             </span>
                                         </div>
+                                        {getPreciseLocation(selectedLead) && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                                                <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>GPS autorizado</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getLeadMapQuery(selectedLead))}`, '_blank')}
+                                                    style={{ color: '#008069', fontSize: '11px', fontWeight: 700, textAlign: 'right', lineHeight: 1.25, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', maxWidth: '190px' }}
+                                                    title="Abrir localizacao exata no Google Maps"
+                                                >
+                                                    {formatGpsLocation(selectedLead)}
+                                                </button>
+                                            </div>
+                                        )}
+                                        {!getPreciseLocation(selectedLead) && formatGpsPermissionStatus(selectedLead) && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>GPS</span>
+                                                <span style={{ color: '#8a6d3b', fontSize: '12px', fontWeight: 700 }}>
+                                                    {formatGpsPermissionStatus(selectedLead)}
+                                                </span>
+                                            </div>
+                                        )}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ color: '#667781', fontSize: '12px', transition: 'color 0.2s' }}>IP</span>
                                             <span style={{ color: '#54656f', fontFamily: 'monospace', fontSize: '11px', backgroundColor: '#f0f2f5', padding: '3px 6px', borderRadius: '4px', border: '1px solid #d1d7db' }}>
@@ -817,10 +1144,28 @@ export default function LeadsPage() {
                                     </div>
                                 </div>
 
+                                {getLeadSiteActivity(selectedLead).length > 0 && (
+                                    <div>
+                                        <h3 style={{ color: '#8a6d3b', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid rgba(201,169,110,0.28)' }}>
+                                            Atividade no site
+                                        </h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', background: '#fffaf0', border: '1px solid rgba(201,169,110,0.22)', borderRadius: '8px', padding: '10px' }}>
+                                            {getLeadSiteActivity(selectedLead).map((activity: any, index: number) => (
+                                                <div key={`${activity?.id || activity?.occurred_at || index}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', alignItems: 'flex-start' }}>
+                                                    <span style={{ color: '#111b21', fontSize: '11px', fontWeight: 700, lineHeight: 1.3 }}>{formatSiteActivity(activity)}</span>
+                                                    <span style={{ color: '#667781', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                                                        {activity?.occurred_at ? new Date(activity.occurred_at).toLocaleDateString('pt-BR') : 'agora'}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Location Map */}
-                                {(selectedLead.visitor?.city || selectedLead.visitor?.region) && (
+                                {getLeadMapQuery(selectedLead) && (
                                     <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #d1d7db', height: '96px', position: 'relative', cursor: 'pointer' }}
-                                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', '))}`, '_blank')}
+                                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getLeadMapQuery(selectedLead))}`, '_blank')}
                                     >
                                         <iframe
                                             width="100%"
@@ -829,7 +1174,7 @@ export default function LeadsPage() {
                                             style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(85%)' }}
                                             loading="lazy"
                                             referrerPolicy="no-referrer-when-downgrade"
-                                            src={`https://maps.google.com/maps?q=${encodeURIComponent([safeDecode(selectedLead.visitor?.city), safeDecode(selectedLead.visitor?.region), selectedLead.visitor?.country].filter(Boolean).join(', '))}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                                            src={`https://maps.google.com/maps?q=${encodeURIComponent(getLeadMapQuery(selectedLead))}&t=&z=${getPreciseLocation(selectedLead) ? '16' : '13'}&ie=UTF8&iwloc=&output=embed`}
                                         ></iframe>
                                     </div>
                                 )}
@@ -853,13 +1198,7 @@ export default function LeadsPage() {
                                 {/* Header */}
                                 <div style={{ padding: '10px 16px', borderBottom: '1px solid #d1d7db', backgroundColor: '#f0f2f5', position: 'sticky', top: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{ height: '40px', width: '40px', borderRadius: '50%', background: '#dfe5e7', color: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, overflow: 'hidden' }}>
-                                            {selectedLead.avatar_url ? (
-                                                <img src={selectedLead.avatar_url} alt={selectedLead.name || 'Lead'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            ) : (
-                                                selectedLead.name?.[0]?.toUpperCase() || '?'
-                                            )}
-                                        </div>
+                                        <LeadAvatar name={selectedLead.name} avatarUrl={selectedLead.avatar_url} size={40} />
                                         <div>
                                             <h3 style={{ color: '#111b21', fontSize: '15px', fontWeight: 600, margin: 0 }}>
                                                 {selectedLead.name || 'Lead AnÃ´nimo'}

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, CalendarDays, Clock3, Activity, AlertTriangle, Bug } from 'lucide-react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, Clock3, Activity, AlertTriangle, Bug, Mail, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -9,13 +9,14 @@ interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest' | 'elevenlabs'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'google_analytics' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest' | 'elevenlabs' | 'email' | 'image_bank'
     fields: {
         key: string
         label: string
         placeholder: string
         isSecret: boolean
         type?: 'text' | 'password' | 'select'
+        options?: { value: string; label: string }[]
     }[]
 }
 
@@ -32,6 +33,46 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
 
     {
+        id: 'meta_ads',
+        title: 'Meta Social, Ads & Caixa Meta',
+        description: 'Credenciais para Meta Ads, Facebook Messenger, comentarios, Instagram API, webhooks, publicacao e agentes de atendimento social.',
+        icon: 'meta_ads',
+        fields: [
+            { key: 'meta_app_id', label: 'Meta App ID', placeholder: 'App ID do Pilger CRM Ads', isSecret: false },
+            { key: 'meta_app_secret', label: 'Meta App Secret', placeholder: 'App Secret da Meta', isSecret: true },
+            { key: 'facebook_login_configuration_id', label: 'Facebook Login Configuration ID', placeholder: 'ID da configuracao do Facebook Login for Business', isSecret: false },
+            { key: 'instagram_app_id', label: 'Instagram App ID', placeholder: 'ID do aplicativo Instagram', isSecret: false },
+            { key: 'instagram_app_secret', label: 'Instagram App Secret', placeholder: 'Secret do aplicativo Instagram', isSecret: true },
+            { key: 'meta_access_token', label: 'Business/System User Token', placeholder: 'Token geral do Business Manager', isSecret: true },
+            { key: 'meta_business_id', label: 'Business ID', placeholder: 'ID do portfolio de negocios', isSecret: false },
+            { key: 'meta_ad_account_id', label: 'Ad Account ID', placeholder: 'act_... ou numero da conta', isSecret: false },
+            { key: 'meta_pixel_id', label: 'Pixel ID', placeholder: 'ID do pixel Meta', isSecret: false },
+            { key: 'meta_facebook_page_id', label: 'Facebook Page ID', placeholder: 'ID da pagina Guilherme Pilger', isSecret: false },
+            { key: 'facebook_page_access_token', label: 'Facebook Page Access Token', placeholder: 'Token da pagina para Messenger/publicacao', isSecret: true },
+            { key: 'meta_instagram_account_id', label: 'Instagram Business ID legado', placeholder: 'ID IG usado pela Graph API atual', isSecret: false },
+            { key: 'instagram_business_account_id', label: 'Instagram Business ID novo', placeholder: 'ID da Instagram API com login Instagram', isSecret: false },
+            { key: 'instagram_business_access_token', label: 'Instagram Business Access Token', placeholder: 'Token gerado no API setup with Instagram login', isSecret: true },
+            { key: 'meta_webhook_verify_token', label: 'Webhook Verify Token', placeholder: 'pilger-meta-webhook', isSecret: true },
+            { key: 'public_site_url', label: 'URL publica do sistema', placeholder: 'https://guilhermepilger.ai', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'google_analytics',
+        title: 'Google Analytics & Search Console',
+        description: 'GA4 e Search Console para medir trafego organico, paginas de entrada, buscas, cliques, impressoes e conversoes do site.',
+        icon: 'google_analytics',
+        fields: [
+            { key: 'google_analytics_measurement_id', label: 'Measurement ID GA4', placeholder: 'G-XXXXXXXXXX', isSecret: false },
+            { key: 'google_analytics_property_id', label: 'Property ID GA4', placeholder: '123456789', isSecret: false },
+            { key: 'google_search_console_site_url', label: 'Site no Search Console', placeholder: 'https://guilhermepilger.ai ou sc-domain:guilhermepilger.ai', isSecret: false },
+            { key: 'google_analytics_oauth_client_id', label: 'OAuth Client ID', placeholder: 'Client ID do Google Cloud', isSecret: false },
+            { key: 'google_analytics_oauth_client_secret', label: 'OAuth Client Secret', placeholder: 'Client Secret do Google Cloud', isSecret: true },
+            { key: 'google_analytics_refresh_token', label: 'OAuth Refresh Token', placeholder: 'Gerado pelo botao Conectar Google Analytics', isSecret: true },
+        ],
+    },
+
+    {
         id: 'vapid',
         title: 'VAPID - Push Notifications',
         description: 'Chaves VAPID para envio de notificações push para visitantes do site.',
@@ -40,6 +81,84 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'vapid_subject', label: 'Subject (mailto:)', placeholder: 'mailto:email@exemplo.com', isSecret: false },
             { key: 'vapid_public_key', label: 'Public Key', placeholder: 'BJDt...', isSecret: false },
             { key: 'vapid_private_key', label: 'Private Key', placeholder: 'am19...', isSecret: true },
+        ],
+    },
+
+    {
+        id: 'brevo',
+        title: 'Brevo - Envio de E-mails',
+        description: 'API transacional para e-mails do sistema, alertas administrativos, recuperacao de acesso e comunicacoes operacionais.',
+        icon: 'email',
+        fields: [
+            { key: 'brevo_api_key', label: 'API Key', placeholder: 'xkeysib-...', isSecret: true },
+            { key: 'brevo_sender_name', label: 'Nome do remetente', placeholder: 'Imobiliaria Guilherme Pilger', isSecret: false },
+            { key: 'brevo_sender_email', label: 'E-mail do remetente validado', placeholder: 'contato@seudominio.com', isSecret: false },
+            { key: 'brevo_reply_to_email', label: 'Reply-To', placeholder: 'atendimento@seudominio.com', isSecret: false },
+            { key: 'brevo_test_recipient', label: 'Destinatario de teste', placeholder: 'voce@seudominio.com', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'pexels',
+        title: 'Pexels - Banco de Imagens Editorial',
+        description: 'Biblioteca externa para os agentes buscarem imagens editoriais de blog e noticias. O agente usa a API pelo servidor e escolhe imagens alinhadas ao conteudo.',
+        icon: 'image_bank',
+        fields: [
+            { key: 'pexels_api_key', label: 'Pexels API Key', placeholder: 'Sua chave da Pexels API', isSecret: true },
+            {
+                key: 'pexels_enabled',
+                label: 'Uso nos agentes',
+                placeholder: 'Ativo',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'pexels_priority',
+                label: 'Prioridade',
+                placeholder: '1',
+                isSecret: false,
+                options: [
+                    { value: '1', label: '1 - Principal' },
+                    { value: '2', label: '2 - Backup' },
+                    { value: '3', label: '3 - Ultimo recurso' },
+                ],
+            },
+            { key: 'pexels_per_page', label: 'Imagens por busca', placeholder: '12', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'pixabay',
+        title: 'Pixabay - Banco de Imagens Editorial',
+        description: 'Fonte complementar para fotos, ilustracoes e imagens editoriais. As imagens escolhidas depois poderao ser baixadas para o R2 antes de publicar.',
+        icon: 'image_bank',
+        fields: [
+            { key: 'pixabay_api_key', label: 'Pixabay API Key', placeholder: 'Sua chave da Pixabay API', isSecret: true },
+            {
+                key: 'pixabay_enabled',
+                label: 'Uso nos agentes',
+                placeholder: 'Ativo',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'pixabay_priority',
+                label: 'Prioridade',
+                placeholder: '2',
+                isSecret: false,
+                options: [
+                    { value: '1', label: '1 - Principal' },
+                    { value: '2', label: '2 - Backup' },
+                    { value: '3', label: '3 - Ultimo recurso' },
+                ],
+            },
+            { key: 'pixabay_per_page', label: 'Imagens por busca', placeholder: '12', isSecret: false },
         ],
     },
 
@@ -99,33 +218,192 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
 ]
 
-const WEEK_DAYS = [
-    { value: '0', label: 'Dom' },
-    { value: '1', label: 'Seg' },
-    { value: '2', label: 'Ter' },
-    { value: '3', label: 'Qua' },
-    { value: '4', label: 'Qui' },
-    { value: '5', label: 'Sex' },
-    { value: '6', label: 'Sáb' },
-]
-
-const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-
-function parseCsvSet(raw: string | undefined, fallback: string): Set<string> {
-    const source = String(raw || fallback)
-    return new Set(
-        source
-            .split(',')
-            .map(v => v.trim())
-            .filter(Boolean)
-    )
+type SectorRecipient = {
+    key: string
+    label: string
+    responsible_name: string
+    phone: string
+    enabled: boolean
+    destination_type?: 'phone' | 'instance'
+    delivery_mode?: 'all_sector' | 'sector_and_diretoria' | 'primary_only' | 'muted'
+    event_types?: string[]
+    members?: SectorMember[]
+    target_instance_id?: string
+    whatsapp_instance_id?: string
 }
 
-function toSortedCsv(values: Set<string>, mode: 'hour' | 'day'): string {
-    const arr = Array.from(values)
-    if (mode === 'hour') arr.sort((a, b) => Number(a) - Number(b))
-    if (mode === 'day') arr.sort((a, b) => Number(a) - Number(b))
-    return arr.join(',')
+type SectorMember = {
+    id: string
+    name: string
+    phone: string
+    role?: string
+    enabled: boolean
+    critical_only?: boolean
+    event_types?: string[]
+}
+
+const SECTOR_NOTIFICATION_EVENTS = [
+    { key: 'property_review', label: 'Imovel em analise' },
+    { key: 'blog_review', label: 'Blog aguardando aprovacao' },
+    { key: 'blog_published', label: 'Blog publicado' },
+    { key: 'news_review', label: 'Noticia aguardando aprovacao' },
+    { key: 'news_published', label: 'Noticia publicada' },
+    { key: 'meta_payment_issue', label: 'Problema pagamento Meta' },
+    { key: 'google_payment_issue', label: 'Problema pagamento Google' },
+    { key: 'ads_alert', label: 'Alerta trafego' },
+    { key: 'ads_daily_report', label: 'Relatorio trafego' },
+    { key: 'paid_report_ready', label: 'Relatorio pago IA' },
+    { key: 'lead_received', label: 'Novo lead' },
+    { key: 'system_integration_error', label: 'Erro integracao' },
+]
+
+const DEFAULT_SECTOR_EVENT_TYPES: Record<string, string[]> = {
+    comercial: ['lead_received', 'system_integration_error'],
+    diretoria: ['blog_published', 'news_published', 'meta_payment_issue', 'google_payment_issue', 'ads_alert', 'ads_daily_report', 'paid_report_ready', 'system_integration_error'],
+    marketing: ['property_review', 'blog_review', 'blog_published', 'news_review', 'news_published', 'paid_report_ready', 'system_integration_error'],
+    trafego_pago: ['meta_payment_issue', 'google_payment_issue', 'ads_alert', 'ads_daily_report', 'paid_report_ready', 'system_integration_error'],
+}
+
+const DEFAULT_SECTOR_RECIPIENTS: SectorRecipient[] = [
+    { key: 'comercial', label: 'Comercial', responsible_name: '', phone: '', enabled: true, destination_type: 'phone', delivery_mode: 'all_sector', event_types: DEFAULT_SECTOR_EVENT_TYPES.comercial, members: [], target_instance_id: '', whatsapp_instance_id: '' },
+    { key: 'diretoria', label: 'Diretoria', responsible_name: '', phone: '', enabled: true, destination_type: 'phone', delivery_mode: 'all_sector', event_types: DEFAULT_SECTOR_EVENT_TYPES.diretoria, members: [], target_instance_id: '', whatsapp_instance_id: '' },
+    { key: 'marketing', label: 'Marketing', responsible_name: '', phone: '', enabled: true, destination_type: 'phone', delivery_mode: 'all_sector', event_types: DEFAULT_SECTOR_EVENT_TYPES.marketing, members: [], target_instance_id: '', whatsapp_instance_id: '' },
+    { key: 'trafego_pago', label: 'Trafego Pago', responsible_name: '', phone: '', enabled: true, destination_type: 'phone', delivery_mode: 'all_sector', event_types: DEFAULT_SECTOR_EVENT_TYPES.trafego_pago, members: [], target_instance_id: '', whatsapp_instance_id: '' },
+]
+
+type WhatsAppInstanceOption = {
+    id: string
+    instance_name: string
+    phone_number?: string | null
+    status: string
+    live_data?: { phone?: string | null; pushName?: string | null } | null
+    virtual_brokers?: { name?: string | null } | null
+    admin_users?: { name?: string | null } | null
+}
+
+function parseSectorRecipients(raw?: string): SectorRecipient[] {
+    if (!raw) return DEFAULT_SECTOR_RECIPIENTS
+
+    try {
+        const parsed = JSON.parse(raw)
+        if (!Array.isArray(parsed)) return DEFAULT_SECTOR_RECIPIENTS
+
+        const byKey = new Map(DEFAULT_SECTOR_RECIPIENTS.map(item => [item.key, { ...item }]))
+        for (const item of parsed) {
+            const key = String(item?.key || '').trim()
+            if (!key) continue
+            const fallback = byKey.get(key)
+            const sectorEvents = normalizeEventTypes(item?.event_types, fallback?.event_types, key)
+            const rawMembers = Array.isArray(item?.members) ? item.members : []
+            const members: SectorMember[] = rawMembers.length
+                ? rawMembers.map((member: any, index: number) => normalizeSectorMember(member, index, sectorEvents))
+                : normalizeLegacyMembers(item, fallback, sectorEvents)
+            const primaryMember = members.find(member => member.enabled !== false && member.phone)
+                || members.find(member => member.phone)
+                || members[0]
+            byKey.set(key, {
+                key,
+                label: String(item?.label || fallback?.label || key),
+                responsible_name: String(item?.responsible_name || primaryMember?.name || fallback?.responsible_name || ''),
+                phone: String(item?.phone || primaryMember?.phone || fallback?.phone || ''),
+                enabled: item?.enabled !== false && item?.enabled !== 'false',
+                destination_type: item?.destination_type === 'instance' ? 'instance' : (fallback?.destination_type || 'phone'),
+                delivery_mode: normalizeDeliveryMode(item?.delivery_mode || fallback?.delivery_mode),
+                event_types: sectorEvents,
+                members,
+                target_instance_id: String(item?.target_instance_id || fallback?.target_instance_id || ''),
+                whatsapp_instance_id: String(item?.whatsapp_instance_id || fallback?.whatsapp_instance_id || ''),
+            })
+        }
+        return Array.from(byKey.values())
+    } catch {
+        return DEFAULT_SECTOR_RECIPIENTS
+    }
+}
+
+function normalizeDeliveryMode(value: unknown): SectorRecipient['delivery_mode'] {
+    const mode = String(value || 'all_sector')
+    if (mode === 'sector_and_diretoria' || mode === 'primary_only' || mode === 'muted') return mode
+    return 'all_sector'
+}
+
+function normalizeEventTypes(value: unknown, fallback: string[] | undefined, sectorKey: string) {
+    if (Array.isArray(value)) return value.map(String).filter(Boolean)
+    if (typeof value === 'string' && value.trim()) {
+        try {
+            const parsed = JSON.parse(value)
+            if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean)
+        } catch {
+            return value.split(',').map(item => item.trim()).filter(Boolean)
+        }
+    }
+    return [...(fallback || DEFAULT_SECTOR_EVENT_TYPES[sectorKey] || [])]
+}
+
+function normalizeSectorMemberEventTypes(value: unknown, fallback?: string[]) {
+    if (Array.isArray(value)) return value.map(String).filter(Boolean)
+    if (typeof value === 'string' && value.trim()) {
+        try {
+            const parsed = JSON.parse(value)
+            if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean)
+        } catch {
+            return value.split(',').map(item => item.trim()).filter(Boolean)
+        }
+    }
+    return Array.isArray(fallback) ? [...fallback] : []
+}
+
+function normalizeSectorMember(member: any, index: number, fallbackEvents?: string[]): SectorMember {
+    const phone = String(member?.phone || member?.whatsapp || '')
+    const name = String(member?.name || member?.responsible_name || member?.responsibleName || '')
+    const stableId = phone.replace(/\D/g, '') || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    return {
+        id: String(member?.id || `member-${index + 1}${stableId ? `-${stableId}` : ''}`),
+        name,
+        phone,
+        role: String(member?.role || member?.cargo || ''),
+        enabled: member?.enabled !== false && member?.enabled !== 'false',
+        critical_only: member?.critical_only === true || member?.criticalOnly === true || member?.critical_only === 'true',
+        event_types: normalizeSectorMemberEventTypes(member?.event_types ?? member?.eventTypes, fallbackEvents),
+    }
+}
+
+function normalizeLegacyMembers(item: any, fallback?: SectorRecipient, fallbackEvents?: string[]) {
+    const name = String(item?.responsible_name || item?.responsibleName || fallback?.responsible_name || '')
+    const phone = String(item?.phone || item?.whatsapp || fallback?.phone || '')
+    if (!name && !phone) return [...(fallback?.members || [])]
+    return [normalizeSectorMember({ id: 'primary', name, phone, role: 'Responsavel', enabled: true, event_types: fallbackEvents }, 0, fallbackEvents)]
+}
+
+function syncSectorPrimary(recipient: SectorRecipient): SectorRecipient {
+    const members = Array.isArray(recipient.members) ? recipient.members : []
+    const primaryMember = members.find(member => member.enabled !== false && member.phone)
+        || members.find(member => member.phone)
+        || members[0]
+    return {
+        ...recipient,
+        responsible_name: recipient.destination_type === 'instance'
+            ? recipient.responsible_name
+            : primaryMember?.name || recipient.responsible_name || '',
+        phone: recipient.destination_type === 'instance'
+            ? recipient.phone
+            : primaryMember?.phone || recipient.phone || '',
+        delivery_mode: normalizeDeliveryMode(recipient.delivery_mode),
+        event_types: normalizeEventTypes(recipient.event_types, undefined, recipient.key),
+        members,
+    }
+}
+
+function simplifySectorRecipient(recipient: SectorRecipient): SectorRecipient {
+    const eventTypes = SECTOR_NOTIFICATION_EVENTS.map(event => event.key)
+    return syncSectorPrimary({
+        ...recipient,
+        destination_type: 'phone',
+        delivery_mode: 'all_sector',
+        event_types: eventTypes,
+        members: (recipient.members || []).map((member, index) => normalizeSectorMember(member, index, eventTypes)),
+        target_instance_id: '',
+    })
 }
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'error'
@@ -141,7 +419,6 @@ interface LLMCreditCheck {
     success: boolean
     checked_at?: string
     active_provider?: string
-    whatsapp_provider?: string | null
     openai?: { configured: boolean; status: LLMProviderStatus; message: string }
     gemini?: { configured: boolean; status: LLMProviderStatus; message: string }
 }
@@ -165,6 +442,36 @@ interface AgentLogEntry {
 }
 
 type AgentLogSummary = Record<AgentLogSeverity | 'total', number>
+
+function toDisplayText(value: unknown, fallback = ''): string {
+    if (value === null || value === undefined) return fallback
+    if (typeof value === 'string') return value || fallback
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+    if (Array.isArray(value)) {
+        const parts = value.map(item => toDisplayText(item)).filter(Boolean)
+        return parts.join(', ') || fallback
+    }
+    if (typeof value === 'object') {
+        const record = value as Record<string, unknown>
+        const preferred = record.name
+            || record.pushName
+            || record.phone
+            || record.message
+            || record.status_message
+            || record.status
+            || record.error
+        const preferredText = toDisplayText(preferred)
+        const statusText = preferred !== record.status ? toDisplayText(record.status) : ''
+        if (preferredText && statusText && !preferredText.includes(statusText)) return `${preferredText} (${statusText})`
+        if (preferredText) return preferredText
+        try {
+            return JSON.stringify(value).slice(0, 220)
+        } catch {
+            return fallback
+        }
+    }
+    return fallback
+}
 
 interface GeminiUsageTotals {
     calls: number
@@ -224,105 +531,36 @@ interface GeminiCostSummary {
     official_billing?: GeminiOfficialBillingSummary
 }
 
-const WHATSAPP_SYSTEM_PROMPT_PREVIEW = `CAMADA GLOBAL DOS AGENTES WHATSAPP
+type MetaConnectionLogEntry = {
+    at: string
+    provider?: 'meta' | 'facebook' | 'instagram'
+    action: string
+    status: 'info' | 'success' | 'warning' | 'error'
+    message: string
+}
 
-Este bloco e aplicado automaticamente a todos os corretores IA no WhatsApp.
-Ele nao substitui o prompt individual do corretor; ele entra junto com o prompt configurado em Corretores IA.
-
-ORDEM DO PROMPT FINAL
-1. Prompt individual do agente/corretor.
-2. Tags processadas: {nome_lead}, {nome_corretor}, {agendamento}, {regioes}, {transferir}, {documentos}, {horario}, {empresa}, {imoveis}, botoes e redes sociais.
-3. Contexto interno do lead, gerado dinamicamente pelo banco.
-4. Diretrizes globais de qualificacao e comportamento.
-5. Catalogo de imoveis, somente quando o prompt usa {imoveis} ou quando o agente nao tem prompt customizado.
-
-CONTEXTO INTERNO DO LEAD
-- Nome, telefone e dados ja cadastrados.
-- Origem principal: Instagram, Google, YouTube, TikTok, Facebook, acesso direto ou formulario.
-- UTM/campanha quando existir.
-- Landing page por onde o lead entrou.
-- Dispositivo, navegador e localizacao aproximada.
-- Status atual no funil, score, classificacao e resumo anterior.
-- Finalidade, orcamento e prazo ja conhecidos.
-
-REGRAS DE USO DO CONTEXTO
-- Nunca revelar esses dados internos ao cliente.
-- Nao perguntar de novo uma informacao que ja esta conhecida.
-- Confirmar com naturalidade quando precisar validar algo.
-- Fazer uma pergunta por vez.
-- Nunca transformar a conversa em formulario.
-- Detectar o idioma do cliente e responder no mesmo idioma.
-- Se a origem do lead nao estiver clara, perguntar uma unica vez no decorrer da conversa como ele conheceu a Pilger, sem parecer pesquisa.
-
-DIRETRIZES DE QUALIFICACAO
-- O objetivo e filtrar e amadurecer o lead, nao apenas responder perguntas.
-- Descobrir aos poucos se busca investimento, moradia ou os dois.
-- Descobrir valor disponivel, prazo de compra, regiao, tipo de imovel, objecoes e urgencia.
-- Antes de falar de valor, reforcar beneficio, posicionamento, seguranca e adequacao ao objetivo.
-- Quando houver intencao real, aproximar de corretor humano, visita ou imovel especifico.
-- Usar botao de agendamento somente quando o cliente pedir, aceitar ou demonstrar claramente que quer marcar visita/reuniao agora.
-- Nao enviar botoes Manha/Tarde/Noite junto com explicacao de imovel, investimento ou curadoria se o cliente ainda nao pediu agendamento.
-
-NATURALIDADE NO USO DO NOME
-- Usar o nome do lead somente de vez em quando: abertura importante, retomada depois de pausa, fechamento ou momento de proximidade.
-- Nao comecar toda resposta chamando pelo nome.
-- Nao repetir o nome mais de uma vez na mesma resposta.
-- Se o nome cadastrado parecer nome de plataforma, empresa, sistema ou bot, nao usar como nome da pessoa.
-- Se o nome estiver nao informado ou nao confiavel, perguntar uma unica vez e de forma leve como pode chamar a pessoa.
-- Se ja perguntou o nome antes ou o cliente ignorou, nao insistir; continuar ajudando normalmente.
-
-REDES SOCIAIS POR ORIGEM
-- Instagram: se o lead veio do Instagram, nao chamar para seguir Instagram como primeira opcao.
-- Google: construir autoridade, clareza e seguranca antes de oferecer rede social.
-- YouTube: priorizar prova em video quando configurado.
-- TikTok: respostas curtas e dinamicas; oferecer TikTok/Instagram apenas se fizer sentido.
-- Facebook: linguagem proxima e prova social quando fizer sentido.
-- Origem desconhecida: usar Instagram como primeira prova social, sempre um link por vez.
-- Se o cliente mencionar Facebook, Instagram, Google, YouTube ou trafego como origem/desconfianca, tratar a objecao primeiro; nao enviar link automaticamente se ele nao pediu.
-
-RAPPORT ADAPTATIVO (quando habilitado na instancia)
-- Espelhar primeiro o jeito real que o lead escreve/fala: idioma, formalidade, energia, tamanho das mensagens e vocabulario.
-- Usar DDD, localizacao e historico apenas como pistas secundarias.
-- Nao fingir ser da mesma regiao do lead.
-- Modo suave: regionalismo raro, leve, natural e nunca caricatural.
-- Modo forte: regionalismo com mais presenca quando a regiao e o jeito do lead combinarem.
-- Se o lead fala formal, responder formal mesmo que a localizacao sugira uma regiao especifica.
-- Se o lead usar expressoes regionais, acompanhar com moderacao para gerar proximidade.
-
-CATALOGO DE IMOVEIS
-- Quando usar {imoveis}, o sistema injeta imoveis ativos e paginas publicadas.
-- Se o cliente informar orcamento, o sistema ordena por proximidade de valor.
-- O agente deve recomendar no maximo 1 imovel por resposta, ou 2 se o cliente pedir comparacao.
-- Ao recomendar um imovel, deve enviar o botao "Ver imovel" daquele imovel.
-- Links de imoveis enviados pelo WhatsApp recebem UTM e referencia do lead para rastrear clique, IP, dispositivo, origem e associar a visita a ficha do CRM.
-
-REGRAS PARA AUDIO E VALORES
-- Quando mencionar valores, metragem ou numeros importantes, escrever de forma falada e natural.
-- Exemplo: "vinte e dois milhoes de reais" em vez de "R$ 22.000.000" quando a resposta puder virar audio.
-- Exemplo: "duzentos metros quadrados" em vez de "200m2".
-- O pipeline de audio tambem normaliza dinheiro, percentuais e metragens antes do TTS.
-
-LIMITACOES DE MIDIA
-- Gemini: texto, audio transcrito, imagens, documentos e videos.
-- OpenAI no fluxo atual: texto, audio transcrito, imagens e documentos. Videos recebem resposta pedindo foto, print ou descricao.`
+function parseMetaConnectionLogs(value?: string): MetaConnectionLogEntry[] {
+    try {
+        const parsed = JSON.parse(String(value || '[]'))
+        return Array.isArray(parsed) ? parsed.slice(0, 12) : []
+    } catch {
+        return []
+    }
+}
 
 export default function MaintenancePage() {
     const [configs, setConfigs] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+    const [configsDirty, setConfigsDirty] = useState(false)
     const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({})
     const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
 
-    const [geminiModels, setGeminiModels] = useState<{ id: string; name: string }[]>([])
-    const [openaiModels, setOpenaiModels] = useState<{ id: string; name: string }[]>([])
-    const [loadingGeminiModels, setLoadingGeminiModels] = useState(false)
-    const [loadingOpenAIModels, setLoadingOpenAIModels] = useState(false)
     const [elevenLabsVoices, setElevenLabsVoices] = useState<{ voice_id: string; name: string; category: string }[]>([])
     const [loadingVoices, setLoadingVoices] = useState(false)
     const [llmCreditLoading, setLlmCreditLoading] = useState(false)
     const [llmCreditCheck, setLlmCreditCheck] = useState<LLMCreditCheck | null>(null)
-    const [syncingAdsSpend, setSyncingAdsSpend] = useState(false)
     const [agentLogs, setAgentLogs] = useState<AgentLogEntry[]>([])
     const [agentLogSummary, setAgentLogSummary] = useState<AgentLogSummary>({ total: 0, info: 0, success: 0, warning: 0, error: 0 })
     const [agentLogsLoading, setAgentLogsLoading] = useState(false)
@@ -332,40 +570,146 @@ export default function MaintenancePage() {
     const [geminiCostsLoading, setGeminiCostsLoading] = useState(false)
     const [geminiCostsError, setGeminiCostsError] = useState<string | null>(null)
     const [syncingGeminiFinance, setSyncingGeminiFinance] = useState(false)
+    const [selectedNotificationSector, setSelectedNotificationSector] = useState('marketing')
+    const [whatsappInstances, setWhatsappInstances] = useState<WhatsAppInstanceOption[]>([])
+    const sectorRecipientsRef = useRef<SectorRecipient[]>(DEFAULT_SECTOR_RECIPIENTS)
 
-    const dailyDays = parseCsvSet(configs['pilger_daily_days'], '0,1,2,3,4,5,6')
-    const dailyHours = parseCsvSet(configs['pilger_daily_time'], '23')
-    const weeklyDays = parseCsvSet(configs['pilger_weekly_days'] || configs['pilger_weekly_day'], '1')
-    const weeklyHours = parseCsvSet(configs['pilger_weekly_times'] || configs['pilger_weekly_time'], '23')
-    const radarDays = parseCsvSet(configs['radar_collection_days'], '0,1,2,3,4,5,6')
-    const radarHours = parseCsvSet(configs['radar_collection_times'], '06,12,18')
-    const isWhatsAppOpenAI = configs['whatsapp_provider'] === 'openai'
-        || (!configs['whatsapp_provider'] && configs['ai_provider'] === 'openai')
+    const getSectorRecipientsFromConfig = (source: Record<string, string>) => {
+        return parseSectorRecipients(source['sector_notification_recipients']).map(recipient => {
+            const baseRecipient = {
+                ...recipient,
+                destination_type: 'phone' as const,
+                delivery_mode: 'all_sector' as const,
+                event_types: [...(DEFAULT_SECTOR_EVENT_TYPES[recipient.key] || [])],
+                members: recipient.members || [],
+                target_instance_id: '',
+                whatsapp_instance_id: recipient.whatsapp_instance_id || '',
+            }
 
-    const toggleDay = (key: string, value: string, fallback: string) => {
-        const current = parseCsvSet(configs[key], fallback)
-        if (current.has(value)) {
-            if (current.size === 1) return
-            current.delete(value)
-        } else {
-            current.add(value)
-        }
-        setConfigs(prev => ({ ...prev, [key]: toSortedCsv(current, 'day') }))
+            if (recipient.key !== 'marketing') return simplifySectorRecipient(baseRecipient)
+
+            const marketingRecipient = {
+                ...baseRecipient,
+                label: recipient.label || source['property_review_sector_name'] || 'Marketing',
+                responsible_name: recipient.responsible_name || source['property_review_responsible_name'] || '',
+                phone: recipient.phone || source['property_review_responsible_phone'] || '',
+                whatsapp_instance_id: recipient.whatsapp_instance_id || source['property_review_whatsapp_instance_id'] || '',
+            }
+            if (!marketingRecipient.members?.length && (marketingRecipient.responsible_name || marketingRecipient.phone)) {
+                marketingRecipient.members = normalizeLegacyMembers(marketingRecipient, undefined, DEFAULT_SECTOR_EVENT_TYPES.marketing)
+            }
+            return simplifySectorRecipient(marketingRecipient)
+        })
     }
 
-    const toggleHour = (key: string, value: string, fallback: string) => {
-        const current = parseCsvSet(configs[key], fallback)
-        if (current.has(value)) {
-            if (current.size === 1) return
-            current.delete(value)
-        } else {
-            current.add(value)
-        }
-        setConfigs(prev => ({ ...prev, [key]: toSortedCsv(current, 'hour') }))
+    const sectorRecipients = getSectorRecipientsFromConfig(configs)
+    const metaConnectionLogs = parseMetaConnectionLogs(configs.meta_connection_logs)
+    const instagramTokenExpiresAt = configs.instagram_token_expires_at || ''
+    const instagramTokenExpired = Boolean(
+        instagramTokenExpiresAt
+        && Number.isFinite(new Date(instagramTokenExpiresAt).getTime())
+        && new Date(instagramTokenExpiresAt).getTime() <= Date.now()
+    )
+    const instagramTokenNeedsReconnect = Boolean(
+        configs.instagram_business_access_token
+        && (
+            instagramTokenExpired
+            || configs.instagram_token_kind === 'short_lived'
+            || !instagramTokenExpiresAt
+        )
+    )
+    sectorRecipientsRef.current = sectorRecipients
+    const selectedSectorRecipient = sectorRecipients.find(recipient => recipient.key === selectedNotificationSector)
+        || sectorRecipients[0]
+    const connectedWhatsappInstances = whatsappInstances.filter(instance => instance.status === 'connected')
+
+    const updateConfigField = useCallback((key: string, value: string) => {
+        setConfigs(prev => ({ ...prev, [key]: value }))
+        setConfigsDirty(true)
+    }, [])
+
+    const updateSectorRecipient = (sectorKey: string, patch: Partial<SectorRecipient>) => {
+        setConfigsDirty(true)
+        setConfigs(prev => {
+            const currentRecipients = getSectorRecipientsFromConfig(prev)
+            const nextRecipients = currentRecipients.map(recipient =>
+                recipient.key === sectorKey ? simplifySectorRecipient({ ...recipient, ...patch }) : simplifySectorRecipient(recipient)
+            )
+            sectorRecipientsRef.current = nextRecipients
+            const nextConfigs: Record<string, string> = {
+                ...prev,
+                sector_notification_recipients: JSON.stringify(nextRecipients),
+            }
+            const marketing = nextRecipients.find(recipient => recipient.key === 'marketing')
+            if (marketing) {
+                nextConfigs.property_review_sector_name = marketing.label
+                nextConfigs.property_review_responsible_name = marketing.responsible_name
+                nextConfigs.property_review_responsible_phone = marketing.phone
+                nextConfigs.property_review_whatsapp_instance_id = marketing.whatsapp_instance_id || ''
+            }
+            return nextConfigs
+        })
     }
 
-    const dayLabel = (day: string) => WEEK_DAYS.find(d => d.value === day)?.label || day
-    const formatHourLabel = (h: string) => `${h.padStart(2, '0')}:00`
+    const updateSectorMember = (sectorKey: string, memberId: string, patch: Partial<SectorMember>) => {
+        const recipient = sectorRecipients.find(item => item.key === sectorKey)
+        if (!recipient) return
+        const members = (recipient.members || []).map(member =>
+            member.id === memberId ? { ...member, ...patch } : member
+        )
+        updateSectorRecipient(sectorKey, { members })
+    }
+
+    const addSectorMember = (sectorKey: string) => {
+        const recipient = sectorRecipients.find(item => item.key === sectorKey)
+        if (!recipient) return
+        const members = [
+            ...(recipient.members || []),
+            {
+                id: `member-${Date.now()}`,
+                name: '',
+                phone: '',
+                role: '',
+                enabled: true,
+                critical_only: false,
+                event_types: [...(DEFAULT_SECTOR_EVENT_TYPES[sectorKey] || [])],
+            },
+        ]
+        updateSectorRecipient(sectorKey, { members })
+    }
+
+    const removeSectorMember = (sectorKey: string, memberId: string) => {
+        const recipient = sectorRecipients.find(item => item.key === sectorKey)
+        if (!recipient) return
+        const members = (recipient.members || []).filter(member => member.id !== memberId)
+        updateSectorRecipient(sectorKey, { members })
+    }
+
+    const toggleSectorMemberEvent = (sectorKey: string, memberId: string, eventKey: string) => {
+        const recipient = sectorRecipients.find(item => item.key === sectorKey)
+        if (!recipient) return
+        const member = (recipient.members || []).find(item => item.id === memberId)
+        if (!member) return
+        const currentEvents = new Set(member.event_types || DEFAULT_SECTOR_EVENT_TYPES[sectorKey] || [])
+        if (currentEvents.has(eventKey)) {
+            currentEvents.delete(eventKey)
+        } else {
+            currentEvents.add(eventKey)
+        }
+        updateSectorMember(sectorKey, memberId, { event_types: Array.from(currentEvents) })
+    }
+
+    const getInstanceDisplayName = (instance: WhatsAppInstanceOption) => {
+        return toDisplayText(instance.virtual_brokers?.name)
+            || toDisplayText(instance.admin_users?.name)
+            || toDisplayText(instance.live_data?.pushName)
+            || toDisplayText(instance.instance_name, 'Instancia')
+    }
+
+    const getInstancePhone = (instance: WhatsAppInstanceOption) => {
+        return toDisplayText(instance.live_data?.phone) || toDisplayText(instance.phone_number)
+    }
+
     const formatConfigDateTime = (value?: string) => {
         if (!value) return 'Ainda nao executou'
         const date = new Date(value)
@@ -404,77 +748,6 @@ export default function MaintenancePage() {
         if (status === 'error') return '#ef4444'
         return '#f59e0b'
     }
-
-    // Fetch Gemini Models
-    useEffect(() => {
-        const apiKey = configs['gemini_api_key']
-        if (!apiKey) return
-
-        const fetchGemini = async () => {
-            setLoadingGeminiModels(true)
-            try {
-                const res = await fetch('/api/admin/gemini-models', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ apiKey }),
-                })
-                const data = await res.json()
-                if (data.success) {
-                    setGeminiModels(data.models)
-                    // Set defaults if empty
-                    setConfigs(prev => {
-                        const next = { ...prev }
-                        if (!next['gemini_concierge_model'] && data.models.length > 0) next['gemini_concierge_model'] = 'gemini-1.5-flash'
-                        if (!next['gemini_pilger_model'] && data.models.length > 0) next['gemini_pilger_model'] = 'gemini-1.5-flash'
-                        if (!next['gemini_ceo_model'] && data.models.length > 0) next['gemini_ceo_model'] = 'gemini-1.5-flash'
-                        return next
-                    })
-                }
-            } catch (e) {
-                console.error(e)
-            } finally {
-                setLoadingGeminiModels(false)
-            }
-        }
-        const timer = setTimeout(fetchGemini, 1000)
-        return () => clearTimeout(timer)
-    }, [configs['gemini_api_key']])
-
-    // Fetch OpenAI Models
-    useEffect(() => {
-        const apiKey = configs['openai_api_key']
-        if (!apiKey) return
-
-        const fetchOpenAI = async () => {
-            setLoadingOpenAIModels(true)
-            try {
-                const res = await fetch('/api/admin/openai-models', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ apiKey }),
-                })
-                const data = await res.json()
-                if (data.success) {
-                    setOpenaiModels(data.models)
-                    // Set defaults if empty
-                    setConfigs(prev => {
-                        const next = { ...prev }
-                        if (!next['openai_concierge_model'] && data.models.length > 0) next['openai_concierge_model'] = 'gpt-3.5-turbo'
-                        if (!next['openai_pilger_model'] && data.models.length > 0) next['openai_pilger_model'] = 'gpt-3.5-turbo'
-                        if (!next['openai_ceo_model'] && data.models.length > 0) next['openai_ceo_model'] = 'gpt-4o-mini'
-                        return next
-                    })
-                }
-            } catch (e) {
-                console.error(e)
-            } finally {
-                setLoadingOpenAIModels(false)
-            }
-        }
-        const timer = setTimeout(fetchOpenAI, 1000)
-        return () => clearTimeout(timer)
-    }, [configs['openai_api_key']])
-
     // Auto-fetch ElevenLabs voices when API key is available
     useEffect(() => {
         const apiKey = configs['elevenlabs_api_key']
@@ -498,9 +771,13 @@ export default function MaintenancePage() {
     }, [configs['elevenlabs_api_key']])
 
 
-    const fetchConfigs = useCallback(async () => {
+    const fetchConfigs = useCallback(async (force = false) => {
+        if (configsDirty && !force) {
+            setLoading(false)
+            return
+        }
         try {
-            const res = await fetch('/api/admin/configs')
+            const res = await fetch('/api/admin/configs', { cache: 'no-store' })
             const json = await res.json()
             if (json.success) {
                 setConfigs(json.configs)
@@ -510,11 +787,11 @@ export default function MaintenancePage() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [configsDirty])
 
     useEffect(() => {
-        fetchConfigs()
-        const timer = setInterval(fetchConfigs, 60000)
+        fetchConfigs(true)
+        const timer = setInterval(() => fetchConfigs(false), 60000)
         return () => clearInterval(timer)
     }, [fetchConfigs])
 
@@ -589,26 +866,6 @@ export default function MaintenancePage() {
         }
     }, [fetchGeminiCosts, geminiCostSummary?.month])
 
-    const syncAdsSpendNow = async () => {
-        setSyncingAdsSpend(true)
-        try {
-            const res = await fetch('/api/admin/finance/sync-ads-spend', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}),
-            })
-            const data = await res.json()
-            if (!res.ok || !data.success) {
-                throw new Error(data.error || 'Erro ao sincronizar trafego pago')
-            }
-            await fetchConfigs()
-        } catch (err) {
-            console.error('Error syncing ads spend:', err)
-        } finally {
-            setSyncingAdsSpend(false)
-        }
-    }
-
     const runLLMCreditCheck = useCallback(async () => {
         setLlmCreditLoading(true)
         try {
@@ -657,6 +914,7 @@ export default function MaintenancePage() {
     }
 
     const getAgentActionLabel = (action: string) => {
+        const actionText = toDisplayText(action, 'Evento')
         const labels: Record<string, string> = {
             agent_skip_stale_queue: 'Fila antiga ignorada',
             agent_no_queue_work: 'Fila vazia',
@@ -670,20 +928,19 @@ export default function MaintenancePage() {
             ignored_no_phone: 'Sem telefone',
             error: 'Erro no webhook',
         }
-        return labels[action] || action.replace(/_/g, ' ')
+        return labels[actionText] || actionText.replace(/_/g, ' ')
     }
 
     const getPayloadString = (payload: AgentLogEntry['payload'], key: string) => {
         const value = payload?.[key]
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
-        return ''
+        return toDisplayText(value)
     }
 
     const getAgentLogDetail = (log: AgentLogEntry) => {
-        if (log.error) return log.error
+        if (log.error) return toDisplayText(log.error)
         const reason = getPayloadString(log.payload, 'reason') || getPayloadString(log.payload, 'queueReason')
         if (reason) return reason
-        return log.summary || ''
+        return toDisplayText(log.summary)
     }
 
     const getGeminiFeatureLabel = (feature: string) => {
@@ -709,21 +966,10 @@ export default function MaintenancePage() {
             const allKeys = [
                 ...INTEGRATIONS.flatMap(i => i.fields.map(f => f.key)),
                 'ai_provider',
+                'gemini_model',
+                'openai_model',
                 'gemini_api_key',
                 'openai_api_key',
-                'pilger_ai_system_prompt',
-                'pilger_ai_rules_prompt',
-                'gemini_pilger_model',
-                'openai_pilger_model',
-                'pilger_provider',
-                'ceo_provider',
-                'gemini_ceo_model',
-                'openai_ceo_model',
-                'ceo_agent_system_prompt',
-                'lead_extraction_prompt',
-                'ads_provider',
-                'gemini_ads_model',
-                'openai_ads_model',
                 'vapid_subject',
                 'vapid_public_key',
                 'vapid_private_key',
@@ -743,6 +989,12 @@ export default function MaintenancePage() {
                 'google_ads_refresh_token',
                 'google_ads_manager_id',
                 'google_ads_customer_id',
+                'google_analytics_measurement_id',
+                'google_analytics_property_id',
+                'google_analytics_oauth_client_id',
+                'google_analytics_oauth_client_secret',
+                'google_analytics_refresh_token',
+                'google_search_console_site_url',
                 'gemini_billing_bigquery_project_id',
                 'gemini_billing_bigquery_dataset',
                 'gemini_billing_bigquery_table',
@@ -755,31 +1007,18 @@ export default function MaintenancePage() {
                 'dataforseo_password',
                 'inngest_event_key',
                 'inngest_signing_key',
-                'pilger_daily_days',
-                'pilger_daily_time',
-                'pilger_weekly_day',
-                'pilger_weekly_time',
-                'pilger_weekly_days',
-                'pilger_weekly_times',
-                'radar_collection_days',
-                'radar_collection_times',
-                'radar_ai_enabled',
-                'radar_ai_min_opportunity_score',
-                'radar_ai_max_insights_per_run',
-                'radar_opportunity_alert_threshold',
-                'radar_analyst_system_prompt',
-                'ads_sync_interval_minutes',
-                'ads_analyst_system_prompt',
-                'pilger_daily_system_prompt',
-                'pilger_weekly_system_prompt',
-                'whatsapp_provider',
-                'gemini_whatsapp_model',
-                'openai_whatsapp_model',
+                'meta_social_inbox_enabled',
+                'meta_social_agent_enabled',
+                'meta_social_agent_autopilot',
+                'organic_report_agent_enabled',
+                'organic_report_agent_interval_hours',
+                'paid_report_agent_enabled',
+                'paid_report_agent_interval_hours',
+                'marketing_publisher_agent_enabled',
+                'marketing_publisher_autopilot',
+                'marketing_publisher_interval_minutes',
 
                 'elevenlabs_api_key',
-                'ads_provider',
-                'openai_ads_model',
-                'gemini_ads_model'
             ]
             const configsToSave: Record<string, string> = {}
             for (const key of allKeys) {
@@ -795,6 +1034,9 @@ export default function MaintenancePage() {
             const json = await res.json()
             if (!json.success) {
                 console.error('Save error:', json.message)
+            } else {
+                setConfigsDirty(false)
+                await fetchConfigs(true)
             }
         } catch (err) {
             console.error('Error saving configs:', err)
@@ -828,9 +1070,10 @@ export default function MaintenancePage() {
                 ...prev,
                 [integrationId]: {
                     status: data.success ? 'success' : 'error',
-                    message: data.message,
+                    message: toDisplayText(data.message, data.success ? 'Conexao testada.' : 'Erro ao testar conexao'),
                 },
             }))
+            if (integrationId === 'meta_ads') await fetchConfigs(true)
         } catch {
             setTestResults(prev => ({
                 ...prev,
@@ -847,11 +1090,14 @@ export default function MaintenancePage() {
             case 'vapid': return <Bell size={22} />
             case 'meta_ads': return <Megaphone size={22} />
             case 'google_ads': return <BarChart3 size={22} />
+            case 'google_analytics': return <Activity size={22} />
             case 'serpapi': return <Search size={22} />
             case 'dataforseo': return <TrendingUp size={22} />
             case 'r2': return <Database size={22} />
             case 'inngest': return <Zap size={22} />
             case 'elevenlabs': return <Mic size={22} />
+            case 'email': return <Mail size={22} />
+            case 'image_bank': return <ImageIcon size={22} />
             default: return null
         }
     }
@@ -859,9 +1105,10 @@ export default function MaintenancePage() {
     const getStatusIndicator = (integrationId: string) => {
         const result = testResults[integrationId]
         if (!result || result.status === 'idle') {
-            const hasConfig = INTEGRATIONS
-                .find(i => i.id === integrationId)
-                ?.fields.some(f => configs[f.key])
+            const integration = INTEGRATIONS.find(i => i.id === integrationId)
+            const hasConfig = integrationId === 'brevo'
+                ? Boolean(configs.brevo_api_key && configs.brevo_sender_email)
+                : integration?.fields.some(f => configs[f.key])
             return (
                 <span style={{
                     display: 'inline-flex',
@@ -993,7 +1240,7 @@ export default function MaintenancePage() {
                                                 className="form-input"
                                                 type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
                                                 value={configs[field.key] || ''}
-                                                onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                onChange={e => updateConfigField(field.key, e.target.value)}
                                                 placeholder={field.placeholder}
                                                 style={{
                                                     paddingRight: field.isSecret ? '44px' : undefined,
@@ -1001,12 +1248,12 @@ export default function MaintenancePage() {
                                                     fontSize: '0.9rem',
                                                 }}
                                             />
-                                        ) : field.key === 'openai_model' ? (
+                                        ) : field.type === 'select' ? (
                                             <div style={{ position: 'relative' }}>
                                                 <select
                                                     className="form-input"
-                                                    value={configs[field.key] || 'gpt-3.5-turbo'}
-                                                    onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                    value={configs[field.key] || field.options?.[0]?.value || ''}
+                                                    onChange={e => updateConfigField(field.key, e.target.value)}
                                                     style={{ appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: '32px' }}
                                                 >
                                                     <option value="gpt-4o">GPT-4o (Mais inteligente e rápido)</option>
@@ -1019,7 +1266,7 @@ export default function MaintenancePage() {
                                                 className="form-input"
                                                 type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
                                                 value={configs[field.key] || ''}
-                                                onChange={e => setConfigs({ ...configs, [field.key]: e.target.value })}
+                                                onChange={e => updateConfigField(field.key, e.target.value)}
                                                 placeholder={field.placeholder}
                                                 style={{
                                                     paddingRight: field.isSecret ? '44px' : undefined,
@@ -1090,6 +1337,272 @@ export default function MaintenancePage() {
                                 </span>
                             )}
                         </div>
+
+                        {integration.id === 'meta_ads' && (
+                            <div style={{
+                                marginTop: '18px',
+                                paddingTop: '18px',
+                                borderTop: '1px solid var(--border-color)',
+                                display: 'grid',
+                                gap: '16px',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{
+                                            width: '44px',
+                                            height: '44px',
+                                            borderRadius: '12px',
+                                            background: 'linear-gradient(135deg, #E1306C, #1877F2)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#fff',
+                                        }}>
+                                            <Wifi size={22} />
+                                        </div>
+                                        <div>
+                                            <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.05rem' }}>Conexao assistida Meta</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                Use estes botoes para autorizar Facebook, Instagram, Direct, Messenger e publicacao.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span style={{
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800,
+                                        color: 'var(--gold)',
+                                        border: '1px solid rgba(201, 169, 110, .35)',
+                                        borderRadius: '999px',
+                                        padding: '7px 10px',
+                                        background: 'rgba(201, 169, 110, .08)',
+                                    }}>
+                                        Callback: {(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/meta
+                                    </span>
+                                </div>
+
+                                <div style={{ display: 'grid', gap: '12px' }}>
+                                    {[
+                                        {
+                                            title: 'Instagram do Guilherme',
+                                            description: 'Conecta a conta Instagram Business pelo Instagram Login. Comentarios e publicacao usam este token; Direct precisa token valido e capability de mensagens.',
+                                            href: '/api/auth/meta/instagram/start',
+                                            connected: Boolean(configs.instagram_business_access_token && configs.instagram_business_account_id && !instagramTokenNeedsReconnect),
+                                            warning: instagramTokenNeedsReconnect,
+                                            detail: configs.instagram_business_account_id
+                                                ? `${instagramTokenNeedsReconnect ? 'Reconexao recomendada. ' : ''}ID: ${configs.instagram_business_account_id}${instagramTokenExpiresAt ? ` | expira em ${formatConfigDateTime(instagramTokenExpiresAt)}` : ' | validade nao registrada'}`
+                                                : 'Aguardando autorizacao do dono da conta.',
+                                        },
+                                        {
+                                            title: 'Facebook Page',
+                                            description: 'Conecta a pagina do Facebook para Messenger, comentarios, publicacao e Page Access Token.',
+                                            href: '/api/auth/meta/facebook/start',
+                                            connected: Boolean(configs.facebook_page_access_token && configs.meta_facebook_page_id),
+                                            warning: false,
+                                            detail: configs.meta_facebook_page_name || (configs.meta_facebook_page_id ? `Pagina: ${configs.meta_facebook_page_id}` : 'Aguardando autorizacao da pagina.'),
+                                        },
+                                    ].map(item => (
+                                        <div key={item.title} style={{
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '10px',
+                                            padding: '14px',
+                                            background: 'rgba(250, 248, 244, .65)',
+                                            display: 'grid',
+                                            gap: '10px',
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+                                                <div>
+                                                    <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '5px' }}>{item.title}</strong>
+                                                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>{item.description}</p>
+                                                </div>
+                                                <span style={{
+                                                    whiteSpace: 'nowrap',
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 900,
+                                                    color: item.connected ? '#22c55e' : item.warning ? '#f59e0b' : '#f59e0b',
+                                                    background: item.connected ? 'rgba(34, 197, 94, .1)' : 'rgba(245, 158, 11, .12)',
+                                                    borderRadius: '999px',
+                                                    padding: '5px 8px',
+                                                }}>
+                                                    {item.connected ? 'Conectado' : item.warning ? 'Reconectar' : 'Pendente'}
+                                                </span>
+                                            </div>
+                                            <small style={{ color: 'var(--text-muted)' }}>{item.detail}</small>
+                                            <a
+                                                href={item.href}
+                                                className="btn btn-gold"
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
+                                                    textDecoration: 'none',
+                                                    width: 'fit-content',
+                                                }}
+                                            >
+                                                <Wifi size={15} />
+                                                {item.connected ? 'Reconectar' : 'Conectar'}
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '10px',
+                                    padding: '14px',
+                                    background: 'var(--bg-primary)',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '10px' }}>
+                                        <strong style={{ fontSize: '0.9rem' }}>Log da conexao Meta</strong>
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchConfigs(true)}
+                                            style={{
+                                                border: '1px solid var(--border-color)',
+                                                background: 'transparent',
+                                                borderRadius: '8px',
+                                                padding: '6px 10px',
+                                                color: 'var(--text-muted)',
+                                                cursor: 'pointer',
+                                                fontSize: '0.75rem',
+                                            }}
+                                        >
+                                            Atualizar log
+                                        </button>
+                                    </div>
+                                    {metaConnectionLogs.length === 0 ? (
+                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                                            Nenhum evento registrado ainda. Ao testar conexao ou autorizar Facebook/Instagram, erros e sucessos aparecem aqui.
+                                        </p>
+                                    ) : (
+                                        <div style={{ display: 'grid', gap: '8px' }}>
+                                            {metaConnectionLogs.map((log, index) => (
+                                                <div key={`${log.at}-${index}`} style={{
+                                                    display: 'grid',
+                                                    gap: '3px',
+                                                    padding: '9px 10px',
+                                                    borderRadius: '8px',
+                                                    background: log.status === 'error' ? 'rgba(239,68,68,.08)' : log.status === 'success' ? 'rgba(34,197,94,.08)' : log.status === 'warning' ? 'rgba(245,158,11,.1)' : 'rgba(59,130,246,.07)',
+                                                    border: `1px solid ${log.status === 'error' ? 'rgba(239,68,68,.18)' : log.status === 'success' ? 'rgba(34,197,94,.18)' : log.status === 'warning' ? 'rgba(245,158,11,.2)' : 'rgba(59,130,246,.16)'}`,
+                                                }}>
+                                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                                        {formatConfigDateTime(log.at)} | {log.provider || 'meta'} | {log.action}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.45 }}>{log.message}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.5 }}>
+                                    Antes de enviar o link, salve as credenciais acima. No Meta Developers, use os callbacks
+                                    {' '}
+                                    <code>{(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/meta/instagram/callback</code>
+                                    {' '}
+                                    e
+                                    {' '}
+                                    <code>{(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/meta/facebook/callback</code>.
+                                </div>
+                            </div>
+                        )}
+
+                        {integration.id === 'google_analytics' && (
+                            <div style={{
+                                marginTop: '18px',
+                                paddingTop: '18px',
+                                borderTop: '1px solid var(--border-color)',
+                                display: 'grid',
+                                gap: '14px',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{
+                                            width: '44px',
+                                            height: '44px',
+                                            borderRadius: '12px',
+                                            background: 'linear-gradient(135deg, #4285F4, #34A853)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#fff',
+                                        }}>
+                                            <Activity size={22} />
+                                        </div>
+                                        <div>
+                                            <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.05rem' }}>Conexao assistida Google</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                                                Use OAuth quando o Analytics nao aceitar service account. Salve Client ID e Client Secret antes de conectar.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span style={{
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800,
+                                        color: 'var(--gold)',
+                                        border: '1px solid rgba(201, 169, 110, .35)',
+                                        borderRadius: '999px',
+                                        padding: '7px 10px',
+                                        background: 'rgba(201, 169, 110, .08)',
+                                    }}>
+                                        Callback: {(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/google-analytics/callback
+                                    </span>
+                                </div>
+
+                                <div style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '10px',
+                                    padding: '14px',
+                                    background: 'rgba(250, 248, 244, .65)',
+                                    display: 'grid',
+                                    gap: '10px',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                                        <div>
+                                            <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '5px' }}>
+                                                Google Analytics e Search Console
+                                            </strong>
+                                            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                                Autoriza o sistema a ler relatorios do GA4 e buscas organicas com o usuario administrador do Google.
+                                            </p>
+                                        </div>
+                                        <span style={{
+                                            whiteSpace: 'nowrap',
+                                            fontSize: '0.68rem',
+                                            fontWeight: 900,
+                                            color: configs.google_analytics_refresh_token ? '#22c55e' : '#f59e0b',
+                                            background: configs.google_analytics_refresh_token ? 'rgba(34, 197, 94, .1)' : 'rgba(245, 158, 11, .12)',
+                                            borderRadius: '999px',
+                                            padding: '5px 8px',
+                                        }}>
+                                            {configs.google_analytics_refresh_token ? 'OAuth conectado' : 'OAuth pendente'}
+                                        </span>
+                                    </div>
+
+                                    <a
+                                        href="/api/auth/google-analytics/start"
+                                        className="btn btn-gold"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            textDecoration: 'none',
+                                            width: 'fit-content',
+                                        }}
+                                    >
+                                        <Wifi size={15} />
+                                        {configs.google_analytics_refresh_token ? 'Reconectar Google' : 'Conectar Google Analytics'}
+                                    </a>
+
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.5 }}>
+                                        No Google Cloud, cadastre este callback no OAuth Client ID:
+                                        {' '}
+                                        <code>{(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/google-analytics/callback</code>.
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -1111,7 +1624,7 @@ export default function MaintenancePage() {
                     <div>
                         <div className="chart-title" style={{ marginBottom: '2px', fontSize: '1.1rem' }}>Central de Controle AI (Multi-Provedor)</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Gerencie provedores e modelos especficos para cada funo (Agentes IA WhatsApp e Pilger AI).
+                            Gerencie o combustivel global usado por todos os agentes do ecossistema.
                         </div>
                     </div>
                 </div>
@@ -1121,8 +1634,8 @@ export default function MaintenancePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                         <Zap size={18} style={{ color: 'var(--gold)' }} />
                         <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Provedor Padrão (Global)</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Usado quando uma funo no tem provedor especfico selecionado.</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>LLM Global do Ecossistema</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Todos os agentes usam este provedor e modelo. Os prompts ficam em Pilger AI &gt; Agentes.</div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '16px' }}>
@@ -1154,12 +1667,36 @@ export default function MaintenancePage() {
                         </label>
                     </div>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginTop: '16px' }}>
+                        {configs['ai_provider'] === 'openai' ? (
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Modelo OpenAI global</label>
+                                <input
+                                    className="form-input"
+                                    value={configs['openai_model'] || 'gpt-4o-mini'}
+                                    onChange={e => setConfigs({ ...configs, openai_model: e.target.value })}
+                                    placeholder="gpt-4o-mini"
+                                />
+                            </div>
+                        ) : (
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Modelo Gemini global</label>
+                                <input
+                                    className="form-input"
+                                    value={configs['gemini_model'] || 'gemini-2.5-flash'}
+                                    onChange={e => setConfigs({ ...configs, gemini_model: e.target.value })}
+                                    placeholder="gemini-2.5-flash"
+                                />
+                            </div>
+                        )}
+                    </div>
+
                     {/* API Keys (Conditional) */}
                     {/* API Keys (Conditional) */}
                     <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
                         {/* Gemini Key */}
-                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['pilger_provider']].includes('gemini')) && (
-                            <div className="form-group" style={{ marginBottom: (configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('openai')) ? '20px' : '0' }}>
+                        {(configs['ai_provider'] !== 'openai') && (
+                            <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Brain size={16} style={{ color: 'var(--gold)' }} />
                                     Google Gemini API Key
@@ -1209,7 +1746,7 @@ export default function MaintenancePage() {
                             </div>
                         )}
 
-                        {(configs['ai_provider'] !== 'openai' || [configs['concierge_provider'], configs['cloner_provider'], configs['pilger_provider']].includes('gemini')) && (
+                        {(configs['ai_provider'] !== 'openai') && (
                             <details style={{ marginTop: '18px', padding: '14px', border: '1px solid var(--border-color)', borderRadius: '10px', background: 'var(--bg-primary)' }}>
                                 <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                                     Faturamento oficial Gemini / Google Billing
@@ -1290,7 +1827,7 @@ export default function MaintenancePage() {
                         )}
 
                         {/* OpenAI Key */}
-                        {(configs['ai_provider'] === 'openai' || [configs['concierge_provider'], configs['pilger_provider']].includes('openai')) && (
+                        {(configs['ai_provider'] === 'openai') && (
                             <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Bot size={16} style={{ color: 'var(--gold)' }} />
@@ -1340,488 +1877,6 @@ export default function MaintenancePage() {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* 1. PILGER AI */}
-                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#818cf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>Y</span> 1. Pilger AI (Assistente Admin)
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Provedor do Pilger AI</label>
-                            <select
-                                className="form-input"
-                                value={configs['pilger_provider'] || ''}
-                                onChange={e => setConfigs({ ...configs, pilger_provider: e.target.value })}
-                            >
-                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo do Pilger AI</label>
-                            {(configs['pilger_provider'] === 'openai' || (!configs['pilger_provider'] && configs['ai_provider'] === 'openai')) ? (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['openai_pilger_model'] || ''} onChange={e => setConfigs({ ...configs, openai_pilger_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            ) : (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['gemini_pilger_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_pilger_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt do Sistema (Pilger AI)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={10}
-                            value={configs['pilger_ai_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, pilger_ai_system_prompt: e.target.value })}
-                            placeholder="Digite o prompt completo do Pilger AI"
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(129, 140, 248, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Prompt principal do assistente administrativo.
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Prompt de Regras (Pilger AI)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={8}
-                            value={configs['pilger_ai_rules_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, pilger_ai_rules_prompt: e.target.value })}
-                            placeholder="Digite as regras complementares do Pilger AI"
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(129, 140, 248, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Regras extras que sero aplicadas junto ao prompt principal.
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. AGENTES IA WHATSAPP */}
-                <div style={{ marginBottom: '40px', paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#22c55e', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span></span> 2. Agentes IA WhatsApp (Corretores)
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Provedor dos Agentes WhatsApp</label>
-                            <select
-                                className="form-input"
-                                value={configs['whatsapp_provider'] || ''}
-                                onChange={e => setConfigs({ ...configs, whatsapp_provider: e.target.value })}
-                            >
-                                <option value="">Usar Padrão Global ({configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'})</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo dos Agentes WhatsApp</label>
-                            {isWhatsAppOpenAI ? (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['openai_whatsapp_model'] || ''} onChange={e => setConfigs({ ...configs, openai_whatsapp_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            ) : (
-                                <div style={{ position: 'relative' }}>
-                                    <select className="form-input" value={configs['gemini_whatsapp_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_whatsapp_model: e.target.value })}>
-                                        <option value="">Selecione...</option>
-                                        {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-
-
-                    {isWhatsAppOpenAI && (
-                        <div style={{ padding: '12px 16px', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.25)', marginBottom: '20px' }}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                                <strong>Atencao:</strong> usando OpenAI nos agentes WhatsApp, fotos/prints continuam sendo analisados, mas videos nao serao interpretados automaticamente. Quando um cliente enviar video, o agente vai pedir foto, print ou uma descricao para continuar o atendimento.
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.06)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.15)', marginBottom: '20px' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                            O provedor e modelo escolhidos aqui serão usados por <strong>todos os agentes IA de WhatsApp</strong> (corretores). O prompt de cada agente é configurado individualmente na <strong>página de Corretores</strong>.
-                        </div>
-                    </div>
-                </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt Global Automático dos Agentes WhatsApp</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={22}
-                            value={WHATSAPP_SYSTEM_PROMPT_PREVIEW}
-                            readOnly
-                            style={{
-                                fontFamily: 'monospace',
-                                fontSize: '0.82rem',
-                                borderColor: 'rgba(34, 197, 94, 0.3)',
-                                background: 'rgba(34, 197, 94, 0.03)',
-                                lineHeight: 1.55,
-                            }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Visualização técnica da camada global aplicada automaticamente. O conteúdo real recebe dados dinâmicos de cada lead, agente, tags e catálogo no momento da resposta.
-                        </div>
-                    </div>
-
-                {/* 3. EXTRAÇÃO DE LEADS */}
-                <div style={{ paddingBottom: '30px' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#34d399', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span></span> 3. Extração de Leads (WhatsApp)
-                    </h3>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt de Extração de Dados</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={6}
-                            value={configs['lead_extraction_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, lead_extraction_prompt: e.target.value })}
-                            placeholder="Digite o prompt completo de extração de leads"
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(52, 211, 153, 0.3)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Controla como a IA identifica e extrai leads da conversa.
-                        </div>
-                    </div>
-                </div>
-
-                {/* 4. TRÁFEGO (GESTOR IA) */}
-                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '40px' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#ec4899', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span></span> 4. Gestor de Tráfego (Análise Autônoma)
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Provedor do Gestor de Tráfego</label>
-                            <select className="form-input" value={configs['ads_provider'] || ''} onChange={e => setConfigs({ ...configs, ads_provider: e.target.value })}>
-                                <option value="">Usar Padrão Global</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo do Gestor de Tráfego</label>
-                            <select className="form-input" value={configs['ads_provider'] === 'openai' ? (configs['openai_ads_model'] || '') : (configs['gemini_ads_model'] || '')} onChange={e => {
-                                if (configs['ads_provider'] === 'openai') {
-                                    setConfigs({ ...configs, openai_ads_model: e.target.value })
-                                } else {
-                                    setConfigs({ ...configs, gemini_ads_model: e.target.value })
-                                }
-                            }}>
-                                <option value="">Selecione...</option>
-                                {configs['ads_provider'] === 'openai' ? openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>) : geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px', alignItems: 'end' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label">Intervalo da sincronizacao Ads</label>
-                            <input
-                                className="form-input"
-                                type="number"
-                                min={1}
-                                max={1440}
-                                step={1}
-                                value={configs['ads_sync_interval_minutes'] || '60'}
-                                onChange={e => setConfigs({ ...configs, ads_sync_interval_minutes: e.target.value })}
-                            />
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                Minutos entre leituras de metricas e sincronizacao financeira.
-                            </div>
-                        </div>
-                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'grid', gap: '8px' }}>
-                            <div>Ultima conclusao: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_run_at'])}</b></div>
-                            <div>Ultimo inicio: <b style={{ color: 'var(--text-primary)' }}>{formatConfigDateTime(configs['ads_sync_last_started_at'])}</b></div>
-                            {configs['ads_sync_last_error'] && (
-                                <div style={{ color: '#ef4444' }}>Ultimo erro: <b>{configs['ads_sync_last_error']}</b></div>
-                            )}
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-secondary"
-                                onClick={syncAdsSpendNow}
-                                disabled={syncingAdsSpend}
-                                style={{ justifySelf: 'start', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                            >
-                                <RefreshCw size={14} className={syncingAdsSpend ? 'spin' : ''} />
-                                {syncingAdsSpend ? 'Sincronizando...' : 'Sincronizar agora'}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt do Sistema (Gestor de Tráfego)</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={8}
-                            value={configs['ads_analyst_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, ads_analyst_system_prompt: e.target.value })}
-                            placeholder="Digite o prompt completo do Gestor de Tráfego"
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
-                        />
-                    </div>
-                </div>
-
-                {/* 5. AGENDAMENTOS */}
-                <div style={{ paddingBottom: '30px' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span></span> 5. Agendamento de Relatórios Pilger CEO
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '12px', alignItems: 'start' }}>
-                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <CalendarDays size={18} style={{ color: 'var(--gold)' }} />
-                                <div style={{ fontWeight: 700 }}>Relatório Diário & Análise</div>
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                                Selecione os dias e horários em que o relatório deve rodar automaticamente.
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {WEEK_DAYS.map(day => {
-                                        const selected = dailyDays.has(day.value)
-                                        return (
-                                            <button key={`daily-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('pilger_daily_days', day.value, '0,1,2,3,4,5,6')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
-                                                {day.label}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {HOUR_OPTIONS.map(hour => {
-                                        const selected = dailyHours.has(hour)
-                                        return (
-                                            <button key={`daily-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('pilger_daily_time', hour, '23')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
-                                                {formatHourLabel(hour)}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                Resumo: roda em <b>{Array.from(dailyDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(dailyHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
-                            </div>
-                        </div>
-
-                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <Clock3 size={18} style={{ color: '#8b5cf6' }} />
-                                <div style={{ fontWeight: 700 }}>Diretriz Semanal Pilger AI</div>
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                                Também pode rodar mais de uma vez por semana e em múltiplos horários.
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {WEEK_DAYS.map(day => {
-                                        const selected = weeklyDays.has(day.value)
-                                        return (
-                                            <button key={`weekly-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('pilger_weekly_days', day.value, '1')} style={{ background: selected ? '#8b5cf6' : 'transparent', color: selected ? '#fff' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
-                                                {day.label}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {HOUR_OPTIONS.map(hour => {
-                                        const selected = weeklyHours.has(hour)
-                                        return (
-                                            <button key={`weekly-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('pilger_weekly_times', hour, '23')} style={{ background: selected ? '#8b5cf6' : 'transparent', color: selected ? '#fff' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
-                                                {formatHourLabel(hour)}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                Resumo: roda em <b>{Array.from(weeklyDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(weeklyHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
-                            </div>
-                        </div>
-
-                        <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
-                                <div style={{ fontWeight: 700 }}>Radar de Mercado</div>
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                                Configure facilmente quando o radar coleta dados de mercado.
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Dias da semana</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {WEEK_DAYS.map(day => {
-                                        const selected = radarDays.has(day.value)
-                                        return (
-                                            <button key={`radar-day-${day.value}`} type="button" className="btn btn-sm" onClick={() => toggleDay('radar_collection_days', day.value, '0,1,2,3,4,5,6')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '3px 10px', fontSize: '0.75rem' }}>
-                                                {day.label}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Horários (Brasília)</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {HOUR_OPTIONS.map(hour => {
-                                        const selected = radarHours.has(hour)
-                                        return (
-                                            <button key={`radar-hour-${hour}`} type="button" className="btn btn-sm" onClick={() => toggleHour('radar_collection_times', hour, '06,12,18')} style={{ background: selected ? 'var(--gold)' : 'transparent', color: selected ? '#111' : 'var(--text-primary)', border: '1px solid var(--border-color)', minWidth: '56px', padding: '3px 8px', fontSize: '0.74rem', flex: '0 0 auto' }}>
-                                                {formatHourLabel(hour)}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                            <div style={{ marginTop: '8px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                Resumo: coleta em <b>{Array.from(radarDays).sort((a, b) => Number(a) - Number(b)).map(dayLabel).join(', ')}</b> às <b>{Array.from(radarHours).sort((a, b) => Number(a) - Number(b)).map(formatHourLabel).join(', ')}</b>.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(201, 169, 110, 0.25)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                            <Brain size={18} style={{ color: 'var(--gold)' }} />
-                            <div>
-                                <div style={{ fontWeight: 800 }}>Inteligencia IA do Radar</div>
-                                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                                    Controla quando o radar gera analises comerciais, score Pilger e recomendacoes para blog, campanhas e vitrines.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '14px' }}>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Analise IA</label>
-                                <select
-                                    className="form-input"
-                                    value={configs['radar_ai_enabled'] || 'true'}
-                                    onChange={e => setConfigs({ ...configs, radar_ai_enabled: e.target.value })}
-                                >
-                                    <option value="true">Ativada</option>
-                                    <option value="false">Desativada (apenas regras)</option>
-                                </select>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Score minimo para chamar IA</label>
-                                <input className="form-input" type="number" min={0} max={100} value={configs['radar_ai_min_opportunity_score'] || '70'} onChange={e => setConfigs({ ...configs, radar_ai_min_opportunity_score: e.target.value })} />
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Maximo de analises IA por coleta</label>
-                                <input className="form-input" type="number" min={0} max={50} value={configs['radar_ai_max_insights_per_run'] || '6'} onChange={e => setConfigs({ ...configs, radar_ai_max_insights_per_run: e.target.value })} />
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Alerta de oportunidade acima de</label>
-                                <input className="form-input" type="number" min={0} max={100} value={configs['radar_opportunity_alert_threshold'] || '75'} onChange={e => setConfigs({ ...configs, radar_opportunity_alert_threshold: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label">Prompt do Analista de Radar de Mercado</label>
-                            <textarea
-                                className="form-textarea"
-                                rows={7}
-                                value={configs['radar_analyst_system_prompt'] || ''}
-                                onChange={e => setConfigs({ ...configs, radar_analyst_system_prompt: e.target.value })}
-                                placeholder="Digite o prompt do Analista de Radar de Mercado"
-                                style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Prompts dos Relatórios */}
-                    <div className="form-group" style={{ marginTop: '20px' }}>
-                        <label className="form-label">Prompt do Relatório Diário</label>
-                        <textarea className="form-textarea" rows={6} value={configs['pilger_daily_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_daily_system_prompt: e.target.value })} placeholder="Digite o prompt completo do relatório diário" style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Prompt da Diretriz Semanal</label>
-                        <textarea className="form-textarea" rows={6} value={configs['pilger_weekly_system_prompt'] || ''} onChange={e => setConfigs({ ...configs, pilger_weekly_system_prompt: e.target.value })} placeholder="Digite o prompt completo da diretriz semanal" style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
-                    </div>
-                </div>
-
-                {/* 6. AGENTE CEO IA */}
-                <div style={{ paddingBottom: '30px', borderBottom: '1px dashed var(--border-color)', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '1.1rem', color: '#6366f1', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span></span> 6. Agente CEO IA (WhatsApp + ERP)
-                    </h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Provedor do CEO IA</label>
-                            <select
-                                className="form-input"
-                                value={configs['ceo_provider'] || ''}
-                                onChange={e => setConfigs({ ...configs, ceo_provider: e.target.value })}
-                            >
-                                <option value="">Usar Padrão do Pilger AI ({configs['pilger_provider'] === 'openai' ? 'OpenAI' : (configs['pilger_provider'] === 'gemini' ? 'Gemini' : (configs['ai_provider'] === 'openai' ? 'OpenAI' : 'Gemini'))})</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Modelo do CEO IA</label>
-                            {(configs['ceo_provider'] === 'openai' || (!configs['ceo_provider'] && (configs['pilger_provider'] === 'openai' || (!configs['pilger_provider'] && configs['ai_provider'] === 'openai')))) ? (
-                                <select className="form-input" value={configs['openai_ceo_model'] || ''} onChange={e => setConfigs({ ...configs, openai_ceo_model: e.target.value })}>
-                                    <option value="">Selecione...</option>
-                                    {openaiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                </select>
-                            ) : (
-                                <select className="form-input" value={configs['gemini_ceo_model'] || ''} onChange={e => setConfigs({ ...configs, gemini_ceo_model: e.target.value })}>
-                                    <option value="">Selecione...</option>
-                                    {geminiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                </select>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Prompt Base do Agente CEO IA</label>
-                        <textarea
-                            className="form-textarea"
-                            rows={7}
-                            value={configs['ceo_agent_system_prompt'] || ''}
-                            onChange={e => setConfigs({ ...configs, ceo_agent_system_prompt: e.target.value })}
-                            placeholder="Digite o prompt base do CEO IA"
-                            style={{ fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(99, 102, 241, 0.35)' }}
-                        />
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Este prompt define o comportamento executivo do CEO IA e e combinado com os prompts de relatorio diario e semanal.
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1927,7 +1982,7 @@ export default function MaintenancePage() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
                                         <strong style={{ fontSize: '0.86rem' }}>{getAgentActionLabel(log.action)}</strong>
                                         <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                            {log.from_phone || 'sem telefone'} {log.message_type ? `- ${log.message_type}` : ''}
+                                            {toDisplayText(log.from_phone, 'sem telefone')} {toDisplayText(log.message_type) ? `- ${toDisplayText(log.message_type)}` : ''}
                                         </span>
                                     </div>
                                     {detail && (
@@ -1937,7 +1992,7 @@ export default function MaintenancePage() {
                                     )}
                                     {(log.instance_name || log.sender_name) && (
                                         <div style={{ marginTop: '4px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                            {log.instance_name || 'Instancia'} {log.sender_name ? `- ${log.sender_name}` : ''}
+                                            {toDisplayText(log.instance_name, 'Instancia')} {toDisplayText(log.sender_name) ? `- ${toDisplayText(log.sender_name)}` : ''}
                                         </div>
                                     )}
                                     <details style={{ marginTop: '6px' }}>
@@ -1978,8 +2033,7 @@ export default function MaintenancePage() {
                         <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>
                             Status de Créditos / Quota (LLMs)
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                Provider ativo: <strong>{llmCreditCheck?.active_provider || '—'}</strong>
-                                {llmCreditCheck?.whatsapp_provider ? ` • WhatsApp: ${llmCreditCheck.whatsapp_provider}` : ''}
+                                Provider ativo: <strong>{llmCreditCheck?.active_provider || '�'}</strong>
                             </div>
                         </div>
                         <button
@@ -2258,4 +2312,6 @@ export default function MaintenancePage() {
         </div >
     )
 }
+
+
 

@@ -4,11 +4,11 @@ import Link from 'next/link'
 import { Building2, Gem, Mountain, Palmtree, Sparkles, Warehouse } from 'lucide-react'
 
 const CATEGORIES = [
-  { icon: <Building2 size={22} />, label: 'Alto Padrao', href: '/busca?priceMin=2000000' },
+  { icon: <Building2 size={22} />, label: 'Alto Padrao', href: '/busca?type=casa&priceMin=5000000' },
   { icon: <Palmtree size={22} />, label: 'Vista Mar', href: '/busca?tag=vista-mar' },
   { icon: <Palmtree size={22} />, label: 'Frente Mar', href: '/busca?tag=frente-mar' },
   { icon: <Building2 size={22} />, label: 'Coberturas', href: '/busca?subtype=cobertura' },
-  { icon: <Gem size={22} />, label: 'Mansoes', href: '/busca?type=casa&bedroomsMin=4' },
+  { icon: <Gem size={22} />, label: 'Mansoes', href: '/busca?type=casa&priceMin=10000000' },
   { icon: <Warehouse size={22} />, label: 'Condominios', href: '/busca?subtype=condominio' },
   { icon: <Mountain size={22} />, label: 'Terrenos', href: '/busca?type=terreno' },
   { icon: <Sparkles size={22} />, label: 'Lancamentos', href: '/busca?tag=lancamento' },

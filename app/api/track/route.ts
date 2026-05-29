@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
+import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
 
 const VISITOR_COOKIE_NAME = 'pilger_visitor_id'
@@ -17,11 +18,205 @@ function normalizeLeadPhone(raw: string | null): string {
     return `55${digits}`
 }
 
+function normalizeLeadId(raw: string | null): string {
+    const id = String(raw || '').trim()
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+        ? id
+        : ''
+}
+
 function buildPhoneOrFilter(candidates: string[]): string {
     const safe = candidates
         .map(candidate => candidate.replace(/[^0-9]/g, ''))
         .filter(Boolean)
     return `phone.in.(${safe.join(',')}),phone_e164.in.(${safe.join(',')})`
+}
+
+function metadataRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {}
+}
+
+async function findLeadByVisitorId(visitorId: string) {
+    const { data, error } = await supabase
+        .from('leads')
+        .select('id, metadata')
+        .eq('visitor_id', visitorId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (error) {
+        console.warn('[Track] lead lookup by visitor failed:', error.message)
+        return null
+    }
+
+    return data || null
+}
+
+async function appendSiteActivityToLead(
+    leadId: string | null | undefined,
+    visitorId: string | null | undefined,
+    eventRow: LeadActivityEventRow | null | undefined
+) {
+    if (!leadId || !eventRow?.event_type) return
+
+    if (visitorId) {
+        await supabase
+            .from('funnel_events')
+            .update({ lead_id: leadId })
+            .eq('visitor_id', visitorId)
+            .is('lead_id', null)
+    }
+
+    const { data: lead, error } = await supabase
+        .from('leads')
+        .select('metadata, lead_score, lead_classification')
+        .eq('id', leadId)
+        .maybeSingle()
+
+    if (error) {
+        console.warn('[Track] lead activity metadata lookup failed:', error.message)
+        return
+    }
+
+    let eventRows: LeadActivityEventRow[] = [eventRow]
+    if (visitorId) {
+        const { data: recentRows, error: eventError } = await supabase
+            .from('funnel_events')
+            .select('id, event_type, metadata, created_at')
+            .eq('visitor_id', visitorId)
+            .order('created_at', { ascending: false })
+            .limit(120)
+
+        if (eventError) {
+            console.warn('[Track] lead activity history fetch failed:', eventError.message)
+        } else if (recentRows?.length) {
+            eventRows = (recentRows as LeadActivityEventRow[]).reverse()
+        }
+    }
+
+    const nextMetadata = mergeLeadSiteActivity(lead?.metadata || {}, eventRows)
+    const intentColumns = leadIntentColumnsFromMetadata(
+        nextMetadata,
+        lead?.lead_score,
+        lead?.lead_classification
+    )
+    const { error: updateError } = await supabase
+        .from('leads')
+        .update({
+            metadata: nextMetadata,
+            ...intentColumns,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', leadId)
+
+    if (updateError) {
+        console.warn('[Track] lead activity metadata update failed:', updateError.message)
+    }
+}
+
+async function findBrokerCandidateByVisitorId(visitorId: string) {
+    const { data, error } = await supabase
+        .from('broker_candidates')
+        .select('id, metadata')
+        .eq('visitor_id', visitorId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (error) {
+        if (!String(error.message || '').includes('broker_candidates')) {
+            console.warn('[Track] broker candidate lookup by visitor failed:', error.message)
+        }
+        return null
+    }
+
+    return data || null
+}
+
+async function appendSiteActivityToBrokerCandidate(
+    visitorId: string | null | undefined,
+    eventRow: LeadActivityEventRow | null | undefined
+) {
+    if (!visitorId || !eventRow?.event_type) return
+
+    const candidate = await findBrokerCandidateByVisitorId(visitorId)
+    if (!candidate?.id) return
+
+    const { data: recentRows, error: eventError } = await supabase
+        .from('funnel_events')
+        .select('id, event_type, metadata, created_at')
+        .eq('visitor_id', visitorId)
+        .order('created_at', { ascending: false })
+        .limit(120)
+
+    if (eventError) {
+        console.warn('[Track] broker candidate activity history fetch failed:', eventError.message)
+    }
+
+    const eventRows = (recentRows?.length ? recentRows : [eventRow]) as LeadActivityEventRow[]
+    const metadata = metadataRecord(candidate.metadata)
+    const previousActivity = metadataRecord((metadata as any).activity)
+    const lastEvent = eventRows[0] || eventRow
+    const brokerEvents = eventRows.filter(row => String(row?.event_type || '').includes('broker_candidate'))
+
+    const nextMetadata = {
+        ...metadata,
+        activity: {
+            ...previousActivity,
+            events: eventRows.length,
+            broker_candidate_events: brokerEvents.length,
+            last_event_type: lastEvent?.event_type || eventRow.event_type,
+            last_event_at: lastEvent?.created_at || new Date().toISOString(),
+            recent_events: eventRows.slice(0, 20).map(row => ({
+                event_type: row.event_type,
+                created_at: row.created_at,
+                metadata: metadataRecord(row.metadata),
+            })),
+        },
+    }
+
+    const { error: updateError } = await supabase
+        .from('broker_candidates')
+        .update({
+            metadata: nextMetadata,
+            last_activity_at: lastEvent?.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', candidate.id)
+
+    if (updateError && !String(updateError.message || '').includes('broker_candidates')) {
+        console.warn('[Track] broker candidate activity update failed:', updateError.message)
+    }
+}
+
+async function insertFunnelEvent(params: {
+    visitorId: string
+    leadId?: string | null
+    landingPageId?: string | null
+    eventType: string
+    metadata: Record<string, unknown>
+}) {
+    const { data, error } = await supabase
+        .from('funnel_events')
+        .insert({
+            visitor_id: params.visitorId,
+            lead_id: params.leadId || null,
+            landing_page_id: params.landingPageId || null,
+            event_type: params.eventType,
+            metadata: params.metadata,
+        })
+        .select('id, event_type, metadata, created_at')
+        .single()
+
+    if (error) {
+        console.warn('[Track] funnel event insert failed:', error.message)
+        return null
+    }
+
+    return data as LeadActivityEventRow
 }
 
 function safeHttpUrl(raw: string | null): string | null {
@@ -30,6 +225,113 @@ function safeHttpUrl(raw: string | null): string | null {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
         return url.toString()
     } catch {
+        return null
+    }
+}
+
+function expandCompactTrackingParams(input: URLSearchParams, requestUrl?: string) {
+    const params = new URLSearchParams(input.toString())
+    const aliases: Array<[string, string]> = [
+        ['e', 'event_type'],
+        ['s', 'utm_source'],
+        ['m', 'utm_medium'],
+        ['c', 'utm_campaign'],
+        ['i', 'utm_content'],
+        ['l', 'lead_id'],
+        ['lp', 'lead_phone'],
+        ['t', 'link_type'],
+        ['lb', 'link_label'],
+        ['lt', 'link_title'],
+        ['ls', 'landing_page_slug'],
+        ['ct', 'content_type'],
+        ['pid', 'content_id'],
+    ]
+
+    for (const [shortKey, longKey] of aliases) {
+        const shortValue = params.get(shortKey)
+        if (shortValue && !params.get(longKey)) {
+            params.set(longKey, shortValue)
+        }
+    }
+
+    const compactPath = params.get('p') || params.get('path')
+    if (!params.get('redirect') && compactPath && requestUrl) {
+        try {
+            if (compactPath.startsWith('/') && !compactPath.startsWith('//')) {
+                params.set('redirect', new URL(compactPath, new URL(requestUrl).origin).toString())
+            }
+        } catch { }
+    }
+
+    return params
+}
+
+function normalizeTrackedContentType(raw: string | null) {
+    const value = String(raw || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+
+    if (['news', 'noticia', 'noticias'].includes(value)) return 'news'
+    if (['blog', 'article', 'artigo'].includes(value)) return 'blog'
+    if (['property', 'imovel', 'imoveis'].includes(value)) return 'property'
+    return ''
+}
+
+function isUuid(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+}
+
+async function resolveTrackedTargetUrl(searchParams: URLSearchParams, requestUrl: string) {
+    const explicitTarget = safeHttpUrl(searchParams.get('redirect') || searchParams.get('to'))
+    if (explicitTarget) return explicitTarget
+
+    const contentType = normalizeTrackedContentType(
+        searchParams.get('content_type')
+        || searchParams.get('link_type')
+    )
+    const contentId = String(
+        searchParams.get('content_id')
+        || searchParams.get('post_id')
+        || searchParams.get('property_id')
+        || ''
+    ).trim()
+
+    if (!contentType || !contentId) return null
+
+    const origin = new URL(requestUrl).origin
+
+    if (contentType === 'property') {
+        return new URL(`/imovel/${encodeURIComponent(contentId)}/detalhes`, origin).toString()
+    }
+
+    try {
+        let query = supabase
+            .from('blog_posts')
+            .select('slug')
+            .eq('status', 'published')
+            .limit(1)
+
+        query = isUuid(contentId)
+            ? query.eq('id', contentId)
+            : query.eq('slug', contentId)
+
+        const { data, error } = await query.maybeSingle()
+        if (error) {
+            console.warn('[Track] content redirect lookup failed:', error.message)
+            return null
+        }
+
+        const slug = String(data?.slug || '').trim()
+        if (!slug) return null
+
+        const path = contentType === 'news'
+            ? `/noticias/${encodeURIComponent(slug)}`
+            : `/blog/${encodeURIComponent(slug)}`
+        return new URL(path, origin).toString()
+    } catch (error) {
+        console.warn('[Track] content redirect resolve failed:', error)
         return null
     }
 }
@@ -46,6 +348,7 @@ function buildClickMetadata(params: {
         link_label: params.searchParams.get('link_label') || null,
         link_title: params.searchParams.get('link_title') || null,
         target_url: redirectUrl,
+        lead_id: normalizeLeadId(params.searchParams.get('lead_id')) || null,
         lead_phone: normalizeLeadPhone(
             params.searchParams.get('lead_phone')
             || params.searchParams.get('wa_phone')
@@ -59,6 +362,27 @@ function buildClickMetadata(params: {
     }
 }
 
+function isTrackedClickFromSearchParams(searchParams: URLSearchParams) {
+    return Boolean(
+        searchParams.get('event_type')
+        && (
+            searchParams.get('utm_source')
+            || searchParams.get('utm_medium')
+            || searchParams.get('utm_campaign')
+            || searchParams.get('lead_id')
+            || searchParams.get('lead_phone')
+            || searchParams.get('link_type')
+        )
+    )
+}
+
+function isContentClick(click: Record<string, unknown>) {
+    const eventType = String(click.event_type || '').toLowerCase()
+    const linkType = String(click.link_type || '').toLowerCase()
+    return ['blog', 'news', 'noticia', 'artigo', 'article', 'event'].includes(linkType)
+        || /(^|_)(blog|news|noticia|artigo|event)(_|$)/.test(eventType)
+}
+
 async function attachTrackedVisitorToLead(params: {
     visitorId: string
     landingPageId: string | null
@@ -66,21 +390,40 @@ async function attachTrackedVisitorToLead(params: {
     searchParams: URLSearchParams
     skipFunnelEvent?: boolean
 }) {
+    const leadId = normalizeLeadId(params.searchParams.get('lead_id'))
     const phone = normalizeLeadPhone(
         params.searchParams.get('lead_phone')
         || params.searchParams.get('wa_phone')
         || params.searchParams.get('wpp_phone')
     )
-    const candidates = phoneCandidates(phone)
-    if (!candidates.length) return null
 
-    const { data: lead, error } = await supabase
-        .from('leads')
-        .select('id, metadata, landing_page_id')
-        .or(buildPhoneOrFilter(candidates))
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
+    let lead: any = null
+    let error: any = null
+
+    if (leadId) {
+        const lookup = await supabase
+            .from('leads')
+            .select('id, metadata, landing_page_id')
+            .eq('id', leadId)
+            .maybeSingle()
+        lead = lookup.data
+        error = lookup.error
+    }
+
+    if (!lead?.id) {
+        const candidates = phoneCandidates(phone)
+        if (!candidates.length) return null
+
+        const lookup = await supabase
+            .from('leads')
+            .select('id, metadata, landing_page_id')
+            .or(buildPhoneOrFilter(candidates))
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        lead = lookup.data
+        error = lookup.error
+    }
 
     if (error || !lead?.id) {
         if (error) console.warn('[Track] lead attach lookup failed:', error.message)
@@ -99,10 +442,21 @@ async function attachTrackedVisitorToLead(params: {
         ? (metadata as any).whatsapp_clicks
         : []
     const nextClicks = [...previousClicks, whatsappClick].slice(-100)
+    const previousLinkClicks = Array.isArray((metadata as any).link_clicks)
+        ? (metadata as any).link_clicks
+        : []
+    const nextLinkClicks = [...previousLinkClicks, whatsappClick].slice(-150)
+    const previousContentClicks = Array.isArray((metadata as any).content_clicks)
+        ? (metadata as any).content_clicks
+        : []
+    const nextContentClicks = isContentClick(whatsappClick)
+        ? [...previousContentClicks, whatsappClick].slice(-120)
+        : previousContentClicks
     const isPropertyClick =
         params.searchParams.get('utm_campaign') === 'property_recommendation'
         || whatsappClick.event_type === 'whatsapp_property_click'
         || whatsappClick.link_type === 'property'
+    const contentClick = isContentClick(whatsappClick)
 
     const { error: updateError } = await supabase
         .from('leads')
@@ -130,8 +484,14 @@ async function attachTrackedVisitorToLead(params: {
                     city: params.trackingData.city || currentTracking.city || null,
                     region: params.trackingData.region || currentTracking.region || null,
                 },
+                last_link_click: whatsappClick,
+                link_clicks: nextLinkClicks,
                 last_whatsapp_click: whatsappClick,
                 whatsapp_clicks: nextClicks,
+                ...(contentClick ? {
+                    last_content_click: whatsappClick,
+                    content_clicks: nextContentClicks,
+                } : {}),
                 ...(isPropertyClick ? { whatsapp_property_click: whatsappClick } : {}),
             },
             updated_at: new Date().toISOString(),
@@ -154,6 +514,193 @@ async function attachTrackedVisitorToLead(params: {
     }
 
     return lead.id
+}
+
+async function appendEventLinkClick(searchParams: URLSearchParams, clickMetadata: Record<string, unknown>) {
+    const registrationId = searchParams.get('event_registration_id')
+    const eventId = searchParams.get('event_id')
+    const queueId = searchParams.get('event_queue_id')
+    const ruleId = searchParams.get('event_rule_id')
+    const phone = normalizeLeadPhone(searchParams.get('lead_phone'))
+
+    if (!registrationId && !eventId && !phone) return
+
+    let registration: any = null
+    if (registrationId) {
+        const { data } = await supabase
+            .from('event_registrations')
+            .select('*')
+            .eq('id', registrationId)
+            .maybeSingle()
+        registration = data
+    }
+
+    if (!registration && eventId && phone) {
+        const variants = phoneCandidates(phone)
+        const { data } = await supabase
+            .from('event_registrations')
+            .select('*')
+            .eq('event_id', eventId)
+            .in('phone', variants)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        registration = data
+    }
+
+    if (!registration?.id) return
+
+    const metadata = metadataRecord(registration.metadata)
+    const interaction = {
+        type: 'link_click',
+        event_id: eventId || registration.event_id,
+        registration_id: registration.id,
+        rule_id: ruleId || null,
+        queue_id: queueId || null,
+        tracking_tag: searchParams.get('event_tracking_tag') || searchParams.get('utm_campaign') || 'event_agent_link',
+        button_label: searchParams.get('link_label') || null,
+        button_action: searchParams.get('link_type') || null,
+        button_url: clickMetadata.target_url || null,
+        target_url: clickMetadata.target_url || null,
+        clicked_at: new Date().toISOString(),
+    }
+    const previous = Array.isArray((metadata as any).event_interactions) ? (metadata as any).event_interactions : []
+
+    await supabase
+        .from('event_registrations')
+        .update({
+            metadata: {
+                ...metadata,
+                last_event_interaction: interaction,
+                event_interactions: [...previous, interaction].slice(-80),
+            },
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', registration.id)
+
+    if (queueId) {
+        const { data: queue } = await supabase
+            .from('event_message_queue')
+            .select('metadata')
+            .eq('id', queueId)
+            .maybeSingle()
+        const queueMetadata = metadataRecord(queue?.metadata)
+        const responses = Array.isArray((queueMetadata as any).responses) ? (queueMetadata as any).responses : []
+        await supabase
+            .from('event_message_queue')
+            .update({
+                metadata: {
+                    ...queueMetadata,
+                    last_response: interaction,
+                    responses: [...responses, interaction].slice(-40),
+                },
+            })
+            .eq('id', queueId)
+    }
+
+    await supabase.from('event_agent_logs').insert({
+        event_id: interaction.event_id,
+        registration_id: registration.id,
+        rule_id: ruleId || null,
+        message_queue_id: queueId || null,
+        action: 'event_link_click_tracked',
+        message: interaction.button_label
+            ? `Clique registrado: ${interaction.button_label}.`
+            : 'Clique de link do evento registrado.',
+        metadata: interaction,
+    })
+}
+
+async function appendBrokerCandidateLinkClick(searchParams: URLSearchParams, clickMetadata: Record<string, unknown>) {
+    const candidateId = searchParams.get('broker_candidate_id')
+    const queueId = searchParams.get('broker_candidate_queue_id')
+    const ruleId = searchParams.get('broker_candidate_rule_id')
+    const phone = normalizeLeadPhone(searchParams.get('lead_phone'))
+
+    if (!candidateId && !queueId && !phone) return
+
+    let candidate: any = null
+    if (candidateId) {
+        const { data } = await supabase
+            .from('broker_candidates')
+            .select('*')
+            .eq('id', candidateId)
+            .maybeSingle()
+        candidate = data
+    }
+
+    if (!candidate && phone) {
+        const candidates = phoneCandidates(phone)
+        const { data } = await supabase
+            .from('broker_candidates')
+            .select('*')
+            .in('phone_normalized', candidates)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        candidate = data
+    }
+
+    if (!candidate?.id) return
+
+    const metadata = metadataRecord(candidate.metadata)
+    const interaction = {
+        type: 'link_click',
+        candidate_id: candidate.id,
+        rule_id: ruleId || null,
+        queue_id: queueId || null,
+        tracking_tag: searchParams.get('broker_candidate_tracking_tag') || searchParams.get('utm_campaign') || 'broker_candidate_link',
+        button_label: searchParams.get('link_label') || null,
+        button_action: searchParams.get('link_type') || null,
+        button_url: clickMetadata.target_url || null,
+        target_url: clickMetadata.target_url || null,
+        clicked_at: new Date().toISOString(),
+    }
+    const previous = Array.isArray((metadata as any).candidate_interactions) ? (metadata as any).candidate_interactions : []
+
+    await supabase
+        .from('broker_candidates')
+        .update({
+            metadata: {
+                ...metadata,
+                last_candidate_interaction: interaction,
+                candidate_interactions: [...previous, interaction].slice(-80),
+            },
+            last_activity_at: interaction.clicked_at,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', candidate.id)
+
+    if (queueId) {
+        const { data: queue } = await supabase
+            .from('broker_candidate_message_queue')
+            .select('metadata')
+            .eq('id', queueId)
+            .maybeSingle()
+        const queueMetadata = metadataRecord(queue?.metadata)
+        const responses = Array.isArray((queueMetadata as any).responses) ? (queueMetadata as any).responses : []
+        await supabase
+            .from('broker_candidate_message_queue')
+            .update({
+                metadata: {
+                    ...queueMetadata,
+                    last_response: interaction,
+                    responses: [...responses, interaction].slice(-40),
+                },
+            })
+            .eq('id', queueId)
+    }
+
+    await supabase.from('broker_candidate_agent_logs').insert({
+        candidate_id: candidate.id,
+        rule_id: ruleId || null,
+        message_queue_id: queueId || null,
+        action: 'candidate_link_click_tracked',
+        message: interaction.button_label
+            ? `Clique registrado: ${interaction.button_label}.`
+            : 'Clique de link do candidato registrado.',
+        metadata: interaction,
+    })
 }
 
 async function findLandingPageId(landingPageSlug: string | null | undefined) {
@@ -217,37 +764,43 @@ async function upsertTrackedVisitor(params: {
 
 export async function GET(request: NextRequest) {
     const url = new URL(request.url)
-    const targetUrl = safeHttpUrl(url.searchParams.get('redirect') || url.searchParams.get('to'))
+    const searchParams = expandCompactTrackingParams(url.searchParams, request.url)
+    const targetUrl = await resolveTrackedTargetUrl(searchParams, request.url)
     const fallbackUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || new URL('/', request.url).toString()
 
     if (!targetUrl) {
         return NextResponse.redirect(fallbackUrl)
     }
+    searchParams.set('redirect', targetUrl)
 
     try {
         const cookieId = request.cookies.get(VISITOR_COOKIE_NAME)?.value || generateVisitorId()
-        const trackingData = extractTrackingData(request.headers, url.searchParams, request.headers.get('referer') || undefined)
+        const trackingData = extractTrackingData(request.headers, searchParams, request.headers.get('referer') || undefined)
         trackingData.visitor_cookie_id = cookieId
 
-        const landingPageId = await findLandingPageId(url.searchParams.get('landing_page_slug'))
+        const landingPageId = await findLandingPageId(searchParams.get('landing_page_slug'))
         const visitorId = await upsertTrackedVisitor({ cookieId, landingPageId, trackingData })
-        const clickMetadata = buildClickMetadata({ landingPageId, searchParams: url.searchParams })
+        const clickMetadata = buildClickMetadata({ landingPageId, searchParams })
+        await appendEventLinkClick(searchParams, clickMetadata)
+        await appendBrokerCandidateLinkClick(searchParams, clickMetadata)
 
         const linkedLeadId = await attachTrackedVisitorToLead({
             visitorId,
             landingPageId,
             trackingData,
-            searchParams: url.searchParams,
+            searchParams,
             skipFunnelEvent: true,
         })
 
-        await supabase.from('funnel_events').insert({
-            visitor_id: visitorId,
-            lead_id: linkedLeadId,
-            landing_page_id: landingPageId,
-            event_type: clickMetadata.event_type || 'whatsapp_link_click',
+        const funnelEvent = await insertFunnelEvent({
+            visitorId,
+            leadId: linkedLeadId,
+            landingPageId,
+            eventType: clickMetadata.event_type || 'whatsapp_link_click',
             metadata: clickMetadata,
         })
+        await appendSiteActivityToLead(linkedLeadId, visitorId, funnelEvent)
+        await appendSiteActivityToBrokerCandidate(visitorId, funnelEvent)
 
         const response = NextResponse.redirect(targetUrl)
         response.cookies.set(VISITOR_COOKIE_NAME, cookieId, {
@@ -267,7 +820,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { visitor_cookie_id, landing_page_slug, referrer, search_params, event_type, metadata } = body
 
-        const searchParams = new URLSearchParams(search_params || '')
+        const searchParams = expandCompactTrackingParams(new URLSearchParams(search_params || ''), request.url)
         const trackingData = extractTrackingData(request.headers, searchParams, referrer)
 
         const cookieId = visitor_cookie_id || generateVisitorId()
@@ -275,11 +828,12 @@ export async function POST(request: NextRequest) {
 
         // Look up landing page ID by slug
         let landingPageId = null
-        if (landing_page_slug) {
+        const resolvedLandingPageSlug = landing_page_slug || searchParams.get('landing_page_slug')
+        if (resolvedLandingPageSlug) {
             const { data: lp } = await supabase
                 .from('landing_pages')
                 .select('id')
-                .eq('slug', landing_page_slug)
+                .eq('slug', resolvedLandingPageSlug)
                 .maybeSingle()
             landingPageId = lp?.id
         }
@@ -316,7 +870,10 @@ export async function POST(request: NextRequest) {
                 landingPageId,
                 trackingData,
                 searchParams,
+                skipFunnelEvent: true,
             })
+            const visitorLead = linkedLeadId ? null : await findLeadByVisitorId(existing.id)
+            const resolvedLeadId = linkedLeadId || visitorLead?.id || null
 
             // Update existing visitor
             await supabase
@@ -345,21 +902,33 @@ export async function POST(request: NextRequest) {
                 .eq('id', existing.id)
 
             // Log funnel event
-            if (event_type) {
-                await supabase.from('funnel_events').insert({
-                    visitor_id: existing.id,
-                    landing_page_id: landingPageId,
-                    event_type: event_type,
-                    metadata: metadata || {}
+            const eventMetadata = event_type
+                ? metadataRecord(metadata)
+                : {
+                    ...metadataRecord(metadata),
+                    page_views: (existing.page_views || 1) + 1,
+                }
+            const funnelEvent = await insertFunnelEvent({
+                visitorId: existing.id,
+                leadId: resolvedLeadId,
+                landingPageId,
+                eventType: event_type || 'page_view',
+                metadata: eventMetadata,
+            })
+            await appendSiteActivityToLead(resolvedLeadId, existing.id, funnelEvent)
+            await appendSiteActivityToBrokerCandidate(existing.id, funnelEvent)
+
+            if (!event_type && isTrackedClickFromSearchParams(searchParams)) {
+                const clickMetadata = buildClickMetadata({ landingPageId, searchParams })
+                const clickEvent = await insertFunnelEvent({
+                    visitorId: existing.id,
+                    leadId: resolvedLeadId,
+                    landingPageId,
+                    eventType: String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
+                    metadata: clickMetadata,
                 })
-            } else {
-                // Default: Page View
-                await supabase.from('funnel_events').insert({
-                    visitor_id: existing.id,
-                    landing_page_id: landingPageId,
-                    event_type: 'page_view',
-                    metadata: { page_views: (existing.page_views || 1) + 1 },
-                })
+                await appendSiteActivityToLead(resolvedLeadId, existing.id, clickEvent)
+                await appendSiteActivityToBrokerCandidate(existing.id, clickEvent)
             }
 
             // Get VAPID public key for push notifications
@@ -373,7 +942,7 @@ export async function POST(request: NextRequest) {
                 visitor_id: existing.id,
                 visitor_cookie_id: cookieId,
                 is_returning: true,
-                linked_lead_id: linkedLeadId,
+                linked_lead_id: resolvedLeadId,
                 vapid_public_key: vapidKey?.value || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
             })
         }
@@ -398,24 +967,39 @@ export async function POST(request: NextRequest) {
             landingPageId,
             trackingData,
             searchParams,
+            skipFunnelEvent: true,
         })
+        const visitorLead = linkedLeadId ? null : await findLeadByVisitorId(visitor.id)
+        const resolvedLeadId = linkedLeadId || visitorLead?.id || null
 
         // Log initial funnel event
-        if (event_type) {
-            await supabase.from('funnel_events').insert({
-                visitor_id: visitor.id,
-                landing_page_id: landingPageId,
-                event_type: event_type,
-                metadata: metadata || {}
+        const eventMetadata = event_type
+            ? metadataRecord(metadata)
+            : {
+                ...metadataRecord(metadata),
+                first_visit: true,
+            }
+        const funnelEvent = await insertFunnelEvent({
+            visitorId: visitor.id,
+            leadId: resolvedLeadId,
+            landingPageId,
+            eventType: event_type || 'page_view',
+            metadata: eventMetadata,
+        })
+        await appendSiteActivityToLead(resolvedLeadId, visitor.id, funnelEvent)
+        await appendSiteActivityToBrokerCandidate(visitor.id, funnelEvent)
+
+        if (!event_type && isTrackedClickFromSearchParams(searchParams)) {
+            const clickMetadata = buildClickMetadata({ landingPageId, searchParams })
+            const clickEvent = await insertFunnelEvent({
+                visitorId: visitor.id,
+                leadId: resolvedLeadId,
+                landingPageId,
+                eventType: String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
+                metadata: clickMetadata,
             })
-        } else {
-            // Default: Page View
-            await supabase.from('funnel_events').insert({
-                visitor_id: visitor.id,
-                landing_page_id: landingPageId,
-                event_type: 'page_view',
-                metadata: { first_visit: true },
-            })
+            await appendSiteActivityToLead(resolvedLeadId, visitor.id, clickEvent)
+            await appendSiteActivityToBrokerCandidate(visitor.id, clickEvent)
         }
 
         // Get VAPID public key for push notifications
@@ -429,7 +1013,7 @@ export async function POST(request: NextRequest) {
             visitor_id: visitor.id,
             visitor_cookie_id: cookieId,
             is_returning: false,
-            linked_lead_id: linkedLeadId,
+            linked_lead_id: resolvedLeadId,
             vapid_public_key: vapidKey?.value || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
         })
     } catch (error) {

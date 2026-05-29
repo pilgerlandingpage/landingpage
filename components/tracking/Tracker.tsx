@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { getVisitorId } from '@/lib/tracking/client'
+import { getVisitorId, isTrackingDisabled } from '@/lib/tracking/client'
 
 interface TrackerProps {
     landingPageSlug?: string
@@ -13,9 +13,18 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
     const scrollMilestones = useRef(new Set<number>())
 
     useEffect(() => {
+        if (isTrackingDisabled()) return
+
         const cookieId = getVisitorId()
+        const pageMetadata = () => ({
+            page_path: window.location.pathname,
+            page_url: window.location.href,
+            page_title: document.title,
+        })
 
         const trackEvent = async (eventType: string, metadata: any = {}) => {
+            if (isTrackingDisabled()) return
+
             try {
                 await fetch('/api/track', {
                     method: 'POST',
@@ -24,7 +33,10 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
                         visitor_cookie_id: cookieId,
                         landing_page_slug: landingPageSlug,
                         event_type: eventType,
-                        metadata
+                        metadata: {
+                            ...pageMetadata(),
+                            ...metadata,
+                        }
                     }),
                 })
             } catch (e) {
@@ -44,6 +56,7 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
                             landing_page_slug: landingPageSlug,
                             referrer: document.referrer,
                             search_params: window.location.search,
+                            metadata: pageMetadata(),
                         }),
                     })
 

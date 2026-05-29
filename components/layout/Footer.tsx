@@ -1,217 +1,326 @@
 'use client'
 
 import Link from 'next/link'
-import { Instagram, Facebook, Youtube } from 'lucide-react'
+import { Facebook, Instagram, MapPin, MessageCircle, Youtube } from 'lucide-react'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 
 const TiktokIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
 )
 
+const propertyLinks = [
+    ['Todos', '/imoveis'],
+    ['Apartamentos', '/busca?type=apartamento'],
+    ['Coberturas', '/imoveis/coberturas'],
+    ['Frente mar', '/imoveis/frente-mar'],
+    ['Lançamentos', '/busca?tag=lancamento'],
+]
+
+const cityLinks = [
+    ['Balneário Camboriú', '/imoveis/balneario-camboriu'],
+    ['Praia Brava', '/imoveis/praia-brava'],
+    ['Itapema', '/imoveis/itapema'],
+    ['Porto Belo', '/busca?city=Porto+Belo'],
+]
+
 export default function Footer() {
     return (
         <footer className="site-footer">
+            <div className="footer-cta">
+                <div>
+                    <span className="footer-kicker">Pilger Luxury Search</span>
+                    <h2>Quer comprar melhor no litoral catarinense?</h2>
+                    <p>Fale com a equipe do Guilherme e receba uma curadoria de oportunidades alinhada ao seu momento.</p>
+                </div>
+                <WhatsAppCaptureLink
+                    phone="5547992528080"
+                    message="Olá! Vim pelo site e gostaria de uma curadoria de luxo."
+                    slug="footer"
+                    template="footer-premium-cta"
+                    className="footer-cta-button"
+                >
+                    <MessageCircle size={18} />
+                    Falar com especialista
+                </WhatsAppCaptureLink>
+            </div>
+
             <div className="footer-main">
-                <div className="footer-grid">
-                    {/* Brand */}
-                    <div className="footer-brand">
-                        <Link href="/" className="footer-logo">
-                            <span className="footer-logo-name">GUILHERME PILGER</span>
-                            <span className="footer-logo-sub">Corretor de Imóveis</span>
-                        </Link>
-                        <p className="footer-creci">CRECI/SC 6772-J</p>
-                        <p className="footer-location">Balneário Camboriú, SC</p>
-
-                        <WhatsAppCaptureLink
-                            phone="5547992528080"
-                            message="Olá! Vim pelo site e gostaria de mais informações."
-                            slug="footer"
-                            template="footer-cta"
-                            className="footer-whatsapp-btn"
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            Fale com Especialista
-                        </WhatsAppCaptureLink>
-
-                        <div className="footer-socials">
-                            <a href="https://www.instagram.com/guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={20} /></a>
-                            <a href="https://www.facebook.com/guilherme.pilger/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={20} /></a>
-                            <a href="https://www.youtube.com/@guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={20} /></a>
-                            <a href="https://www.tiktok.com/@guilhermepilgeroficial" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TiktokIcon /></a>
-                        </div>
+                <div className="footer-brand">
+                    <Link href="/" className="footer-logo">
+                        <span className="footer-logo-name">GUILHERME PILGER</span>
+                        <span className="footer-logo-sub">CRECI/SC 6772-J</span>
+                    </Link>
+                    <p className="footer-description">
+                        Curadoria, conteúdo e negociação para alto padrão em Balneário Camboriú e litoral de Santa Catarina.
+                    </p>
+                    <div className="footer-meta">
+                        <span>CRECI/SC 6772-J</span>
+                        <span><MapPin size={13} /> Balneário Camboriú / SC</span>
                     </div>
-
-                    {/* Imóveis */}
-                    <div className="footer-section">
-                        <h4>Imóveis</h4>
-                        <Link href="/busca?status=active">Todos os imóveis</Link>
-                        <Link href="/busca?type=apartamento">Apartamentos</Link>
-                        <Link href="/busca?type=casa">Casas</Link>
-                        <Link href="/busca?subtype=cobertura">Coberturas</Link>
-                        <Link href="/busca?type=terreno">Terrenos</Link>
-                        <Link href="/busca?tag=lancamento">Lançamentos</Link>
-                    </div>
-
-                    {/* Cidades */}
-                    <div className="footer-section">
-                        <h4>Cidades</h4>
-                        <Link href="/busca?city=Balneário+Camboriú">Balneário Camboriú</Link>
-                        <Link href="/busca?city=Itajaí">Itajaí</Link>
-                        <Link href="/busca?city=Itapema">Itapema</Link>
-                        <Link href="/busca?city=Porto+Belo">Porto Belo</Link>
-                        <Link href="/busca?city=Camboriú">Camboriú</Link>
-                    </div>
-
-                    {/* Institucional */}
-                    <div className="footer-section">
-                        <h4>Institucional</h4>
-                        <Link href="/sobre">Sobre a Pilger</Link>
-                        <Link href="/contato">Contato</Link>
-                        <Link href="/blog">Blog</Link>
-                        <Link href="/noticias">Notícias</Link>
+                    <div className="footer-socials">
+                        <a href="https://www.instagram.com/guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={19} /></a>
+                        <a href="https://www.facebook.com/guilherme.pilger/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={19} /></a>
+                        <a href="https://www.youtube.com/@guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={19} /></a>
+                        <a href="https://www.tiktok.com/@guilhermepilgeroficial" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TiktokIcon /></a>
                     </div>
                 </div>
+
+                <nav className="footer-section" aria-label="Vitrine">
+                    <h3>Vitrine</h3>
+                    {propertyLinks.map(([label, href]) => (
+                        <Link href={href} key={href}>{label}</Link>
+                    ))}
+                </nav>
+
+                <nav className="footer-section" aria-label="Cidades">
+                    <h3>Cidades</h3>
+                    {cityLinks.map(([label, href]) => (
+                        <Link href={href} key={href}>{label}</Link>
+                    ))}
+                </nav>
+
+                <nav className="footer-section" aria-label="Institucional">
+                    <h3>Marca Pilger</h3>
+                    <Link href="/blog">Blog</Link>
+                    <Link href="/noticias">Notícias</Link>
+                    <Link href="/eventos">Eventos</Link>
+                    <WhatsAppCaptureLink
+                        phone="5547992528080"
+                        message="Olá! Quero falar com um especialista."
+                        slug="footer"
+                        template="footer-contato"
+                    >
+                        Contato
+                    </WhatsAppCaptureLink>
+                    <Link href="/busca">Busca premium</Link>
+                    <Link href="/politica-de-privacidade">Politica de privacidade</Link>
+                    <Link href="/termos-de-servico">Termos de servico</Link>
+                </nav>
             </div>
 
             <div className="footer-bottom">
-                <p>© 2026 Guilherme Pilger Imóveis. Todos os direitos reservados.</p>
+                <p>© 2026 Guilherme Pilger. Todos os direitos reservados.</p>
                 <p>CRECI/SC 6772-J · Balneário Camboriú, SC</p>
             </div>
 
             <style jsx>{`
                 .site-footer {
-                    background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
-                    color: #999;
+                    position: relative;
+                    overflow: hidden;
+                    background:
+                        radial-gradient(circle at 10% 0%, rgba(223,193,142,0.14), transparent 30%),
+                        linear-gradient(180deg, #151311 0%, #080807 100%);
+                    color: rgba(255,255,255,0.66);
                     font-family: 'Inter', -apple-system, sans-serif;
-                    font-size: 0.82rem;
-                    margin-top: 40px;
+                    margin-top: 0;
                 }
-                .footer-main {
-                    max-width: 1400px;
-                    margin: 0 auto;
-                    padding: 48px 24px 32px;
-                }
-                .footer-grid {
-                    display: grid;
-                    grid-template-columns: 1fr;
-                    gap: 32px;
-                }
-                @media (min-width: 550px) {
-                    .footer-grid { grid-template-columns: 1fr 1fr; }
-                }
-                @media (min-width: 900px) {
-                    .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
-                    .footer-main { padding: 56px 40px 36px; }
-                }
-
-                /* Brand column */
-                .footer-brand {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 6px;
-                }
-                .footer-logo {
-                    display: flex;
-                    flex-direction: column;
-                    margin-bottom: 4px;
-                }
-                .footer-logo-name {
-                    font-family: 'Playfair Display', Georgia, serif;
-                    font-size: 1.2rem;
-                    font-weight: 700;
-                    color: #e8e5e0;
-                    letter-spacing: 0.06em;
-                    line-height: 1.1;
-                }
-                .footer-logo-sub {
-                    font-size: 0.7rem;
-                    color: #b8945f;
-                    font-weight: 500;
+                .site-footer::before {
+                    content: 'PILGER';
+                    position: absolute;
+                    right: -3vw;
+                    bottom: 5%;
+                    color: rgba(255,255,255,0.035);
+                    font-size: clamp(7rem, 20vw, 20rem);
+                    font-weight: 950;
                     letter-spacing: 0.08em;
+                    pointer-events: none;
+                }
+                .footer-cta {
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 24px;
+                    max-width: 1320px;
+                    margin: 0 auto;
+                    padding: clamp(34px, 5vw, 58px) clamp(20px, 4vw, 44px);
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                }
+                .footer-kicker {
+                    color: #d8b979;
+                    font-size: 0.7rem;
+                    font-weight: 950;
+                    letter-spacing: 0.18em;
                     text-transform: uppercase;
                 }
-                .footer-creci {
-                    color: #666;
-                    font-size: 0.72rem;
+                .footer-cta h2 {
+                    max-width: 760px;
+                    margin: 8px 0 10px;
+                    color: #fff8ea;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(2rem, 4vw, 4rem);
+                    line-height: 1;
+                    letter-spacing: 0;
+                }
+                .footer-cta p {
+                    max-width: 620px;
                     margin: 0;
+                    color: rgba(255,255,255,0.64);
+                    font-size: 0.98rem;
+                    line-height: 1.65;
                 }
-                .footer-location {
-                    color: #666;
-                    font-size: 0.72rem;
-                    margin: 0 0 8px 0;
-                }
-                .footer-whatsapp-btn {
+                :global(.footer-cta-button) {
                     display: inline-flex;
                     align-items: center;
+                    justify-content: center;
                     gap: 8px;
-                    background: #25D366;
-                    color: white !important;
-                    padding: 10px 20px;
-                    border-radius: 50px;
-                    font-weight: 600;
-                    font-size: 0.78rem;
-                    transition: all 0.3s;
-                    width: fit-content;
-                    margin: 4px 0;
-                    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+                    min-height: 44px;
+                    padding: 0 18px;
+                    border-radius: 999px;
+                    background: #087a3d;
+                    color: #fff !important;
+                    font-size: 0.76rem;
+                    font-weight: 950;
+                    letter-spacing: 0.09em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    box-shadow: 0 16px 32px rgba(8,122,61,0.28);
                 }
-                .footer-whatsapp-btn:hover {
-                    background: #20bd5a;
-                    transform: translateY(-1px);
-                    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+                .footer-main {
+                    position: relative;
+                    z-index: 1;
+                    display: grid;
+                    grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(160px, 1fr));
+                    gap: clamp(24px, 4vw, 54px);
+                    max-width: 1320px;
+                    margin: 0 auto;
+                    padding: clamp(34px, 5vw, 58px) clamp(20px, 4vw, 44px);
+                }
+                .footer-logo {
+                    display: inline-flex;
+                    flex-direction: column;
+                }
+                .footer-logo-name {
+                    color: #fff8ea;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(1.4rem, 2vw, 2rem);
+                    font-weight: 700;
+                    letter-spacing: 0.08em;
+                    line-height: 1;
+                }
+                .footer-logo-sub {
+                    margin-top: 5px;
+                    color: #d8b979;
+                    font-size: 0.68rem;
+                    font-weight: 900;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                }
+                .footer-description {
+                    max-width: 430px;
+                    margin: 18px 0 0;
+                    color: rgba(255,255,255,0.62);
+                    font-size: 0.9rem;
+                    line-height: 1.7;
+                }
+                .footer-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-top: 18px;
+                }
+                .footer-meta span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    min-height: 30px;
+                    padding: 0 10px;
+                    border: 1px solid rgba(223,193,142,0.16);
+                    border-radius: 999px;
+                    color: #dcc89f;
+                    font-size: 0.66rem;
+                    font-weight: 850;
+                    letter-spacing: 0.06em;
+                    text-transform: uppercase;
                 }
                 .footer-socials {
                     display: flex;
-                    gap: 14px;
-                    margin-top: 8px;
+                    gap: 10px;
+                    margin-top: 20px;
                 }
                 .footer-socials a {
-                    color: #666;
-                    transition: color 0.2s, transform 0.2s;
+                    display: grid;
+                    place-items: center;
+                    width: 38px;
+                    height: 38px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.04);
+                    color: #fff8ea;
+                    transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
                 }
                 .footer-socials a:hover {
-                    color: #b8945f;
                     transform: translateY(-2px);
+                    border-color: rgba(223,193,142,0.34);
+                    color: #d8b979;
                 }
-
-                /* Sections */
                 .footer-section {
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 9px;
                 }
-                .footer-section h4 {
+                .footer-section h3 {
+                    margin: 0 0 6px;
+                    color: #d8b979;
                     font-family: 'Inter', sans-serif;
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    color: #b8945f;
+                    font-size: 0.7rem;
+                    font-weight: 950;
+                    letter-spacing: 0.16em;
                     text-transform: uppercase;
-                    letter-spacing: 0.1em;
-                    margin: 0 0 4px 0;
                 }
                 .footer-section a {
-                    color: #888 !important;
-                    font-size: 0.8rem;
-                    transition: color 0.2s;
-                    line-height: 1.6;
+                    color: rgba(255,255,255,0.62) !important;
+                    font-size: 0.86rem;
+                    font-weight: 650;
+                    line-height: 1.55;
+                    transition: color 0.18s ease, transform 0.18s ease;
                 }
                 .footer-section a:hover {
-                    color: #e8e5e0 !important;
+                    color: #fff8ea !important;
+                    transform: translateX(3px);
                 }
-
-                /* Bottom */
                 .footer-bottom {
-                    border-top: 1px solid rgba(255,255,255,0.06);
-                    padding: 16px 24px;
-                    text-align: center;
-                    font-size: 0.7rem;
-                    color: #555;
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 18px;
+                    max-width: 1320px;
+                    margin: 0 auto;
+                    padding: 18px clamp(20px, 4vw, 44px) 24px;
+                    border-top: 1px solid rgba(255,255,255,0.08);
+                    color: rgba(255,255,255,0.38);
+                    font-size: 0.72rem;
+                    font-weight: 650;
                 }
                 .footer-bottom p {
-                    margin: 2px 0;
+                    margin: 0;
                 }
-                @media (min-width: 900px) {
-                    .footer-bottom { padding: 16px 40px; }
+                @media (max-width: 900px) {
+                    .footer-cta {
+                        display: block;
+                    }
+                    :global(.footer-cta-button) {
+                        width: 100%;
+                        margin-top: 22px;
+                    }
+                    .footer-main {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                    .footer-brand {
+                        grid-column: 1 / -1;
+                    }
+                    .footer-bottom {
+                        display: grid;
+                        text-align: center;
+                    }
+                }
+                @media (max-width: 560px) {
+                    .footer-main {
+                        grid-template-columns: 1fr;
+                    }
                 }
             `}</style>
         </footer>

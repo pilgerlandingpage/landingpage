@@ -41,3 +41,28 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# dev server logs
+.codex-*.log
+.codex-*.err.log
+.next-dev*.log
+.next-dev*.err.log
+.next-start*.log
+.next-start*.err.log
+
+# dev screenshots e csvs temporários
+*-check.png
+*-check-*.png
+*-local-check.png
+*-production-check.png
+home-after-*.png
+property-detail-*.png
+property-feed-*.png
+property-social-*.png
+admin-*.png
+codex-*.png
+trabalhe-conosco-*.png
+*.csv
+
+# temp files
+temp_config.json

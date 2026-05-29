@@ -1,4 +1,5 @@
 import { generateChatResponse } from '@/lib/ai/generation'
+import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
 
 type SupabaseClient = any
 
@@ -50,7 +51,7 @@ export type RadarInsightResult = {
   ai_used: boolean
 }
 
-const DEFAULT_RADAR_ANALYST_PROMPT = `Voce e o Analista de Radar de Mercado da Pilger Imoveis, uma imobiliaria de luxo em Santa Catarina.
+const DEFAULT_RADAR_ANALYST_PROMPT = `Voce e o Analista de Radar de Mercado da Imobiliaria Guilherme Pilger, uma imobiliaria de luxo em Santa Catarina.
 Sua funcao e interpretar sinais de busca, estoque imobiliario e oportunidade comercial.
 Responda sempre em portugues do Brasil, com linguagem executiva, objetiva e orientada a acao.
 Nunca invente numeros alem dos dados fornecidos.
@@ -288,6 +289,7 @@ async function runAiAnalysis(args: {
   trend: TrendInput
   fallback: ReturnType<typeof buildFallbackInsight>
   relatedProperties: PropertyIndexItem[]
+  ecosystemContext?: Record<string, unknown> | null
 }) {
   const relatedPreview = args.relatedProperties.slice(0, 8).map(property => ({
     title: property.title,
@@ -314,6 +316,7 @@ ${JSON.stringify({
     related_properties_count: args.relatedProperties.length,
     price_stats: args.fallback.priceStats,
     related_properties_sample: relatedPreview,
+    ecosystem_context: args.ecosystemContext || null,
   }, null, 2)}
 
 Formato obrigatorio:
@@ -392,12 +395,18 @@ export async function generateMarketRadarInsight(args: {
 
   if (shouldUseAi) {
     try {
+      const ecosystemContext = await getAgentEcosystemContext({ supabase: args.supabase, agent: 'radar', days: 30 })
       aiPayload = await runAiAnalysis({
         config: args.config,
         radar: args.radar,
         trend: args.trend,
         fallback,
         relatedProperties,
+        ecosystemContext: {
+          brief: buildAgentContextBrief(ecosystemContext),
+          signals: ecosystemContext.signals,
+          source_counts: ecosystemContext.source_counts,
+        },
       })
       aiUsed = true
     } catch (error: any) {

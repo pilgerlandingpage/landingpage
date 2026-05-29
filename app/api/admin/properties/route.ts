@@ -1,19 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { deleteFile } from '@/lib/r2'
+import { notifyPropertyReviewReady } from '@/lib/properties/review-notifications'
 
-export async function GET() {
+const PROPERTY_TEXT_FIELDS = ['title', 'description', 'seo_title', 'seo_description'] as const
+
+function normalizeBedroomText(value: string) {
+    return value
+        .replace(/\bQUARTOS\b/g, 'DORMITÓRIOS')
+        .replace(/\bQuartos\b/g, 'Dormitórios')
+        .replace(/\bquartos\b/g, 'dormitórios')
+        .replace(/\bQUARTO\b/g, 'DORMITÓRIO')
+        .replace(/\bQuarto\b/g, 'Dormitório')
+        .replace(/\bquarto\b/g, 'dormitório')
+}
+
+function normalizePropertyPayload(payload: Record<string, any>) {
+    const normalized = { ...payload }
+
+    for (const field of PROPERTY_TEXT_FIELDS) {
+        if (typeof normalized[field] === 'string') {
+            normalized[field] = normalizeBedroomText(normalized[field])
+        }
+    }
+
+    if (Array.isArray(normalized.amenities)) {
+        normalized.amenities = normalized.amenities.map((item: unknown) => (
+            typeof item === 'string' ? normalizeBedroomText(item) : item
+        ))
+    }
+
+    return normalized
+}
+
+export async function GET(request: NextRequest) {
     try {
         const supabase = createAdminClient()
+        const { searchParams } = request.nextUrl
+        const status = searchParams.get('status')
+        const type = searchParams.get('type')
+        const city = searchParams.get('city')
+        const q = searchParams.get('q')?.trim()
 
         const data: any[] = []
         const pageSize = 1000
         for (let from = 0; ; from += pageSize) {
-            const { data: page, error } = await supabase
+            let query = supabase
                 .from('properties')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .range(from, from + pageSize - 1)
+
+            if (status && status !== 'all') query = query.eq('status', status)
+            if (type && type !== 'all') query = query.eq('property_type', type)
+            if (city && city !== 'all') query = query.eq('city', city)
+            if (q) {
+                const escaped = q.replace(/[%_]/g, '\\$&')
+                query = query.or([
+                    `title.ilike.%${escaped}%`,
+                    `city.ilike.%${escaped}%`,
+                    `neighborhood.ilike.%${escaped}%`,
+                    `property_type.ilike.%${escaped}%`,
+                    `owner_name.ilike.%${escaped}%`,
+                    `owner_phone.ilike.%${escaped}%`,
+                    `source_reference.ilike.%${escaped}%`,
+                ].join(','))
+            }
+
+            const { data: page, error } = await query
 
             if (error) throw error
             data.push(...(page || []))
@@ -42,15 +96,29 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
         const supabase = createAdminClient()
+        const insertBody = normalizePropertyPayload({
+            ...body,
+            status: body?.status || 'under_review',
+        })
 
         const { data, error } = await supabase
             .from('properties')
-            .insert(body)
+            .insert(insertBody)
             .select()
             .single()
 
         if (error) throw error
-        return NextResponse.json(data, { status: 201 })
+
+        const shouldNotifyReview = data?.status !== 'active'
+        const notification = shouldNotifyReview
+            ? await notifyPropertyReviewReady({
+                supabase,
+                property: data,
+                origin: request.nextUrl.origin,
+            })
+            : { sent: false, skipped: true, reason: 'Imovel criado como ativo.' }
+
+        return NextResponse.json({ property: data, notification }, { status: 201 })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
@@ -65,7 +133,7 @@ export async function PUT(request: NextRequest) {
         const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('properties')
-            .update(updateData)
+            .update(normalizePropertyPayload(updateData))
             .eq('id', id)
             .select()
             .single()

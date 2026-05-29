@@ -8,6 +8,7 @@ import {
     getContactAvatar,
     listAllInstances,
 } from '@/lib/uazapi'
+import { DEFAULT_WHATSAPP_INSTANCE_CONFIG, normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {
     return createClient(
@@ -20,6 +21,7 @@ function normalizeInstanceStatus(result: any): 'disconnected' | 'connecting' | '
     const statusValue = result?.status
     const statusText = String(
         result?.instance?.status ||
+        result?.status?.status ||
         (typeof statusValue === 'string' ? statusValue : '') ||
         result?.state ||
         ''
@@ -231,6 +233,7 @@ export async function GET(request: NextRequest) {
             reconciledInstances.map(async (inst: any) => {
                 const enriched: any = {
                     ...inst,
+                    config: normalizeWhatsAppInstanceConfig(inst.config || {}),
                     virtual_brokers: inst.broker_id ? brokersMap[inst.broker_id] || null : null,
                     admin_users: inst.admin_user_id ? adminsMap[inst.admin_user_id] || null : null,
                 }
@@ -355,6 +358,7 @@ export async function POST(request: NextRequest) {
             instance_name: instanceName,
             instance_token: instanceToken,
             status: 'disconnected',
+            config: DEFAULT_WHATSAPP_INSTANCE_CONFIG,
         }
         if (adminUserId) insertData.admin_user_id = adminUserId
         if (brokerId) insertData.broker_id = brokerId
@@ -478,9 +482,25 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Move a instância selecionada para este corretor
+        const { data: selectedInstance } = await supabase
+            .from('whatsapp_instances')
+            .select('config')
+            .eq('id', instanceId)
+            .maybeSingle()
+        const currentConfig = selectedInstance?.config && typeof selectedInstance.config === 'object'
+            ? selectedInstance.config
+            : null
+        const updates: Record<string, any> = {
+            broker_id: brokerId,
+            updated_at: new Date().toISOString(),
+        }
+        if (!currentConfig || Object.keys(currentConfig).length === 0) {
+            updates.config = DEFAULT_WHATSAPP_INSTANCE_CONFIG
+        }
+
         const { error: assignError } = await supabase
             .from('whatsapp_instances')
-            .update({ broker_id: brokerId, updated_at: new Date().toISOString() })
+            .update(updates)
             .eq('id', instanceId)
 
         if (assignError) {

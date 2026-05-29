@@ -1,4 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { appendMetaConnectionLog } from '@/lib/social/meta-oauth'
+import { testEditorialImageProvider } from '@/lib/media/editorial-image-providers'
+import { testGoogleAnalyticsConnection } from '@/lib/analytics/google'
+
+function parseJsonText(text: string) {
+    if (!text) return {}
+    try {
+        return JSON.parse(text)
+    } catch {
+        return { message: text }
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -48,7 +60,7 @@ export async function POST(request: NextRequest) {
 
             case 'gemini': {
                 const apiKey = config.gemini_api_key || process.env.GEMINI_API_KEY
-                const model = config.gemini_model || 'gemini-2.0-flash'
+                const model = config.gemini_model || 'gemini-2.5-flash'
 
                 if (!apiKey) {
                     return NextResponse.json({
@@ -79,7 +91,7 @@ export async function POST(request: NextRequest) {
 
                 return NextResponse.json({
                     success: true,
-                    message: 'API Gemini funcionando! Modelo: gemini-2.0-flash',
+                    message: `API Gemini funcionando! Modelo: ${model}`,
                 })
             }
 
@@ -169,6 +181,12 @@ export async function POST(request: NextRequest) {
                 const adAccountId = config.meta_ad_account_id
 
                 if (!accessToken) {
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_connection',
+                        status: 'error',
+                        message: 'Teste Meta falhou: Access Token nao configurado.',
+                    })
                     return NextResponse.json({
                         success: false,
                         message: 'Access Token do Meta Ads não configurado',
@@ -185,6 +203,12 @@ export async function POST(request: NextRequest) {
 
                     if (!res.ok) {
                         const error = await res.json()
+                        await appendMetaConnectionLog({
+                            provider: 'meta',
+                            action: 'test_connection',
+                            status: 'error',
+                            message: `Teste Meta falhou: ${error.error?.message || res.statusText}`,
+                        })
                         return NextResponse.json({
                             success: false,
                             message: `Erro Meta Ads: ${error.error?.message || res.statusText}`,
@@ -200,18 +224,37 @@ export async function POST(request: NextRequest) {
                                     data.account_status === 7 ? 'Pendente de Revisão' :
                                         data.account_status === 101 ? 'Fechada' :
                                             `Status ${data.account_status}`
+                        const message = `Conectado! Conta: ${data.name || adAccountId} (${statusName})`
+                        await appendMetaConnectionLog({
+                            provider: 'meta',
+                            action: 'test_connection',
+                            status: 'success',
+                            message,
+                        })
                         return NextResponse.json({
                             success: true,
-                            message: `Conectado! Conta: ${data.name || adAccountId} (${statusName})`,
+                            message,
                         })
                     }
 
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_connection',
+                        status: 'success',
+                        message: `Token valido. Conectado como: ${data.name || data.id}`,
+                    })
                     return NextResponse.json({
                         success: true,
                         message: `Token válido! Conectado como: ${data.name || data.id}`,
                     })
 
                 } catch (e) {
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_connection',
+                        status: 'error',
+                        message: `Erro ao conectar com Meta Ads: ${e instanceof Error ? e.message : String(e)}`,
+                    })
                     return NextResponse.json({
                         success: false,
                         message: `Erro ao conectar com Meta Ads: ${e instanceof Error ? e.message : String(e)}`,
@@ -330,6 +373,18 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            case 'google_analytics': {
+                try {
+                    const result = await testGoogleAnalyticsConnection(config || {})
+                    return NextResponse.json(result)
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro ao conectar com Google Analytics: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
             case 'serpapi': {
                 const apiKey = config.serpapi_api_key
 
@@ -409,6 +464,122 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({
                         success: false,
                         message: `Erro na conexão: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'brevo': {
+                const apiKey = (config.brevo_api_key || process.env.BREVO_API_KEY || '').trim()
+                const senderName = (config.brevo_sender_name || process.env.BREVO_SENDER_NAME || 'Guilherme Pilger').trim()
+                const senderEmail = (config.brevo_sender_email || process.env.BREVO_SENDER_EMAIL || '').trim()
+                const replyToEmail = (config.brevo_reply_to_email || process.env.BREVO_REPLY_TO_EMAIL || '').trim()
+                const testRecipient = (config.brevo_test_recipient || process.env.BREVO_TEST_RECIPIENT || '').trim()
+
+                if (!apiKey) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'API Key da Brevo nao configurada',
+                    })
+                }
+
+                if (!senderEmail) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Informe um e-mail de remetente validado na Brevo',
+                    })
+                }
+
+                try {
+                    const accountRes = await fetch('https://api.brevo.com/v3/account', {
+                        headers: {
+                            accept: 'application/json',
+                            'api-key': apiKey,
+                        },
+                    })
+
+                    const accountText = await accountRes.text()
+                    const accountData = parseJsonText(accountText)
+
+                    if (!accountRes.ok) {
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro Brevo (${accountRes.status}): ${(accountData?.message || accountData?.error || accountText || accountRes.statusText).slice(0, 180)}`,
+                        })
+                    }
+
+                    if (testRecipient) {
+                        const sendRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+                            method: 'POST',
+                            headers: {
+                                accept: 'application/json',
+                                'api-key': apiKey,
+                                'content-type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                sender: { name: senderName || senderEmail, email: senderEmail },
+                                to: [{ email: testRecipient }],
+                                replyTo: replyToEmail ? { email: replyToEmail } : undefined,
+                                subject: 'Teste de integracao Brevo - Pilger CRM',
+                                htmlContent: '<p>Integracao Brevo conectada com sucesso.</p>',
+                                textContent: 'Integracao Brevo conectada com sucesso.',
+                            }),
+                        })
+
+                        const sendText = await sendRes.text()
+                        const sendData = parseJsonText(sendText)
+
+                        if (!sendRes.ok) {
+                            return NextResponse.json({
+                                success: false,
+                                message: `Conta Brevo valida, mas envio falhou (${sendRes.status}): ${(sendData?.message || sendData?.error || sendText || sendRes.statusText).slice(0, 180)}`,
+                            })
+                        }
+
+                        return NextResponse.json({
+                            success: true,
+                            message: `Brevo conectado. E-mail de teste enviado para ${testRecipient}.`,
+                        })
+                    }
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `Brevo conectado! Conta: ${accountData.email || accountData.companyName || 'valida'}.`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexao Brevo: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+            case 'pexels': {
+                try {
+                    const result = await testEditorialImageProvider('pexels', config)
+                    return NextResponse.json({
+                        success: true,
+                        message: `Pexels conectado. ${result.count} imagem(ns) retornada(s) no teste editorial.`,
+                        sample: result.sample,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro Pexels: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'pixabay': {
+                try {
+                    const result = await testEditorialImageProvider('pixabay', config)
+                    return NextResponse.json({
+                        success: true,
+                        message: `Pixabay conectado. ${result.count} imagem(ns) retornada(s) no teste editorial.`,
+                        sample: result.sample,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro Pixabay: ${e instanceof Error ? e.message : String(e)}`,
                     })
                 }
             }
@@ -538,7 +709,6 @@ export async function POST(request: NextRequest) {
                     })
                 }
             }
-
             default:
                 return NextResponse.json({
                     success: false,

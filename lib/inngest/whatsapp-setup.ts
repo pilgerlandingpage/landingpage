@@ -119,7 +119,7 @@ export const whatsappInstanceSetup = inngest.createFunction(
             {
                 shortCut: '/oi',
                 type: 'text' as const,
-                text: 'Olá! 👋 Sou corretor da Pilger Imóveis. Como posso ajudá-lo hoje?',
+                text: 'Olá! 👋 Sou corretor da Imobiliaria Guilherme Pilger. Como posso ajudá-lo hoje?',
             },
             {
                 shortCut: '/horario',

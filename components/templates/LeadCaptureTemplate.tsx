@@ -41,7 +41,7 @@ export default function LeadCaptureTemplate({ data, slug, landingPageId, agentNa
 
                         <div className="lead-features">
                             <div className="lead-feature">
-                                <Bed size={20} /> {stats.bedrooms} Quartos
+                                <Bed size={20} /> {stats.bedrooms} Dormitórios
                             </div>
                             <div className="lead-feature">
                                 <Move size={20} /> {stats.area}m²
@@ -107,7 +107,7 @@ export default function LeadCaptureTemplate({ data, slug, landingPageId, agentNa
 
             {/* Footer */}
             <footer className="lead-footer">
-                <p>© Pilger Imóveis</p>
+                <p>© Imobiliaria Guilherme Pilger</p>
             </footer>
 
             <style jsx>{`

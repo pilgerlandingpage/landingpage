@@ -1,211 +1,326 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
+import { BadgeCheck, Camera, Crown, MessageCircle, TrendingUp } from 'lucide-react'
+import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+
+const AUTHORITY_BADGES = [
+    { icon: Crown, label: 'Especialista em luxo' },
+    { icon: Camera, label: 'Presença online' },
+    { icon: TrendingUp, label: 'Leitura de mercado' },
+    { icon: BadgeCheck, label: 'CRECI/SC 6772-J' },
+]
+
 export default function AboutGuilhermeSection() {
     return (
-        <section className="about-section">
+        <section id="sobre-guilherme" className="about-section">
             <div className="about-inner">
-                {/* Left: Signature watermark + name block */}
-                <div className="about-col about-col-left">
-                    <div className="watermark-wrap">
-                        <span className="watermark">Guilherme Pilger</span>
-                    </div>
-                    <h3 className="brand-name">GUILHERME PILGER</h3>
-                    <p className="brand-role">Corretor de Imóveis</p>
-                </div>
-
-                {/* Center: Photo */}
-                <div className="about-col about-col-center">
-                    <img
+                <div className="about-media">
+                    <Image
                         src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png"
                         alt="Guilherme Pilger"
                         className="about-photo"
+                        width={1920}
+                        height={1080}
+                        sizes="(max-width: 860px) 146vw, 1144px"
+                        quality={72}
+                        loading="lazy"
                     />
                 </div>
 
-                {/* Right: Bio */}
-                <div className="about-col about-col-right">
-                    <h4 className="bio-title">
-                        Uma forma irreverente de apresentar os melhores imóveis do litoral Catarinense
-                    </h4>
-                    <p className="bio-body">
-                        <strong>Guilherme Pilger</strong> está entre os principais players do mercado
-                        imobiliário brasileiro. Eleito pelo CRECI como um dos 3 melhores estrategistas
-                        na venda de imóveis, Guilherme é um dos corretores com maior visibilidade
-                        do Sul do país com mais de 1 milhão de visualizações mensais em suas redes sociais.
+                <div className="about-copy">
+                    <span className="about-kicker">Sobre o Guilherme</span>
+                    <h2>O rosto por trás da curadoria mais desejada do litoral.</h2>
+                    <p className="about-lead">
+                        Guilherme Pilger transformou o alto padrão em conteúdo, presença e estratégia.
+                        Ele une audiência, bastidor de mercado e atendimento direto para apresentar oportunidades com mais contexto.
                     </p>
-                    <p className="bio-body">
-                        Como dono de uma das imobiliárias de Balneário Camboriú que mais crescem,
-                        a expertise de mercado está entre as suas maiores habilidades, principalmente
-                        na venda de propriedades imobiliárias que requerem atendimento especializado.
-                    </p>
+
+                    <div className="about-quote">
+                        Antes de vender, Guilherme entrega clareza: o que vale, onde está a oportunidade e qual movimento faz sentido.
+                    </div>
+
+                    <div className="about-badges">
+                        {AUTHORITY_BADGES.map((badge) => {
+                            const Icon = badge.icon
+                            return (
+                                <span key={badge.label}>
+                                    <Icon size={14} />
+                                    {badge.label}
+                                </span>
+                            )
+                        })}
+                    </div>
+
+                    <div className="about-actions">
+                        <Link href="/busca?priceMin=5000000" className="about-button about-button-gold">
+                            Ver curadoria premium
+                        </Link>
+                        <WhatsAppCaptureLink
+                            phone="5547992528080"
+                            message="Olá! Vim pelo site e quero falar com o Guilherme."
+                            slug="home"
+                            template="about-guilherme"
+                            className="about-button about-button-dark"
+                        >
+                            <MessageCircle size={16} />
+                            Falar com Guilherme
+                        </WhatsAppCaptureLink>
+                    </div>
                 </div>
             </div>
 
             <style jsx>{`
                 .about-section {
-                    background-color: #1a1a1a;
-                    background-image:
-                        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-                    background-size: 60px 60px;
-                    color: #fff;
-                    margin-top: 40px;
-                    overflow: visible;
-                }
-
-                /* ---- MOBILE (default, stacked) ---- */
-                .about-inner {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    padding: 48px 24px 0;
-                }
-
-                .about-col-left {
-                    text-align: center;
                     position: relative;
-                    z-index: 2;
-                    margin-top: 80px;
-                    margin-bottom: 8px;
+                    margin-top: 44px;
+                    overflow: hidden;
+                    background:
+                        radial-gradient(circle at 22% 10%, rgba(223,193,142,0.08), transparent 36%),
+                        linear-gradient(135deg, #242321 0%, #222221 100%);
+                    color: #fff8ea;
                 }
-                .watermark-wrap {
-                    position: relative;
-                    height: 60px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: visible;
-                }
-                .watermark {
-                    font-family: 'Great Vibes', 'Dancing Script', cursive;
-                    font-size: 4rem;
-                    color: rgba(255,255,255,0.08);
-                    white-space: nowrap;
-                    transform: rotate(-4deg);
+                .about-section::before {
+                    content: 'GUILHERME PILGER';
                     position: absolute;
-                }
-                .brand-name {
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    color: rgba(255,255,255,0.028);
                     font-family: 'Inter', sans-serif;
-                    font-size: 1.3rem;
-                    font-weight: 700;
-                    letter-spacing: 3px;
-                    margin: 0;
+                    font-size: clamp(4rem, 16vw, 16rem);
+                    font-weight: 950;
+                    letter-spacing: 0.08em;
+                    white-space: nowrap;
+                    pointer-events: none;
                 }
-                .brand-role {
-                    font-family: 'Inter', sans-serif;
-                    font-size: 0.85rem;
-                    color: #b8945f;
-                    font-weight: 400;
-                    font-style: italic;
-                    margin: 4px 0 0;
-                    letter-spacing: 0.5px;
+                .about-inner {
+                    position: relative;
+                    z-index: 1;
+                    display: grid;
+                    grid-template-columns: minmax(879px, 1.08fr) minmax(0, 0.92fr);
+                    gap: clamp(20px, 3vw, 42px);
+                    align-items: center;
+                    width: 100%;
+                    max-width: 1820px;
+                    margin: 0 auto;
+                    padding: clamp(30px, 3.6vw, 52px) clamp(20px, 4vw, 44px);
                 }
-
-                .about-col-center {
+                .about-media {
+                    position: relative;
+                    min-height: 0;
                     display: flex;
+                    align-items: center;
                     justify-content: center;
-                    align-items: flex-end;
+                    overflow: visible;
+                    border: 0;
+                    border-radius: 0;
+                    background: transparent;
+                    box-shadow: none;
+                    isolation: isolate;
                 }
-                .about-photo {
-                    width: 280px;
-                    height: auto;
-                    object-fit: contain;
+                .about-media::before,
+                .about-media::after {
+                    display: none;
+                }
+                :global(.about-photo) {
+                    position: relative;
+                    z-index: 1;
                     display: block;
-                    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
-                    transform: scale(2.3);
-                    transform-origin: bottom center;
+                    width: min(100%, 1144px);
+                    height: auto;
+                    max-width: 100%;
+                    max-height: clamp(845px, 72vw, 1294px);
+                    object-fit: contain;
+                    object-position: center bottom;
+                    transform: none;
+                    transform-origin: center center;
+                    filter: saturate(0.98) contrast(1.03) drop-shadow(0 18px 30px rgba(0,0,0,0.2));
                 }
-
-                .about-col-right {
-                    text-align: center;
-                    padding: 24px 0 48px;
+                .about-copy {
+                    min-width: 0;
+                    width: 100%;
+                    max-width: 650px;
+                    overflow-wrap: anywhere;
                 }
-                .bio-title {
-                    font-family: 'Inter', sans-serif;
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                    line-height: 1.5;
-                    margin: 0 0 16px;
+                .about-kicker {
+                    display: inline-flex;
+                    margin-bottom: 10px;
+                    color: #d8b979;
+                    font: 950 0.66rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
                 }
-                .bio-body {
-                    font-family: 'Inter', sans-serif;
-                    font-size: 0.85rem;
-                    line-height: 1.7;
-                    color: #bbb;
+                .about-copy h2 {
                     margin: 0 0 12px;
+                    color: #fff8ea;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(1.65rem, 2.65vw, 2.55rem);
+                    font-weight: 700;
+                    line-height: 1.02;
+                    letter-spacing: 0;
                 }
-                .bio-body:last-child {
-                    margin-bottom: 0;
+                .about-lead {
+                    max-width: 610px;
+                    margin: 0;
+                    color: rgba(255,255,255,0.72);
+                    font-size: clamp(0.82rem, 0.9vw, 0.9rem);
+                    font-weight: 520;
+                    line-height: 1.55;
                 }
-
-                /* ---- DESKTOP (3-column side-by-side) ---- */
-                @media (min-width: 900px) {
-                    .about-inner {
-                        flex-direction: row;
-                        align-items: stretch;
-                        padding: 0;
-                        gap: 0;
+                .about-quote {
+                    margin-top: 14px;
+                    padding: 13px 16px;
+                    max-width: 100%;
+                    border-left: 3px solid #d8b979;
+                    border-radius: 0 14px 14px 0;
+                    background: rgba(255,255,255,0.045);
+                    color: #f5ead4;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(0.9rem, 1.18vw, 1.04rem);
+                    font-weight: 600;
+                    line-height: 1.3;
+                }
+                .about-badges {
+                    display: grid;
+                    grid-template-columns: repeat(4, minmax(0, max-content));
+                    gap: 8px;
+                    align-items: center;
+                    margin-top: 16px;
+                }
+                .about-badges span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    min-height: 30px;
+                    padding: 0 10px;
+                    border: 1px solid rgba(223,193,142,0.18);
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.055);
+                    color: #ead8b5;
+                    font-size: 0.62rem;
+                    font-weight: 900;
+                    letter-spacing: 0.06em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+                .about-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-top: 18px;
+                }
+                :global(.about-button) {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 40px;
+                    padding: 0 16px;
+                    border: 1px solid transparent;
+                    border-radius: 999px;
+                    font-size: 0.68rem;
+                    font-weight: 950;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    text-decoration: none;
+                    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+                    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+                }
+                :global(.about-button:hover) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+                }
+                :global(.about-button-gold) {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #111 !important;
+                }
+                :global(.about-button-dark) {
+                    border-color: rgba(223,193,142,0.3);
+                    background: rgba(255,255,255,0.09);
+                    color: #fff8ea !important;
+                }
+                @media (max-width: 860px) {
+                    .about-section {
+                        overflow-x: hidden;
                     }
-
-                    .about-col-left {
-                        flex: 1;
-                        display: flex;
-                        flex-direction: column;
+                    .about-inner {
+                        grid-template-columns: 1fr;
+                        gap: 18px;
+                        width: 100%;
+                        max-width: 100%;
+                        padding: 28px 18px 84px;
+                        overflow: hidden;
+                    }
+                    .about-media {
+                        min-height: 0;
                         align-items: center;
                         justify-content: center;
-                        text-align: center;
-                        padding: 40px 20px;
-                        margin-top: 0;
-                        margin-bottom: 0;
+                        width: 100%;
+                        overflow: visible;
                     }
-                    .watermark-wrap {
-                        height: 80px;
+                    :global(.about-photo) {
+                        width: min(100%, 550px);
+                        height: auto;
+                        max-width: 100%;
+                        max-height: 600px;
+                        margin: 0 auto;
+                        transform: scale(1.3);
+                        transform-origin: center center;
                     }
-                    .watermark {
-                        font-size: 5.5rem;
+                    .about-copy {
+                        min-width: 0;
+                        width: 100%;
+                        max-width: 100%;
+                        padding: 0;
+                        overflow: hidden;
                     }
-                    .brand-name {
-                        font-size: 1.4rem;
+                    .about-copy h2 {
+                        max-width: 100%;
+                        font-size: clamp(1.55rem, 7vw, 2.05rem);
+                        overflow-wrap: anywhere;
                     }
-
-                    .about-col-center {
-                        flex: 0 0 280px;
-                        align-self: flex-end;
+                    .about-lead,
+                    .about-quote {
+                        max-width: 100%;
+                        overflow-wrap: anywhere;
                     }
-                    .about-photo {
-                        width: 280px;
+                    .about-badges {
+                        width: 100%;
+                        grid-template-columns: 1fr;
+                        gap: 7px;
                     }
-
-                    .about-col-right {
-                        flex: 1.2;
-                        text-align: left;
-                        display: flex;
+                    .about-badges span {
+                        justify-content: flex-start;
+                        gap: 6px;
+                        min-height: 30px;
+                        padding: 0 11px;
+                        font-size: 0.62rem;
+                        letter-spacing: 0.055em;
+                    }
+                    .about-badges span :global(svg) {
+                        display: block;
+                        width: 13px;
+                        height: 13px;
+                        flex: 0 0 auto;
+                    }
+                    .about-actions {
                         flex-direction: column;
-                        justify-content: center;
-                        padding: 40px 40px 40px 30px;
                     }
-                    .bio-title {
-                        font-size: 1.15rem;
-                    }
-                    .bio-body {
-                        font-size: 0.82rem;
+                    :global(.about-button) {
+                        width: 100%;
                     }
                 }
-
-                @media (min-width: 1200px) {
-                    .about-col-center {
-                        flex: 0 0 340px;
+                @media (min-width: 861px) and (max-width: 1180px) {
+                    .about-inner {
+                        grid-template-columns: minmax(709px, 0.98fr) minmax(0, 1.02fr);
+                        max-width: 1480px;
                     }
-                    .about-photo {
-                        width: 340px;
-                    }
-                    .watermark {
-                        font-size: 7rem;
-                    }
-                    .brand-name {
-                        font-size: 1.6rem;
+                    :global(.about-photo) {
+                        width: min(100%, 913px);
+                        max-height: 946px;
                     }
                 }
             `}</style>

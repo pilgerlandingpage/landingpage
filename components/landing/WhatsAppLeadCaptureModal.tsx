@@ -88,6 +88,7 @@ export default function WhatsAppLeadCaptureModal() {
                     referrer: document.referrer,
                     search_params: window.location.search,
                     consent_lgpd: true,
+                    metadata: state.metadata || null,
                 }),
             })
 
@@ -99,6 +100,7 @@ export default function WhatsAppLeadCaptureModal() {
             await trackChatOpened(state.slug, {
                 template: state.template || 'unknown',
                 capture_before_whatsapp: true,
+                ...(state.metadata || {}),
             })
 
             try {

@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import PropertyCard from '@/components/marketplace/PropertyCard'
 
 interface HomepageSectionProps {
@@ -50,7 +50,7 @@ export default function HomepageSection({
         const el = scrollRef.current
         if (!el) return
         const cardWidth = el.querySelector('.card-slide')?.clientWidth ?? 280
-        const gap = 16
+        const gap = 18
         const scrollAmount = (cardWidth + gap) * 2
         el.scrollBy({
             left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -63,10 +63,16 @@ export default function HomepageSection({
     return (
         <section className="homepage-section">
             <div className="section-header">
-                <div>
+                <div className="section-copy">
                     <h2 className="section-title">{title}</h2>
-                    {subtitle && <p className="section-subtitle">{subtitle}</p>}
+                    {viewAllHref && (
+                        <Link href={viewAllHref} className="section-view-all-mobile">
+                            <span>{viewAllLabel}</span>
+                            <ArrowRight size={13} />
+                        </Link>
+                    )}
                 </div>
+
                 <div className="section-header-right">
                     <div className="carousel-arrows">
                         <button
@@ -74,6 +80,7 @@ export default function HomepageSection({
                             onClick={() => scroll('left')}
                             aria-label="Anterior"
                             disabled={!canScrollLeft}
+                            type="button"
                         >
                             <ChevronLeft size={20} />
                         </button>
@@ -82,140 +89,344 @@ export default function HomepageSection({
                             onClick={() => scroll('right')}
                             aria-label="Próximo"
                             disabled={!canScrollRight}
+                            type="button"
                         >
                             <ChevronRight size={20} />
                         </button>
                     </div>
-                    {viewAllHref && (
-                        <Link href={viewAllHref} className="section-view-all">
-                            {viewAllLabel} →
-                        </Link>
-                    )}
                 </div>
             </div>
-            <div className="carousel-track" ref={scrollRef}>
-                {properties.map((property: any) => (
-                    <div className="card-slide" key={property.id}>
-                        <PropertyCard
-                            property={property}
-                            landingPageSlug={lpMap.get(property.id)}
-                        />
-                    </div>
-                ))}
+
+            <div className="carousel-shell">
+                <span className={`rail-fade rail-fade-left ${canScrollLeft ? 'visible' : ''}`} />
+                <div className="carousel-track" ref={scrollRef}>
+                    {properties.map((property: any, index: number) => (
+                        <div className="card-slide" key={property.id}>
+                            <PropertyCard
+                                property={property}
+                                landingPageSlug={lpMap.get(property.id)}
+                                imagePriority={index < 2}
+                                variant="homeCompact"
+                            />
+                        </div>
+                    ))}
+
+                    {viewAllHref && (
+                        <div className="card-slide">
+                            <Link href={viewAllHref} className="section-end-card">
+                                <span className="end-card-kicker">Mais oportunidades</span>
+                            <strong>Ver a seleção completa</strong>
+                            <small>Continue explorando a seleção separada pelo Guilherme.</small>
+                                <span className="end-card-action">
+                                    Abrir vitrine
+                                    <ArrowRight size={15} />
+                                </span>
+                            </Link>
+                        </div>
+                    )}
+                </div>
+                <span className={`rail-fade rail-fade-right ${canScrollRight ? 'visible' : ''}`} />
             </div>
+
+            <div className="section-mobile-hint">Arraste para comparar lado a lado</div>
 
             <style jsx>{`
                 .homepage-section {
-                    margin-bottom: 24px;
+                    position: relative;
+                    margin-bottom: clamp(22px, 3vw, 38px);
+                    padding-top: clamp(18px, 2.4vw, 26px);
+                    border-top: 1px solid rgba(184, 148, 95, 0.18);
                 }
                 .section-header {
                     display: flex;
-                    align-items: baseline;
+                    align-items: flex-end;
                     justify-content: space-between;
-                    margin-bottom: 12px;
-                    gap: 16px;
+                    margin-bottom: 10px;
+                    gap: 18px;
+                }
+                .section-copy {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 0;
+                    max-width: 760px;
+                    text-align: left;
                 }
                 .section-header-right {
                     display: flex;
                     align-items: center;
-                    gap: 16px;
+                    gap: 12px;
                     flex-shrink: 0;
                 }
                 .section-title {
-                    font-family: 'Inter', sans-serif;
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    color: #0a0a0a;
-                    background: linear-gradient(135deg, #c9a96e 0%, #dfc18e 50%, #a88b4a 100%);
-                    display: inline-block;
-                    padding: 6px 16px;
+                    color: #1f1b16;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(1.2rem, 1.72vw, 1.88rem);
+                    font-weight: 760;
+                    line-height: 0.98;
+                    letter-spacing: 0;
                     margin: 0;
+                }
+                .homepage-section :global(.section-view-all) {
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 38px;
+                    padding: 0 14px;
+                    border: 1px solid rgba(31, 27, 21, 0.12);
+                    border-radius: 999px;
+                    background: #171410;
+                    color: #fff8ea !important;
+                    font: 900 0.72rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.08em;
                     text-transform: uppercase;
-                    letter-spacing: 1.5px;
-                    border-radius: 4px;
-                    box-shadow: 0 2px 8px rgba(201, 169, 110, 0.3);
-                    border: none;
-                }
-                .section-subtitle {
-                    font-size: 0.8rem;
-                    color: var(--text-muted, #777);
-                    margin: 6px 0 0 2px;
-                    font-weight: 500;
-                }
-                .section-view-all {
-                    font-size: 0.82rem;
-                    font-weight: 600;
-                    color: var(--gold, #b8945f) !important;
                     white-space: nowrap;
-                    transition: opacity 0.2s;
+                    transition: transform 0.22s ease, background 0.22s ease;
+                    text-decoration: none !important;
                 }
-                .section-view-all:hover {
-                    opacity: 0.7;
+                .homepage-section :global(.section-view-all:hover) {
+                    background: #2b251d;
+                    transform: translateY(-1px);
+                }
+                .homepage-section :global(.section-view-all-mobile) {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    color: #171410 !important;
+                    font: 900 clamp(0.58rem, 0.8vw, 0.68rem)/1 'Inter', sans-serif;
+                    letter-spacing: 0.07em;
+                    text-decoration: none !important;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    transform: translateY(1px);
+                    transition: color 0.2s ease, transform 0.2s ease;
+                }
+                .homepage-section :global(.section-view-all-mobile:hover) {
+                    color: #b18442 !important;
+                    transform: translate(2px, 1px);
                 }
                 .carousel-arrows {
                     display: flex;
-                    gap: 6px;
+                    gap: 7px;
                 }
                 .arrow-btn {
-                    width: 34px;
-                    height: 34px;
+                    width: 38px;
+                    height: 38px;
                     border-radius: 50%;
-                    border: 1px solid #ddd;
-                    background: white;
+                    border: 1px solid rgba(31, 27, 21, 0.1);
+                    background: rgba(255, 255, 255, 0.78);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
-                    color: #333;
-                    transition: all 0.2s;
+                    color: #211c16;
+                    box-shadow: 0 10px 24px rgba(31, 27, 21, 0.08);
+                    transition: all 0.22s ease;
                 }
                 .arrow-btn:hover:not(.disabled) {
-                    border-color: var(--gold, #b8945f);
-                    color: var(--gold, #b8945f);
+                    border-color: rgba(184, 148, 95, 0.4);
+                    background: #dfc18e;
+                    color: #111;
+                    transform: translateY(-1px);
                 }
                 .arrow-btn.disabled {
                     opacity: 0.3;
                     cursor: default;
+                    box-shadow: none;
+                }
+                .carousel-shell {
+                    position: relative;
+                    margin: 0 -2px;
                 }
                 .carousel-track {
                     display: flex;
                     align-items: stretch;
-                    gap: 16px;
+                    gap: 18px;
                     overflow-x: auto;
                     scroll-snap-type: x mandatory;
                     -webkit-overflow-scrolling: touch;
                     scrollbar-width: none;
-                    padding-bottom: 4px;
+                    padding: 3px 2px 12px;
                 }
                 .carousel-track::-webkit-scrollbar {
                     display: none;
                 }
                 .card-slide {
-                    flex: 0 0 calc(50% - 8px);
+                    flex: 0 0 min(78vw, 260px);
                     scroll-snap-align: start;
                     min-width: 0;
                     display: flex;
                 }
+                .rail-fade {
+                    position: absolute;
+                    top: 0;
+                    bottom: 12px;
+                    z-index: 2;
+                    width: 70px;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.22s ease;
+                }
+                .rail-fade.visible {
+                    opacity: 1;
+                }
+                .rail-fade-left {
+                    left: 0;
+                    background: linear-gradient(90deg, #f7f5f0 0%, rgba(247,245,240,0) 100%);
+                }
+                .rail-fade-right {
+                    right: 0;
+                    background: linear-gradient(270deg, #f7f5f0 0%, rgba(247,245,240,0) 100%);
+                }
+                .homepage-section :global(.section-end-card) {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    width: 100%;
+                    min-height: 100%;
+                    padding: 18px;
+                    overflow: hidden;
+                    border: 1px solid rgba(184, 148, 95, 0.24);
+                    border-radius: 14px;
+                    background:
+                        linear-gradient(145deg, rgba(31,27,21,0.96), rgba(64,52,36,0.92)),
+                        #1f1b16;
+                    color: #fff8ea !important;
+                    text-decoration: none !important;
+                    box-shadow: 0 16px 34px rgba(31, 27, 21, 0.16);
+                    isolation: isolate;
+                }
+                .homepage-section :global(.section-end-card::before) {
+                    content: '';
+                    position: absolute;
+                    inset: 10px;
+                    border: 1px solid rgba(223, 193, 142, 0.18);
+                    border-radius: 10px;
+                    pointer-events: none;
+                }
+                .homepage-section :global(.end-card-kicker) {
+                    color: #dfc18e;
+                    font: 950 0.64rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                }
+                .homepage-section :global(.section-end-card strong) {
+                    display: block;
+                    margin-top: 12px;
+                    color: #fff8ea;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(1.1rem, 1.7vw, 1.55rem);
+                    line-height: 1.05;
+                    letter-spacing: 0;
+                }
+                .homepage-section :global(.section-end-card small) {
+                    display: block;
+                    margin-top: 9px;
+                    color: rgba(255, 248, 234, 0.68);
+                    font: 650 0.78rem/1.45 'Inter', sans-serif;
+                }
+                .homepage-section :global(.end-card-action) {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    margin-top: 18px;
+                    color: #dfc18e;
+                    font: 900 0.72rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                }
+                .section-mobile-hint {
+                    display: none;
+                    color: #4f4435;
+                    font: 900 0.63rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.12em;
+                    text-align: center;
+                    text-transform: uppercase;
+                }
+                .homepage-section :global(.property-card) {
+                    box-shadow:
+                        none;
+                }
 
                 @media (min-width: 600px) {
                     .card-slide {
-                        flex: 0 0 calc(33.333% - 11px);
+                        flex-basis: min(32vw, 260px);
                     }
                 }
                 @media (min-width: 768px) {
-                    .section-title { font-size: 0.82rem; padding: 7px 20px; }
                     .card-slide {
-                        flex: 0 0 calc(25% - 12px);
+                        flex-basis: 250px;
                     }
                 }
                 @media (min-width: 1200px) {
                     .card-slide {
-                        flex: 0 0 calc(20% - 13px);
+                        flex-basis: 250px;
                     }
                 }
                 @media (min-width: 1600px) {
                     .card-slide {
-                        flex: 0 0 calc(16.666% - 14px);
+                        flex-basis: 250px;
+                    }
+                }
+                @media (max-width: 760px) {
+                    .homepage-section {
+                        margin-bottom: 24px;
+                        padding-top: 18px;
+                    }
+                    .section-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 10px;
+                        gap: 10px;
+                    }
+                    .section-copy {
+                        flex: 1;
+                        min-width: 0;
+                        gap: 8px;
+                    }
+                    .section-title {
+                        font-size: clamp(0.96rem, 4.8vw, 1.23rem);
+                        line-height: 1.02;
+                    }
+                    .section-header-right {
+                        display: none;
+                        justify-content: space-between;
+                        margin-top: 8px;
+                    }
+                    .homepage-section :global(.section-view-all-mobile) {
+                        display: inline-flex;
+                        font-size: 0.62rem;
+                    }
+                    .carousel-track {
+                        gap: 12px 10px;
+                        padding-bottom: 6px;
+                    }
+                    .card-slide {
+                        flex: 0 0 calc(50% - 5px);
+                    }
+                    .rail-fade {
+                        display: none;
+                    }
+                    .homepage-section :global(.section-end-card) {
+                        padding: 12px;
+                        border-radius: 12px;
+                    }
+                    .homepage-section :global(.section-end-card strong) {
+                        font-size: 1rem;
+                    }
+                    .homepage-section :global(.section-end-card small) {
+                        display: none;
+                    }
+                    .homepage-section :global(.end-card-action) {
+                        margin-top: 12px;
+                        font-size: 0.58rem;
+                    }
+                    .section-mobile-hint {
+                        display: block;
+                        margin-top: 2px;
                     }
                 }
             `}</style>

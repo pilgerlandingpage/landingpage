@@ -240,19 +240,117 @@ function cleanPhone(phone: string): string {
     return clean
 }
 
+function normalizeProviderStatus(instance: any): string {
+    return String(
+        instance?.status?.status ||
+        (typeof instance?.status === 'string' ? instance.status : '') ||
+        instance?.state ||
+        instance?.connectionStatus ||
+        instance?.instance?.status ||
+        ''
+    ).toLowerCase()
+}
+
+function providerInstanceToken(instance: any): string {
+    return String(
+        instance?.token ||
+        instance?.instanceToken ||
+        instance?.instance_token ||
+        instance?.instance?.token ||
+        ''
+    ).trim()
+}
+
+function providerInstanceName(instance: any): string {
+    return String(
+        instance?.name ||
+        instance?.instanceName ||
+        instance?.instance_name ||
+        instance?.instance?.name ||
+        ''
+    ).trim()
+}
+
+function normalizeProviderInstances(raw: any): any[] {
+    if (Array.isArray(raw)) return raw
+    if (Array.isArray(raw?.instances)) return raw.instances
+    if (Array.isArray(raw?.data)) return raw.data
+    return []
+}
+
+export async function resolveDefaultWhatsAppInstanceToken(): Promise<string | null> {
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: config } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'agent_default_instance_id')
+        .maybeSingle()
+
+    const configuredInstanceId = String(config?.value || '').trim()
+    if (configuredInstanceId) {
+        const { data } = await supabase
+            .from('whatsapp_instances')
+            .select('instance_token, status')
+            .eq('id', configuredInstanceId)
+            .maybeSingle()
+
+        if (data?.status === 'connected' && data.instance_token) {
+            return data.instance_token
+        }
+    }
+
+    try {
+        const providerInstances = normalizeProviderInstances(await listAllInstances())
+        const connected = providerInstances
+            .filter(instance => normalizeProviderStatus(instance) === 'connected')
+            .filter(instance => providerInstanceToken(instance))
+
+        const preferred =
+            connected.find(instance => providerInstanceName(instance).toLowerCase().includes('agente global')) ||
+            (connected.length === 1 ? connected[0] : null)
+
+        return preferred ? providerInstanceToken(preferred) : null
+    } catch {
+        return null
+    }
+}
+
 /** Enviar mensagem de texto */
 export async function sendWhatsAppMessage({ phone, message, instanceToken, delay }: SendTextOptions) {
+    if (!instanceToken) {
+        instanceToken = await resolveDefaultWhatsAppInstanceToken() || undefined
+    }
+
     if (!instanceToken) {
         const { createClient } = await import('@supabase/supabase-js')
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
-        const { data } = await supabase.from('whatsapp_instances').select('instance_token').eq('status', 'connected').limit(1).maybeSingle()
+        const { data: config } = await supabase
+            .from('app_config')
+            .select('value')
+            .eq('key', 'agent_default_instance_id')
+            .maybeSingle()
+        const configuredInstanceId = String(config?.value || '').trim()
+        let data: { instance_token?: string | null } | null = null
+        if (configuredInstanceId) {
+            const result = await supabase
+                .from('whatsapp_instances')
+                .select('instance_token, status')
+                .eq('id', configuredInstanceId)
+                .maybeSingle()
+            if (result.data?.status === 'connected') data = result.data
+        }
         if (data && data.instance_token) {
             instanceToken = data.instance_token
         } else {
-            throw new Error('Token da instância é obrigatório e nenhuma instância conectada foi encontrada')
+            throw new Error('Token da instância é obrigatório e a instância global do agente não está conectada')
         }
     }
 
@@ -277,6 +375,9 @@ export async function sendMenuMessage(options: SendMenuOptions | SendMenuOptions
     }
 
     const opts = options as SendMenuOptions
+    if (!opts.instanceToken) {
+        opts.instanceToken = await resolveDefaultWhatsAppInstanceToken() || undefined
+    }
     if (!opts.instanceToken) {
         throw new Error('Token da instância é obrigatório')
     }
@@ -305,6 +406,9 @@ export async function sendMenuMessage(options: SendMenuOptions | SendMenuOptions
 
 /** Wrapper legado — converte buttons/sections antigo para formato choices */
 async function sendMenuLegacy(opts: SendMenuOptionsLegacy): Promise<any> {
+    if (!opts.instanceToken) {
+        opts.instanceToken = await resolveDefaultWhatsAppInstanceToken() || undefined
+    }
     if (!opts.instanceToken) {
         throw new Error('Token da instância é obrigatório')
     }

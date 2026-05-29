@@ -32,7 +32,7 @@ export function PropertyInfo({
                 <div className="detail-item">
                     <Bed size={24} color="#c9a96e" style={{ margin: '0 auto 8px', display: 'block' }} />
                     <div className="detail-value">{bedrooms}</div>
-                    <div className="detail-label">Quartos</div>
+                    <div className="detail-label">Dormitórios</div>
                 </div>
             )}
             {bathrooms && (

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as googleAds from '@/lib/ads/google'
 import type { GoogleDatePreset } from '@/lib/ads/google'
+import { sendGooglePaymentIssueAlert } from '@/lib/ads/whatsapp-alerts'
 
 function startOfDay(d: Date) { const res = new Date(d); res.setHours(0,0,0,0); return res; }
 function endOfDay(d: Date) { const res = new Date(d); res.setHours(23,59,59,999); return res; }
@@ -46,13 +47,19 @@ export async function GET(request: Request) {
 
         // Try to fetch live metrics from Google Ads API
         let liveMetricsMap: Record<string, { campaign: any; metrics: any }> = {}
+        let accountHealth: Awaited<ReturnType<typeof googleAds.getGoogleAccountHealth>> | null = null
         try {
-            liveMetricsMap = await googleAds.getAllCampaignsWithMetrics(
-                datePreset,
-                (datePreset as string) === 'custom' && startDate && endDate
-                    ? { startDate, endDate }
-                    : undefined
-            )
+            const [metricsRes, accountHealthRes] = await Promise.allSettled([
+                googleAds.getAllCampaignsWithMetrics(
+                    datePreset,
+                    (datePreset as string) === 'custom' && startDate && endDate
+                        ? { startDate, endDate }
+                        : undefined
+                ),
+                googleAds.getGoogleAccountHealth(),
+            ])
+            if (metricsRes.status === 'fulfilled') liveMetricsMap = metricsRes.value
+            if (accountHealthRes.status === 'fulfilled') accountHealth = accountHealthRes.value
         } catch (err) {
             console.error('Erro ao buscar métricas ao vivo do Google Ads:', err)
         }
@@ -102,6 +109,14 @@ export async function GET(request: Request) {
             return { ...camp, latest_metrics: null }
         })
 
+        if (accountHealth?.is_payment_issue) {
+            try {
+                await sendGooglePaymentIssueAlert(supabase, accountHealth, new URL(request.url).origin)
+            } catch (alertError) {
+                console.error('Erro ao avisar envolvidos sobre problema de pagamento Google Ads:', alertError)
+            }
+        }
+
         // Fetch internal lead counts and recent leads
         const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
         let sinceInternal: string
@@ -137,6 +152,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             campaigns: enriched,
+            accountHealth,
             internalStats: {
                 totalLeads: internalLeadsRes.count || 0,
                 recentLeads: recentLeadsRes.data || []

@@ -6,7 +6,7 @@ export async function generateGeminiChat(history: { role: string; content: strin
   const apiKey = await getGeminiApiKey()
   if (!apiKey) throw new Error('Gemini API Key not configured. Configure em Admin > Manutenção.')
 
-  const modelName = modelOverride || (await getAIConfig('gemini_model')) || 'gemini-1.5-flash'
+  const modelName = modelOverride || (await getAIConfig('gemini_model')) || 'gemini-2.5-flash'
   console.log('[Gemini Chat] Usando modelo:', modelName)
 
   try {

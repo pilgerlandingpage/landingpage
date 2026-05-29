@@ -5,3 +5,8 @@ node_modules
 *.tsbuildinfo
 supabase/.temp
 dados dos imoveis.txt
+open-design
+*.log
+property-feed-*.png
+trabalhe-conosco-*.png
+admin-trabalhe-conosco.png

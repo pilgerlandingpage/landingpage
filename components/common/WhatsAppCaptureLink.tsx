@@ -8,6 +8,7 @@ type Props = {
     message?: string
     slug?: string
     template?: string
+    metadata?: Record<string, unknown>
     className?: string
     style?: CSSProperties
     onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
@@ -19,6 +20,7 @@ export default function WhatsAppCaptureLink({
     message = 'Olá! Quero falar com um especialista.',
     slug = 'home',
     template = 'site-global',
+    metadata,
     className,
     style,
     onClick: externalOnClick,
@@ -27,12 +29,12 @@ export default function WhatsAppCaptureLink({
     const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault()
         if (externalOnClick) externalOnClick(e)
-        openWhatsAppWithLeadCapture({ phone, message, slug, template })
+        openWhatsAppWithLeadCapture({ phone, message, slug, template, metadata })
     }
 
     return (
         <a
-            href={`https://wa.me/${phone}`}
+            href="#whatsapp-form"
             onClick={onClick}
             className={className}
             style={style}
@@ -41,4 +43,3 @@ export default function WhatsAppCaptureLink({
         </a>
     )
 }
-

@@ -36,6 +36,12 @@ const ADMIN_MENU_PERMISSIONS = [
         category: 'principal',
     },
     {
+        module_key: 'pilger_ai',
+        label: 'Pilger AI',
+        description: 'Acessar estrutura da empresa autonoma, agentes, eventos, tarefas e auditoria',
+        category: 'pilger_ai',
+    },
+    {
         module_key: 'funnel',
         label: 'Funil de Conversao',
         description: 'Acessar funil de conversao dos leads',
@@ -51,7 +57,7 @@ const ADMIN_MENU_PERMISSIONS = [
         module_key: 'leads',
         label: 'Leads',
         description: 'Acessar leads e CRM do agente',
-        category: 'marketing',
+        category: 'comercial',
     },
     {
         module_key: 'landing_pages',
@@ -63,19 +69,25 @@ const ADMIN_MENU_PERMISSIONS = [
         module_key: 'properties',
         label: 'Imoveis',
         description: 'Gerenciar catalogo de imoveis',
-        category: 'marketing',
+        category: 'operacoes',
+    },
+    {
+        module_key: 'homepage',
+        label: 'Configurar Homepage',
+        description: 'Gerenciar secoes e curadoria da homepage',
+        category: 'produto_digital',
     },
     {
         module_key: 'brokers',
         label: 'Corretores IA',
         description: 'Gerenciar corretores IA',
-        category: 'automacao',
+        category: 'comercial',
     },
     {
         module_key: 'automation',
         label: 'Automacoes',
         description: 'Acessar automacoes do sistema',
-        category: 'automacao',
+        category: 'tecnologia',
     },
     {
         module_key: 'push',
@@ -93,13 +105,13 @@ const ADMIN_MENU_PERMISSIONS = [
         module_key: 'radar',
         label: 'Radar de Mercado',
         description: 'Acessar radar de mercado',
-        category: 'marketing',
+        category: 'inteligencia',
     },
     {
         module_key: 'whatsapp',
         label: 'WhatsApp Web',
         description: 'Gerenciar WhatsApp Web, agente, campanhas, agenda e etiquetas',
-        category: 'comunicacao',
+        category: 'atendimento',
     },
     {
         module_key: 'feedback',

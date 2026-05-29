@@ -1,79 +1,52 @@
 // =============================================
-// Alertas WhatsApp via ConnectyHub para Admins
-// =============================================
-// Envia alertas de tráfego e ações da IA
-// para os administradores via WhatsApp.
+// Alertas WhatsApp via ConnectyHub para Trafego
 // =============================================
 
-import { sendWhatsAppMessage } from '../uazapi'
-import type { AICampaignAlert, AdminAlertContact, AlertType, AlertUrgency } from './types'
+import {
+    getSectorNotificationDeliveries,
+    resolveSectorWhatsappInstance,
+} from '@/lib/notifications/sector-recipients'
+import { sendMenuMessage, sendWhatsAppMessage } from '../uazapi'
+import type { AICampaignAlert, AlertType, AlertUrgency } from './types'
 
-// --- Mapa de urgência (para comparação) ---
-
-const URGENCY_LEVEL: Record<AlertUrgency, number> = {
-    low: 0,
-    medium: 1,
-    high: 2,
-    critical: 3
+type SupabaseAdmin = {
+    from: (table: string) => any
 }
 
-// --- Buscar contatos de admin ativos ---
-
-async function getActiveAdminContacts(
-    alertType: AlertType,
-    urgency: AlertUrgency
-): Promise<AdminAlertContact[]> {
+async function createSupabaseAdmin() {
     const { createClient } = await import('@supabase/supabase-js')
-    const supabase = createClient(
+    return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-
-    const { data, error } = await supabase
-        .from('admin_alert_contacts')
-        .select('*')
-        .eq('is_active', true)
-
-    if (error || !data) {
-        console.error('Erro ao buscar contatos admin:', error)
-        return []
-    }
-
-    // Filtrar por tipo de alerta e urgência mínima
-    return (data as AdminAlertContact[]).filter(contact => {
-        // Verificar tipo de alerta
-        if (alertType === 'action' && !contact.receive_ai_actions) return false
-        if (alertType === 'budget_alert' && !contact.receive_budget_alerts) return false
-        if ((alertType === 'insight' || alertType === 'warning') && !contact.receive_traffic_alerts) return false
-
-        // Verificar urgência mínima
-        if (URGENCY_LEVEL[urgency] < URGENCY_LEVEL[contact.min_urgency]) return false
-
-        return true
-    })
 }
 
-// --- Formatar mensagem de alerta ---
+async function getTrafficPaidRecipients(
+    supabase: SupabaseAdmin,
+    options: { eventType: string; critical?: boolean; includeDiretoria?: boolean }
+) {
+    return getSectorNotificationDeliveries(supabase, 'trafego_pago', options)
+}
 
 const URGENCY_EMOJI: Record<AlertUrgency, string> = {
-    low: 'ℹ️',
-    medium: '⚠️',
-    high: '🚨',
-    critical: '🔴'
+    low: 'INFO',
+    medium: 'ATENCAO',
+    high: 'URGENTE',
+    critical: 'CRITICO',
 }
 
 const TYPE_EMOJI: Record<AlertType, string> = {
-    insight: '💡',
-    warning: '⚠️',
-    action: '🤖',
-    budget_alert: '💰'
+    insight: 'INSIGHT',
+    warning: 'AVISO',
+    action: 'IA',
+    budget_alert: 'ORCAMENTO',
 }
 
 const TYPE_LABEL: Record<AlertType, string> = {
     insight: 'Insight',
     warning: 'Aviso',
-    action: 'Ação Automática',
-    budget_alert: 'Alerta de Orçamento'
+    action: 'Acao automatica',
+    budget_alert: 'Alerta de orcamento',
 }
 
 function formatAlertMessage(
@@ -85,31 +58,31 @@ function formatAlertMessage(
     const urgencyEmoji = URGENCY_EMOJI[alert.urgency]
     const typeLabel = TYPE_LABEL[alert.type]
 
-    let msg = `🤖 *Alerta IA — Pilger Tráfego*\n\n`
-    msg += `📛 Campanha: ${campaignName} — ${platform === 'meta' ? 'Meta Ads' : 'Google Ads'}\n`
-    msg += `${urgencyEmoji} Tipo: ${emoji} ${typeLabel}\n`
+    let msg = `*Alerta IA - Pilger Trafego*\n\n`
+    msg += `Campanha: ${campaignName} - ${platform === 'meta' ? 'Meta Ads' : 'Google Ads'}\n`
+    msg += `Prioridade: ${urgencyEmoji}\n`
+    msg += `Tipo: ${emoji} ${typeLabel}\n`
 
     if (alert.action_taken && alert.action_taken !== 'NONE') {
         const actionLabels: Record<string, string> = {
-            'PAUSE_AD': '⏸️ ANÚNCIO PAUSADO',
-            'SCALE_BUDGET': '📈 ORÇAMENTO ESCALADO',
-            'REDUCE_BUDGET': '📉 ORÇAMENTO REDUZIDO',
-            'SWAP_CREATIVE': '🔄 TROCAR CRIATIVO'
+            PAUSE_AD: 'ANUNCIO PAUSADO',
+            SCALE_BUDGET: 'ORCAMENTO ESCALADO',
+            REDUCE_BUDGET: 'ORCAMENTO REDUZIDO',
+            SWAP_CREATIVE: 'TROCAR CRIATIVO',
         }
-        msg += `🎯 Ação: ${actionLabels[alert.action_taken] || alert.action_taken}\n`
+        msg += `Acao: ${actionLabels[alert.action_taken] || alert.action_taken}\n`
     }
 
-    msg += `\n📝 ${alert.message}\n`
+    msg += `\n${alert.message}\n`
 
-    // Link para o painel (será interpolado com a URL real)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'seusite.com'
-    msg += `\n🔗 Painel: https://${siteUrl}/admin/ads`
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://guilhermepilger.ai')
+    msg += `\nPainel: ${siteUrl.replace(/\/$/, '')}/admin/ads`
 
     return msg
 }
 
-// --- Enviar alerta para todos os admins elegíveis ---
-
+// Envia alertas de trafego para os envolvidos configurados no setor.
 export async function sendAlertToAdmins(alert: {
     type: AlertType
     urgency: AlertUrgency
@@ -118,10 +91,16 @@ export async function sendAlertToAdmins(alert: {
     campaign_name: string
     platform: string
 }): Promise<{ sent: number; errors: number }> {
-    const contacts = await getActiveAdminContacts(alert.type, alert.urgency)
+    const supabase = await createSupabaseAdmin()
+    const critical = alert.urgency === 'high' || alert.urgency === 'critical'
+    const deliveries = await getTrafficPaidRecipients(supabase, {
+        eventType: 'ads_alert',
+        critical,
+        includeDiretoria: alert.urgency === 'critical',
+    })
 
-    if (contacts.length === 0) {
-        console.log(`Nenhum admin para receber alerta tipo=${alert.type} urgencia=${alert.urgency}`)
+    if (!deliveries.length) {
+        console.log(`Nenhum envolvido configurado para alertas do setor Trafego Pago.`)
         return { sent: 0, errors: 0 }
     }
 
@@ -130,33 +109,280 @@ export async function sendAlertToAdmins(alert: {
             type: alert.type,
             urgency: alert.urgency,
             message: alert.message,
-            action_taken: alert.action_taken as AICampaignAlert['action_taken']
+            action_taken: alert.action_taken as AICampaignAlert['action_taken'],
         },
         alert.campaign_name,
         alert.platform
     )
 
+    const instanceToken = await resolveSectorWhatsappInstance(supabase)
     let sent = 0
     let errors = 0
 
-    for (const contact of contacts) {
+    if (!instanceToken) {
+        console.log('Nenhuma instancia WhatsApp conectada para alertas de Trafego Pago.')
+        return { sent: 0, errors: deliveries.length }
+    }
+
+    for (const delivery of deliveries) {
+        const name = delivery.member?.name || delivery.recipient.responsible_name || delivery.recipient.label
         try {
             await sendWhatsAppMessage({
-                phone: contact.phone,
-                message: formattedMessage
+                phone: delivery.phone,
+                message: formattedMessage,
+                instanceToken,
             })
-            sent++
-            console.log(`✅ Alerta WhatsApp enviado para ${contact.name} (${contact.phone})`)
+            console.log(`Alerta WhatsApp de Trafego Pago enviado para ${name} (${delivery.phone})`)
+            sent += 1
         } catch (err) {
-            errors++
-            console.error(`❌ Falha ao enviar alerta para ${contact.name}:`, err)
+            console.error(`Falha ao enviar alerta de Trafego Pago para ${name}:`, err)
+            errors += 1
         }
     }
 
     return { sent, errors }
 }
 
-// --- Enviar relatório diário ---
+async function getRecentMetaPaymentAlert(supabase: SupabaseAdmin) {
+    const { data } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'meta_payment_issue_last_alert')
+        .maybeSingle()
+
+    try {
+        return data?.value ? JSON.parse(String(data.value)) : null
+    } catch {
+        return null
+    }
+}
+
+async function saveMetaPaymentAlertStamp(supabase: SupabaseAdmin, value: Record<string, unknown>) {
+    await supabase
+        .from('app_config')
+        .upsert({
+            key: 'meta_payment_issue_last_alert',
+            value: JSON.stringify(value),
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' })
+}
+
+export async function sendMetaPaymentIssueAlert(
+    supabase: SupabaseAdmin,
+    accountHealth: {
+        name?: string | null
+        status?: number | string | null
+        status_label?: string | null
+        message?: string | null
+        balance?: number | null
+        is_payment_issue?: boolean
+    } | null | undefined,
+    origin?: string | null
+): Promise<{ sent: number; errors: number; skipped?: boolean; reason?: string }> {
+    if (!accountHealth?.is_payment_issue) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Conta Meta sem pendencia de pagamento.' }
+    }
+
+    const lastAlert = await getRecentMetaPaymentAlert(supabase)
+    const lastSentAt = lastAlert?.sent_at ? new Date(lastAlert.sent_at).getTime() : 0
+    const sixHours = 6 * 60 * 60 * 1000
+    if (lastSentAt && Date.now() - lastSentAt < sixHours && String(lastAlert?.status || '') === String(accountHealth.status || '')) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Alerta de pagamento Meta ja enviado nas ultimas 6 horas.' }
+    }
+
+    const deliveries = await getTrafficPaidRecipients(supabase, {
+        eventType: 'meta_payment_issue',
+        critical: true,
+        includeDiretoria: true,
+    })
+
+    if (!deliveries.length) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Nenhum envolvido configurado para problema de pagamento Meta.' }
+    }
+
+    const instanceToken = await resolveSectorWhatsappInstance(supabase)
+    if (!instanceToken) {
+        return { sent: 0, errors: deliveries.length, skipped: true, reason: 'Nenhuma instancia WhatsApp conectada.' }
+    }
+
+    const baseUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://guilhermepilger.ai')).replace(/\/$/, '')
+    const panelUrl = `${baseUrl}/admin/ads`
+    const balance = Number(accountHealth.balance || 0)
+    const balanceLine = balance > 0
+        ? `Pendencia informada: ${balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+        : 'Pendencia informada: verificar no Gerenciador de Anuncios'
+    const message = [
+        '*Alerta critico - Meta Ads*',
+        '',
+        `Conta: ${accountHealth.name || 'Conta Meta'}`,
+        `Status: ${accountHealth.status_label || accountHealth.status || 'pendente'}`,
+        balanceLine,
+        '',
+        accountHealth.message || 'A conta Meta pode estar pausada por pendencia de pagamento.',
+        '',
+        'Acao recomendada: regularizar pagamento antes de avaliar performance das campanhas.',
+    ].join('\n')
+
+    let sent = 0
+    let errors = 0
+    for (const delivery of deliveries) {
+        try {
+            await sendMenuMessage({
+                phone: delivery.phone,
+                text: message,
+                type: 'button',
+                choices: [`Abrir Meta Ads|url:${panelUrl}`],
+                footerText: 'Pilger Trafego',
+                instanceToken,
+            })
+            sent += 1
+        } catch (buttonError) {
+            console.warn('[Meta Payment Alert] button send failed, falling back to text:', buttonError)
+            try {
+                await sendWhatsAppMessage({
+                    phone: delivery.phone,
+                    message: `${message}\n\nAbrir Meta Ads: ${panelUrl}`,
+                    instanceToken,
+                })
+                sent += 1
+            } catch (textError) {
+                errors += 1
+                console.error('[Meta Payment Alert] text fallback failed:', textError)
+            }
+        }
+    }
+
+    if (sent > 0) {
+        await saveMetaPaymentAlertStamp(supabase, {
+            sent_at: new Date().toISOString(),
+            status: accountHealth.status,
+            status_label: accountHealth.status_label,
+            balance: accountHealth.balance,
+            sent,
+        })
+    }
+
+    return { sent, errors }
+}
+
+export async function sendGooglePaymentIssueAlert(
+    supabase: SupabaseAdmin,
+    accountHealth: {
+        name?: string | null
+        customer_status?: string | null
+        customer_status_label?: string | null
+        billing_status?: string | null
+        billing_status_label?: string | null
+        payments_account?: string | null
+        message?: string | null
+        is_payment_issue?: boolean
+    } | null | undefined,
+    origin?: string | null
+): Promise<{ sent: number; errors: number; skipped?: boolean; reason?: string }> {
+    if (!accountHealth?.is_payment_issue) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Conta Google Ads sem problema de pagamento/faturamento detectado.' }
+    }
+
+    const { data } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'google_payment_issue_last_alert')
+        .maybeSingle()
+
+    let lastAlert: any = null
+    try {
+        lastAlert = data?.value ? JSON.parse(String(data.value)) : null
+    } catch {
+        lastAlert = null
+    }
+
+    const lastSentAt = lastAlert?.sent_at ? new Date(lastAlert.sent_at).getTime() : 0
+    const sixHours = 6 * 60 * 60 * 1000
+    const currentSignature = `${accountHealth.customer_status || ''}:${accountHealth.billing_status || ''}`
+    if (lastSentAt && Date.now() - lastSentAt < sixHours && String(lastAlert?.signature || '') === currentSignature) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Alerta de pagamento Google ja enviado nas ultimas 6 horas.' }
+    }
+
+    const deliveries = await getTrafficPaidRecipients(supabase, {
+        eventType: 'google_payment_issue',
+        critical: true,
+        includeDiretoria: true,
+    })
+
+    if (!deliveries.length) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Nenhum envolvido configurado para problema de pagamento Google.' }
+    }
+
+    const instanceToken = await resolveSectorWhatsappInstance(supabase)
+    if (!instanceToken) {
+        return { sent: 0, errors: deliveries.length, skipped: true, reason: 'Nenhuma instancia WhatsApp conectada.' }
+    }
+
+    const baseUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://guilhermepilger.ai')).replace(/\/$/, '')
+    const panelUrl = `${baseUrl}/admin/ads/google`
+    const billingLine = accountHealth.billing_status_label
+        ? `Faturamento: ${accountHealth.billing_status_label}`
+        : 'Faturamento: verificar no painel Google Ads'
+    const message = [
+        '*Alerta critico - Google Ads*',
+        '',
+        `Conta: ${accountHealth.name || 'Conta Google Ads'}`,
+        `Status: ${accountHealth.customer_status_label || accountHealth.customer_status || 'desconhecido'}`,
+        billingLine,
+        accountHealth.payments_account ? `Conta de pagamento: ${accountHealth.payments_account}` : '',
+        '',
+        accountHealth.message || 'A conta Google Ads pode estar com problema de pagamento, faturamento ou suspensao.',
+        '',
+        'Acao recomendada: verificar faturamento e status da conta no Google Ads antes de avaliar performance.',
+    ].filter(Boolean).join('\n')
+
+    let sent = 0
+    let errors = 0
+    for (const delivery of deliveries) {
+        try {
+            await sendMenuMessage({
+                phone: delivery.phone,
+                text: message,
+                type: 'button',
+                choices: [`Abrir Google Ads|url:${panelUrl}`],
+                footerText: 'Pilger Trafego',
+                instanceToken,
+            })
+            sent += 1
+        } catch (buttonError) {
+            console.warn('[Google Payment Alert] button send failed, falling back to text:', buttonError)
+            try {
+                await sendWhatsAppMessage({
+                    phone: delivery.phone,
+                    message: `${message}\n\nAbrir Google Ads: ${panelUrl}`,
+                    instanceToken,
+                })
+                sent += 1
+            } catch (textError) {
+                errors += 1
+                console.error('[Google Payment Alert] text fallback failed:', textError)
+            }
+        }
+    }
+
+    if (sent > 0) {
+        await supabase
+            .from('app_config')
+            .upsert({
+                key: 'google_payment_issue_last_alert',
+                value: JSON.stringify({
+                    sent_at: new Date().toISOString(),
+                    signature: currentSignature,
+                    customer_status: accountHealth.customer_status,
+                    billing_status: accountHealth.billing_status,
+                    sent,
+                }),
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'key' })
+    }
+
+    return { sent, errors }
+}
 
 export async function sendDailyReport(report: {
     total_spend: number
@@ -167,26 +393,45 @@ export async function sendDailyReport(report: {
     campaigns_active: number
     campaigns_paused: number
 }): Promise<void> {
-    const contacts = await getActiveAdminContacts('insight', 'low')
+    const supabase = await createSupabaseAdmin()
+    const deliveries = await getTrafficPaidRecipients(supabase, { eventType: 'ads_daily_report' })
+
+    if (!deliveries.length) {
+        console.log('Nenhum envolvido configurado para relatorio diario de Trafego Pago.')
+        return
+    }
 
     const msg = [
-        `📊 *Relatório Diário — Pilger Tráfego*`,
+        `*Relatorio Diario - Pilger Trafego*`,
         ``,
-        `💰 Gasto Total: R$ ${report.total_spend.toFixed(2)}`,
-        `👥 Leads Captados: ${report.total_leads}`,
-        `📈 CPA Médio: R$ ${report.avg_cpa.toFixed(2)}`,
+        `Gasto Total: R$ ${report.total_spend.toFixed(2)}`,
+        `Leads Captados: ${report.total_leads}`,
+        `CPA Medio: R$ ${report.avg_cpa.toFixed(2)}`,
         ``,
-        `🏆 Melhor Campanha: ${report.best_campaign}`,
-        `⚠️ Pior Campanha: ${report.worst_campaign}`,
+        `Melhor Campanha: ${report.best_campaign}`,
+        `Pior Campanha: ${report.worst_campaign}`,
         ``,
-        `✅ Ativas: ${report.campaigns_active} | ⏸️ Pausadas: ${report.campaigns_paused}`,
+        `Ativas: ${report.campaigns_active} | Pausadas: ${report.campaigns_paused}`,
     ].join('\n')
 
-    for (const contact of contacts) {
+    const instanceToken = await resolveSectorWhatsappInstance(supabase)
+    if (!instanceToken) {
+        console.log('Nenhuma instancia WhatsApp conectada para relatorio diario de Trafego Pago.')
+        return
+    }
+
+    let errors = 0
+    for (const delivery of deliveries) {
+        const name = delivery.member?.name || delivery.recipient.responsible_name || delivery.recipient.label
         try {
-            await sendWhatsAppMessage({ phone: contact.phone, message: msg })
+            await sendWhatsAppMessage({ phone: delivery.phone, message: msg, instanceToken })
         } catch (err) {
-            console.error(`Falha no relatório diário para ${contact.name}:`, err)
+            errors += 1
+            console.error(`Falha no relatorio diario de Trafego Pago para ${name}:`, err)
         }
+    }
+
+    if (errors > 0) {
+        console.error(`Relatorio diario de Trafego Pago finalizado com ${errors} erro(s).`)
     }
 }

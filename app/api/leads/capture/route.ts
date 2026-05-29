@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
+import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
+import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
 import { inngest } from '@/lib/inngest/client'
 
 function getSupabase() {
@@ -17,6 +19,46 @@ function normalizePhoneBR(raw: string): string {
     return `55${digits}`
 }
 
+function metadataRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {}
+}
+
+function buildPhoneOrFilter(candidates: string[]): string {
+    const safe = candidates
+        .map(candidate => candidate.replace(/[^0-9]/g, ''))
+        .filter(Boolean)
+    return `phone.in.(${safe.join(',')}),phone_e164.in.(${safe.join(',')})`
+}
+
+async function syncLeadActivityFromVisitor(params: {
+    supabase: ReturnType<typeof getSupabase>
+    leadId: string
+    visitorId: string
+    metadata: Record<string, unknown>
+}) {
+    await params.supabase
+        .from('funnel_events')
+        .update({ lead_id: params.leadId })
+        .eq('visitor_id', params.visitorId)
+        .is('lead_id', null)
+
+    const { data: eventRows, error } = await params.supabase
+        .from('funnel_events')
+        .select('id, event_type, metadata, created_at')
+        .eq('visitor_id', params.visitorId)
+        .order('created_at', { ascending: false })
+        .limit(120)
+
+    if (error) {
+        console.warn('[Lead Capture] activity history fetch skipped:', error.message)
+        return params.metadata
+    }
+
+    return mergeLeadSiteActivity(params.metadata, ((eventRows || []) as LeadActivityEventRow[]).reverse())
+}
+
 export async function POST(request: NextRequest) {
     try {
         const supabase = getSupabase()
@@ -30,6 +72,7 @@ export async function POST(request: NextRequest) {
         const referrer = body?.referrer ? String(body.referrer) : undefined
         const searchParams = new URLSearchParams(String(body?.search_params || ''))
         const consentLgpd = Boolean(body?.consent_lgpd)
+        const captureMetadata = metadataRecord(body?.metadata)
 
         if (!name || !phoneRaw) {
             return NextResponse.json({ success: false, error: 'name e phone são obrigatórios' }, { status: 400 })
@@ -67,27 +110,32 @@ export async function POST(request: NextRequest) {
         if (visitorError) throw visitorError
 
         // Busca lead existente por telefone, depois por visitor_id
+        const candidates = phoneCandidates(phone)
         const { data: existingByPhone } = await supabase
             .from('leads')
-            .select('id, metadata')
-            .eq('phone', phone)
+            .select('id, metadata, lead_score, lead_classification')
+            .or(buildPhoneOrFilter(candidates.length ? candidates : [phone]))
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle()
 
         let leadId: string | null = existingByPhone?.id || null
         let existingMetadata = existingByPhone?.metadata || {}
+        let currentLeadScore = existingByPhone?.lead_score || null
+        let currentLeadClassification = existingByPhone?.lead_classification || null
 
         if (!leadId) {
             const { data: existingByVisitor } = await supabase
                 .from('leads')
-                .select('id, metadata')
+                .select('id, metadata, lead_score, lead_classification')
                 .eq('visitor_id', visitor.id)
                 .order('updated_at', { ascending: false })
                 .limit(1)
                 .maybeSingle()
             leadId = existingByVisitor?.id || null
             existingMetadata = existingByVisitor?.metadata || existingMetadata
+            currentLeadScore = existingByVisitor?.lead_score || currentLeadScore
+            currentLeadClassification = existingByVisitor?.lead_classification || currentLeadClassification
         }
 
         const metadataPatch = {
@@ -97,6 +145,7 @@ export async function POST(request: NextRequest) {
             capture_source: 'site_form',
             landing_page_slug: landingPageSlug,
             visitor_cookie_id: visitorCookieId,
+            ...(Object.keys(captureMetadata).length ? { capture_context: captureMetadata } : {}),
             tracking: {
                 detected_source: trackingData.detected_source || null,
                 utm_source: trackingData.utm_source || null,
@@ -169,12 +218,33 @@ export async function POST(request: NextRequest) {
                 landing_page_slug: landingPageSlug,
                 visitor_cookie_id: visitorCookieId,
                 tracking: metadataPatch.tracking,
+                ...captureMetadata,
             },
         })
 
         if (!leadId) {
             throw new Error('Lead ID not resolved after capture')
         }
+
+        const metadataWithActivity = await syncLeadActivityFromVisitor({
+            supabase,
+            leadId,
+            visitorId: visitor.id,
+            metadata: metadataPatch,
+        })
+
+        await supabase
+            .from('leads')
+            .update({
+                metadata: metadataWithActivity,
+                ...leadIntentColumnsFromMetadata(
+                    metadataWithActivity,
+                    currentLeadScore,
+                    currentLeadClassification
+                ),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', leadId)
 
         // Agenda fluxo completo de follow-up caso o lead não inicie conversa no WhatsApp.
         await inngest.send({

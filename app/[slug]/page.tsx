@@ -10,6 +10,7 @@ import VipExclusiveTemplate from '@/components/templates/VipExclusiveTemplate'
 import BravaConcettoTemplate from '@/components/templates/BravaConcettoTemplate'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
+import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 // Force dynamic rendering since we rely on DB data
 export const dynamic = 'force-dynamic'
@@ -107,23 +108,83 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         agentName: agent.name,
         greetingMessage: agent.greeting_message
     }
+    const gallery = getGallery()
+    const pageUrl = absoluteUrl(`/${slug}`)
+    const jsonLd = [
+        organizationJsonLd(),
+        webPageJsonLd({
+            path: `/${slug}`,
+            name: displayData.title,
+            description: displayData.description,
+            type: 'WebPage',
+            image: displayData.heroImage,
+        }),
+        breadcrumbJsonLd([
+            { name: 'Home', url: '/' },
+            { name: displayData.title, url: `/${slug}` },
+        ]),
+        property.id ? {
+            '@context': 'https://schema.org',
+            '@type': 'RealEstateListing',
+            '@id': `${pageUrl}#listing`,
+            name: displayData.title,
+            url: pageUrl,
+            image: gallery.length ? gallery : [displayData.heroImage],
+            description: displayData.description,
+            mainEntityOfPage: {
+                '@id': `${pageUrl}#webpage`,
+            },
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: property.city || displayData.stats.location,
+                addressRegion: property.state || 'SC',
+                addressCountry: 'BR',
+                streetAddress: [property.neighborhood, property.street].filter(Boolean).join(', ') || undefined,
+            },
+            floorSize: property.area_m2 || property.area_private_m2 || displayData.stats.area ? {
+                '@type': 'QuantitativeValue',
+                value: Number(property.area_m2 || property.area_private_m2 || displayData.stats.area),
+                unitCode: 'MTK',
+            } : undefined,
+            numberOfRooms: property.bedrooms || property.suites || displayData.stats.bedrooms || undefined,
+            offers: {
+                '@type': 'Offer',
+                price: property.price || undefined,
+                priceCurrency: 'BRL',
+                availability: 'https://schema.org/InStock',
+                url: pageUrl,
+                seller: {
+                    '@id': `${absoluteUrl('/')}#organization`,
+                },
+            },
+        } : undefined,
+    ].filter(Boolean) as Record<string, unknown>[]
+
+    const page = (() => {
+        switch (templateId) {
+            case 'brava-concetto':
+                return <BravaConcettoTemplate {...commonProps} />
+            case 'modern':
+                return <ModernLuxuryTemplate {...commonProps} />
+            case 'lead-capture':
+                return <LeadCaptureTemplate {...commonProps} />
+            case 'urgency':
+                return <UrgencyTemplate {...commonProps} />
+            case 'social-proof':
+                return <SocialProofTemplate {...commonProps} />
+            case 'vip':
+                return <VipExclusiveTemplate {...commonProps} />
+            case 'classic':
+            default:
+                return <ClassicTemplate {...commonProps} />
+        }
+    })()
 
     // 5. Render Selected Template
-    switch (templateId) {
-        case 'brava-concetto':
-            return <BravaConcettoTemplate {...commonProps} />
-        case 'modern':
-            return <ModernLuxuryTemplate {...commonProps} />
-        case 'lead-capture':
-            return <LeadCaptureTemplate {...commonProps} />
-        case 'urgency':
-            return <UrgencyTemplate {...commonProps} />
-        case 'social-proof':
-            return <SocialProofTemplate {...commonProps} />
-        case 'vip':
-            return <VipExclusiveTemplate {...commonProps} />
-        case 'classic':
-        default:
-            return <ClassicTemplate {...commonProps} />
-    }
+    return (
+        <>
+            <JsonLd data={jsonLd} />
+            {page}
+        </>
+    )
 }

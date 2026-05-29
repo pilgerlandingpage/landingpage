@@ -2,10 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import * as metaAds from '@/lib/ads/meta'
 import * as googleAds from '@/lib/ads/google'
+import { sendMetaPaymentIssueAlert } from '@/lib/ads/whatsapp-alerts'
 
 function startOfDay(d: Date) { const res = new Date(d); res.setHours(0,0,0,0); return res; }
 function endOfDay(d: Date) { const res = new Date(d); res.setHours(23,59,59,999); return res; }
 function subDays(d: Date, days: number) { const res = new Date(d); res.setDate(res.getDate() - days); return res; }
+
+function firstRelation<T>(value: T | T[] | null | undefined) {
+    return Array.isArray(value) ? value[0] || null : value || null
+}
+
+function isMetaLead(row: any) {
+    const visitor = firstRelation(row?.visitors)
+    const sourceText = [
+        row?.acquired_via,
+        visitor?.detected_source,
+        visitor?.utm_source,
+        visitor?.utm_medium,
+        visitor?.utm_campaign,
+    ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+    return sourceText.includes('facebook')
+        || sourceText.includes('instagram')
+        || sourceText.includes('meta')
+        || sourceText.includes('fbclid')
+}
 
 // GET — list all campaigns (with optional ?alerts=true to fetch alerts instead)
 export async function GET(request: NextRequest) {
@@ -49,6 +73,7 @@ export async function GET(request: NextRequest) {
         // Try to fetch live insights from both Meta and Google grouped by campaign
         let metaInsightsMap: Record<string, any> = {}
         let googleInsightsMap: Record<string, any> = {}
+        let accountHealth: Awaited<ReturnType<typeof metaAds.getAdAccountHealth>> | null = null
         
         try {
             const metaParams: any[] = [datePreset];
@@ -59,12 +84,14 @@ export async function GET(request: NextRequest) {
                 googleParams[1] = { startDate, endDate };
             }
 
-            const [metaRes, googleRes] = await Promise.allSettled([
+            const [metaRes, googleRes, accountHealthRes] = await Promise.allSettled([
                 metaAds.getAccountInsightsByCampaign(metaParams[0], metaParams[1]),
-                googleAds.getAllCampaignsWithMetrics(googleParams[0], googleParams[1])
+                googleAds.getAllCampaignsWithMetrics(googleParams[0], googleParams[1]),
+                metaAds.getAdAccountHealth(),
             ])
             if (metaRes.status === 'fulfilled') metaInsightsMap = metaRes.value
             if (googleRes.status === 'fulfilled') googleInsightsMap = googleRes.value
+            if (accountHealthRes.status === 'fulfilled') accountHealth = accountHealthRes.value
         } catch (err) {
             console.error('Erro ao buscar insights ao vivo:', err)
         }
@@ -117,6 +144,27 @@ export async function GET(request: NextRequest) {
             return { ...camp, latest_metrics: null }
         })
 
+        let liveAccountStats: Awaited<ReturnType<typeof metaAds.getTodayAccountSpendEstimate>> | null = null
+        if (datePreset === 'today') {
+            try {
+                const currentInsightsSpend = Object.values(metaInsightsMap).reduce((sum: number, row: any) => {
+                    const spend = Number.parseFloat(String(row?.spend || '0'))
+                    return sum + (Number.isFinite(spend) ? spend : 0)
+                }, 0)
+                liveAccountStats = await metaAds.getTodayAccountSpendEstimate(currentInsightsSpend)
+            } catch (err) {
+                console.error('Erro ao buscar gasto diario ao vivo Meta:', err)
+            }
+        }
+
+        if (accountHealth?.is_payment_issue) {
+            try {
+                await sendMetaPaymentIssueAlert(supabase, accountHealth, request.nextUrl.origin)
+            } catch (alertError) {
+                console.error('Erro ao avisar envolvidos sobre pendencia de pagamento Meta:', alertError)
+            }
+        }
+
         // Fetch internal lead counts and recent leads
         const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
         let sinceInternal: string
@@ -139,23 +187,27 @@ export async function GET(request: NextRequest) {
             sinceInternal = startOfDay(subDays(spNow, 90)).toISOString() // Fallback to 90d for 'maximum'
         }
 
-        const metaSources = ['Facebook Ads', 'Instagram', 'Facebook']
-        const [internalLeadsRes, recentLeadsRes] = await Promise.all([
-            supabase.from('leads').select('id, visitors!inner(detected_source)', { count: 'exact', head: true })
-                .in('visitors.detected_source', metaSources)
-                .gte('created_at', sinceInternal)
-                .lte('created_at', untilInternal),
-            supabase.from('leads').select('name, phone, created_at, funnel_stage, visitors!inner(detected_source)')
-                .in('visitors.detected_source', metaSources)
-                .order('created_at', { ascending: false })
-                .limit(10)
-        ])
+        const { data: leadRows, error: leadRowsError } = await supabase
+            .from('leads')
+            .select('name, phone, created_at, funnel_stage, acquired_via, visitors(detected_source, utm_source, utm_medium, utm_campaign)')
+            .gte('created_at', sinceInternal)
+            .lte('created_at', untilInternal)
+            .order('created_at', { ascending: false })
+            .limit(500)
+
+        if (leadRowsError) {
+            console.error('Erro ao buscar leads internos Meta:', leadRowsError)
+        }
+
+        const metaLeads = ((leadRows || []) as any[]).filter(isMetaLead)
 
         return NextResponse.json({
             campaigns: enriched,
+            liveAccountStats,
+            accountHealth,
             internalStats: {
-                totalLeads: internalLeadsRes.count || 0,
-                recentLeads: recentLeadsRes.data || []
+                totalLeads: metaLeads.length,
+                recentLeads: metaLeads.slice(0, 10)
             }
         })
     } catch (err: any) {

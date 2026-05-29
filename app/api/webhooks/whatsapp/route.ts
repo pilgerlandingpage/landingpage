@@ -4,6 +4,10 @@ import { inngest } from '@/lib/inngest/client'
 import { markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/uazapi'
 import { uploadImageToR2 } from '@/lib/storage/r2'
 import { appendLeadConversationLog, ensureWhatsAppLead, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
+import { generateChatResponse } from '@/lib/ai/generation'
+import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
+import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
+import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
 import {
     buildAppointmentConfirmationText,
     detectConfirmedAppointment,
@@ -89,6 +93,44 @@ function normalizeLoopText(value: unknown): string {
         .replace(/[^\p{L}\p{N}\s]/gu, ' ')
         .replace(/\s+/g, ' ')
         .trim()
+}
+
+function pickTextFromMessageNode(node: any): string {
+    if (!node || typeof node !== 'object') return ''
+    const candidates = [
+        node.conversation,
+        node.text,
+        node.caption,
+        node.extendedTextMessage?.text,
+        node.imageMessage?.caption,
+        node.videoMessage?.caption,
+        node.documentMessage?.caption,
+        node.message?.conversation,
+        node.message?.extendedTextMessage?.text,
+        node.message?.imageMessage?.caption,
+        node.message?.videoMessage?.caption,
+        node.message?.documentMessage?.caption,
+    ]
+    for (const candidate of candidates) {
+        const text = String(candidate || '').trim()
+        if (text) return text.slice(0, 500)
+    }
+    return ''
+}
+
+function extractQuotedReplyText(messageData: any): string {
+    const contextInfo = messageData?.message?.extendedTextMessage?.contextInfo
+        || messageData?.extendedTextMessage?.contextInfo
+        || messageData?.contextInfo
+        || messageData?.message?.contextInfo
+        || null
+    const quoted = contextInfo?.quotedMessage
+        || messageData?.quotedMessage
+        || messageData?.quoted
+        || messageData?.reply_to
+        || messageData?.replyTo
+        || null
+    return pickTextFromMessageNode(quoted)
 }
 
 function parseMessageTimestamp(value: unknown): number {
@@ -476,10 +518,16 @@ async function notifyHumanAboutPendingAppointment(params: {
         'Confirme no painel da agenda se esse horario esta disponivel. O lead ja foi avisado que estamos verificando.'
     ].join('\n')
 
+    const systemInstanceToken = await resolveSystemNotificationWhatsappInstance(supabase)
+    if (!systemInstanceToken) {
+        console.warn('[Appointment] Pending appointment notification skipped: global agent instance unavailable')
+        return { sent: false, reason: 'global_instance_unavailable' as const }
+    }
+
     const result = await sendWhatsAppMessage({
         phone: target.phone,
         message,
-        instanceToken: instance.instance_token,
+        instanceToken: systemInstanceToken,
     })
 
     return {
@@ -498,11 +546,11 @@ function normalizeAssistantText(text: string): string {
 }
 
 function isAssistantConfirmationText(text: string): boolean {
-    return /\b(sim|confirmo|confirma|pode|pode marcar|pode criar|isso|isso mesmo|ok|fechado|perfeito|confirmado)\b/.test(normalizeAssistantText(text))
+    return /\b(sim|confirmo|confirma|confirmar|concierge_confirm|agenda_confirm|pode|pode marcar|pode criar|isso|isso mesmo|ok|fechado|perfeito|confirmado)\b/.test(normalizeAssistantText(text))
 }
 
 function isAssistantCancelText(text: string): boolean {
-    return /\b(nao|não|cancela|cancelar|deixa|esquece|volta|errado)\b/.test(normalizeAssistantText(text))
+    return /\b(nao|não|cancela|cancelar|concierge_cancel|agenda_cancel|deixa|esquece|volta|errado)\b/.test(normalizeAssistantText(text))
 }
 
 function parseAssistantAgendaCommand(text: string) {
@@ -570,6 +618,989 @@ async function findAssistantAuthorization(params: {
     } catch (error) {
         console.warn('[Broker Assistant] Authorization lookup failed:', error)
         return null
+    }
+}
+
+function isBrokerConciergeEnabled(broker: any): boolean {
+    if (!broker) return false
+    if (!Object.prototype.hasOwnProperty.call(broker, 'concierge_enabled')) return true
+    return isConfigEnabled(broker?.concierge_enabled, false)
+}
+
+function brokerConciergeRequiresConfirmation(broker: any): boolean {
+    return isConfigEnabled(broker?.concierge_require_confirmation, true)
+}
+
+function assistantHasPermission(authorization: any, permission: string, defaultEnabled = false): boolean {
+    return isConfigEnabled(authorization?.[permission], defaultEnabled)
+}
+
+function buildConciergeCapabilities(authorization: any): string[] {
+    const capabilities = [
+        assistantHasPermission(authorization, 'can_manage_agenda', true) ? 'agenda' : '',
+        assistantHasPermission(authorization, 'can_view_properties', true) ? 'imoveis' : '',
+        assistantHasPermission(authorization, 'can_manage_leads') ? 'leads' : '',
+        assistantHasPermission(authorization, 'can_update_crm') ? 'CRM' : '',
+        assistantHasPermission(authorization, 'can_send_messages') ? 'mensagens' : '',
+        assistantHasPermission(authorization, 'can_view_reports') ? 'relatorios' : '',
+        assistantHasPermission(authorization, 'can_manage_finance') ? 'financeiro' : '',
+    ].filter(Boolean)
+
+    return capabilities
+}
+
+function buildConciergeFallbackReply(params: {
+    broker: any
+    authorization: any
+    conciergeEnabled: boolean
+}) {
+    const { broker, authorization, conciergeEnabled } = params
+    const brokerName = broker?.name || broker?.broker_name || broker?.display_name || 'este agente'
+
+    if (!conciergeEnabled) {
+        return 'Recebi sua mensagem como telefone autorizado do dono, mas o Concierge deste agente esta desligado no painel. Ligue o Concierge do dono para eu executar comandos internos.'
+    }
+
+    const capabilities = buildConciergeCapabilities(authorization)
+    if (!capabilities.length) {
+        return `Estou no modo concierge do ${brokerName}, mas este telefone ainda nao tem permissoes operacionais liberadas.`
+    }
+
+    const examples = assistantHasPermission(authorization, 'can_manage_agenda', true)
+        ? '\n\nPara agenda, me envie algo como: "marca reuniao com o lead Joao amanha as 15h".'
+        : ''
+
+    return `Estou no modo concierge do ${brokerName}. Posso ajudar com: ${capabilities.join(', ')}.${examples}`
+}
+
+type ConciergeButtonTagConfig = {
+    tag: string
+    aliases?: string[]
+    type: 'button' | 'list'
+    choices: string[]
+    listButton?: string
+    fallbackTitle: string
+}
+
+const CONCIERGE_BUTTON_TAGS: ConciergeButtonTagConfig[] = [
+    {
+        tag: '{pf_pj}',
+        aliases: ['{botao_pf_pj}'],
+        type: 'button',
+        fallbackTitle: 'Escolha o tipo do lancamento:',
+        choices: ['Pessoa fisica|finance_party_pf', 'Pessoa juridica|finance_party_pj'],
+    },
+    {
+        tag: '{confirmar}',
+        aliases: ['{botao_confirmar_cancelar}'],
+        type: 'button',
+        fallbackTitle: 'Confirme a acao:',
+        choices: ['Sim, confirmar|concierge_confirm', 'Cancelar|concierge_cancel'],
+    },
+    {
+        tag: '{corrigir}',
+        aliases: ['{botao_corrigir_lancamento}'],
+        type: 'list',
+        listButton: 'Corrigir',
+        fallbackTitle: 'O que voce quer corrigir?',
+        choices: [
+            '[Lancamento]',
+            'Corrigir valor|finance_fix_amount|Alterar o valor antes de gravar',
+            'Corrigir data|finance_fix_date|Alterar a data do lancamento',
+            'Corrigir categoria|finance_fix_category|Escolher outra categoria',
+            'Corrigir pagamento|finance_fix_payment|Alterar a forma de pagamento',
+        ],
+    },
+    {
+        tag: '{categoria}',
+        aliases: ['{botao_categoria_despesa}'],
+        type: 'list',
+        listButton: 'Categorias',
+        fallbackTitle: 'Escolha a categoria da despesa:',
+        choices: [
+            '[Despesa]',
+            'Combustivel|finance_category_fuel|Abastecimento, gasolina, etanol ou diesel',
+            'Alimentacao|finance_category_food|Cafe, almoco, jantar ou reuniao',
+            'Marketing|finance_category_marketing|Trafego pago, criativos ou divulgacao',
+            'Documentacao|finance_category_docs|Cartorio, taxas e documentos',
+            'Manutencao|finance_category_maintenance|Servicos, reparos e manutencao',
+            'Outros|finance_category_other|Outra despesa operacional',
+        ],
+    },
+    {
+        tag: '{pagamento}',
+        aliases: ['{botao_forma_pagamento}'],
+        type: 'list',
+        listButton: 'Pagamento',
+        fallbackTitle: 'Escolha a forma de pagamento:',
+        choices: [
+            '[Pagamento]',
+            'Pix|finance_payment_pix|Pagamento por Pix',
+            'Cartao|finance_payment_card|Credito ou debito',
+            'Dinheiro|finance_payment_cash|Pagamento em dinheiro',
+            'Boleto|finance_payment_boleto|Pagamento por boleto',
+        ],
+    },
+    {
+        tag: '{agenda}',
+        aliases: ['{botao_agenda_confirmar}'],
+        type: 'button',
+        fallbackTitle: 'Confirme a agenda:',
+        choices: ['Sim, confirmar|agenda_confirm', 'Reagendar|agenda_reschedule', 'Cancelar|agenda_cancel'],
+    },
+    {
+        tag: '{resumo}',
+        aliases: ['{botao_resumo_dia}'],
+        type: 'button',
+        fallbackTitle: 'Qual resumo voce quer ver?',
+        choices: ['Resumo financeiro|summary_finance', 'Resumo agenda|summary_agenda', 'Resumo leads|summary_leads'],
+    },
+    {
+        tag: '{imoveis}',
+        aliases: ['{botao_imoveis}'],
+        type: 'button',
+        fallbackTitle: 'O que voce quer consultar?',
+        choices: ['Estoque ativo|properties_stock', 'Mais visitados|properties_top', 'Oportunidades|properties_opportunities'],
+    },
+    {
+        tag: '{relatorio}',
+        aliases: ['{botao_relatorio_atendimentos}'],
+        type: 'button',
+        fallbackTitle: 'Periodo do relatorio:',
+        choices: ['Hoje|report_today', 'Semana|report_week', 'Mes|report_month'],
+    },
+]
+
+function parseConciergeButtonTags(reply: string): { cleanText: string; menu?: ConciergeButtonTagConfig } {
+    let cleanText = String(reply || '')
+    const found = CONCIERGE_BUTTON_TAGS.find(config => [config.tag, ...(config.aliases || [])].some(tag => cleanText.includes(tag)))
+    for (const config of CONCIERGE_BUTTON_TAGS) {
+        for (const tag of [config.tag, ...(config.aliases || [])]) {
+            cleanText = cleanText.split(tag).join('')
+        }
+        cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim()
+    }
+    return { cleanText, menu: found }
+}
+
+function buildConciergeButtonFallback(text: string, menu: ConciergeButtonTagConfig): string {
+    const options = menu.choices
+        .filter(choice => !choice.startsWith('['))
+        .map(choice => {
+            const [label] = choice.split('|')
+            return `- ${label}`
+        })
+        .join('\n')
+    return [text || menu.fallbackTitle, options].filter(Boolean).join('\n\n')
+}
+
+function detectConciergeIntent(text: string): string {
+    const normalized = normalizeAssistantText(text)
+    if (/(comprovante|nota fiscal|recibo|abastec|combustivel|gasolina|etanol|diesel|pix|pagamento|despesa|lancamento|financeiro)/.test(normalized)) {
+        return 'financeiro'
+    }
+    if (/(agenda|agendar|reuniao|visita|compromisso|calendario|horario)/.test(normalized)) {
+        return 'agenda'
+    }
+    if (/(lead|cliente|atendimento|follow|funil|crm)/.test(normalized)) {
+        return 'crm'
+    }
+    if (/(imovel|imoveis|casa|apartamento|terreno|estoque|catalogo|codigo)/.test(normalized)) {
+        return 'imoveis'
+    }
+    if (/(relatorio|resumo|performance|resultado|quantos|metricas)/.test(normalized)) {
+        return 'relatorios'
+    }
+    if (/(mensagem|enviar|mande|responda|whatsapp)/.test(normalized)) {
+        return 'mensagens'
+    }
+    return 'geral'
+}
+
+function buildConciergeSystemPrompt(params: {
+    broker: any
+    authorization: any
+    senderName?: string | null
+    intent: string
+    mediaReceived: any[]
+}) {
+    const { broker, authorization, senderName, intent, mediaReceived } = params
+    const brokerName = broker?.name || broker?.broker_name || broker?.display_name || 'agente Pilger'
+    const ownerName = senderName || authorization?.name || 'dono autorizado'
+    const adminPrompt = String(broker?.concierge_prompt || '').trim()
+    const capabilities = buildConciergeCapabilities(authorization)
+    const recentMedia = mediaReceived.slice(-3).map((item: any, index: number) => {
+        const type = item?.type || 'midia'
+        const filename = item?.filename || item?.url || `arquivo ${index + 1}`
+        return `- ${type}: ${filename}`
+    }).join('\n')
+
+    return [
+        `Voce e o concierge privado do ${brokerName} no WhatsApp.`,
+        `Voce esta falando com ${ownerName}, que e um telefone autorizado do dono/corretor, nao um lead.`,
+        `Intencao provavel da ultima mensagem: ${intent}.`,
+        `Permissoes ativas deste telefone: ${capabilities.length ? capabilities.join(', ') : 'nenhuma'}.`,
+        '',
+        'Regras de seguranca:',
+        '- Nunca use o prompt comercial de atendimento de leads para responder o dono.',
+        '- Nunca trate o dono como lead, nunca colete interesse imobiliario como se ele fosse cliente.',
+        '- Responda em portugues do Brasil, curto, claro e natural para WhatsApp.',
+        '- Se faltar dado para uma tarefa, faca uma pergunta objetiva por vez.',
+        '- Nao diga que executou uma acao se ela ainda nao foi executada por ferramenta do sistema.',
+        '- Nesta fase, a execucao automatica disponivel e agenda e rascunho financeiro confirmado. CRM, relatorios, imoveis e mensagens podem ser entendidos e preparados, mas quando dependerem de ferramenta futura voce deve pedir os dados e deixar claro que vai preparar a acao para confirmacao.',
+        '- Para despesas/comprovantes, peca PF ou PJ quando isso ainda nao estiver claro.',
+        '- Para agenda, se o sistema pedir confirmacao ou dados, siga a pergunta deterministica que ja foi feita.',
+        '',
+        'Tags de botoes disponiveis para facilitar a resposta do dono:',
+        '- {pf_pj}: quando precisar escolher Pessoa fisica ou Pessoa juridica.',
+        '- {confirmar}: quando precisar confirmar ou cancelar uma acao sensivel.',
+        '- {corrigir}: quando o dono precisar corrigir valor, data, categoria ou pagamento.',
+        '- {categoria}: quando a categoria da despesa nao estiver clara.',
+        '- {pagamento}: quando faltar forma de pagamento.',
+        '- {agenda}: antes de criar ou alterar compromisso de agenda.',
+        '- {resumo}: quando o dono pedir resumo rapido.',
+        '- {imoveis}: quando o dono pedir estoque, oportunidades ou imoveis mais relevantes.',
+        '- {relatorio}: quando o dono pedir relatorio de leads/atendimentos.',
+        '- Use no maximo uma tag de botao por resposta.',
+        '',
+        adminPrompt ? `Prompt especifico configurado pelo admin:\n${adminPrompt}` : 'Prompt especifico configurado pelo admin: nao informado.',
+        recentMedia ? `\nMidias internas recentes recebidas deste dono:\n${recentMedia}` : '',
+    ].filter(Boolean).join('\n')
+}
+
+function buildConciergeHistory(messages: any[]): { role: string; content: string }[] {
+    return (messages || [])
+        .slice(-14)
+        .map((message: any) => {
+            const content = String(message?.content || '').trim()
+            if (!content) return null
+            const role = message?.role === 'assistant' ? 'assistant' : 'user'
+            return { role, content: content.slice(0, 1200) }
+        })
+        .filter(Boolean) as { role: string; content: string }[]
+}
+
+function sanitizeConciergeReply(reply: string): string {
+    const text = String(reply || '').trim()
+    if (!text) return ''
+    return text
+        .replace(/\n{3,}/g, '\n\n')
+        .slice(0, 1400)
+}
+
+function saoPauloDateKey(date = getSaoPauloDate()): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+function formatCurrencyBR(value: number): string {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function normalizeReceiptDate(raw: any): string | null {
+    const value = String(raw || '').trim()
+    if (!value) return null
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+
+    const br = value.match(/\b(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?\b/)
+    if (br) {
+        const day = String(br[1]).padStart(2, '0')
+        const month = String(br[2]).padStart(2, '0')
+        const currentYear = String(getSaoPauloDate().getFullYear())
+        const rawYear = br[3] ? String(br[3]) : currentYear
+        const year = rawYear.length === 2 ? `20${rawYear}` : rawYear
+        if (Number(month) >= 1 && Number(month) <= 12 && Number(day) >= 1 && Number(day) <= 31) {
+            return `${year}-${month}-${day}`
+        }
+    }
+
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed.toISOString().slice(0, 10)
+}
+
+function parseMoneyValue(raw: string): number | null {
+    const value = String(raw || '').replace(/[^\d,.]/g, '').trim()
+    if (!value) return null
+    const normalized = value.includes(',')
+        ? value.replace(/\./g, '').replace(',', '.')
+        : value
+    const amount = Number(normalized)
+    if (!Number.isFinite(amount) || amount <= 0) return null
+    return Math.round(amount * 100) / 100
+}
+
+function coerceReceiptAmount(raw: any): number | null {
+    if (typeof raw === 'number') {
+        return Number.isFinite(raw) && raw > 0 ? Math.round(raw * 100) / 100 : null
+    }
+    return parseMoneyValue(String(raw || ''))
+}
+
+function extractJsonObject(text: string): any | null {
+    const raw = String(text || '').trim()
+    if (!raw) return null
+    const withoutFence = raw
+        .replace(/^```(?:json)?/i, '')
+        .replace(/```$/i, '')
+        .trim()
+    const jsonSlice = withoutFence.includes('{') && withoutFence.includes('}')
+        ? withoutFence.slice(withoutFence.indexOf('{'), withoutFence.lastIndexOf('}') + 1)
+        : ''
+    const candidates = [withoutFence, jsonSlice]
+        .filter(candidate => candidate && candidate.startsWith('{') && candidate.endsWith('}'))
+
+    for (const candidate of candidates) {
+        try {
+            return JSON.parse(candidate)
+        } catch {
+            // Try next candidate.
+        }
+    }
+    return null
+}
+
+function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = '') {
+    if (!raw || typeof raw !== 'object') return null
+    const amount = coerceReceiptAmount(raw.amount ?? raw.valor ?? raw.total)
+    const paymentMethod = detectFinancePaymentMethod([
+        raw.payment_method,
+        raw.forma_pagamento,
+        raw.raw_summary,
+        fallbackText,
+    ].filter(Boolean).join(' '))
+    const merchant = String(raw.merchant || raw.favorecido || raw.estabelecimento || '').trim() || null
+    const rawSummary = String(raw.raw_summary || raw.summary || fallbackText || '').trim()
+    const normalized = normalizeAssistantText([merchant, rawSummary, raw.category_hint, raw.subcategory_hint].filter(Boolean).join(' '))
+    const isFuel = /(abastec|combustivel|gasolina|etanol|diesel|posto)/.test(normalized)
+
+    return {
+        is_receipt: raw.is_receipt !== false,
+        amount,
+        date: normalizeReceiptDate(raw.date || raw.data || raw.entry_date),
+        merchant,
+        document_number: String(raw.document_number || raw.numero || '').trim() || null,
+        payment_method: paymentMethod,
+        category_hint: String(raw.category_hint || '').trim() || (isFuel ? 'Consumo despesas' : null),
+        subcategory_hint: String(raw.subcategory_hint || '').trim() || (isFuel ? 'Combustivel' : null),
+        description: String(raw.description || raw.descricao || '').trim() || (isFuel ? `Abastecimento${merchant ? ` - ${merchant}` : ''}` : merchant ? `Despesa - ${merchant}` : null),
+        confidence: Math.max(0, Math.min(1, Number(raw.confidence || raw.confianca || 0) || 0)),
+        raw_summary: rawSummary,
+    }
+}
+
+function extractFinanceAmountFromText(text: string, allowLoose = false): number | null {
+    const value = String(text || '')
+    const explicit = value.match(/(?:r\$|valor|total|paguei|pagamento|deu|custou|foi|abasteci|abastecimento)\s*(?:de\s*)?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}|[0-9]+(?:[,.][0-9]{1,2})?)/i)
+    const decimal = value.match(/\b([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}|[0-9]+,[0-9]{2})\b/)
+    const loose = (allowLoose || /(comprovante|recibo|abastec|combustivel|gasolina|etanol|diesel|despesa|paguei|pagamento)/i.test(normalizeAssistantText(value)))
+        ? value.match(/\b([1-9]\d{1,5})\b/)
+        : null
+
+    return parseMoneyValue(explicit?.[1] || decimal?.[1] || loose?.[1] || '')
+}
+
+function detectFinancePartyType(text: string): 'pessoa_fisica' | 'pessoa_juridica' | null {
+    const normalized = normalizeAssistantText(text)
+    if (/\b(pf|fisica|pessoa fisica|finance_party_pf)\b/.test(normalized)) return 'pessoa_fisica'
+    if (/\b(pj|juridica|pessoa juridica|cnpj|empresa|finance_party_pj)\b/.test(normalized)) return 'pessoa_juridica'
+    return null
+}
+
+function detectFinancePaymentMethod(text: string): string | null {
+    const normalized = normalizeAssistantText(text)
+    if (/\b(pix|finance_payment_pix)\b/.test(normalized)) return 'PIX'
+    if (/\b(cartao|credito|debito|finance_payment_card)\b/.test(normalized)) return 'Cartao'
+    if (/\b(boleto|finance_payment_boleto)\b/.test(normalized)) return 'Boleto'
+    if (/\b(dinheiro|especie|finance_payment_cash)\b/.test(normalized)) return 'Dinheiro'
+    if (/\b(ted)\b/.test(normalized)) return 'TED'
+    if (/\b(doc)\b/.test(normalized)) return 'DOC'
+    return null
+}
+
+function detectFinanceCategoryPatch(text: string): { category: string; subcategory: string; description?: string } | null {
+    const normalized = normalizeAssistantText(text)
+    if (/\b(combustivel|abastec|gasolina|etanol|diesel|finance_category_fuel)\b/.test(normalized)) {
+        return { category: 'Consumo despesas', subcategory: 'Combustivel', description: 'Abastecimento do carro' }
+    }
+    if (/\b(alimentacao|restaurante|almoco|jantar|cafe|finance_category_food)\b/.test(normalized)) {
+        return { category: 'Consumo despesas', subcategory: 'Alimentacao', description: 'Despesa de alimentacao' }
+    }
+    if (/\b(marketing|trafego|meta|google|criativo|divulgacao|finance_category_marketing)\b/.test(normalized)) {
+        return { category: 'Marketing', subcategory: 'Divulgacao', description: 'Despesa de marketing' }
+    }
+    if (/\b(documentacao|documento|cartorio|taxa|finance_category_docs)\b/.test(normalized)) {
+        return { category: 'Taxas e documentacao', subcategory: 'Documentacao', description: 'Despesa de documentacao' }
+    }
+    if (/\b(manutencao|reparo|servico|finance_category_maintenance)\b/.test(normalized)) {
+        return { category: 'Manutencao', subcategory: 'Servicos', description: 'Despesa de manutencao' }
+    }
+    if (/\b(outros|finance_category_other)\b/.test(normalized)) {
+        return { category: 'Outros', subcategory: 'Outros', description: 'Despesa operacional' }
+    }
+    return null
+}
+
+function detectFinanceCorrectionChoice(text: string): 'amount' | 'date' | 'category' | 'payment' | null {
+    const normalized = normalizeAssistantText(text)
+    if (/\b(corrigir valor|alterar valor|finance_fix_amount)\b/.test(normalized)) return 'amount'
+    if (/\b(corrigir data|alterar data|finance_fix_date)\b/.test(normalized)) return 'date'
+    if (/\b(corrigir categoria|alterar categoria|finance_fix_category)\b/.test(normalized)) return 'category'
+    if (/\b(corrigir pagamento|forma de pagamento|finance_fix_payment)\b/.test(normalized)) return 'payment'
+    return null
+}
+
+function parseFinanceDateFromText(text: string): string | null {
+    const value = String(text || '')
+    const match = value.match(/\b(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?\b/)
+    if (!match) return null
+    const day = Number(match[1])
+    const month = Number(match[2])
+    const yearRaw = match[3] ? Number(match[3]) : Number(saoPauloDateKey().slice(0, 4))
+    const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000) return null
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function isConciergeQuickChoice(text: string): boolean {
+    const normalized = normalizeAssistantText(text)
+    return /\b(summary_finance|summary_agenda|summary_leads|resumo financeiro|resumo agenda|resumo leads|properties_stock|properties_top|properties_opportunities|estoque ativo|mais visitados|oportunidades|report_today|report_week|report_month)\b/.test(normalized)
+}
+
+async function fetchFinanceReceiptBuffer(url: string): Promise<Buffer | null> {
+    try {
+        if (!/^https?:\/\//i.test(String(url || ''))) return null
+        const response = await fetch(url)
+        if (!response.ok) {
+            console.warn(`[Broker Concierge] Receipt media fetch failed (${response.status}): ${url.substring(0, 120)}`)
+            return null
+        }
+        const buffer = Buffer.from(await response.arrayBuffer())
+        return buffer.length > 64 ? buffer : null
+    } catch (error) {
+        console.warn('[Broker Concierge] Receipt media fetch error:', error)
+        return null
+    }
+}
+
+function canAnalyzeFinanceReceiptMime(mime: string): boolean {
+    const value = String(mime || '').toLowerCase()
+    return value.startsWith('image/')
+        || value.includes('pdf')
+        || value.includes('octet-stream')
+        || value === 'unknown'
+}
+
+async function analyzeFinanceReceiptWithGemini(params: {
+    mediaBuffer: Buffer
+    mimeType: string
+    apiKey: string
+    model: string
+    fileName?: string | null
+}) {
+    const { mediaBuffer, mimeType, apiKey, model, fileName } = params
+    const prompt = [
+        'Analise este comprovante, recibo, cupom fiscal, nota fiscal ou comprovante de pagamento enviado pelo dono no WhatsApp.',
+        'Retorne somente JSON valido, sem markdown, no formato:',
+        '{"is_receipt":true,"amount":123.45,"date":"YYYY-MM-DD","merchant":"Nome do favorecido","document_number":"numero ou null","payment_method":"PIX|Cartao|Boleto|Dinheiro|TED|DOC|null","category_hint":"categoria sugerida","subcategory_hint":"subcategoria sugerida","description":"descricao curta","confidence":0.0,"raw_summary":"resumo curto"}',
+        'Regras:',
+        '- amount deve ser numero em reais, usando ponto decimal.',
+        '- Se nao encontrar um campo com seguranca, use null.',
+        '- Para abastecimento, use category_hint "Consumo despesas" e subcategory_hint "Combustivel".',
+        '- Se nao parecer comprovante financeiro, use is_receipt false e explique em raw_summary.',
+        `Arquivo: ${fileName || 'sem nome'}.`,
+    ].join('\n')
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.5-flash'}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                role: 'user',
+                parts: [
+                    { inlineData: { mimeType, data: mediaBuffer.toString('base64') } },
+                    { text: prompt },
+                ],
+            }],
+        }),
+    })
+
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '')
+        console.warn(`[Broker Concierge] Gemini receipt analysis failed (${response.status}): ${errorText.substring(0, 500)}`)
+        return null
+    }
+
+    const data = await response.json()
+    await recordGeminiUsage({
+        model: model || 'gemini-2.5-flash',
+        feature: 'broker_concierge_receipt_analysis',
+        usageMetadata: data.usageMetadata,
+        metadata: { mimeType },
+    })
+    const parts = data?.candidates?.[0]?.content?.parts
+    const text = Array.isArray(parts) ? parts.map((part: any) => part?.text || '').filter(Boolean).join('\n') : ''
+    return normalizeFinanceReceiptAnalysis(extractJsonObject(text), text)
+}
+
+async function analyzeFinanceReceiptWithOpenAI(params: {
+    mediaBuffer: Buffer
+    mimeType: string
+    apiKey: string
+    model: string
+    fileName?: string | null
+}) {
+    const { mediaBuffer, mimeType, apiKey, model, fileName } = params
+    if (!mimeType.toLowerCase().startsWith('image/')) return null
+
+    const dataUrl = `data:${mimeType};base64,${mediaBuffer.toString('base64')}`
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: model || 'gpt-4o-mini',
+            temperature: 0.1,
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Voce extrai dados financeiros de comprovantes. Responda somente JSON valido.',
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: [
+                                `Arquivo: ${fileName || 'sem nome'}.`,
+                                'Extraia comprovante em JSON: {"is_receipt":true,"amount":123.45,"date":"YYYY-MM-DD","merchant":"Nome","document_number":null,"payment_method":"PIX|Cartao|Boleto|Dinheiro|TED|DOC|null","category_hint":"categoria","subcategory_hint":"subcategoria","description":"descricao curta","confidence":0.0,"raw_summary":"resumo"}',
+                                'Se nao encontrar com seguranca, use null. Para abastecimento use categoria Consumo despesas e subcategoria Combustivel.',
+                            ].join('\n'),
+                        },
+                        { type: 'image_url', image_url: { url: dataUrl } },
+                    ],
+                },
+            ],
+        }),
+    })
+
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '')
+        console.warn(`[Broker Concierge] OpenAI receipt analysis failed (${response.status}): ${errorText.substring(0, 500)}`)
+        return null
+    }
+
+    const data = await response.json()
+    const text = data?.choices?.[0]?.message?.content || ''
+    return normalizeFinanceReceiptAnalysis(extractJsonObject(text), text)
+}
+
+async function analyzeFinanceReceiptMedia(params: {
+    supabase: ReturnType<typeof getSupabase>
+    instance?: any
+    docEntry: any
+}) {
+    const { supabase, instance, docEntry } = params
+    const url = String(docEntry?.url || docEntry?.r2_url || docEntry?.original_url || '').trim()
+    const mimeType = String(docEntry?.mimetype || docEntry?.mime || 'application/octet-stream').trim() || 'application/octet-stream'
+    if (!url || !canAnalyzeFinanceReceiptMime(mimeType)) return null
+
+    const mediaBuffer = await fetchFinanceReceiptBuffer(url)
+    if (!mediaBuffer) return null
+
+    const maxBytes = 12 * 1024 * 1024
+    if (mediaBuffer.length > maxBytes) {
+        console.warn(`[Broker Concierge] Receipt media too large for analysis: ${mediaBuffer.length}`)
+        return null
+    }
+
+    const configs = await loadAIConfigs(supabase, instance?.id)
+    const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
+    const geminiKey = configs['gemini_api_key']
+    const openaiKey = configs['openai_api_key']
+    const geminiModel = configs['gemini_model'] || 'gemini-2.5-flash'
+    const openaiModel = configs['openai_model'] || 'gpt-4o-mini'
+
+    let analysis: any = null
+    if (provider === 'openai' && openaiKey) {
+        analysis = await analyzeFinanceReceiptWithOpenAI({
+            mediaBuffer,
+            mimeType,
+            apiKey: openaiKey,
+            model: openaiModel,
+            fileName: docEntry?.filename || null,
+        })
+    }
+
+    if (!analysis && geminiKey) {
+        analysis = await analyzeFinanceReceiptWithGemini({
+            mediaBuffer,
+            mimeType,
+            apiKey: geminiKey,
+            model: geminiModel,
+            fileName: docEntry?.filename || null,
+        })
+    }
+
+    if (!analysis && openaiKey && provider !== 'openai') {
+        analysis = await analyzeFinanceReceiptWithOpenAI({
+            mediaBuffer,
+            mimeType,
+            apiKey: openaiKey,
+            model: openaiModel,
+            fileName: docEntry?.filename || null,
+        })
+    }
+
+    return analysis?.is_receipt ? analysis : null
+}
+
+function latestAssistantMedia(state: any): any | null {
+    const mediaReceived = Array.isArray(state?.media_received) ? state.media_received : []
+    return mediaReceived.length ? mediaReceived[mediaReceived.length - 1] : null
+}
+
+function isMediaOnlyFinanceCandidate(text: string, state: any): boolean {
+    void state
+    const normalized = normalizeAssistantText(text)
+    return /\[(image|document|midia)/.test(normalized)
+}
+
+function buildFinanceDraftFromText(text: string, state: any, previous?: any) {
+    const normalized = normalizeAssistantText(text)
+    const media = latestAssistantMedia(state)
+    const receipt = media?.finance_receipt_analysis || previous?.receipt_analysis || null
+    const receiptText = normalizeAssistantText([
+        receipt?.merchant,
+        receipt?.description,
+        receipt?.raw_summary,
+        receipt?.category_hint,
+        receipt?.subcategory_hint,
+    ].filter(Boolean).join(' '))
+    const isFuel = /(abastec|combustivel|gasolina|etanol|diesel|posto)/.test(`${normalized} ${receiptText}`)
+    const partyType = detectFinancePartyType(text) || previous?.counterparty_type || null
+    const amount = extractFinanceAmountFromText(text, previous?.assistant_action === 'create_finance_entry')
+        || Number(previous?.amount || 0)
+        || Number(receipt?.amount || 0)
+        || null
+    const paymentMethod = detectFinancePaymentMethod(text) || previous?.payment_method || receipt?.payment_method || null
+    const categoryPatch = detectFinanceCategoryPatch(text)
+    const typedDate = parseFinanceDateFromText(text)
+    const today = saoPauloDateKey()
+    const shouldUseReceiptDate = receipt?.date && (!previous?.entry_date || (previous.entry_date === today && !previous?.receipt_analysis))
+    const entryDate = typedDate || (shouldUseReceiptDate ? receipt.date : (previous?.entry_date || today))
+    const receiptDescription = receipt?.description
+        || (receipt?.merchant ? `${isFuel ? 'Abastecimento' : 'Despesa'} - ${receipt.merchant}` : null)
+    const previousDescription = String(previous?.description || '').trim()
+    const canReplaceDefaultDescription = !previousDescription
+        || previousDescription === 'Despesa enviada pelo WhatsApp'
+        || previousDescription === 'Abastecimento do carro'
+    const previousCounterparty = String(previous?.counterparty_name || '').trim()
+    const canReplaceDefaultCounterparty = !previousCounterparty || previousCounterparty === 'Posto de combustivel'
+
+    return {
+        ...(previous || {}),
+        assistant_action: 'create_finance_entry',
+        entry_type: 'expense',
+        amount,
+        counterparty_type: partyType,
+        payment_method: paymentMethod,
+        payment_status: previous?.payment_status || 'paid',
+        entry_date: entryDate,
+        due_date: (typedDate || shouldUseReceiptDate) ? entryDate : (previous?.due_date || entryDate),
+        competence_date: (typedDate || shouldUseReceiptDate) ? entryDate : (previous?.competence_date || entryDate),
+        category: categoryPatch?.category || previous?.category || receipt?.category_hint || 'Consumo despesas',
+        subcategory: categoryPatch?.subcategory || previous?.subcategory || receipt?.subcategory_hint || (isFuel ? 'Combustivel' : 'Comprovante recebido'),
+        description: canReplaceDefaultDescription
+            ? (categoryPatch?.description || receiptDescription || (isFuel ? 'Abastecimento do carro' : 'Despesa enviada pelo WhatsApp'))
+            : previousDescription,
+        counterparty_name: canReplaceDefaultCounterparty ? (receipt?.merchant || (isFuel ? 'Posto de combustivel' : null)) : previousCounterparty,
+        reference_company: partyType === 'pessoa_fisica'
+            ? 'Pessoa fisica'
+            : partyType === 'pessoa_juridica'
+                ? 'Pessoa juridica'
+                : previous?.reference_company || null,
+        attachment_url: previous?.attachment_url || media?.url || media?.r2_url || null,
+        source_text: previous?.source_text || text,
+        media_filename: previous?.media_filename || media?.filename || null,
+        receipt_analysis: receipt || previous?.receipt_analysis || null,
+    }
+}
+
+function getFinanceDraftMissingField(draft: any): 'counterparty_type' | 'amount' | null {
+    if (!draft?.counterparty_type) return 'counterparty_type'
+    if (!Number.isFinite(Number(draft?.amount)) || Number(draft?.amount) <= 0) return 'amount'
+    return null
+}
+
+function financeDraftSummary(draft: any): string {
+    const party = draft?.counterparty_type === 'pessoa_fisica' ? 'Pessoa fisica' : 'Pessoa juridica'
+    return [
+        `Descricao: ${draft?.description || 'Despesa'}`,
+        `Valor: ${formatCurrencyBR(Number(draft?.amount || 0))}`,
+        `Tipo: ${party}`,
+        draft?.counterparty_name ? `Favorecido: ${draft.counterparty_name}` : '',
+        `Categoria: ${draft?.category || '-'}`,
+        `Subcategoria: ${draft?.subcategory || '-'}`,
+        `Data: ${draft?.entry_date || saoPauloDateKey()}`,
+        draft?.payment_method ? `Pagamento: ${draft.payment_method}` : '',
+        draft?.attachment_url ? 'Anexo: comprovante recebido' : '',
+        draft?.receipt_analysis?.confidence ? `Leitura IA: ${Math.round(Number(draft.receipt_analysis.confidence) * 100)}%` : '',
+    ].filter(Boolean).join('\n')
+}
+
+async function financeColumnExists(supabase: ReturnType<typeof getSupabase>, columnName: string): Promise<boolean> {
+    try {
+        const { error } = await supabase.from('finance_entries').select(columnName).limit(1)
+        return !error
+    } catch {
+        return false
+    }
+}
+
+async function getConciergeFinanceSchema(supabase: ReturnType<typeof getSupabase>) {
+    const [
+        hasEntryDate,
+        hasDate,
+        hasOccurredAt,
+        hasCreatedAt,
+        hasCategory,
+        hasSubcategory,
+        hasPaymentMethod,
+        hasPaymentStatus,
+        hasCounterpartyName,
+        hasCounterpartyType,
+        hasReferenceCompany,
+        hasDueDate,
+        hasCompetenceDate,
+        hasSourceModule,
+        hasExternalReference,
+        hasNotes,
+        hasAttachmentUrl,
+        hasCreatedBy,
+        hasUpdatedAt,
+    ] = await Promise.all([
+        financeColumnExists(supabase, 'entry_date'),
+        financeColumnExists(supabase, 'date'),
+        financeColumnExists(supabase, 'occurred_at'),
+        financeColumnExists(supabase, 'created_at'),
+        financeColumnExists(supabase, 'category'),
+        financeColumnExists(supabase, 'subcategory'),
+        financeColumnExists(supabase, 'payment_method'),
+        financeColumnExists(supabase, 'payment_status'),
+        financeColumnExists(supabase, 'counterparty_name'),
+        financeColumnExists(supabase, 'counterparty_type'),
+        financeColumnExists(supabase, 'reference_company'),
+        financeColumnExists(supabase, 'due_date'),
+        financeColumnExists(supabase, 'competence_date'),
+        financeColumnExists(supabase, 'source_module'),
+        financeColumnExists(supabase, 'external_reference'),
+        financeColumnExists(supabase, 'notes'),
+        financeColumnExists(supabase, 'attachment_url'),
+        financeColumnExists(supabase, 'created_by'),
+        financeColumnExists(supabase, 'updated_at'),
+    ])
+
+    const dateField = hasEntryDate ? 'entry_date' : hasDate ? 'date' : hasOccurredAt ? 'occurred_at' : hasCreatedAt ? 'created_at' : null
+    if (!dateField) return null
+
+    return {
+        dateField,
+        hasOccurredAt,
+        hasCategory,
+        hasSubcategory,
+        hasPaymentMethod,
+        hasPaymentStatus,
+        hasCounterpartyName,
+        hasCounterpartyType,
+        hasReferenceCompany,
+        hasDueDate,
+        hasCompetenceDate,
+        hasSourceModule,
+        hasExternalReference,
+        hasNotes,
+        hasAttachmentUrl,
+        hasCreatedBy,
+        hasUpdatedAt,
+    }
+}
+
+async function ensureFinanceDateUnlocked(supabase: ReturnType<typeof getSupabase>, dateKey: string): Promise<string | null> {
+    const periodMonth = `${String(dateKey || '').slice(0, 7)}-01`
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(periodMonth)) return null
+    const { data, error } = await supabase
+        .from('finance_closing_periods')
+        .select('status')
+        .eq('period_month', periodMonth)
+        .maybeSingle()
+    if (error) return null
+    if (String(data?.status || '').trim().toLowerCase() === 'locked') {
+        return `Periodo ${periodMonth.slice(5, 7)}/${periodMonth.slice(0, 4)} bloqueado para alteracoes.`
+    }
+    return null
+}
+
+async function createConciergeFinanceEntry(params: {
+    supabase: ReturnType<typeof getSupabase>
+    broker: any
+    authorization: any
+    phone: string
+    conversationId: string
+    draft: any
+    actionId?: string | null
+}) {
+    const { supabase, broker, authorization, phone, conversationId, draft, actionId } = params
+    const schema = await getConciergeFinanceSchema(supabase)
+    if (!schema) throw new Error('Tabela financeira incompativel para lancamento via concierge.')
+
+    const entryDate = draft.entry_date || saoPauloDateKey()
+    const lockError = await ensureFinanceDateUnlocked(supabase, entryDate)
+    if (lockError) throw new Error(lockError)
+
+    const insertData: any = {
+        description: draft.description || 'Despesa enviada pelo WhatsApp',
+        entry_type: 'expense',
+        amount: Number(draft.amount || 0),
+    }
+
+    if (schema.hasCategory) insertData.category = draft.category || 'Consumo despesas'
+    if (schema.hasSubcategory) insertData.subcategory = draft.subcategory || null
+    if (schema.hasPaymentMethod) insertData.payment_method = draft.payment_method || null
+    if (schema.hasPaymentStatus) insertData.payment_status = draft.payment_status || 'paid'
+    if (schema.hasCounterpartyName) insertData.counterparty_name = draft.counterparty_name || authorization?.name || null
+    if (schema.hasCounterpartyType) insertData.counterparty_type = draft.counterparty_type || 'pessoa_juridica'
+    if (schema.hasReferenceCompany) insertData.reference_company = draft.reference_company || null
+    if (schema.hasDueDate) insertData.due_date = draft.due_date || entryDate
+    if (schema.hasCompetenceDate) insertData.competence_date = draft.competence_date || entryDate
+    if (schema.hasSourceModule) insertData.source_module = 'broker_concierge'
+    if (schema.hasExternalReference) insertData.external_reference = actionId || `broker-concierge:${conversationId}:${Date.now()}`
+    if (schema.hasAttachmentUrl) insertData.attachment_url = draft.attachment_url || null
+    if (schema.hasCreatedBy) insertData.created_by = broker?.admin_user_id || null
+    if (schema.hasUpdatedAt) insertData.updated_at = new Date().toISOString()
+    if (schema.hasNotes) {
+        insertData.notes = [
+            'Lancado pelo concierge financeiro do WhatsApp.',
+            `Telefone autorizado: ${normalizeOutboundBrazilPhone(phone)}`,
+            draft.source_text ? `Solicitacao: ${draft.source_text}` : '',
+            draft.media_filename ? `Comprovante: ${draft.media_filename}` : '',
+            draft.receipt_analysis?.raw_summary ? `Leitura IA: ${draft.receipt_analysis.raw_summary}` : '',
+            draft.receipt_analysis?.document_number ? `Documento: ${draft.receipt_analysis.document_number}` : '',
+        ].filter(Boolean).join('\n')
+    }
+
+    if (schema.dateField === 'created_at' || schema.dateField === 'occurred_at') {
+        insertData[schema.dateField] = `${entryDate}T12:00:00.000Z`
+    } else {
+        insertData[schema.dateField] = entryDate
+    }
+    if (schema.hasOccurredAt && !insertData.occurred_at) insertData.occurred_at = `${entryDate}T12:00:00.000Z`
+
+    const { data, error } = await supabase
+        .from('finance_entries')
+        .insert(insertData)
+        .select('id, description, amount')
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+async function upsertPendingFinanceAction(params: {
+    supabase: ReturnType<typeof getSupabase>
+    conversationId: string
+    brokerId: string
+    authorizedPhoneId: string
+    draft: any
+    actionId?: string | null
+}) {
+    const { supabase, conversationId, brokerId, authorizedPhoneId, draft, actionId } = params
+    if (actionId) {
+        await supabase
+            .from('broker_assistant_actions')
+            .update({
+                payload: draft,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', actionId)
+        return actionId
+    }
+
+    const { data } = await supabase
+        .from('broker_assistant_actions')
+        .insert({
+            conversation_id: conversationId,
+            broker_id: brokerId,
+            authorized_phone_id: authorizedPhoneId,
+            action_type: 'create_finance_entry',
+            status: 'pending',
+            payload: draft,
+        })
+        .select('id')
+        .single()
+
+    return data?.id || null
+}
+
+async function markAssistantAction(params: {
+    supabase: ReturnType<typeof getSupabase>
+    actionId?: string | null
+    status: 'executed' | 'cancelled' | 'failed'
+    result?: any
+}) {
+    const { supabase, actionId, status, result } = params
+    if (!actionId) return
+    const now = new Date().toISOString()
+    await supabase
+        .from('broker_assistant_actions')
+        .update({
+            status,
+            result: result || {},
+            confirmed_at: status === 'executed' ? now : undefined,
+            executed_at: status === 'executed' ? now : undefined,
+            updated_at: now,
+        })
+        .eq('id', actionId)
+}
+
+async function generateConciergeReply(params: {
+    supabase: ReturnType<typeof getSupabase>
+    instance: any
+    broker: any
+    authorization: any
+    messages: any[]
+    state: any
+    inputText: string
+    senderName?: string | null
+}) {
+    const { supabase, instance, broker, authorization, messages, state, inputText, senderName } = params
+    const intent = detectConciergeIntent(inputText)
+    const configs = await loadAIConfigs(supabase, instance?.id)
+    const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
+    const mediaReceived = Array.isArray(state?.media_received) ? state.media_received : []
+    const systemPrompt = buildConciergeSystemPrompt({
+        broker,
+        authorization,
+        senderName,
+        intent,
+        mediaReceived,
+    })
+
+    const reply = await generateChatResponse(
+        buildConciergeHistory(messages),
+        inputText,
+        systemPrompt,
+        {
+            provider,
+            geminiModel: configs['gemini_model'] || undefined,
+            openaiModel: configs['openai_model'] || undefined,
+        }
+    )
+
+    return {
+        text: sanitizeConciergeReply(reply),
+        intent,
+        provider,
     }
 }
 
@@ -703,6 +1734,10 @@ async function handleBrokerAssistantMessage(params: {
         .select('*')
         .eq('id', brokerId)
         .maybeSingle()
+    const conciergeEnabled = isBrokerConciergeEnabled(broker)
+    const canManageAgenda = assistantHasPermission(authorization, 'can_manage_agenda', true)
+    const canManageFinance = assistantHasPermission(authorization, 'can_manage_finance')
+    const requiresConfirmation = brokerConciergeRequiresConfirmation(broker)
 
     const conversation = await getOrCreateAssistantConversation({
         supabase,
@@ -721,6 +1756,48 @@ async function handleBrokerAssistantMessage(params: {
     }]
 
     const sendAssistantReply = async (reply: string, nextState: any) => {
+        const parsedReply = parseConciergeButtonTags(reply)
+        const outgoingText = parsedReply.cleanText || parsedReply.menu?.fallbackTitle || reply
+        nextMessages.push({
+            role: 'assistant',
+            content: outgoingText,
+            timestamp: new Date().toISOString(),
+        })
+        await updateAssistantConversation({
+            supabase,
+            conversationId: conversation.id,
+            messages: nextMessages,
+            state: nextState,
+        })
+        if (parsedReply.menu) {
+            try {
+                await sendMenuMessage({
+                    phone,
+                    text: outgoingText,
+                    type: parsedReply.menu.type,
+                    choices: parsedReply.menu.choices,
+                    listButton: parsedReply.menu.listButton,
+                    instanceToken: instance.instance_token,
+                })
+            } catch (error) {
+                console.warn('[Broker Concierge] Failed to send tagged buttons, using text fallback:', error)
+                await sendWhatsAppMessage({
+                    phone,
+                    message: buildConciergeButtonFallback(outgoingText, parsedReply.menu),
+                    instanceToken: instance.instance_token,
+                })
+            }
+        } else {
+            await sendWhatsAppMessage({
+                phone,
+                message: outgoingText,
+                instanceToken: instance.instance_token,
+            })
+        }
+        return { handled: true, reason: conciergeEnabled ? 'broker_concierge' : 'broker_assistant_disabled' }
+    }
+
+    const sendAssistantButtonReply = async (reply: string, choices: string[], nextState: any) => {
         nextMessages.push({
             role: 'assistant',
             content: reply,
@@ -732,18 +1809,221 @@ async function handleBrokerAssistantMessage(params: {
             messages: nextMessages,
             state: nextState,
         })
-        await sendWhatsAppMessage({
-            phone,
-            message: reply,
-            instanceToken: instance.instance_token,
-        })
-        return { handled: true, reason: 'broker_assistant' }
+
+        try {
+            await sendMenuMessage({
+                phone,
+                text: reply,
+                type: 'button',
+                choices,
+                instanceToken: instance.instance_token,
+            })
+        } catch (error) {
+            console.warn('[Broker Concierge] Failed to send finance buttons, using text fallback:', error)
+            await sendWhatsAppMessage({
+                phone,
+                message: `${reply}\n\n- Pessoa fisica\n- Pessoa juridica`,
+                instanceToken: instance.instance_token,
+            })
+        }
+
+        return { handled: true, reason: conciergeEnabled ? 'broker_concierge' : 'broker_assistant_disabled' }
     }
 
     const pending = state?.pending_action
+    if (pending?.assistant_action === 'create_finance_entry') {
+        if (isAssistantCancelText(inputText)) {
+            await markAssistantAction({
+                supabase,
+                actionId: pending.action_id,
+                status: 'cancelled',
+                result: { reason: 'cancelled_by_owner' },
+            })
+            return sendAssistantReply('Sem problema, descartei esse lancamento financeiro antes de gravar.', {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        if (!conciergeEnabled) {
+            return sendAssistantReply(buildConciergeFallbackReply({ broker, authorization, conciergeEnabled }), {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        if (!canManageFinance) {
+            await markAssistantAction({
+                supabase,
+                actionId: pending.action_id,
+                status: 'cancelled',
+                result: { reason: 'missing_permission', permission: 'can_manage_finance' },
+            })
+            return sendAssistantReply('Nao posso criar lancamentos financeiros porque este telefone autorizado nao tem permissao financeira.', {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        const correctionChoice = detectFinanceCorrectionChoice(inputText)
+        if (correctionChoice === 'amount') {
+            return sendAssistantReply('Claro. Qual e o valor correto? Pode mandar assim: R$ 250,00.', {
+                ...state,
+                pending_action: {
+                    ...pending,
+                    awaiting_confirmation: false,
+                    awaiting_field: 'amount',
+                },
+            })
+        }
+        if (correctionChoice === 'date') {
+            return sendAssistantReply('Qual e a data correta do lancamento? Pode mandar no formato 18/05/2026.', {
+                ...state,
+                pending_action: {
+                    ...pending,
+                    awaiting_confirmation: false,
+                    awaiting_field: 'date',
+                },
+            })
+        }
+        if (correctionChoice === 'category') {
+            return sendAssistantReply('Escolha a categoria correta para esse lancamento. {categoria}', {
+                ...state,
+                pending_action: {
+                    ...pending,
+                    awaiting_confirmation: false,
+                    awaiting_field: 'category',
+                },
+            })
+        }
+        if (correctionChoice === 'payment') {
+            return sendAssistantReply('Qual foi a forma de pagamento? {pagamento}', {
+                ...state,
+                pending_action: {
+                    ...pending,
+                    awaiting_confirmation: false,
+                    awaiting_field: 'payment_method',
+                },
+            })
+        }
+
+        const mergedDraft = buildFinanceDraftFromText(inputText, state, pending)
+        const actionId = await upsertPendingFinanceAction({
+            supabase,
+            conversationId: conversation.id,
+            brokerId,
+            authorizedPhoneId: authorization.id,
+            draft: mergedDraft,
+            actionId: pending.action_id,
+        })
+        const nextFinanceState = {
+            ...state,
+            pending_action: {
+                ...mergedDraft,
+                action_id: actionId,
+            },
+        }
+        const missing = getFinanceDraftMissingField(mergedDraft)
+
+        if (missing === 'counterparty_type') {
+            return sendAssistantButtonReply('Esse lancamento e para pessoa fisica ou pessoa juridica?', [
+                'Pessoa fisica|finance_party_pf',
+                'Pessoa juridica|finance_party_pj',
+            ], nextFinanceState)
+        }
+
+        if (missing === 'amount') {
+            return sendAssistantReply('Qual foi o valor desse comprovante? Pode mandar assim: R$ 250,00.', nextFinanceState)
+        }
+
+        if (!isAssistantConfirmationText(inputText) && (requiresConfirmation || pending.awaiting_confirmation === true)) {
+            return sendAssistantReply([
+                'Vou criar este lancamento financeiro:',
+                financeDraftSummary(mergedDraft),
+                '',
+                'Confirma que posso gravar no financeiro?',
+                '{confirmar}',
+            ].join('\n'), {
+                ...nextFinanceState,
+                pending_action: {
+                    ...mergedDraft,
+                    action_id: actionId,
+                    awaiting_confirmation: true,
+                },
+            })
+        }
+
+        try {
+            const entry = await createConciergeFinanceEntry({
+                supabase,
+                broker,
+                authorization,
+                phone,
+                conversationId: conversation.id,
+                draft: mergedDraft,
+                actionId,
+            })
+            await markAssistantAction({
+                supabase,
+                actionId,
+                status: 'executed',
+                result: { finance_entry_id: entry?.id || null },
+            })
+            return sendAssistantReply(`Feito. Lancei ${formatCurrencyBR(Number(mergedDraft.amount || 0))} no financeiro como ${mergedDraft.description || 'despesa'}.`, {
+                ...state,
+                pending_action: null,
+                last_finance_entry_id: entry?.id || null,
+            })
+        } catch (error) {
+            console.error('[Broker Concierge] Failed to create finance entry:', error)
+            await markAssistantAction({
+                supabase,
+                actionId,
+                status: 'failed',
+                result: { error: error instanceof Error ? error.message : String(error) },
+            })
+            return sendAssistantReply('Tentei gravar no financeiro, mas encontrei um erro. Mantive a acao registrada para revisao no painel.', {
+                ...state,
+                pending_action: null,
+            })
+        }
+    }
+
     if (pending?.assistant_action === 'create_appointment') {
         if (isAssistantCancelText(inputText)) {
             return sendAssistantReply('Sem problema, cancelei essa solicitação antes de gravar na agenda.', {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        if (/\b(reagendar|agenda_reschedule)\b/.test(normalizeAssistantText(inputText))) {
+            return sendAssistantReply('Claro. Me envie a nova data e horario para eu montar o compromisso novamente.', {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        if (!conciergeEnabled) {
+            return sendAssistantReply(buildConciergeFallbackReply({ broker, authorization, conciergeEnabled }), {
+                ...state,
+                pending_action: null,
+            })
+        }
+
+        if (!canManageAgenda) {
+            if (pending.action_id) {
+                await supabase
+                    .from('broker_assistant_actions')
+                    .update({
+                        status: 'cancelled',
+                        result: { reason: 'missing_permission', permission: 'can_manage_agenda' },
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', pending.action_id)
+            }
+
+            return sendAssistantReply('Nao posso gravar esse compromisso porque este telefone autorizado nao tem permissao de agenda.', {
                 ...state,
                 pending_action: null,
             })
@@ -802,7 +2082,129 @@ async function handleBrokerAssistantMessage(params: {
 
     const parsed = parseAssistantAgendaCommand(inputText)
     if (!parsed) {
-        return sendAssistantReply('Estou no modo assistente. Por enquanto consigo criar compromissos na agenda. Exemplo: "marca reunião com o lead João amanhã às 15h".', state)
+        const shouldHandleFinance = conciergeEnabled
+            && !isConciergeQuickChoice(inputText)
+            && (detectConciergeIntent(inputText) === 'financeiro' || isMediaOnlyFinanceCandidate(inputText, state))
+
+        if (shouldHandleFinance) {
+            if (!canManageFinance) {
+                return sendAssistantReply('Entendi que isso e financeiro, mas este telefone autorizado nao tem permissao para criar lancamentos.', state)
+            }
+
+            const financeDraft = buildFinanceDraftFromText(inputText, state)
+            const actionId = await upsertPendingFinanceAction({
+                supabase,
+                conversationId: conversation.id,
+                brokerId,
+                authorizedPhoneId: authorization.id,
+                draft: financeDraft,
+            })
+            const nextFinanceState = {
+                ...state,
+                pending_action: {
+                    ...financeDraft,
+                    action_id: actionId,
+                    awaiting_confirmation: requiresConfirmation,
+                },
+                last_intent: 'financeiro',
+            }
+            const missing = getFinanceDraftMissingField(financeDraft)
+
+            if (missing === 'counterparty_type') {
+                return sendAssistantButtonReply('Recebi o comprovante/despesa. Esse lancamento e para pessoa fisica ou pessoa juridica?', [
+                    'Pessoa fisica|finance_party_pf',
+                    'Pessoa juridica|finance_party_pj',
+                ], nextFinanceState)
+            }
+
+            if (missing === 'amount') {
+                return sendAssistantReply('Recebi a despesa. Qual foi o valor? Pode mandar assim: R$ 250,00.', nextFinanceState)
+            }
+
+            if (requiresConfirmation) {
+                return sendAssistantReply([
+                    'Vou criar este lancamento financeiro:',
+                    financeDraftSummary(financeDraft),
+                    '',
+                    'Confirma que posso gravar no financeiro?',
+                    '{confirmar}',
+                ].join('\n'), nextFinanceState)
+            }
+
+            try {
+                const entry = await createConciergeFinanceEntry({
+                    supabase,
+                    broker,
+                    authorization,
+                    phone,
+                    conversationId: conversation.id,
+                    draft: financeDraft,
+                    actionId,
+                })
+                await markAssistantAction({
+                    supabase,
+                    actionId,
+                    status: 'executed',
+                    result: { finance_entry_id: entry?.id || null },
+                })
+                return sendAssistantReply(`Feito. Lancei ${formatCurrencyBR(Number(financeDraft.amount || 0))} no financeiro como ${financeDraft.description || 'despesa'}.`, {
+                    ...state,
+                    pending_action: null,
+                    last_intent: 'financeiro',
+                    last_finance_entry_id: entry?.id || null,
+                })
+            } catch (error) {
+                console.error('[Broker Concierge] Failed to create direct finance entry:', error)
+                await markAssistantAction({
+                    supabase,
+                    actionId,
+                    status: 'failed',
+                    result: { error: error instanceof Error ? error.message : String(error) },
+                })
+                return sendAssistantReply('Tentei gravar no financeiro, mas encontrei um erro. Mantive a acao registrada para revisao no painel.', {
+                    ...state,
+                    pending_action: null,
+                    last_intent: 'financeiro',
+                })
+            }
+        }
+
+        if (conciergeEnabled) {
+            try {
+                const aiReply = await generateConciergeReply({
+                    supabase,
+                    instance,
+                    broker,
+                    authorization,
+                    messages,
+                    state,
+                    inputText,
+                    senderName,
+                })
+
+                if (aiReply.text) {
+                    return sendAssistantReply(aiReply.text, {
+                        ...state,
+                        last_intent: aiReply.intent,
+                        last_ai_provider: aiReply.provider,
+                        last_ai_at: new Date().toISOString(),
+                        last_ai_error: null,
+                    })
+                }
+            } catch (error) {
+                console.warn('[Broker Concierge] AI reply failed, using deterministic fallback:', error)
+            }
+        }
+
+        return sendAssistantReply(buildConciergeFallbackReply({ broker, authorization, conciergeEnabled }), state)
+    }
+
+    if (!conciergeEnabled) {
+        return sendAssistantReply(buildConciergeFallbackReply({ broker, authorization, conciergeEnabled }), state)
+    }
+
+    if (!canManageAgenda) {
+        return sendAssistantReply('Entendi que voce quer mexer na agenda, mas este telefone autorizado nao tem permissao para criar compromissos.', state)
     }
 
     if (parsed.incomplete) {
@@ -821,6 +2223,39 @@ async function handleBrokerAssistantMessage(params: {
     })
     if (conflict) {
         return sendAssistantReply(`Esse horário já tem um compromisso na sua agenda (${formatAppointmentDatePt(parsed.date)}, ${parsed.time}). Quer me passar outro horário?`, state)
+    }
+
+    if (!requiresConfirmation) {
+        try {
+            const appointment = await createAssistantAppointment({
+                supabase,
+                broker,
+                assistantPhone: normalizeOutboundBrazilPhone(phone),
+                pending: parsed,
+            })
+
+            await supabase
+                .from('broker_assistant_actions')
+                .insert({
+                    conversation_id: conversation.id,
+                    broker_id: brokerId,
+                    authorized_phone_id: authorization.id,
+                    action_type: 'create_appointment',
+                    status: 'executed',
+                    payload: parsed,
+                    result: { appointment_id: appointment.id },
+                    confirmed_at: new Date().toISOString(),
+                    executed_at: new Date().toISOString(),
+                })
+
+            return sendAssistantReply(`Feito. Registrei ${parsed.title || 'o compromisso'} na sua agenda para ${formatAppointmentDatePt(parsed.date)}, as ${parsed.time}.`, {
+                ...state,
+                pending_action: null,
+            })
+        } catch (error) {
+            console.error('[Broker Assistant] Failed to create appointment without confirmation:', error)
+            return sendAssistantReply('Tentei gravar na agenda, mas encontrei um erro. Vou deixar registrado que essa ação precisa ser revisada no painel.', state)
+        }
     }
 
     const { data: action } = await supabase
@@ -847,7 +2282,8 @@ async function handleBrokerAssistantMessage(params: {
 
     return sendAssistantReply([
         `Entendi. Vou registrar ${parsed.title} para ${formatAppointmentDatePt(parsed.date)}, as ${parsed.time}.`,
-        'Confirma que posso gravar na sua agenda?'
+        'Confirma que posso gravar na sua agenda?',
+        '{agenda}',
     ].join('\n\n'), nextState)
 }
 
@@ -1143,6 +2579,7 @@ async function tryFastTextBrokerResponse(params: {
         senderName: senderName || undefined,
         instanceId: instance.id,
         instanceName: instance.instance_name,
+        instanceToken: instance.instance_token,
         brokerId: broker.id,
         acquiredVia: 'whatsapp',
         messages: updatedMessages,
@@ -1204,6 +2641,122 @@ function filenameFromMediaUrl(url: string, fallback: string): string {
     }
 }
 
+async function saveAssistantMediaArtifact(params: {
+    supabase: ReturnType<typeof getSupabase>
+    instance?: any
+    brokerId: string
+    phone: string
+    authorization: any
+    docEntry: any
+}) {
+    const { supabase, instance, brokerId, phone, authorization, docEntry } = params
+    const conversation = await getOrCreateAssistantConversation({
+        supabase,
+        brokerId,
+        phone: normalizeOutboundBrazilPhone(phone),
+        authorizedPhoneId: authorization.id,
+    })
+
+    const messages = Array.isArray(conversation?.messages) ? conversation.messages : []
+    const state = conversation?.state && typeof conversation.state === 'object' ? conversation.state : {}
+    const mediaReceived = Array.isArray(state?.media_received) ? state.media_received : []
+    const messageIds: string[] = Array.isArray(docEntry?.message_ids) ? docEntry.message_ids.map(String) : []
+    const alreadySaved = mediaReceived.some((doc: any) => {
+        const docIds = Array.isArray(doc?.message_ids) ? doc.message_ids.map(String) : []
+        return doc?.url === docEntry.url
+            || doc?.r2_url === docEntry.r2_url
+            || doc?.original_url === docEntry.original_url
+            || messageIds.some((id) => docIds.includes(id))
+    })
+    const existingDoc = mediaReceived.find((doc: any) => {
+        const docIds = Array.isArray(doc?.message_ids) ? doc.message_ids.map(String) : []
+        return doc?.url === docEntry.url
+            || doc?.r2_url === docEntry.r2_url
+            || doc?.original_url === docEntry.original_url
+            || messageIds.some((id) => docIds.includes(id))
+    })
+    let enrichedDocEntry = existingDoc || docEntry
+
+    if (!existingDoc?.finance_receipt_analysis
+        && assistantHasPermission(authorization, 'can_manage_finance')
+        && (docEntry.type === 'image' || docEntry.type === 'document')) {
+        const analysis = await analyzeFinanceReceiptMedia({
+            supabase,
+            instance,
+            docEntry,
+        }).catch((error) => {
+            console.warn('[Broker Concierge] Receipt analysis failed:', error)
+            return null
+        })
+
+        if (analysis) {
+            enrichedDocEntry = {
+                ...docEntry,
+                finance_receipt_analysis: analysis,
+                finance_receipt_analyzed_at: new Date().toISOString(),
+            }
+        }
+    }
+
+    const pendingAction = state?.pending_action
+    const nextMediaReceived = alreadySaved
+        ? mediaReceived.map((doc: any) => {
+            const docIds = Array.isArray(doc?.message_ids) ? doc.message_ids.map(String) : []
+            const sameDoc = doc?.url === docEntry.url
+                || doc?.r2_url === docEntry.r2_url
+                || doc?.original_url === docEntry.original_url
+                || messageIds.some((id) => docIds.includes(id))
+            return sameDoc ? { ...doc, ...enrichedDocEntry } : doc
+        })
+        : [...mediaReceived, enrichedDocEntry].slice(-80)
+    const pendingWithAttachment = pendingAction?.assistant_action === 'create_finance_entry'
+        ? buildFinanceDraftFromText('', { ...state, media_received: nextMediaReceived }, {
+            ...pendingAction,
+            attachment_url: pendingAction.attachment_url || enrichedDocEntry.url || enrichedDocEntry.r2_url || null,
+            media_filename: pendingAction.media_filename || enrichedDocEntry.filename || null,
+        })
+        : pendingAction
+
+    const nextState: any = {
+        ...state,
+        media_received: nextMediaReceived,
+    }
+    if (pendingWithAttachment !== undefined) nextState.pending_action = pendingWithAttachment
+    const nextMessages = alreadySaved
+        ? messages
+        : [...messages, {
+            role: 'broker',
+            content: `[${enrichedDocEntry.type} recebida] ${enrichedDocEntry.filename}`,
+            type: enrichedDocEntry.type,
+            media_url: enrichedDocEntry.url,
+            finance_receipt_analysis: enrichedDocEntry.finance_receipt_analysis || null,
+            timestamp: enrichedDocEntry.received_at || new Date().toISOString(),
+        }]
+
+    if (pendingWithAttachment !== pendingAction && pendingWithAttachment?.action_id) {
+        try {
+            await supabase
+                .from('broker_assistant_actions')
+                .update({
+                    payload: pendingWithAttachment,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', pendingWithAttachment.action_id)
+        } catch {
+            // Best effort: the conversation state still keeps the attachment.
+        }
+    }
+
+    await updateAssistantConversation({
+        supabase,
+        conversationId: conversation.id,
+        messages: nextMessages,
+        state: nextState,
+    })
+
+    return { alreadySaved, conversationId: conversation.id }
+}
+
 async function saveInboundMediaArtifact(params: {
     supabase: ReturnType<typeof getSupabase>
     instanceName: string
@@ -1235,6 +2788,41 @@ async function saveInboundMediaArtifact(params: {
         instance = data
     }
 
+    const docEntry = {
+        type: mediaKind,
+        filename,
+        mimetype: mime || mirrored.mime || 'unknown',
+        url: storedUrl,
+        r2_url: storedUrl,
+        original_url: fileUrl,
+        storage: storedUrl === fileUrl ? 'uazapi' : 'r2',
+        message_ids: messageIds,
+        received_at: now,
+        instance_id: instance?.id || null,
+        broker_id: instance?.broker_id || null,
+    }
+
+    if (phone && instance?.broker_id) {
+        const authorization = await findAssistantAuthorization({
+            supabase,
+            brokerId: instance.broker_id,
+            phone,
+        }).catch(() => null)
+
+        if (authorization?.id) {
+            await saveAssistantMediaArtifact({
+                supabase,
+                instance,
+                brokerId: instance.broker_id,
+                phone,
+                authorization,
+                docEntry,
+            }).catch((error) => console.warn('[Broker Assistant] Failed to save assistant media:', error))
+
+            return { ...mirrored, stored_url: storedUrl, filename, assistant_mode: true }
+        }
+    }
+
     let lead: any = null
     if (phone) {
         lead = await ensureWhatsAppLead(supabase, {
@@ -1247,20 +2835,6 @@ async function saveInboundMediaArtifact(params: {
     }
 
     if (phone) {
-        const docEntry = {
-            type: mediaKind,
-            filename,
-            mimetype: mime || mirrored.mime || 'unknown',
-            url: storedUrl,
-            r2_url: storedUrl,
-            original_url: fileUrl,
-            storage: storedUrl === fileUrl ? 'uazapi' : 'r2',
-            message_ids: messageIds,
-            received_at: now,
-            instance_id: instance?.id || null,
-            broker_id: instance?.broker_id || null,
-        }
-
         const { data: existing } = await supabase
             .from('lead_collected_data')
             .select('documents_received')
@@ -1303,6 +2877,109 @@ async function saveInboundMediaArtifact(params: {
     return { ...mirrored, stored_url: storedUrl, filename }
 }
 
+function webhookText(value: unknown): string {
+    if (value === null || value === undefined) return ''
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+    return ''
+}
+
+function extractWebhookInstanceName(body: any, eventPayload: any): string {
+    const direct = webhookText(body?.instanceName)
+        || webhookText(body?.instance_name)
+        || webhookText(body?.server_url)
+        || webhookText(eventPayload?.Instance)
+        || webhookText(eventPayload?.instanceName)
+        || webhookText(eventPayload?.instance_name)
+    if (direct) return direct
+
+    const instanceObject = body?.instance || eventPayload?.instance
+    if (instanceObject && typeof instanceObject === 'object') {
+        return webhookText(instanceObject.name)
+            || webhookText(instanceObject.instanceName)
+            || webhookText(instanceObject.instance_name)
+    }
+
+    return ''
+}
+
+function normalizeConnectionWebhookStatus(body: any): 'connected' | 'connecting' | 'disconnected' {
+    const statusText = String(
+        body?.instance?.status ||
+        body?.status?.status ||
+        (typeof body?.status === 'string' ? body.status : '') ||
+        body?.state ||
+        body?.type ||
+        ''
+    ).toLowerCase()
+    const connected = body?.status?.connected === true || body?.connected === true
+    const loggedIn = body?.status?.loggedIn === true || body?.loggedIn === true
+    const loggedOut = /loggedout|logout|disconnected|logged out/.test(statusText)
+        || body?.status?.loggedIn === false
+        || body?.status?.connected === false
+
+    if ((connected && loggedIn) || statusText === 'connected') return 'connected'
+    if (statusText === 'connecting') return 'connecting'
+    if (loggedOut || statusText === 'disconnected') return 'disconnected'
+    return 'disconnected'
+}
+
+async function syncConnectionWebhookStatus(params: {
+    supabase: ReturnType<typeof getSupabase>
+    instanceName: string
+    body: any
+}) {
+    const { supabase, instanceName, body } = params
+    const token = webhookText(body?.token)
+    const status = normalizeConnectionWebhookStatus(body)
+    const ownerPhone = String(body?.owner || body?.instance?.owner || '').replace(/\D/g, '') || null
+    const lastDisconnect = webhookText(body?.instance?.lastDisconnect)
+    const lastDisconnectReason = webhookText(body?.instance?.lastDisconnectReason)
+
+    let query = supabase
+        .from('whatsapp_instances')
+        .select('id, connected_at, config')
+        .limit(1)
+
+    if (instanceName) {
+        query = query.eq('instance_name', instanceName)
+    } else if (token) {
+        query = query.eq('instance_token', token)
+    } else {
+        return { synced: false, reason: 'missing_instance_identifier', status }
+    }
+
+    const { data: rows, error: findError } = await query
+    if (findError) throw findError
+    const instance = Array.isArray(rows) ? rows[0] : rows
+    if (!instance?.id) return { synced: false, reason: 'instance_not_found', status }
+
+    const config = instance.config && typeof instance.config === 'object' ? instance.config : {}
+    const nextConfig = lastDisconnect || lastDisconnectReason
+        ? {
+            ...config,
+            last_disconnect_at: lastDisconnect || config.last_disconnect_at || null,
+            last_disconnect_reason: lastDisconnectReason || config.last_disconnect_reason || null,
+        }
+        : config
+
+    const updates: Record<string, any> = {
+        status,
+        updated_at: new Date().toISOString(),
+        config: nextConfig,
+    }
+    if (ownerPhone) updates.phone_number = ownerPhone
+    if (status === 'connected') updates.connected_at = instance.connected_at || new Date().toISOString()
+    if (status === 'disconnected') updates.connected_at = null
+
+    const { error: updateError } = await supabase
+        .from('whatsapp_instances')
+        .update(updates)
+        .eq('id', instance.id)
+    if (updateError) throw updateError
+
+    return { synced: true, status, instance_id: instance.id }
+}
+
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // WEBHOOK DISPATCHER â€” Recebe â†’ Dispara evento Inngest â†’ 200 OK
 // Sem processamento pesado. Retorno imediato.
@@ -1330,12 +3007,7 @@ export async function POST(request: NextRequest) {
         const event = typeof body.event === 'string'
             ? body.event
             : (body.EventType || body.action || '')
-        const instanceName = body.instance
-            || body.instanceName
-            || body.server_url
-            || eventPayload?.Instance
-            || eventPayload?.instance
-            || ''
+        const instanceName = extractWebhookInstanceName(body, eventPayload)
         const messageData = body.data || body.message || eventPayload || body
         let auditPhone: string | null = null
         let auditSenderName: string | null = null
@@ -1345,23 +3017,41 @@ export async function POST(request: NextRequest) {
         const auditMedia: any[] = []
 
         const saveAudit = async (params: { action: string; statusCode?: number; error?: string }) => {
+            const createdAt = new Date().toISOString()
+            const auditRow = {
+                instance_name: instanceName || null,
+                event_type: event || null,
+                message_type: auditMessageType,
+                action: params.action,
+                status_code: params.statusCode || 200,
+                is_from_me: auditIsFromMe,
+                from_phone: auditPhone,
+                lead_id: auditLeadId,
+                sender_name: auditSenderName,
+                payload: auditPayload,
+                media: auditMedia,
+                error: params.error || null,
+                created_at: createdAt,
+            }
             try {
-                await supabase.from('whatsapp_webhook_audit_logs').insert({
-                    instance_name: instanceName || null,
-                    event_type: event || null,
-                    message_type: auditMessageType,
-                    action: params.action,
-                    status_code: params.statusCode || 200,
-                    is_from_me: auditIsFromMe,
-                    from_phone: auditPhone,
-                    lead_id: auditLeadId,
-                    sender_name: auditSenderName,
-                    payload: auditPayload,
-                    media: auditMedia,
-                    error: params.error || null,
-                })
+                const { error: auditError } = await supabase.from('whatsapp_webhook_audit_logs').insert(auditRow)
+                if (auditError) throw auditError
             } catch (e) {
                 console.warn('[Webhook][Audit] Failed to save audit row:', e)
+                try {
+                    const key = `_webhooklog_${createdAt.replace(/\D/g, '')}_${Math.random().toString(36).slice(2, 10)}`
+                    await supabase.from('app_config').insert({
+                        key,
+                        value: JSON.stringify({
+                            id: key,
+                            ...auditRow,
+                            fallback_reason: e instanceof Error ? e.message : String(e),
+                        }),
+                        updated_at: createdAt,
+                    })
+                } catch (fallbackError) {
+                    console.warn('[Webhook][Audit] Failed to save fallback audit row:', fallbackError)
+                }
             }
         }
 
@@ -1370,6 +3060,12 @@ export async function POST(request: NextRequest) {
             auditPhone = (tracked as any)?.phone || null
             await saveAudit({ action: (tracked as any)?.tracked ? 'presence_tracked' : 'presence_ignored' })
             return NextResponse.json({ success: true, action: (tracked as any)?.tracked ? 'presence_tracked' : 'presence_ignored', tracked })
+        }
+
+        if (String(event).toLowerCase() === 'connection') {
+            const synced = await syncConnectionWebhookStatus({ supabase, instanceName, body })
+            await saveAudit({ action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored' })
+            return NextResponse.json({ success: true, action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored', synced })
         }
 
         const updateKind = String(messageData?.Type || messageData?.type || '').toLowerCase()
@@ -1635,6 +3331,7 @@ export async function POST(request: NextRequest) {
             || null
         const reactionEmoji = reactionMsg?.text || reactionMsg?.emoji || null
         const isReaction = !!reactionEmoji
+        const quotedReplyText = extractQuotedReplyText(messageData)
 
         // â”€â”€ Determine message type â”€â”€
         const messageType = isAudio ? 'audio'
@@ -1659,6 +3356,9 @@ export async function POST(request: NextRequest) {
             storedMessageContent = `[${mediaType || 'midia'}${mediaFilename ? `: ${mediaFilename}` : ''}]`
         } else if (!storedMessageContent && isReaction) {
             storedMessageContent = `[reacao: ${reactionEmoji}]`
+        }
+        if (storedMessageContent && quotedReplyText) {
+            storedMessageContent = `[mensagem citada: ${quotedReplyText}]\n${storedMessageContent}`
         }
 
         // â”€â”€ Extract media decryption data (WhatsApp E2EE media keys) â”€â”€
@@ -1861,6 +3561,23 @@ export async function POST(request: NextRequest) {
             }
         } catch (e) {
             console.warn('[Webhook] Anti-loop check failed (non-fatal):', e)
+        }
+
+        if (!isFromMe && (isButtonResponse || isPollResponse)) {
+            try {
+                await trackEventInteractionFromWhatsApp(supabase, {
+                    phone: finalPhone,
+                    messageType,
+                    buttonResponseId: buttonResponseId || null,
+                    buttonResponseTitle: buttonResponseTitle || null,
+                    pollVotes: pollVotes || null,
+                    messageId: messageId || null,
+                    instanceId: instance.id,
+                    instanceName: instance.instance_name,
+                })
+            } catch (e) {
+                console.warn('[Webhook] Event interaction tracking failed:', e)
+            }
         }
 
         if (!isFromMe && instance.broker_id && storedMessageContent?.trim()) {
@@ -2209,17 +3926,41 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, action: 'dispatched' })
     } catch (error) {
         console.error('[Webhook Error]', error)
+        const createdAt = new Date().toISOString()
         try {
             const supabase = getSupabase()
-            await supabase.from('whatsapp_webhook_audit_logs').insert({
+            const errorRow = {
                 action: 'error',
                 status_code: 500,
                 payload: {},
                 media: [],
                 error: String(error),
-            })
-        } catch {
-            // best effort
+                created_at: createdAt,
+            }
+            const { error: auditError } = await supabase.from('whatsapp_webhook_audit_logs').insert(errorRow)
+            if (auditError) throw auditError
+        } catch (auditError) {
+            try {
+                const supabase = getSupabase()
+                const key = `_webhooklog_${createdAt.replace(/\D/g, '')}_${Math.random().toString(36).slice(2, 10)}`
+                await supabase.from('app_config').insert({
+                    key,
+                    value: JSON.stringify({
+                        id: key,
+                        event_type: 'webhook_error',
+                        action: 'error',
+                        status_code: 500,
+                        payload: {},
+                        media: [],
+                        error: String(error),
+                        fallback_reason: auditError instanceof Error ? auditError.message : String(auditError),
+                        created_at: createdAt,
+                    }),
+                    updated_at: createdAt,
+                })
+            } catch {
+                // best effort
+            }
         }
         return NextResponse.json({ success: false, message: 'Erro no webhook' }, { status: 500 })
     }

@@ -1,5 +1,6 @@
 import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
+import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
 
 function getSupabase() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -71,37 +72,86 @@ export async function saveSubscription(
 
     if (subError) return { success: false, error: subError.message }
 
+    const { data: visitor } = await supabase
+        .from('visitors')
+        .select('*')
+        .eq('id', visitorId)
+        .maybeSingle()
+
+    const { data: eventRows } = await supabase
+        .from('funnel_events')
+        .select('id, event_type, metadata, created_at')
+        .eq('visitor_id', visitorId)
+        .order('created_at', { ascending: false })
+        .limit(120)
+
     // Check if lead exists
     const { data: existingLead } = await supabase
         .from('leads')
-        .select('id')
+        .select('id, metadata, lead_score, lead_classification')
         .eq('visitor_id', visitorId)
-        .single()
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    const activityMetadata = mergeLeadSiteActivity(
+        existingLead?.metadata || {
+            capture_source: 'push',
+            tracking: {
+                detected_source: visitor?.detected_source || null,
+                utm_source: visitor?.utm_source || null,
+                utm_medium: visitor?.utm_medium || null,
+                utm_campaign: visitor?.utm_campaign || null,
+                referrer: visitor?.referrer || null,
+                device_type: visitor?.device_type || null,
+                browser: visitor?.browser || null,
+                os: visitor?.os || null,
+                country: visitor?.country || null,
+                city: visitor?.city || null,
+                region: visitor?.region || null,
+            },
+        },
+        ((eventRows || []) as LeadActivityEventRow[]).reverse()
+    )
 
     if (existingLead) {
         // Update existing lead
+        const nextMetadata = {
+            ...activityMetadata,
+            push_subscribed_at: new Date().toISOString(),
+        }
         await supabase
             .from('leads')
             .update({
                 push_subscribed: true,
-                push_subscribed_lead: true
+                push_subscribed_lead: true,
+                metadata: nextMetadata,
+                ...leadIntentColumnsFromMetadata(
+                    nextMetadata,
+                    existingLead.lead_score,
+                    existingLead.lead_classification
+                ),
+                updated_at: new Date().toISOString(),
             })
             .eq('id', existingLead.id)
-    } else {
-        // Create new lead (Lead Push Over)
-        // Fetch visitor data to populate lead
-        const { data: visitor } = await supabase
-            .from('visitors')
-            .select('*')
-            .eq('id', visitorId)
-            .single()
 
+        await supabase
+            .from('funnel_events')
+            .update({ lead_id: existingLead.id })
+            .eq('visitor_id', visitorId)
+            .is('lead_id', null)
+    } else {
         if (!visitor) {
             console.error('[Push] Visitor not found for ID:', visitorId)
             return { success: false, error: 'Visitor ID not found in database. Clear cookies?' }
         }
 
-        const { error: insertError } = await supabase.from('leads').insert({
+        const nextMetadata = {
+            ...activityMetadata,
+            push_subscribed_at: new Date().toISOString(),
+        }
+
+        const { data: insertedLead, error: insertError } = await supabase.from('leads').insert({
             visitor_id: visitorId,
             funnel_stage: 'engaged',
             name: 'Inscrito Push', // Placeholder
@@ -110,12 +160,25 @@ export async function saveSubscription(
             created_at: new Date().toISOString(),
             country: visitor?.country,
             city: visitor?.city,
-            state: visitor?.region
+            state: visitor?.region,
+            acquired_via: visitor?.detected_source || 'push',
+            metadata: nextMetadata,
+            ...leadIntentColumnsFromMetadata(nextMetadata),
         })
+            .select('id')
+            .single()
 
         if (insertError) {
             console.error('[Push] Failed to create lead:', insertError)
             return { success: false, error: 'Failed to create lead record: ' + insertError.message }
+        }
+
+        if (insertedLead?.id) {
+            await supabase
+                .from('funnel_events')
+                .update({ lead_id: insertedLead.id })
+                .eq('visitor_id', visitorId)
+                .is('lead_id', null)
         }
     }
 

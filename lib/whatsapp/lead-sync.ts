@@ -11,6 +11,7 @@ export type WhatsAppLeadMessage = {
     instance_id?: string | null
     broker_id?: string | null
     timestamp?: string | null
+    metadata?: Record<string, unknown> | null
 }
 
 export type WhatsAppLeadContext = {
@@ -28,6 +29,11 @@ export function normalizeWhatsAppPhone(value: unknown): string {
     if (!digits) return ''
     if (digits.startsWith('55') || digits.length > 11) return digits
     return `55${digits}`
+}
+
+function normalizeEmail(value: unknown): string | null {
+    const email = String(value || '').trim().toLowerCase()
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null
 }
 
 export function phoneCandidates(value: unknown): string[] {
@@ -134,6 +140,7 @@ function toConversationEntry(message: WhatsAppLeadMessage) {
         instance_id: message.instance_id || null,
         broker_id: message.broker_id || null,
         timestamp: message.timestamp || new Date().toISOString(),
+        metadata: message.metadata || null,
     }
 }
 
@@ -164,6 +171,267 @@ function dedupeConversationLog(messages: any[]): any[] {
     }
 
     return result.slice(-250)
+}
+
+function asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function compactString(value: unknown, max = 700): string {
+    return String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, max)
+}
+
+function normalizeOutboundContentType(value: unknown): LeadOutboundContext['content_type'] {
+    const normalized = String(value || '').toLowerCase()
+    if (['blog', 'news', 'event', 'property', 'campaign'].includes(normalized)) {
+        return normalized as LeadOutboundContext['content_type']
+    }
+    return 'other'
+}
+
+export type LeadOutboundContext = {
+    id: string
+    channel: 'whatsapp' | 'email' | 'sms' | 'push' | 'other'
+    source_agent: string | null
+    sender_agent: string | null
+    origin_agent: string | null
+    campaign_id: string | null
+    workflow_run_id: string | null
+    content_type: 'blog' | 'news' | 'event' | 'property' | 'campaign' | 'other'
+    trigger: string | null
+    content_id: string | null
+    content_title: string | null
+    content_summary: string | null
+    content_url: string | null
+    cta_label: string | null
+    message_preview: string | null
+    sent_at: string
+}
+
+function sanitizeOutboundContext(params: {
+    channel?: unknown
+    sourceAgent?: unknown
+    senderAgent?: unknown
+    originAgent?: unknown
+    campaignId?: unknown
+    workflowRunId?: unknown
+    contentType?: unknown
+    trigger?: unknown
+    contentId?: unknown
+    contentTitle?: unknown
+    contentSummary?: unknown
+    contentUrl?: unknown
+    ctaLabel?: unknown
+    message?: unknown
+    sentAt?: unknown
+}): LeadOutboundContext {
+    const sentAt = String(params.sentAt || '').trim() || new Date().toISOString()
+    const contentTitle = compactString(params.contentTitle, 220)
+    const contentUrl = compactString(params.contentUrl, 600)
+    const campaignId = compactString(params.campaignId, 180)
+    const workflowRunId = compactString(params.workflowRunId, 120)
+    return {
+        id: workflowRunId || campaignId || `${sentAt}:${contentTitle || contentUrl || 'outbound'}`,
+        channel: ['whatsapp', 'email', 'sms', 'push'].includes(String(params.channel || '').toLowerCase())
+            ? String(params.channel).toLowerCase() as LeadOutboundContext['channel']
+            : 'other',
+        source_agent: compactString(params.sourceAgent, 120) || null,
+        sender_agent: compactString(params.senderAgent, 120) || null,
+        origin_agent: compactString(params.originAgent, 120) || null,
+        campaign_id: campaignId || null,
+        workflow_run_id: workflowRunId || null,
+        content_type: normalizeOutboundContentType(params.contentType),
+        trigger: compactString(params.trigger, 120) || null,
+        content_id: compactString(params.contentId, 120) || null,
+        content_title: contentTitle || null,
+        content_summary: compactString(params.contentSummary, 500) || null,
+        content_url: contentUrl || null,
+        cta_label: compactString(params.ctaLabel, 80) || null,
+        message_preview: compactString(params.message, 700) || null,
+        sent_at: sentAt,
+    }
+}
+
+export function getRecentLeadOutboundContexts(lead: any): LeadOutboundContext[] {
+    const metadata = asRecord(lead?.metadata)
+    const whatsapp = asRecord(metadata.whatsapp)
+    const contexts = Array.isArray(whatsapp.outbound_contexts) ? whatsapp.outbound_contexts : []
+    const last = asRecord(whatsapp.last_outbound_context)
+    const all = [
+        Object.keys(last).length ? last : null,
+        ...contexts,
+    ].filter(Boolean)
+
+    const seen = new Set<string>()
+    return all
+        .map((item: any) => sanitizeOutboundContext({
+            channel: item.channel,
+            sourceAgent: item.source_agent,
+            senderAgent: item.sender_agent,
+            originAgent: item.origin_agent,
+            campaignId: item.campaign_id,
+            workflowRunId: item.workflow_run_id,
+            contentType: item.content_type,
+            trigger: item.trigger,
+            contentId: item.content_id,
+            contentTitle: item.content_title,
+            contentSummary: item.content_summary,
+            contentUrl: item.content_url,
+            ctaLabel: item.cta_label,
+            message: item.message_preview,
+            sentAt: item.sent_at,
+        }))
+        .filter((item) => {
+            const key = item.id || `${item.sent_at}:${item.content_url || item.content_title || ''}`
+            if (seen.has(key)) return false
+            seen.add(key)
+            return true
+        })
+        .sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime())
+        .slice(0, 5)
+}
+
+export function buildRecentLeadOutboundContextPrompt(lead: any, latestUserMessage?: string | null): string {
+    const contexts = getRecentLeadOutboundContexts(lead)
+    const latest = contexts.find(context => context.channel === 'whatsapp') || contexts[0]
+    if (!latest) return ''
+
+    const sentAtMs = new Date(latest.sent_at).getTime()
+    const maxAgeMs = 10 * 24 * 60 * 60 * 1000
+    if (Number.isFinite(sentAtMs) && Date.now() - sentAtMs > maxAgeMs) return ''
+
+    const contentLabel = latest.content_type === 'news'
+        ? 'noticia'
+        : latest.content_type === 'blog'
+            ? 'artigo de blog'
+            : latest.content_type === 'event'
+                ? 'evento'
+                : latest.content_type === 'property'
+                    ? 'imovel'
+                    : 'conteudo'
+    const rawLeadText = compactString(latestUserMessage, 160).toLowerCase()
+    const looksLikeReplyToContext = rawLeadText.length > 0 && rawLeadText.length <= 90
+
+    return [
+        'CONTEXTO RECENTE DO LEAD NO ECOSSISTEMA (nao revele como dado interno):',
+        `- Ultima comunicacao ativa enviada pelo sistema: ${contentLabel}.`,
+        latest.content_title ? `- Titulo enviado: ${latest.content_title}` : '',
+        latest.content_summary ? `- Resumo do conteudo: ${latest.content_summary}` : '',
+        latest.content_url ? `- Link enviado ao lead: ${latest.content_url}` : '',
+        latest.cta_label ? `- Texto do botao enviado: ${latest.cta_label}` : '',
+        `- Canal de envio: ${latest.channel}; agente distribuidor: ${latest.source_agent || 'gabriel_distribuicao'}; origem: ${latest.origin_agent || 'ecossistema'}.`,
+        latest.sent_at ? `- Enviado em: ${latest.sent_at}` : '',
+        '',
+        'REGRAS PARA RESPONDER:',
+        looksLikeReplyToContext
+            ? '- A mensagem atual do lead parece resposta curta/ambigua ao conteudo enviado. Responda considerando esse conteudo antes de qualquer outro assunto.'
+            : '- Se o lead citar esse conteudo, use as informacoes acima para responder com continuidade.',
+        '- Nao assuma que o lead esta falando de um apartamento, visita ou outro imovel se ele nao mencionou isso claramente.',
+        '- Se houver duvida, confirme com naturalidade: "Voce esta falando da noticia/artigo que te enviei agora ha pouco?"',
+        '- Quando fizer sentido, convide o lead a abrir o link enviado ou perguntar algo sobre aquele conteudo.',
+    ].filter(Boolean).join('\n')
+}
+
+export async function recordLeadOutboundContext(
+    supabase: SupabaseClientLike,
+    params: {
+        leadId?: string | null
+        phone?: string | null
+        channel?: unknown
+        sourceAgent?: unknown
+        senderAgent?: unknown
+        originAgent?: unknown
+        campaignId?: unknown
+        workflowRunId?: unknown
+        contentType?: unknown
+        trigger?: unknown
+        contentId?: unknown
+        contentTitle?: unknown
+        contentSummary?: unknown
+        contentUrl?: unknown
+        ctaLabel?: unknown
+        message?: unknown
+        sentAt?: unknown
+    }
+) {
+    let lead: any = null
+
+    if (params.leadId) {
+        const { data, error } = await supabase
+            .from('leads')
+            .select('id, metadata, conversation_log, phone, phone_e164')
+            .eq('id', params.leadId)
+            .maybeSingle()
+        if (error) console.warn('[WhatsApp Lead Sync] outbound lead lookup by id failed:', error.message)
+        else lead = data || null
+    }
+
+    if (!lead && params.phone) {
+        lead = await findLeadByPhone(supabase, params.phone)
+    }
+
+    if (!lead?.id) return null
+
+    const outbound = sanitizeOutboundContext(params)
+    const metadata = asRecord(lead.metadata)
+    const whatsapp = asRecord(metadata.whatsapp)
+    const previousContexts = Array.isArray(whatsapp.outbound_contexts)
+        ? whatsapp.outbound_contexts
+        : []
+    const nextContexts = [
+        outbound,
+        ...previousContexts.filter((item: any) => {
+            const itemId = compactString(item?.id || item?.workflow_run_id || item?.campaign_id)
+            return itemId !== outbound.id
+        }),
+    ].slice(0, 20)
+
+    const nextMetadata = {
+        ...metadata,
+        whatsapp: {
+            ...whatsapp,
+            last_outbound_context: outbound,
+            last_editorial_context: ['blog', 'news'].includes(outbound.content_type)
+                ? outbound
+                : whatsapp.last_editorial_context || null,
+            outbound_contexts: nextContexts,
+        },
+    }
+
+    const currentLog = Array.isArray(lead.conversation_log) ? lead.conversation_log : []
+    const conversationLog = dedupeConversationLog([
+        ...currentLog,
+        toConversationEntry({
+            role: 'assistant',
+            content: outbound.message_preview || outbound.content_title || outbound.content_url || 'Conteudo enviado pelo ecossistema.',
+            type: 'editorial_distribution',
+            source: outbound.source_agent || 'editorial_distribution',
+            message_id: outbound.workflow_run_id ? `editorial:${outbound.workflow_run_id}` : null,
+            timestamp: outbound.sent_at,
+            metadata: {
+                outbound_context: outbound,
+            },
+        }),
+    ])
+
+    const { error } = await supabase
+        .from('leads')
+        .update({
+            metadata: nextMetadata,
+            conversation_log: conversationLog,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', lead.id)
+
+    if (error) {
+        console.warn('[WhatsApp Lead Sync] outbound context update failed:', error.message)
+        return null
+    }
+
+    return { lead_id: lead.id, outbound_context: outbound }
 }
 
 export async function findLeadByPhone(supabase: SupabaseClientLike, phone: string) {
@@ -397,7 +665,8 @@ export async function syncWhatsAppLeadSnapshot(
     else if (!['qualified', 'converted', 'closed'].includes(String(lead.funnel_stage || '').toLowerCase())) leadUpdate.funnel_stage = 'lead'
 
     if (extracted.name && (!lead.name || /^whatsapp\s/i.test(String(lead.name)))) leadUpdate.name = extracted.name
-    if (extracted.email) leadUpdate.email = extracted.email
+    const extractedEmail = normalizeEmail(extracted.email)
+    if (extractedEmail) leadUpdate.email = extractedEmail
     if (extracted.summary) leadUpdate.ai_summary = extracted.summary
     if (scoreSeed.interest) leadUpdate.lead_purpose = scoreSeed.interest
     if (extracted.budget || extracted.orcamento) leadUpdate.lead_budget = extracted.budget || extracted.orcamento

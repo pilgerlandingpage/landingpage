@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { Facebook, Home, Instagram, Menu, Search, X, Youtube } from 'lucide-react'
+import { BookOpen, Building2, CalendarDays, ChevronDown, Facebook, Home, Instagram, KeyRound, MapPin, Menu, MessageCircle, Newspaper, Search, X, Youtube } from 'lucide-react'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 
 type MenuLink = {
     label: string
@@ -16,6 +18,14 @@ type MenuSection = {
     title?: string
     count?: string
     links: MenuLink[]
+}
+
+type HeaderInstagramPost = {
+    id: string
+    caption?: string | null
+    media_url?: string | null
+    thumbnail_url?: string | null
+    permalink?: string | null
 }
 
 const TiktokIcon = ({ size = 16 }: { size?: number }) => (
@@ -36,11 +46,11 @@ const saleSections: MenuSection[] = [
         title: 'IMÓVEIS À VENDA',
         count: '1.382',
         links: [
-            { label: 'Todos os imóveis', href: busca({ status: 'active' }), count: '1.382', accent: true },
+            { label: 'Todos', href: busca({ status: 'active' }), count: '1.382', accent: true },
             { label: 'Apartamentos', href: busca({ type: 'apartamento' }), count: '1.006' },
             { label: 'Casas', href: busca({ type: 'casa' }), count: '143' },
             { label: 'Terrenos', href: busca({ type: 'terreno' }), count: '65' },
-            { label: 'Imóveis comerciais', href: busca({ type: 'comercial' }), count: '25' },
+            { label: 'Comerciais', href: busca({ type: 'comercial' }), count: '25' },
         ],
     },
     {
@@ -128,7 +138,7 @@ const locationSections: MenuSection[] = [
 
 const rentLinks: MenuLink[] = [
     { label: 'Aluguel anual', href: busca({ offer: 'rent' }), count: '4', accent: true },
-    { label: 'Imóveis comerciais para aluguel', href: busca({ offer: 'rent', type: 'comercial' }), count: '4' },
+    { label: 'Comerciais para aluguel', href: busca({ offer: 'rent', type: 'comercial' }), count: '4' },
 ]
 
 function DesktopSection({ section }: { section: MenuSection }) {
@@ -144,7 +154,7 @@ function DesktopSection({ section }: { section: MenuSection }) {
                 {section.links.map(link => (
                     <li key={`${link.label}-${link.href}`}>
                         <Link href={link.href} className={link.accent ? 'gh-accent' : undefined}>
-                            › {link.label}
+                            › {replaceItajaiWithPraiaBrava(link.label)}
                             {link.count && <span className="gh-count">{link.count}</span>}
                         </Link>
                     </li>
@@ -157,16 +167,18 @@ function DesktopSection({ section }: { section: MenuSection }) {
 function MobileLink({ link, onClose }: { link: MenuLink; onClose: () => void }) {
     return (
         <Link href={link.href} className={link.accent ? 'gh-accent' : undefined} onClick={onClose}>
-            {link.label}
+            {replaceItajaiWithPraiaBrava(link.label)}
             {link.count && <span>{link.count}</span>}
         </Link>
     )
 }
 
 export default function GlobalHeader() {
+    const pathname = usePathname()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [openAccordion, setOpenAccordion] = useState<string | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
+    const [mobileInstagramPosts, setMobileInstagramPosts] = useState<HeaderInstagramPost[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
 
     const closeMobileMenu = () => setMobileMenuOpen(false)
@@ -185,9 +197,27 @@ export default function GlobalHeader() {
         return () => document.removeEventListener('mousedown', handleClick)
     }, [searchOpen])
 
+    useEffect(() => {
+        if (!mobileMenuOpen || mobileInstagramPosts.length) return
+
+        let cancelled = false
+        fetch('/api/instagram?limit=6')
+            .then(response => response.ok ? response.json() : null)
+            .then(data => {
+                if (cancelled) return
+                const posts = Array.isArray(data?.media) ? data.media : []
+                setMobileInstagramPosts(posts.slice(0, 6))
+            })
+            .catch(() => null)
+
+        return () => {
+            cancelled = true
+        }
+    }, [mobileMenuOpen, mobileInstagramPosts.length])
+
     return (
         <>
-            <header className="gh-wrap">
+            <header className={`gh-wrap ${pathname === '/' || pathname === '/busca' ? 'gh-home-mobile' : ''} ${pathname === '/' ? 'gh-home-topbar-mobile' : ''}`}>
                 <div className="gh-topbar">
                     <div>CRECI/SC 6772-J - Balneário Camboriú / SC</div>
                     <div className="gh-topbar-right">
@@ -215,12 +245,12 @@ export default function GlobalHeader() {
                 <div className="gh-main">
                     <Link href="/" className="gh-logo">
                         <span className="gh-logo-name">GUILHERME PILGER</span>
-                        <span className="gh-logo-sub">Corretor de Imóveis</span>
+                        <span className="gh-logo-sub">CRECI/SC 6772-J</span>
                     </Link>
 
                     <ul className="gh-desktop-nav">
                         <li className="gh-menu-item">
-                            <Link href="/" className="gh-menu-label" aria-label="Home"><Home size={18} color="#333" /></Link>
+                            <Link href="/" className="gh-menu-label" aria-label="Home"><Home size={18} color="currentColor" /></Link>
                         </li>
 
                         <li className="gh-menu-item">
@@ -228,7 +258,14 @@ export default function GlobalHeader() {
                             <div className="gh-dropdown gh-dropdown-narrow">
                                 <Link href="/sobre">Sobre a Pilger</Link>
                                 <Link href="/busca?city=Balne%C3%A1rio+Cambori%C3%BA">Imobiliária em Balneário Camboriú</Link>
-                                <Link href="/contato">Consultoria imobiliária personalizada</Link>
+                                <WhatsAppCaptureLink
+                                    phone="5547992528080"
+                                    message="Olá! Quero uma consultoria imobiliária personalizada."
+                                    slug="menu-desktop"
+                                    template="global-header-consultoria"
+                                >
+                                    Consultoria imobiliária personalizada
+                                </WhatsAppCaptureLink>
                             </div>
                         </li>
 
@@ -249,7 +286,7 @@ export default function GlobalHeader() {
                             <div className="gh-dropdown gh-dropdown-narrow">
                                 {rentLinks.map(link => (
                                     <Link key={link.href} href={link.href} className={link.accent ? 'gh-accent' : undefined}>
-                                        › {link.label}
+                                        › {replaceItajaiWithPraiaBrava(link.label)}
                                         {link.count && <span className="gh-count">{link.count}</span>}
                                     </Link>
                                 ))}
@@ -265,9 +302,13 @@ export default function GlobalHeader() {
                         </li>
 
                         <li className="gh-menu-item">
+                            <Link href="/eventos" className="gh-menu-label">EVENTOS</Link>
+                        </li>
+
+                        <li className="gh-menu-item">
                             <WhatsAppCaptureLink
                                 phone="5547992528080"
-                                message="Olá! Gostaria de falar com um especialista sobre imóveis."
+                                message="Olá! Gostaria de falar com um especialista."
                                 slug="menu-desktop"
                                 template="global-header-contato"
                                 className="gh-menu-label"
@@ -278,7 +319,7 @@ export default function GlobalHeader() {
 
                         <li className="gh-menu-item" ref={searchRef}>
                             <button className="gh-search-trigger" onClick={() => setSearchOpen(!searchOpen)} aria-label="Abrir busca">
-                                <Search size={18} color="#333" />
+                                <Search size={18} color="currentColor" />
                             </button>
                             {searchOpen && (
                                 <div className="gh-search-panel">
@@ -292,8 +333,13 @@ export default function GlobalHeader() {
                         </li>
                     </ul>
 
-                    <button className="gh-burger" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menu">
-                        <Menu size={28} color="#333" />
+                    <button
+                        className="gh-burger"
+                        onClick={() => setMobileMenuOpen(open => !open)}
+                        aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+                        aria-expanded={mobileMenuOpen}
+                    >
+                        {mobileMenuOpen ? <X size={28} color="#b8942f" /> : <Menu size={28} color="#b8942f" />}
                     </button>
                 </div>
             </header>
@@ -302,26 +348,41 @@ export default function GlobalHeader() {
                 <div className="gh-mobile-overlay" onClick={closeMobileMenu}>
                     <div className="gh-mobile-panel" onClick={e => e.stopPropagation()}>
                         <div className="gh-mobile-header">
-                            <span>MENU</span>
+                            <div className="gh-mobile-brand">
+                                <strong>GUILHERME PILGER</strong>
+                                <small>CRECI/SC 6772-J</small>
+                            </div>
                             <button onClick={closeMobileMenu} aria-label="Fechar menu">
-                                <X size={24} color="#666" />
+                                <X size={24} color="#b8942f" />
                             </button>
                         </div>
                         <div className="gh-mobile-links">
-                            <Link href="/" onClick={closeMobileMenu}>HOME</Link>
+                            <Link href="/" className="gh-mobile-nav-item" onClick={closeMobileMenu}>
+                                <span className="gh-mobile-link-main"><Home size={17} strokeWidth={1.75} /><span>Home</span></span>
+                            </Link>
 
-                            <button onClick={() => toggleAccordion('imobiliaria')}>
-                                A IMOBILIÁRIA <span>{openAccordion === 'imobiliaria' ? '▴' : '▾'}</span>
+                            <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('imobiliaria')} aria-expanded={openAccordion === 'imobiliaria'}>
+                                <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>A imobiliária</span></span>
+                                <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
                             </button>
                             {openAccordion === 'imobiliaria' && (
                                 <div className="gh-mobile-sub">
                                     <Link href="/sobre" onClick={closeMobileMenu}>Sobre a Pilger</Link>
-                                    <Link href="/contato" onClick={closeMobileMenu}>Consultoria imobiliária</Link>
+                                    <WhatsAppCaptureLink
+                                        phone="5547992528080"
+                                        message="Olá! Quero uma consultoria imobiliária personalizada."
+                                        slug="menu-mobile"
+                                        template="global-header-consultoria"
+                                        onClick={() => closeMobileMenu()}
+                                    >
+                                        Consultoria imobiliária
+                                    </WhatsAppCaptureLink>
                                 </div>
                             )}
 
-                            <button onClick={() => toggleAccordion('vendas')}>
-                                VENDAS <span>{openAccordion === 'vendas' ? '▴' : '▾'}</span>
+                            <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('vendas')} aria-expanded={openAccordion === 'vendas'}>
+                                <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>Vendas</span></span>
+                                <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
                             </button>
                             {openAccordion === 'vendas' && (
                                 <div className="gh-mobile-sub">
@@ -332,8 +393,9 @@ export default function GlobalHeader() {
                                 </div>
                             )}
 
-                            <button onClick={() => toggleAccordion('localidades')}>
-                                LOCALIDADES <span>{openAccordion === 'localidades' ? '▴' : '▾'}</span>
+                            <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('localidades')} aria-expanded={openAccordion === 'localidades'}>
+                                <span className="gh-mobile-link-main"><MapPin size={17} strokeWidth={1.75} /><span>Localidades</span></span>
+                                <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
                             </button>
                             {openAccordion === 'localidades' && (
                                 <div className="gh-mobile-sub">
@@ -343,8 +405,9 @@ export default function GlobalHeader() {
                                 </div>
                             )}
 
-                            <button onClick={() => toggleAccordion('aluguel')}>
-                                ALUGUEL <span>{openAccordion === 'aluguel' ? '▴' : '▾'}</span>
+                            <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('aluguel')} aria-expanded={openAccordion === 'aluguel'}>
+                                <span className="gh-mobile-link-main"><KeyRound size={17} strokeWidth={1.75} /><span>Aluguel</span></span>
+                                <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
                             </button>
                             {openAccordion === 'aluguel' && (
                                 <div className="gh-mobile-sub">
@@ -352,23 +415,62 @@ export default function GlobalHeader() {
                                 </div>
                             )}
 
-                            <Link href="/noticias" onClick={closeMobileMenu}>NOTÍCIAS</Link>
-                            <Link href="/blog" onClick={closeMobileMenu}>BLOG</Link>
+                            <Link href="/noticias" className="gh-mobile-nav-item" onClick={closeMobileMenu}>
+                                <span className="gh-mobile-link-main"><Newspaper size={17} strokeWidth={1.75} /><span>Notícias</span></span>
+                            </Link>
+                            <Link href="/blog" className="gh-mobile-nav-item" onClick={closeMobileMenu}>
+                                <span className="gh-mobile-link-main"><BookOpen size={17} strokeWidth={1.75} /><span>Blog</span></span>
+                            </Link>
+                            <Link href="/eventos" className="gh-mobile-nav-item" onClick={closeMobileMenu}>
+                                <span className="gh-mobile-link-main"><CalendarDays size={17} strokeWidth={1.75} /><span>Eventos</span></span>
+                            </Link>
                             <WhatsAppCaptureLink
                                 phone="5547992528080"
-                                message="Olá! Gostaria de falar com um especialista sobre imóveis."
+                                message="Olá! Gostaria de falar com um especialista."
                                 slug="menu-mobile"
                                 template="global-header-contato"
+                                className="gh-mobile-nav-item"
                                 onClick={closeMobileMenu as any}
                             >
-                                CONTATO
+                                <span className="gh-mobile-link-main"><MessageCircle size={17} strokeWidth={1.75} /><span>Contato</span></span>
                             </WhatsAppCaptureLink>
-
-                            <div className="gh-mobile-socials">
-                                <a href="https://www.instagram.com/guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={22} /></a>
-                                <a href="https://www.facebook.com/guilherme.pilger/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={22} /></a>
-                                <a href="https://www.youtube.com/@guilhermepilger" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={22} /></a>
-                                <a href="https://www.tiktok.com/@guilhermepilgeroficial" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TiktokIcon size={22} /></a>
+                            <div className="gh-mobile-instagram">
+                                <div className="gh-mobile-instagram-head">
+                                    <span>Últimos no Instagram</span>
+                                    <a href="https://www.instagram.com/guilhermepilger" target="_blank" rel="noopener noreferrer" onClick={closeMobileMenu}>Ver perfil</a>
+                                </div>
+                                {mobileInstagramPosts.length > 0 ? (
+                                    <div className="gh-mobile-instagram-grid">
+                                        {mobileInstagramPosts.map(post => {
+                                            const image = post.thumbnail_url || post.media_url
+                                            const caption = (post.caption || 'Conteúdo Guilherme Pilger').split('\n')[0]
+                                            return (
+                                                <a
+                                                    key={post.id}
+                                                    href={post.permalink || 'https://www.instagram.com/guilhermepilger'}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={closeMobileMenu}
+                                                    className="gh-mobile-instagram-card"
+                                                    aria-label={caption}
+                                                >
+                                                    {image ? <img src={image} alt={caption} /> : <span className="gh-mobile-instagram-fallback">Instagram</span>}
+                                                </a>
+                                            )
+                                        })}
+                                    </div>
+                                ) : (
+                                    <a
+                                        href="https://www.instagram.com/guilhermepilger"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={closeMobileMenu}
+                                        className="gh-mobile-instagram-empty"
+                                    >
+                                        <Instagram size={18} />
+                                        Acompanhar bastidores, tours e oportunidades no Instagram
+                                    </a>
+                                )}
                             </div>
                         </div>
                     </div>

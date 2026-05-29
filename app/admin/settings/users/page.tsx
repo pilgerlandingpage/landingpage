@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
@@ -38,6 +38,7 @@ export default function UsersPage() {
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
     const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
     const [sendingFirstAccessUserId, setSendingFirstAccessUserId] = useState<string | null>(null)
+    const formCardRef = useRef<HTMLDivElement | null>(null)
 
     const [form, setForm] = useState({
         name: '', email: '', phone: '',
@@ -73,6 +74,11 @@ export default function UsersPage() {
 
     useEffect(() => { fetchData() }, [])
 
+    useEffect(() => {
+        if (!creating && !editing) return
+        formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, [creating, editing])
+
     const startCreate = () => {
         if (!canCreateUsers) {
             showToast('Somente Master e Diretoria podem cadastrar novos usuarios.', 'error')
@@ -84,10 +90,11 @@ export default function UsersPage() {
     }
 
     const startEdit = (u: AdminUser) => {
+        const userSectors = Array.isArray(u.sectors) ? u.sectors : []
         setEditing(u.id); setCreating(false)
         setForm({
             name: u.name, email: u.email, phone: u.phone || '',
-            is_master: canGrantMaster ? u.is_master : false, sector_ids: u.sectors.map(s => s.id),
+            is_master: canGrantMaster ? u.is_master : false, sector_ids: userSectors.map(s => s.id),
         })
         setUserWhatsapp(null)
         loadUserWhatsApp(u.id)
@@ -341,7 +348,7 @@ export default function UsersPage() {
 
             {/* Form */}
             {(creating || editing) && (
-                <div className="chart-card" style={{ marginBottom: 24, border: '2px solid var(--gold)' }}>
+                <div ref={formCardRef} className="chart-card" style={{ marginBottom: 24, border: '2px solid var(--gold)', scrollMarginTop: 96 }}>
                     <div className="chart-title" style={{ marginBottom: 16 }}>
                         {creating ? 'Novo Usuario' : 'Editar Usuario'}
                     </div>

@@ -11,6 +11,131 @@ function normalizeAssistantPhone(value: any): string {
     return digits
 }
 
+function normalizeBrokerPhone(value: any): string {
+    return normalizeAssistantPhone(value)
+}
+
+const ASSISTANT_PHONE_OPTIONAL_COLUMNS = [
+    'can_manage_finance',
+    'can_view_reports',
+    'can_view_properties',
+]
+
+const BROKER_OPTIONAL_COLUMNS = [
+    'transfer_to_phone',
+    'concierge_enabled',
+    'concierge_prompt',
+    'concierge_require_confirmation',
+]
+
+const BROKER_BASE_SELECT_FIELDS = [
+    'id',
+    'name',
+    'creci',
+    'photo_url',
+    'is_active',
+    'assignment_type',
+    'assigned_page_slugs',
+    'phone',
+    'system_prompt',
+    'voice_id',
+    'handoff_prompt',
+]
+
+const BROKER_GET_OPTIONAL_COLUMNS = [
+    'transfer_to_phone',
+    'summary_to_phone',
+    'concierge_enabled',
+    'concierge_prompt',
+    'concierge_require_confirmation',
+]
+
+function findMissingOptionalColumn(error: any, columns: string[]) {
+    const message = String(error?.message || error || '')
+    return columns.find(column => message.includes(column)) || null
+}
+
+async function upsertAssistantPhonesWithCompatibility(supabase: any, rows: any[]) {
+    let pendingRows = rows
+
+    for (let attempt = 0; attempt <= ASSISTANT_PHONE_OPTIONAL_COLUMNS.length; attempt += 1) {
+        const { error } = await supabase
+            .from('broker_assistant_authorized_phones')
+            .upsert(pendingRows, { onConflict: 'broker_id,phone' })
+
+        if (!error) return
+
+        const missing = findMissingOptionalColumn(error, ASSISTANT_PHONE_OPTIONAL_COLUMNS)
+        if (!missing) throw error
+
+        pendingRows = pendingRows.map((row: any) => {
+            const { [missing]: _missingColumn, ...rest } = row
+            return rest
+        })
+    }
+}
+
+async function listBrokersWithCompatibility(supabase: any) {
+    let optionalColumns = [...BROKER_GET_OPTIONAL_COLUMNS]
+
+    for (let attempt = 0; attempt <= BROKER_GET_OPTIONAL_COLUMNS.length; attempt += 1) {
+        const result = await supabase
+            .from('virtual_brokers')
+            .select([...BROKER_BASE_SELECT_FIELDS, ...optionalColumns].join(', '))
+            .order('name')
+
+        if (!result.error) return result
+
+        const missing = findMissingOptionalColumn(result.error, optionalColumns)
+        if (!missing) return result
+
+        optionalColumns = optionalColumns.filter(column => column !== missing)
+    }
+
+    return supabase
+        .from('virtual_brokers')
+        .select(BROKER_BASE_SELECT_FIELDS.join(', '))
+        .order('name')
+}
+
+async function updateBrokerWithCompatibility(
+    supabase: any,
+    id: string,
+    payload: Record<string, any>,
+    requiredColumns: string[] = [],
+) {
+    let pendingPayload = { ...payload }
+
+    for (let attempt = 0; attempt <= BROKER_OPTIONAL_COLUMNS.length; attempt += 1) {
+        const result = await supabase
+            .from('virtual_brokers')
+            .update(pendingPayload)
+            .eq('id', id)
+            .select()
+            .single()
+
+        if (!result.error) return { ...result, payload: pendingPayload }
+
+        const missing = findMissingOptionalColumn(result.error, BROKER_OPTIONAL_COLUMNS)
+        if (!missing) return { ...result, payload: pendingPayload }
+        if (requiredColumns.includes(missing)) {
+            return { ...result, payload: pendingPayload, missingRequiredColumn: missing }
+        }
+
+        const { [missing]: _missingColumn, ...rest } = pendingPayload
+        pendingPayload = rest
+    }
+
+    const result = await supabase
+        .from('virtual_brokers')
+        .update(pendingPayload)
+        .eq('id', id)
+        .select()
+        .single()
+
+    return { ...result, payload: pendingPayload }
+}
+
 async function syncAssistantPhones(supabase: any, brokerId: string, phones: any[]) {
     if (!Array.isArray(phones)) return
 
@@ -27,6 +152,9 @@ async function syncAssistantPhones(supabase: any, brokerId: string, phones: any[
                 can_manage_leads: phone?.can_manage_leads === true,
                 can_send_messages: phone?.can_send_messages === true,
                 can_update_crm: phone?.can_update_crm === true,
+                can_manage_finance: phone?.can_manage_finance === true,
+                can_view_reports: phone?.can_view_reports === true,
+                can_view_properties: phone?.can_view_properties !== false,
                 is_active: phone?.is_active !== false,
             }
         })
@@ -38,9 +166,7 @@ async function syncAssistantPhones(supabase: any, brokerId: string, phones: any[
         .eq('broker_id', brokerId)
 
     if (rows.length > 0) {
-        await supabase
-            .from('broker_assistant_authorized_phones')
-            .upsert(rows, { onConflict: 'broker_id,phone' })
+        await upsertAssistantPhonesWithCompatibility(supabase, rows)
     }
 }
 
@@ -50,24 +176,9 @@ export async function GET() {
         const supabase = createAdminClient()
         // Tenta seleção completa primeiro; se alguma coluna opcional não existir no ambiente,
         // cai para seleções progressivamente mais simples para não "sumir" com os corretores.
-        let data: any[] | null = null
-        let error: any = null
-
-        const fullQuery = await supabase
-            .from('virtual_brokers')
-            .select('id, name, creci, photo_url, is_active, assignment_type, assigned_page_slugs, phone, summary_to_phone, system_prompt, voice_id, handoff_prompt')
-            .order('name')
-        data = fullQuery.data
-        error = fullQuery.error
-
-        if (error) {
-            const midQuery = await supabase
-                .from('virtual_brokers')
-                .select('id, name, creci, photo_url, is_active, assignment_type, assigned_page_slugs, phone, system_prompt, voice_id')
-                .order('name')
-            data = midQuery.data
-            error = midQuery.error
-        }
+        const brokersQuery = await listBrokersWithCompatibility(supabase)
+        let data: any[] | null = brokersQuery.data
+        let error: any = brokersQuery.error
 
         if (error) {
             const safeQuery = await supabase
@@ -107,13 +218,22 @@ export async function GET() {
         try {
             const { data: phonesData, error: phonesError } = await supabase
                 .from('broker_assistant_authorized_phones')
-                .select('id, broker_id, phone, name, role, can_manage_agenda, can_manage_leads, can_send_messages, can_update_crm, is_active')
+                .select('id, broker_id, phone, name, role, can_manage_agenda, can_manage_leads, can_send_messages, can_update_crm, can_manage_finance, can_view_reports, can_view_properties, is_active')
                 .in('broker_id', brokerIds)
                 .order('created_at')
             if (!phonesError && Array.isArray(phonesData)) {
                 assistantPhones = phonesData
             } else if (phonesError) {
-                console.warn('List broker assistant phones warning:', phonesError.message)
+                const fallback = await supabase
+                    .from('broker_assistant_authorized_phones')
+                    .select('id, broker_id, phone, name, role, can_manage_agenda, can_manage_leads, can_send_messages, can_update_crm, is_active')
+                    .in('broker_id', brokerIds)
+                    .order('created_at')
+                if (!fallback.error && Array.isArray(fallback.data)) {
+                    assistantPhones = fallback.data
+                } else {
+                    console.warn('List broker assistant phones warning:', fallback.error?.message || phonesError.message)
+                }
             }
         } catch (err) {
             console.warn('List broker assistant phones exception:', err)
@@ -175,7 +295,12 @@ export async function POST(request: NextRequest) {
         if (typeof body?.system_prompt === 'string') payload.system_prompt = body.system_prompt
         if (typeof body?.voice_id === 'string') payload.voice_id = body.voice_id
         if (typeof body?.handoff_prompt === 'string') payload.handoff_prompt = body.handoff_prompt
+        if (typeof body?.concierge_enabled === 'boolean') payload.concierge_enabled = body.concierge_enabled
+        if (typeof body?.concierge_prompt === 'string') payload.concierge_prompt = body.concierge_prompt
+        if (typeof body?.concierge_require_confirmation === 'boolean') payload.concierge_require_confirmation = body.concierge_require_confirmation
         if (typeof body?.phone === 'string') payload.phone = body.phone
+        const transferPhone = normalizeBrokerPhone(body?.transfer_to_phone || body?.summary_to_phone)
+        if (transferPhone) payload.transfer_to_phone = transferPhone
         if (typeof body?.assignment_type === 'string') payload.assignment_type = body.assignment_type
         if (Array.isArray(body?.assigned_page_slugs)) payload.assigned_page_slugs = body.assigned_page_slugs
 
@@ -229,23 +354,28 @@ export async function PUT(request: NextRequest) {
         // Compatibilidade entre ambientes: algumas colunas opcionais podem não existir
         // (ex.: summary_to_phone). Tentamos salvar tudo e, se a API reclamar de coluna ausente,
         // removemos esse campo e tentamos novamente.
+        const transferPhone = normalizeBrokerPhone((updates as any).transfer_to_phone || (updates as any).summary_to_phone)
         let payload: Record<string, any> = { ...updates }
-        let result = await supabase
-            .from('virtual_brokers')
-            .update(payload)
-            .eq('id', id)
-            .select()
-            .single()
+        delete payload.summary_to_phone
+        if (transferPhone) {
+            payload.transfer_to_phone = transferPhone
+        } else if ((updates as any).transfer_to_phone !== undefined || (updates as any).summary_to_phone !== undefined) {
+            payload.transfer_to_phone = null
+        }
+        const requiredColumns = [
+            typeof (updates as any).concierge_enabled === 'boolean' ? 'concierge_enabled' : null,
+            typeof (updates as any).concierge_prompt === 'string' ? 'concierge_prompt' : null,
+            typeof (updates as any).concierge_require_confirmation === 'boolean' ? 'concierge_require_confirmation' : null,
+        ].filter(Boolean) as string[]
 
-        if (result.error?.message?.includes("summary_to_phone")) {
-            const { summary_to_phone, ...safePayload } = payload
-            payload = safePayload
-            result = await supabase
-                .from('virtual_brokers')
-                .update(payload)
-                .eq('id', id)
-                .select()
-                .single()
+        const result = await updateBrokerWithCompatibility(supabase, id, payload, requiredColumns)
+
+        if ((result as any).missingRequiredColumn) {
+            const column = (result as any).missingRequiredColumn
+            return NextResponse.json({
+                error: 'missing_required_column',
+                message: `A coluna ${column} ainda nao esta disponivel no Supabase. Execute a migracao do concierge ou aguarde o schema cache atualizar antes de salvar.`,
+            }, { status: 409 })
         }
 
         if (result.error) {

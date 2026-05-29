@@ -1,56 +1,89 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { getVisitorId } from '@/lib/tracking/client'
+import { useEffect, useRef, useState } from 'react'
+import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
-/**
- * Persuasive Push Notification Trigger with Visual Guidance.
- * Appears after the user scrolls ~35% or after 15 seconds.
- * When the user clicks to enable, it shows a visual guide pointing to the 
- * browser's native "Allow" button to maximize acceptance rates.
- */
-export default function PushConsent() {
+type PushConsentProps = {
+    visitorId?: string
+    vapidPublicKey?: string
+}
+
+type PushPromptContent = {
+    reason: string
+    title: string
+    body: string
+    cta: string
+}
+
+const DEFAULT_PROMPT: PushPromptContent = {
+    reason: 'passive',
+    title: 'Receba oportunidades antes de todo mundo',
+    body: 'Avisamos quando aparecer um imovel alinhado ao seu perfil em Balneario, Praia Brava, Itapema ou Porto Belo.',
+    cta: 'Ativar alertas VIP',
+}
+
+export default function PushConsent({ visitorId, vapidPublicKey: trackedVapidPublicKey }: PushConsentProps) {
     const [show, setShow] = useState(false)
     const [isSubscribing, setIsSubscribing] = useState(false)
     const [isDismissed, setIsDismissed] = useState(false)
     const [isWaitingForNative, setIsWaitingForNative] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [promptContent, setPromptContent] = useState<PushPromptContent>(DEFAULT_PROMPT)
     const hasTriggered = useRef(false)
 
-    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    const vapidPublicKey = trackedVapidPublicKey || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
     useEffect(() => {
-        // Detect mobile
-        const checkMobile = () => {
-            setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
-        }
-        checkMobile()
-
         if (typeof window === 'undefined') return
+
+        setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+
         if (!('Notification' in window)) return
         if (!('serviceWorker' in navigator)) return
         if (!vapidPublicKey) return
         if (Notification.permission !== 'default') return
-
         if (sessionStorage.getItem('push_prompt_dismissed')) return
 
-        const trigger = () => {
+        const trigger = (content: PushPromptContent) => {
             if (hasTriggered.current) return
+            if (sessionStorage.getItem('push_prompt_dismissed')) return
             hasTriggered.current = true
+            setPromptContent(content)
             setShow(true)
+            void trackEvent('push_soft_prompt_shown', {
+                reason: content.reason,
+                title: content.title,
+            })
         }
 
         const handleScroll = () => {
-            const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)
-            if (scrollPercent > 0.35) trigger()
+            const scrollable = document.documentElement.scrollHeight - window.innerHeight
+            if (scrollable <= 0) return
+            const scrollPercent = window.scrollY / scrollable
+            if (scrollPercent > 0.35) trigger({ ...DEFAULT_PROMPT, reason: 'scroll_35' })
         }
 
-        const timer = setTimeout(trigger, 15000)
+        const handleIntent = (event: Event) => {
+            const detail = (event as CustomEvent<Partial<PushPromptContent>>).detail || {}
+            trigger({
+                reason: detail.reason || 'intent',
+                title: detail.title || DEFAULT_PROMPT.title,
+                body: detail.body || DEFAULT_PROMPT.body,
+                cta: detail.cta || DEFAULT_PROMPT.cta,
+            })
+        }
+
+        const timer = window.setTimeout(() => {
+            trigger({ ...DEFAULT_PROMPT, reason: 'timer_15s' })
+        }, 15000)
+
         window.addEventListener('scroll', handleScroll, { passive: true })
+        window.addEventListener('pilger_push_intent', handleIntent)
 
         return () => {
-            clearTimeout(timer)
+            window.clearTimeout(timer)
             window.removeEventListener('scroll', handleScroll)
+            window.removeEventListener('pilger_push_intent', handleIntent)
         }
     }, [vapidPublicKey])
 
@@ -59,88 +92,119 @@ export default function PushConsent() {
         const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
         const rawData = window.atob(base64)
         const outputArray = new Uint8Array(rawData.length)
+
         for (let i = 0; i < rawData.length; ++i) {
             outputArray[i] = rawData.charCodeAt(i)
         }
+
         return outputArray
+    }
+
+    const handleDismiss = (shouldTrack = true) => {
+        if (shouldTrack) {
+            void trackEvent('push_soft_prompt_dismissed', {
+                reason: promptContent.reason,
+                title: promptContent.title,
+            })
+        }
+
+        setIsDismissed(true)
+        sessionStorage.setItem('push_prompt_dismissed', 'true')
+        window.setTimeout(() => setShow(false), 400)
     }
 
     const handleEnable = async () => {
         if (!vapidPublicKey) return
-        setIsSubscribing(true)
-        setIsWaitingForNative(true) // Start visual guidance
 
-        const timeout = setTimeout(() => {
-            console.error('[PushTrigger] Subscription timed out')
+        void trackEvent('push_soft_prompt_clicked', {
+            reason: promptContent.reason,
+            title: promptContent.title,
+        })
+
+        setIsSubscribing(true)
+        setIsWaitingForNative(true)
+
+        const timeout = window.setTimeout(() => {
             setIsSubscribing(false)
             setIsWaitingForNative(false)
-            handleDismiss()
+            handleDismiss(false)
         }, 20000)
 
         try {
-            console.log('[PushTrigger] Requesting notification permission...')
             let result: NotificationPermission = 'denied'
+
             try {
-                const p = Notification.requestPermission()
-                if (p && typeof p.then === 'function') {
-                    result = await p
-                } else {
-                    result = await new Promise<NotificationPermission>((resolve) =>
-                        Notification.requestPermission(resolve)
-                    )
-                }
-            } catch (e) {
-                console.warn('[PushTrigger] Permission error:', e)
+                result = await Notification.requestPermission()
+            } catch {
                 result = Notification.permission
             }
 
-            console.log('[PushTrigger] Permission result:', result)
-
             if (result !== 'granted') {
                 const cookieId = getVisitorId()
-                try {
-                    await fetch('/api/track', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            visitor_cookie_id: cookieId,
-                            event_type: 'push_denied',
-                            metadata: { permission: result }
-                        }),
-                    })
-                } catch { }
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitor_cookie_id: cookieId,
+                        event_type: 'push_denied',
+                        metadata: {
+                            permission: result,
+                            soft_prompt_reason: promptContent.reason,
+                        },
+                    }),
+                }).catch(() => null)
+
                 setIsWaitingForNative(false)
-                handleDismiss()
+                handleDismiss(false)
                 return
             }
 
-            // SUCCESS FLOW
-            setIsWaitingForNative(false) // Stop guidance overlay
+            setIsWaitingForNative(false)
 
-            console.log('[PushTrigger] Registering service worker...')
             const swRegistration = await navigator.serviceWorker.register('/sw.js')
             await navigator.serviceWorker.ready
 
-            const subscription = await swRegistration.pushManager.subscribe({
+            const existingSubscription = await swRegistration.pushManager.getSubscription()
+            const subscription = existingSubscription || await swRegistration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
             })
 
             const cookieId = getVisitorId()
-            const trackRes = await fetch('/api/track', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    visitor_cookie_id: cookieId,
-                    event_type: 'push_consent',
-                    metadata: { granted: true }
-                }),
-            })
-            const trackData = await trackRes.json()
-            const dbVisitorId = trackData.visitor_id
+            let dbVisitorId = visitorId
+
+            if (!dbVisitorId) {
+                const trackRes = await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitor_cookie_id: cookieId,
+                        event_type: 'push_consent',
+                        metadata: {
+                            granted: true,
+                            soft_prompt_reason: promptContent.reason,
+                        },
+                    }),
+                })
+                const trackData = await trackRes.json()
+                dbVisitorId = trackData.visitor_id
+            } else {
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitor_cookie_id: cookieId,
+                        event_type: 'push_consent',
+                        metadata: {
+                            granted: true,
+                            soft_prompt_reason: promptContent.reason,
+                        },
+                    }),
+                }).catch(() => null)
+            }
 
             if (dbVisitorId) {
-                await fetch('/api/push/subscribe', {
+                const saveRes = await fetch('/api/push/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -148,197 +212,258 @@ export default function PushConsent() {
                         subscription: subscription.toJSON(),
                     }),
                 })
+
+                if (!saveRes.ok) {
+                    const data = await saveRes.json().catch(() => ({}))
+                    console.error('[PushTrigger] Failed to save subscription:', data?.error || saveRes.status)
+                }
             }
         } catch (error) {
             console.error('[PushTrigger] Error:', error)
         } finally {
-            clearTimeout(timeout)
+            window.clearTimeout(timeout)
             setIsSubscribing(false)
             setIsWaitingForNative(false)
-            handleDismiss()
+            handleDismiss(false)
         }
-    }
-
-    const handleDismiss = () => {
-        setIsDismissed(true)
-        sessionStorage.setItem('push_prompt_dismissed', 'true')
-        setTimeout(() => setShow(false), 400)
     }
 
     if (!show) return null
 
     return (
         <>
-            {/* 1. NATIVE GUIDANCE OVERLAY (The "Tutorial") */}
             {isWaitingForNative && (
-                <div style={{
-                    position: 'fixed',
-                    inset: 0,
-                    zIndex: 10000,
-                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: isMobile ? 'center' : 'flex-start',
-                    padding: isMobile ? '20px' : '80px 40px',
-                    textAlign: 'center',
-                    animation: 'pushFadeIn 0.3s ease-out',
-                }}>
-                    {/* Animated Arrow for Desktop (Points Top-Left) */}
+                <div className="push-native-guide">
                     {!isMobile && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '20px',
-                            left: '120px',
-                            animation: 'pushPulseArrow 1.5s infinite ease-in-out',
-                            zIndex: 10001,
-                        }}>
+                        <div className="push-native-arrow" aria-hidden="true">
                             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(-45)">
                                 <path d="M12 5V19M12 5L6 11M12 5L18 11" stroke="#c9a96e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         </div>
                     )}
 
-                    {/* Instruction Box */}
-                    <div style={{
-                        maxWidth: '450px',
-                        background: '#1a1a1a',
-                        border: '2px solid #c9a96e',
-                        borderRadius: '24px',
-                        padding: '32px 24px',
-                        boxShadow: '0 0 50px rgba(201, 169, 110, 0.3)',
-                        marginTop: !isMobile ? '100px' : '0',
-                    }}>
-                        <div style={{
-                            fontSize: '2rem',
-                            marginBottom: '16px',
-                            animation: 'pushBounce 2s infinite'
-                        }}>
-                            ☝️
-                        </div>
-                        <h2 style={{
-                            color: '#ffffff',
-                            fontFamily: 'Playfair Display, serif',
-                            fontSize: '1.5rem',
-                            fontWeight: 700,
-                            marginBottom: '16px',
-                            lineHeight: 1.3,
-                        }}>
-                            QUASE LÁ!
-                        </h2>
-                        <p style={{
-                            color: 'rgba(255,255,255,0.9)',
-                            fontSize: '1.1rem',
-                            lineHeight: 1.6,
-                            marginBottom: '0',
-                        }}>
+                    <div className="push-native-card">
+                        <div className="push-native-symbol" aria-hidden="true">^</div>
+                        <h2>Quase la</h2>
+                        <p>
                             {isMobile
-                                ? "Clique em 'PERMITIR' na pequena janela que apareceu no topo da sua tela para confirmar."
-                                : "Clique em 'PERMITIR' na caixa de aviso que apareceu no canto superior esquerdo para ativar seu acesso VIP."}
+                                ? "Toque em Permitir na janela do navegador para confirmar seus alertas VIP."
+                                : "Clique em Permitir no aviso do navegador para ativar seus alertas VIP."}
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* 2. REGULAR TRIGGER UI */}
             {!isWaitingForNative && (
                 <>
-                    <div
-                        onClick={handleDismiss}
-                        style={{
-                            position: 'fixed',
-                            inset: 0,
-                            zIndex: 9997,
-                            backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                            animation: isDismissed ? 'pushFadeOut 0.4s ease-out forwards' : 'pushFadeIn 0.3s ease-out',
-                            cursor: 'pointer',
-                        }}
-                    />
+                    <div className="push-backdrop" onClick={() => handleDismiss()} />
 
-                    <div style={{
-                        position: 'fixed',
-                        bottom: '24px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 9998,
-                        width: 'calc(100% - 32px)',
-                        maxWidth: '400px',
-                        animation: isDismissed
-                            ? 'pushSlideOut 0.4s ease-in forwards'
-                            : 'pushSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                    }}>
-                        <div style={{
-                            background: 'linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%)',
-                            borderRadius: '20px',
-                            padding: '28px 24px 24px',
-                            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06)',
-                            position: 'relative',
-                            overflow: 'hidden',
-                        }}>
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                height: '3px',
-                                background: 'linear-gradient(90deg, #c9a96e, #e8d5a8, #c9a96e)',
-                            }} />
-
-                            <button onClick={handleDismiss} style={{
-                                position: 'absolute',
-                                top: '12px',
-                                right: '12px',
-                                background: 'rgba(255,255,255,0.08)',
-                                border: 'none',
-                                color: 'rgba(255,255,255,0.4)',
-                                width: '28px',
-                                height: '28px',
-                                borderRadius: '50%',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '16px',
-                            }}>✕</button>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                <div style={{
-                                    width: '44px', height: '44px', borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #c9a96e, #b08a45)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    boxShadow: '0 4px 12px rgba(201, 169, 110, 0.3)',
-                                }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /><circle cx="18" cy="4" r="3" fill="#ef4444" stroke="#ef4444" />
-                                    </svg>
-                                </div>
-                                <div style={{ background: 'rgba(201, 169, 110, 0.15)', border: '1px solid rgba(201, 169, 110, 0.25)', borderRadius: '20px', padding: '2px 10px', fontSize: '0.7rem', fontWeight: 600, color: '#c9a96e', letterSpacing: '0.05em', textTransform: 'uppercase' }}>⭐ Acesso VIP</div>
-                            </div>
-
-                            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', marginBottom: '8px', fontFamily: 'Georgia, serif', lineHeight: 1.3 }}>Seja o primeiro a saber das oportunidades exclusivas</h3>
-                            <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.55)', lineHeight: 1.6, marginBottom: '20px' }}>Receba alertas de novos imóveis, condições especiais e oportunidades antes de todos.</p>
-
-                            <button
-                                onClick={handleEnable}
-                                disabled={isSubscribing}
-                                style={{
-                                    width: '100%', padding: '14px 20px', borderRadius: '12px', border: 'none',
-                                    background: isSubscribing ? 'rgba(201, 169, 110, 0.3)' : 'linear-gradient(135deg, #c9a96e, #b08a45)',
-                                    color: '#1a1a1a', fontWeight: 700, fontSize: '0.95rem', cursor: isSubscribing ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s ease', boxShadow: isSubscribing ? 'none' : '0 4px 14px rgba(201, 169, 110, 0.3)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                }}
-                            >
-                                {isSubscribing ? "⚙️ Ativando..." : "🔔 Quero receber novidades"}
+                    <div className={`push-card-wrap ${isDismissed ? 'is-dismissed' : ''}`}>
+                        <div className="push-card">
+                            <div className="push-card-bar" />
+                            <button type="button" className="push-close" onClick={() => handleDismiss()} aria-label="Fechar convite de notificacao">
+                                x
                             </button>
 
-                            <button onClick={handleDismiss} style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.25)', fontSize: '0.78rem', cursor: 'pointer', padding: '10px 0 0' }}>Agora não, obrigado</button>
+                            <div className="push-card-head">
+                                <div className="push-icon" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                        <circle cx="18" cy="4" r="3" fill="#ef4444" stroke="#ef4444" />
+                                    </svg>
+                                </div>
+                                <span>Acesso VIP</span>
+                            </div>
+
+                            <h3>{promptContent.title}</h3>
+                            <p>{promptContent.body}</p>
+
+                            <button type="button" className="push-enable" onClick={handleEnable} disabled={isSubscribing}>
+                                {isSubscribing ? 'Ativando...' : promptContent.cta}
+                            </button>
+
+                            <button type="button" className="push-later" onClick={() => handleDismiss()}>
+                                Agora nao
+                            </button>
                         </div>
                     </div>
                 </>
             )}
 
-            <style>{`
+            <style jsx>{`
+                .push-native-guide {
+                    align-items: center;
+                    animation: pushFadeIn 0.3s ease-out;
+                    background: rgba(0, 0, 0, 0.85);
+                    display: flex;
+                    flex-direction: column;
+                    inset: 0;
+                    justify-content: ${isMobile ? 'center' : 'flex-start'};
+                    padding: ${isMobile ? '20px' : '80px 40px'};
+                    position: fixed;
+                    text-align: center;
+                    z-index: 10000;
+                }
+                .push-native-arrow {
+                    animation: pushPulseArrow 1.5s infinite ease-in-out;
+                    left: 120px;
+                    position: absolute;
+                    top: 20px;
+                    z-index: 10001;
+                }
+                .push-native-card {
+                    background: #1a1a1a;
+                    border: 2px solid #c9a96e;
+                    border-radius: 24px;
+                    box-shadow: 0 0 50px rgba(201, 169, 110, 0.3);
+                    margin-top: ${isMobile ? '0' : '100px'};
+                    max-width: 450px;
+                    padding: 32px 24px;
+                }
+                .push-native-symbol {
+                    animation: pushBounce 2s infinite;
+                    color: #c9a96e;
+                    font-size: 2rem;
+                    font-weight: 900;
+                    margin-bottom: 16px;
+                }
+                .push-native-card h2 {
+                    color: #fff;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 1.5rem;
+                    line-height: 1.3;
+                    margin: 0 0 16px;
+                }
+                .push-native-card p {
+                    color: rgba(255,255,255,0.9);
+                    font-size: 1.02rem;
+                    line-height: 1.6;
+                    margin: 0;
+                }
+                .push-backdrop {
+                    animation: ${isDismissed ? 'pushFadeOut 0.4s ease-out forwards' : 'pushFadeIn 0.3s ease-out'};
+                    background: rgba(0, 0, 0, 0.25);
+                    cursor: pointer;
+                    inset: 0;
+                    position: fixed;
+                    z-index: 9997;
+                }
+                .push-card-wrap {
+                    animation: pushSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    bottom: 24px;
+                    left: 50%;
+                    max-width: 400px;
+                    position: fixed;
+                    transform: translateX(-50%);
+                    width: calc(100% - 32px);
+                    z-index: 9998;
+                }
+                .push-card-wrap.is-dismissed {
+                    animation: pushSlideOut 0.4s ease-in forwards;
+                }
+                .push-card {
+                    background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+                    border-radius: 20px;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+                    overflow: hidden;
+                    padding: 28px 24px 24px;
+                    position: relative;
+                }
+                .push-card-bar {
+                    background: linear-gradient(90deg, #c9a96e, #e8d5a8, #c9a96e);
+                    height: 3px;
+                    inset: 0 0 auto;
+                    position: absolute;
+                }
+                .push-close {
+                    align-items: center;
+                    background: rgba(255,255,255,0.08);
+                    border: 0;
+                    border-radius: 50%;
+                    color: rgba(255,255,255,0.5);
+                    cursor: pointer;
+                    display: flex;
+                    font-size: 16px;
+                    height: 28px;
+                    justify-content: center;
+                    position: absolute;
+                    right: 12px;
+                    top: 12px;
+                    width: 28px;
+                }
+                .push-card-head {
+                    align-items: center;
+                    display: flex;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                }
+                .push-icon {
+                    align-items: center;
+                    background: linear-gradient(135deg, #c9a96e, #b08a45);
+                    border-radius: 12px;
+                    box-shadow: 0 4px 12px rgba(201, 169, 110, 0.3);
+                    display: flex;
+                    flex: 0 0 auto;
+                    height: 44px;
+                    justify-content: center;
+                    width: 44px;
+                }
+                .push-card-head span {
+                    background: rgba(201, 169, 110, 0.15);
+                    border: 1px solid rgba(201, 169, 110, 0.25);
+                    border-radius: 20px;
+                    color: #c9a96e;
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                    padding: 3px 10px;
+                    text-transform: uppercase;
+                }
+                .push-card h3 {
+                    color: #fff;
+                    font-family: Georgia, serif;
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    line-height: 1.3;
+                    margin: 0 0 8px;
+                }
+                .push-card p {
+                    color: rgba(255, 255, 255, 0.62);
+                    font-size: 0.85rem;
+                    line-height: 1.6;
+                    margin: 0 0 20px;
+                }
+                .push-enable {
+                    align-items: center;
+                    background: linear-gradient(135deg, #c9a96e, #b08a45);
+                    border: 0;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 14px rgba(201, 169, 110, 0.3);
+                    color: #1a1a1a;
+                    cursor: pointer;
+                    display: flex;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    justify-content: center;
+                    min-height: 46px;
+                    padding: 0 20px;
+                    width: 100%;
+                }
+                .push-enable:disabled {
+                    background: rgba(201, 169, 110, 0.3);
+                    box-shadow: none;
+                    cursor: not-allowed;
+                }
+                .push-later {
+                    background: none;
+                    border: 0;
+                    color: rgba(255, 255, 255, 0.32);
+                    cursor: pointer;
+                    font-size: 0.78rem;
+                    padding: 10px 0 0;
+                    width: 100%;
+                }
                 @keyframes pushFadeIn { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes pushFadeOut { from { opacity: 1; } to { opacity: 0; } }
                 @keyframes pushSlideIn { from { transform: translateX(-50%) translateY(100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
@@ -349,4 +474,3 @@ export default function PushConsent() {
         </>
     )
 }
-

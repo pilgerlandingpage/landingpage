@@ -186,6 +186,16 @@ function emptyOfficialBilling(month: string, message: string, status: 'not_confi
     }
 }
 
+function isOptionalBillingConfigError(message: string) {
+    const normalized = message.toLowerCase()
+    return normalized.includes('decoder routines')
+        || normalized.includes('unsupported')
+        || normalized.includes('private key')
+        || normalized.includes('service account')
+        || normalized.includes('invalid_grant')
+        || normalized.includes('json da service account')
+}
+
 function base64Url(input: Buffer | string) {
     return Buffer.from(input)
         .toString('base64')
@@ -556,6 +566,16 @@ async function getCachedOfficialBilling(admin: ReturnType<typeof getSupabase>, m
         const ageMs = Date.now() - new Date(data.updated_at).getTime()
         if (ageMs > OFFICIAL_BILLING_CACHE_MINUTES * 60 * 1000) return null
         const parsed = JSON.parse(String(data.value))
+        if (parsed?.status === 'error' && isOptionalBillingConfigError(String(parsed?.message || ''))) {
+            return {
+                ...parsed,
+                configured: false,
+                status: 'not_configured',
+                source: 'not_configured',
+                message: 'Billing oficial opcional nao configurado corretamente. O painel esta usando o relatorio interno por tokens.',
+                cache_updated_at: data.updated_at,
+            } as GeminiOfficialBillingSummary
+        }
         return { ...parsed, cache_updated_at: data.updated_at } as GeminiOfficialBillingSummary
     } catch {
         return null
@@ -593,7 +613,14 @@ export async function loadGeminiOfficialBillingSummary(options: {
     try {
         config = await getGeminiBillingConfig(admin)
     } catch (error: any) {
-        return emptyOfficialBilling(month, error?.message || 'Configuracao oficial do Google Billing invalida.', 'error')
+        const rawMessage = error?.message || 'Configuracao oficial do Google Billing invalida.'
+        return emptyOfficialBilling(
+            month,
+            isOptionalBillingConfigError(rawMessage)
+                ? 'Billing oficial opcional nao configurado corretamente. O painel esta usando o relatorio interno por tokens.'
+                : rawMessage,
+            isOptionalBillingConfigError(rawMessage) ? 'not_configured' : 'error'
+        )
     }
 
     if (!config) {
@@ -652,9 +679,17 @@ export async function loadGeminiOfficialBillingSummary(options: {
         await setCachedOfficialBilling(admin, month, summary)
         return summary
     } catch (error: any) {
-        const summary = emptyOfficialBilling(month, error?.message || 'Nao foi possivel puxar o faturamento oficial do Google Billing.', 'error')
-        summary.configured = true
-        summary.source = 'cloud_billing_bigquery'
+        const rawMessage = error?.message || 'Nao foi possivel puxar o faturamento oficial do Google Billing.'
+        const optionalConfigError = isOptionalBillingConfigError(rawMessage)
+        const summary = emptyOfficialBilling(
+            month,
+            optionalConfigError
+                ? 'Billing oficial opcional nao configurado corretamente. O painel esta usando o relatorio interno por tokens.'
+                : rawMessage,
+            optionalConfigError ? 'not_configured' : 'error'
+        )
+        summary.configured = !optionalConfigError
+        summary.source = optionalConfigError ? 'not_configured' : 'cloud_billing_bigquery'
         summary.billing_project_id = config.billingProjectId
         summary.gemini_project_id = config.geminiProjectId || null
         summary.table = `${config.billingProjectId}.${config.dataset}.${config.table}`

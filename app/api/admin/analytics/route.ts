@@ -7,6 +7,45 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+function asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, any>
+        : {}
+}
+
+function summarizeGpsLocation(leads: any[] = []) {
+    const summary = {
+        granted: 0,
+        denied: 0,
+        unavailable: 0,
+        dismissed: 0,
+        requested: 0,
+        acceptanceRate: 0,
+    }
+
+    for (const lead of leads) {
+        const metadata = asRecord(lead?.metadata)
+        const preciseLocation = asRecord(metadata.precise_location || metadata.gps_location)
+        const permission = asRecord(metadata.gps_permission)
+        const latitude = Number(preciseLocation.latitude)
+        const longitude = Number(preciseLocation.longitude)
+        const hasPreciseLocation = Number.isFinite(latitude) && Number.isFinite(longitude)
+        const status = String(permission.status || (hasPreciseLocation ? 'granted' : '')).toLowerCase()
+
+        if (hasPreciseLocation || status === 'granted') summary.granted += 1
+        else if (status === 'denied') summary.denied += 1
+        else if (status === 'unavailable') summary.unavailable += 1
+        else if (status === 'dismissed') summary.dismissed += 1
+    }
+
+    summary.requested = summary.granted + summary.denied + summary.unavailable + summary.dismissed
+    summary.acceptanceRate = summary.requested > 0
+        ? parseFloat(((summary.granted / summary.requested) * 100).toFixed(1))
+        : 0
+
+    return summary
+}
+
 export async function GET() {
     try {
         // Parallelize queries for performance
@@ -27,7 +66,8 @@ export async function GET() {
             { count: investCount },
             { count: housingCount },
             { data: topPagesRaw },
-            { data: lpTitlesRaw }
+            { data: lpTitlesRaw },
+            { data: leadGpsRaw }
         ] = await Promise.all([
             // 1. Total Visitors
             supabase.from('visitors').select('*', { count: 'exact', head: true }),
@@ -82,7 +122,10 @@ export async function GET() {
             supabase.from('visitors').select('landing_page_id'),
 
             // 15. Titles
-            supabase.from('landing_pages').select('id, title, slug')
+            supabase.from('landing_pages').select('id, title, slug'),
+
+            // 16. GPS consent and precise location saved in the lead file
+            supabase.from('leads').select('id, metadata')
         ])
 
 
@@ -150,6 +193,8 @@ export async function GET() {
             }
         }) || []
 
+        const gpsLocation = summarizeGpsLocation(leadGpsRaw || [])
+
         const stats = {
             totalVisitors: visitorsCount || 0,
             completeLeads: leadsCount || 0,
@@ -164,6 +209,13 @@ export async function GET() {
             cookieConsent: cookieConsentCount || 0,
             investors: investCount || 0,
             housingLeads: housingCount || 0,
+            gpsLocation,
+            gpsLocationGranted: gpsLocation.granted,
+            gpsLocationDenied: gpsLocation.denied,
+            gpsLocationUnavailable: gpsLocation.unavailable,
+            gpsLocationDismissed: gpsLocation.dismissed,
+            gpsLocationRequested: gpsLocation.requested,
+            gpsLocationAcceptanceRate: gpsLocation.acceptanceRate,
         }
 
         return NextResponse.json({

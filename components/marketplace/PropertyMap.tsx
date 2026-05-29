@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } from 'react-leaflet'
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Bed, Bath, Maximize } from 'lucide-react'
+import { Bath, Bed, Building2, Layers, Maximize, Satellite, Sparkles } from 'lucide-react'
+import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import { isPlainLeftClick, propertyDetailsPath, propertyFeedPath, shouldOpenPropertyDetailsOnDesktop } from '@/lib/properties/responsive-destination'
+import { trackEvent } from '@/lib/tracking/client'
 
-// Fix for default Leaflet icons in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -19,12 +21,19 @@ interface Property {
     id: string
     title: string
     price: number | null
-    latitude: number | null
-    longitude: number | null
+    latitude: number | string | null
+    longitude: number | string | null
     featured_image: string | null
     bedrooms: number | null
     bathrooms: number | null
+    suites?: number | null
+    parking_spaces?: number | null
     area_m2: number | null
+    property_type?: string | null
+    neighborhood?: string | null
+    description?: string | null
+    source_status?: string | null
+    exclusive?: boolean | null
     slug?: string
 }
 
@@ -40,44 +49,171 @@ interface PropertyMapProps {
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
+    refitKey?: string
 }
 
-// Component to update map center when properties change
-function MapUpdater({ properties }: { properties: Property[] }) {
+type MappedProperty = {
+    property: Property
+    latLng: [number, number]
+}
+
+type ClusterItem =
+    | { kind: 'single'; item: MappedProperty }
+    | { kind: 'cluster'; id: string; items: MappedProperty[]; latLng: [number, number]; minPrice: number | null }
+
+type MapStyle = 'luxury' | 'satellite' | 'classic'
+type QuickFilter = 'all' | 'exclusive' | 'waterfront' | 'launch' | 'premium'
+
+const QUICK_FILTERS: Array<{ value: QuickFilter; label: string }> = [
+    { value: 'all', label: 'Todos' },
+    { value: 'exclusive', label: 'Exclusivos' },
+    { value: 'waterfront', label: 'Frente mar' },
+    { value: 'launch', label: 'Lançamentos' },
+    { value: 'premium', label: 'Alto padrão' },
+]
+
+const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'satellite' | 'layers' }> = [
+    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
+    { value: 'satellite', label: 'Satélite', icon: 'satellite' },
+    { value: 'classic', label: 'Claro', icon: 'layers' },
+]
+
+const SERVICE_AREA_BOUNDS = {
+    north: -25.0,
+    south: -30.5,
+    east: -47.0,
+    west: -54.5,
+}
+
+function toCoordinate(value: number | string | null | undefined) {
+    if (typeof value === 'string') return Number(value.replace(',', '.'))
+    return Number(value)
+}
+
+function isValidLatLng(lat: number, lng: number) {
+    return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+    )
+}
+
+function isInsideServiceArea(lat: number, lng: number) {
+    return (
+        lat >= SERVICE_AREA_BOUNDS.south &&
+        lat <= SERVICE_AREA_BOUNDS.north &&
+        lng >= SERVICE_AREA_BOUNDS.west &&
+        lng <= SERVICE_AREA_BOUNDS.east
+    )
+}
+
+function getPropertyLatLng(property: Property): [number, number] | null {
+    const lat = toCoordinate(property.latitude)
+    const lng = toCoordinate(property.longitude)
+
+    if (isValidLatLng(lat, lng) && isInsideServiceArea(lat, lng)) return [lat, lng]
+    if (isValidLatLng(lng, lat) && isInsideServiceArea(lng, lat)) return [lng, lat]
+
+    return null
+}
+
+function formatCompactPrice(price: number | null | undefined) {
+    if (!price) return 'Consulte'
+
+    return new Intl.NumberFormat('pt-BR', {
+        notation: 'compact',
+        compactDisplay: 'short',
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 1,
+    }).format(price)
+}
+
+function formatFullPrice(price: number | null | undefined) {
+    if (!price) return 'Sob Consulta'
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0,
+    }).format(price)
+}
+
+function propertyText(property: Property) {
+    return [
+        property.title,
+        property.description,
+        property.property_type,
+        property.neighborhood,
+        property.source_status,
+    ].filter(Boolean).join(' ').toLowerCase()
+}
+
+function textHasAny(property: Property, terms: string[]) {
+    const text = propertyText(property)
+    return terms.some(term => text.includes(term))
+}
+
+function matchesQuickFilter(item: MappedProperty, filter: QuickFilter) {
+    const { property } = item
+
+    if (filter === 'all') return true
+    if (filter === 'exclusive') return Boolean(property.exclusive)
+    if (filter === 'premium') return Number(property.price || 0) >= 5000000
+    if (filter === 'waterfront') return textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
+    if (filter === 'launch') return textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
+
+    return true
+}
+
+function getStyleIcon(icon: 'sparkles' | 'satellite' | 'layers') {
+    if (icon === 'satellite') return <Satellite size={14} />
+    if (icon === 'layers') return <Layers size={14} />
+    return <Sparkles size={14} />
+}
+
+function MapUpdater({ points, refitKey = '' }: { points: [number, number][], refitKey?: string }) {
     const map = useMap()
+    const lastPointsKey = useRef('')
+
+    const pointsKey = useMemo(
+        () => `${refitKey}::${points.map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`).join('|')}`,
+        [points, refitKey]
+    )
 
     useEffect(() => {
-        if (properties.length > 0) {
-            const validPoints = properties.filter(p => p.latitude && p.longitude).map(p => L.latLng(p.latitude!, p.longitude!))
-
-            if (validPoints.length > 0) {
-                const bounds = L.latLngBounds(validPoints)
-                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 })
-            }
+        if (lastPointsKey.current === pointsKey) {
+            return
         }
-    }, [properties, map])
+
+        lastPointsKey.current = pointsKey
+
+        if (points.length > 0) {
+            map.invalidateSize({ animate: false })
+
+            if (points.length === 1) {
+                map.flyTo(points[0], 15, { duration: 0.65 })
+                return
+            }
+
+            const bounds = L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng)))
+            map.flyToBounds(bounds, { padding: [64, 64], maxZoom: 15, duration: 0.75 })
+        }
+    }, [map, points, pointsKey])
 
     useEffect(() => {
-        // Fix for grey tiles when Leaflet initializes before CSS layout settles
         const resizeObserver = new ResizeObserver(() => {
             map.invalidateSize({ animate: false })
         })
         const container = map.getContainer()
         resizeObserver.observe(container)
 
-        // Staggered invalidateSize calls to catch all CSS layout phases
         const timers = [100, 300, 600, 1200].map(delay =>
             setTimeout(() => {
                 map.invalidateSize({ animate: false })
-                // Re-fit bounds if we have markers
-                if (properties.length > 0) {
-                    const validPoints = properties
-                        .filter(p => p.latitude && p.longitude)
-                        .map(p => L.latLng(p.latitude!, p.longitude!))
-                    if (validPoints.length > 0) {
-                        map.fitBounds(L.latLngBounds(validPoints), { padding: [50, 50], maxZoom: 16 })
-                    }
-                }
             }, delay)
         )
 
@@ -85,12 +221,11 @@ function MapUpdater({ properties }: { properties: Property[] }) {
             resizeObserver.disconnect()
             timers.forEach(clearTimeout)
         }
-    }, [map, properties])
+    }, [map, points])
 
     return null
 }
 
-// Component to emit bounds changes on zoom/pan
 function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds) => void }) {
     const map = useMap()
 
@@ -107,13 +242,12 @@ function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds
             })
         }
 
-        // Emit initial bounds after map settles
-        setTimeout(emitBounds, 500)
-
+        const timer = setTimeout(emitBounds, 500)
         map.on('moveend', emitBounds)
         map.on('zoomend', emitBounds)
 
         return () => {
+            clearTimeout(timer)
             map.off('moveend', emitBounds)
             map.off('zoomend', emitBounds)
         }
@@ -122,384 +256,733 @@ function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds
     return null
 }
 
+function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): ClusterItem[] {
+    if (zoom >= 15) return items.map(item => ({ kind: 'single', item }))
 
-export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange }: PropertyMapProps) {
-    // Filter properties with valid coordinates
-    const validProperties = properties.filter(p => p.latitude && p.longitude)
+    const gridSize = zoom < 11 ? 92 : zoom < 13 ? 78 : 64
+    const grouped = new Map<string, MappedProperty[]>()
 
-    // Default center (Florianópolis / Santa Catarina region approx)
-    const defaultCenter: [number, number] = [-27.594870, -48.548220]
+    items.forEach(item => {
+        const point = map.project(L.latLng(item.latLng), zoom)
+        const key = `${Math.floor(point.x / gridSize)}:${Math.floor(point.y / gridSize)}`
+        const group = grouped.get(key)
+        if (group) {
+            group.push(item)
+        } else {
+            grouped.set(key, [item])
+        }
+    })
 
-    // Create marker icon with custom pin image + price label
+    return Array.from(grouped.entries()).map(([id, group]) => {
+        if (group.length === 1) return { kind: 'single', item: group[0] }
+
+        const lat = group.reduce((sum, item) => sum + item.latLng[0], 0) / group.length
+        const lng = group.reduce((sum, item) => sum + item.latLng[1], 0) / group.length
+        const prices = group.map(item => Number(item.property.price || 0)).filter(price => price > 0)
+
+        return {
+            kind: 'cluster',
+            id,
+            items: group,
+            latLng: [lat, lng],
+            minPrice: prices.length ? Math.min(...prices) : null,
+        }
+    })
+}
+
+function createClusterIcon(count: number, minPrice: number | null) {
+    const priceText = minPrice ? formatCompactPrice(minPrice) : 'Consulte'
+
+    return L.divIcon({
+        className: 'premium-cluster-marker',
+        html: `<div class="cluster-orbit">
+            <span class="cluster-count">${count}</span>
+            <span class="cluster-label">${priceText}</span>
+        </div>`,
+        iconSize: [96, 58],
+        iconAnchor: [48, 29],
+    })
+}
+
+function ClusterLayer({
+    items,
+    hoveredPropertyId,
+    createIcon,
+    onMarkerHover,
+}: {
+    items: MappedProperty[]
+    hoveredPropertyId?: string | null
+    createIcon: (property: Property, isHovered: boolean) => L.DivIcon
+    onMarkerHover?: (id: string | null) => void
+}) {
+    const map = useMap()
+    const [zoom, setZoom] = useState(map.getZoom())
+
+    useEffect(() => {
+        const updateZoom = () => setZoom(map.getZoom())
+        map.on('zoomend', updateZoom)
+        return () => {
+            map.off('zoomend', updateZoom)
+        }
+    }, [map])
+
+    const clusters = useMemo(() => buildClusters(items, map, zoom), [items, map, zoom])
+
+    return (
+        <>
+            {clusters.map(cluster => {
+                if (cluster.kind === 'cluster') {
+                    return (
+                        <Marker
+                            key={`cluster-${cluster.id}`}
+                            position={cluster.latLng}
+                            icon={createClusterIcon(cluster.items.length, cluster.minPrice)}
+                            zIndexOffset={400}
+                            eventHandlers={{
+                                click: () => {
+                                    const bounds = L.latLngBounds(cluster.items.map(item => L.latLng(item.latLng)))
+                                    map.flyToBounds(bounds, { padding: [82, 82], maxZoom: 15, duration: 0.75 })
+                                },
+                            }}
+                        />
+                    )
+                }
+
+                const { property, latLng } = cluster.item
+                const isHovered = hoveredPropertyId === property.id
+
+                return (
+                    <Marker
+                        key={property.id}
+                        position={latLng}
+                        icon={createIcon(property, isHovered)}
+                        zIndexOffset={isHovered ? 1000 : 0}
+                        eventHandlers={{
+                            mouseover: (e: any) => {
+                                e.target.openPopup()
+                                onMarkerHover?.(property.id)
+                            },
+                            mouseout: (e: any) => {
+                                e.target.closePopup()
+                                onMarkerHover?.(null)
+                            },
+                            click: (e: any) => {
+                                e.target.openPopup()
+                                map.flyTo(latLng, Math.max(map.getZoom(), 15), { duration: 0.5 })
+                            },
+                        }}
+                    >
+                        <Popup className="property-popup">
+                            <PropertyPopup property={property} />
+                        </Popup>
+                    </Marker>
+                )
+            })}
+        </>
+    )
+}
+
+function PropertyPopup({ property }: { property: Property }) {
+    const displayTitle = replaceItajaiWithPraiaBrava(property.title)
+    const feedHref = propertyFeedPath(property.id)
+    const detailsHref = propertyDetailsPath(property.id)
+    const displayKicker = replaceItajaiWithPraiaBrava(property.neighborhood || property.property_type || 'Seleção premium')
+
+    return (
+        <div className="popup-content">
+            <div className="popup-img-wrapper">
+                <img
+                    src={property.featured_image || 'https://via.placeholder.com/300x200'}
+                    alt={displayTitle}
+                    className="popup-img"
+                />
+                {property.exclusive && <span className="popup-badge">Exclusivo</span>}
+            </div>
+            <div className="popup-info">
+                <div className="popup-kicker">
+                    {displayKicker}
+                </div>
+                <h3 className="popup-title">{displayTitle}</h3>
+                <div className="popup-price">{formatFullPrice(property.price)}</div>
+                <div className="popup-specs">
+                    {property.bedrooms && <span><Bed size={12} /> {property.bedrooms}</span>}
+                    {property.suites && <span>Suíte {property.suites}</span>}
+                    {property.bathrooms && <span><Bath size={12} /> {property.bathrooms}</span>}
+                    {property.area_m2 && <span><Maximize size={12} /> {property.area_m2}m²</span>}
+                </div>
+                <Link
+                    href={feedHref}
+                    className="popup-link"
+                    onClick={(event) => {
+                        const opensDetails = shouldOpenPropertyDetailsOnDesktop()
+                        const destination = opensDetails ? detailsHref : feedHref
+                        void trackEvent('property_map_popup_opened', {
+                            property_id: property.id,
+                            title: displayTitle,
+                            price: property.price,
+                            neighborhood: property.neighborhood,
+                            property_type: property.property_type,
+                            destination,
+                        })
+                        if (opensDetails && isPlainLeftClick(event)) {
+                            event.preventDefault()
+                            window.location.assign(detailsHref)
+                        }
+                    }}
+                >
+                    Ver detalhes
+                </Link>
+            </div>
+        </div>
+    )
+}
+
+export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange, refitKey }: PropertyMapProps) {
+    const [mapStyle, setMapStyle] = useState<MapStyle>('luxury')
+    const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
+
+    const validProperties = useMemo<MappedProperty[]>(
+        () => properties
+            .map(property => ({ property, latLng: getPropertyLatLng(property) }))
+            .filter((item): item is MappedProperty => Boolean(item.latLng)),
+        [properties]
+    )
+
+    const filteredProperties = useMemo(
+        () => validProperties.filter(item => matchesQuickFilter(item, quickFilter)),
+        [validProperties, quickFilter]
+    )
+    const mapPoints = useMemo(() => filteredProperties.map(item => item.latLng), [filteredProperties])
+    const defaultCenter: [number, number] = [-26.9446, -48.6292]
+
+    const handleQuickFilterChange = (filter: QuickFilter) => {
+        const option = QUICK_FILTERS.find(item => item.value === filter)
+        setQuickFilter(filter)
+        void trackEvent('property_map_quick_filter_clicked', {
+            filter,
+            filter_label: option?.label || filter,
+            results_count: validProperties.filter(item => matchesQuickFilter(item, filter)).length,
+            total_count: validProperties.length,
+        })
+    }
+
+    const handleMapStyleChange = (style: MapStyle) => {
+        const option = MAP_STYLES.find(item => item.value === style)
+        setMapStyle(style)
+        void trackEvent('property_map_style_changed', {
+            style,
+            style_label: option?.label || style,
+        })
+    }
+
     const createIcon = useCallback((property: Property, isHovered: boolean) => {
-        const priceText = property.price
-            ? new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short', style: 'currency', currency: 'BRL' }).format(property.price)
-            : 'Consulte'
+        const priceText = formatCompactPrice(property.price)
+        const badgeClass = property.exclusive ? ' marker-wrap--exclusive' : ''
 
         return L.divIcon({
             className: 'custom-price-marker',
-            html: `<div class="marker-wrap ${isHovered ? 'marker-wrap--active' : ''}">
-                <img src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png" class="marker-icon" alt="" />
+            html: `<div class="marker-wrap ${isHovered ? 'marker-wrap--active' : ''}${badgeClass}">
+                <span class="marker-pin"><span class="marker-glyph"></span></span>
                 <span class="marker-price">${priceText}</span>
             </div>`,
-            iconSize: [56, 72],
-            iconAnchor: [28, 72]
+            iconSize: [68, 78],
+            iconAnchor: [34, 74],
         })
     }, [])
 
     return (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <div className={`map-shell map-style-${mapStyle}`}>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
-            <style>{`
-                /* ===== LAYER CONTROL — Premium Dark ===== */
-                .leaflet-control-layers {
-                    border: none !important;
-                    border-radius: 12px !important;
-                    box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
-                    background: rgba(22,22,24,0.92) !important;
-                    backdrop-filter: blur(16px);
-                    -webkit-backdrop-filter: blur(16px);
-                    padding: 0 !important;
-                    overflow: hidden;
-                }
-                .leaflet-control-layers-toggle {
-                    width: 38px !important;
-                    height: 38px !important;
-                    background-size: 20px 20px !important;
-                    background-position: center !important;
-                    border-radius: 10px !important;
-                    filter: invert(1) brightness(0.85);
-                }
-                .leaflet-control-layers-expanded {
-                    padding: 10px 16px 10px 12px !important;
-                }
-                .leaflet-control-layers-base label {
-                    display: flex !important;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 6px 4px;
-                    margin: 0 !important;
-                    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                    color: #c4c7c7;
-                    cursor: pointer;
-                    border-radius: 6px;
-                    transition: all 0.2s;
-                }
-                .leaflet-control-layers-base label:hover {
-                    background: rgba(233,193,118,0.12);
-                    color: #e9c176;
-                }
-                .leaflet-control-layers-base label span {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                .leaflet-control-layers-base input[type="radio"] {
-                    accent-color: #e9c176;
-                    width: 14px;
-                    height: 14px;
-                    margin: 0;
-                }
-                .leaflet-control-layers-separator {
-                    display: none;
-                }
+            <div className="map-topbar" role="group" aria-label="Filtros rápidos do mapa">
+                {QUICK_FILTERS.map(filter => (
+                    <button
+                        key={filter.value}
+                        type="button"
+                        className={quickFilter === filter.value ? 'active' : ''}
+                        onClick={() => handleQuickFilterChange(filter.value)}
+                    >
+                        {filter.label}
+                    </button>
+                ))}
+            </div>
 
-                /* ===== ZOOM CONTROL — Dark ===== */
+            <div className="map-style-control" role="group" aria-label="Estilo do mapa">
+                {MAP_STYLES.map(style => (
+                    <button
+                        key={style.value}
+                        type="button"
+                        className={mapStyle === style.value ? 'active' : ''}
+                        aria-label={`Mapa ${style.label}`}
+                        onClick={() => handleMapStyleChange(style.value)}
+                    >
+                        {getStyleIcon(style.icon)}
+                        <span>{style.label}</span>
+                    </button>
+                ))}
+            </div>
+
+            <div className="map-watermark">
+                <Building2 size={14} />
+                <span>{filteredProperties.length} no mapa</span>
+            </div>
+
+            <style>{`
+                .map-shell {
+                    position: absolute;
+                    inset: 0;
+                    overflow: hidden;
+                    background: #111;
+                }
+                .map-shell::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    z-index: 401;
+                    pointer-events: none;
+                    box-shadow: inset 0 0 120px rgba(5, 8, 10, 0.22);
+                    mix-blend-mode: multiply;
+                }
+                .map-style-luxury .leaflet-tile-pane {
+                    filter: saturate(0.86) contrast(1.06) sepia(0.08) hue-rotate(352deg);
+                }
+                .map-style-classic .leaflet-tile-pane {
+                    filter: saturate(0.9) contrast(1.02);
+                }
+                .map-style-satellite .leaflet-tile-pane {
+                    filter: saturate(1.08) contrast(1.04) brightness(0.94);
+                }
                 .leaflet-control-zoom {
                     border: none !important;
                     border-radius: 12px !important;
                     overflow: hidden;
-                    box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+                    box-shadow: 0 10px 28px rgba(0,0,0,0.26) !important;
                 }
                 .leaflet-control-zoom a {
-                    background: rgba(22,22,24,0.92) !important;
-                    color: #c4c7c7 !important;
-                    border: none !important;
-                    border-bottom: 1px solid rgba(68,71,72,0.3) !important;
-                    font-size: 18px !important;
                     width: 38px !important;
                     height: 38px !important;
                     line-height: 38px !important;
-                    transition: all 0.2s;
+                    border: none !important;
+                    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+                    background: rgba(20,20,20,0.92) !important;
+                    color: #e8dcc7 !important;
+                    font-size: 18px !important;
                     backdrop-filter: blur(16px);
                 }
                 .leaflet-control-zoom a:hover {
-                    background: rgba(233,193,118,0.15) !important;
-                    color: #e9c176 !important;
+                    background: #c9a96e !important;
+                    color: #111 !important;
                 }
-                .leaflet-control-zoom a:last-child {
-                    border-bottom: none !important;
+                .leaflet-control-attribution {
+                    background: rgba(12,12,12,0.58) !important;
+                    color: rgba(255,255,255,0.48) !important;
+                    font-size: 9px !important;
+                }
+                .leaflet-control-attribution a { color: rgba(255,255,255,0.66) !important; }
+
+                .map-topbar {
+                    position: absolute;
+                    top: 14px;
+                    left: 58px;
+                    right: 74px;
+                    z-index: 600;
+                    display: flex;
+                    gap: 8px;
+                    overflow-x: auto;
+                    padding-bottom: 4px;
+                    scrollbar-width: none;
+                }
+                .map-topbar::-webkit-scrollbar { display: none; }
+                .map-topbar button,
+                .map-style-control button {
+                    border: 1px solid rgba(232,220,199,0.14);
+                    background: rgba(18, 18, 18, 0.76);
+                    color: #e8dcc7;
+                    border-radius: 999px;
+                    cursor: pointer;
+                    font: 800 0.72rem/1 'Inter', sans-serif;
+                    white-space: nowrap;
+                    backdrop-filter: blur(16px);
+                    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                }
+                .map-topbar button {
+                    height: 34px;
+                    padding: 0 13px;
+                }
+                .map-topbar button:hover,
+                .map-style-control button:hover {
+                    transform: translateY(-1px);
+                }
+                .map-topbar button.active,
+                .map-style-control button.active {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    border-color: rgba(255,255,255,0.28);
+                }
+                .map-style-control {
+                    position: absolute;
+                    right: 14px;
+                    top: 58px;
+                    z-index: 610;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 7px;
+                }
+                .map-style-control button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 7px;
+                    height: 36px;
+                    min-width: 102px;
+                    padding: 0 12px;
+                    border-radius: 10px;
+                }
+                .map-watermark {
+                    position: absolute;
+                    left: 14px;
+                    bottom: 14px;
+                    z-index: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    height: 34px;
+                    padding: 0 12px;
+                    border: 1px solid rgba(232,220,199,0.14);
+                    border-radius: 999px;
+                    background: rgba(18,18,18,0.76);
+                    color: #e8dcc7;
+                    font: 800 0.72rem/1 'Inter', sans-serif;
+                    backdrop-filter: blur(16px);
+                    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
                 }
 
-                /* ===== CUSTOM ICON MARKERS ===== */
-                .custom-price-marker { background: none !important; border: none !important; }
+                .custom-price-marker,
+                .premium-cluster-marker {
+                    background: none !important;
+                    border: none !important;
+                }
                 .marker-wrap {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 2px;
+                    gap: 3px;
                     cursor: pointer;
-                    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-                    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+                    filter: drop-shadow(0 10px 16px rgba(0,0,0,0.46));
+                    transform-origin: center bottom;
+                    animation: markerRise 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+                    transition: transform 0.24s ease, filter 0.24s ease;
                 }
-                .marker-icon {
-                    width: 36px;
-                    height: 36px;
-                    object-fit: contain;
-                    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s;
+                .marker-pin {
+                    position: relative;
+                    display: grid;
+                    place-items: center;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50% 50% 50% 8px;
+                    transform: rotate(45deg);
+                    background: linear-gradient(145deg, #fff3c7 0%, #d7ad42 48%, #9c741b 100%);
+                    border: 2px solid rgba(18,18,18,0.88);
+                    box-shadow:
+                        0 0 0 2px rgba(255,255,255,0.18),
+                        0 10px 28px rgba(217, 172, 63, 0.28);
+                }
+                .marker-pin::before {
+                    content: '';
+                    position: absolute;
+                    inset: -8px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(223,193,142,0.32), transparent 64%);
+                    z-index: -1;
+                }
+                .marker-glyph {
+                    position: relative;
+                    width: 11px;
+                    height: 9px;
+                    transform: rotate(-45deg);
+                    border-radius: 2px;
+                    background: #15130f;
+                }
+                .marker-glyph::before {
+                    content: '';
+                    position: absolute;
+                    left: 1px;
+                    top: -5px;
+                    width: 9px;
+                    height: 9px;
+                    background: #15130f;
+                    transform: rotate(45deg);
+                    border-radius: 2px 1px 0 1px;
+                }
+                .marker-glyph::after {
+                    content: '';
+                    position: absolute;
+                    left: 4px;
+                    bottom: 0;
+                    width: 3px;
+                    height: 5px;
+                    border-radius: 1px 1px 0 0;
+                    background: #d7ad42;
                 }
                 .marker-price {
-                    background: rgba(14,14,14,0.92);
-                    border: 1px solid rgba(233,193,118,0.4);
-                    color: #e9c176;
-                    padding: 2px 8px;
-                    border-radius: 10px;
-                    font-size: 0.65rem;
-                    font-weight: 700;
-                    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-                    white-space: nowrap;
-                    text-align: center;
+                    min-width: 58px;
+                    padding: 3px 9px;
+                    border: 1px solid rgba(223,193,142,0.54);
+                    border-radius: 999px;
+                    background: rgba(10,10,10,0.88);
+                    color: #f0d08f;
+                    font: 900 0.66rem/1.3 'Inter', sans-serif;
                     letter-spacing: 0.02em;
-                    line-height: 1.4;
+                    text-align: center;
+                    white-space: nowrap;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.24);
+                }
+                .marker-wrap--exclusive .marker-price::after {
+                    content: 'EX';
+                    margin-left: 5px;
+                    color: #fff3c7;
+                    font-size: 0.56rem;
                 }
                 .marker-wrap:hover,
                 .marker-wrap--active {
-                    transform: scale(1.25);
-                    filter: drop-shadow(0 6px 20px rgba(233,193,118,0.5));
-                    z-index: 1000 !important;
+                    transform: translateY(-4px) scale(1.18);
+                    filter: drop-shadow(0 14px 28px rgba(223,193,142,0.42));
                 }
                 .marker-wrap:hover .marker-price,
                 .marker-wrap--active .marker-price {
-                    background: #e9c176;
-                    color: #0a0a0a;
-                    border-color: #e9c176;
+                    background: #dfc18e;
+                    color: #0d0c0b;
+                }
+                .cluster-orbit {
+                    position: relative;
+                    display: grid;
+                    place-items: center;
+                    min-width: 92px;
+                    height: 54px;
+                    padding: 7px 12px;
+                    border: 1px solid rgba(223,193,142,0.56);
+                    border-radius: 18px;
+                    background:
+                        radial-gradient(circle at 32% 10%, rgba(255,244,198,0.28), transparent 30%),
+                        rgba(8,8,8,0.9);
+                    color: #f4d999;
+                    box-shadow:
+                        0 14px 28px rgba(0,0,0,0.36),
+                        0 0 0 5px rgba(223,193,142,0.11),
+                        0 0 38px rgba(223,193,142,0.26);
+                    backdrop-filter: blur(12px);
+                    cursor: pointer;
+                    animation: clusterPulse 2.8s ease-in-out infinite;
+                }
+                .cluster-count {
+                    font: 950 1.05rem/1 'Inter', sans-serif;
+                }
+                .cluster-label {
+                    margin-top: 3px;
+                    color: #d6c6a5;
+                    font: 850 0.6rem/1 'Inter', sans-serif;
+                    white-space: nowrap;
                 }
 
-                /* ===== POPUP — Premium Dark ===== */
                 .property-popup .leaflet-popup-content-wrapper {
-                    border-radius: 16px;
+                    width: 292px;
+                    border: 1px solid rgba(223,193,142,0.22);
+                    border-radius: 18px;
                     padding: 0;
                     overflow: hidden;
-                    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-                    background: #161618;
-                    border: 1px solid rgba(68,71,72,0.3);
+                    background: #131313;
+                    box-shadow: 0 18px 52px rgba(0,0,0,0.5);
                 }
                 .property-popup .leaflet-popup-content {
+                    width: 292px !important;
                     margin: 0;
-                    min-width: 240px;
                 }
                 .property-popup .leaflet-popup-tip {
-                    background: #161618;
-                    border: 1px solid rgba(68,71,72,0.3);
-                    border-top: none;
-                    border-left: none;
+                    background: #131313;
+                    border: 1px solid rgba(223,193,142,0.2);
                 }
-                .popup-content { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
-                .popup-img-wrapper {
-                    width: 100%;
-                    height: 140px;
+                .popup-content {
                     overflow: hidden;
+                    font-family: 'Inter', sans-serif;
+                }
+                .popup-img-wrapper {
                     position: relative;
+                    width: 100%;
+                    height: 158px;
+                    overflow: hidden;
+                    background: #222;
                 }
                 .popup-img-wrapper::after {
                     content: '';
                     position: absolute;
-                    bottom: 0;
-                    left: 0; right: 0;
-                    height: 40px;
-                    background: linear-gradient(to top, #161618, transparent);
+                    inset: auto 0 0;
+                    height: 62px;
+                    background: linear-gradient(to top, #131313, transparent);
                 }
                 .popup-img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    transform: scale(1.02);
                 }
-                .popup-info { padding: 14px 16px; }
-                .popup-title {
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                    color: #e4e2e2;
+                .popup-badge {
+                    position: absolute;
+                    top: 12px;
+                    left: 12px;
+                    z-index: 2;
+                    padding: 5px 8px;
+                    border-radius: 999px;
+                    background: rgba(223,193,142,0.92);
+                    color: #111;
+                    font: 900 0.62rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                }
+                .popup-info {
+                    padding: 14px 15px 15px;
+                }
+                .popup-kicker {
                     margin-bottom: 6px;
-                    font-family: 'Noto Serif', 'Georgia', serif;
-                    line-height: 1.3;
+                    color: #bda36b;
+                    font: 900 0.62rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                }
+                .popup-title {
+                    display: -webkit-box;
+                    margin: 0 0 8px;
+                    overflow: hidden;
+                    color: #f4efe7;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    line-height: 1.28;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
                 }
                 .popup-price {
-                    font-size: 1rem;
-                    font-weight: 700;
-                    color: #e9c176;
                     margin-bottom: 10px;
-                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    color: #f0d08f;
+                    font: 950 1.06rem/1 'Inter', sans-serif;
                 }
                 .popup-specs {
                     display: flex;
-                    gap: 12px;
-                    font-size: 0.75rem;
-                    color: #78797a;
-                    margin-bottom: 14px;
+                    flex-wrap: wrap;
+                    gap: 7px;
+                    margin-bottom: 13px;
+                    color: #aaa39a;
+                    font: 750 0.72rem/1 'Inter', sans-serif;
                 }
                 .popup-specs span {
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
                     gap: 4px;
+                    padding: 5px 7px;
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.04);
                 }
-                .popup-specs svg { stroke: #78797a; }
                 .popup-link {
                     display: block;
+                    padding: 11px;
+                    border-radius: 10px;
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #0c0c0c;
+                    font: 950 0.72rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
                     text-align: center;
-                    padding: 10px;
-                    background: #e9c176;
-                    color: #0a0a0a;
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    letter-spacing: 0.15em;
-                    text-transform: uppercase;
-                    border-radius: 8px;
                     text-decoration: none;
-                    transition: opacity 0.2s;
+                    text-transform: uppercase;
                 }
-                .popup-link:hover { opacity: 0.85; }
-
-                /* Close button */
                 .property-popup .leaflet-popup-close-button {
-                    color: #78797a !important;
-                    font-size: 20px !important;
+                    top: 8px !important;
+                    right: 8px !important;
                     width: 28px !important;
                     height: 28px !important;
-                    top: 6px !important;
-                    right: 6px !important;
-                    background: rgba(14,14,14,0.6);
                     border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10;
+                    background: rgba(12,12,12,0.72) !important;
+                    color: #f4efe7 !important;
+                    font-size: 18px !important;
+                    line-height: 26px !important;
                 }
-                .property-popup .leaflet-popup-close-button:hover {
-                    color: #e4e2e2 !important;
+                @keyframes markerRise {
+                    from { opacity: 0; transform: translateY(12px) scale(0.86); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
                 }
-
-                /* Attribution dark */
-                .leaflet-control-attribution {
-                    background: rgba(14,14,14,0.7) !important;
-                    color: #555 !important;
-                    font-size: 9px !important;
+                @keyframes clusterPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.045); }
                 }
-                .leaflet-control-attribution a { color: #78797a !important; }
+                @media (max-width: 720px) {
+                    .map-topbar {
+                        left: 64px;
+                        right: 14px;
+                        top: 12px;
+                    }
+                    .map-style-control {
+                        top: 56px;
+                        right: 12px;
+                    }
+                    .map-style-control button {
+                        min-width: 40px;
+                        width: 40px;
+                        justify-content: center;
+                        padding: 0;
+                    }
+                    .map-style-control span {
+                        display: none;
+                    }
+                    .map-watermark {
+                        display: none;
+                    }
+                    .property-popup .leaflet-popup-content-wrapper,
+                    .property-popup .leaflet-popup-content {
+                        width: 260px !important;
+                    }
+                    .popup-img-wrapper {
+                        height: 132px;
+                    }
+                }
             `}</style>
 
             <MapContainer
                 center={defaultCenter}
-                zoom={10}
-                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#161618' }}
+                zoom={14}
+                zoomControl
+                style={{ position: 'absolute', inset: 0, background: '#111' }}
             >
-                <LayersControl position="topright">
-                    {/* Google Maps - Standard (colorful with POIs) — Default */}
-                    <LayersControl.BaseLayer checked name="🗺️ Padrão">
-                        <TileLayer
-                            attribution='&copy; Google Maps'
-                            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-                            maxZoom={21}
-                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-                        />
-                    </LayersControl.BaseLayer>
+                {mapStyle === 'luxury' && (
+                    <TileLayer
+                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
+                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        maxZoom={20}
+                    />
+                )}
+                {mapStyle === 'classic' && (
+                    <TileLayer
+                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
+                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        maxZoom={20}
+                    />
+                )}
+                {mapStyle === 'satellite' && (
+                    <TileLayer
+                        attribution='Tiles &copy; Esri'
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        maxZoom={19}
+                    />
+                )}
 
-                    {/* Google Maps - Satellite Hybrid */}
-                    <LayersControl.BaseLayer name="🛰️ Satélite">
-                        <TileLayer
-                            attribution='&copy; Google Maps'
-                            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-                            maxZoom={21}
-                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-                        />
-                    </LayersControl.BaseLayer>
-
-                    {/* Dark Mode */}
-                    <LayersControl.BaseLayer name="🌙 Noturno">
-                        <TileLayer
-                            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                        />
-                    </LayersControl.BaseLayer>
-
-                    {/* Google Maps - Standard */}
-                    <LayersControl.BaseLayer name="🗺️ Padrão">
-                        <TileLayer
-                            attribution='&copy; Google Maps'
-                            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-                            maxZoom={21}
-                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-                        />
-                    </LayersControl.BaseLayer>
-
-                    {/* Google Maps - Terrain */}
-                    <LayersControl.BaseLayer name="⛰️ Relevo">
-                        <TileLayer
-                            attribution='&copy; Google Maps'
-                            url="https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}"
-                            maxZoom={21}
-                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-                        />
-                    </LayersControl.BaseLayer>
-                </LayersControl>
-
-                <MapUpdater properties={validProperties} />
+                <MapUpdater points={mapPoints} refitKey={refitKey} />
                 <BoundsEmitter onBoundsChange={onBoundsChange} />
-
-                {validProperties.map(property => {
-                    const isHovered = hoveredPropertyId === property.id
-                    return (
-                        <Marker
-                            key={property.id}
-                            position={[property.latitude!, property.longitude!]}
-                            icon={createIcon(property, isHovered)}
-                            zIndexOffset={isHovered ? 1000 : 0}
-                            eventHandlers={{
-                                mouseover: (e) => {
-                                    e.target.openPopup();
-                                    onMarkerHover?.(property.id);
-                                },
-                                mouseout: (e) => {
-                                    e.target.closePopup();
-                                    onMarkerHover?.(null);
-                                },
-                                click: () => {
-                                    window.location.href = `/imovel/${property.id}`;
-                                }
-                            }}
-                        >
-                            <Popup className="property-popup">
-                                <div className="popup-content">
-                                    <div className="popup-img-wrapper">
-                                        <img
-                                            src={property.featured_image || 'https://via.placeholder.com/300x200'}
-                                            alt={property.title}
-                                            className="popup-img"
-                                        />
-                                    </div>
-                                    <div className="popup-info">
-                                        <h3 className="popup-title">{property.title}</h3>
-                                        <div className="popup-price">
-                                            {property.price
-                                                ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(property.price)
-                                                : 'Sob Consulta'}
-                                        </div>
-                                        <div className="popup-specs">
-                                            {property.bedrooms && <span>{property.bedrooms} <Bed size={12} /></span>}
-                                            {property.bathrooms && <span>{property.bathrooms} <Bath size={12} /></span>}
-                                            {property.area_m2 && <span>{property.area_m2}m²</span>}
-                                        </div>
-                                        <Link href={`/imovel/${property.id}`} className="popup-link">
-                                            Ver Detalhes
-                                        </Link>
-                                    </div>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    )
-                })}
+                <ClusterLayer
+                    items={filteredProperties}
+                    hoveredPropertyId={hoveredPropertyId}
+                    createIcon={createIcon}
+                    onMarkerHover={onMarkerHover}
+                />
             </MapContainer>
         </div>
     )

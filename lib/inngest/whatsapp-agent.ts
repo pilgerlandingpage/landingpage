@@ -16,6 +16,7 @@ import {
 } from '../uazapi'
 import {
     appendLeadConversationLog,
+    buildRecentLeadOutboundContextPrompt,
     ensureWhatsAppLead,
     normalizeWhatsAppPhone,
     phoneCandidates,
@@ -24,6 +25,10 @@ import {
 import { getPublicAppUrl } from '../app-url'
 import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
 import { recordGeminiUsage } from '../ai/gemini-costs'
+import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '../whatsapp/agent-global-prompt'
+import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
+import { buildAgentContextBrief, getAgentEcosystemContext } from '../intelligence/ecosystem'
+import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
 
 function getSupabase() {
     return createClient(
@@ -664,6 +669,8 @@ async function sendHandoffSummaryIfNeeded(
 ) {
     const { conversation, instanceId, instanceToken, recipientPhone, markerSuffix } = params
     if (!conversation?.id || !conversation?.broker_id || !instanceToken) return false
+    const systemInstanceToken = await resolveSystemNotificationWhatsappInstance(supabase)
+    if (!systemInstanceToken) return false
 
     const markerKey = `_handoff_${conversation.id}_${markerSuffix}`
     const { data: existingMarker } = await supabase
@@ -685,7 +692,7 @@ async function sendHandoffSummaryIfNeeded(
     await sendWhatsAppMessage({
         phone: handoffPhone,
         message: summary,
-        instanceToken,
+        instanceToken: systemInstanceToken,
     }).catch((err) => {
         console.warn('[Handoff] Failed to send summary:', err)
     })
@@ -709,27 +716,52 @@ async function resolveSummaryTargetPhone(
     instanceId: string,
     recipientPhone: string
 ): Promise<string> {
-    const { data: broker } = await supabase
+    let broker: any = null
+    const fullBrokerQuery = await supabase
         .from('virtual_brokers')
         .select('phone, transfer_to_phone, summary_to_phone')
         .eq('id', brokerId)
         .maybeSingle()
+    if (fullBrokerQuery.error) {
+        const fallbackBrokerQuery = await supabase
+            .from('virtual_brokers')
+            .select('phone, transfer_to_phone')
+            .eq('id', brokerId)
+            .maybeSingle()
+        broker = fallbackBrokerQuery.data || null
+        if (fallbackBrokerQuery.error) {
+            console.warn('[Handoff] Failed to load broker transfer phones:', fallbackBrokerQuery.error.message)
+        }
+    } else {
+        broker = fullBrokerQuery.data || null
+    }
 
     const { data: inst } = await supabase
         .from('whatsapp_instances')
-        .select('phone_number')
+        .select('phone_number, admin_user_id')
         .eq('id', instanceId)
         .maybeSingle()
 
+    let adminPhone = ''
+    if (inst?.admin_user_id) {
+        const { data: adminUser } = await supabase
+            .from('admin_users')
+            .select('phone')
+            .eq('id', inst.admin_user_id)
+            .maybeSingle()
+        adminPhone = String(adminUser?.phone || '').replace(/\D/g, '')
+    }
+
+    const instancePhone = String(inst?.phone_number || '').replace(/\D/g, '')
     const candidates = [
         broker?.summary_to_phone,
-        inst?.phone_number,
         broker?.transfer_to_phone,
+        adminPhone,
         broker?.phone,
     ].map(v => String(v || '').replace(/\D/g, '')).filter(Boolean)
 
     const recipient = String(recipientPhone || '').replace(/\D/g, '')
-    const firstValid = candidates.find(c => c && c !== recipient)
+    const firstValid = candidates.find(c => c && c !== recipient && c !== instancePhone)
     return firstValid || ''
 }
 
@@ -769,6 +801,8 @@ async function sendShiftConsolidatedSummaryIfNeeded(
 ) {
     const { brokerId, instanceId, instanceToken, timezone, markerSuffix } = params
     if (!brokerId || !instanceToken) return false
+    const systemInstanceToken = await resolveSystemNotificationWhatsappInstance(supabase)
+    if (!systemInstanceToken) return false
 
     const markerKey = `_handoff_shift_${instanceId}_${markerSuffix}`
     const { data: marker } = await supabase
@@ -796,7 +830,7 @@ async function sendShiftConsolidatedSummaryIfNeeded(
     await sendWhatsAppMessage({
         phone: handoffPhone,
         message: summary,
-        instanceToken,
+        instanceToken: systemInstanceToken,
     }).catch((err) => {
         console.warn('[Handoff Shift] Failed to send consolidated summary:', err)
     })
@@ -979,15 +1013,15 @@ export async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, in
         .from('app_config')
         .select('key, value')
         .in('key', [
-            'ai_provider', 'gemini_api_key', 'openai_api_key',
-            'whatsapp_provider', 'gemini_whatsapp_model', 'openai_whatsapp_model',
+            'ai_provider', 'gemini_api_key', 'openai_api_key', 'gemini_model', 'openai_model',
             'whatsapp_audio_enabled', 'whatsapp_tts_provider', 'whatsapp_tts_voice',
             'elevenlabs_api_key',
             // Global fallback settings
             'whatsapp_always_online', 'whatsapp_mark_as_read',
             'whatsapp_transcription_enabled', 'whatsapp_human_intervention',
             'whatsapp_human_intervention_minutes', 'whatsapp_mirror_mode',
-            'whatsapp_response_mode',
+            'whatsapp_response_mode', 'whatsapp_global_system_prompt',
+            'whatsapp_legacy_property_catalog_enabled',
             'whatsapp_media_image_enabled', 'whatsapp_media_document_enabled', 'whatsapp_media_video_enabled',
             'whatsapp_media_batch_image_limit', 'whatsapp_media_batch_video_limit', 'whatsapp_media_batch_document_limit',
             'whatsapp_detect_human_request_enabled', 'whatsapp_detect_reschedule_cancel_enabled',
@@ -1025,7 +1059,7 @@ export async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, in
                 .single()
 
             if (inst?.config && typeof inst.config === 'object') {
-                const cfg = inst.config as Record<string, any>
+                const cfg = normalizeWhatsAppInstanceConfig(inst.config as Record<string, any>) as unknown as Record<string, any>
                 // Map instance config keys to global config keys
                 const keyMap: Record<string, string> = {
                     agent_enabled: 'whatsapp_agent_enabled',
@@ -1937,6 +1971,16 @@ function formatBudgetForCrm(value: number | null): string | null {
     })
 }
 
+function extractEmailFromText(value: string): string | null {
+    const match = String(value || '').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
+    if (!match) return null
+
+    return match[0]
+        .replace(/[.,;:!?)]$/g, '')
+        .trim()
+        .toLowerCase()
+}
+
 function extractRequestedBudgetV2(text: string): number | null {
     const matches = [...String(text || '').matchAll(/(r\$\s*)?(\d{1,3}(?:[.\s]\d{3})+|\d+(?:[,.]\d+)?)\s*(milhoes|milhao|milh(?:a|ã|õ|o)?es|mi|mil|k)?/gi)]
     for (const match of matches) {
@@ -1956,6 +2000,9 @@ function extractLeadDataForCrm(inputText: string, aiText: string, senderName?: s
     const out: Record<string, any> = { ...legacy }
 
     if (senderName) out.name = senderName
+
+    const email = extractEmailFromText(merged)
+    if (email) out.email = email
 
     const requestedBudget = extractRequestedBudgetV2(merged)
     if (requestedBudget) {
@@ -2010,7 +2057,7 @@ function extractLeadDataForCrm(inputText: string, aiText: string, senderName?: s
     if (out.budget) summaryParts.push(`orcamento: ${out.budget}`)
     if (out.region) summaryParts.push(`regiao: ${out.region}`)
     if (out.property_type) summaryParts.push(`tipo: ${out.property_type}`)
-    if (out.bedrooms) summaryParts.push(`${out.bedrooms} quartos`)
+    if (out.bedrooms) summaryParts.push(`${out.bedrooms} dormitorios`)
     if (out.timeframe) summaryParts.push(`prazo: ${out.timeframe}`)
     if (objections.length) summaryParts.push(`objecoes: ${objections.join(', ')}`)
     if (summaryParts.length) out.summary = summaryParts.join('; ')
@@ -2028,6 +2075,376 @@ function computeLeadScore(lead: Record<string, unknown>): number {
     if (lead.property_type) score += 10
     if (lead.timeline) score += 15
     return Math.min(score, 100)
+}
+
+const PROPERTY_CATALOG_FIELDS = [
+    'id',
+    'title',
+    'city',
+    'state',
+    'neighborhood',
+    'price',
+    'property_type',
+    'bedrooms',
+    'bathrooms',
+    'suites',
+    'parking_spaces',
+    'area_m2',
+    'area_private_m2',
+    'amenities',
+    'description',
+    'featured_image',
+    'images',
+    'exclusive',
+    'created_at',
+].join(',')
+
+type AgentPropertySearchPrefs = {
+    budget: number | null
+    budgetMode: 'around' | 'max' | 'min' | null
+    region: string
+    propertyType: string
+    bedroomsMin: number | null
+    suitesMin: number | null
+    parkingMin: number | null
+    tags: string[]
+    wantsMore: boolean
+    wantsAll: boolean
+    hasIntent: boolean
+}
+
+function safePostgrestTerm(value: string) {
+    return String(value || '').replace(/[(),{}%]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function normalizeCatalogText(value: unknown) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+}
+
+function firstNumberNear(text: string, pattern: RegExp): number | null {
+    const match = String(text || '').match(pattern)
+    if (!match) return null
+    const number = parseInt(match[1], 10)
+    return Number.isFinite(number) && number > 0 ? number : null
+}
+
+function detectPropertySearchIntent(text: string) {
+    const normalized = normalizeCatalogText(text)
+    return /\b(imovel|imoveis|opcao|opcoes|apartamento|apto|casa|cobertura|terreno|sala comercial|loja|duplex|garden|frente mar|vista mar|praia brava|balneario|itapema|porto belo|meia praia|quero ver|me manda|mostra|tem algo|procuro|busco|valor|orcamento|faixa)\b/i.test(normalized)
+}
+
+function buildBudgetPreference(text: string): { budget: number | null; mode: AgentPropertySearchPrefs['budgetMode'] } {
+    const budget = extractRequestedBudgetV2(text)
+    if (!budget) return { budget: null, mode: null }
+    const normalized = normalizeCatalogText(text)
+    if (/\b(ate|maximo|no maximo|limite|abaixo de|menos de)\b/.test(normalized)) return { budget, mode: 'max' }
+    if (/\b(acima de|a partir de|apartir de|minimo|mais de)\b/.test(normalized)) return { budget, mode: 'min' }
+    return { budget, mode: 'around' }
+}
+
+function extractPropertySearchPrefs(messages: any[]): AgentPropertySearchPrefs {
+    const userMessages = messages
+        .filter((m: any) => m?.role === 'user' && typeof m?.content === 'string')
+        .map((m: any) => String(m.content || ''))
+    const recentText = userMessages.slice(-8).join('\n')
+    const lastText = userMessages[userMessages.length - 1] || ''
+    const normalized = normalizeCatalogText(recentText)
+    const extracted = extractLeadDataForCrm(recentText, '')
+    const budgetPref = buildBudgetPreference(recentText)
+    const tags: string[] = []
+
+    if (/\bfrente\s*(ao\s*)?mar\b/.test(normalized)) tags.push('frente-mar')
+    if (/\bvista\s*(para\s*)?mar\b/.test(normalized)) tags.push('vista-mar')
+    if (/\bquadra\s*(do\s*)?mar\b/.test(normalized)) tags.push('quadra-mar')
+    if (/\blancamento|lancamentos|na planta|construcao\b/.test(normalized)) tags.push('lancamento')
+    if (/\bmobiliad/.test(normalized)) tags.push('mobiliado')
+
+    return {
+        budget: budgetPref.budget,
+        budgetMode: budgetPref.mode,
+        region: String(extracted.region || '').trim(),
+        propertyType: String(extracted.property_type || '').trim(),
+        bedroomsMin: extracted.bedrooms ? parseInt(String(extracted.bedrooms), 10) || null : null,
+        suitesMin: firstNumberNear(recentText, /(\d+)\s*su[ií]tes?/i),
+        parkingMin: firstNumberNear(recentText, /(\d+)\s*(?:vagas?|garagens?)/i),
+        tags: Array.from(new Set(tags)),
+        wantsMore: /\b(mais|outras|outra opcao|outras opcoes|mais opcoes|mande mais|mostra mais|tem mais|ver mais)\b/i.test(normalizeCatalogText(lastText)),
+        wantsAll: /\b(todos|todas|lista completa|ver tudo|mapa|catalogo completo|estoque completo)\b/i.test(normalizeCatalogText(lastText)),
+        hasIntent: detectPropertySearchIntent(recentText),
+    }
+}
+
+function extractRecommendedPropertyIds(messages: any[]) {
+    const ids = new Set<string>()
+    const re = /\/imovel\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi
+    for (const message of messages || []) {
+        const text = String(message?.content || '')
+        let match: RegExpExecArray | null
+        while ((match = re.exec(text))) ids.add(match[1])
+    }
+    return ids
+}
+
+function regionSearchTerms(region: string) {
+    const normalized = normalizeCatalogText(region)
+    if (!normalized) return []
+    if (normalized.includes('praia brava')) return ['Praia Brava', 'Brava']
+    if (normalized.includes('meia praia')) return ['Meia Praia']
+    if (normalized.includes('barra sul')) return ['Barra Sul']
+    if (normalized.includes('barra norte')) return ['Barra Norte']
+    if (normalized.includes('balneario') || /\bbc\b/.test(normalized)) return ['Balneario Camboriu', 'Balneário Camboriú']
+    if (normalized.includes('itajai')) return ['Itajai', 'Itajaí']
+    if (normalized.includes('itapema')) return ['Itapema']
+    if (normalized.includes('porto belo')) return ['Porto Belo']
+    if (normalized.includes('camboriu')) return ['Camboriu', 'Camboriú']
+    return [region]
+}
+
+function buildTextOrFilter(fields: string[], terms: string[]) {
+    return terms
+        .map(safePostgrestTerm)
+        .filter(Boolean)
+        .flatMap(term => fields.map(field => `${field}.ilike.%${term}%`))
+        .join(',')
+}
+
+function applyAgentPropertyFilters(query: any, prefs: AgentPropertySearchPrefs) {
+    const regionFilter = buildTextOrFilter(['city', 'neighborhood', 'title', 'description'], regionSearchTerms(prefs.region))
+    if (regionFilter) query = query.or(regionFilter)
+
+    const type = normalizeCatalogText(prefs.propertyType)
+    if (type) {
+        if (type.includes('cobertura')) query = query.or('property_type.ilike.%Cobertura%,title.ilike.%Cobertura%')
+        else if (type.includes('casa')) query = query.or('property_type.ilike.%Casa%,title.ilike.%Casa%')
+        else if (type.includes('terreno')) query = query.or('property_type.ilike.%Terreno%,title.ilike.%Terreno%')
+        else if (type.includes('sala') || type.includes('loja') || type.includes('comercial')) query = query.or('property_type.ilike.%Comercial%,property_type.ilike.%Sala%,property_type.ilike.%Loja%,title.ilike.%Comercial%,title.ilike.%Sala%')
+        else if (type.includes('duplex')) query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
+        else if (type.includes('apartamento')) query = query.or('property_type.ilike.%Apartamento%,title.ilike.%Apartamento%,title.ilike.%Apto%')
+    }
+
+    if (prefs.budget) {
+        if (prefs.budgetMode === 'max') query = query.lte('price', prefs.budget)
+        else if (prefs.budgetMode === 'min') query = query.gte('price', prefs.budget)
+        else query = query.gte('price', Math.round(prefs.budget * 0.5)).lte('price', Math.round(prefs.budget * 2))
+    }
+
+    if (prefs.bedroomsMin) query = query.gte('bedrooms', prefs.bedroomsMin)
+    if (prefs.suitesMin) query = query.gte('suites', prefs.suitesMin)
+    if (prefs.parkingMin) query = query.gte('parking_spaces', prefs.parkingMin)
+
+    for (const tag of prefs.tags) {
+        const terms = tag === 'frente-mar'
+            ? ['frente mar', 'frente ao mar']
+            : tag === 'vista-mar'
+                ? ['vista mar', 'vista para o mar']
+                : tag === 'quadra-mar'
+                    ? ['quadra mar', 'quadra do mar']
+                    : tag === 'lancamento'
+                        ? ['lancamento', 'lançamento', 'na planta']
+                        : [tag]
+        const filter = buildTextOrFilter(['title', 'description', 'property_type'], terms)
+        if (filter) query = query.or(filter)
+    }
+
+    return query
+}
+
+function propertyText(property: any) {
+    return normalizeCatalogText([
+        property?.title,
+        property?.city,
+        property?.state,
+        property?.neighborhood,
+        property?.property_type,
+        property?.description,
+        Array.isArray(property?.amenities) ? property.amenities.join(' ') : '',
+    ].filter(Boolean).join(' '))
+}
+
+function scorePropertyForLead(property: any, prefs: AgentPropertySearchPrefs, sentIds: Set<string>) {
+    if (sentIds.has(String(property?.id || ''))) return -10000
+    const text = propertyText(property)
+    let score = 0
+
+    const regionTerms = regionSearchTerms(prefs.region).map(normalizeCatalogText).filter(Boolean)
+    if (regionTerms.length && regionTerms.some(term => text.includes(term))) score += 42
+
+    const type = normalizeCatalogText(prefs.propertyType)
+    if (type && text.includes(type === 'apto' ? 'apartamento' : type)) score += 28
+    if (type.includes('cobertura') && /cobertura|duplex|triplex/.test(text)) score += 12
+
+    const price = Number(property?.price || 0)
+    if (prefs.budget && price > 0) {
+        if (prefs.budgetMode === 'max') score += price <= prefs.budget ? 32 : -24
+        else if (prefs.budgetMode === 'min') score += price >= prefs.budget ? 28 : -18
+        else {
+            const distance = Math.abs(price - prefs.budget) / prefs.budget
+            score += Math.max(0, 34 - Math.round(distance * 38))
+        }
+    }
+
+    if (prefs.bedroomsMin && Number(property?.bedrooms || 0) >= prefs.bedroomsMin) score += 10
+    if (prefs.suitesMin && Number(property?.suites || 0) >= prefs.suitesMin) score += 12
+    if (prefs.parkingMin && Number(property?.parking_spaces || 0) >= prefs.parkingMin) score += 8
+
+    for (const tag of prefs.tags) {
+        if (tag === 'frente-mar' && /frente mar|frente ao mar/.test(text)) score += 18
+        if (tag === 'vista-mar' && /vista mar|vista para o mar/.test(text)) score += 14
+        if (tag === 'quadra-mar' && /quadra mar|quadra do mar/.test(text)) score += 12
+        if (tag === 'lancamento' && /lancamento|na planta|construcao/.test(text)) score += 12
+        if (tag === 'mobiliado' && /mobiliad/.test(text)) score += 10
+    }
+
+    if (property?.exclusive) score += 8
+    if (property?.featured_image || (Array.isArray(property?.images) && property.images.length > 0)) score += 5
+    const createdAt = new Date(property?.created_at || 0).getTime()
+    if (createdAt) score += Math.max(0, 6 - Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24 * 30)))
+
+    return score
+}
+
+function buildPropertySearchUrl(prefs: AgentPropertySearchPrefs) {
+    const params = new URLSearchParams()
+    const normalizedRegion = normalizeCatalogText(prefs.region)
+    if (normalizedRegion.includes('balneario')) params.set('city', 'Balneário Camboriú')
+    else if (normalizedRegion.includes('itapema')) params.set('city', 'Itapema')
+    else if (normalizedRegion.includes('itajai')) params.set('city', 'Itajaí')
+    else if (normalizedRegion.includes('porto belo')) params.set('city', 'Porto Belo')
+    else if (prefs.region) params.set('q', prefs.region)
+
+    if (prefs.propertyType) params.set('type', prefs.propertyType)
+    if (prefs.budget) {
+        if (prefs.budgetMode === 'max') params.set('priceMax', String(prefs.budget))
+        else if (prefs.budgetMode === 'min') params.set('priceMin', String(prefs.budget))
+        else {
+            params.set('priceMin', String(Math.round(prefs.budget * 0.5)))
+            params.set('priceMax', String(Math.round(prefs.budget * 2)))
+        }
+    }
+    if (prefs.bedroomsMin) params.set('bedroomsMin', String(prefs.bedroomsMin))
+    if (prefs.suitesMin) params.set('suitesMin', String(prefs.suitesMin))
+    if (prefs.parkingMin) params.set('parkingMin', String(prefs.parkingMin))
+    if (prefs.tags[0]) params.set('tag', prefs.tags[0])
+    const query = params.toString()
+    return `${getPublicAppUrl()}/busca${query ? `?${query}` : ''}`
+}
+
+function formatPropertyCatalogItem(property: any, index: number, appUrl: string) {
+    const parts: string[] = []
+    parts.push(`${index + 1}. ${property.title || 'Imovel selecionado'}`)
+    const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(' - ')
+    if (location) parts.push(`Local: ${location}`)
+    if (property.price) parts.push(`Valor: R$ ${Number(property.price).toLocaleString('pt-BR')}`)
+    if (property.property_type) parts.push(`Tipo: ${property.property_type}`)
+    const specs: string[] = []
+    if (property.suites) specs.push(`${property.suites} suites`)
+    else if (property.bedrooms) specs.push(`${property.bedrooms} dormitorios`)
+    if (property.parking_spaces) specs.push(`${property.parking_spaces} vagas`)
+    const area = property.area_private_m2 || property.area_m2
+    if (area) specs.push(`${area} m2`)
+    if (specs.length) parts.push(`Ficha: ${specs.join(' | ')}`)
+    if (Array.isArray(property.amenities) && property.amenities.length) parts.push(`Destaques: ${property.amenities.slice(0, 4).join(', ')}`)
+    if (property.description) parts.push(`Resumo: ${String(property.description).replace(/\s+/g, ' ').substring(0, 120)}${String(property.description).length > 120 ? '...' : ''}`)
+    const path = `/imovel/${property.id}`
+    const buttonLabel = `Ver ${String(property.title || 'imovel').replace(/\s+/g, ' ').trim()}`.substring(0, 20)
+    parts.push(`BOTAO: [BOTOES_URL:${buttonLabel}|${buttonLabel}=>${appUrl}${path}]`)
+    return parts.join(' | ')
+}
+
+async function fetchAgentPropertyMatches(supabase: any, prefs: AgentPropertySearchPrefs, maxRows = 5000) {
+    const pageSize = 1000
+    const all: any[] = []
+    let totalCount: number | null = null
+
+    for (let from = 0; from < maxRows; from += pageSize) {
+        let pageQuery = supabase
+            .from('properties')
+            .select(PROPERTY_CATALOG_FIELDS, { count: 'exact' })
+            .eq('status', 'active')
+
+        pageQuery = applyAgentPropertyFilters(pageQuery, prefs)
+            .order('created_at', { ascending: false })
+            .range(from, Math.min(from + pageSize - 1, maxRows - 1))
+
+        const { data, count, error } = await pageQuery
+        if (error) return { data: all, count: totalCount ?? all.length, error }
+
+        if (typeof count === 'number') totalCount = count
+        const rows = Array.isArray(data) ? data : []
+        all.push(...rows)
+
+        if (rows.length < pageSize) break
+        if (totalCount !== null && all.length >= totalCount) break
+    }
+
+    return { data: all, count: totalCount ?? all.length, error: null }
+}
+
+async function buildAgentPropertySearchPrompt(supabase: any, messages: any[], leadPhone?: string) {
+    const prefs = extractPropertySearchPrefs(messages)
+    if (!prefs.hasIntent && !prefs.wantsMore && !prefs.wantsAll) return ''
+
+    const sentIds = extractRecommendedPropertyIds(messages)
+    const appUrl = getPublicAppUrl()
+    const searchUrl = buildPropertySearchUrl(prefs)
+
+    let { data: properties, count, error } = await fetchAgentPropertyMatches(supabase, prefs)
+
+    let relaxed = false
+    if ((error || !properties?.length) && (prefs.region || prefs.propertyType || prefs.budget || prefs.tags.length)) {
+        relaxed = true
+        const fallbackPrefs: AgentPropertySearchPrefs = {
+            ...prefs,
+            region: '',
+            propertyType: '',
+            bedroomsMin: null,
+            suitesMin: null,
+            parkingMin: null,
+            tags: [],
+        }
+        const fallback = await fetchAgentPropertyMatches(supabase, fallbackPrefs)
+        properties = fallback.data || []
+        count = fallback.count || properties.length
+        error = fallback.error
+    }
+
+    if (error) {
+        console.error('[AI Agent] Erro na busca completa de imoveis:', error)
+        return ''
+    }
+
+    const allMatches = Array.isArray(properties) ? properties : []
+    const rankedAll = allMatches
+        .map((property: any) => ({ property, score: scorePropertyForLead(property, prefs, sentIds) }))
+        .sort((a: any, b: any) => {
+            if (b.score !== a.score) return b.score - a.score
+            return new Date(b.property?.created_at || 0).getTime() - new Date(a.property?.created_at || 0).getTime()
+        })
+
+    const freshMatches = rankedAll.filter((item: any) => item.score > -1000)
+    const selected = (freshMatches.length ? freshMatches : rankedAll)
+        .slice(0, prefs.wantsMore ? 14 : 12)
+        .map((item: any) => item.property)
+
+    const criteria = [
+        prefs.region ? `regiao=${prefs.region}` : '',
+        prefs.propertyType ? `tipo=${prefs.propertyType}` : '',
+        prefs.budget ? `orcamento=${formatBudgetForCrm(prefs.budget)} (${prefs.budgetMode || 'aproximado'})` : '',
+        prefs.bedroomsMin ? `dormitorios>=${prefs.bedroomsMin}` : '',
+        prefs.suitesMin ? `suites>=${prefs.suitesMin}` : '',
+        prefs.parkingMin ? `vagas>=${prefs.parkingMin}` : '',
+        prefs.tags.length ? `desejos=${prefs.tags.join(', ')}` : '',
+    ].filter(Boolean).join('; ') || 'sem filtros explicitos'
+
+    const catalog = selected.map((property: any, index: number) => formatPropertyCatalogItem(property, index, appUrl)).join('\n')
+    const trackedSearchUrl = leadPhone
+        ? buildTrackedWhatsAppLink({ url: searchUrl, leadPhone, label: 'Ver todos no mapa', title: 'Busca completa de imoveis', type: 'property_search', campaign: 'whatsapp_agent_property_search' })
+        : searchUrl
+
+    return `\n\nBUSCA COMPLETA NO ESTOQUE DE IMOVEIS\nCriterios interpretados: ${criteria}.\nTotal encontrado no estoque ativo: ${count ?? allMatches.length} imoveis. ${sentIds.size ? `Ja foram enviados ${sentIds.size} imoveis nesta conversa; priorize opcoes novas.` : ''}${relaxed ? '\nObservacao: nenhum resultado exato apareceu com todos os filtros, entao a selecao abaixo relaxou parte dos filtros para manter boas alternativas.' : ''}\nLink para o lead ver a busca completa no mapa: [BOTOES_URL:Ver todos no mapa|Ver todos no mapa=>${trackedSearchUrl}]\n\nSELECAO RANQUEADA PARA ESTA RESPOSTA\n${catalog || 'Nenhum imovel ativo localizado para esses filtros.'}\n\nREGRAS PARA RECOMENDAR IMOVEIS\n- Use esta busca como fonte principal; ela foi feita no estoque ativo completo, nao em uma amostra fixa.\n- Se o cliente pediu mais opcoes, escolha imoveis ainda nao enviados nesta conversa.\n- Recomende no maximo 2 imoveis por resposta, salvo se o cliente pedir lista maior.\n- Ao recomendar um imovel especifico, copie exatamente o BOTAO do imovel escolhido.\n- Se o cliente quiser navegar sozinho, envie o botao "Ver todos no mapa".\n- Se nao houver encaixe perfeito, diga isso com transparencia e ofereca alternativas proximas, acima ou abaixo do valor quando fizer sentido.`
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2157,7 +2574,7 @@ async function transcribeWithGemini(audioUrl: string, apiKey: string, model: str
         return ''
     }
     const base64Audio = Buffer.from(audioBuffer).toString('base64')
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.0-flash'}:generateContent?key=${apiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.5-flash'}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2177,7 +2594,7 @@ async function transcribeWithGemini(audioUrl: string, apiKey: string, model: str
     }
     const data = await res.json()
     await recordGeminiUsage({
-        model: model || 'gemini-2.0-flash',
+        model: model || 'gemini-2.5-flash',
         feature: 'whatsapp_audio_transcription',
         usageMetadata: data.usageMetadata,
     })
@@ -2591,12 +3008,12 @@ ${contextLine}${videoInstruction}${documentInstruction}
 Responda em português (pt-BR), curto e prático com:
 1) O que aparece/contém (resumo objetivo)
 2) Perfil de imóvel/interesse provável do cliente
-3) Características-chave (estilo, localização sugerida, padrão, quartos, área, lazer, etc. quando possível)
+3) Características-chave (estilo, localização sugerida, padrão, dormitorios, área, lazer, etc. quando possível)
 4) 3 perguntas curtas que o corretor deve fazer para qualificar melhor
 
 Se não for possível analisar com confiança, diga isso claramente.`
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.0-flash'}:generateContent?key=${apiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.5-flash'}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2616,7 +3033,7 @@ Se não for possível analisar com confiança, diga isso claramente.`
     }
     const data = await res.json()
     await recordGeminiUsage({
-        model: model || 'gemini-2.0-flash',
+        model: model || 'gemini-2.5-flash',
         feature: `whatsapp_${kind}_analysis`,
         usageMetadata: data.usageMetadata,
         metadata: { kind, mimeType },
@@ -2857,10 +3274,10 @@ async function analyzeIncomingMediaItem(params: {
 
     const geminiKey = configs['gemini_api_key']
     const openaiKey = configs['openai_api_key']
-    const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
-    const openaiModel = configs['openai_whatsapp_model'] || 'gpt-4o-mini'
+    const geminiModel = configs['gemini_model'] || 'gemini-2.5-flash'
+    const openaiModel = configs['openai_model'] || 'gpt-4o-mini'
     const globalProvider = configs['ai_provider'] || 'gemini'
-    const effectiveProvider = configs['whatsapp_provider'] || globalProvider
+    const effectiveProvider = globalProvider
 
     let analysisText = ''
 
@@ -2977,6 +3394,50 @@ function buildSocialStrategyFromSource(source: string, social: Record<string, st
     return 'Origem sem rede dominante. Se precisar gerar confianca, prefira Instagram como primeira prova social, sempre um link por vez.'
 }
 
+function formatLeadSiteActivityForPrompt(metadata: any): string[] {
+    const summary = metadata?.behavior_summary && typeof metadata.behavior_summary === 'object'
+        ? metadata.behavior_summary
+        : {}
+    const activity = Array.isArray(metadata?.site_activity) ? metadata.site_activity.slice(-8).reverse() : []
+    const lines: string[] = []
+
+    const viewed = Array.isArray(summary.viewed_property_ids) ? summary.viewed_property_ids.length : 0
+    const liked = Array.isArray(summary.liked_property_ids) ? summary.liked_property_ids.length : 0
+    const disliked = Array.isArray(summary.disliked_property_ids) ? summary.disliked_property_ids.length : 0
+    const shared = Array.isArray(summary.shared_property_ids) ? summary.shared_property_ids.length : 0
+    const whatsapp = Array.isArray(summary.whatsapp_property_ids) ? summary.whatsapp_property_ids.length : 0
+    const engagementScore = Number(summary.engagement_score || 0)
+    const temperature = String(summary.intent_temperature || '').trim()
+    const nextAction = String(summary.next_best_action || '').trim()
+    const signals = Array.isArray(summary.intent_signals) ? summary.intent_signals.slice(0, 4).filter(Boolean) : []
+
+    if (engagementScore || temperature) {
+        lines.push(`- Temperatura digital do lead: ${temperature || 'em analise'} (${engagementScore || 0}/100).`)
+    }
+    if (viewed || liked || disliked || shared || whatsapp) {
+        lines.push(`- Comportamento no site: viu ${viewed} imoveis; curtiu ${liked}; recusou ${disliked}; compartilhou ${shared}; chamou WhatsApp em ${whatsapp}.`)
+    }
+    if (signals.length) {
+        lines.push(`- Sinais de intencao: ${signals.join('; ')}.`)
+    }
+    if (nextAction) {
+        lines.push(`- Proxima melhor acao sugerida pelo sistema: ${nextAction}`)
+    }
+    if (summary.last_property_id) {
+        lines.push(`- Ultimo imovel de interesse no site: ${summary.last_property_id}.`)
+    }
+
+    for (const item of activity.slice(0, 5)) {
+        const label = String(item?.label || item?.event_type || '').trim()
+        if (!label) continue
+        const title = String(item?.property_title || item?.property_id || item?.page_path || '').trim()
+        const detail = String(item?.detail || '').trim()
+        lines.push(`- Atividade recente: ${label}${title ? ` - ${title}` : ''}${detail ? ` (${detail})` : ''}.`)
+    }
+
+    return lines.slice(0, 7)
+}
+
 function inferBrazilRegionFromPhone(phoneRaw: string | undefined): string {
     const phone = normalizeWhatsAppPhone(phoneRaw)
     const local = phone.startsWith('55') ? phone.slice(2) : phone
@@ -3019,10 +3480,199 @@ function buildAdaptiveRapportPrompt(leadPhone: string | undefined, mode: 'soft' 
     ].join('\n')
 }
 
+function dateKeyInSaoPaulo(date: Date): string {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(date)
+    const map = Object.fromEntries(parts.map(part => [part.type, part.value]))
+    return `${map.year}-${map.month}-${map.day}`
+}
+
+function relativeSaoPauloDateKey(daysFromToday: number): string {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(new Date())
+    const map = Object.fromEntries(parts.map(part => [part.type, part.value]))
+    const localNoonUtc = new Date(Date.UTC(Number(map.year), Number(map.month) - 1, Number(map.day) + daysFromToday, 12, 0, 0))
+    return dateKeyInSaoPaulo(localNoonUtc)
+}
+
+function formatEventDateTimeForPrompt(date: Date): string {
+    return date.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).replace(',', ', as')
+}
+
+function eventTimingLabel(eventDate: Date, now = new Date()) {
+    const eventEnd = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000)
+    if (now < eventDate) return 'FUTURO'
+    if (now <= eventEnd) return 'ACONTECENDO_AGORA'
+    return 'JA_ACONTECEU'
+}
+
+function relativeEventDayLabel(eventDate: Date, now = new Date()) {
+    const eventKey = dateKeyInSaoPaulo(eventDate)
+    const todayKey = dateKeyInSaoPaulo(now)
+    const yesterdayKey = relativeSaoPauloDateKey(-1)
+    const tomorrowKey = relativeSaoPauloDateKey(1)
+    if (eventKey === todayKey) return 'hoje'
+    if (eventKey === yesterdayKey) return 'ontem'
+    if (eventKey === tomorrowKey) return 'amanha'
+    return formatEventDateTimeForPrompt(eventDate)
+}
+
+function isEventRelatedConversation(messages: any[]) {
+    const recent = messages
+        .filter((m: any) => typeof m?.content === 'string')
+        .slice(-6)
+        .map((m: any) => m.content)
+        .join(' ')
+    const normalized = normalizeForSearch(recent)
+    return /\b(evento|encontro|cadastro|cadastr|inscri|confirmar|confirmacao|presenca|checkin|check in|horario|localizacao|endereco|mapa|maps|rota|ontem|perdi|perdeu)\b/.test(normalized)
+}
+
+function isDirectEventTimingQuestion(text: string) {
+    const normalized = normalizeForSearch(text)
+    return /\b(foi ontem|ja foi|ja aconteceu|aconteceu ontem|perdi|perdeu|ainda da tempo|ainda posso|que dia|qual dia|quando|horario|que horas)\b/.test(normalized)
+        && /\b(evento|encontro|cadastro|cadastr|inscri|presenca|confirmar|ontem|perdi|perdeu)\b/.test(normalized)
+}
+
+async function buildEventTimingContext(messages: any[], leadPhone?: string): Promise<{ prompt: string; directAnswer?: string } | null> {
+    if (!isEventRelatedConversation(messages)) return null
+
+    try {
+        const supabase = getSupabase()
+        const now = new Date()
+        const since = new Date(now)
+        since.setDate(since.getDate() - 14)
+        const until = new Date(now)
+        until.setDate(until.getDate() + 60)
+
+        const { data: events, error } = await supabase
+            .from('event_events')
+            .select('id, title, slug, event_date, status, location_name, location_address, metadata')
+            .eq('status', 'published')
+            .gte('event_date', since.toISOString())
+            .lte('event_date', until.toISOString())
+            .order('event_date', { ascending: true })
+            .limit(12)
+
+        if (error || !events?.length) {
+            if (error) console.warn('[Event Timing] failed to load events:', error.message)
+            return null
+        }
+
+        const selected = [...events].sort((a: any, b: any) =>
+            Math.abs(new Date(a.event_date).getTime() - now.getTime()) - Math.abs(new Date(b.event_date).getTime() - now.getTime())
+        )[0]
+        const eventDate = new Date(selected.event_date)
+        if (Number.isNaN(eventDate.getTime())) return null
+
+        const status = eventTimingLabel(eventDate, now)
+        const when = formatEventDateTimeForPrompt(eventDate)
+        const dayLabel = relativeEventDayLabel(eventDate, now)
+        const metadata = selected.metadata && typeof selected.metadata === 'object' ? selected.metadata : {}
+        const mapsUrl = String(metadata.maps_url || '').trim()
+
+        let registrationText = '- Inscricao deste telefone: nao verificada.'
+        const candidates = phoneCandidates(leadPhone)
+            .map(candidate => candidate.replace(/\D/g, ''))
+            .filter(Boolean)
+        if (candidates.length) {
+            const { data: registration } = await supabase
+                .from('event_registrations')
+                .select('id, full_name, status, phone, email, created_at')
+                .eq('event_id', selected.id)
+                .in('phone', [...new Set(candidates)])
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+
+            registrationText = registration
+                ? `- Inscricao deste telefone: encontrada (${registration.status || 'sem status'}) em nome de ${registration.full_name || 'sem nome'}.`
+                : '- Inscricao deste telefone: nao encontrada em event_registrations. Nao confirme presenca como certa; diga que vai verificar ou peca o e-mail usado no cadastro.'
+        }
+
+        const prompt = [
+            'CONTEXTO DINAMICO DE EVENTO - PRIORIDADE ALTA:',
+            '- Este bloco sobrepoe qualquer texto antigo ou exemplo fixo do prompt do corretor sobre data do evento.',
+            `- Agora em America/Sao_Paulo: ${getSaoPauloTimeContext().date} ${getSaoPauloTimeContext().time}.`,
+            `- Evento relevante: ${selected.title || 'Evento Guilherme Pilger'}.`,
+            `- Data real do evento: ${when} (America/Sao_Paulo).`,
+            `- Status temporal calculado: ${status}.`,
+            `- Relacao com hoje: ${dayLabel}.`,
+            selected.location_name ? `- Local: ${selected.location_name}.` : '',
+            selected.location_address ? `- Endereco: ${selected.location_address}.` : '',
+            mapsUrl ? `- Mapa: ${mapsUrl}.` : '',
+            registrationText,
+            '',
+            'REGRAS OBRIGATORIAS PARA RESPONDER SOBRE ESTE EVENTO:',
+            '- Antes de dizer "sera", "vai ser", "ainda da tempo" ou "voce nao perdeu", compare a data real do evento com o agora acima.',
+            '- Se o status for JA_ACONTECEU e o lead perguntar se perdeu, diga com clareza que o evento ja aconteceu. Nao diga que ainda da tempo de participar.',
+            '- Se o status for JA_ACONTECEU, ofereca proximo passo: verificar materiais, proxima data ou encaminhar para a equipe. Nao invente gravacao, transmissao ou nova agenda.',
+            '- Se o status for FUTURO, confirme dia, horario e local normalmente.',
+            '- Se o status for ACONTECENDO_AGORA, diga que o encontro ja comecou/esta acontecendo e oriente com cuidado.',
+        ].filter(Boolean).join('\n')
+
+        const lastUserText = String(messages[messages.length - 1]?.content || '')
+        if (isDirectEventTimingQuestion(lastUserText)) {
+            if (status === 'JA_ACONTECEU') {
+                return {
+                    prompt,
+                    directAnswer: [
+                        `Sim, o encontro aconteceu ${dayLabel === 'ontem' ? 'ontem' : `em ${when}`}.`,
+                        '',
+                        'Sinto muito que voce tenha perdido. Posso encaminhar para a equipe verificar se existe material, proxima data ou alguma forma de acompanhar o conteudo depois do evento?',
+                    ].join('\n'),
+                }
+            }
+
+            if (status === 'ACONTECENDO_AGORA') {
+                const location = [selected.location_name, selected.location_address].filter(Boolean).join('\n')
+                return {
+                    prompt,
+                    directAnswer: [
+                        `O encontro e hoje e ja comecou, as ${eventDate.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })}.`,
+                        location ? `\n${location}` : '',
+                        mapsUrl ? `\n[BOTOES_URL:Localizacao|Abrir no Maps=>${mapsUrl}]` : '',
+                    ].filter(Boolean).join('\n'),
+                }
+            }
+
+            const location = [selected.location_name, selected.location_address].filter(Boolean).join('\n')
+            return {
+                prompt,
+                directAnswer: [
+                    `Nao, voce nao perdeu. O encontro sera em ${when}.`,
+                    location ? `\n${location}` : '',
+                    mapsUrl ? `\n[BOTOES_URL:Localizacao|Abrir no Maps=>${mapsUrl}]` : '',
+                ].filter(Boolean).join('\n'),
+            }
+        }
+
+        return { prompt }
+    } catch (err) {
+        console.warn('[Event Timing] failed to build prompt:', err)
+        return null
+    }
+}
+
 async function buildLeadIntelligencePrompt(
     leadPhone: string | undefined,
     senderName: string | undefined,
-    social: Record<string, string>
+    social: Record<string, string>,
+    latestUserMessage?: string
 ): Promise<string> {
     const candidates = phoneCandidates(leadPhone)
     if (!candidates.length) return ''
@@ -3074,6 +3724,7 @@ async function buildLeadIntelligencePrompt(
             || !!lead.landing_page_id
             || !!lead.visitor_id
         const contextualLeadName = sanitizeLeadName(lead.name) || sanitizeLeadName(senderName) || ''
+        const siteActivityLines = formatLeadSiteActivityForPrompt(metadata)
 
         const lines = [
             '',
@@ -3086,6 +3737,7 @@ async function buildLeadIntelligencePrompt(
             `- Dispositivo/localizacao: ${visitor?.device_type || readMetadataValue(tracking, ['device_type']) || '-'}; ${visitor?.city || lead.city || readMetadataValue(tracking, ['city']) || '-'} ${visitor?.region || lead.state || readMetadataValue(tracking, ['region']) || ''}`,
             `- Status atual: ${lead.funnel_stage || '-'}; classificacao=${lead.lead_classification || '-'}; score=${lead.lead_score ?? '-'}`,
             `- Dados ja conhecidos: finalidade=${lead.lead_purpose || '-'}; orcamento=${lead.lead_budget || '-'}; prazo=${lead.lead_timeframe || '-'}`,
+            ...siteActivityLines,
             lead.ai_summary ? `- Resumo anterior: ${String(lead.ai_summary).slice(0, 450)}` : '',
             '',
             'COMO USAR ESSE CONTEXTO:',
@@ -3102,7 +3754,8 @@ async function buildLeadIntelligencePrompt(
             `- Estrategia de rede social: ${buildSocialStrategyFromSource(source, social)}`,
         ].filter(Boolean)
 
-        return lines.join('\n')
+        const recentOutboundPrompt = buildRecentLeadOutboundContextPrompt(lead, latestUserMessage)
+        return [lines.join('\n'), recentOutboundPrompt].filter(Boolean).join('\n\n')
     } catch (err) {
         console.warn('[AI Lead Context] failed:', err)
         return ''
@@ -3119,7 +3772,7 @@ export async function generateAIResponse(
     const lastUserTextRaw = String(messages[messages.length - 1]?.content || '')
     const lastUserText = lastUserTextRaw.toLowerCase().trim()
     const globalProvider = configs['ai_provider'] || 'openai'
-    const effectiveProvider = configs['whatsapp_provider'] || globalProvider
+    const effectiveProvider = globalProvider
     const apiKey = effectiveProvider === 'openai' ? configs['openai_api_key'] : configs['gemini_api_key']
 
     if (!apiKey) {
@@ -3129,11 +3782,15 @@ export async function generateAIResponse(
 
     // Prompt único: broker.system_prompt com tags processadas, ou fallback natural
     const spTime = getSaoPauloTimeContext()
+    const eventTimingContext = await buildEventTimingContext(messages, leadPhone)
+    if (eventTimingContext?.directAnswer) {
+        return { text: eventTimingContext.directAnswer, shouldTransfer: false }
+    }
     const brokerName = broker.name || 'Corretor'
     const safeLeadName = sanitizeLeadName(senderName)
     const customPrompt = String(broker.system_prompt || '').trim()
     const hasCustomPrompt = customPrompt.length > 0
-    const rawPrompt = hasCustomPrompt ? customPrompt : `Você é ${brokerName}, corretor de imóveis da Pilger Imóveis.
+    const rawPrompt = hasCustomPrompt ? customPrompt : `Você é ${brokerName}, corretor de imóveis da Imobiliaria Guilherme Pilger.
 Converse naturalmente no WhatsApp, como uma pessoa real.
 Seja simpático, use linguagem informal mas profissional.
 Use frases curtas — é WhatsApp, não email.
@@ -3187,7 +3844,7 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
         }
     } catch {}
 
-    const companyName = agentConfigs['agent_company_name'] || 'Pilger Imóveis'
+    const companyName = agentConfigs['agent_company_name'] || 'Imobiliaria Guilherme Pilger'
     const companyDesc = agentConfigs['agent_company_description'] || 'referência em imóveis de alto padrão em Balneário Camboriú e região'
     const companyLocationUrl = agentConfigs['agent_company_location_url'] || 'https://maps.app.goo.gl/javGAuakYTwsQrmLA'
     const socialInstagram = agentConfigs['agent_social_instagram'] || ''
@@ -3358,10 +4015,28 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
         linkedin: socialLinkedin,
         tiktok: socialTiktok,
         site: socialSite,
-    })
+    }, lastUserTextRaw)
     if (leadIntelligencePrompt) {
         systemPrompt += `\n${leadIntelligencePrompt}`
     }
+
+    try {
+        const supabase = getSupabase()
+        const ecosystemContext = await getAgentEcosystemContext({
+            supabase,
+            agent: 'whatsapp',
+            phone: leadPhone,
+            days: 30,
+            limit: 80,
+        })
+        const ecosystemBrief = buildAgentContextBrief(ecosystemContext)
+        if (ecosystemBrief) {
+            systemPrompt += `\n\nCONTEXTO CENTRAL DO ECOSSISTEMA PILGER\n${ecosystemBrief}\n\nREGRAS DE USO DO CONTEXTO CENTRAL:\n- Use esses sinais para personalizar o atendimento e recomendar com mais precisao.\n- Nao revele dados internos, IP, origem tecnica, nomes de outros leads ou metricas sensiveis ao cliente.\n- Se o contexto indicar interesse em imoveis, priorize as preferencias reais do lead e o estoque ativo.`
+        }
+    } catch (err) {
+        console.warn('[AI Agent] Ecosystem context unavailable:', err)
+    }
+
     const rapportModeRaw = String(configs['whatsapp_adaptive_rapport_mode'] || '').toLowerCase()
     const rapportMode: 'off' | 'soft' | 'strong' = rapportModeRaw === 'strong'
         ? 'strong'
@@ -3375,11 +4050,16 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
         systemPrompt += `\n${agendaPrompt}`
     }
 
-    systemPrompt += '\n\nDIRETRIZES DE QUALIFICACAO:\n- O objetivo e filtrar e amadurecer o lead, nao apenas responder perguntas.\n- Conduza a conversa com naturalidade, como consultor imobiliario experiente no WhatsApp.\n- Descubra aos poucos se o cliente busca investimento, moradia ou os dois; qual valor disponivel; prazo de compra; regiao; tipo de imovel; e objecoes.\n- Se a origem do lead nao estiver clara, pergunte uma unica vez no decorrer da conversa como ele conheceu a Pilger, sem parecer pesquisa ou formulario.\n- Antes de falar de valor, reforce beneficio, posicionamento, seguranca e adequacao ao objetivo do cliente.\n- Quando houver intencao real, aproxime do corretor humano, visita ou imovel especifico.\n- Nunca envie todas as redes sociais juntas; escolha uma quando o contexto pedir.\n- Se o cliente mencionar Facebook, Instagram, Google, YouTube ou trafego como origem/desconfianca, trate a objecao primeiro; nao envie link automaticamente se ele nao pediu.\n- Use botao de agendamento somente quando o cliente pedir, aceitar ou demonstrar claramente que quer marcar visita/reuniao agora.\n- Nao envie botoes Manha/Tarde/Noite junto com uma explicacao de imovel, investimento ou curadoria se o cliente ainda nao pediu agendamento.\n\nNATURALIDADE NO USO DO NOME:\n- Use o nome do lead somente de vez em quando: abertura importante, retomada depois de pausa, fechamento ou momento de proximidade.\n- Nao comece toda resposta chamando pelo nome.\n- Nao repita o nome mais de uma vez na mesma resposta.\n- Se o nome cadastrado parecer nome de plataforma, empresa, sistema ou bot, nao use como nome da pessoa.\n\nREGRAS PARA AUDIO E VALORES:\n- Quando mencionar valores, metragem ou numeros importantes, escreva de forma falada e natural.\n- Prefira "vinte e dois milhoes de reais" em vez de "R$ 22.000.000" quando a resposta puder virar audio.\n- Para metragem, prefira "duzentos metros quadrados" em vez de "200m2".'
-
-    systemPrompt += '\n\nRESPOSTAS QUANDO O CLIENTE ENVIA MIDIA:\n- Se o cliente enviar imagem, video ou documento, responda com blocos curtos, como conversa real de WhatsApp.\n- Ao reconhecer um imovel por imagem, cite apenas o essencial: nome, cidade/regiao e um ponto forte.\n- Se enviar botao de imovel, deixe a explicacao fora do card e use o card apenas como chamada curta, por exemplo "Ver imovel".\n- Nao envie textao junto com botao. Faca no maximo uma pergunta de continuacao.'
+    const globalWhatsAppPrompt = String(configs['whatsapp_global_system_prompt'] || DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT).trim()
+    if (globalWhatsAppPrompt) {
+        systemPrompt += `\n\n${globalWhatsAppPrompt}`
+    }
 
     systemPrompt += buildSpecialLeadScenarioPrompt(configs)
+
+    if (eventTimingContext?.prompt) {
+        systemPrompt += `\n\n${eventTimingContext.prompt}`
+    }
 
     if (!safeLeadName) {
         const alreadyAskedName = messages.some((m: any) =>
@@ -3391,7 +4071,27 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
         }
     }
 
-    if (!hasCustomPrompt || promptUsesPropertyCatalog) {
+    const recentLeadPropertyText = messages
+        .filter((m: any) => m?.role === 'user' && typeof m?.content === 'string')
+        .slice(-8)
+        .map((m: any) => m.content)
+        .join('\n')
+    const shouldUsePropertySearch = !hasCustomPrompt
+        || promptUsesPropertyCatalog
+        || detectPropertySearchIntent(recentLeadPropertyText)
+
+    if (shouldUsePropertySearch) {
+        try {
+            const propertySearchPrompt = await buildAgentPropertySearchPrompt(getSupabase(), messages, leadPhone)
+            if (propertySearchPrompt) {
+                systemPrompt += propertySearchPrompt
+            }
+        } catch (err) {
+            console.error('[AI Agent] Erro ao carregar busca completa de imoveis:', err)
+        }
+    }
+
+    if (String(configs['whatsapp_legacy_property_catalog_enabled'] || '').toLowerCase() === 'true' && (!hasCustomPrompt || promptUsesPropertyCatalog)) {
     try {
         const supabase = getSupabase()
         const requestedBudget = extractRequestedBudgetV2(
@@ -3421,16 +4121,6 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
 
         const { data: properties } = await propertiesQuery
 
-        const { data: landingPages } = await supabase
-            .from('landing_pages')
-            .select('slug, property_id')
-            .eq('status', 'published')
-
-        const landingPageByPropertyId = new Map<string, string>()
-        for (const lp of landingPages || []) {
-            if (lp?.property_id && lp?.slug) landingPageByPropertyId.set(String(lp.property_id), String(lp.slug))
-        }
-
         if (properties && properties.length > 0) {
             const rankedProperties = [...properties]
                 .sort((a: any, b: any) => {
@@ -3452,14 +4142,13 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
                 if (p.price) parts.push(`💰 R$ ${Number(p.price).toLocaleString('pt-BR')}`)
                 if (p.property_type) parts.push(`🏠 ${p.property_type}`)
                 const specs: string[] = []
-                if (p.bedrooms) specs.push(`${p.bedrooms}q`)
+                if (p.bedrooms) specs.push(`${p.bedrooms} dorm.`)
                 if (p.bathrooms) specs.push(`${p.bathrooms}b`)
                 if (p.area_m2) specs.push(`${p.area_m2}m²`)
                 if (specs.length) parts.push(`📐 ${specs.join(' | ')}`)
                 if (p.amenities?.length) parts.push(`✨ ${p.amenities.slice(0, 4).join(', ')}`)
                 if (p.description) parts.push(`ℹ️ ${p.description.substring(0, 100)}${p.description.length > 100 ? '...' : ''}`)
-                const slug = landingPageByPropertyId.get(String(p.id))
-                const path = slug ? `/${slug}` : `/imovel/${p.id}`
+                const path = `/imovel/${p.id}`
                 const buttonLabel = `Ver ${String(p.title || 'imovel').replace(/\s+/g, ' ').trim()}`.substring(0, 20)
                 parts.push(`BOTAO: [BOTOES_URL:${buttonLabel}|${buttonLabel}=>${appUrl}${path}]`)
                 return parts.join(' | ')
@@ -3477,7 +4166,7 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
     try {
         let responseText = ''
         if (effectiveProvider === 'openai') {
-            const model = configs['openai_whatsapp_model'] || 'gpt-4o-mini'
+            const model = configs['openai_model'] || 'gpt-4o-mini'
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -3486,7 +4175,7 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
             const data = await res.json()
             responseText = data.choices?.[0]?.message?.content || ''
         } else {
-            const model = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
+            const model = configs['gemini_model'] || 'gemini-2.5-flash'
             // Gemini 2.5+ models have built-in "thinking" that can leak internal
             // reasoning into the response. Disable it via thinkingBudget: 0.
             const isThinkingModel = /gemini-2\.5|gemini-3/i.test(model)
@@ -3659,6 +4348,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 senderName,
                 instanceId,
                 instanceName,
+                instanceToken,
                 brokerId: broker.id,
                 acquiredVia: 'whatsapp',
             }).catch(() => null)
@@ -4162,6 +4852,23 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const sendResult = await sendWhatsAppMessage({ phone: cleanPhone, message: responseText, instanceToken })
                 botMessageIds = await trackBotMessageId(supabase, conversation.id, botMessageIds, sendResult)
 
+                await syncWhatsAppLeadSnapshot(supabase, {
+                    phone: cleanPhone,
+                    senderName,
+                    instanceId,
+                    instanceName,
+                    instanceToken,
+                    brokerId: broker.id,
+                    acquiredVia: 'whatsapp',
+                    messages: updatedMessages,
+                    extractedData: controlledIntent === 'opt_out'
+                        ? { summary: 'Lead pediu para parar o contato por WhatsApp.', classification: 'cold' }
+                        : { summary: 'Lead pediu atendimento humano.', classification: 'hot' },
+                    shouldTransfer: controlledIntent === 'human_request',
+                }).catch((err) => {
+                    console.warn('[WhatsApp Agent] controlled intent CRM sync failed:', err)
+                })
+
                 return {
                     action: 'controlled_intent',
                     intent: controlledIntent,
@@ -4300,6 +5007,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 senderName,
                 instanceId,
                 instanceName,
+                instanceToken,
                 brokerId: broker.id,
                 acquiredVia: 'whatsapp',
                 messages: updatedMessages,
@@ -4602,10 +5310,10 @@ export const processWhatsAppMessage = inngest.createFunction(
 
                 const geminiKey = configs['gemini_api_key']
                 const openaiKey = configs['openai_api_key']
-                const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
-                const openaiModel = configs['openai_whatsapp_model'] || 'gpt-4o-mini'
+                const geminiModel = configs['gemini_model'] || 'gemini-2.5-flash'
+                const openaiModel = configs['openai_model'] || 'gpt-4o-mini'
                 const globalProvider = configs['ai_provider'] || 'gemini'
-                const effectiveProvider = configs['whatsapp_provider'] || globalProvider
+                const effectiveProvider = globalProvider
 
                 let analysisText = ''
 
@@ -4706,11 +5414,11 @@ export const processWhatsAppMessage = inngest.createFunction(
                 
                 const hasGemini = !!configs['gemini_api_key']
                 const hasOpenAI = !!configs['openai_api_key']
-                const geminiModel = configs['gemini_whatsapp_model'] || 'gemini-2.0-flash'
+                const geminiModel = configs['gemini_model'] || 'gemini-2.5-flash'
                 
                 // Respect the provider configured in the maintenance panel
                 const globalProvider = configs['ai_provider'] || 'openai'
-                const effectiveProvider = configs['whatsapp_provider'] || globalProvider
+                const effectiveProvider = globalProvider
                 const useWhisperFirst = effectiveProvider === 'openai'
                 
                 console.log(`[WhatsApp Agent] STT: provider=${effectiveProvider}, useWhisperFirst=${useWhisperFirst}, hasOpenAI=${hasOpenAI}, hasGemini=${hasGemini}`)
@@ -4923,6 +5631,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 senderName,
                 instanceId,
                 instanceName,
+                instanceToken,
                 brokerId: broker.id,
                 acquiredVia: 'whatsapp',
                 messages: aiResponse.updatedMessages,
@@ -5473,12 +6182,17 @@ export const processWhatsAppMessage = inngest.createFunction(
                         brokerMsg += `\n\n?? *Ultimas mensagens:*\n${lastMessages}`
 
                         const { sendWhatsAppMessage } = await import('../uazapi')
-                        await sendWhatsAppMessage({
-                            phone: targetInstance.phone_number,
-                            message: brokerMsg,
-                            instanceToken
-                        })
-                        console.log(`[Transfer] Summary sent to specialist instance ${targetInstance.id}`)
+                        const systemInstanceToken = await resolveSystemNotificationWhatsappInstance(supabase)
+                        if (!systemInstanceToken) {
+                            console.warn('[Transfer] Specialist summary skipped: global agent instance unavailable')
+                        } else {
+                            await sendWhatsAppMessage({
+                                phone: targetInstance.phone_number,
+                                message: brokerMsg,
+                                instanceToken: systemInstanceToken
+                            })
+                            console.log(`[Transfer] Summary sent to specialist instance ${targetInstance.id}`)
+                        }
 
                         // Specialist instance reaches the lead from its own WhatsApp
                         let leadMsg = tCfg['agent_transfer_message_lead']
@@ -5515,6 +6229,13 @@ export const processWhatsAppMessage = inngest.createFunction(
                         })
                     } else {
                         console.warn('[Transfer] No eligible specialist instance in configured queue')
+                        await sendHandoffSummaryIfNeeded(supabase, {
+                            conversation: { ...conversation, messages: aiResponse.updatedMessages, lead_phone: cleanPhone },
+                            instanceId,
+                            instanceToken,
+                            recipientPhone: cleanPhone,
+                            markerSuffix: 'transfer_fallback',
+                        }).catch(() => null)
                     }
                 } catch (transferErr) {
                     console.error('[Transfer] Erro ao notificar corretor:', transferErr)
@@ -6008,7 +6729,7 @@ export const shadowAgentResponse = inngest.createFunction(
                     const data = await res.json()
                     text = data.choices?.[0]?.message?.content || ''
                 } else {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -6021,7 +6742,7 @@ export const shadowAgentResponse = inngest.createFunction(
                     })
                     const data = await res.json()
                     await recordGeminiUsage({
-                        model: 'gemini-2.0-flash',
+                        model: 'gemini-2.5-flash',
                         feature: 'whatsapp_shadow_agent',
                         usageMetadata: data.usageMetadata,
                         metadata: { admin_user_id: user.id || null },

@@ -3,15 +3,19 @@ import { normalizeWhatsAppPhone } from '@/lib/whatsapp/lead-sync'
 
 type TrackedWhatsAppLinkOptions = {
     url: string
+    leadId?: string | null
     leadPhone?: string | null
     label?: string | null
     title?: string | null
     type?: string | null
     campaign?: string | null
     content?: string | null
+    contentId?: string | null
     source?: string | null
     medium?: string | null
 }
+
+const WHATSAPP_BUTTON_SAFE_URL_LENGTH = 300
 
 function slug(value: string): string {
     return value
@@ -54,12 +58,81 @@ export function whatsappClickEventType(linkType: string): string {
     return `whatsapp_${safeType}_click`
 }
 
+function setCompactParam(url: URL, key: string, value?: string | null) {
+    const clean = String(value || '').trim()
+    if (clean) url.searchParams.set(key, clean)
+}
+
+function normalizeCompactContentType(linkType: string): string {
+    const safeType = slug(linkType || '')
+    if (safeType === 'property' || safeType === 'imovel') return 'property'
+    if (safeType === 'news' || safeType === 'noticia' || safeType === 'noticias') return 'news'
+    if (safeType === 'blog' || safeType === 'article' || safeType === 'artigo') return 'blog'
+    return ''
+}
+
+function buildCompactInternalTrackingLink(params: {
+    destination: URL
+    linkType: string
+    eventType: string
+    source: string
+    medium: string
+    campaign: string
+    content?: string | null
+    contentId?: string | null
+    leadId?: string | null
+    leadPhone?: string | null
+    label?: string | null
+    title?: string | null
+}) {
+    const appUrl = new URL(getPublicAppUrl())
+    const compact = new URL('/api/track', appUrl)
+    const compactContentType = normalizeCompactContentType(params.linkType)
+    const contentId = String(params.contentId || '').trim()
+    if (compactContentType && contentId) {
+        compact.searchParams.set('ct', compactContentType)
+        compact.searchParams.set('pid', contentId)
+    } else {
+        compact.searchParams.set('p', `${params.destination.pathname}${params.destination.search}${params.destination.hash}`)
+    }
+    compact.searchParams.set('e', params.eventType)
+    compact.searchParams.set('t', params.linkType)
+    compact.searchParams.set('s', params.source)
+    compact.searchParams.set('m', params.medium)
+    compact.searchParams.set('c', params.campaign)
+    setCompactParam(compact, 'i', params.content)
+    setCompactParam(compact, 'l', params.leadId)
+    setCompactParam(compact, 'lp', normalizeWhatsAppPhone(params.leadPhone))
+    if (compact.toString().length > WHATSAPP_BUTTON_SAFE_URL_LENGTH) {
+        compact.searchParams.delete('i')
+    }
+    if (params.leadId && compact.toString().length > WHATSAPP_BUTTON_SAFE_URL_LENGTH) {
+        compact.searchParams.delete('lp')
+    }
+
+    let safeUrl = compact
+    const withLabel = new URL(safeUrl.toString())
+    setCompactParam(withLabel, 'lb', params.label ? String(params.label).slice(0, 42) : '')
+    if (withLabel.toString().length <= WHATSAPP_BUTTON_SAFE_URL_LENGTH) {
+        safeUrl = withLabel
+    }
+
+    const withTitle = new URL(safeUrl.toString())
+    setCompactParam(withTitle, 'lt', params.title ? String(params.title).slice(0, 64) : '')
+    if (withTitle.toString().length <= WHATSAPP_BUTTON_SAFE_URL_LENGTH) {
+        safeUrl = withTitle
+    }
+
+    return safeUrl.toString()
+}
+
 export function buildTrackedWhatsAppLink(options: TrackedWhatsAppLinkOptions): string {
     const rawUrl = String(options.url || '').trim()
     if (!/^https?:\/\//i.test(rawUrl)) return rawUrl
 
     try {
         const destination = new URL(rawUrl)
+        const cleanDestination = new URL(rawUrl)
         if (destination.pathname === '/api/track' && destination.searchParams.get('redirect')) {
             return destination.toString()
         }
@@ -72,17 +145,40 @@ export function buildTrackedWhatsAppLink(options: TrackedWhatsAppLinkOptions): s
         )
         const phone = normalizeWhatsAppPhone(options.leadPhone)
         const appUrl = new URL(getPublicAppUrl())
+        const eventType = whatsappClickEventType(linkType)
 
-        // For internal links, just append UTMs directly to avoid URL length limits in WhatsApp Buttons
+        // WhatsApp interactive buttons are sensitive to long URLs, so internal WhatsApp
+        // buttons go through a compact /api/track alias and are expanded server-side.
         if (destination.hostname === appUrl.hostname) {
             destination.searchParams.set('utm_source', source)
             destination.searchParams.set('utm_medium', medium)
             destination.searchParams.set('utm_campaign', campaign)
             if (options.content) destination.searchParams.set('utm_content', String(options.content))
+            if (options.leadId) destination.searchParams.set('lead_id', String(options.leadId))
             if (phone) destination.searchParams.set('lead_phone', phone)
             // Optional but helps our tracker know what event triggered this
-            destination.searchParams.set('event_type', whatsappClickEventType(linkType))
-            
+            destination.searchParams.set('event_type', eventType)
+            destination.searchParams.set('link_type', linkType)
+            if (options.label) destination.searchParams.set('link_label', String(options.label).slice(0, 80))
+            if (options.title) destination.searchParams.set('link_title', String(options.title).slice(0, 80))
+
+            if (medium === 'whatsapp' || destination.toString().length > WHATSAPP_BUTTON_SAFE_URL_LENGTH) {
+                return buildCompactInternalTrackingLink({
+                    destination: cleanDestination,
+                    linkType,
+                    eventType,
+                    source,
+                    medium,
+                    campaign,
+                    content: options.content,
+                    contentId: options.contentId,
+                    leadId: options.leadId,
+                    leadPhone: phone,
+                    label: options.label,
+                    title: options.title,
+                })
+            }
+
             return destination.toString()
         }
 
@@ -102,6 +198,7 @@ export function buildTrackedWhatsAppLink(options: TrackedWhatsAppLinkOptions): s
         trackingUrl.searchParams.set('utm_medium', medium)
         trackingUrl.searchParams.set('utm_campaign', campaign)
         if (options.content) trackingUrl.searchParams.set('utm_content', String(options.content))
+        if (options.leadId) trackingUrl.searchParams.set('lead_id', String(options.leadId))
         if (phone) trackingUrl.searchParams.set('lead_phone', phone)
 
         return trackingUrl.toString()

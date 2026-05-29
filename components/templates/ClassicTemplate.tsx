@@ -63,7 +63,7 @@ export default function ClassicTemplate({ data, slug, landingPageId, agentName, 
                                 <div className="lp-stat-card">
                                     <Bed size={24} color={primaryColor} />
                                     <span className="lp-stat-value">{stats.bedrooms}</span>
-                                    <span className="lp-stat-label">Quartos</span>
+                                    <span className="lp-stat-label">Dormitórios</span>
                                 </div>
                                 <div className="lp-stat-card">
                                     <Bath size={24} color={primaryColor} />
@@ -117,7 +117,7 @@ export default function ClassicTemplate({ data, slug, landingPageId, agentName, 
 
             {/* Footer */}
             <footer className="lp-footer">
-                <p>© {new Date().getFullYear()} Pilger Imóveis. Todos os direitos reservados.</p>
+                <p>© {new Date().getFullYear()} Imobiliaria Guilherme Pilger. Todos os direitos reservados.</p>
             </footer>
 
             <style jsx>{`

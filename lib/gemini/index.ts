@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
-const DEFAULT_MODEL = 'gemini-2.0-flash'
+const DEFAULT_MODEL = 'gemini-2.5-flash'
 
 function getSupabase() {
     return createClient(
@@ -48,7 +48,7 @@ export async function getGeminiModel(type: 'concierge' | 'cloner' = 'concierge')
     } catch { /* fallback to default */ }
 
     // Default optimized for each task
-    return type === 'cloner' ? 'gemini-1.5-pro' : 'gemini-2.0-flash'
+    return type === 'cloner' ? 'gemini-1.5-pro' : DEFAULT_MODEL
 }
 
 export interface GeminiModel {

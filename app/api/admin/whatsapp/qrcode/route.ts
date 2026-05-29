@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createInstance, connectInstance } from '@/lib/uazapi'
+import { DEFAULT_WHATSAPP_INSTANCE_CONFIG } from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {
     return createClient(
@@ -191,16 +192,22 @@ export async function POST(request: NextRequest) {
 
                 // If there was a row without token, update. Otherwise insert.
                 if (existing) {
+                    const existingConfig = existing?.config && typeof existing.config === 'object' ? existing.config : null
+                    const updates: Record<string, any> = { instance_token: token, instance_name, updated_at: new Date().toISOString() }
+                    if (!existingConfig || Object.keys(existingConfig).length === 0) {
+                        updates.config = DEFAULT_WHATSAPP_INSTANCE_CONFIG
+                    }
                     await supabase
                         .from('whatsapp_instances')
-                        .update({ instance_token: token, instance_name, updated_at: new Date().toISOString() })
+                        .update(updates)
                         .eq('id', existing.id)
-                    instance = { ...existing, instance_token: token, instance_name }
+                    instance = { ...existing, ...updates }
                 } else {
                     const insertData: any = {
                         instance_name,
                         instance_token: token,
                         status: 'disconnected',
+                        config: DEFAULT_WHATSAPP_INSTANCE_CONFIG,
                     }
                     if (broker_id) insertData.broker_id = broker_id
                     if (admin_user_id) insertData.admin_user_id = admin_user_id

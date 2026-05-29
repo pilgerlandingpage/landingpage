@@ -1,11 +1,29 @@
 import { NextResponse } from 'next/server'
+import { getCachedFacebookOrganic } from '@/lib/social/facebook'
+import { getCachedInstagramOrganic } from '@/lib/social/instagram'
 
 export async function GET() {
-  // Retorna os dados mockados no formato numérico real.
-  // Futuramente, esta rota irá ler do Supabase ou fazer o fetch real nas APIs (YouTube Data API, Instagram Graph, etc)
+  let instagram = 187000
+  let facebook = 14915
+
+  try {
+    const cached = await getCachedInstagramOrganic(1)
+    instagram = cached?.totals.followers || instagram
+  } catch (error) {
+    console.warn('Instagram social stats cache unavailable:', error instanceof Error ? error.message : error)
+  }
+
+  try {
+    const cached = await getCachedFacebookOrganic(1)
+    facebook = cached?.totals.followers || facebook
+  } catch (error) {
+    console.warn('Facebook social stats cache unavailable:', error instanceof Error ? error.message : error)
+  }
+
   return NextResponse.json({
-    instagram: 187000,
+    instagram,
+    facebook,
     tiktok: 210000,
-    youtube: 119000
+    youtube: 119000,
   })
 }

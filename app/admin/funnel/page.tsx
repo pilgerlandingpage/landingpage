@@ -69,6 +69,12 @@ export default function FunnelPage() {
                     { label: '✅ Convertido', count: data.converted || 0, percentage: ((data.converted || 0) / total) * 100 },
                 ]
 
+                steps.splice(9, 0, {
+                    label: 'GPS autorizado',
+                    count: data.gpsLocationGranted || 0,
+                    percentage: ((data.gpsLocationGranted || 0) / total) * 100,
+                })
+
                 setFunnelData(steps)
             } catch (error) {
                 console.error('Error loading funnel:', error)
@@ -233,7 +239,7 @@ export default function FunnelPage() {
                             <tr style={{ borderBottom: '1px solid #2a2a2a', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Status</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Última Visita</th>
-                                <th style={{ padding: '8px', fontWeight: 500 }}>Localização</th>
+                                <th style={{ padding: '8px', fontWeight: 500 }}>Localizacao aprox.</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Origem</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Páginas</th>
                                 <th style={{ padding: '8px', fontWeight: 500 }}>Leitura</th>

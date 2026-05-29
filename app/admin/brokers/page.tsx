@@ -20,6 +20,7 @@ interface Broker {
     assigned_page_slugs: string[]
     phone?: string
     summary_to_phone?: string
+    transfer_to_phone?: string
     connectyhub_chat_message?: string
     system_prompt?: string
     voice_id?: string
@@ -135,6 +136,7 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         summary_to_phone: '',
+        transfer_to_phone: '',
         system_prompt: '',
         voice_id: '',
         handoff_prompt: '',
@@ -153,6 +155,7 @@ export default function BrokersAdmin() {
         assigned_page_slugs: [] as string[],
         phone: '',
         summary_to_phone: '',
+        transfer_to_phone: '',
         system_prompt: '',
         voice_id: '',
         handoff_prompt: '',
@@ -359,10 +362,13 @@ export default function BrokersAdmin() {
         e.preventDefault()
         const selectedInstance = availableInstances.find(i => i.id === selectedInstanceId) || null
         const syncedWhatsAppPhone = getInstancePhone(selectedInstance) || formData.phone || ''
+        const humanTransferPhone = String(formData.summary_to_phone || formData.transfer_to_phone || '').replace(/\D/g, '')
 
         const payload = {
             ...formData,
             phone: syncedWhatsAppPhone,
+            summary_to_phone: humanTransferPhone,
+            transfer_to_phone: humanTransferPhone,
             assignment_type: formData.assignment_type,
             assigned_page_slugs: formData.assigned_page_slugs
         }
@@ -664,12 +670,15 @@ export default function BrokersAdmin() {
                                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>WhatsApp para Resumo de Plantão</label>
                                         <input
                                             value={formData.summary_to_phone || ''}
-                                            onChange={(e) => setFormData({ ...formData, summary_to_phone: e.target.value.replace(/\D/g, '') })}
+                                            onChange={(e) => {
+                                                const clean = e.target.value.replace(/\D/g, '')
+                                                setFormData({ ...formData, summary_to_phone: clean, transfer_to_phone: clean })
+                                            }}
                                             placeholder="Opcional: 5547999999999"
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e0ddd8', fontSize: '0.88rem', fontFamily: 'inherit', background: '#fafafa' }}
                                         />
                                         <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '4px' }}>
-                                            Se vazio, o sistema tenta enviar o resumo para o próprio número da instância (mensagem para si mesmo).
+                                            Use um número diferente da instância do agente. Se vazio, o sistema procura outro destino humano configurado.
                                         </p>
                                     </div>
                                 </div>
@@ -788,7 +797,7 @@ export default function BrokersAdmin() {
                                             { tag: '{transferir}', desc: 'Transferir ao corretor humano', color: '#f59e0b' },
                                             { tag: '{documentos}', desc: 'Botão para solicitar documentos', color: '#818cf8' },
                                             { tag: '{horario}', desc: 'Horários de atendimento', color: '#06b6d4' },
-                                            { tag: '{empresa}', desc: 'Info da Pilger Imóveis', color: '#06b6d4' },
+                                            { tag: '{empresa}', desc: 'Info da Imobiliaria Guilherme Pilger', color: '#06b6d4' },
                                             { tag: '{localizacao_empresa}', desc: 'Link de localização da imobiliária', color: '#06b6d4' },
                                             { tag: '{imoveis}', desc: 'Carrega imóveis ativos e permite enviar botão Ver imóvel', color: '#f59e0b' },
                                             { tag: '{botao_instagram}', desc: 'Botão rastreável para Instagram', color: '#0ea5e9' },
@@ -832,7 +841,7 @@ export default function BrokersAdmin() {
                                         style={{ minHeight: '280px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: '1.6' }}
                                         value={formData.system_prompt}
                                         onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                                        placeholder={`Você é {nome_corretor}, corretor de imóveis da Pilger Imóveis em Balneário Camboriú.\n\nCOMO SE COMPORTAR:\n- Converse naturalmente, como uma pessoa real no WhatsApp\n- Seja simpático, use linguagem informal mas profissional\n- Use frases curtas (é WhatsApp, não email)\n- NUNCA pareça um robô ou siga um roteiro engessado\n- Adapte-se ao estilo do cliente\n\nO QUE COLETAR (naturalmente, durante a conversa):\n- Nome do cliente\n- Se quer comprar pra morar ou investir\n- Região de interesse\n- Faixa de orçamento\n\nQUANDO USAR AS FERRAMENTAS:\n- Quando o lead perguntar por opções, consulte {imoveis}\n- Quando o lead demonstrar interesse real, ofereça agendar visita com {agendamento}\n- Se perguntar sobre regiões, use {regioes}\n- Quando tiver todas as informações, use {transferir}\n- Use o nome com moderação quando souber: {nome_lead}\n\nIMPORTANTE:\n- Nunca invente dados de imóveis\n- Nunca fale preço exato\n- Nunca revele que é IA`}
+                                        placeholder={`Você é {nome_corretor}, corretor de imóveis da Imobiliaria Guilherme Pilger em Balneário Camboriú.\n\nCOMO SE COMPORTAR:\n- Converse naturalmente, como uma pessoa real no WhatsApp\n- Seja simpático, use linguagem informal mas profissional\n- Use frases curtas (é WhatsApp, não email)\n- NUNCA pareça um robô ou siga um roteiro engessado\n- Adapte-se ao estilo do cliente\n\nO QUE COLETAR (naturalmente, durante a conversa):\n- Nome do cliente\n- Se quer comprar pra morar ou investir\n- Região de interesse\n- Faixa de orçamento\n\nQUANDO USAR AS FERRAMENTAS:\n- Quando o lead perguntar por opções, consulte {imoveis}\n- Quando o lead demonstrar interesse real, ofereça agendar visita com {agendamento}\n- Se perguntar sobre regiões, use {regioes}\n- Quando tiver todas as informações, use {transferir}\n- Use o nome com moderação quando souber: {nome_lead}\n\nIMPORTANTE:\n- Nunca invente dados de imóveis\n- Nunca fale preço exato\n- Nunca revele que é IA`}
                                     />
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                                         Escreva como o agente deve conversar. Use as tags acima para dar ações ao agente. Quanto mais contexto, mais natural o atendimento.
@@ -1279,7 +1288,8 @@ export default function BrokersAdmin() {
                                         assignment_type: broker.assignment_type || 'all',
                                         assigned_page_slugs: broker.assigned_page_slugs || [],
                                         phone: broker.phone || '',
-                                        summary_to_phone: (broker as any).summary_to_phone || '',
+                                        summary_to_phone: (broker as any).summary_to_phone || (broker as any).transfer_to_phone || '',
+                                        transfer_to_phone: (broker as any).transfer_to_phone || (broker as any).summary_to_phone || '',
 
                                         system_prompt: broker.system_prompt || '',
                                         voice_id: (broker as any).voice_id || '',

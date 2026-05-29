@@ -21,6 +21,37 @@ function getBaseUrl(): string {
     return `https://graph.facebook.com/${META_API_VERSION}`
 }
 
+function centsToCurrency(value: any) {
+    const amount = Number(value || 0)
+    return Number.isFinite(amount) ? amount / 100 : 0
+}
+
+function metaAccountStatusLabel(status: number | string | null | undefined) {
+    const numericStatus = Number(status)
+    const labels: Record<number, string> = {
+        1: 'Ativa',
+        2: 'Desativada',
+        3: 'Pendente de pagamento',
+        7: 'Pendente de revisao',
+        8: 'Aguardando liquidacao',
+        9: 'Em periodo de carencia',
+        100: 'Fechamento pendente',
+        101: 'Fechada',
+    }
+
+    return labels[numericStatus] || `Status ${status || 'desconhecido'}`
+}
+
+function metaAccountHealthMessage(status: number, balance: number) {
+    if (status === 1) return 'Conta Meta ativa para veiculacao.'
+    if (status === 3) {
+        return balance > 0
+            ? `Conta Meta com pendencia de pagamento. Saldo/pendencia informado pela Meta: R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`
+            : 'Conta Meta com pendencia de pagamento. A entrega pode ficar pausada ate a regularizacao.'
+    }
+    return 'Conta Meta nao esta ativa. Verifique o Gerenciador de Anuncios antes de avaliar performance.'
+}
+
 async function getMetaConfig() {
     const supabase = createAdminClient();
     const { data } = await supabase.from('app_config').select('key, value').in('key', ['meta_access_token', 'meta_ad_account_id', 'meta_pixel_id']);
@@ -71,6 +102,39 @@ export async function testConnection(): Promise<{ success: boolean; message: str
         }
     } catch (err) {
         return { success: false, message: `Falha na conexão: ${String(err)}` }
+    }
+}
+
+export async function getAdAccountHealth() {
+    const conf = await getMetaConfig()
+    const res = await fetch(
+        `${getBaseUrl()}/${conf.adAccountId}?fields=name,account_status,disable_reason,currency,timezone_name,amount_spent,balance&access_token=${conf.accessToken}`
+    )
+    const data = await res.json()
+
+    if (data.error) {
+        throw new Error(`Erro ao verificar conta Meta: ${data.error.message}`)
+    }
+
+    const status = Number(data.account_status || 0)
+    const balance = centsToCurrency(data.balance)
+    const paymentIssue = status === 3
+    const active = status === 1
+
+    return {
+        account_id: data.id,
+        name: data.name,
+        status,
+        status_label: metaAccountStatusLabel(status),
+        disable_reason: Number(data.disable_reason || 0),
+        currency: data.currency,
+        timezone_name: data.timezone_name,
+        amount_spent: centsToCurrency(data.amount_spent),
+        balance,
+        is_active: active,
+        is_payment_issue: paymentIssue,
+        severity: active ? 'ok' : paymentIssue ? 'error' : 'warning',
+        message: metaAccountHealthMessage(status, balance),
     }
 }
 
@@ -360,6 +424,49 @@ export async function getAccountInsightsByCampaign(
     }
 
     return map
+}
+
+export async function getTodayAccountSpendEstimate(currentInsightsSpend = 0): Promise<{
+    spend: number
+    current_insights_spend: number
+    lifetime_insights_spend: number
+    account_amount_spent: number
+    currency?: string
+    timezone_name?: string
+    source: 'insights' | 'account_amount_spent_delta'
+}> {
+    const conf = await getMetaConfig()
+
+    const [accountRes, maximumRes] = await Promise.all([
+        fetch(`${getBaseUrl()}/${conf.adAccountId}?fields=amount_spent,currency,timezone_name&access_token=${conf.accessToken}`),
+        fetch(`${getBaseUrl()}/${conf.adAccountId}/insights?fields=spend&level=account&date_preset=maximum&access_token=${conf.accessToken}`),
+    ])
+
+    const accountData = await accountRes.json()
+    const maximumData = await maximumRes.json()
+
+    if (accountData.error) {
+        throw new Error(`Erro ao buscar gasto total Meta: ${accountData.error.message}`)
+    }
+
+    if (maximumData.error) {
+        throw new Error(`Erro ao buscar gasto vitalicio Meta: ${maximumData.error.message}`)
+    }
+
+    const accountAmountSpent = centsToCurrency(accountData.amount_spent)
+    const lifetimeInsightsSpend = Number.parseFloat(maximumData.data?.[0]?.spend || '0')
+    const deltaSpend = Math.max(0, accountAmountSpent - lifetimeInsightsSpend)
+    const spend = Math.max(currentInsightsSpend, deltaSpend)
+
+    return {
+        spend: Number(spend.toFixed(2)),
+        current_insights_spend: Number(currentInsightsSpend.toFixed(2)),
+        lifetime_insights_spend: Number(lifetimeInsightsSpend.toFixed(2)),
+        account_amount_spent: Number(accountAmountSpent.toFixed(2)),
+        currency: accountData.currency,
+        timezone_name: accountData.timezone_name,
+        source: spend > currentInsightsSpend ? 'account_amount_spent_delta' : 'insights',
+    }
 }
 
 export async function getAccountMonthlySpend(): Promise<Record<string, number>> {

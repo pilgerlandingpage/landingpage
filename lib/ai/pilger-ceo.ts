@@ -8,6 +8,7 @@ import {
 } from '../market-radar/insights'
 import { sendAlertToAdmins } from '../ads/whatsapp-alerts'
 import { getCeoGeminiModel, getCeoOpenAIModel, getCeoProvider } from './config'
+import { buildAgentContextBrief, getAgentEcosystemContext } from '../intelligence/ecosystem'
 
 function getSupabase() {
   return createClient(
@@ -184,6 +185,8 @@ export async function generateDailyPilgerReport() {
   const ceoBasePrompt = await getOptionalPromptFromConfig('ceo_agent_system_prompt')
   const dailyPrompt = await getRequiredPromptFromConfig('pilger_daily_system_prompt')
   const systemPrompt = [ceoBasePrompt, dailyPrompt].filter(Boolean).join('\n\n')
+  const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'ceo', days: 30, limit: 120 })
+  const ecosystemBrief = buildAgentContextBrief(ecosystemContext)
 
   // 4. Gerar relatório para cada plataforma que tenha métricas
   for (const { platform, platformMetrics, platformLabel } of [
@@ -215,6 +218,9 @@ ${JSON.stringify(summaryData, null, 2)}
 
 Radar de Mercado (Interesse atual):
 ${JSON.stringify(radarContext, null, 2)}
+
+Central de Inteligencia Pilger:
+${ecosystemBrief}
 
 Formato de Saída esperado (Markdown):
 1. **🚀 Resumo Geral ${platformLabel}:** O que aconteceu de mais importante hoje (gastos vs leads).
@@ -391,6 +397,8 @@ export async function generateWeeklyPilgerReport() {
   const ceoBasePrompt = await getOptionalPromptFromConfig('ceo_agent_system_prompt')
   const weeklyPrompt = await getRequiredPromptFromConfig('pilger_weekly_system_prompt')
   const systemPrompt = [ceoBasePrompt, weeklyPrompt].filter(Boolean).join('\n\n')
+  const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'ceo', days: 30, limit: 120 })
+  const ecosystemBrief = buildAgentContextBrief(ecosystemContext)
 
   const results = []
 
@@ -422,6 +430,9 @@ ${JSON.stringify(summaryData, null, 2)}
 
 **2. Radar de Mercado (Trends Externos):**
 ${JSON.stringify(radarResults.map(r => ({ keyword: r.keyword, type: r.trend, currentScore: r.currentScore, avgScore: r.averageScore })), null, 2)}
+
+**3. Central de Inteligencia Pilger:**
+${ecosystemBrief}
 
 Formato de Saída esperado (Markdown):
 1. **📊 Balanço Semanal ${platformLabel}:** Como foi a semana (CPA geral, Volume de Leads, Qualidade).

@@ -57,90 +57,110 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
     return (
         <>
             <style>{`
-                /* ===== WRAPPER ===== */
                 .sv-wrap {
                     display: flex;
                     flex-direction: column;
                     flex: 1;
                     position: relative;
                     overflow: hidden;
-                    background: #f7f7f5;
-                    /* Explicit height calculation — doesn't depend on parent flex chain */
-                    height: calc(100vh - 57px);  /* fallback: 100vh minus mobile header */
-                    height: calc(100dvh - 57px); /* preferred: dynamic viewport height */
+                    background: #f3f0ea;
+                    height: 100%;
+                    min-height: 0;
                 }
 
-                /* ===== MAP ===== */
                 .sv-map {
                     position: absolute;
-                    top: 0; left: 0; right: 0; bottom: 0;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
                     z-index: 1;
+                    background: #111;
                 }
 
-                /* ===== CONTENT PANEL (bottom sheet on mobile) ===== */
                 .sv-panel {
                     position: absolute;
-                    left: 0; right: 0; bottom: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
                     z-index: 10;
-                    background: #fff;
-                    border-top-left-radius: 20px;
-                    border-top-right-radius: 20px;
-                    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+                    background:
+                        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,247,243,0.98));
+                    border: 1px solid rgba(201,169,110,0.16);
+                    border-bottom: 0;
+                    border-top-left-radius: 22px;
+                    border-top-right-radius: 22px;
+                    box-shadow:
+                        0 -18px 44px rgba(18,18,18,0.18),
+                        0 -1px 0 rgba(255,255,255,0.8) inset;
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
+                    backdrop-filter: blur(18px);
                 }
                 .sv-handle {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 10px 0 6px;
+                    padding: 9px 0 7px;
                     cursor: grab;
                     touch-action: none;
                     flex-shrink: 0;
                     user-select: none;
                     -webkit-user-select: none;
                 }
+                .sv-handle:active {
+                    cursor: grabbing;
+                }
                 .sv-handle-bar {
-                    width: 40px; height: 5px;
-                    background: #d1d1d1;
+                    width: 42px;
+                    height: 5px;
+                    background: linear-gradient(90deg, #d7c29a, #b8945f);
                     border-radius: 100px;
+                    box-shadow: 0 1px 8px rgba(184,148,95,0.2);
                 }
                 .sv-scroll {
                     flex: 1;
                     overflow-y: auto;
                     overscroll-behavior: contain;
                     -webkit-overflow-scrolling: touch;
-                    padding: 0 16px 80px;
+                    padding: 0 16px 82px;
                     scrollbar-width: thin;
-                    scrollbar-color: rgba(0,0,0,0.1) transparent;
+                    scrollbar-color: rgba(184,148,95,0.34) transparent;
                 }
                 .sv-scroll::-webkit-scrollbar { width: 4px; }
                 .sv-scroll::-webkit-scrollbar-track { background: transparent; }
-                .sv-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 20px; }
+                .sv-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(184,148,95,0.34);
+                    border-radius: 20px;
+                }
 
-                /* ===== DESKTOP (>=1024px) ===== */
                 @media (min-width: 1024px) {
                     .sv-wrap {
                         flex-direction: row;
-                        padding: 24px;
-                        gap: 24px;
-                        height: calc(100vh - 65px);
-                        height: calc(100dvh - 65px);
+                        padding: 28px;
+                        gap: 28px;
+                        height: 100%;
+                        min-height: 0;
+                        background:
+                            linear-gradient(180deg, #f7f5f0 0%, #eee9df 100%);
                     }
-                    /* Panel becomes left sidebar */
                     .sv-panel {
                         position: relative;
                         top: auto !important;
-                        left: auto; right: auto; bottom: auto;
-                        width: 52%;
-                        min-width: 480px;
-                        max-width: 780px;
+                        left: auto;
+                        right: auto;
+                        bottom: auto;
+                        width: 43%;
+                        min-width: 500px;
+                        max-width: 735px;
                         flex-shrink: 0;
                         background: transparent;
                         border-radius: 0;
+                        border: 0;
                         box-shadow: none;
-                        overflow-y: auto;
+                        backdrop-filter: none;
+                        overflow: hidden;
                         transition: none !important;
                         scrollbar-width: thin;
                         scrollbar-color: rgba(0,0,0,0.15) transparent;
@@ -148,31 +168,36 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     .sv-panel::-webkit-scrollbar { width: 6px; }
                     .sv-panel::-webkit-scrollbar-track { background: transparent; }
                     .sv-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
-                    /* Hide drag handle */
                     .sv-handle { display: none; }
-                    /* Adjust scroll padding */
                     .sv-scroll {
-                        padding: 20px 16px 20px 0;
-                        overflow-y: visible;
+                        padding: 4px 16px 22px 4px;
+                        overflow-y: auto;
+                        overflow-x: hidden;
                     }
-                    /* Map becomes right panel */
                     .sv-map {
                         position: relative;
-                        top: auto; left: auto; right: auto; bottom: auto;
+                        top: auto;
+                        left: auto;
+                        right: auto;
+                        bottom: auto;
                         flex: 1;
                         min-width: 0;
-                        border-radius: 20px;
-                        border: 1px solid #e8e5e0;
-                        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+                        border-radius: 22px;
+                        border: 1px solid rgba(35,31,26,0.08);
+                        box-shadow:
+                            0 18px 48px rgba(30,25,18,0.16),
+                            0 0 0 1px rgba(255,255,255,0.78) inset;
                         overflow: hidden;
                     }
                 }
                 @media (min-width: 1280px) {
-                    .sv-wrap { padding: 32px; gap: 32px; }
-                    .sv-panel { max-width: 780px; }
+                    .sv-wrap {
+                        padding: 32px;
+                        gap: 32px;
+                    }
+                    .sv-panel { max-width: 720px; }
                 }
 
-                /* Force leaflet containers */
                 .sv-map .leaflet-container {
                     width: 100% !important;
                     height: 100% !important;

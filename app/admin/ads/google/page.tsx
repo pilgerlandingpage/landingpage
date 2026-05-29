@@ -68,6 +68,22 @@ interface Report {
     created_at: string
 }
 
+interface GoogleAccountHealth {
+    account_id?: string
+    name?: string
+    customer_status?: string
+    customer_status_label: string
+    billing_status?: string | null
+    billing_status_label?: string | null
+    payments_account?: string | null
+    currency?: string | null
+    timezone_name?: string | null
+    is_active: boolean
+    is_payment_issue: boolean
+    severity: 'ok' | 'warning' | 'error'
+    message: string
+}
+
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
     draft: { label: 'Rascunho', color: '#94a3b8' },
     pending: { label: 'Publicando...', color: '#f59e0b' },
@@ -123,6 +139,7 @@ export default function AdsPage() {
     const [expandedReport, setExpandedReport] = useState<string | null>(null)
     const [showHistory, setShowHistory] = useState(false)
     const [internalStats, setInternalStats] = useState<{ totalLeads: number; recentLeads: any[] }>({ totalLeads: 0, recentLeads: [] })
+    const [googleAccountHealth, setGoogleAccountHealth] = useState<GoogleAccountHealth | null>(null)
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type })
@@ -148,6 +165,7 @@ export default function AdsPage() {
                 const data = await campRes.json()
                 setCampaigns(data.campaigns || [])
                 setInternalStats(data.internalStats || { totalLeads: 0, recentLeads: [] })
+                setGoogleAccountHealth(data.accountHealth || null)
             }
             if (alertRes.ok) {
                 const data = await alertRes.json()
@@ -313,6 +331,7 @@ export default function AdsPage() {
     const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0
     const avgCpa = totalConversions > 0 ? totalSpend / totalConversions : (totalLeads > 0 ? totalSpend / totalLeads : 0)
     const avgCpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    const googleAccountNeedsAttention = Boolean(googleAccountHealth && googleAccountHealth.severity !== 'ok')
 
     const spendBarData = filteredCampaigns
         .filter(c => c.latest_metrics?.spend)
@@ -434,6 +453,32 @@ export default function AdsPage() {
                     </Link>
                 </div>
             </div>
+
+            {googleAccountNeedsAttention && googleAccountHealth && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    marginBottom: 18,
+                    background: googleAccountHealth.severity === 'error' ? 'rgba(239,68,68,.08)' : 'rgba(245,158,11,.09)',
+                    border: `1px solid ${googleAccountHealth.severity === 'error' ? 'rgba(239,68,68,.28)' : 'rgba(245,158,11,.28)'}`,
+                    color: 'var(--text-primary)',
+                }}>
+                    <AlertTriangle size={21} color={googleAccountHealth.severity === 'error' ? '#ef4444' : '#f59e0b'} style={{ marginTop: 2, flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                        <strong style={{ display: 'block', marginBottom: 4 }}>
+                            {googleAccountHealth.is_payment_issue ? 'Conta Google Ads com possivel problema de pagamento' : 'Conta Google Ads precisa de atencao'}
+                        </strong>
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.86rem', lineHeight: 1.45 }}>
+                            {googleAccountHealth.message} Status: {googleAccountHealth.customer_status_label}
+                            {googleAccountHealth.billing_status_label ? ` | Faturamento: ${googleAccountHealth.billing_status_label}` : ''}.
+                            {' '}Enquanto isso, o Google pode pausar entregas, zerar gasto do dia ou atrasar dados de performance.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <div className="ads-top-cards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                 <AdsCountdown noMargin />

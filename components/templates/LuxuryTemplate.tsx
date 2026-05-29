@@ -368,7 +368,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     </div>
 
                     <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.5em] text-white/20 uppercase">
-                        <span>&copy; {new Date().getFullYear()} Pilger Imóveis.</span>
+                        <span>&copy; {new Date().getFullYear()} Imobiliaria Guilherme Pilger.</span>
                         <span className="mt-4 md:mt-0">Todos os direitos reservados.</span>
                     </div>
                 </div>

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Instagram, Youtube } from 'lucide-react'
+import { Instagram, MessageCircle, PlayCircle, Youtube } from 'lucide-react'
+import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
-// Hook customizado para animação dos números
 function useCountUp(end: number, startAnim: boolean, duration: number = 2500) {
   const [count, setCount] = useState(0)
 
@@ -16,22 +16,26 @@ function useCountUp(end: number, startAnim: boolean, duration: number = 2500) {
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp
       const progress = Math.min((timestamp - startTime) / duration, 1)
-      // easeOutExpo para ficar mais rápido no começo e devagar no fim
       const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
       setCount(Math.floor(easeOut * end))
-      
+
       if (progress < 1) {
         animationFrame = requestAnimationFrame(step)
       }
     }
 
     animationFrame = requestAnimationFrame(step)
-
     return () => cancelAnimationFrame(animationFrame)
   }, [end, duration, startAnim])
 
   return count
 }
+
+const TiktokIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M19.589 6.686a4.793 4.793 0 0 1-3.97-1.53 4.747 4.747 0 0 1-1.359-3.644H10.15v13.13a2.868 2.868 0 0 1-3.418 2.82 2.872 2.872 0 0 1-2.316-2.318 2.868 2.868 0 0 1 2.82-3.42c.162 0 .322.015.48.046V7.614a6.974 6.974 0 0 0-7.702 7.7 6.978 6.978 0 0 0 6.96 6.944c3.844 0 6.96-3.116 6.96-6.96V9.456a8.887 8.887 0 0 0 5.655 2.01v-4.78z" />
+  </svg>
+)
 
 export default function SocialProofSection() {
   const [stats, setStats] = useState({ instagram: 0, tiktok: 0, youtube: 0 })
@@ -39,15 +43,13 @@ export default function SocialProofSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    // Busca os dados da API
     fetch('/api/social-stats')
       .then(res => res.json())
       .then(data => setStats(data))
-      .catch(err => console.error("Falha ao buscar stats sociais", err))
+      .catch(err => console.error('Falha ao buscar stats sociais', err))
   }, [])
 
   useEffect(() => {
-    // Inicia a animação apenas quando o usuário chega na seção (scroll)
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -55,289 +57,265 @@ export default function SocialProofSection() {
           observer.disconnect()
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     )
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
   }, [])
 
   const igCount = useCountUp(stats.instagram, isVisible)
   const tkCount = useCountUp(stats.tiktok, isVisible)
   const ytCount = useCountUp(stats.youtube, isVisible)
-
-  // Formata número (ex: 187000 => 187.000)
   const formatNumber = (num: number) => num.toLocaleString('pt-BR')
+
+  const cards = [
+    {
+      href: 'https://www.instagram.com/guilhermepilger/',
+      name: 'Instagram',
+      label: 'Bastidores, tours e desejo',
+      value: formatNumber(igCount),
+      metric: 'seguidores',
+      icon: <Instagram size={22} />,
+      className: 'ig',
+    },
+    {
+      href: 'https://www.tiktok.com/@guilhermepilgeroficial',
+      name: 'TikTok',
+      label: 'Cortes rápidos do mercado',
+      value: formatNumber(tkCount),
+      metric: 'seguidores',
+      icon: <TiktokIcon />,
+      className: 'tk',
+    },
+    {
+      href: 'https://www.youtube.com/@guilhermepilger',
+      name: 'YouTube',
+      label: 'Tours completos e análises',
+      value: formatNumber(ytCount),
+      metric: 'inscritos',
+      icon: <Youtube size={22} />,
+      className: 'yt',
+    },
+    {
+      href: '#whatsapp',
+      name: 'WhatsApp',
+      label: 'Atendimento direto',
+      value: '1:1',
+      metric: 'consultoria',
+      icon: <MessageCircle size={22} />,
+      className: 'wa',
+      capture: true,
+    },
+  ]
+
+  const openWhatsAppCapture = () => {
+    openWhatsAppWithLeadCapture({
+      phone: '5547992528080',
+      message: 'Olá! Vim pelo site e quero falar com o Guilherme.',
+      slug: 'home',
+      template: 'social-proof-whatsapp',
+    })
+  }
 
   return (
     <section className="social-proof-section" ref={sectionRef}>
-      <div className="watermark-bg">REDES SOCIAIS</div>
-      
       <div className="social-container">
-        
-        {/* Lado Esquerdo - Cards */}
-        <div className="social-cards-column">
-          <div className="social-header">
-            <h2>Maior presença digital do Sul do Brasil</h2>
-            <p>Conectando milhares de pessoas todos os dias ao mercado de alto padrão de Balneário Camboriú.</p>
-          </div>
-
-          <div className="cards-grid">
-            
-            {/* Card Instagram */}
-            <a href="https://www.instagram.com/guilhermepilger/" target="_blank" rel="noopener noreferrer" className="glass-card ig-card">
-              <div className="card-icon ig-icon">
-                <Instagram size={28} />
-              </div>
-              <div className="card-info">
-                <h3>Instagram</h3>
-                <div className="counter">
-                  <span className="number">{formatNumber(igCount)}</span>
-                  <span className="label">SEGUIDORES</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card TikTok */}
-            <a href="https://www.tiktok.com/@guilhermepilger_" target="_blank" rel="noopener noreferrer" className="glass-card tk-card">
-              <div className="card-icon tk-icon">
-                {/* Ícone customizado do TikTok */}
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19.589 6.686a4.793 4.793 0 0 1-3.97-1.53 4.747 4.747 0 0 1-1.359-3.644H10.15v13.13a2.868 2.868 0 0 1-3.418 2.82 2.872 2.872 0 0 1-2.316-2.318 2.868 2.868 0 0 1 2.82-3.42c.162 0 .322.015.48.046V7.614a6.974 6.974 0 0 0-7.702 7.7 6.978 6.978 0 0 0 6.96 6.944c3.844 0 6.96-3.116 6.96-6.96V9.456a8.887 8.887 0 0 0 5.655 2.01v-4.14c-1.597.001-3.109-.623-4.24-1.75z"/>
-                </svg>
-              </div>
-              <div className="card-info">
-                <h3>TikTok</h3>
-                <div className="counter">
-                  <span className="number">{formatNumber(tkCount)}</span>
-                  <span className="label">SEGUIDORES</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card YouTube */}
-            <a href="https://www.youtube.com/@guilhermepilger" target="_blank" rel="noopener noreferrer" className="glass-card yt-card">
-              <div className="card-icon yt-icon">
-                <Youtube size={28} />
-              </div>
-              <div className="card-info">
-                <h3>YouTube</h3>
-                <div className="counter">
-                  <span className="number">{formatNumber(ytCount)}</span>
-                  <span className="label">INSCRITOS</span>
-                </div>
-              </div>
-            </a>
-
-          </div>
+        <div className="social-copy">
+          <span className="social-kicker">Ecossistema Pilger</span>
+          <h2>Presença digital que transforma oportunidade em desejo.</h2>
+          <p>
+            A audiência do Guilherme acompanha tours, opinião de mercado e bastidores.
+            Para quem compra ou vende, isso vira alcance, contexto e velocidade.
+          </p>
+          <a href="https://www.instagram.com/guilhermepilger/" target="_blank" rel="noopener noreferrer" className="social-main-link">
+            <PlayCircle size={17} />
+            Acompanhar conteúdos
+          </a>
         </div>
 
-        {/* Lado Direito - Imagem */}
-        <div className="social-image-column">
-          <div className="image-wrapper">
-            <img 
-              src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/mobile-transp-min.png" 
-              alt="Guilherme Pilger Redes Sociais" 
-              className="guilherme-phones-img"
-            />
-          </div>
-        </div>
+        <div className="social-grid">
+          {cards.map((card) => {
+            const content = (
+              <>
+                <span className="social-card-icon">{card.icon}</span>
+                <span className="social-card-name">{card.name}</span>
+                <strong>{card.value}</strong>
+                <small>{card.metric}</small>
+                <em>{card.label}</em>
+              </>
+            )
 
+            if (card.capture) {
+              return (
+                <button type="button" className={`social-card ${card.className}`} key={card.name} onClick={openWhatsAppCapture}>
+                  {content}
+                </button>
+              )
+            }
+
+            return (
+              <a href={card.href} target="_blank" rel="noopener noreferrer" className={`social-card ${card.className}`} key={card.name}>
+                {content}
+              </a>
+            )
+          })}
+        </div>
       </div>
 
       <style jsx>{`
         .social-proof-section {
-          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
           position: relative;
           overflow: hidden;
-          padding: 80px 20px;
-          border-top: 1px solid #222;
+          padding: clamp(56px, 7vw, 96px) 20px;
+          background:
+            radial-gradient(circle at 16% 14%, rgba(223,193,142,0.15), transparent 32%),
+            linear-gradient(135deg, #0f0e0d 0%, #1e1a16 100%);
+          color: #fff8ea;
         }
-
-        .watermark-bg {
+        .social-proof-section::before {
+          content: 'REDES SOCIAIS';
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-family: 'Inter', sans-serif;
-          font-size: 20vw;
-          font-weight: 900;
-          color: rgba(255,255,255, 0.02);
+          right: -4vw;
+          top: 8%;
+          color: rgba(255,255,255,0.035);
+          font-size: clamp(4rem, 13vw, 13rem);
+          font-weight: 950;
+          letter-spacing: 0.08em;
           white-space: nowrap;
-          z-index: 1;
-          pointer-events: none;
-          user-select: none;
         }
-
         .social-container {
-          max-width: 1300px;
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+          gap: clamp(28px, 5vw, 70px);
+          align-items: center;
+          max-width: 1320px;
           margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-          z-index: 2;
-          gap: 50px;
         }
-
-        .social-cards-column {
-          flex: 1;
-          max-width: 600px;
+        .social-kicker {
+          display: inline-flex;
+          margin-bottom: 12px;
+          color: #d8b979;
+          font: 950 0.72rem/1 'Inter', sans-serif;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
         }
-
-        .social-header {
-          margin-bottom: 50px;
-        }
-
-        .social-header h2 {
-          color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(1.6rem, 5vw, 3rem);
-          font-weight: 800;
-          line-height: 1.2;
-          margin: 0 0 15px 0;
-          letter-spacing: -0.03em;
-        }
-
-        .social-header p {
-          color: #aaa;
-          font-size: clamp(0.95rem, 2vw, 1.1rem);
-          line-height: 1.5;
+        .social-copy h2 {
           margin: 0;
+          color: #fff8ea;
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: clamp(2.1rem, 5vw, 4.6rem);
+          line-height: 0.98;
+          letter-spacing: 0;
         }
-
-        .cards-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+        .social-copy p {
+          max-width: 570px;
+          margin: 18px 0 0;
+          color: rgba(255,255,255,0.72);
+          font-size: 1rem;
+          font-weight: 520;
+          line-height: 1.75;
         }
-
-        .glass-card {
-          display: flex;
+        .social-main-link {
+          display: inline-flex;
           align-items: center;
-          gap: 20px;
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 20px 30px;
-          border-radius: 20px;
-          text-decoration: none;
-          transition: all 0.3s ease;
+          gap: 8px;
+          min-height: 42px;
+          margin-top: 26px;
+          padding: 0 16px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #dfc18e, #b8945f);
+          color: #111 !important;
+          font-size: 0.74rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+        .social-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+        .social-card {
           position: relative;
+          display: grid;
+          min-height: 210px;
+          padding: 20px;
           overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 18px;
+          background: rgba(255,255,255,0.045);
+          color: #fff8ea !important;
+          box-shadow: 0 18px 44px rgba(0,0,0,0.2);
+          cursor: pointer;
+          font-family: inherit;
+          text-align: left;
+          transition: transform 0.24s ease, background 0.24s ease, border-color 0.24s ease;
         }
-
-        .glass-card:hover {
-          transform: translateX(10px);
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(255, 255, 255, 0.1);
+        .social-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(223,193,142,0.24);
+          background: rgba(255,255,255,0.075);
         }
-
-        /* Linha brilhante no topo do card ao passar o mouse */
-        .glass-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 0%;
-          height: 2px;
-          transition: width 0.4s ease;
-        }
-
-        .ig-card:hover::before { background: linear-gradient(90deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); width: 100%; }
-        .tk-card:hover::before { background: linear-gradient(90deg, #69C9D0, #EE1D52); width: 100%; }
-        .yt-card:hover::before { background: red; width: 100%; }
-
-        .card-icon {
-          width: 60px;
-          height: 60px;
+        .social-card-icon {
+          display: grid;
+          place-items: center;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          flex-shrink: 0;
+          background: rgba(223,193,142,0.12);
+          color: #e5c98f;
         }
-
-        .ig-icon { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-        .tk-icon { background: #000; border: 1px solid #333; }
-        .yt-icon { background: red; }
-
-        .card-info h3 {
+        .social-card-name {
+          align-self: end;
+          color: rgba(255,255,255,0.66);
+          font-size: 0.72rem;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .social-card strong {
+          margin-top: 4px;
           color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin: 0 0 5px 0;
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: clamp(1.75rem, 3vw, 2.65rem);
+          line-height: 1;
         }
-
-        .counter {
-          display: flex;
-          align-items: baseline;
-          gap: 6px;
+        .social-card small {
+          margin-top: 5px;
+          color: #d8b979;
+          font-size: 0.64rem;
+          font-weight: 950;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
         }
-
-        .number {
-          color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: 1.8rem;
-          font-weight: 800;
-          letter-spacing: -0.02em;
+        .social-card em {
+          margin-top: 14px;
+          color: rgba(255,255,255,0.58);
+          font-size: 0.82rem;
+          font-style: normal;
+          font-weight: 650;
+          line-height: 1.45;
         }
-
-        .label {
-          color: var(--gold, #b8945f);
-          font-size: 0.8rem;
-          font-weight: 700;
-          letter-spacing: 0.05em;
-        }
-
-        .social-image-column {
-          flex: 1;
-          display: flex;
-          justify-content: flex-end;
-          align-items: flex-end;
-          max-width: 650px;
-        }
-
-        .image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-        }
-
-        .guilherme-phones-img {
-          width: 100%;
-          height: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
-        }
-
-        @media (max-width: 1024px) {
+        .ig .social-card-icon { color: #f1a0c6; }
+        .tk .social-card-icon { color: #8be8ef; }
+        .yt .social-card-icon { color: #ff7a7a; }
+        .wa .social-card-icon { color: #6ee7a4; }
+        @media (max-width: 860px) {
           .social-container {
-            flex-direction: column;
+            grid-template-columns: 1fr;
           }
-          
-          .social-header {
-            text-align: center;
+          .social-grid {
+            gap: 10px;
           }
-
-          .social-cards-column {
-            width: 100%;
-            max-width: 100%;
-            margin-bottom: 40px;
+          .social-card {
+            min-height: 176px;
+            padding: 16px;
           }
-
-          .glass-card:hover {
-            transform: translateY(-5px);
-          }
-
-          .social-image-column {
-            justify-content: center;
+          .social-card strong {
+            font-size: clamp(1.45rem, 7vw, 2.1rem);
           }
         }
       `}</style>

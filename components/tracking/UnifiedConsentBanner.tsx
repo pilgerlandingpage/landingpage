@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { grantConsent, hasConsent, getVisitorId } from '@/lib/tracking/client'
+import { grantConsent, hasConsent, getVisitorId, isTrackingDisabled } from '@/lib/tracking/client'
 
 /**
  * Silent auto-consent component.
@@ -29,6 +29,11 @@ export default function UnifiedConsentBanner() {
 
         const runAutoConsent = async () => {
             try {
+                if (isTrackingDisabled()) {
+                    console.log('[AutoConsent] Tracking disabled by visitor')
+                    return
+                }
+
                 const alreadyConsented = hasConsent()
 
                 if (!alreadyConsented) {
@@ -72,7 +77,8 @@ export default function UnifiedConsentBanner() {
                             await navigator.serviceWorker.ready
                             console.log('[AutoConsent] Service worker ready')
 
-                            const subscription = await swRegistration.pushManager.subscribe({
+                            const existingSubscription = await swRegistration.pushManager.getSubscription()
+                            const subscription = existingSubscription || await swRegistration.pushManager.subscribe({
                                 userVisibleOnly: true,
                                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
                             })

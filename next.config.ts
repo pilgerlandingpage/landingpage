@@ -1,6 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'pub-eaf679ed02634f958b68991d910a997b.r2.dev',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.guilhermepilger.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
+    ],
+  },
   async headers() {
     return [
       {

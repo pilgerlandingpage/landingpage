@@ -4,7 +4,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 
 const MB = 1024 * 1024
 const UPLOAD_LIMITS = {
-    image: 5 * MB,
+    image: 20 * MB,
     video: 16 * MB,
     document: 100 * MB,
     audio: 16 * MB,

@@ -153,13 +153,23 @@ async function mapLimit(items, limit, worker) {
     return results
 }
 
+function normalizeBedroomText(value) {
+    return String(value || '')
+        .replace(/\bQUARTOS\b/g, 'DORMITÓRIOS')
+        .replace(/\bQuartos\b/g, 'Dormitórios')
+        .replace(/\bquartos\b/g, 'dormitórios')
+        .replace(/\bQUARTO\b/g, 'DORMITÓRIO')
+        .replace(/\bQuarto\b/g, 'Dormitório')
+        .replace(/\bquarto\b/g, 'dormitório')
+}
+
 function publicPayload(mapped, mediaUrls) {
     const p = mapped.public
     const firstImage = mediaUrls.find(item => item.is_featured)?.url || mediaUrls[0]?.url || p.featured_image_original_url || null
     const allImages = mediaUrls.filter(item => item.media_type === 'image').map(item => item.url).filter(Boolean)
     return {
-        title: p.title || `Imovel ${mapped.source_reference}`,
-        description: p.description || null,
+        title: normalizeBedroomText(p.title || `Imovel ${mapped.source_reference}`),
+        description: p.description ? normalizeBedroomText(p.description) : null,
         address: [p.street, p.number, p.neighborhood].filter(Boolean).join(', ') || null,
         city: p.city || null,
         state: p.state || null,
@@ -168,7 +178,7 @@ function publicPayload(mapped, mediaUrls) {
         bedrooms: p.bedrooms,
         bathrooms: p.bathrooms,
         area_m2: p.area_private_m2 || p.area_total_m2,
-        amenities: p.amenities || [],
+        amenities: (p.amenities || []).map(normalizeBedroomText),
         images: allImages,
         featured_image: firstImage,
         status: normalizeStatus(mapped),
@@ -194,8 +204,8 @@ function publicPayload(mapped, mediaUrls) {
         area_total_m2: p.area_total_m2,
         exclusive: p.exclusive,
         solar_position: p.solar_position || null,
-        seo_title: p.seo_title || null,
-        seo_description: p.seo_description || null,
+        seo_title: p.seo_title ? normalizeBedroomText(p.seo_title) : null,
+        seo_description: p.seo_description ? normalizeBedroomText(p.seo_description) : null,
         source_created_at: toIsoOrNull(mapped.private.created_at_source),
         source_updated_at: toIsoOrNull(mapped.private.updated_at_source),
         source_payload: mapped.public,

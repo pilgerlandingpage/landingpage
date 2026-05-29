@@ -53,7 +53,7 @@ export default function WhatsAppFloatingButton() {
                     display: none;
                     align-items: center;
                     gap: 10px;
-                    background: #25D366;
+                    background: #087a3d;
                     color: white;
                     border: none;
                     border-radius: 50px;
@@ -62,7 +62,7 @@ export default function WhatsAppFloatingButton() {
                     font-family: 'Inter', sans-serif;
                     font-size: 0.85rem;
                     font-weight: 700;
-                    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.4);
+                    box-shadow: 0 6px 24px rgba(8, 122, 61, 0.32);
                     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                     transform: translateY(80px);
                     opacity: 0;
@@ -72,9 +72,9 @@ export default function WhatsAppFloatingButton() {
                     opacity: 1;
                 }
                 .whatsapp-floating-btn:hover {
-                    background: #20bd5a;
+                    background: #066b35;
                     transform: translateY(-3px);
-                    box-shadow: 0 8px 32px rgba(37, 211, 102, 0.5);
+                    box-shadow: 0 8px 32px rgba(8, 122, 61, 0.42);
                 }
                 .whatsapp-floating-btn:active {
                     transform: translateY(0);

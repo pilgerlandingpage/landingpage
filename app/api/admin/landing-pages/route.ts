@@ -1,6 +1,26 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('landing_pages')
+            .select('id, slug, title, status')
+            .order('title')
+
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 400 })
+        }
+
+        return NextResponse.json({ data: data || [] })
+    } catch (err: any) {
+        return NextResponse.json({ error: err?.message || String(err) }, { status: 500 })
+    }
+}
+
 export async function POST(req: NextRequest) {
     try {
         const supabase = createAdminClient()
