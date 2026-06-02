@@ -4574,7 +4574,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                             </div>
                         )}
 
-                        <div className="agent-office-matrix-editor">
+                        <div className="agent-office-prompt-editor">
                             <textarea
                                 id="agent-office-prompt-textarea"
                                 value={draft}
@@ -4661,7 +4661,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                 </small>
                             </div>
 
-                            <div className="agent-office-matrix-editor">
+                            <div className="agent-office-prompt-editor">
                                 <textarea
                                     id="agent-office-concierge-prompt-textarea"
                                     value={brokerDraft.concierge_prompt}

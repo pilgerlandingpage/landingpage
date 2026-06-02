@@ -2560,15 +2560,10 @@
   padding: 6px 9px;
 }
 
-.agent-office-matrix-editor {
-  background:
-    radial-gradient(circle at 12% 18%, rgba(34,197,94,0.18), transparent 28%),
-    radial-gradient(circle at 88% 82%, rgba(14,165,233,0.12), transparent 26%),
-    linear-gradient(180deg, #040706 0%, #07110b 48%, #030504 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(34,197,94,0.2),
-    inset 0 0 32px rgba(34,197,94,0.13),
-    0 18px 44px rgba(0,0,0,0.14);
+.agent-office-prompt-editor {
+  background: #000;
+  border: 1px solid #1f1f1f;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.14);
   border-radius: 14px;
   margin: 12px;
   min-height: 360px;
@@ -2576,38 +2571,19 @@
   position: relative;
 }
 
-.agent-office-matrix-editor::before {
-  background:
-    repeating-linear-gradient(90deg, rgba(34,197,94,0.055) 0 1px, transparent 1px 32px),
-    repeating-linear-gradient(0deg, rgba(34,197,94,0.045) 0 1px, transparent 1px 24px),
-    linear-gradient(90deg, rgba(34,197,94,0.08), transparent 18%, transparent 82%, rgba(34,197,94,0.08));
-  content: '';
-  inset: 0;
-  opacity: 0.85;
-  pointer-events: none;
-  position: absolute;
-  z-index: 0;
+.agent-office-prompt-editor::before {
+  content: none;
 }
 
-.agent-office-matrix-editor::after {
-  animation: agentOfficeMatrixScan 7s linear infinite;
-  background: linear-gradient(180deg, transparent, rgba(95,255,146,0.12), transparent);
-  content: '';
-  height: 90px;
-  left: 0;
-  pointer-events: none;
-  position: absolute;
-  right: 0;
-  top: -110px;
-  z-index: 1;
+.agent-office-prompt-editor::after {
+  content: none;
 }
 
-.agent-office-matrix-editor textarea {
+.agent-office-prompt-editor textarea {
   background: transparent;
   border: 0;
-  color: #d9ffe4;
-  caret-color: #a7ffbf;
-  caret-shape: block;
+  color: #fff;
+  caret-color: #fff;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.83rem;
   line-height: 1.55;
@@ -2616,42 +2592,32 @@
   padding: 18px;
   position: relative;
   resize: vertical;
-  text-shadow: 0 0 8px rgba(95,255,146,0.24);
   width: 100%;
   z-index: 2;
 }
 
-.agent-office-matrix-editor textarea::placeholder {
-  color: rgba(167,243,208,0.52);
+.agent-office-prompt-editor textarea::placeholder {
+  color: rgba(255,255,255,0.55);
 }
 
-.agent-office-matrix-editor textarea::selection {
-  background: rgba(34,197,94,0.28);
-  color: #f0fff6;
+.agent-office-prompt-editor textarea::selection {
+  background: rgba(255,255,255,0.24);
+  color: #fff;
 }
 
-.agent-office-matrix-editor textarea::-webkit-scrollbar {
+.agent-office-prompt-editor textarea::-webkit-scrollbar {
   height: 12px;
   width: 12px;
 }
 
-.agent-office-matrix-editor textarea::-webkit-scrollbar-track {
-  background: rgba(3,7,18,0.72);
+.agent-office-prompt-editor textarea::-webkit-scrollbar-track {
+  background: #000;
 }
 
-.agent-office-matrix-editor textarea::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(34,197,94,0.78), rgba(6,95,70,0.92));
-  border: 3px solid rgba(3,7,18,0.72);
+.agent-office-prompt-editor textarea::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border: 3px solid #000;
   border-radius: 999px;
-}
-
-@keyframes agentOfficeMatrixScan {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(620px);
-  }
 }
 
 .agent-office-tag-panel {
