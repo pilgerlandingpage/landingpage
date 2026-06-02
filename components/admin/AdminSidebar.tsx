@@ -161,6 +161,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         section: 'PILGER AI',
         subItems: [
             { href: '/admin/pilger-ai', label: 'Visao Geral' },
+            { href: '/admin/pilger-ai/organograma', label: 'Mapa Vivo' },
             { href: '/admin/pilger-ai/saude', label: 'Saude dos Agentes' },
             { href: '/admin/pilger-ai/agentes', label: 'Agentes' },
             { href: '/admin/pilger-ai/tarefas', label: 'Tarefas' },
