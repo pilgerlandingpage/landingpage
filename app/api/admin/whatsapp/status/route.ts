@@ -167,11 +167,6 @@ function extractPhoneFromStatus(result: any, fallback?: string | null): string |
     return null
 }
 
-function buildDefaultBrokerPrompt(name: string) {
-    const safeName = String(name || '').trim() || 'Corretor Pilger'
-    return `Voce e ${safeName}, corretor da Pilger. Atenda leads de forma profissional, cordial e objetiva. Nao invente informacoes e, quando faltar contexto, faca perguntas curtas para qualificar o cliente.`
-}
-
 async function ensureAiBrokerForAdminUser(params: {
     supabase: any
     adminUserId: string
@@ -238,8 +233,8 @@ async function ensureAiBrokerForAdminUser(params: {
         const brokerPayload: any = {
             name: brokerName,
             creci: 'N/A',
-            is_active: true,
-            system_prompt: buildDefaultBrokerPrompt(brokerName),
+            is_active: false,
+            system_prompt: '',
         }
 
         const brokerPhone = normalizeDigits(adminUser.phone)

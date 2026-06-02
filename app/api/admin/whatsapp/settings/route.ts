@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         // Merge with existing config
         const { data: existing } = await supabase
             .from('whatsapp_instances')
-            .select('config, instance_token')
+            .select('config, instance_token, broker_id')
             .eq('id', instance_id)
             .single()
 
@@ -65,6 +65,20 @@ export async function POST(req: NextRequest) {
             .eq('id', instance_id)
 
         if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+        if (existing?.broker_id && typeof mergedConfig.agent_enabled === 'boolean') {
+            const { error: brokerSyncError } = await supabase
+                .from('virtual_brokers')
+                .update({
+                    is_active: mergedConfig.agent_enabled,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', existing.broker_id)
+
+            if (brokerSyncError) {
+                console.warn('[WhatsApp Settings] Broker active sync failed:', brokerSyncError)
+            }
+        }
 
         // Sync WhatsApp privacy settings so "online" and "read receipts"
         // in the phone app match the toggles configured in admin panel.

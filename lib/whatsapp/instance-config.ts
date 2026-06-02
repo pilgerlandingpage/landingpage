@@ -49,36 +49,62 @@ export type WhatsAppInstanceConfig = {
     ai_schedule_timezone: string
 }
 
+const AGENT_DEPENDENT_CONFIG_KEYS: Array<keyof WhatsAppInstanceConfig> = [
+    'always_online',
+    'mark_as_read',
+    'media_image_enabled',
+    'media_document_enabled',
+    'media_video_enabled',
+    'split_messages',
+    'adaptive_rapport_enabled',
+    'mirror_mode',
+    'audio_response',
+    'audio_transcription',
+    'human_intervention',
+    'bot_loop_protection_enabled',
+    'allow_internal_instance_messages',
+    'detect_human_request_enabled',
+    'detect_reschedule_cancel_enabled',
+    'detect_property_capture_enabled',
+    'detect_location_enabled',
+    'detect_opt_out_enabled',
+    'analyze_links_enabled',
+    'quoted_reply_context_enabled',
+    'lead_file_storage_enabled',
+    'smart_timing_enabled',
+    'ai_schedule_enabled',
+]
+
 export const DEFAULT_WHATSAPP_INSTANCE_CONFIG: WhatsAppInstanceConfig = {
-    agent_enabled: true,
-    always_online: true,
-    mark_as_read: true,
-    response_mode: 'mirror',
-    media_image_enabled: true,
-    media_document_enabled: true,
-    media_video_enabled: true,
+    agent_enabled: false,
+    always_online: false,
+    mark_as_read: false,
+    response_mode: 'text',
+    media_image_enabled: false,
+    media_document_enabled: false,
+    media_video_enabled: false,
     media_batch_image_limit: 8,
     media_batch_video_limit: 2,
     media_batch_document_limit: 3,
-    split_messages: true,
+    split_messages: false,
     adaptive_rapport_enabled: false,
     adaptive_rapport_mode: 'off',
-    mirror_mode: true,
-    audio_response: true,
-    audio_transcription: true,
-    human_intervention: true,
-    bot_loop_protection_enabled: true,
+    mirror_mode: false,
+    audio_response: false,
+    audio_transcription: false,
+    human_intervention: false,
+    bot_loop_protection_enabled: false,
     allow_internal_instance_messages: false,
-    detect_human_request_enabled: true,
-    detect_reschedule_cancel_enabled: true,
-    detect_property_capture_enabled: true,
-    detect_location_enabled: true,
-    detect_opt_out_enabled: true,
-    analyze_links_enabled: true,
-    quoted_reply_context_enabled: true,
-    lead_file_storage_enabled: true,
+    detect_human_request_enabled: false,
+    detect_reschedule_cancel_enabled: false,
+    detect_property_capture_enabled: false,
+    detect_location_enabled: false,
+    detect_opt_out_enabled: false,
+    analyze_links_enabled: false,
+    quoted_reply_context_enabled: false,
+    lead_file_storage_enabled: false,
     debounce_seconds: 15,
-    smart_timing_enabled: true,
+    smart_timing_enabled: false,
     timing_text_seconds: 6,
     timing_text_burst_seconds: 9,
     timing_media_caption_seconds: 10,
@@ -105,6 +131,17 @@ export function normalizeWhatsAppInstanceConfig(config?: Record<string, unknown>
         ...DEFAULT_WHATSAPP_INSTANCE_CONFIG,
         ...(config || {}),
     } as WhatsAppInstanceConfig
+
+    if (!merged.agent_enabled) {
+        const mutableMerged = merged as Record<string, unknown>
+        for (const key of AGENT_DEPENDENT_CONFIG_KEYS) {
+            if (typeof merged[key] === 'boolean') {
+                mutableMerged[key] = false
+            }
+        }
+        merged.response_mode = 'text'
+        merged.adaptive_rapport_mode = 'off'
+    }
 
     if (!['text', 'audio', 'mirror'].includes(String(merged.response_mode || ''))) {
         merged.response_mode = merged.mirror_mode ? 'mirror' : (merged.audio_response ? 'audio' : 'text')

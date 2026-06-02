@@ -8,6 +8,7 @@ import {
     editQuickReply,
 } from '../uazapi'
 import { getPublicAppUrl } from '../app-url'
+import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 
 function getSupabase() {
     return createClient(
@@ -59,13 +60,20 @@ export const whatsappInstanceSetup = inngest.createFunction(
         // ── Step 2: Configurar Privacidade ──
         const privacyResult = await step.run('setup-privacy', async () => {
             try {
+                const { data: instanceRow } = await supabase
+                    .from('whatsapp_instances')
+                    .select('config')
+                    .eq('id', instanceId)
+                    .maybeSingle()
+                const instanceConfig = normalizeWhatsAppInstanceConfig(instanceRow?.config || {})
+
                 await configurePrivacy({
                     groupadd: 'contacts',       // Só contatos podem adicionar em grupos
                     last: 'contacts',            // Visto por último apenas para contatos
                     status: 'contacts',          // Status apenas para contatos
                     profile: 'all',              // Foto de perfil para todos (boa para negócios)
-                    readreceipts: 'all',         // Confirmação de leitura ativada
-                    online: 'all',               // Online visível para todos
+                    readreceipts: instanceConfig.mark_as_read ? 'all' : 'none',
+                    online: instanceConfig.always_online ? 'all' : 'match_last_seen',
                 }, instanceToken)
                 return { success: true }
             } catch (e: any) {
@@ -176,10 +184,18 @@ export const whatsappInstanceSetup = inngest.createFunction(
 
         // ── Step 6: Atualizar status no Supabase ──
         await step.run('update-db-status', async () => {
+            const { data: instanceRow } = await supabase
+                .from('whatsapp_instances')
+                .select('config')
+                .eq('id', instanceId)
+                .maybeSingle()
+            const currentConfig = normalizeWhatsAppInstanceConfig(instanceRow?.config || {})
+
             await supabase
                 .from('whatsapp_instances')
                 .update({
                     config: {
+                        ...currentConfig,
                         setup_completed: true,
                         setup_at: new Date().toISOString(),
                         setup_log: log,
