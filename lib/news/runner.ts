@@ -1,6 +1,7 @@
 import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
 import { generateNewsArticleDraft } from '@/lib/blog/agent'
 import { notifyBlogReviewReady } from '@/lib/blog/review-notifications'
+import { getAvailableBlogSlug } from '@/lib/blog/types'
 import { getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -18,10 +19,12 @@ export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
 
   try {
     const draft = await generateNewsArticleDraft(options.topic)
+    const slug = await getAvailableBlogSlug(supabase, draft.slug || draft.title)
     const { data: post, error } = await supabase
       .from('blog_posts')
       .insert({
         ...draft,
+        slug,
         status: 'under_review',
         published_at: null,
       })

@@ -8,6 +8,7 @@ import { generateChatResponse } from '@/lib/ai/generation'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
+import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import {
     buildAppointmentConfirmationText,
     detectConfirmedAppointment,
@@ -2442,6 +2443,24 @@ async function tryFastTextBrokerResponse(params: {
         .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
         .eq('id', conversation.id)
 
+    await recordAgentConversationEcosystemEvent({
+        supabase,
+        conversationId: conversation.id,
+        brokerId: broker.id,
+        brokerName: broker.name,
+        instanceId: instance.id,
+        instanceName: instance.instance_name,
+        leadPhone: phone,
+        leadName: senderName || null,
+        messages: updatedMessages,
+        status: aiResponse.shouldTransfer ? 'transfer_requested' : conversation.status || 'active',
+        source: 'fast-whatsapp-webhook',
+        extractedData: aiResponse.extractedData || null,
+        shouldTransfer: aiResponse.shouldTransfer,
+    }).catch(error => {
+        console.warn('[Webhook] Ecosystem conversation event failed:', error?.message || error)
+    })
+
     setPresenceAvailable(instance.instance_token, phone).catch(() => null)
 
     const interactive = parseInteractiveElements(aiResponse.text)
@@ -2581,6 +2600,7 @@ async function tryFastTextBrokerResponse(params: {
         instanceName: instance.instance_name,
         instanceToken: instance.instance_token,
         brokerId: broker.id,
+        conversationId: conversation.id,
         acquiredVia: 'whatsapp',
         messages: updatedMessages,
         extractedData: aiResponse.extractedData || null,
@@ -3655,7 +3675,7 @@ export async function POST(request: NextRequest) {
                         role: 'assistant',
                         content: storedMessageContent,
                         type: messageType,
-                        source: 'human',
+                        source: botMsgId ? 'from_me_pending' : 'human',
                         message_id: botMsgId || messageId,
                         instance_id: instance.id,
                         broker_id: instance.broker_id || null,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { configureWebhook, getWebhook, getWebhookErrors } from '@/lib/uazapi'
+import { getPublicAppUrl } from '@/lib/app-url'
 
 function getSupabase() {
     return createClient(
@@ -32,10 +33,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Instância sem token — conecte primeiro via QR Code' }, { status: 400 })
         }
 
-        // Detect the base URL from the current request
-        const host = request.headers.get('host') || ''
-        const proto = request.headers.get('x-forwarded-proto') || 'https'
-        const baseUrl = `${proto}://${host}`
+        const baseUrl = getPublicAppUrl(request.nextUrl.origin)
         const webhookUrl = `${baseUrl}/api/webhooks/whatsapp`
 
         // Configure webhook with optimal settings for Pilger

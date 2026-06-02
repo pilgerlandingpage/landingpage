@@ -1,4 +1,5 @@
 import { getChatDetails, getContactAvatar } from '../uazapi'
+import { recordEcosystemEvent } from '../intelligence/ecosystem'
 
 type SupabaseClientLike = any
 
@@ -21,6 +22,7 @@ export type WhatsAppLeadContext = {
     instanceName?: string | null
     instanceToken?: string | null
     brokerId?: string | null
+    conversationId?: string | null
     acquiredVia?: string | null
 }
 
@@ -173,6 +175,68 @@ function dedupeConversationLog(messages: any[]): any[] {
     return result.slice(-250)
 }
 
+function findConversationEntryIndex(messages: any[], entry: any) {
+    const entryId = entry?.message_id ? String(entry.message_id) : ''
+    if (entryId) {
+        return messages.findIndex(item => item?.message_id && String(item.message_id) === entryId)
+    }
+
+    const entryContent = String(entry?.content || '').trim()
+    const entryRole = String(entry?.role || '')
+    const entryTimestamp = entry?.timestamp ? String(entry.timestamp).slice(0, 19) : ''
+    return messages.findIndex(item => {
+        const content = String(item?.content || '').trim()
+        const role = String(item?.role || '')
+        const timestamp = item?.timestamp ? String(item.timestamp).slice(0, 19) : ''
+        return content === entryContent && role === entryRole && timestamp === entryTimestamp
+    })
+}
+
+async function recordLeadConversationLogEvent(
+    supabase: SupabaseClientLike,
+    lead: any,
+    entry: ReturnType<typeof toConversationEntry>
+) {
+    const source = String(entry.source || '').toLowerCase()
+    const role = String(entry.role || '').toLowerCase()
+    const isHuman = source === 'human'
+    const isLead = source === 'lead' || role === 'user'
+    if (!isHuman && !isLead) return
+
+    const phone = normalizeWhatsAppPhone(lead?.phone_e164 || lead?.phone)
+    const eventType = isHuman ? 'whatsapp_human_message_logged' : 'whatsapp_lead_message_logged'
+    const label = isHuman
+        ? `Mensagem humana registrada no WhatsApp${lead?.name ? ` para ${lead.name}` : ''}`
+        : `Mensagem do lead registrada no WhatsApp${lead?.name ? `: ${lead.name}` : ''}`
+
+    await recordEcosystemEvent({
+        supabase,
+        eventType,
+        actorType: isHuman ? 'human' : 'lead',
+        leadId: lead?.id || null,
+        entityType: 'lead_conversation_log',
+        entityId: lead?.id || null,
+        source: isHuman ? 'human-broker-whatsapp' : 'lead-whatsapp',
+        label,
+        importanceScore: isHuman ? 63 : 56,
+        occurredAt: entry.timestamp || undefined,
+        metadata: {
+            lead_id: lead?.id || null,
+            lead_name: lead?.name || null,
+            lead_phone: phone || null,
+            broker_id: entry.broker_id || null,
+            instance_id: entry.instance_id || null,
+            message_id: entry.message_id || null,
+            message_type: entry.type || null,
+            message_source: source || null,
+            message_role: role || null,
+            message_preview: compactString(entry.content, 500),
+        },
+    }).catch((error: any) => {
+        console.warn('[WhatsApp Lead Sync] ecosystem conversation log event failed:', error?.message || error)
+    })
+}
+
 function asRecord(value: unknown): Record<string, any> {
     return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
 }
@@ -182,6 +246,33 @@ function compactString(value: unknown, max = 700): string {
         .replace(/\s+/g, ' ')
         .trim()
         .slice(0, max)
+}
+
+function isTechnicalOutboundText(value: unknown) {
+    const text = String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+
+    return [
+        'rascunho criado por fallback',
+        'rascunho de noticia criado por fallback',
+        'fallback usando o contexto disponivel',
+        'revisar fontes e atualidade antes de publicar',
+        'ia nao retornou json valido',
+    ].some(marker => text.includes(marker))
+}
+
+function cleanOutboundText(value: unknown) {
+    return String(value || '')
+        .split(/\r?\n/)
+        .filter(line => {
+            const clean = line.trim()
+            return !clean || !isTechnicalOutboundText(clean)
+        })
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
 }
 
 function normalizeOutboundContentType(value: unknown): LeadOutboundContext['content_type'] {
@@ -233,6 +324,8 @@ function sanitizeOutboundContext(params: {
     const contentUrl = compactString(params.contentUrl, 600)
     const campaignId = compactString(params.campaignId, 180)
     const workflowRunId = compactString(params.workflowRunId, 120)
+    const contentSummary = cleanOutboundText(params.contentSummary)
+    const messagePreview = cleanOutboundText(params.message)
     return {
         id: workflowRunId || campaignId || `${sentAt}:${contentTitle || contentUrl || 'outbound'}`,
         channel: ['whatsapp', 'email', 'sms', 'push'].includes(String(params.channel || '').toLowerCase())
@@ -247,10 +340,10 @@ function sanitizeOutboundContext(params: {
         trigger: compactString(params.trigger, 120) || null,
         content_id: compactString(params.contentId, 120) || null,
         content_title: contentTitle || null,
-        content_summary: compactString(params.contentSummary, 500) || null,
+        content_summary: compactString(contentSummary, 500) || null,
         content_url: contentUrl || null,
         cta_label: compactString(params.ctaLabel, 80) || null,
-        message_preview: compactString(params.message, 700) || null,
+        message_preview: compactString(messagePreview, 700) || null,
         sent_at: sentAt,
     }
 }
@@ -515,6 +608,15 @@ export async function ensureWhatsAppLead(
             console.warn('[WhatsApp Lead Sync] lead update failed:', error.message)
             return existing
         }
+        if (context.brokerId) {
+            await upsertBrokerLeadProfile(supabase, {
+                ...context,
+                leadId: data.id,
+                leadName: data.name || senderName || null,
+                status: 'new',
+                lastMessageAt: now,
+            }).catch(() => null)
+        }
         return data
     }
 
@@ -542,6 +644,16 @@ export async function ensureWhatsAppLead(
         return null
     }
 
+    if (context.brokerId) {
+        await upsertBrokerLeadProfile(supabase, {
+            ...context,
+            leadId: data.id,
+            leadName: data.name || fallbackName,
+            status: 'new',
+            lastMessageAt: now,
+        }).catch(() => null)
+    }
+
     return data
 }
 
@@ -556,7 +668,7 @@ export async function appendLeadConversationLog(
 
     const { data, error } = await supabase
         .from('leads')
-        .select('conversation_log')
+        .select('id, name, phone, phone_e164, conversation_log')
         .eq('id', leadId)
         .maybeSingle()
 
@@ -566,7 +678,25 @@ export async function appendLeadConversationLog(
     }
 
     const current = Array.isArray(data?.conversation_log) ? data.conversation_log : []
-    const next = dedupeConversationLog([...current, entry])
+    const existingIndex = findConversationEntryIndex(current, entry)
+    const existingEntry = existingIndex >= 0 ? current[existingIndex] : null
+    const existingSource = String(existingEntry?.source || '').toLowerCase()
+    const nextSource = String(entry.source || '').toLowerCase()
+    const shouldUpgradePendingSource = existingEntry && existingSource === 'from_me_pending' && ['human', 'agent', 'whatsapp_agent'].includes(nextSource)
+    const shouldRecordEvent = existingIndex < 0 || shouldUpgradePendingSource
+    const mergedCurrent = shouldUpgradePendingSource
+        ? current.map((item: any, index: number) => index === existingIndex
+            ? {
+                ...item,
+                ...entry,
+                metadata: {
+                    ...((item?.metadata && typeof item.metadata === 'object') ? item.metadata : {}),
+                    ...((entry.metadata && typeof entry.metadata === 'object') ? entry.metadata : {}),
+                },
+            }
+            : item)
+        : current
+    const next = dedupeConversationLog(shouldUpgradePendingSource ? mergedCurrent : [...current, entry])
 
     const { error: updateError } = await supabase
         .from('leads')
@@ -575,6 +705,11 @@ export async function appendLeadConversationLog(
 
     if (updateError) {
         console.warn('[WhatsApp Lead Sync] append conversation_log failed:', updateError.message)
+        return
+    }
+
+    if (shouldRecordEvent) {
+        await recordLeadConversationLogEvent(supabase, data, entry)
     }
 }
 
@@ -613,6 +748,82 @@ function classificationFromScore(score: number, explicit?: unknown) {
     return 'cold'
 }
 
+async function upsertBrokerLeadProfile(
+    supabase: SupabaseClientLike,
+    params: WhatsAppLeadContext & {
+        leadId?: string | null
+        conversationId?: string | null
+        leadName?: string | null
+        interest?: string | null
+        region?: string | null
+        budgetMin?: number | null
+        budgetMax?: number | null
+        bedroomsWanted?: number | null
+        propertyType?: string | null
+        timeline?: string | null
+        qualificationScore?: number | null
+        leadClassification?: string | null
+        status?: string | null
+        notes?: string | null
+        documentsReceived?: any[] | null
+        latitude?: number | null
+        longitude?: number | null
+        lastMessageAt?: string | null
+    }
+) {
+    const phone = normalizeWhatsAppPhone(params.phone)
+    if (!phone || !params.brokerId) return null
+
+    const now = new Date().toISOString()
+    const payload: Record<string, unknown> = {
+        lead_id: params.leadId || null,
+        lead_phone: phone,
+        broker_id: params.brokerId,
+        instance_id: params.instanceId || null,
+        conversation_id: params.conversationId || null,
+        lead_name: params.leadName || params.senderName || null,
+        interest: params.interest || null,
+        region: params.region || null,
+        budget_min: params.budgetMin ?? null,
+        budget_max: params.budgetMax ?? null,
+        bedrooms_wanted: params.bedroomsWanted ?? null,
+        property_type: params.propertyType || null,
+        timeline: params.timeline || null,
+        qualification_score: Math.max(0, Math.min(100, Number(params.qualificationScore || 0))),
+        lead_classification: params.leadClassification || null,
+        status: params.status || 'new',
+        notes: params.notes ?? null,
+        documents_received: Array.isArray(params.documentsReceived) ? params.documentsReceived : [],
+        latitude: params.latitude ?? null,
+        longitude: params.longitude ?? null,
+        first_contact_at: params.lastMessageAt || now,
+        last_message_at: params.lastMessageAt || now,
+        updated_at: now,
+    }
+
+    for (const key of Object.keys(payload)) {
+        if (
+            !['lead_phone', 'broker_id', 'qualification_score', 'status', 'documents_received', 'updated_at'].includes(key)
+            && (payload[key] === null || payload[key] === undefined || payload[key] === '')
+        ) {
+            delete payload[key]
+        }
+    }
+
+    const { data, error } = await supabase
+        .from('broker_lead_profiles')
+        .upsert(payload, { onConflict: 'broker_id,lead_phone' })
+        .select('id')
+        .maybeSingle()
+
+    if (error) {
+        console.warn('[WhatsApp Lead Sync] broker lead profile upsert failed:', error.message)
+        return null
+    }
+
+    return data || null
+}
+
 export async function syncWhatsAppLeadSnapshot(
     supabase: SupabaseClientLike,
     params: WhatsAppLeadContext & {
@@ -646,6 +857,7 @@ export async function syncWhatsAppLeadSnapshot(
         property_type: extracted.property_type || null,
         timeline: extracted.timeframe || extracted.prazo || null,
     }
+    const budgetMaxNumber = typeof scoreSeed.budget_max === 'number' ? scoreSeed.budget_max : null
     const score = scoreCollectedLead(scoreSeed)
     const classification = classificationFromScore(score, extracted.classification)
     const now = new Date().toISOString()
@@ -727,7 +939,7 @@ export async function syncWhatsAppLeadSnapshot(
         lead_name: scoreSeed.lead_name || null,
         interest: scoreSeed.interest || null,
         region: scoreSeed.region || null,
-        budget_max: scoreSeed.budget_max || null,
+        budget_max: budgetMaxNumber,
         property_type: scoreSeed.property_type || null,
         timeline: scoreSeed.timeline || null,
         qualification_score: score,
@@ -754,6 +966,22 @@ export async function syncWhatsAppLeadSnapshot(
     if (collectedError) {
         console.warn('[WhatsApp Lead Sync] lead_collected_data upsert failed:', collectedError.message)
     }
+
+    await upsertBrokerLeadProfile(supabase, {
+        ...params,
+        leadId: lead.id,
+        leadName: String(scoreSeed.lead_name || lead.name || params.senderName || '').trim() || null,
+        interest: scoreSeed.interest ? String(scoreSeed.interest) : null,
+        region: scoreSeed.region ? String(scoreSeed.region) : null,
+        budgetMax: budgetMaxNumber,
+        propertyType: scoreSeed.property_type ? String(scoreSeed.property_type) : null,
+        timeline: scoreSeed.timeline ? String(scoreSeed.timeline) : null,
+        bedroomsWanted: extracted.bedrooms ? parseInt(String(extracted.bedrooms), 10) || null : null,
+        qualificationScore: score,
+        leadClassification: classification,
+        status: String(collectedUpdate.status || 'new'),
+        lastMessageAt: now,
+    }).catch(() => null)
 
     return { lead_id: lead.id, score, classification }
 }

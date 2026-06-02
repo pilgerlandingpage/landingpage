@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveAppConfig } from '@/lib/admin/app-config'
+import { getPublicAppUrl } from '@/lib/app-url'
 import { createAdminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -141,7 +142,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const response = await fetch(`${request.nextUrl.origin}/api/admin/benchmark-editorial`, {
+    const response = await fetch(`${getPublicAppUrl(request.nextUrl.origin)}/api/admin/benchmark-editorial`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

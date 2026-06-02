@@ -7,6 +7,7 @@ import {
     editLabel,
     editQuickReply,
 } from '../uazapi'
+import { getPublicAppUrl } from '../app-url'
 
 function getSupabase() {
     return createClient(
@@ -39,7 +40,7 @@ export const whatsappInstanceSetup = inngest.createFunction(
         // ── Step 1: Configurar Webhook ──
         const webhookResult = await step.run('setup-webhook', async () => {
             try {
-                const webhookUrl = `${webhookBaseUrl}/api/webhooks/whatsapp`
+                const webhookUrl = `${getPublicAppUrl(webhookBaseUrl)}/api/webhooks/whatsapp`
                 await configureWebhook({
                     enabled: true,
                     url: webhookUrl,

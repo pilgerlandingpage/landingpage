@@ -9,7 +9,7 @@ import {
 import { createAdminClient } from '@/lib/supabase/server'
 
 function normalizeAgent(value: string | null): EcosystemAgent {
-    const allowed = new Set(['global', 'blog', 'news', 'whatsapp', 'radar', 'traffic', 'ceo', 'recruiting'])
+    const allowed = new Set(['global', 'blog', 'news', 'whatsapp', 'radar', 'traffic', 'ceo', 'recruiting', 'events', 'social', 'distribution', 'publisher', 'property', 'research', 'benchmark', 'creative'])
     return allowed.has(String(value || '')) ? value as EcosystemAgent : 'global'
 }
 

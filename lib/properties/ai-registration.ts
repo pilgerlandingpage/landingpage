@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
 type MediaInput = {
     url: string
@@ -138,7 +139,7 @@ async function getConfigMap(): Promise<ConfigMap> {
     return Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
 }
 
-function buildUserPrompt(request: PropertyAiDraftRequest, media: MediaInput[]) {
+function buildUserPrompt(request: PropertyAiDraftRequest, media: MediaInput[], ecosystemBrief = '') {
     const mediaSummary = media.length
         ? media.map((item, index) => `${index + 1}. ${item.kind}: ${item.url}`).join('\n')
         : 'Nenhuma midia enviada.'
@@ -150,6 +151,8 @@ ${request.context}
 
 MIDIAS ENVIADAS:
 ${mediaSummary}
+
+${ecosystemBrief ? `CONTEXTO CENTRAL DO ECOSSISTEMA PILGER:\n${ecosystemBrief}\n\nUse esse contexto para alinhar linguagem, SEO, cidades, regioes, demanda e posicionamento. Nao revele dados internos, nomes de leads, IPs, IDs ou metricas sensiveis.` : ''}
 
 Lembre-se: retorne somente JSON valido.`
 }
@@ -278,6 +281,7 @@ async function generateWithOpenAI(configs: ConfigMap, prompt: string, media: Med
 }
 
 export async function generatePropertyAiDraft(request: PropertyAiDraftRequest) {
+    const supabase = createAdminClient()
     const configs = await getConfigMap()
     const provider = String(configs.ai_provider || 'gemini').toLowerCase()
 
@@ -287,18 +291,56 @@ export async function generatePropertyAiDraft(request: PropertyAiDraftRequest) {
         ...(request.documents || []).filter(Boolean).slice(0, 8).map(url => ({ url, kind: 'document' as const })),
     ]
 
-    const prompt = buildUserPrompt(request, media)
+    const ecosystemBrief = await getAgentEcosystemContext({ supabase, agent: 'property', days: 30, limit: 80 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[Property AI Draft] Ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
+    const prompt = buildUserPrompt(request, media, ecosystemBrief)
     const text = provider === 'openai'
         ? await generateWithOpenAI(configs, prompt, media)
         : await generateWithGemini(configs, prompt, media)
 
-    if (!text.trim()) return fallbackDraftFromContext(request.context)
+    const draft = !text.trim()
+        ? fallbackDraftFromContext(request.context)
+        : (() => {
+            try {
+                return normalizeDraft(JSON.parse(cleanJsonText(text)))
+            } catch {
+                return fallbackDraftFromContext(`${request.context}\n\nResposta bruta da IA:\n${text}`)
+            }
+        })()
 
-    try {
-        return normalizeDraft(JSON.parse(cleanJsonText(text)))
-    } catch {
-        return fallbackDraftFromContext(`${request.context}\n\nResposta bruta da IA:\n${text}`)
-    }
+    await recordEcosystemEvent({
+        supabase,
+        eventType: 'property_ai_draft_created',
+        actorType: 'agent',
+        entityType: 'property_draft',
+        entityId: draft.title || 'property_ai_draft',
+        source: 'property-registration-agent',
+        label: draft.title || 'Rascunho de imovel gerado pela IA',
+        importanceScore: 58,
+        metadata: {
+            title: draft.title,
+            city: draft.city,
+            state: draft.state,
+            property_type: draft.property_type,
+            price: draft.price,
+            bedrooms: draft.bedrooms,
+            area_m2: draft.area_m2,
+            missing_information: draft.missing_information || [],
+            media: {
+                images: request.images?.length || 0,
+                videos: request.videos?.length || 0,
+                documents: request.documents?.length || 0,
+            },
+        },
+    }).catch((error: any) => {
+        console.warn('[Property AI Draft] ecosystem event failed:', error?.message || error)
+    })
+
+    return draft
 }
 
 export { DEFAULT_AGENT_PROMPT as DEFAULT_PROPERTY_REGISTER_AGENT_PROMPT }

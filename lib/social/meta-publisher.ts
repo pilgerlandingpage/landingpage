@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
 const META_API_VERSION = 'v21.0'
 
@@ -206,16 +207,55 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
       })
       .eq('id', row.id)
 
+    await recordEcosystemEvent({
+      supabase,
+      eventType: 'social_post_published',
+      actorType: 'agent',
+      entityType: 'marketing_scheduled_post',
+      entityId: row.id,
+      source: 'marketing-publisher-agent',
+      label: `Publicacao ${row.platform} realizada`,
+      importanceScore: 64,
+      metadata: {
+        platform: row.platform,
+        external_id: result.external_id || null,
+        permalink: result.permalink || null,
+        scheduled_for: row.scheduled_for,
+        caption_preview: firstText(row.caption, row.ai_context).slice(0, 500),
+        creative: normalizeCreative(row.marketing_creatives),
+      },
+    }).catch((eventError: any) => {
+      console.warn('[Meta Publisher] ecosystem event failed:', eventError?.message || eventError)
+    })
+
     return { published: true, platform: row.platform, ...result }
   } catch (publishError) {
+    const errorMessage = publishError instanceof Error ? publishError.message : 'Falha ao publicar.'
     await supabase
       .from('marketing_scheduled_posts')
       .update({
         status: 'failed',
-        error_message: publishError instanceof Error ? publishError.message : 'Falha ao publicar.',
+        error_message: errorMessage,
         updated_at: new Date().toISOString(),
       })
       .eq('id', row.id)
+    await recordEcosystemEvent({
+      supabase,
+      eventType: 'social_post_publish_failed',
+      actorType: 'agent',
+      entityType: 'marketing_scheduled_post',
+      entityId: row.id,
+      source: 'marketing-publisher-agent',
+      label: `Falha ao publicar em ${row.platform}`,
+      importanceScore: 48,
+      metadata: {
+        platform: row.platform,
+        scheduled_for: row.scheduled_for,
+        error: errorMessage,
+      },
+    }).catch((eventError: any) => {
+      console.warn('[Meta Publisher] failed ecosystem event failed:', eventError?.message || eventError)
+    })
     throw publishError
   }
 }

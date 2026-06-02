@@ -3,7 +3,8 @@ import { randomUUID } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/server'
 import { BENCHMARK_EDITORIAL_SYSTEM_PROMPT } from '@/lib/ai/prompts'
 import { createResearchReport } from '@/lib/research/pilger'
-import { slugifyBlog } from '@/lib/blog/types'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
+import { getAvailableBlogSlug, slugifyBlog } from '@/lib/blog/types'
 import { notifyBlogReviewReady } from '@/lib/blog/review-notifications'
 import {
     BENCHMARK_CONFIG_KEYS,
@@ -320,6 +321,11 @@ export async function POST(request: NextRequest) {
             }
 
             try {
+                const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'benchmark', days: 30, limit: 100 }).catch((error: any) => {
+                    console.warn('[Benchmark Editorial] Ecosystem context unavailable:', error?.message || error)
+                    return null
+                })
+                const ecosystemBrief = ecosystemContext ? buildAgentContextBrief(ecosystemContext) : ''
                 const report = await createResearchReport({
                     topic: `Benchmark editorial competitivo: ${topic}`,
                     requester: 'benchmark-editorial',
@@ -329,6 +335,9 @@ export async function POST(request: NextRequest) {
                     context: {
                         monitored_topic: topic,
                         intent,
+                        ecosystem_brief: ecosystemBrief,
+                        ecosystem_source_counts: ecosystemContext?.source_counts || null,
+                        ecosystem_signals: ecosystemContext?.signals || null,
                         active_competitors: state.competitors.filter(item => item.status === 'active'),
                         active_keywords: state.keywords.filter(item => item.status === 'active').slice(0, 20),
                         instruction: [
@@ -355,6 +364,49 @@ export async function POST(request: NextRequest) {
                 const runs = [run, ...state.runs].slice(0, 40)
 
                 await saveState(supabase, { opportunities, runs })
+
+                await recordEcosystemEvent({
+                    supabase,
+                    eventType: 'benchmark_editorial_opportunity_created',
+                    actorType: 'agent',
+                    entityType: 'benchmark_opportunity',
+                    entityId: opportunity.id,
+                    source: 'benchmark-editorial',
+                    label: opportunity.title,
+                    importanceScore: opportunity.opportunity_score || 70,
+                    metadata: {
+                        topic,
+                        intent,
+                        depth,
+                        report_id: report.id,
+                        opportunity,
+                    },
+                }).catch((eventError: any) => {
+                    console.warn('[Benchmark Editorial] ecosystem event failed:', eventError?.message || eventError)
+                })
+
+                if (ecosystemContext) {
+                    await saveEcosystemSnapshot({
+                        supabase,
+                        agent: 'benchmark',
+                        scope: 'global',
+                        createdBy: 'benchmark-editorial',
+                        context: {
+                            ...ecosystemContext,
+                            executive_summary: [
+                                `Benchmark Editorial criou uma oportunidade: "${opportunity.title}".`,
+                                ecosystemContext.executive_summary || '',
+                            ].filter(Boolean).join(' '),
+                            signals: {
+                                ...(ecosystemContext.signals || {}),
+                                latest_benchmark_opportunity: opportunity,
+                            },
+                        },
+                    }).catch((snapshotError: any) => {
+                        console.warn('[Benchmark Editorial] ecosystem snapshot failed:', snapshotError?.message || snapshotError)
+                    })
+                }
+
                 return NextResponse.json({ opportunity, opportunities, runs, report })
             } catch (error: any) {
                 const run: BenchmarkRun = {
@@ -379,9 +431,10 @@ export async function POST(request: NextRequest) {
             if (!opportunity) return NextResponse.json({ error: 'Oportunidade nao encontrada.' }, { status: 404 })
 
             const payload = buildBlogPayload(opportunity, type)
+            const slug = await getAvailableBlogSlug(supabase, payload.slug || payload.title)
             const { data: post, error } = await supabase
                 .from('blog_posts')
-                .insert(payload)
+                .insert({ ...payload, slug })
                 .select('*')
                 .single()
 
@@ -398,6 +451,26 @@ export async function POST(request: NextRequest) {
                 item.id === opportunity.id ? { ...item, status: status as any, updated_at: nowIso() } : item
             )
             await saveState(supabase, { opportunities })
+
+            await recordEcosystemEvent({
+                supabase,
+                eventType: type === 'news' ? 'benchmark_sent_to_news' : 'benchmark_sent_to_blog',
+                actorType: 'agent',
+                entityType: 'blog_post',
+                entityId: post.id,
+                source: 'benchmark-editorial',
+                label: post.title,
+                importanceScore: 68,
+                metadata: {
+                    opportunity_id: opportunity.id,
+                    opportunity_title: opportunity.title,
+                    type,
+                    slug: post.slug,
+                    status: post.status,
+                },
+            }).catch((eventError: any) => {
+                console.warn('[Benchmark Editorial] send ecosystem event failed:', eventError?.message || eventError)
+            })
 
             return NextResponse.json({ post, notification, opportunities })
         }

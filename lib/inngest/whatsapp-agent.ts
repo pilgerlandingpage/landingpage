@@ -27,7 +27,7 @@ import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
 import { recordGeminiUsage } from '../ai/gemini-costs'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '../whatsapp/agent-global-prompt'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
-import { buildAgentContextBrief, getAgentEcosystemContext } from '../intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
 
 function getSupabase() {
@@ -3762,6 +3762,152 @@ async function buildLeadIntelligencePrompt(
     }
 }
 
+function formatSharedMemoryDate(value: any) {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+}
+
+function compactSharedMemoryText(value: any, max = 260) {
+    return String(value || '')
+        .replace(/\[BOTOES_URL:[^\]]+\]/gi, '')
+        .replace(/\[BOTOES:[^\]]+\]/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, max)
+}
+
+function formatSharedConversationMessages(messages: any[], maxMessages = 6) {
+    const safe = Array.isArray(messages) ? messages : []
+    return safe
+        .filter((message: any) => ['user', 'assistant'].includes(String(message?.role || '')) && String(message?.content || '').trim())
+        .slice(-maxMessages)
+        .map((message: any) => {
+            const role = message.role === 'assistant' ? 'Agente' : 'Lead'
+            return `  - ${role}: ${compactSharedMemoryText(message.content, 220)}`
+        })
+}
+
+async function buildCrossBrokerLeadMemoryPrompt(params: {
+    leadPhone?: string
+    currentBrokerId?: string | null
+    currentBrokerName?: string | null
+    messages: any[]
+}) {
+    const candidates = phoneCandidates(params.leadPhone)
+    if (candidates.length === 0 || !params.currentBrokerId) return ''
+
+    try {
+        const supabase = getSupabase()
+        const { data: conversations, error } = await supabase
+            .from('whatsapp_ai_conversations')
+            .select('id, broker_id, instance_id, lead_phone, messages, status, summary, lead_data_extracted, qualification_score, created_at, updated_at')
+            .in('lead_phone', candidates)
+            .neq('broker_id', params.currentBrokerId)
+            .order('updated_at', { ascending: false })
+            .limit(4)
+
+        if (error) {
+            console.warn('[Cross Broker Memory] conversation lookup failed:', error.message)
+            return ''
+        }
+
+        const usefulConversations = (conversations || []).filter((conversation: any) => {
+            return Array.isArray(conversation.messages) && conversation.messages.length > 0
+        })
+        if (usefulConversations.length === 0) return ''
+
+        const brokerIds = Array.from(new Set(usefulConversations.map((conversation: any) => conversation.broker_id).filter(Boolean)))
+        const brokerMap = new Map<string, any>()
+        if (brokerIds.length > 0) {
+            const { data: brokers, error: brokerError } = await supabase
+                .from('virtual_brokers')
+                .select('id, name')
+                .in('id', brokerIds)
+            if (brokerError) {
+                console.warn('[Cross Broker Memory] broker lookup failed:', brokerError.message)
+            } else {
+                for (const broker of brokers || []) brokerMap.set(broker.id, broker)
+            }
+        }
+
+        let profileMap = new Map<string, any>()
+        try {
+            if (brokerIds.length === 0) {
+                profileMap = new Map()
+            } else {
+            const { data: profiles, error: profileError } = await supabase
+                .from('broker_lead_profiles')
+                .select('broker_id, lead_phone, lead_name, interest, region, budget_min, budget_max, bedrooms_wanted, property_type, timeline, qualification_score, lead_classification, status, notes, updated_at')
+                .in('lead_phone', candidates)
+                .in('broker_id', brokerIds)
+            if (profileError) {
+                console.warn('[Cross Broker Memory] profile lookup failed:', profileError.message)
+            } else {
+                profileMap = new Map((profiles || []).map((profile: any) => [`${profile.broker_id}:${profile.lead_phone}`, profile]))
+            }
+            }
+        } catch (err) {
+            console.warn('[Cross Broker Memory] profile lookup exception:', err)
+        }
+
+        const currentHasAssistantHistory = params.messages.some((message: any) => message?.role === 'assistant')
+        const previousAgentNames = usefulConversations
+            .map((conversation: any) => brokerMap.get(conversation.broker_id)?.name)
+            .filter(Boolean)
+        const previousAgentLabel = previousAgentNames.length === 1
+            ? previousAgentNames[0]
+            : previousAgentNames.slice(0, 2).join(' e ')
+
+        const blocks = usefulConversations.slice(0, 3).map((conversation: any, index: number) => {
+            const brokerName = brokerMap.get(conversation.broker_id)?.name || 'outro corretor IA'
+            const profile = profileMap.get(`${conversation.broker_id}:${conversation.lead_phone}`) || {}
+            const extracted = conversation.lead_data_extracted && typeof conversation.lead_data_extracted === 'object'
+                ? conversation.lead_data_extracted
+                : {}
+            const dataLines = [
+                profile.lead_name || extracted.name ? `  - Nome conhecido: ${profile.lead_name || extracted.name}` : '',
+                profile.interest || extracted.interest || extracted.purpose ? `  - Interesse/finalidade: ${profile.interest || extracted.interest || extracted.purpose}` : '',
+                profile.region || extracted.region ? `  - Regiao: ${profile.region || extracted.region}` : '',
+                profile.budget_max || extracted.budget || extracted.orcamento ? `  - Orcamento: ${profile.budget_max ? `R$ ${Number(profile.budget_max).toLocaleString('pt-BR')}` : (extracted.budget || extracted.orcamento)}` : '',
+                profile.property_type || extracted.property_type ? `  - Tipo de imovel: ${profile.property_type || extracted.property_type}` : '',
+                profile.timeline || extracted.timeframe || extracted.prazo ? `  - Prazo: ${profile.timeline || extracted.timeframe || extracted.prazo}` : '',
+                profile.notes || conversation.summary || extracted.summary ? `  - Resumo/notas: ${compactSharedMemoryText(profile.notes || conversation.summary || extracted.summary, 300)}` : '',
+            ].filter(Boolean)
+            const messageLines = formatSharedConversationMessages(conversation.messages, index === 0 ? 6 : 4)
+
+            return [
+                `Atendimento anterior com ${brokerName}:`,
+                `  - Ultima atualizacao: ${formatSharedMemoryDate(conversation.updated_at) || 'sem data'}`,
+                `  - Status: ${conversation.status || profile.status || 'sem status'}`,
+                ...dataLines,
+                messageLines.length > 0 ? '  - Trechos recentes:' : '',
+                ...messageLines,
+            ].filter(Boolean).join('\n')
+        })
+
+        return [
+            '',
+            'MEMORIA COMPARTILHADA ENTRE CORRETORES IA (nao revele como banco de dados):',
+            `- Este telefone ja conversou com ${previousAgentLabel || 'outro corretor IA'} antes deste atendimento de ${params.currentBrokerName || 'corretor atual'}.`,
+            ...blocks,
+            '',
+            'REGRAS PARA CONTINUIDADE ENTRE CORRETORES:',
+            '- Use esse historico para continuar a conversa sem recomecar do zero.',
+            '- Nao pergunte novamente informacoes ja conhecidas; confirme com naturalidade somente se necessario.',
+            '- Nao misture identidades: voce e o corretor atual, nao finja ser o corretor anterior.',
+            currentHasAssistantHistory
+                ? '- Como este corretor atual ja respondeu antes nesta conversa, nao mencione novamente o corretor anterior sem motivo.'
+                : `- Se for natural na primeira resposta, mencione uma unica vez: "Vi aqui que voce ja conversou com ${previousAgentLabel || 'outro corretor da equipe'}..." e continue do ponto certo.`,
+            '- Nao revele IP, score, funil, CRM, tags internas, IDs, banco de dados ou metricas ao cliente.',
+        ].join('\n')
+    } catch (err) {
+        console.warn('[Cross Broker Memory] failed:', err)
+        return ''
+    }
+}
+
 export async function generateAIResponse(
     configs: Record<string, string>,
     broker: any,
@@ -4018,6 +4164,16 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
     }, lastUserTextRaw)
     if (leadIntelligencePrompt) {
         systemPrompt += `\n${leadIntelligencePrompt}`
+    }
+
+    const crossBrokerMemoryPrompt = await buildCrossBrokerLeadMemoryPrompt({
+        leadPhone,
+        currentBrokerId: broker?.id || null,
+        currentBrokerName: brokerName,
+        messages,
+    })
+    if (crossBrokerMemoryPrompt) {
+        systemPrompt += `\n${crossBrokerMemoryPrompt}`
     }
 
     try {
@@ -4859,6 +5015,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                     instanceName,
                     instanceToken,
                     brokerId: broker.id,
+                    conversationId: conversation.id,
                     acquiredVia: 'whatsapp',
                     messages: updatedMessages,
                     extractedData: controlledIntent === 'opt_out'
@@ -4867,6 +5024,26 @@ export const processWhatsAppMessage = inngest.createFunction(
                     shouldTransfer: controlledIntent === 'human_request',
                 }).catch((err) => {
                     console.warn('[WhatsApp Agent] controlled intent CRM sync failed:', err)
+                })
+
+                await recordAgentConversationEcosystemEvent({
+                    supabase,
+                    conversationId: conversation.id,
+                    brokerId: broker.id,
+                    brokerName: broker.name,
+                    instanceId,
+                    instanceName,
+                    leadPhone: cleanPhone,
+                    leadName: senderName || null,
+                    messages: updatedMessages,
+                    status: 'human_takeover',
+                    source: 'inngest-whatsapp-controlled-intent',
+                    extractedData: controlledIntent === 'opt_out'
+                        ? { summary: 'Lead pediu para parar o contato por WhatsApp.', classification: 'cold' }
+                        : { summary: 'Lead pediu atendimento humano.', classification: 'hot' },
+                    shouldTransfer: controlledIntent === 'human_request',
+                }).catch((err) => {
+                    console.warn('[WhatsApp Agent] controlled intent ecosystem event failed:', err)
                 })
 
                 return {
@@ -5009,12 +5186,31 @@ export const processWhatsAppMessage = inngest.createFunction(
                 instanceName,
                 instanceToken,
                 brokerId: broker.id,
+                conversationId: conversation.id,
                 acquiredVia: 'whatsapp',
                 messages: updatedMessages,
                 extractedData: aiResponse.extractedData || null,
                 shouldTransfer: aiResponse.shouldTransfer,
             }).catch((err) => {
                 console.warn('[WhatsApp Agent] fast CRM sync failed:', err)
+            })
+
+            await recordAgentConversationEcosystemEvent({
+                supabase,
+                conversationId: conversation.id,
+                brokerId: broker.id,
+                brokerName: broker.name,
+                instanceId,
+                instanceName,
+                leadPhone: cleanPhone,
+                leadName: senderName || null,
+                messages: updatedMessages,
+                status: aiResponse.shouldTransfer ? 'transfer_requested' : conversation.status || 'active',
+                source: 'inngest-whatsapp-fast-direct',
+                extractedData: aiResponse.extractedData || null,
+                shouldTransfer: aiResponse.shouldTransfer,
+            }).catch((err) => {
+                console.warn('[WhatsApp Agent] fast ecosystem event failed:', err)
             })
 
             console.log(`[WhatsApp Agent] Fast direct response sent for ${cleanPhone}`)
@@ -5633,6 +5829,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                 instanceName,
                 instanceToken,
                 brokerId: broker.id,
+                conversationId: conversation.id,
                 acquiredVia: 'whatsapp',
                 messages: aiResponse.updatedMessages,
                 extractedData: aiResponse.extractedData || null,
@@ -5641,6 +5838,26 @@ export const processWhatsAppMessage = inngest.createFunction(
         })
 
         // ── Step 5: Human-like behavior (sleep is native in Inngest!) ──
+        await step.run('record-ecosystem-conversation-event', async () => {
+            await recordAgentConversationEcosystemEvent({
+                supabase,
+                conversationId: conversation.id,
+                brokerId: broker.id,
+                brokerName: broker.name,
+                instanceId,
+                instanceName,
+                leadPhone: cleanPhone,
+                leadName: senderName || null,
+                messages: aiResponse.updatedMessages,
+                status: aiResponse.shouldTransfer ? 'transfer_requested' : conversation.status || 'active',
+                source: 'inngest-whatsapp-agent',
+                extractedData: aiResponse.extractedData || null,
+                shouldTransfer: aiResponse.shouldTransfer,
+            }).catch((err) => {
+                console.warn('[WhatsApp Agent] ecosystem event failed:', err)
+            })
+        })
+
         await step.run('ensure-online', async () => {
             if (configs['whatsapp_always_online'] !== 'false') {
                 await setPresenceAvailable(instanceToken, cleanPhone).catch((err) => {
@@ -6601,6 +6818,7 @@ export const detectHumanTakeover = inngest.createFunction(
                         content: cleanHumanText,
                         type: 'text',
                         source: 'human',
+                        message_id: botMsgId || null,
                         instance_id: instanceId,
                         broker_id: currentConv.broker_id || null,
                     }).catch(() => { })

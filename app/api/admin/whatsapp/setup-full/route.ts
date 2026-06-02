@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
+import { getPublicAppUrl } from '@/lib/app-url'
 
 function getSupabase() {
     return createClient(
@@ -29,10 +30,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Instância não encontrada ou sem token' }, { status: 404 })
         }
 
-        // Detect base URL from request
-        const host = request.headers.get('host') || ''
-        const proto = request.headers.get('x-forwarded-proto') || 'https'
-        const webhookBaseUrl = `${proto}://${host}`
+        const webhookBaseUrl = getPublicAppUrl(request.nextUrl.origin)
 
         // Dispatch to Inngest — runs in background, no timeout
         await inngest.send({

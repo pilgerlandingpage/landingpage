@@ -1,5 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
-import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type PlatformKey = 'meta' | 'google'
@@ -414,6 +414,28 @@ export async function generatePaidMarketingReport({
     .single()
 
   if (error || !data) throw new Error(error?.message || 'Nao foi possivel salvar o relatorio pago.')
+
+  await recordEcosystemEvent({
+    supabase,
+    eventType: 'paid_marketing_report_created',
+    actorType: 'agent',
+    entityType: 'marketing_ai_report',
+    entityId: data.id,
+    source: 'paid-report-agent',
+    label: data.title,
+    importanceScore: 72,
+    metadata: {
+      report_type: 'paid',
+      period_start: context.periodStart.toISOString(),
+      period_end: context.periodEnd.toISOString(),
+      summary: report.summary,
+      insights: report.insights.slice(0, 4),
+      recommendations: report.recommendations.slice(0, 4),
+      metrics: report.metrics || {},
+    },
+  }).catch((eventError) => {
+    console.warn('[Paid Report Agent] ecosystem event failed:', eventError?.message || eventError)
+  })
 
   return {
     success: true,

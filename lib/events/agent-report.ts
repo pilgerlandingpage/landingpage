@@ -1,4 +1,5 @@
 import { generateChatResponse } from '@/lib/ai/generation'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from './agent-prompt'
 
 type JsonRecord = Record<string, any>
@@ -405,7 +406,21 @@ export async function generateEventAgentAiSummary(supabase: any, report: EventAg
         throw new Error('Relatorio IA do Agente de Eventos esta desativado no comportamento operacional.')
     }
 
-    const systemPrompt = clean(configs.event_agent_system_prompt, DEFAULT_EVENT_AGENT_SYSTEM_PROMPT)
+    const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'events', days: 30, limit: 100 }).catch((error: any) => {
+        console.warn('[Event Agent] Ecosystem context unavailable:', error?.message || error)
+        return null
+    })
+    const ecosystemBrief = ecosystemContext ? buildAgentContextBrief(ecosystemContext) : ''
+    const systemPrompt = [
+        clean(configs.event_agent_system_prompt, DEFAULT_EVENT_AGENT_SYSTEM_PROMPT),
+        ecosystemBrief
+            ? [
+                'CONTEXTO CENTRAL DO ECOSSISTEMA PILGER:',
+                ecosystemBrief,
+                'Use estes sinais para recomendar automacoes e prioridades, sem revelar dados internos, IPs, IDs ou nomes de outros leads ao publico.',
+            ].join('\n')
+            : '',
+    ].filter(Boolean).join('\n\n')
     const payload = {
         event: report.event,
         totals: report.totals,
@@ -425,6 +440,10 @@ export async function generateEventAgentAiSummary(supabase: any, report: EventAg
             reasons: lead.reasons,
         })),
         current_recommendations: report.recommendations,
+        ecosystem_context: ecosystemContext ? {
+            source_counts: ecosystemContext.source_counts,
+            signals: ecosystemContext.signals,
+        } : null,
     }
 
     const message = [
@@ -435,5 +454,32 @@ export async function generateEventAgentAiSummary(supabase: any, report: EventAg
         JSON.stringify(payload, null, 2),
     ].join('\n')
 
-    return (await generateChatResponse([], message, systemPrompt)).trim()
+    const summary = (await generateChatResponse([], message, systemPrompt)).trim()
+
+    await recordEcosystemEvent({
+        supabase,
+        eventType: 'event_agent_report_generated',
+        actorType: 'agent',
+        entityType: 'event',
+        entityId: report.event.id,
+        source: 'event-agent',
+        label: `Relatorio do Agente de Eventos: ${report.event.title}`,
+        importanceScore: report.totals.hot > 0 ? 78 : 62,
+        metadata: {
+            event: report.event,
+            totals: report.totals,
+            top_leads: report.top_leads.slice(0, 5).map(lead => ({
+                id: lead.id,
+                name: lead.name,
+                score: lead.score,
+                level: lead.level,
+            })),
+            recommendations: report.recommendations,
+            ai_summary: summary.slice(0, 1200),
+        },
+    }).catch((error: any) => {
+        console.warn('[Event Agent] ecosystem event failed:', error?.message || error)
+    })
+
+    return summary
 }

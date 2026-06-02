@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type PlatformKey = 'instagram' | 'facebook'
@@ -32,6 +33,8 @@ const SYSTEM_PROMPT = [
   'Voce e o agente de atendimento social da Pilger Luxury Search.',
   'Sua funcao e analisar comentarios e mensagens vindos de Instagram/Facebook para identificar oportunidade imobiliaria.',
   'Classifique intencao, prioridade, score de lead e sugira uma resposta curta, natural e profissional em portugues do Brasil.',
+  'Use o contexto do ecossistema quando existir: cidades quentes, buscas, imoveis em alta, conversas de WhatsApp, relatorios de marketing e sinais de leads.',
+  'Nao revele ao usuario dados internos, nomes de outros leads, IPs, metricas sensiveis, IDs ou que voce consultou uma base interna.',
   'Nunca prometa dados que nao estao no texto.',
   'Se a pessoa demonstrar interesse em comprar, vender, visitar, preco, condominio, dormitorios, frente mar, alto padrao ou SKU, aumente o lead_score.',
   'Se houver reclamacao, urgencia ou risco de reputacao, marque prioridade alta ou urgente.',
@@ -124,7 +127,7 @@ async function loadInboxItems(limit: number, force: boolean): Promise<InboxItem[
   return items.filter(item => !existing.has(`${item.source_type}:${item.source_id}`))
 }
 
-function buildUserPrompt(items: InboxItem[]) {
+function buildUserPrompt(items: InboxItem[], ecosystemContext?: Record<string, unknown> | null) {
   return JSON.stringify({
     instruction: 'Analise cada item e retorne um array JSON em "items".',
     output_schema: {
@@ -141,6 +144,7 @@ function buildUserPrompt(items: InboxItem[]) {
         recommended_action: 'proxima acao objetiva',
       }],
     },
+    ecosystem_context: ecosystemContext || null,
     items,
   })
 }
@@ -224,16 +228,53 @@ export async function analyzeMetaSocialInbox({
     }
   }
 
+  let ecosystemContext: Record<string, unknown> | null = null
+  try {
+    const supabase = createAdminClient()
+    const context = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 80 })
+    ecosystemContext = {
+      brief: buildAgentContextBrief(context),
+      signals: context.signals,
+      source_counts: context.source_counts,
+    }
+  } catch (error: any) {
+    console.warn('[Meta Social Agent] Ecosystem context unavailable:', error?.message || error)
+  }
+
   const raw = await chatWithGemini({
     systemPrompt: SYSTEM_PROMPT,
     history: [],
-    userMessage: buildUserPrompt(items),
+    userMessage: buildUserPrompt(items, ecosystemContext),
     temperature: 0.2,
     maxTokens: 4096,
   })
 
   const suggestions = parseSuggestions(raw, items)
   const saved = await saveSuggestions(suggestions, raw)
+
+  if (saved.length > 0) {
+    const top = [...saved].sort((a: any, b: any) => Number(b.lead_score || 0) - Number(a.lead_score || 0))[0] as any
+    await recordEcosystemEvent({
+      eventType: 'social_agent_suggestions_created',
+      actorType: 'agent',
+      entityType: 'meta_social_ai_suggestion',
+      entityId: top?.id || null,
+      source: 'meta-social-agent',
+      label: `${saved.length} sugestao(oes) sociais geradas`,
+      importanceScore: Math.max(55, Number(top?.lead_score || 0)),
+      metadata: {
+        analyzed: items.length,
+        saved: saved.length,
+        top_platform: top?.platform || null,
+        top_intent: top?.intent || null,
+        top_priority: top?.priority || null,
+        top_score: top?.lead_score || null,
+        top_summary: truncate(top?.summary, 500),
+      },
+    }).catch((error) => {
+      console.warn('[Meta Social Agent] Ecosystem event failed:', error?.message || error)
+    })
+  }
 
   return {
     success: true,

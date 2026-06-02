@@ -8,7 +8,7 @@ import {
 } from '../market-radar/insights'
 import { sendAlertToAdmins } from '../ads/whatsapp-alerts'
 import { getCeoGeminiModel, getCeoOpenAIModel, getCeoProvider } from './config'
-import { buildAgentContextBrief, getAgentEcosystemContext } from '../intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '../intelligence/ecosystem'
 
 function getSupabase() {
   return createClient(
@@ -244,6 +244,27 @@ ${SCORE_INSTRUCTION}`
       token_usage: {}
     })
 
+    await recordEcosystemEvent({
+      supabase,
+      eventType: 'ceo_daily_report_created',
+      actorType: 'agent',
+      entityType: 'pilger_ai_report',
+      entityId: `${today}:${platform}:daily`,
+      source: 'pilger-ceo',
+      label: `Fechamento diario CEO ${platformLabel}`,
+      importanceScore: 74,
+      metadata: {
+        type: 'daily',
+        date: today,
+        platform,
+        platform_label: platformLabel,
+        performance_score: performanceScore,
+        summary_preview: reportMarkdown.slice(0, 1200),
+      },
+    }).catch((eventError: any) => {
+      console.warn('[Pilger CEO] daily ecosystem event failed:', eventError?.message || eventError)
+    })
+
     results.push({ platform, score: performanceScore })
   }
 
@@ -452,6 +473,27 @@ ${SCORE_INSTRUCTION}`
       content_markdown: reportMarkdown,
       performance_score: performanceScore,
       token_usage: {}
+    })
+
+    await recordEcosystemEvent({
+      supabase,
+      eventType: 'ceo_weekly_report_created',
+      actorType: 'agent',
+      entityType: 'pilger_ai_report',
+      entityId: `${todayStr}:${platform}:weekly`,
+      source: 'pilger-ceo',
+      label: `Diretriz semanal CEO ${platformLabel}`,
+      importanceScore: 78,
+      metadata: {
+        type: 'weekly',
+        date: todayStr,
+        platform,
+        platform_label: platformLabel,
+        performance_score: performanceScore,
+        summary_preview: reportMarkdown.slice(0, 1200),
+      },
+    }).catch((eventError: any) => {
+      console.warn('[Pilger CEO] weekly ecosystem event failed:', eventError?.message || eventError)
     })
 
     results.push({ platform, score: performanceScore })

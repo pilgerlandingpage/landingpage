@@ -95,3 +95,38 @@ export function slugifyBlog(value: string) {
         .replace(/^-+|-+$/g, '')
         .slice(0, 110) || `artigo-${Date.now()}`
 }
+
+type BlogSlugLookup = {
+    from: (table: string) => any
+}
+
+function slugWithSuffix(base: string, index: number) {
+    const suffix = `-${index}`
+    return `${base.slice(0, Math.max(1, 110 - suffix.length)).replace(/-+$/g, '')}${suffix}`
+}
+
+export async function getAvailableBlogSlug(supabase: BlogSlugLookup, value: string) {
+    const baseSlug = slugifyBlog(value)
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('slug')
+        .like('slug', `${baseSlug}%`)
+        .limit(500)
+
+    if (error) throw error
+
+    const used = new Set<string>(
+        (data || [])
+            .map((row: any) => String(row.slug || ''))
+            .filter((slug: string) => slug === baseSlug || slug.startsWith(`${baseSlug}-`))
+    )
+
+    if (!used.has(baseSlug)) return baseSlug
+
+    for (let index = 2; index < 500; index += 1) {
+        const candidate = slugWithSuffix(baseSlug, index)
+        if (!used.has(candidate)) return candidate
+    }
+
+    return slugWithSuffix(baseSlug, Date.now())
+}

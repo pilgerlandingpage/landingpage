@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Search, Download, Filter } from 'lucide-react'
+import { Search, Download } from 'lucide-react'
 
 
 interface Lead {
@@ -26,6 +25,11 @@ interface Lead {
     lead_timeframe?: string | null
     is_partner?: boolean
     push_subscribed_lead?: boolean
+    active_broker_id?: string | null
+    active_broker_profile?: any | null
+    active_broker_conversation?: any | null
+    broker_conversation_log?: any[]
+    broker_profiles?: any[]
     landing_page?: {
         title: string
     }
@@ -57,6 +61,12 @@ interface Visitor {
     is_lead: boolean
     funnel_stage: string
     push_subscribed?: boolean
+}
+
+interface Broker {
+    id: string
+    name: string
+    is_active?: boolean | null
 }
 
 const stageLabel: Record<string, string> = {
@@ -356,6 +366,8 @@ export default function LeadsPage() {
     const [activeTab, setActiveTab] = useState<'leads' | 'visitors'>('leads')
     const [visitors, setVisitors] = useState<Visitor[]>([])
     const [loadingVisitors, setLoadingVisitors] = useState(false)
+    const [brokers, setBrokers] = useState<Broker[]>([])
+    const [selectedBrokerId, setSelectedBrokerId] = useState('')
 
     const openLeadDetails = (lead: Lead) => setSelectedLead(lead)
     const closeLeadDetails = () => setSelectedLead(null)
@@ -423,66 +435,77 @@ export default function LeadsPage() {
             .join(', ')
     }
 
-    useEffect(() => {
-        const fetchLeads = async () => {
-            try {
-                const res = await fetch('/api/admin/leads')
-                if (!res.ok) throw new Error('Failed to fetch')
+    const calculateCounts = (leadsData: Lead[]) => {
+        const newCounts: Record<string, number> = {
+            total: leadsData.length,
+            lead: 0,
+            engaged: 0,
+            qualifying: 0,
+            qualified: 0,
+            contacted: 0,
+            scheduled: 0,
+            proposal: 0,
+            closed: 0,
+            lost: 0,
+            transferred: 0,
+            purpose_invest: 0,
+            purpose_housing: 0,
+            timeframe_now: 0,
+            has_push: 0,
+            partners: 0
+        }
 
-                const leadsData: Lead[] = await res.json()
-                setLeads(leadsData)
-
-                // Calculate counts
-                const newCounts: Record<string, number> = {
-                    total: leadsData.length,
-                    lead: 0,
-                    engaged: 0,
-                    qualifying: 0,
-                    qualified: 0,
-                    contacted: 0,
-                    scheduled: 0,
-                    proposal: 0,
-                    closed: 0,
-                    lost: 0,
-                    transferred: 0,
-                    purpose_invest: 0,
-                    purpose_housing: 0,
-                    timeframe_now: 0,
-                    has_push: 0,
-                    partners: 0
-                }
-
-                leadsData.forEach(lead => {
-                    const stageKey = getCanonicalStage(lead.funnel_stage)
-                    if (Object.prototype.hasOwnProperty.call(newCounts, stageKey)) {
-                        newCounts[stageKey]++
-                    }
-                    if (isInvestmentPurpose(lead.lead_purpose)) newCounts.purpose_invest++
-                    if (isHousingPurpose(lead.lead_purpose)) newCounts.purpose_housing++
-                    if (isImmediateTimeframe(lead.lead_timeframe)) newCounts.timeframe_now++
-                    if (lead.push_subscribed_lead) newCounts.has_push++
-                    if (lead.is_partner) newCounts.partners++
-                })
-                setCounts(newCounts)
-            } catch (error) {
-                console.error('Error fetching leads:', error)
-            } finally {
-                setLoading(false)
+        leadsData.forEach(lead => {
+            const stageKey = getCanonicalStage(lead.funnel_stage)
+            if (Object.prototype.hasOwnProperty.call(newCounts, stageKey)) {
+                newCounts[stageKey]++
             }
-        }
-        fetchLeads()
-    }, [])
+            if (isInvestmentPurpose(lead.lead_purpose)) newCounts.purpose_invest++
+            if (isHousingPurpose(lead.lead_purpose)) newCounts.purpose_housing++
+            if (isImmediateTimeframe(lead.lead_timeframe)) newCounts.timeframe_now++
+            if (lead.push_subscribed_lead) newCounts.has_push++
+            if (lead.is_partner) newCounts.partners++
+        })
 
-    useEffect(() => {
-        if (activeTab === 'visitors' && visitors.length === 0) {
-            fetchVisitors()
+        return newCounts
+    }
+
+    const fetchBrokers = async () => {
+        try {
+            const res = await fetch('/api/admin/brokers')
+            const data = await res.json()
+            if (Array.isArray(data?.data)) setBrokers(data.data)
+        } catch (error) {
+            console.error('Error fetching brokers:', error)
         }
-    }, [activeTab])
+    }
+
+    const fetchLeads = async () => {
+        setLoading(true)
+        try {
+            const params = new URLSearchParams()
+            if (selectedBrokerId) params.set('broker_id', selectedBrokerId)
+            const url = params.toString() ? `/api/admin/leads?${params}` : '/api/admin/leads'
+            const res = await fetch(url)
+            if (!res.ok) throw new Error('Failed to fetch')
+
+            const leadsData: Lead[] = await res.json()
+            setLeads(leadsData)
+            setCounts(calculateCounts(leadsData))
+        } catch (error) {
+            console.error('Error fetching leads:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const fetchVisitors = async () => {
         setLoadingVisitors(true)
         try {
-            const res = await fetch('/api/admin/visitors')
+            const params = new URLSearchParams()
+            if (selectedBrokerId) params.set('broker_id', selectedBrokerId)
+            const url = params.toString() ? `/api/admin/visitors?${params}` : '/api/admin/visitors'
+            const res = await fetch(url)
             if (!res.ok) throw new Error('Failed to fetch visitors')
             const data: Visitor[] = await res.json()
             setVisitors(data)
@@ -492,6 +515,22 @@ export default function LeadsPage() {
             setLoadingVisitors(false)
         }
     }
+
+    useEffect(() => {
+        fetchBrokers()
+    }, [])
+
+    useEffect(() => {
+        setSelectedLead(null)
+        setVisitors([])
+        fetchLeads()
+    }, [selectedBrokerId])
+
+    useEffect(() => {
+        if (activeTab === 'visitors') {
+            fetchVisitors()
+        }
+    }, [activeTab, selectedBrokerId])
 
     const filteredLeads = leads.filter(lead => {
         if (stageFilter && getCanonicalStage(lead.funnel_stage) !== stageFilter) return false
@@ -504,6 +543,84 @@ export default function LeadsPage() {
             lead.phone?.includes(s)
         )
     })
+
+    const selectedBroker = brokers.find(broker => broker.id === selectedBrokerId)
+
+    const getLeadBrokerProfiles = (lead: Lead) => {
+        const rawProfiles = selectedBrokerId
+            ? [lead.active_broker_profile].filter(Boolean)
+            : Array.isArray(lead.broker_profiles) ? lead.broker_profiles : []
+        const seen = new Set<string>()
+        const profiles: any[] = []
+
+        for (const profile of rawProfiles) {
+            const key = profile?.broker_id || profile?.id
+            if (!key || seen.has(key)) continue
+            seen.add(key)
+            profiles.push(profile)
+        }
+
+        if (selectedBrokerId && profiles.length === 0 && selectedBroker) {
+            profiles.push({ broker_id: selectedBroker.id, broker_name: selectedBroker.name })
+        }
+
+        return profiles
+    }
+
+    const getBrokerProfileName = (profile: any) => {
+        return profile?.broker_name
+            || brokers.find(broker => broker.id === profile?.broker_id)?.name
+            || 'Corretor IA'
+    }
+
+    const getLeadBrokerSummary = (lead: Lead) => {
+        const names = getLeadBrokerProfiles(lead).map(getBrokerProfileName)
+        if (names.length === 0) return ''
+        if (names.length <= 2) return names.join(', ')
+        return `${names.slice(0, 2).join(', ')} +${names.length - 2}`
+    }
+
+    const renderLeadBrokerBadges = (lead: Lead) => {
+        const profiles = getLeadBrokerProfiles(lead)
+        if (profiles.length === 0) {
+            return <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>--</span>
+        }
+
+        const visibleProfiles = profiles.slice(0, 2)
+        return (
+            <div title={profiles.map(getBrokerProfileName).join(', ')} style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', maxWidth: 220 }}>
+                {visibleProfiles.map((profile: any) => (
+                    <span key={profile.broker_id || profile.id} style={{
+                        background: '#f8f1df',
+                        color: '#7b5a20',
+                        border: '1px solid #e6cc91',
+                        borderRadius: '999px',
+                        padding: '3px 8px',
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        lineHeight: 1.2,
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {getBrokerProfileName(profile)}
+                    </span>
+                ))}
+                {profiles.length > visibleProfiles.length && (
+                    <span style={{
+                        background: '#f2f2f2',
+                        color: '#666',
+                        border: '1px solid #ddd',
+                        borderRadius: '999px',
+                        padding: '3px 8px',
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        lineHeight: 1.2,
+                    }}>
+                        +{profiles.length - visibleProfiles.length}
+                    </span>
+                )}
+            </div>
+        )
+    }
 
     const exportCSV = () => {
         const headers = ['Nome', 'Email', 'Telefone', 'Estágio', 'VIP', 'Origem', 'Localização', 'GPS autorizado', 'Navegador', 'Dispositivo', 'IP', 'Data']
@@ -644,6 +761,23 @@ export default function LeadsPage() {
         )
     }
 
+    const getDisplayedConversation = (lead?: Lead | null) => {
+        if (!lead) return []
+        const brokerMessages = Array.isArray(lead.broker_conversation_log)
+            ? lead.broker_conversation_log
+            : Array.isArray(lead.active_broker_conversation?.messages)
+                ? lead.active_broker_conversation.messages
+                : []
+
+        if (selectedBrokerId) return brokerMessages
+        return Array.isArray(lead.conversation_log) ? lead.conversation_log : []
+    }
+
+    const selectedLeadConversation = getDisplayedConversation(selectedLead)
+    const selectedLeadConversationLabel = selectedBroker
+        ? `Conversa com ${selectedBroker.name}`
+        : 'Historico geral'
+
     // ... (keep existing state/handlers)
 
     return (
@@ -652,9 +786,11 @@ export default function LeadsPage() {
                 <div className="leads-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>Gerenciamento de Leads</h1>
-                        <p style={{ color: '#888', fontSize: '14px', marginTop: '4px', margin: 0 }}>Acompanhe e gerencie todos os seus contatos.</p>
+                        <p style={{ color: '#888', fontSize: '14px', marginTop: '4px', margin: 0 }}>
+                            {selectedBroker ? `Acompanhe contatos atendidos por ${selectedBroker.name}.` : 'Acompanhe e gerencie todos os seus contatos.'}
+                        </p>
                     </div>
-                    <div className="leads-search-actions" style={{ display: 'flex', gap: '12px', width: '100%', maxWidth: '400px' }}>
+                    <div className="leads-search-actions" style={{ display: 'flex', gap: '12px', width: '100%', maxWidth: '680px', flexWrap: 'wrap' }}>
                         <div style={{ position: 'relative', flex: 1 }}>
                             <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} size={18} />
                             <input
@@ -666,6 +802,17 @@ export default function LeadsPage() {
                                 onChange={e => setSearch(e.target.value)}
                             />
                         </div>
+                        <select
+                            className="form-input"
+                            value={selectedBrokerId}
+                            onChange={e => setSelectedBrokerId(e.target.value)}
+                            style={{ width: '220px', cursor: 'pointer' }}
+                        >
+                            <option value="">Todos os corretores</option>
+                            {brokers.map(broker => (
+                                <option key={broker.id} value={broker.id}>{broker.name}</option>
+                            ))}
+                        </select>
                         <button onClick={exportCSV} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Download size={18} />
                             <span>Exportar</span>
@@ -736,21 +883,24 @@ export default function LeadsPage() {
                                 <th>Contato</th>
                                 <th>Perfil / Persona</th>
                                 <th>Push</th>
+                                <th>Corretor IA</th>
                                 <th>Estágio</th>
                                 <th>Origem / Local</th>
+                                <th>Dispositivo</th>
+                                <th>IP / Data</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                                         Carregando...
                                     </td>
                                 </tr>
                             ) : filteredLeads.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                                         Nenhum lead encontrado
                                     </td>
                                 </tr>
@@ -783,6 +933,11 @@ export default function LeadsPage() {
                                                     <span style={{ width: '4px', height: '4px', backgroundColor: '#333', borderRadius: '50%' }}></span>
                                                     {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                                                 </div>
+                                                {(selectedBroker || (lead.broker_profiles?.length || 0) > 0) && (
+                                                    <div style={{ fontSize: '10px', color: '#9b7a3b', marginTop: '4px', fontWeight: 700 }}>
+                                                        IA: {getLeadBrokerSummary(lead)}
+                                                    </div>
+                                                )}
                                                 </div>
                                             </div>
                                         </td>
@@ -814,6 +969,9 @@ export default function LeadsPage() {
                                             ) : (
                                                 <span title="Não inscrito" className="text-xl opacity-10 grayscale">🔕</span>
                                             )}
+                                        </td>
+                                        <td>
+                                            {renderLeadBrokerBadges(lead)}
                                         </td>
                                         <td>
                                             <span className={`badge ${formatStageBadge(lead.funnel_stage)}`}>
@@ -1209,7 +1367,7 @@ export default function LeadsPage() {
                                         </div>
                                     </div>
                                     <span style={{ backgroundColor: '#fff', color: '#667781', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', border: '1px solid #d1d7db' }}>
-                                        {selectedLead.conversation_log?.length || 0} mensagens
+                                        {selectedLeadConversation.length} mensagens
                                     </span>
                                 </div>
 
@@ -1227,8 +1385,8 @@ export default function LeadsPage() {
                                     backgroundRepeat: 'repeat',
                                     backgroundPosition: 'center top',
                                 }}>
-                                    {selectedLead.conversation_log && selectedLead.conversation_log.length > 0 ? (
-                                        selectedLead.conversation_log.map((msg: any, idx: number) => renderChatMessage(msg, idx))
+                                    {selectedLeadConversation.length > 0 ? (
+                                        selectedLeadConversation.map((msg: any, idx: number) => renderChatMessage(msg, idx))
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#667781', gap: '8px' }}>
                                             <span style={{ fontSize: '2rem' }}>💬</span>
@@ -1238,7 +1396,7 @@ export default function LeadsPage() {
                                 </div>
                                 <div style={{ background: '#f0f2f5', borderTop: '1px solid #d1d7db', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{ height: '40px', borderRadius: '999px', background: '#fff', color: '#667781', flex: 1, display: 'flex', alignItems: 'center', padding: '0 16px', fontSize: '14px' }}>
-                                        Histórico espelhado do WhatsApp
+                                        {selectedLeadConversationLabel}
                                     </div>
                                 </div>
                             </div>

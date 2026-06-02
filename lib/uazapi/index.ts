@@ -639,11 +639,25 @@ export async function setWebhook(webhookUrl: string, instanceToken: string) {
     })
 }
 
+function normalizeWebhookResponse(result: any) {
+    const data = result?.data ?? result
+    const rows = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.webhooks) ? data.webhooks : [data])
+    return rows.find((row: any) => row && typeof row === 'object') || null
+}
+
 /** Obter webhook configurado */
 export async function getWebhook(instanceToken: string) {
-    return uazapiFetch('/webhook/get', {
-        token: instanceToken,
-    })
+    try {
+        return normalizeWebhookResponse(await uazapiFetch('/webhook', {
+            token: instanceToken,
+        }))
+    } catch (error) {
+        return normalizeWebhookResponse(await uazapiFetch('/webhook/get', {
+            token: instanceToken,
+        }))
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════

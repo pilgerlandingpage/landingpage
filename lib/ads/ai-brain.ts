@@ -10,6 +10,7 @@ import { buildMetricsAnalysisPrompt } from './prompts'
 import type { AIAnalysisResponse, MetricsSnapshot, AdCampaign } from './types'
 import { getAdsProvider, getAdsGeminiModel, getAdsOpenAIModel, getOpenAIApiKey } from '../ai/config'
 import { recordGeminiUsage } from '../ai/gemini-costs'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '../intelligence/ecosystem'
 
 // --- Inicializar Gemini ---
 
@@ -63,7 +64,7 @@ export async function analyzeCampaignMetrics(campaign: {
     const daysElapsed = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
     const dailyBudgetTarget = campaign.daily_budget || campaign.total_budget / campaign.duration_days
 
-    const userPrompt = buildMetricsAnalysisPrompt({
+    let userPrompt = buildMetricsAnalysisPrompt({
         campaign_name: campaign.name,
         platform: campaign.platform,
         daily_budget_target: dailyBudgetTarget,
@@ -91,6 +92,16 @@ export async function analyzeCampaignMetrics(campaign: {
             video_p100: metrics.video_p100
         }
     })
+    const supabase = getSupabase()
+    const ecosystemBrief = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 80 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[Ads AI Brain] Ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
+    if (ecosystemBrief) {
+        userPrompt += `\n\nCONTEXTO CENTRAL DO ECOSSISTEMA PILGER:\n${ecosystemBrief}\n\nUse estes sinais para interpretar performance, publico, cidades, conversas e estoque. Nao revele dados internos.`
+    }
 
     try {
         let text = ''
@@ -147,6 +158,27 @@ export async function analyzeCampaignMetrics(campaign: {
                 urgency: 'low'
             }
         }
+
+        await recordEcosystemEvent({
+            supabase,
+            eventType: 'ads_campaign_ai_analysis_created',
+            actorType: 'agent',
+            entityType: 'ad_campaign',
+            entityId: campaign.name,
+            source: 'ads-ai-brain',
+            label: `Analise IA da campanha ${campaign.name}`,
+            importanceScore: parsed.urgency === 'critical' ? 85 : parsed.urgency === 'high' ? 75 : 58,
+            metadata: {
+                campaign,
+                metrics,
+                action: parsed.action,
+                urgency: parsed.urgency,
+                alert_message: parsed.alert_message,
+                ecosystem_brief_used: Boolean(ecosystemBrief),
+            },
+        }).catch((eventError: any) => {
+            console.warn('[Ads AI Brain] ecosystem event failed:', eventError?.message || eventError)
+        })
 
         return parsed
     } catch (err) {
@@ -240,8 +272,20 @@ export function detectCreativeFatigue(metrics: MetricsSnapshot): {
 export async function generateDailyReport(campaignsSummary: string): Promise<string> {
     const provider = await getAdsProvider()
     const dailyReportPrompt = await getRequiredPromptFromConfig('pilger_daily_system_prompt')
+    const supabase = getSupabase()
+    const ecosystemBrief = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 100 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[Ads AI Brain] Daily ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
+    const userMessage = [
+        campaignsSummary,
+        ecosystemBrief ? `CONTEXTO CENTRAL DO ECOSSISTEMA PILGER:\n${ecosystemBrief}\n\nUse esses sinais para interpretar o fechamento. Nao revele dados internos.` : '',
+    ].filter(Boolean).join('\n\n')
 
     try {
+        let report = ''
         if (provider === 'openai') {
             const apiKey = await getOpenAIApiKey()
             if (!apiKey) throw new Error('OpenAI API Key não configurada')
@@ -252,19 +296,19 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
                 model: modelName,
                 messages: [
                     { role: 'system', content: dailyReportPrompt },
-                    { role: 'user', content: campaignsSummary }
+                    { role: 'user', content: userMessage }
                 ],
                 temperature: 0.5,
             })
 
-            return completion.choices[0].message.content || ''
+            report = completion.choices[0].message.content || ''
         } else {
             const gemini = await getGemini()
             const modelName = await getAdsGeminiModel()
             const model = gemini.getGenerativeModel({ model: modelName })
 
             const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: campaignsSummary }] }],
+                contents: [{ role: 'user', parts: [{ text: userMessage }] }],
                 systemInstruction: { role: 'model', parts: [{ text: dailyReportPrompt }] },
                 generationConfig: { temperature: 0.5 }
             })
@@ -274,8 +318,27 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
                 feature: 'ads_daily_report',
                 usageMetadata: (result.response as any).usageMetadata || (result as any).response?.usageMetadata,
             })
-            return result.response.text()
+            report = result.response.text()
         }
+
+        await recordEcosystemEvent({
+            supabase,
+            eventType: 'ads_daily_report_created',
+            actorType: 'agent',
+            entityType: 'ads_daily_report',
+            entityId: new Date().toISOString().slice(0, 10),
+            source: 'ads-ai-brain',
+            label: 'Fechamento diario de Ads gerado',
+            importanceScore: 70,
+            metadata: {
+                summary_preview: report.slice(0, 1200),
+                ecosystem_brief_used: Boolean(ecosystemBrief),
+            },
+        }).catch((eventError: any) => {
+            console.warn('[Ads AI Brain] daily ecosystem event failed:', eventError?.message || eventError)
+        })
+
+        return report
     } catch (err) {
         console.error('Erro ao gerar relatório diário:', err)
         return `⚠️ Erro ao gerar relatório automático: ${String(err)}`

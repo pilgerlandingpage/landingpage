@@ -11,6 +11,14 @@ export type EcosystemAgent =
   | 'traffic'
   | 'ceo'
   | 'recruiting'
+  | 'events'
+  | 'social'
+  | 'distribution'
+  | 'publisher'
+  | 'property'
+  | 'research'
+  | 'benchmark'
+  | 'creative'
 
 type SafeQueryResult<T = unknown> = {
   label: string
@@ -34,6 +42,11 @@ function safeArray<T = any>(value: unknown, limit = 50): T[] {
 
 function safeText(value: unknown) {
   return String(value || '').trim()
+}
+
+function truncateText(value: unknown, max = 420) {
+  const text = safeText(value).replace(/\s+/g, ' ')
+  return text.length > max ? `${text.slice(0, max - 3)}...` : text
 }
 
 function normalize(value: unknown) {
@@ -159,6 +172,7 @@ function buildLeadQuestions(conversations: any[]) {
   return conversations
     .map(conversation => {
       const messages = safeArray<any>(conversation?.messages, 80)
+      const extracted = parseMetadata(conversation?.lead_data_extracted)
       const userMessages = messages
         .filter(message => ['user', 'lead', 'customer'].includes(String(message?.role || '').toLowerCase()))
         .map(message => safeText(message?.content || message?.text || message?.message))
@@ -166,16 +180,96 @@ function buildLeadQuestions(conversations: any[]) {
         .slice(-4)
 
       return {
-        lead_name: conversation?.lead_name || null,
+        lead_name: conversation?.lead_name || extracted.name || extracted.lead_name || null,
         lead_phone: conversation?.lead_phone || null,
-        funnel_stage: conversation?.funnel_stage || null,
-        purpose: conversation?.lead_purpose || null,
-        summary: (safeText(conversation?.summary) || userMessages.join(' | ')).slice(0, 420),
+        broker_id: conversation?.broker_id || null,
+        funnel_stage: conversation?.funnel_stage || extracted.funnel_stage || null,
+        purpose: conversation?.lead_purpose || extracted.purpose || extracted.objective || null,
+        qualification_score: conversation?.qualification_score || extracted.qualification_score || null,
+        summary: truncateText(safeText(conversation?.summary) || safeText(extracted.summary) || userMessages.join(' | '), 420),
         updated_at: conversation?.updated_at || null,
       }
     })
     .filter(item => item.summary)
     .slice(0, 20)
+}
+
+function messageTimestampMs(message: any) {
+  const timestamp = Date.parse(String(message?.timestamp || message?.created_at || ''))
+  return Number.isFinite(timestamp) ? timestamp : 0
+}
+
+function buildLeadConversationLogSignals(leads: any[], virtualBrokers: any[]) {
+  const brokerMap = new Map(virtualBrokers.map(item => [String(item?.id || ''), item]))
+  const threads = leads
+    .map(lead => {
+      const messages = safeArray<any>(lead?.conversation_log, 250)
+        .map(message => {
+          const content = safeText(message?.content || message?.text || message?.message)
+          const source = safeText(message?.source).toLowerCase()
+          const role = safeText(message?.role).toLowerCase()
+          const brokerId = safeText(message?.broker_id)
+          return {
+            role,
+            source,
+            content,
+            broker_id: brokerId || null,
+            broker_name: brokerId ? brokerMap.get(brokerId)?.name || brokerId : null,
+            timestamp: message?.timestamp || null,
+            timestamp_ms: messageTimestampMs(message),
+            type: message?.type || null,
+          }
+        })
+        .filter(message => message.content)
+        .sort((a, b) => a.timestamp_ms - b.timestamp_ms)
+
+      if (!messages.length) return null
+
+      const humanMessages = messages.filter(message => message.source === 'human')
+      const leadMessages = messages.filter(message => message.source === 'lead' || message.role === 'user')
+      const agentMessages = messages.filter(message => message.source === 'agent' || message.source === 'whatsapp_agent')
+      const brokerNames = Array.from(new Set(messages.map(message => message.broker_name).filter(Boolean)))
+      const lastHuman = [...humanMessages].reverse()[0]
+      const lastLead = [...leadMessages].reverse()[0]
+      const lastMessage = [...messages].reverse()[0]
+
+      return {
+        lead_id: lead?.id,
+        lead_name: lead?.name || null,
+        lead_phone: lead?.phone_e164 || lead?.phone || null,
+        funnel_stage: lead?.funnel_stage || null,
+        lead_classification: lead?.lead_classification || null,
+        lead_score: lead?.lead_score || null,
+        acquired_via: lead?.acquired_via || null,
+        human_messages: humanMessages.length,
+        lead_messages: leadMessages.length,
+        agent_messages: agentMessages.length,
+        total_messages: messages.length,
+        broker_names: brokerNames.slice(0, 4),
+        has_human_attendance: humanMessages.length > 0,
+        last_human_message: lastHuman ? truncateText(lastHuman.content, 320) : null,
+        last_lead_message: lastLead ? truncateText(lastLead.content, 320) : null,
+        last_message_preview: lastMessage ? truncateText(lastMessage.content, 320) : null,
+        summary: truncateText(lead?.ai_summary || messages.slice(-6).map(message => {
+          const speaker = message.source === 'human'
+            ? 'Humano'
+            : message.role === 'assistant'
+              ? 'Agente'
+              : 'Lead'
+          return `${speaker}: ${message.content}`
+        }).join(' | '), 650),
+        updated_at: lead?.updated_at || lastMessage?.timestamp || null,
+      }
+    })
+    .filter(Boolean)
+    .sort((a: any, b: any) => Date.parse(String(b.updated_at || '')) - Date.parse(String(a.updated_at || '')))
+
+  const humanThreads = threads.filter((thread: any) => thread.has_human_attendance)
+  return {
+    lead_conversation_threads: threads.slice(0, 20),
+    human_conversation_threads: humanThreads.slice(0, 20),
+    human_whatsapp_messages: humanThreads.reduce((sum: number, thread: any) => sum + Number(thread.human_messages || 0), 0),
+  }
 }
 
 function buildSourceCounts(results: SafeQueryResult[]) {
@@ -199,7 +293,10 @@ function summarizeSignals(params: {
   blogPosts: any[]
   conversations: any[]
   organicMedia: any[]
+  marketingReports: any[]
+  socialSuggestions: any[]
   brokerCandidates: any[]
+  virtualBrokers: any[]
 }) {
   const {
     leads,
@@ -213,7 +310,10 @@ function summarizeSignals(params: {
     blogPosts,
     conversations,
     organicMedia,
+    marketingReports,
+    socialSuggestions,
     brokerCandidates,
+    virtualBrokers,
   } = params
 
   const searchEvents = events.filter(event =>
@@ -230,6 +330,7 @@ function summarizeSignals(params: {
   const topLeadCities = topVisitorsByCity(visitors, leads)
   const hotProperties = buildHotProperties(propertyEvents, properties)
   const leadQuestions = buildLeadQuestions(conversations)
+  const leadConversationLogSignals = buildLeadConversationLogSignals(leads, virtualBrokers)
   const latestResearch = researchReports
     .filter(report => report?.status === 'completed')
     .slice(0, 10)
@@ -252,6 +353,21 @@ function summarizeSignals(params: {
     }))
 
   const trafficSources = countBy(visitors, item => item?.detected_source || 'Direto', 10)
+  const brokerMap = new Map(virtualBrokers.map(item => [String(item?.id || ''), item]))
+  const conversationAgents = countBy(
+    conversations,
+    item => {
+      const brokerId = String(item?.broker_id || '')
+      const brokerName = brokerMap.get(brokerId)?.name
+      return brokerName || brokerId || null
+    },
+    12,
+  )
+  const humanConversationBrokers = countBy(
+    leadConversationLogSignals.human_conversation_threads,
+    item => safeArray<string>(item?.broker_names, 4)[0] || 'Corretor humano',
+    12,
+  )
   const brokerCandidateCities = countBy(brokerCandidates, item => [item?.city, item?.state].filter(Boolean).join(', ') || null, 10)
   const brokerCandidateSources = countBy(brokerCandidates, item => item?.source || item?.utm_source || 'Direto', 10)
   const highPotentialBrokerCandidates = brokerCandidates.filter(candidate => String(candidate?.potential_level || '') === 'hot' || Number(candidate?.potential_score || 0) >= 80)
@@ -283,6 +399,28 @@ function summarizeSignals(params: {
       interactions: item?.total_interactions,
       permalink: item?.permalink,
     }))
+  const latestMarketingReports = marketingReports
+    .slice(0, 8)
+    .map(report => ({
+      id: report?.id,
+      type: report?.report_type,
+      title: report?.title,
+      summary: report?.summary,
+      generated_by: report?.generated_by,
+      created_at: report?.created_at,
+    }))
+  const socialLeadSignals = socialSuggestions
+    .slice(0, 12)
+    .map(item => ({
+      platform: item?.platform,
+      intent: item?.intent,
+      sentiment: item?.sentiment,
+      priority: item?.priority,
+      lead_score: item?.lead_score,
+      summary: item?.summary,
+      recommended_action: item?.recommended_action,
+      updated_at: item?.updated_at,
+    }))
 
   return {
     overview: {
@@ -299,6 +437,11 @@ function summarizeSignals(params: {
       broker_candidates: brokerCandidates.length,
       high_potential_broker_candidates: highPotentialBrokerCandidates.length,
       ecosystem_events: ecosystemEvents.length,
+      marketing_reports: marketingReports.length,
+      social_ai_suggestions: socialSuggestions.length,
+      lead_conversation_threads: leadConversationLogSignals.lead_conversation_threads.length,
+      human_attended_leads: leadConversationLogSignals.human_conversation_threads.length,
+      human_whatsapp_messages: leadConversationLogSignals.human_whatsapp_messages,
     },
     top_lead_cities: topLeadCities,
     traffic_sources: trafficSources,
@@ -306,9 +449,15 @@ function summarizeSignals(params: {
     top_search_terms: topSearchTerms,
     hot_properties: hotProperties,
     lead_questions: leadQuestions,
+    lead_conversation_threads: leadConversationLogSignals.lead_conversation_threads,
+    human_conversation_threads: leadConversationLogSignals.human_conversation_threads,
+    human_conversation_brokers: humanConversationBrokers,
+    conversation_agents: conversationAgents,
     radar_opportunities: radarOpportunities,
     latest_research: latestResearch,
     organic_top_content: organicTopContent,
+    latest_marketing_reports: latestMarketingReports,
+    social_lead_signals: socialLeadSignals,
     broker_candidate_cities: brokerCandidateCities,
     broker_candidate_sources: brokerCandidateSources,
     recent_ecosystem_events: recentEcosystemEvents,
@@ -334,9 +483,13 @@ function buildExecutiveSummary(signals: any, agent: EcosystemAgent) {
   const radar = signals.radar_opportunities?.[0]?.keyword
   const research = signals.latest_research?.[0]?.topic
   const brokerCandidateCity = signals.broker_candidate_cities?.[0]?.label
+  const humanAttendedLeads = Number(overview.human_attended_leads || 0)
+  const humanBroker = signals.human_conversation_brokers?.[0]?.label
 
   const parts = [
     `Contexto ${agent}: ${overview.leads || 0} leads, ${overview.visitors || 0} visitantes, ${overview.events || 0} eventos e ${overview.broker_candidates || 0} candidatos corretores recentes analisados.`,
+    humanAttendedLeads ? `${humanAttendedLeads} leads tiveram atendimento humano registrado no WhatsApp.` : '',
+    humanBroker ? `Corretor humano com mais interacoes registradas: ${humanBroker}.` : '',
     topCity ? `Cidade com mais sinal: ${topCity}.` : '',
     topSearch ? `Busca/filtro mais forte: ${topSearch}.` : '',
     hotProperty ? `Imovel com maior interesse comportamental: ${hotProperty}.` : '',
@@ -359,7 +512,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
   const since = periodStart.toISOString()
 
   const results = await Promise.all([
-    safeQuery('leads', supabase.from('leads').select('id, name, phone, phone_e164, lead_purpose, funnel_stage, acquired_via, landing_page_id, city, state, country, visitor_id, metadata, created_at, updated_at').gte('created_at', since).order('created_at', { ascending: false }).limit(limit)),
+    safeQuery('leads', supabase.from('leads').select('id, name, phone, phone_e164, lead_purpose, lead_budget, lead_timeframe, lead_score, lead_classification, ai_summary, funnel_stage, acquired_via, landing_page_id, city, state, country, visitor_id, metadata, conversation_log, created_at, updated_at').or(`created_at.gte.${since},updated_at.gte.${since}`).order('updated_at', { ascending: false }).limit(limit)),
     safeQuery('visitors', supabase.from('visitors').select('id, city, region, country, detected_source, device_type, browser, os, page_views, ip_address, utm_source, utm_medium, utm_campaign, referrer, last_visit_at').order('last_visit_at', { ascending: false }).limit(limit)),
     safeQuery('funnel_events', supabase.from('funnel_events').select('id, visitor_id, lead_id, landing_page_id, event_type, metadata, created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(limit * 2)),
     safeQuery('properties', supabase.from('properties').select('id, title, city, state, neighborhood, address, price, property_type, bedrooms, bathrooms, suites, parking_spaces, area_m2, status, source_status, amenities, created_at').order('created_at', { ascending: false }).limit(220)),
@@ -369,11 +522,14 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     safeQuery('ad_campaigns', supabase.from('ad_campaigns').select('id, name, platform, status, total_budget, daily_budget, created_at').order('created_at', { ascending: false }).limit(80)),
     safeQuery('ad_metrics_snapshots', supabase.from('ad_metrics_snapshots').select('campaign_id, snapshot_at, impressions, clicks, spend, leads_count, conversions, cost_per_lead').gte('snapshot_at', since).order('snapshot_at', { ascending: false }).limit(180)),
     safeQuery('blog_posts', supabase.from('blog_posts').select('id, title, slug, primary_keyword, status, category, published_at, created_at').order('created_at', { ascending: false }).limit(80)),
-    safeQuery('whatsapp_ai_conversations', supabase.from('whatsapp_ai_conversations').select('id, lead_phone, messages, status, updated_at').order('updated_at', { ascending: false }).limit(100)),
+    safeQuery('whatsapp_ai_conversations', supabase.from('whatsapp_ai_conversations').select('id, lead_id, broker_id, instance_id, lead_phone, messages, status, summary, lead_data_extracted, qualification_score, updated_at').order('updated_at', { ascending: false }).limit(100)),
     safeQuery('organic_social_media', supabase.from('organic_social_media').select('id, platform, caption, media_type, media_product_type, permalink, published_at, reach, views, total_interactions, like_count, comments_count, shares, saved').gte('published_at', since).order('published_at', { ascending: false }).limit(80)),
     safeQuery('marketing_creatives', supabase.from('marketing_creatives').select('id, title, campaign_type, content_type, status, platform_targets, ai_context, created_at').order('created_at', { ascending: false }).limit(60)),
+    safeQuery('marketing_ai_reports', supabase.from('marketing_ai_reports').select('id, report_type, title, summary, insights, recommendations, metrics, generated_by, status, created_at').order('created_at', { ascending: false }).limit(40)),
+    safeQuery('meta_social_ai_suggestions', supabase.from('meta_social_ai_suggestions').select('id, platform, intent, sentiment, priority, lead_score, summary, recommended_action, status, updated_at').order('updated_at', { ascending: false }).limit(60)),
     safeQuery('broker_candidates', supabase.from('broker_candidates').select('id, full_name, email, phone, city, state, creci, creci_state, broker_type, current_company, experience_years, market_focus, regions, specialties, social_links, source, utm_source, utm_medium, utm_campaign, status, potential_score, potential_level, ai_summary, ai_recommendation, visitor_id, metadata, created_at, updated_at, last_activity_at').gte('created_at', since).order('created_at', { ascending: false }).limit(limit)),
     safeQuery('ecosystem_events', supabase.from('ecosystem_events').select('id, event_type, actor_type, entity_type, entity_id, source, label, metadata, importance_score, occurred_at').gte('occurred_at', since).order('occurred_at', { ascending: false }).limit(120)),
+    safeQuery('virtual_brokers', supabase.from('virtual_brokers').select('id, name, is_active, whatsapp_instance_id, created_at').order('created_at', { ascending: false }).limit(80)),
   ])
 
   const byLabel = Object.fromEntries(results.map(result => [result.label, result]))
@@ -390,8 +546,11 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
   const conversations = safeArray(byLabel.whatsapp_ai_conversations?.data, 100)
   const organicMedia = safeArray(byLabel.organic_social_media?.data, 80)
   const marketingCreatives = safeArray(byLabel.marketing_creatives?.data, 60)
+  const marketingReports = safeArray(byLabel.marketing_ai_reports?.data, 40)
+  const socialSuggestions = safeArray(byLabel.meta_social_ai_suggestions?.data, 60)
   const brokerCandidates = safeArray(byLabel.broker_candidates?.data, limit)
   const ecosystemEvents = safeArray(byLabel.ecosystem_events?.data, 120)
+  const virtualBrokers = safeArray(byLabel.virtual_brokers?.data, 80)
 
   const normalizedPhone = normalize(options.phone).replace(/\D/g, '')
   const leadProfile = options.leadId || normalizedPhone
@@ -418,7 +577,10 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     blogPosts,
     conversations,
     organicMedia,
+    marketingReports,
+    socialSuggestions,
     brokerCandidates,
+    virtualBrokers,
   })
 
   const context = {
@@ -453,7 +615,10 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     whatsapp_conversations: conversations,
     organic_social_media: organicMedia,
     marketing_creatives: marketingCreatives,
+    marketing_ai_reports: marketingReports,
+    meta_social_ai_suggestions: socialSuggestions,
     broker_candidates: brokerCandidates,
+    virtual_brokers: virtualBrokers,
     ecosystem_events: ecosystemEvents,
   }
 
@@ -469,7 +634,12 @@ export function buildAgentContextBrief(context: any) {
     ...(signals.top_lead_cities || []).slice(0, 5).map((item: any) => `- Cidade: ${item.label} (${item.count})`),
     ...(signals.top_search_terms || []).slice(0, 5).map((item: any) => `- Busca/filtro: ${item.label} (${item.count})`),
     ...(signals.hot_properties || []).slice(0, 5).map((item: any) => `- Imovel quente: ${item.title} | score ${item.score}`),
+    ...(signals.conversation_agents || []).slice(0, 5).map((item: any) => `- Corretor IA em conversas: ${item.label} (${item.count})`),
+    ...(signals.human_conversation_brokers || []).slice(0, 5).map((item: any) => `- Atendimento humano WhatsApp: ${item.label} (${item.count})`),
+    ...(signals.human_conversation_threads || []).slice(0, 5).map((item: any) => `- Lead atendido por humano: ${item.lead_name || item.lead_phone || item.lead_id} | lead: ${safeText(item.last_lead_message).slice(0, 140)} | humano: ${safeText(item.last_human_message).slice(0, 140)}`),
     ...(signals.radar_opportunities || []).slice(0, 5).map((item: any) => `- Radar: ${item.keyword} | score ${item.score || 'n/a'}`),
+    ...(signals.latest_marketing_reports || []).slice(0, 3).map((item: any) => `- Relatorio ${item.type || 'marketing'}: ${item.title || safeText(item.summary).slice(0, 90)}`),
+    ...(signals.social_lead_signals || []).slice(0, 4).map((item: any) => `- Social ${item.platform || ''}: ${item.intent || 'sinal'} | score ${item.lead_score || 0}`),
     ...(signals.latest_research || []).slice(0, 4).map((item: any) => `- Pesquisa: ${item.topic} | ${safeText(item.summary).slice(0, 160)}`),
     ...(signals.high_potential_broker_candidates || []).slice(0, 5).map((item: any) => `- Candidato corretor: ${item.name} | ${item.city || '-'} | score ${item.score}`),
   ].filter(Boolean)
@@ -567,6 +737,81 @@ export async function recordEcosystemEvent(args: {
   return { skipped: false, event: data }
 }
 
+export async function recordAgentConversationEcosystemEvent(args: {
+  supabase?: SupabaseAdmin
+  conversationId: string
+  brokerId?: string | null
+  brokerName?: string | null
+  instanceId?: string | null
+  instanceName?: string | null
+  leadId?: string | null
+  leadPhone?: string | null
+  leadName?: string | null
+  messages?: any[]
+  status?: string | null
+  source?: string | null
+  extractedData?: Record<string, any> | null
+  shouldTransfer?: boolean
+  occurredAt?: string
+}) {
+  if (!args.conversationId) return { skipped: true, reason: 'missing_conversation_id', event: null }
+
+  const messages = safeArray<any>(args.messages, 100)
+  const lastUserMessage = [...messages]
+    .reverse()
+    .find(message => ['user', 'lead', 'customer'].includes(String(message?.role || '').toLowerCase()))
+  const lastAgentMessage = [...messages]
+    .reverse()
+    .find(message => ['assistant', 'agent'].includes(String(message?.role || '').toLowerCase()))
+  const extracted = parseMetadata(args.extractedData)
+  const summary = truncateText(
+    extracted.summary
+      || extracted.ai_summary
+      || extracted.profile_summary
+      || lastUserMessage?.content
+      || lastUserMessage?.text,
+    520,
+  )
+  const leadName = safeText(args.leadName || extracted.name || extracted.lead_name)
+  const brokerName = safeText(args.brokerName) || 'Corretor IA'
+
+  return recordEcosystemEvent({
+    supabase: args.supabase,
+    eventType: 'whatsapp_agent_conversation_updated',
+    actorType: 'agent',
+    leadId: args.leadId || null,
+    entityType: 'whatsapp_ai_conversation',
+    entityId: args.conversationId,
+    source: args.source || 'whatsapp-agent',
+    label: `${brokerName} atualizou atendimento WhatsApp${leadName ? ` de ${leadName}` : ''}`,
+    importanceScore: args.shouldTransfer ? 85 : summary ? 68 : 52,
+    occurredAt: args.occurredAt,
+    metadata: {
+      broker_id: args.brokerId || null,
+      broker_name: brokerName,
+      instance_id: args.instanceId || null,
+      instance_name: args.instanceName || null,
+      lead_phone: args.leadPhone || null,
+      lead_name: leadName || null,
+      status: args.status || null,
+      message_count: messages.length,
+      should_transfer: Boolean(args.shouldTransfer),
+      summary: summary || null,
+      last_user_message: truncateText(lastUserMessage?.content || lastUserMessage?.text, 360) || null,
+      last_agent_reply: truncateText(lastAgentMessage?.content || lastAgentMessage?.text, 360) || null,
+      lead_data: {
+        interest: extracted.interest || extracted.intent || null,
+        region: extracted.region || extracted.location || null,
+        budget: extracted.budget || extracted.budget_range || null,
+        property_type: extracted.property_type || null,
+        timeline: extracted.timeline || extracted.timeframe || null,
+        classification: extracted.classification || extracted.lead_classification || null,
+        qualification_score: extracted.qualification_score || extracted.score || null,
+      },
+    },
+  })
+}
+
 export async function getLatestEcosystemSnapshots(options: { supabase?: SupabaseAdmin; limit?: number; agent?: EcosystemAgent } = {}) {
   const supabase = options.supabase || createAdminClient()
   let query = supabase
@@ -587,7 +832,7 @@ export async function getLatestEcosystemSnapshots(options: { supabase?: Supabase
 
 export async function runEcosystemSnapshotCycle(options: { supabase?: SupabaseAdmin; days?: number; agents?: EcosystemAgent[]; createdBy?: string } = {}) {
   const supabase = options.supabase || createAdminClient()
-  const agents = options.agents || ['global', 'blog', 'news', 'whatsapp', 'radar', 'traffic', 'ceo', 'recruiting']
+  const agents = options.agents || ['global', 'blog', 'news', 'whatsapp', 'radar', 'traffic', 'ceo', 'recruiting', 'events', 'social', 'distribution', 'publisher', 'property', 'research', 'benchmark', 'creative']
   const results: Array<{ agent: EcosystemAgent; skipped?: boolean; snapshotId?: string | null; error?: string }> = []
 
   for (const agent of agents) {

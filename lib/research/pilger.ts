@@ -6,6 +6,7 @@ import {
     getOpenAIApiKey,
 } from '@/lib/ai/config'
 import { createAdminClient } from '@/lib/supabase/server'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import OpenAI from 'openai'
 
 type ResearchDepth = 'leve' | 'media' | 'profunda'
@@ -310,6 +311,17 @@ export async function createResearchReport(input: ResearchReportInput) {
     const depth = input.depth || ((await getAIConfig('research_pilger_depth')) as ResearchDepth) || 'media'
     const promptKey = input.promptKey || 'research_pilger_system_prompt'
     const prompt = (await getAIConfig(promptKey)) || input.promptFallback || RESEARCH_PILGER_SYSTEM_PROMPT
+    const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'research', days: 30, limit: 100 })
+        .catch((error: any) => {
+            console.warn('[Research Pilger] Ecosystem context unavailable:', error?.message || error)
+            return null
+        })
+    const enrichedContext = {
+        ...(input.context || {}),
+        ecosystem_brief: input.context?.ecosystem_brief || (ecosystemContext ? buildAgentContextBrief(ecosystemContext) : undefined),
+        ecosystem_source_counts: input.context?.ecosystem_source_counts || ecosystemContext?.source_counts,
+        ecosystem_signals: input.context?.ecosystem_signals || ecosystemContext?.signals,
+    }
 
     const { data: inserted, error: insertError } = await supabase
         .from('ai_research_reports')
@@ -331,8 +343,8 @@ export async function createResearchReport(input: ResearchReportInput) {
 
         const provider = await getActiveAIProvider()
         const result = provider === 'openai'
-            ? await callOpenAIResearchFallback(topic, prompt, depth, input.context)
-            : await callGeminiSearch(topic, prompt, depth, input.context)
+            ? await callOpenAIResearchFallback(topic, prompt, depth, enrichedContext)
+            : await callGeminiSearch(topic, prompt, depth, enrichedContext)
 
         const { data: report, error } = await supabase
             .from('ai_research_reports')
@@ -351,6 +363,26 @@ export async function createResearchReport(input: ResearchReportInput) {
             .single()
 
         if (error) throw error
+        await recordEcosystemEvent({
+            supabase,
+            eventType: 'research_report_completed',
+            actorType: 'agent',
+            entityType: 'ai_research_report',
+            entityId: report.id,
+            source: input.requester || 'research-pilger',
+            label: report.topic,
+            importanceScore: depth === 'profunda' ? 76 : 66,
+            metadata: {
+                topic,
+                requester: input.requester || 'manual',
+                depth,
+                executive_summary: report.executive_summary,
+                sources_count: Array.isArray(report.sources) ? report.sources.length : 0,
+                queries: report.queries || [],
+            },
+        }).catch((eventError: any) => {
+            console.warn('[Research Pilger] ecosystem event failed:', eventError?.message || eventError)
+        })
         return report
     } catch (error: any) {
         await supabase
@@ -361,6 +393,25 @@ export async function createResearchReport(input: ResearchReportInput) {
                 updated_at: new Date().toISOString(),
             })
             .eq('id', inserted.id)
+
+        await recordEcosystemEvent({
+            supabase,
+            eventType: 'research_report_failed',
+            actorType: 'agent',
+            entityType: 'ai_research_report',
+            entityId: inserted.id,
+            source: input.requester || 'research-pilger',
+            label: topic,
+            importanceScore: 45,
+            metadata: {
+                topic,
+                requester: input.requester || 'manual',
+                depth,
+                error: error?.message || String(error),
+            },
+        }).catch((eventError: any) => {
+            console.warn('[Research Pilger] failed event record failed:', eventError?.message || eventError)
+        })
 
         throw error
     }

@@ -1,5 +1,5 @@
 import { generateChatResponse } from '@/lib/ai/generation'
-import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
 type SupabaseClient = any
 
@@ -460,6 +460,32 @@ export async function generateMarketRadarInsight(args: {
 
   if (error) {
     console.warn(`[Radar Insights] Failed to save insight for "${args.radar.keyword}":`, error.message)
+  } else {
+    await recordEcosystemEvent({
+      supabase: args.supabase,
+      eventType: 'market_radar_insight_created',
+      actorType: 'agent',
+      entityType: 'market_radar_insight',
+      entityId: `${args.radar.id}:${args.date}:${args.timeSlot}`,
+      source: 'market-radar-agent',
+      label: `${args.radar.keyword} - ${args.radar.location || 'BR'}`,
+      importanceScore: fallback.opportunityScore,
+      metadata: {
+        keyword: args.radar.keyword,
+        location: args.radar.location || 'BR',
+        date: args.date,
+        time_slot: args.timeSlot,
+        opportunity_score: fallback.opportunityScore,
+        market_temperature: fallback.temperature,
+        summary: aiPayload.summary,
+        recommended_actions: aiPayload.recommended_actions,
+        content_opportunities: aiPayload.content_opportunities,
+        campaign_recommendation: aiPayload.campaign_recommendation,
+        ai_used: aiUsed,
+      },
+    }).catch((eventError: any) => {
+      console.warn(`[Radar Insights] Ecosystem event failed for "${args.radar.keyword}":`, eventError?.message || eventError)
+    })
   }
 
   return {

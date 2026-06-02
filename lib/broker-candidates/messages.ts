@@ -1,4 +1,5 @@
 import { getPublicAppUrl } from '@/lib/app-url'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
 import { resolveDefaultWhatsAppInstanceToken, sendLocationRequest, sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import {
@@ -168,6 +169,26 @@ export async function logCandidateAgent(supabase: any, payload: {
             message: payload.message || null,
             metadata: payload.metadata || {},
         })
+        await recordEcosystemEvent({
+            supabase,
+            eventType: `broker_candidate_${payload.action}`,
+            actorType: 'agent',
+            entityType: 'broker_candidate',
+            entityId: payload.candidate_id || payload.message_queue_id || payload.rule_id || null,
+            source: 'broker-candidate-agent',
+            label: payload.message || payload.action,
+            importanceScore: payload.level === 'error' ? 42 : payload.action.includes('sent') ? 62 : 55,
+            metadata: {
+                candidate_id: payload.candidate_id || null,
+                rule_id: payload.rule_id || null,
+                message_queue_id: payload.message_queue_id || null,
+                level: payload.level || 'info',
+                action: payload.action,
+                ...(payload.metadata || {}),
+            },
+        }).catch((eventError: any) => {
+            console.warn('[broker-candidates] failed to write ecosystem event', eventError?.message || eventError)
+        })
     } catch (err) {
         console.warn('[broker-candidates] failed to write agent log', err)
     }
@@ -196,6 +217,12 @@ export async function enqueueCandidateMessages(supabase: any, params: {
 
     const publicUrl = params.publicUrl || `${getPublicAppUrl()}/trabalhe-conosco`
     const triggerType = String(params.triggerType || '')
+    const ecosystemSummary = await getAgentEcosystemContext({ supabase, agent: 'recruiting', days: 30, limit: 80 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[broker-candidates] ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
     const queueRows = selectedRules
         .filter(rule => !triggerType || rule.trigger_type === triggerType || (triggerType === 'created' && ['immediate', 'after_signup'].includes(rule.trigger_type)))
         .filter(rule => candidateMatchesSegment(candidate, rule.segment || 'all'))
@@ -220,6 +247,7 @@ export async function enqueueCandidateMessages(supabase: any, params: {
                     trigger_type: rule.trigger_type || 'immediate',
                     segment: rule.segment || 'all',
                     agent: 'broker_candidate_recruiter',
+                    ecosystem_summary: ecosystemSummary || null,
                     ...getRuleInteractionMetadata(rule),
                 },
             }

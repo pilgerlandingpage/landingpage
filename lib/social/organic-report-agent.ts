@@ -1,5 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
-import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type PlatformKey = 'instagram' | 'facebook'
@@ -331,6 +331,28 @@ export async function generateOrganicMarketingReport({
     .single()
 
   if (error || !data) throw new Error(error?.message || 'Nao foi possivel salvar o relatorio organico.')
+
+  await recordEcosystemEvent({
+    supabase,
+    eventType: 'organic_marketing_report_created',
+    actorType: 'agent',
+    entityType: 'marketing_ai_report',
+    entityId: data.id,
+    source: 'organic-report-agent',
+    label: data.title,
+    importanceScore: 70,
+    metadata: {
+      report_type: 'organic',
+      period_start: context.periodStart.toISOString(),
+      period_end: context.periodEnd.toISOString(),
+      summary: report.summary,
+      insights: report.insights.slice(0, 4),
+      recommendations: report.recommendations.slice(0, 4),
+      metrics: report.metrics || {},
+    },
+  }).catch((eventError) => {
+    console.warn('[Organic Report Agent] ecosystem event failed:', eventError?.message || eventError)
+  })
 
   return {
     success: true,

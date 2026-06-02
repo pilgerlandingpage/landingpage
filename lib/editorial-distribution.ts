@@ -9,6 +9,8 @@ import { resolveEventWhatsAppCtaPhone } from '@/lib/events/whatsapp-cta'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
 import { normalizeWhatsAppPhone, recordLeadOutboundContext } from '@/lib/whatsapp/lead-sync'
 import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { isTechnicalBlogSummary, pickPublicBlogSummary } from '@/lib/blog/types'
+import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
 type SupabaseAdminLike = {
     from: (table: string) => any
@@ -117,6 +119,42 @@ function normalizeText(value: unknown) {
     return String(value || '').trim()
 }
 
+function normalizeDistributionTrigger(value: unknown): DistributionTrigger | null {
+    const trigger = normalizeText(value)
+    return DISTRIBUTION_TRIGGER_TYPES.includes(trigger as DistributionTrigger)
+        ? trigger as DistributionTrigger
+        : null
+}
+
+function cooldownTriggerTypesFor(trigger: DistributionTrigger): DistributionTrigger[] {
+    return trigger === 'property_recommendation'
+        ? DISTRIBUTION_TRIGGER_TYPES
+        : EDITORIAL_TRIGGER_TYPES
+}
+
+function distributionQueuePriority(row: Record<string, any>) {
+    const context = metadataRecord(row.context)
+    const trigger = normalizeDistributionTrigger(row.trigger_type || context.trigger)
+    return trigger === 'property_recommendation' ? 1 : 0
+}
+
+function dateMs(value: unknown) {
+    const timestamp = Date.parse(String(value || ''))
+    return Number.isFinite(timestamp) ? timestamp : 0
+}
+
+function compareDistributionQueueRows(a: Record<string, any>, b: Record<string, any>) {
+    const priorityDiff = distributionQueuePriority(a) - distributionQueuePriority(b)
+    if (priorityDiff !== 0) return priorityDiff
+
+    if (distributionQueuePriority(a) === 0) {
+        const editorialRecencyDiff = dateMs(b.created_at) - dateMs(a.created_at)
+        if (editorialRecencyDiff !== 0) return editorialRecencyDiff
+    }
+
+    return dateMs(a.scheduled_for) - dateMs(b.scheduled_for) || dateMs(a.created_at) - dateMs(b.created_at)
+}
+
 function normalizeEmail(value: unknown) {
     const email = normalizeText(value).toLowerCase()
     return EMAIL_RE.test(email) ? email : ''
@@ -132,6 +170,52 @@ function normalizePostText(value: unknown, max = 220) {
     return normalizeText(value)
         .replace(/\s+/g, ' ')
         .slice(0, max)
+}
+
+function editorialSummaryFallback(contentType: DistributionContentType) {
+    if (contentType === 'news') return 'Uma noticia selecionada pela equipe Guilherme Pilger para acompanhar o mercado imobiliario do litoral.'
+    if (contentType === 'property') return 'Uma oportunidade selecionada pela equipe Guilherme Pilger com base no seu interesse recente.'
+    return 'Uma leitura selecionada pela equipe Guilherme Pilger para comprar ou investir com mais contexto.'
+}
+
+function publicEditorialSummary(post: Record<string, any>, contentType: DistributionContentType, max = 420) {
+    const summary = pickPublicBlogSummary({
+        excerpt: post.excerpt,
+        meta_description: post.meta_description,
+        content_markdown: post.content_markdown,
+    })
+
+    return normalizePostText(summary || editorialSummaryFallback(contentType), max)
+}
+
+function stripTechnicalOutboundText(value: unknown) {
+    const text = normalizeText(value)
+    if (!text) return ''
+
+    return text
+        .split(/\r?\n/)
+        .filter(line => {
+            const clean = line.trim()
+            return !clean || !isTechnicalBlogSummary(clean)
+        })
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+}
+
+function stripTechnicalOutboundHtml(value: unknown) {
+    const html = normalizeText(value)
+    if (!html) return ''
+
+    return html
+        .split(/\r?\n/)
+        .filter(line => {
+            const visibleText = line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+            return !visibleText || !isTechnicalBlogSummary(visibleText)
+        })
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
 }
 
 function isNewsPost(post: Record<string, any>) {
@@ -385,7 +469,7 @@ function buildTemplateVariables(params: {
 }) {
     const { post, lead, contentType, contentUrl, whatsappUrl } = params
     const title = normalizePostText(post.title, 180)
-    const summary = normalizePostText(post.excerpt || post.meta_description || post.primary_keyword || 'Uma leitura selecionada pela equipe Guilherme Pilger.', 420)
+    const summary = publicEditorialSummary(post, contentType, 420)
     const name = normalizeText(lead.name) || 'tudo bem'
 
     return {
@@ -419,8 +503,9 @@ async function buildQueueContext(params: {
     contentUrl: string
     campaignId: string
     whatsappCtaPhone: string
+    ecosystemSummary?: string
 }) {
-    const { post, lead, config, template, whatsappTemplate, pushTemplate, contentType, trigger, channel, contentUrl, campaignId, whatsappCtaPhone } = params
+    const { post, lead, config, template, whatsappTemplate, pushTemplate, contentType, trigger, channel, contentUrl, campaignId, whatsappCtaPhone, ecosystemSummary } = params
     const defaultCtaLabel = contentType === 'news' ? 'Ler noticia' : 'Ler artigo'
     const ctaLabel = channel === 'whatsapp'
         ? (whatsappTemplate?.ctaLabel || defaultCtaLabel)
@@ -506,7 +591,7 @@ async function buildQueueContext(params: {
         post_id: post.id,
         post_title: normalizeText(post.title),
         post_slug: normalizeText(post.slug),
-        post_excerpt: normalizeText(post.excerpt || post.meta_description),
+        post_excerpt: variables.resumo_noticia || variables.resumo_blog,
         post_category: normalizeText(post.category),
         audience: config.audience,
         channel,
@@ -530,6 +615,7 @@ async function buildQueueContext(params: {
         cta_label: ctaLabel,
         approval_required: config.approvalRequired || !config.autopilot,
         approval_status: config.approvalRequired || !config.autopilot ? 'awaiting_approval' : 'approved',
+        ecosystem_summary: ecosystemSummary || null,
         created_by_agent: 'gabriel_correio',
         created_at: new Date().toISOString(),
     }
@@ -642,6 +728,12 @@ export async function enqueueEditorialCampaignForPost(
     const pushTemplate = pushTemplateForTrigger(config, trigger, config.audience)
     const contentUrl = buildContentUrl(post, contentType, params.origin)
     const whatsappCtaPhone = await resolveEventWhatsAppCtaPhone(supabase)
+    const ecosystemSummary = await getAgentEcosystemContext({ supabase: supabase as any, agent: 'distribution', days: 30, limit: 100 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[editorial-distribution] ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
     const queueStatus = config.approvalRequired || !config.autopilot ? 'waiting' : 'queued'
     const baseSchedule = nextWindowStart(config)
     let emailIndex = 0
@@ -678,6 +770,7 @@ export async function enqueueEditorialCampaignForPost(
                 contentUrl,
                 campaignId,
                 whatsappCtaPhone,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -707,6 +800,7 @@ export async function enqueueEditorialCampaignForPost(
                 contentUrl,
                 campaignId,
                 whatsappCtaPhone,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -736,6 +830,7 @@ export async function enqueueEditorialCampaignForPost(
                 contentUrl,
                 campaignId,
                 whatsappCtaPhone,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -1083,8 +1178,9 @@ function buildPropertyRecommendationContext(params: {
     contentUrl: string
     score: number
     reason: string
+    ecosystemSummary?: string
 }) {
-    const { property, lead, config, channel, campaignId, contentUrl, score, reason } = params
+    const { property, lead, config, channel, campaignId, contentUrl, score, reason, ecosystemSummary } = params
     const leadName = normalizeText(lead.name) || 'tudo bem'
     const title = normalizePostText(property.title || 'Imovel selecionado', 180)
     const price = formatPropertyPrice(property)
@@ -1187,6 +1283,7 @@ function buildPropertyRecommendationContext(params: {
         cta_label: ctaLabel,
         approval_required: config.approvalRequired || !config.autopilot,
         approval_status: config.approvalRequired || !config.autopilot ? 'awaiting_approval' : 'approved',
+        ecosystem_summary: ecosystemSummary || null,
         created_by_agent: 'gabriel_distribuicao',
         created_at: new Date().toISOString(),
     }
@@ -1222,6 +1319,12 @@ export async function enqueueBehavioralPropertyRecommendations(
 
     const queueStatus = config.approvalRequired || !config.autopilot ? 'waiting' : 'queued'
     const baseSchedule = nextWindowStart(config)
+    const ecosystemSummary = await getAgentEcosystemContext({ supabase: supabase as any, agent: 'distribution', days: 30, limit: 100 })
+        .then(context => buildAgentContextBrief(context))
+        .catch((error: any) => {
+            console.warn('[editorial-distribution] recommendation ecosystem context unavailable:', error?.message || error)
+            return ''
+        })
     const batchLimit = Math.max(1, Math.min(options.limit || config.recommendationBatchLimit, 500))
     let emailIndex = 0
     let whatsappIndex = 0
@@ -1304,6 +1407,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 contentUrl,
                 score: selected.score,
                 reason,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -1328,6 +1432,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 contentUrl,
                 score: selected.score,
                 reason,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -1352,6 +1457,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 contentUrl,
                 score: selected.score,
                 reason,
+                ecosystemSummary,
             })
             rows.push({
                 lead_id: lead.id,
@@ -1422,6 +1528,7 @@ async function logEditorialEvent(supabase: SupabaseAdminLike, payload: {
     message?: string | null
     metadata?: Record<string, unknown>
 }) {
+    const metadata = payload.metadata || {}
     try {
         await supabase.from('agent_workflow_events').insert({
             run_id: payload.runId || null,
@@ -1430,11 +1537,44 @@ async function logEditorialEvent(supabase: SupabaseAdminLike, payload: {
             event_type: payload.eventType,
             status: payload.status || null,
             message: payload.message || null,
-            metadata: payload.metadata || {},
+            metadata,
         })
     } catch (error) {
         console.warn('[editorial-distribution] failed to write event:', error)
     }
+
+    const campaignId = normalizeText(metadata.campaign_id)
+    const postId = normalizeText(metadata.post_id)
+    await recordEcosystemEvent({
+        supabase: supabase as any,
+        eventType: payload.eventType,
+        actorType: 'agent',
+        leadId: payload.leadId || null,
+        entityType: postId
+            ? 'blog_post'
+            : campaignId
+                ? 'editorial_campaign'
+                : payload.runId
+                    ? 'agent_workflow_run'
+                    : 'editorial_distribution',
+        entityId: payload.runId || campaignId || postId || null,
+        source: 'editorial-distribution-agent',
+        label: payload.message || payload.eventType,
+        importanceScore: payload.status === 'failed'
+            ? 44
+            : payload.status === 'sent'
+                ? 66
+                : 60,
+        metadata: {
+            ...metadata,
+            run_id: payload.runId || null,
+            lead_id: payload.leadId || null,
+            lead_phone: payload.leadPhone || null,
+            status: payload.status || null,
+        },
+    }).catch((error: any) => {
+        console.warn('[editorial-distribution] failed to write ecosystem event:', error?.message || error)
+    })
 }
 
 async function updateRun(supabase: SupabaseAdminLike, id: string, patch: Record<string, any>) {
@@ -1508,21 +1648,29 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
         if (channel === 'email') {
             const email = normalizeEmail(context.target_email)
             if (!email) throw new Error('Lead sem e-mail valido.')
+            const htmlContent = stripTechnicalOutboundHtml(context.html_content)
+            const textContent = stripTechnicalOutboundText(context.text_content) || htmlToText(htmlContent)
+            context.html_content = htmlContent || normalizeText(context.html_content)
+            context.text_content = textContent
+            context.post_excerpt = stripTechnicalOutboundText(context.post_excerpt)
             await sendBrevoEmail({
                 to: [{ email, name: normalizeText(context.target_name) || undefined }],
                 subject: normalizeText(context.subject),
-                htmlContent: normalizeText(context.html_content),
-                textContent: normalizeText(context.text_content) || htmlToText(context.html_content),
+                htmlContent: context.html_content,
+                textContent: context.text_content || htmlToText(context.html_content),
             })
             response = { provider: 'brevo', email }
         } else if (channel === 'whatsapp') {
             const phone = normalizeWhatsAppPhone(context.target_phone || row.lead_phone)
             if (!phone) throw new Error('Lead sem telefone valido para WhatsApp.')
             const contentUrl = trackedWhatsAppContentUrlFromContext(context, row, phone)
-            const message = normalizeText(context.whatsapp_message)
+            const message = stripTechnicalOutboundText(context.whatsapp_message)
             const ctaLabel = normalizeText(context.cta_label) || 'Abrir'
+            if (!message) throw new Error('Mensagem de WhatsApp vazia apos limpeza editorial.')
             context.content_url = contentUrl
             context.link_cta = contentUrl
+            context.whatsapp_message = message
+            context.post_excerpt = stripTechnicalOutboundText(context.post_excerpt)
 
             try {
                 response = await sendMenuMessage({
@@ -1542,9 +1690,14 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
         } else if (channel === 'push') {
             const visitorId = normalizeText(context.target_visitor_id)
             if (!visitorId) throw new Error('Lead sem visitante inscrito para Push.')
+            const pushTitle = stripTechnicalOutboundText(context.push_title || context.subject || 'Guilherme Pilger')
+            const pushBody = stripTechnicalOutboundText(context.push_body || context.text_content || context.post_title || 'Novo conteudo disponivel.')
+            context.push_title = pushTitle
+            context.push_body = pushBody
+            context.post_excerpt = stripTechnicalOutboundText(context.post_excerpt)
             const payload: PushPayload = {
-                title: normalizePostText(context.push_title || context.subject || 'Guilherme Pilger', 90),
-                body: normalizePostText(context.push_body || context.text_content || context.post_title || 'Novo conteudo disponivel.', 220),
+                title: normalizePostText(pushTitle || 'Guilherme Pilger', 90),
+                body: normalizePostText(pushBody || context.post_title || 'Novo conteudo disponivel.', 220),
                 url: normalizeText(context.content_url || context.link_cta) || '/',
                 data: {
                     channel: 'push',
@@ -1590,7 +1743,7 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
                 trigger: context.trigger,
                 contentId: context.post_id,
                 contentTitle: context.post_title,
-                contentSummary: context.post_excerpt || context.text_content || context.whatsapp_message,
+                contentSummary: stripTechnicalOutboundText(context.post_excerpt || context.text_content || context.whatsapp_message),
                 contentUrl: context.content_url || context.link_cta,
                 ctaLabel: context.cta_label,
                 message: channel === 'whatsapp'
@@ -1711,6 +1864,7 @@ async function findRecentEditorialTouchForLead(
     row: any,
     context: Record<string, any>,
     config: Pick<EditorialConfig, 'minHoursBetweenLeadMessages' | 'allowedStartTime' | 'allowedEndTime'>,
+    trigger: DistributionTrigger,
     referenceDate = new Date()
 ) {
     const cooldownMs = config.minHoursBetweenLeadMessages * 60 * 60 * 1000
@@ -1722,7 +1876,7 @@ async function findRecentEditorialTouchForLead(
     let query = supabase
         .from('agent_workflow_runs')
         .select('id,completed_at,context')
-        .in('trigger_type', DISTRIBUTION_TRIGGER_TYPES)
+        .in('trigger_type', cooldownTriggerTypesFor(trigger))
         .eq('status', 'sent')
         .gte('completed_at', since)
         .order('completed_at', { ascending: false })
@@ -1792,17 +1946,19 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
     const dailyCounts = await countSentTodayByChannel(supabase)
     const { data, error } = await supabase
         .from('agent_workflow_runs')
-        .select('id,lead_id,lead_phone,lead_name,status,trigger_type,scheduled_for,attempt_count,context')
+        .select('id,lead_id,lead_phone,lead_name,status,trigger_type,scheduled_for,created_at,attempt_count,context')
         .in('trigger_type', DISTRIBUTION_TRIGGER_TYPES)
         .eq('status', 'queued')
         .lte('scheduled_for', checkedAt)
         .order('scheduled_for', { ascending: true })
         .order('created_at', { ascending: true })
-        .limit(Math.max(limit * 2, limit))
+        .limit(Math.max(limit * 10, 200))
 
     if (error) throw error
 
-    const dueRows = (data || []).filter((row: any) => metadataRecord(row.context).type === 'editorial_distribution')
+    const dueRows = (data || [])
+        .filter((row: any) => metadataRecord(row.context).type === 'editorial_distribution')
+        .sort(compareDistributionQueueRows)
     const results = []
     const touchedInBatch = new Set<string>()
 
@@ -1810,6 +1966,8 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
         if (results.length >= limit) break
         const context = metadataRecord(row.context)
         const channel = context.channel as EditorialChannel
+        const trigger = normalizeDistributionTrigger(row.trigger_type || context.trigger)
+        if (!trigger) continue
 
         if (channel === 'email' && dailyCounts.email >= config.emailDailyLimit) {
             const scheduledFor = nextWindowStartAfterDailyLimit(config, checkedDate)
@@ -1837,7 +1995,7 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
             continue
         }
 
-        const recentScheduledFor = await findRecentEditorialTouchForLead(supabase, row, context, config, checkedDate)
+        const recentScheduledFor = await findRecentEditorialTouchForLead(supabase, row, context, config, trigger, checkedDate)
         if (recentScheduledFor) {
             results.push(await rescheduleEditorialRunForCooldown(supabase, row, context, recentScheduledFor, 'lead_cooldown_recent'))
             continue

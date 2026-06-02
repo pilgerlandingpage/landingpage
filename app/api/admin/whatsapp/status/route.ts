@@ -1,6 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getInstanceStatus, disconnectInstance, setWebhook, getWebhook } from '@/lib/uazapi'
+import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook } from '@/lib/uazapi'
+import { getPublicAppUrl } from '@/lib/app-url'
 
 const NULL_ADMIN_USER_ID = '00000000-0000-0000-0000-000000000000'
 
@@ -405,26 +406,26 @@ export async function GET(request: NextRequest) {
         // Auto-configure webhook whenever connected
         if (newStatus === 'connected' && instance.instance_token) {
             try {
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL
-                    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+                const webhookUrl = `${getPublicAppUrl(request.nextUrl.origin)}/api/webhooks/whatsapp`
 
-                if (appUrl) {
-                    const webhookUrl = `${appUrl}/api/webhooks/whatsapp`
+                let currentWebhook = ''
+                try {
+                    const whData = await getWebhook(instance.instance_token)
+                    currentWebhook = whData?.url || whData?.webhook || ''
+                } catch {
+                    // ignore webhook read failures
+                }
 
-                    let currentWebhook = ''
-                    try {
-                        const whData = await getWebhook(instance.instance_token)
-                        currentWebhook = whData?.url || whData?.webhook || ''
-                    } catch {
-                        // ignore webhook read failures
-                    }
-
-                    if (currentWebhook !== webhookUrl) {
-                        await setWebhook(webhookUrl, instance.instance_token)
-                        console.log(`[Status] Webhook configurado: ${webhookUrl}`)
-                    }
-                } else {
-                    console.warn('[Status] APP_URL nao configurada, webhook nao pode ser setado')
+                if (currentWebhook !== webhookUrl) {
+                    await configureWebhook({
+                        enabled: true,
+                        url: webhookUrl,
+                        events: ['messages', 'messages_update', 'connection', 'chats', 'labels'],
+                        excludeMessages: ['wasSentByApi', 'isGroupYes'],
+                        addUrlEvents: false,
+                        addUrlTypesMessages: false,
+                    }, instance.instance_token)
+                    console.log(`[Status] Webhook configurado: ${webhookUrl}`)
                 }
             } catch (e) {
                 console.error('[Status] Erro ao configurar webhook:', e)

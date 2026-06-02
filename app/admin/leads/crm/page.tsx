@@ -41,6 +41,13 @@ interface LeadData {
     ai_summary?: string | null
     lead_classification?: string | null
     lead_score?: number | null
+    broker_name?: string | null
+    broker_is_active?: boolean | null
+    crm_source?: string | null
+    conversation_status?: string | null
+    conversation_updated_at?: string | null
+    conversation_summary?: string | null
+    conversation_messages?: any[]
     last_whatsapp_click?: any | null
     whatsapp_clicks?: any[]
     site_activity?: any[]
@@ -49,6 +56,12 @@ interface LeadData {
     gps_permission?: any | null
     created_at: string
     updated_at: string
+}
+
+interface Broker {
+    id: string
+    name: string
+    is_active?: boolean | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -110,10 +123,26 @@ export default function LeadCRMPage() {
     const [expandedLead, setExpandedLead] = useState<string | null>(null)
     const [editingNotes, setEditingNotes] = useState<string | null>(null)
     const [notesText, setNotesText] = useState('')
+    const [brokers, setBrokers] = useState<Broker[]>([])
+    const [selectedBrokerId, setSelectedBrokerId] = useState('')
 
     useEffect(() => {
         loadLeads()
-    }, [statusFilter])
+    }, [statusFilter, selectedBrokerId])
+
+    useEffect(() => {
+        loadBrokers()
+    }, [])
+
+    async function loadBrokers() {
+        try {
+            const res = await fetch('/api/admin/brokers')
+            const data = await res.json()
+            if (Array.isArray(data?.data)) setBrokers(data.data)
+        } catch (err) {
+            console.error('Erro ao carregar corretores:', err)
+        }
+    }
 
     async function loadLeads() {
         setLoading(true)
@@ -121,6 +150,7 @@ export default function LeadCRMPage() {
             const params = new URLSearchParams()
             if (statusFilter !== 'all') params.set('status', statusFilter)
             if (search) params.set('search', search)
+            if (selectedBrokerId) params.set('broker_id', selectedBrokerId)
             const res = await fetch(`/api/admin/leads/crm?${params}`)
             const data = await res.json()
             if (data.success) setLeads(data.leads)
@@ -232,6 +262,49 @@ export default function LeadCRMPage() {
         return `${activity?.label || activity?.event_type || 'Atividade'}${title}${detail}`
     }
 
+    function cleanConversationContent(content: string): string {
+        return String(content || '')
+            .replace(/\[BOTOES_URL:[^\]]+\]/gi, '')
+            .replace(/\*\*/g, '')
+            .trim()
+    }
+
+    function renderConversationMessage(message: any, index: number) {
+        const isLead = message?.role !== 'assistant'
+        const text = cleanConversationContent(message?.content)
+        const messageTime = message?.timestamp
+            ? new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : ''
+
+        return (
+            <div key={`${message?.message_id || message?.timestamp || index}-${index}`} style={{
+                alignSelf: isLead ? 'flex-end' : 'flex-start',
+                maxWidth: '78%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: isLead ? 'flex-end' : 'flex-start',
+            }}>
+                <div style={{
+                    background: isLead ? '#d9fdd3' : '#fff',
+                    color: '#111b21',
+                    border: '1px solid rgba(0,0,0,0.05)',
+                    borderRadius: isLead ? '8px 0 8px 8px' : '0 8px 8px 8px',
+                    padding: '8px 10px 6px',
+                    fontSize: '0.78rem',
+                    lineHeight: 1.42,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    boxShadow: '0 1px 1px rgba(11,20,26,0.1)',
+                }}>
+                    {text || '[mensagem sem texto]'}
+                    <span style={{ display: 'block', marginTop: 4, color: '#667781', fontSize: '0.65rem', textAlign: 'right' }}>
+                        {messageTime}{isLead ? ' ok' : ''}
+                    </span>
+                </div>
+            </div>
+        )
+    }
+
     // Stats
     const stats = {
         total: leads.length,
@@ -240,6 +313,8 @@ export default function LeadCRMPage() {
         qualified: leads.filter(l => l.status === 'qualified').length,
         transferred: leads.filter(l => l.status === 'transferred').length,
     }
+
+    const selectedBroker = brokers.find(broker => broker.id === selectedBrokerId)
 
     const cardStyle: React.CSSProperties = {
         background: '#fff',
@@ -259,7 +334,7 @@ export default function LeadCRMPage() {
                         👥 CRM de Leads
                     </h1>
                     <p style={{ color: '#888', fontSize: '0.85rem', margin: '4px 0 0' }}>
-                        Dados coletados automaticamente pelo agente IA
+                        {selectedBroker ? `Dados do corretor IA ${selectedBroker.name}` : 'Dados coletados automaticamente pelo agente IA'}
                     </p>
                 </div>
                 <button
@@ -310,6 +385,23 @@ export default function LeadCRMPage() {
                             fontSize: '0.85rem', fontFamily: 'inherit', background: '#fafafa'
                         }}
                     />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <User size={14} color="#888" />
+                    <select
+                        value={selectedBrokerId}
+                        onChange={e => setSelectedBrokerId(e.target.value)}
+                        style={{
+                            padding: '10px 12px', border: '1px solid #e0ddd8',
+                            borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit',
+                            background: '#fafafa', cursor: 'pointer', maxWidth: 220
+                        }}
+                    >
+                        <option value="">Todos os corretores</option>
+                        {brokers.map(broker => (
+                            <option key={broker.id} value={broker.id}>{broker.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Filter size={14} color="#888" />
@@ -392,6 +484,20 @@ export default function LeadCRMPage() {
                                             }}>
                                                 {statusCfg.label}
                                             </span>
+                                            {lead.broker_name && (
+                                                <span style={{
+                                                    padding: '2px 10px',
+                                                    borderRadius: 12,
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 600,
+                                                    color: '#6b4f1d',
+                                                    background: '#f8f1df',
+                                                    border: '1px solid #ead6a6',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    {lead.broker_name}
+                                                </span>
+                                            )}
                                         </div>
                                         <div style={{ display: 'flex', gap: 14, marginTop: 4, flexWrap: 'wrap' }}>
                                             <span style={{ fontSize: '0.75rem', color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -591,6 +697,31 @@ export default function LeadCRMPage() {
                                                 </div>
                                             </div>
                                         )}
+
+                                        <div style={{ marginTop: 12, padding: 12, background: '#efeae2', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 10 }}>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#3f4b45', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <MessageSquare size={12} /> CONVERSA COM A IA
+                                                </label>
+                                                <span style={{ fontSize: '0.68rem', color: '#667781', background: '#fff', border: '1px solid #d1d7db', borderRadius: 999, padding: '3px 8px', whiteSpace: 'nowrap' }}>
+                                                    {Array.isArray(lead.conversation_messages) ? lead.conversation_messages.length : 0} mensagens
+                                                </span>
+                                            </div>
+                                            {Array.isArray(lead.conversation_messages) && lead.conversation_messages.length > 0 ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 360, overflowY: 'auto', padding: '4px 2px' }}>
+                                                    {lead.conversation_messages.map((message: any, index: number) => renderConversationMessage(message, index))}
+                                                </div>
+                                            ) : (
+                                                <div style={{ padding: 16, background: 'rgba(255,255,255,0.7)', borderRadius: 8, color: '#667781', fontSize: '0.78rem', textAlign: 'center' }}>
+                                                    Nenhuma conversa registrada para este corretor.
+                                                </div>
+                                            )}
+                                            {lead.conversation_updated_at && (
+                                                <div style={{ marginTop: 8, color: '#667781', fontSize: '0.68rem', textAlign: 'right' }}>
+                                                    Atualizada em {formatDate(lead.conversation_updated_at)}
+                                                </div>
+                                            )}
+                                        </div>
 
                                         {/* Status change */}
                                         <div style={{ marginTop: 16 }}>
