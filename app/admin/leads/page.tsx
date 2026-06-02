@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { Search, Download } from 'lucide-react'
 
 
@@ -30,6 +30,17 @@ interface Lead {
     active_broker_conversation?: any | null
     broker_conversation_log?: any[]
     broker_profiles?: any[]
+    attendance_summary?: {
+        ai_count: number
+        human_count: number
+        lead_count: number
+        total_messages: number
+        ai_brokers: { id: string | null; name: string; count: number; last_at: string | null }[]
+        human_brokers: { id: string | null; name: string; count: number; last_at: string | null }[]
+        last_actor: 'human' | 'ai' | 'lead' | 'unknown'
+        last_at: string | null
+        last_message_preview: string | null
+    } | null
     landing_page?: {
         title: string
     }
@@ -622,6 +633,103 @@ export default function LeadsPage() {
         )
     }
 
+    const getLeadAttendanceSummary = (lead: Lead) => {
+        const summary = lead.attendance_summary
+        if (summary) return summary
+
+        const messages = Array.isArray(lead.conversation_log) ? lead.conversation_log : []
+        const humanMessages = messages.filter((message: any) => String(message?.source || '').toLowerCase() === 'human')
+        const aiMessages = messages.filter((message: any) => {
+            const source = String(message?.source || '').toLowerCase()
+            const role = String(message?.role || '').toLowerCase()
+            return ['agent', 'whatsapp_agent', 'ai', 'assistant'].includes(source) || (role === 'assistant' && source !== 'human' && source !== 'from_me_pending')
+        })
+        return {
+            ai_count: aiMessages.length,
+            human_count: humanMessages.length,
+            lead_count: messages.filter((message: any) => String(message?.role || '').toLowerCase() === 'user').length,
+            total_messages: messages.length,
+            ai_brokers: getLeadBrokerProfiles(lead).map((profile: any) => ({
+                id: profile?.broker_id || null,
+                name: getBrokerProfileName(profile),
+                count: 0,
+                last_at: profile?.updated_at || null,
+            })),
+            human_brokers: [] as { id: string | null; name: string; count: number; last_at: string | null }[],
+            last_actor: 'unknown' as const,
+            last_at: null,
+            last_message_preview: null,
+        }
+    }
+
+    const getAttendanceLine = (lead: Lead) => {
+        const summary = getLeadAttendanceSummary(lead)
+        const parts = []
+        if (summary.human_count > 0) parts.push('Humano')
+        if (summary.ai_count > 0) parts.push('IA')
+        return parts.length ? `Atendimento: ${parts.join(' + ')}` : ''
+    }
+
+    const renderLeadAttendanceBadges = (lead: Lead) => {
+        const summary = getLeadAttendanceSummary(lead)
+        const human = summary.human_brokers?.[0]
+        const ai = summary.ai_brokers?.[0]
+        const hasHuman = summary.human_count > 0
+        const hasAi = summary.ai_count > 0
+
+        if (!hasHuman && !hasAi) {
+            return <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>--</span>
+        }
+
+        const title = [
+            hasHuman ? `Humano: ${summary.human_count} mensagem(ns)` : '',
+            hasAi ? `IA: ${summary.ai_count} mensagem(ns)` : '',
+            summary.last_message_preview ? `Ultima: ${summary.last_message_preview}` : '',
+        ].filter(Boolean).join(' | ')
+
+        const chipBase: CSSProperties = {
+            borderRadius: '999px',
+            padding: '3px 8px',
+            fontSize: '10px',
+            fontWeight: 900,
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            maxWidth: '150px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        }
+
+        return (
+            <div title={title} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '5px', maxWidth: 180 }}>
+                {hasHuman && (
+                    <span style={{
+                        ...chipBase,
+                        background: '#ecfdf5',
+                        color: '#047857',
+                        border: '1px solid #a7f3d0',
+                    }}>
+                        Humano: {human?.name || 'Corretor'}
+                    </span>
+                )}
+                {hasAi && (
+                    <span style={{
+                        ...chipBase,
+                        background: '#f8f1df',
+                        color: '#7b5a20',
+                        border: '1px solid #e6cc91',
+                    }}>
+                        IA: {ai?.name || getLeadBrokerSummary(lead) || 'Corretor IA'}
+                    </span>
+                )}
+                {summary.last_actor !== 'unknown' && (
+                    <span style={{ color: '#777', fontSize: '10px', fontWeight: 700 }}>
+                        Ultimo: {summary.last_actor === 'human' ? 'Humano' : summary.last_actor === 'ai' ? 'IA' : 'Lead'}
+                    </span>
+                )}
+            </div>
+        )
+    }
+
     const exportCSV = () => {
         const headers = ['Nome', 'Email', 'Telefone', 'Estágio', 'VIP', 'Origem', 'Localização', 'GPS autorizado', 'Navegador', 'Dispositivo', 'IP', 'Data']
         const rows = filteredLeads.map(l => [
@@ -688,7 +796,26 @@ export default function LeadsPage() {
     }
 
     const renderChatMessage = (msg: any, idx: number) => {
-        const isLead = msg.role !== 'assistant'
+        const source = String(msg?.source || '').toLowerCase()
+        const role = String(msg?.role || '').toLowerCase()
+        const isAssistant = role === 'assistant'
+        const isLead = !isAssistant
+        const isHuman = source === 'human'
+        const isPendingFromMe = source === 'from_me_pending'
+        const speakerLabel = isHuman
+            ? 'Humano'
+            : isPendingFromMe
+                ? 'Pendente'
+                : isAssistant
+                    ? 'Corretor IA'
+                    : 'Lead'
+        const speakerColor = isHuman
+            ? '#047857'
+            : isPendingFromMe
+                ? '#8a6d3b'
+                : isAssistant
+                    ? '#7b5a20'
+                    : '#008069'
         const text = cleanConversationContent(msg.content)
         const buttons = extractConversationButtons(msg.content)
         const messageTime = msg.timestamp
@@ -717,6 +844,16 @@ export default function LeadsPage() {
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                 }}>
+                    <div style={{
+                        color: speakerColor,
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        letterSpacing: '0.02em',
+                        marginBottom: text ? '4px' : 0,
+                        textTransform: 'uppercase',
+                    }}>
+                        {speakerLabel}
+                    </div>
                     {text ? <div>{text}</div> : null}
                     {buttons.length > 0 && (
                         <div style={{
@@ -883,7 +1020,7 @@ export default function LeadsPage() {
                                 <th>Contato</th>
                                 <th>Perfil / Persona</th>
                                 <th>Push</th>
-                                <th>Corretor IA</th>
+                                <th>Atendimento</th>
                                 <th>Estágio</th>
                                 <th>Origem / Local</th>
                                 <th>Dispositivo</th>
@@ -933,9 +1070,9 @@ export default function LeadsPage() {
                                                     <span style={{ width: '4px', height: '4px', backgroundColor: '#333', borderRadius: '50%' }}></span>
                                                     {new Date(lead.created_at).toLocaleDateString('pt-BR')}
                                                 </div>
-                                                {(selectedBroker || (lead.broker_profiles?.length || 0) > 0) && (
+                                                {getAttendanceLine(lead) && (
                                                     <div style={{ fontSize: '10px', color: '#9b7a3b', marginTop: '4px', fontWeight: 700 }}>
-                                                        IA: {getLeadBrokerSummary(lead)}
+                                                        {getAttendanceLine(lead)}
                                                     </div>
                                                 )}
                                                 </div>
@@ -971,7 +1108,7 @@ export default function LeadsPage() {
                                             )}
                                         </td>
                                         <td>
-                                            {renderLeadBrokerBadges(lead)}
+                                            {renderLeadAttendanceBadges(lead)}
                                         </td>
                                         <td>
                                             <span className={`badge ${formatStageBadge(lead.funnel_stage)}`}>
