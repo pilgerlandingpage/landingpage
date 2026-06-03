@@ -7,7 +7,7 @@ import { MapPinned, Search, SearchX, Sparkles, X } from 'lucide-react'
 import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
-import SearchQuizPanel from './SearchQuizPanel'
+import HomeSearchBar from './HomeSearchBar'
 import { trackEvent } from '@/lib/tracking/client'
 
 const MAX_RENDERED_CARDS = 60
@@ -55,6 +55,7 @@ function getFilterLabel(key: string, value: string) {
     }
 
     const priceLabels: Record<string, string> = {
+        '3000000-5000000': 'R$ 4 mi a R$ 5 mi',
         '4000000-6000000': 'R$ 4 mi a R$ 6 mi',
         '6000000-8000000': 'R$ 6 mi a R$ 8 mi',
         '8000000-10000000': 'R$ 8 mi a R$ 10 mi',
@@ -475,10 +476,9 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     </div>
                     {showRefineSearch && (
                         <div className="result-refine-panel">
-                            <SearchQuizPanel
-                                resultsCount={totalCount}
-                                mappedCount={propertiesWithCoords.length}
-                                onSearchComplete={() => setShowRefineSearch(false)}
+                            <HomeSearchBar
+                                initialSearchParams={searchParams.toString()}
+                                variant="results"
                             />
                         </div>
                     )}

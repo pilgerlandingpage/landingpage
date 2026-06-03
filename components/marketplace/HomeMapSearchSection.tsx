@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import { searchLocationName } from '@/lib/locations/display'
 import { trackEvent } from '@/lib/tracking/client'
@@ -267,6 +268,28 @@ function matchesType(property: Property, type: string) {
     return text.includes(normalize(type))
 }
 
+function mapOverlayTypeToMapFilter(value: string) {
+    if (!value || value === 'all') return 'all'
+
+    const [kind, rawValue] = value.split(':')
+    if (!rawValue) return value
+    if (kind === 'type') return rawValue
+
+    const subtypeLabels: Record<string, string> = {
+        cobertura: 'Cobertura',
+        condominio: 'Casa em Condominio',
+        duplex: 'Duplex',
+        galpao: 'Galpao',
+        garden: 'Garden',
+        'predio-residencial': 'Predio',
+        'sala-comercial': 'Sala Comercial',
+        'terreno-comercial': 'Terreno Comercial',
+        'terreno-condominio': 'Terreno',
+    }
+
+    return subtypeLabels[rawValue] || rawValue
+}
+
 function matchesPrice(property: Property, range: string) {
     const price = Number(property.price || property.rent || 0)
     if (!price || price < MINIMUM_FIRST_CONTACT_PRICE) return false
@@ -428,6 +451,13 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         }),
         [applied]
     )
+
+    const syncOverlaySearchWithMap = useCallback((values: HomeSearchValues) => {
+        const nextLocation = (values.locationValue || values.locationLabel).trim()
+        setQuery(nextLocation)
+        setType(mapOverlayTypeToMapFilter(values.typeValue))
+        setPrice(values.priceValue === 'all' ? '' : values.priceValue)
+    }, [])
 
     const markQuizStepAnswered = useCallback((step: MobileFilterKey) => {
         setAnsweredQuizSteps(current => current.includes(step) ? current : [...current, step])
@@ -762,9 +792,17 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         <span>{filteredMappedTotal} de {mappedTotal} no mapa</span>
                     </div>
                     {isMapInteractionLocked && <div className="map-interaction-lock" aria-hidden="true" />}
+                    <div className="map-search-panel map-search-panel-new">
+                        <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
+                    </div>
                 </div>
 
-                <form className={`map-search-panel ${isGuidedSearchActive ? 'is-guide-active' : ''} ${shouldGuideSubmit ? 'is-guide-submit-ready' : ''}`} onSubmit={applySearch}>
+                <form
+                    aria-hidden="true"
+                    className={`map-search-panel legacy-map-search-panel ${isGuidedSearchActive ? 'is-guide-active' : ''} ${shouldGuideSubmit ? 'is-guide-submit-ready' : ''}`}
+                    hidden
+                    onSubmit={applySearch}
+                >
                     <div className="search-heading">
                         <span>Encontre sua seleção</span>
                     </div>
@@ -936,13 +974,18 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     box-shadow: 0 24px 70px rgba(31,27,21,0.11);
                     isolation: isolate;
                     margin: 0 auto;
-                    max-width: 1560px;
+                    max-width: 1680px;
                     overflow: hidden;
                     position: relative;
                     z-index: 0;
                 }
+                .map-search-shell:focus-within {
+                    overflow: visible;
+                    z-index: 20;
+                }
                 .map-preview-panel {
                     background: #1f1b16;
+                    border-radius: 18px;
                     height: clamp(320px, 42vw, 520px);
                     overflow: hidden;
                     position: relative;
@@ -1009,6 +1052,26 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     display: grid;
                     gap: 10px;
                     padding: 16px;
+                }
+                .map-search-panel-new {
+                    align-content: center;
+                    background: transparent;
+                    bottom: 22px;
+                    left: 50%;
+                    max-width: 980px;
+                    padding: 0;
+                    pointer-events: none;
+                    position: absolute;
+                    transform: translateX(-50%);
+                    width: min(980px, calc(100% - 440px));
+                    z-index: 760;
+                }
+                .map-search-panel-new :global(.home-search-box-map) {
+                    pointer-events: auto;
+                    width: 100%;
+                }
+                .legacy-map-search-panel[hidden] {
+                    display: none !important;
                 }
                 .search-heading {
                     color: #5b3d12;
@@ -1520,20 +1583,17 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     color: #dfc18e;
                 }
                 @media (min-width: 900px) {
-                    .map-search-shell {
-                        display: grid;
-                        align-items: stretch;
-                        grid-template-columns: minmax(0, 1.48fr) minmax(360px, 0.72fr);
-                    }
                     .map-preview-panel {
-                        align-self: stretch;
-                        height: auto;
-                        min-height: 535px;
+                        height: clamp(520px, 38vw, 660px);
+                        min-height: 520px;
                     }
                     .map-search-panel {
                         align-content: center;
                         gap: 14px;
-                        padding: 22px;
+                        padding: 20px clamp(22px, 4vw, 54px) 24px;
+                    }
+                    .map-search-panel-new {
+                        justify-items: stretch;
                     }
                     .mobile-quiz-panel {
                         gap: 14px;
@@ -1584,7 +1644,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 @media (max-width: 640px) {
                     .home-map-search {
                         margin: 8px auto 24px;
-                        padding: 0 14px;
+                        padding: 0 6px;
                     }
                     .map-search-copy {
                         margin-bottom: 10px;
@@ -1602,13 +1662,31 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     }
                     .map-search-shell {
                         border-radius: 14px;
+                        max-width: 100%;
+                        overflow: visible;
+                        width: 100%;
                     }
                     .map-preview-panel {
+                        border-radius: 14px;
                         height: clamp(390px, 68svh, 460px);
+                    }
+                    .map-preview-stat {
+                        bottom: 136px;
+                        left: 12px;
+                        padding: 9px 11px;
+                        z-index: 650;
                     }
                     .map-search-panel {
                         gap: 7px;
                         padding: 8px;
+                    }
+                    .map-search-panel-new {
+                        min-width: 0;
+                        overflow: visible;
+                        inset: auto 8px 10px;
+                        transform: none;
+                        width: auto;
+                        z-index: 760;
                     }
                     .search-heading {
                         display: none;

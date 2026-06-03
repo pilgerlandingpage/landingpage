@@ -89,6 +89,8 @@ const SEARCH_PROPERTY_FIELDS = [
     'source_status',
 ].join(',')
 
+const MIN_SEARCH_PRICE = 4000000
+
 export default async function SearchPage({
     searchParams
 }: {
@@ -163,21 +165,29 @@ export default async function SearchPage({
     if (subtype === 'duplex') query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
     if (subtype === 'loft') query = query.ilike('property_type', '%Loft%')
     if (subtype === 'sobrado') query = query.ilike('property_type', '%Sobrado%')
+    if (subtype === 'predio-residencial') query = query.or('property_type.ilike.%Predio Residencial%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Predio Residencial%,title.ilike.%Predio%,title.ilike.%Prédio%')
     if (subtype === 'condominio') query = query.or('property_type.ilike.%Condominio%,property_type.ilike.%Condomínio%')
     if (subtype === 'terreno-condominio') query = query.or('property_type.ilike.%Terreno em Condominio%,property_type.ilike.%Terreno em Condomínio%')
     if (subtype === 'terreno-comercial') query = query.ilike('property_type', '%Terreno Comercial%')
+    if (subtype === 'galpao') query = query.or('property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Deposito%,property_type.ilike.%Depósito%,title.ilike.%Galpao%,title.ilike.%Galpão%,title.ilike.%Deposito%,title.ilike.%Depósito%')
+    if (subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,property_type.ilike.%Comercial%,title.ilike.%Sala Comercial%')
+
+    let selectedPriceMin = MIN_SEARCH_PRICE
+    let selectedPriceMax = 0
 
     if (price && price !== 'Todos os Valores') {
         const [minStr, maxStr] = price.split('-')
         const min = parseInt(minStr, 10)
         const max = maxStr ? parseInt(maxStr, 10) : 0
 
-        if (Number.isFinite(min) && min > 0) query = query.gte('price', min)
-        if (Number.isFinite(max) && max > 0) query = query.lte('price', max)
+        if (Number.isFinite(min) && min > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, min)
+        if (Number.isFinite(max) && max > 0) selectedPriceMax = max
     }
 
-    if (priceMin > 0) query = query.gte('price', priceMin)
-    if (priceMax > 0) query = query.lte('price', priceMax)
+    if (priceMin > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, priceMin)
+    if (priceMax > 0) selectedPriceMax = priceMax
+    query = query.gte('price', selectedPriceMin)
+    if (selectedPriceMax > 0) query = query.lte('price', selectedPriceMax)
     if (bedrooms > 0) query = query.eq('bedrooms', bedrooms)
     if (bedroomsMin > 0) query = query.gte('bedrooms', bedroomsMin)
     if (suites > 0) query = query.eq('suites', suites)

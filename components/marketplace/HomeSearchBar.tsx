@@ -1,27 +1,13 @@
 'use client'
 
-import {
-    Bath,
-    Bed,
-    Building2,
-    Car,
-    ChevronDown,
-    Filter,
-    Home,
-    MapPin,
-    MapPinned,
-    Maximize,
-    RotateCcw,
-    Search,
-    Sparkles,
-    Waves,
-} from 'lucide-react'
+import { Building2, ChevronDown, MapPin, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import { propertyDestinationForViewport, propertyFeedPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
-interface Suggestion {
+type Suggestion = {
     type: 'city' | 'neighborhood' | 'property'
     label: string
     count?: number
@@ -30,251 +16,147 @@ interface Suggestion {
     city?: string
 }
 
-const PROPERTY_TYPES = [
-    { value: 'Todos os Imoveis', label: 'Todos os imoveis' },
-    { value: 'Apartamento', label: 'Apartamento' },
-    { value: 'Cobertura', label: 'Cobertura' },
-    { value: 'Duplex / Triplex', label: 'Duplex / Triplex' },
-    { value: 'Apartamento Garden', label: 'Garden' },
-    { value: 'Casa', label: 'Casa' },
-    { value: 'Casa em Condominio', label: 'Casa em condominio' },
-    { value: 'Sobrado', label: 'Sobrado' },
-    { value: 'Terreno', label: 'Terreno' },
-    { value: 'Comercial', label: 'Comercial' },
-]
-
-const PRICE_PRESETS = [
-    { value: 'Todos os Valores', label: 'Selecione' },
-    { value: '4000000-6000000', label: 'R$ 4 mi a R$ 6 mi' },
-    { value: '6000000-8000000', label: 'R$ 6 mi a R$ 8 mi' },
-    { value: '8000000-10000000', label: 'R$ 8 mi a R$ 10 mi' },
-    { value: '10000000-', label: 'Acima de R$ 10 mi' },
-]
-
-const MINIMUM_FIRST_CONTACT_PRICE = 4000000
-
-const ROOM_OPTIONS = [
-    { value: '', label: 'Qualquer' },
-    { value: '1', label: '1+' },
-    { value: '2', label: '2+' },
-    { value: '3', label: '3+' },
-    { value: '4', label: '4+' },
-    { value: '5', label: '5+' },
-]
-
-const AREA_OPTIONS = [
-    { value: '', label: 'Qualquer' },
-    { value: '80', label: '80 m2+' },
-    { value: '120', label: '120 m2+' },
-    { value: '180', label: '180 m2+' },
-    { value: '250', label: '250 m2+' },
-    { value: '400', label: '400 m2+' },
-]
-
-const TAG_OPTIONS = [
-    { value: '', label: 'Todos' },
-    { value: 'frente-mar', label: 'Frente mar' },
-    { value: 'quadra-mar', label: 'Quadra mar' },
-    { value: 'mobiliado', label: 'Mobiliado' },
-    { value: 'lancamento', label: 'Lancamento' },
-    { value: 'em-construcao', label: 'Em construcao' },
-    { value: 'pronto', label: 'Pronto' },
-]
-
-function isDefaultPropertyType(value: string) {
-    return value === 'Todos os Imoveis' || value === 'Todos os Imóveis'
+export type HomeSearchValues = {
+    locationLabel: string
+    locationType?: 'city' | 'neighborhood'
+    locationValue?: string
+    typeValue: string
+    priceValue: string
 }
 
-function optionLabel(options: Array<{ value: string; label: string }>, value: string) {
-    return options.find(option => option.value === value)?.label || value || 'Todos'
+type HomeSearchBarProps = {
+    initialSearchParams?: string
+    onValuesChange?: (values: HomeSearchValues) => void
+    variant?: 'home' | 'map' | 'results'
 }
 
-export default function HomeSearchBar() {
+const PROPERTY_TYPE_GROUPS = [
+    {
+        label: 'APARTAMENTOS',
+        options: [
+            { value: 'type:Apartamento', label: 'Apartamento' },
+            { value: 'subtype:duplex', label: 'Duplex / Triplex' },
+            { value: 'subtype:garden', label: 'Apartamento Garden' },
+            { value: 'subtype:cobertura', label: 'Cobertura' },
+            { value: 'subtype:predio-residencial', label: 'Predio Residencial' },
+        ],
+    },
+    {
+        label: 'CASAS',
+        options: [
+            { value: 'type:Casa', label: 'Casa' },
+            { value: 'subtype:condominio', label: 'Casa em Condominio' },
+        ],
+    },
+    {
+        label: 'TERRENOS',
+        options: [
+            { value: 'type:Terreno', label: 'Terreno' },
+            { value: 'subtype:terreno-comercial', label: 'Terreno Comercial' },
+            { value: 'subtype:terreno-condominio', label: 'Terreno em Condominio' },
+        ],
+    },
+    {
+        label: 'IMOVEIS COMERCIAIS',
+        options: [
+            { value: 'subtype:galpao', label: 'Galpao / Deposito' },
+            { value: 'subtype:sala-comercial', label: 'Sala Comercial' },
+        ],
+    },
+]
+
+const PROPERTY_TYPE_OPTIONS = [
+    { value: 'all', label: 'Todos os Imoveis' },
+    ...PROPERTY_TYPE_GROUPS.flatMap(group => group.options),
+]
+
+const PRICE_OPTIONS = [
+    { value: 'all', label: 'Todos acima de R$4 mi' },
+    { value: '4000000-6000000', label: 'R$4.000.000 a R$6.000.000' },
+    { value: '6000000-8000000', label: 'R$6.000.000 a R$8.000.000' },
+    { value: '8000000-10000000', label: 'R$8.000.000 a R$10.000.000' },
+    { value: '10000000-', label: 'a partir de R$10.000.000' },
+]
+
+const FALLBACK_CITIES = [
+    { label: 'Balneario Camboriu / SC', value: 'Balneario Camboriu' },
+    { label: 'Itajai / SC', value: 'Itajai' },
+    { label: 'Itapema / SC', value: 'Itapema' },
+    { label: 'Porto Belo / SC', value: 'Porto Belo' },
+    { label: 'Camboriu / SC', value: 'Camboriu' },
+    { label: 'Bombinhas / SC', value: 'Bombinhas' },
+    { label: 'Navegantes / SC', value: 'Navegantes' },
+    { label: 'Penha / SC', value: 'Penha' },
+]
+
+function normalize(value: unknown) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+}
+
+function priceLabel(value: string) {
+    return PRICE_OPTIONS.find(option => option.value === value)?.label || 'Todos acima de R$4 mi'
+}
+
+function typeLabel(value: string) {
+    return PROPERTY_TYPE_OPTIONS.find(option => option.value === value)?.label || 'Todos os Imoveis'
+}
+
+function valuesFromParams(initialSearchParams?: string): HomeSearchValues {
+    const params = new URLSearchParams(initialSearchParams || '')
+    const subtype = params.get('subtype')
+    const type = params.get('type')
+    const city = params.get('city')
+    const query = params.get('q')
+    const price = params.get('price') || 'all'
+    const priceValue = PRICE_OPTIONS.some(option => option.value === price) ? price : 'all'
+
+    return {
+        locationLabel: city || query || '',
+        locationType: city ? 'city' : undefined,
+        locationValue: city || query || '',
+        typeValue: subtype ? `subtype:${subtype}` : type ? `type:${type}` : 'all',
+        priceValue,
+    }
+}
+
+function formatPrice(price: number) {
+    return new Intl.NumberFormat('pt-BR', {
+        currency: 'BRL',
+        maximumFractionDigits: 0,
+        style: 'currency',
+    }).format(price)
+}
+
+export default function HomeSearchBar({ initialSearchParams, onValuesChange, variant = 'home' }: HomeSearchBarProps) {
     const router = useRouter()
-    const [propertyType, setPropertyType] = useState('Todos os Imoveis')
-    const [priceRange, setPriceRange] = useState('Todos os Valores')
-    const [purpose, setPurpose] = useState('sale')
-    const [query, setQuery] = useState('')
-    const [bedroomsMin, setBedroomsMin] = useState('')
-    const [suitesMin, setSuitesMin] = useState('')
-    const [bathroomsMin, setBathroomsMin] = useState('')
-    const [parkingMin, setParkingMin] = useState('')
-    const [areaMin, setAreaMin] = useState('')
-    const [tag, setTag] = useState('')
-    const [showAdvanced, setShowAdvanced] = useState(false)
+    const initialValues = useMemo(() => valuesFromParams(initialSearchParams), [initialSearchParams])
+    const [locationLabel, setLocationLabel] = useState(initialValues.locationLabel)
+    const [locationType, setLocationType] = useState<HomeSearchValues['locationType']>(initialValues.locationType)
+    const [locationValue, setLocationValue] = useState(initialValues.locationValue || '')
+    const [typeValue, setTypeValue] = useState(initialValues.typeValue)
+    const [priceValue, setPriceValue] = useState(initialValues.priceValue)
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
-    const [activeSuggestion, setActiveSuggestion] = useState(-1)
     const [isLoading, setIsLoading] = useState(false)
+    const [activeSuggestion, setActiveSuggestion] = useState(-1)
     const wrapperRef = useRef<HTMLDivElement>(null)
-    const debounceRef = useRef<NodeJS.Timeout | null>(null)
-
-    const advancedCount = [bedroomsMin, suitesMin, bathroomsMin, parkingMin, areaMin, tag].filter(Boolean).length
-
-    const buildSearchParams = () => {
-        const params = new URLSearchParams()
-        const term = query.trim()
-
-        if (term) params.append('q', term)
-        if (!isDefaultPropertyType(propertyType)) params.append('type', propertyType)
-        if (priceRange !== 'Todos os Valores') {
-            params.append('price', priceRange)
-        } else {
-            params.append('priceMin', String(MINIMUM_FIRST_CONTACT_PRICE))
-        }
-        if (purpose) params.append('offer', purpose)
-        if (bedroomsMin) params.append('bedroomsMin', bedroomsMin)
-        if (suitesMin) params.append('suitesMin', suitesMin)
-        if (bathroomsMin) params.append('bathroomsMin', bathroomsMin)
-        if (parkingMin) params.append('parkingMin', parkingMin)
-        if (areaMin) params.append('areaMin', areaMin)
-        if (tag) params.append('tag', tag)
-
-        return params
-    }
-
-    const handleSearch = (e?: React.FormEvent) => {
-        e?.preventDefault()
-        setShowSuggestions(false)
-
-        const params = buildSearchParams()
-        const queryString = params.toString()
-        void trackEvent('home_search_submitted', {
-            query: query.trim(),
-            property_type_value: propertyType,
-            property_type_label: optionLabel(PROPERTY_TYPES, propertyType),
-            price_range_value: priceRange,
-            price_range_label: optionLabel(PRICE_PRESETS, priceRange),
-            purpose,
-            bedrooms_min: bedroomsMin,
-            suites_min: suitesMin,
-            bathrooms_min: bathroomsMin,
-            parking_min: parkingMin,
-            area_min: areaMin,
-            tag,
-            advanced_count: advancedCount,
-            destination: queryString ? `/busca?${queryString}` : '/busca',
-        })
-        router.push(queryString ? `/busca?${queryString}` : '/busca')
-    }
-
-    const fetchSuggestions = useCallback(async (term: string) => {
-        setIsLoading(true)
-        try {
-            const url = term
-                ? `/api/search/suggestions?q=${encodeURIComponent(term)}`
-                : '/api/search/suggestions'
-            const res = await fetch(url)
-            if (res.ok) {
-                const data = await res.json()
-                setSuggestions(data.suggestions || [])
-            }
-        } catch {
-            // Suggestions are progressive enhancement.
-        } finally {
-            setIsLoading(false)
-        }
-    }, [])
-
-    const handleInputChange = (value: string) => {
-        setQuery(value)
-        setActiveSuggestion(-1)
-
-        if (debounceRef.current) clearTimeout(debounceRef.current)
-        debounceRef.current = setTimeout(() => {
-            fetchSuggestions(value)
-        }, 250)
-    }
-
-    const handleFocus = () => {
-        setShowSuggestions(true)
-        if (suggestions.length === 0) fetchSuggestions(query)
-    }
-
-    const handleSuggestionClick = (suggestion: Suggestion) => {
-        const propertyDestination = suggestion.type === 'property' && suggestion.id
-            ? propertyDestinationForViewport(suggestion.id)
-            : undefined
-        setShowSuggestions(false)
-        void trackEvent('home_search_suggestion_clicked', {
-            suggestion_type: suggestion.type,
-            label: suggestion.label,
-            count: suggestion.count,
-            property_id: suggestion.id,
-            price: suggestion.price,
-            city: suggestion.city,
-            destination: propertyDestination,
-            mobile_fallback_destination: suggestion.type === 'property' && suggestion.id ? propertyFeedPath(suggestion.id) : undefined,
-        })
-        if (propertyDestination) {
-            router.push(propertyDestination)
-            return
-        }
-
-        setQuery(suggestion.label)
-        setActiveSuggestion(-1)
-    }
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (!showSuggestions || suggestions.length === 0) {
-            if (e.key === 'Enter') handleSearch()
-            return
-        }
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault()
-            setActiveSuggestion(prev => Math.min(prev + 1, suggestions.length - 1))
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault()
-            setActiveSuggestion(prev => Math.max(prev - 1, -1))
-        } else if (e.key === 'Enter') {
-            e.preventDefault()
-            if (activeSuggestion >= 0) {
-                handleSuggestionClick(suggestions[activeSuggestion])
-            } else {
-                handleSearch()
-            }
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false)
-        }
-    }
-
-    const clearFilters = () => {
-        void trackEvent('home_search_cleared', {
-            query: query.trim(),
-            property_type_value: propertyType,
-            property_type_label: optionLabel(PROPERTY_TYPES, propertyType),
-            price_range_value: priceRange,
-            price_range_label: optionLabel(PRICE_PRESETS, priceRange),
-            purpose,
-            advanced_count: advancedCount,
-        })
-        setPropertyType('Todos os Imoveis')
-        setPriceRange('Todos os Valores')
-        setPurpose('sale')
-        setQuery('')
-        setBedroomsMin('')
-        setSuitesMin('')
-        setBathroomsMin('')
-        setParkingMin('')
-        setAreaMin('')
-        setTag('')
-        setSuggestions([])
-        setShowSuggestions(false)
-    }
-
-    const toggleAdvancedFilters = () => {
-        const nextOpen = !showAdvanced
-        setShowAdvanced(nextOpen)
-        void trackEvent('home_search_advanced_toggled', {
-            open: nextOpen,
-            advanced_count: advancedCount,
-        })
-    }
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const hasReportedInitialValuesRef = useRef(false)
 
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setLocationLabel(initialValues.locationLabel)
+        setLocationType(initialValues.locationType)
+        setLocationValue(initialValues.locationValue || '')
+        setTypeValue(initialValues.typeValue)
+        setPriceValue(initialValues.priceValue)
+    }, [initialValues])
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setShowSuggestions(false)
             }
         }
@@ -283,539 +165,689 @@ export default function HomeSearchBar() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
+    useEffect(() => () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+    }, [])
+
     useEffect(() => {
-        return () => {
-            if (debounceRef.current) clearTimeout(debounceRef.current)
+        if (!onValuesChange) return
+
+        if (!hasReportedInitialValuesRef.current) {
+            hasReportedInitialValuesRef.current = true
+            return
+        }
+
+        onValuesChange({
+            locationLabel,
+            locationType,
+            locationValue,
+            priceValue,
+            typeValue,
+        })
+    }, [locationLabel, locationType, locationValue, onValuesChange, priceValue, typeValue])
+
+    const fetchSuggestions = useCallback(async (term: string) => {
+        setIsLoading(true)
+        try {
+            const url = term
+                ? `/api/search/suggestions?q=${encodeURIComponent(term)}`
+                : '/api/search/suggestions'
+            const response = await fetch(url)
+            if (!response.ok) return
+            const data = await response.json()
+            setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : [])
+        } catch {
+            setSuggestions([])
+        } finally {
+            setIsLoading(false)
         }
     }, [])
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            maximumFractionDigits: 0,
-        }).format(price)
+    const displayedSuggestions = useMemo(() => {
+        if (suggestions.length > 0) return suggestions
+        if (locationLabel.trim()) return []
+
+        return FALLBACK_CITIES.map<Suggestion>(city => ({
+            type: 'city' as const,
+            label: city.label,
+            city: city.value,
+        }))
+    }, [locationLabel, suggestions])
+
+    const groupedSuggestions = useMemo(() => {
+        const cities = displayedSuggestions.filter(suggestion => suggestion.type === 'city')
+        const neighborhoods = displayedSuggestions.filter(suggestion => suggestion.type === 'neighborhood')
+        const properties = displayedSuggestions.filter(suggestion => suggestion.type === 'property')
+
+        return [
+            { key: 'cities', label: 'Cidades', meta: 'Regiao da Busca', items: cities },
+            { key: 'neighborhoods', label: 'Bairros', meta: 'Regiao da Busca', items: neighborhoods },
+            { key: 'properties', label: 'Imoveis', meta: 'Match direto', items: properties },
+        ].filter(group => group.items.length > 0)
+    }, [displayedSuggestions])
+
+    function updateLocation(value: string) {
+        setLocationLabel(value)
+        setLocationType(undefined)
+        setLocationValue('')
+        setActiveSuggestion(-1)
+
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        debounceRef.current = setTimeout(() => {
+            void fetchSuggestions(value)
+        }, 240)
     }
 
+    function focusLocation() {
+        setShowSuggestions(true)
+        if (displayedSuggestions.length === 0) void fetchSuggestions(locationLabel)
+    }
+
+    function buildSearchHref() {
+        const params = new URLSearchParams()
+        const cleanLocation = locationLabel.trim()
+
+        if (locationType === 'city' && locationValue) params.set('city', locationValue)
+        else if (cleanLocation) params.set('q', cleanLocation)
+
+        if (typeValue !== 'all') {
+            const [key, value] = typeValue.split(':')
+            if (key && value) params.set(key, value)
+        }
+
+        if (priceValue !== 'all') params.set('price', priceValue)
+
+        const queryString = params.toString()
+        return queryString ? `/busca?${queryString}` : '/busca'
+    }
+
+    function submitSearch(event?: FormEvent) {
+        event?.preventDefault()
+        const destination = buildSearchHref()
+        setShowSuggestions(false)
+
+        void trackEvent('property_search_submitted', {
+            destination,
+            location_label: locationLabel.trim(),
+            location_type: locationType || 'free_text',
+            property_type: typeValue,
+            property_type_label: typeLabel(typeValue),
+            price: priceValue,
+            price_label: priceLabel(priceValue),
+            source: variant,
+        })
+
+        router.push(destination)
+    }
+
+    function chooseSuggestion(suggestion: Suggestion) {
+        setShowSuggestions(false)
+        setActiveSuggestion(-1)
+
+        if (suggestion.type === 'property' && suggestion.id) {
+            const destination = propertyDestinationForViewport(suggestion.id)
+            void trackEvent('property_search_suggestion_clicked', {
+                destination,
+                mobile_fallback_destination: propertyFeedPath(suggestion.id),
+                property_id: suggestion.id,
+                suggestion_type: suggestion.type,
+                source: variant,
+            })
+            router.push(destination)
+            return
+        }
+
+        const cityFallback = FALLBACK_CITIES.find(city => city.label === suggestion.label)
+        setLocationLabel(suggestion.label)
+        setLocationType(suggestion.type === 'city' ? 'city' : 'neighborhood')
+        setLocationValue(cityFallback?.value || suggestion.city || suggestion.label.replace(/\s*\/\s*SC$/i, ''))
+    }
+
+    function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+        const flatSuggestions = groupedSuggestions.flatMap(group => group.items)
+
+        if (!showSuggestions || flatSuggestions.length === 0) {
+            if (event.key === 'Enter') submitSearch(event)
+            return
+        }
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            setActiveSuggestion(current => Math.min(current + 1, flatSuggestions.length - 1))
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            setActiveSuggestion(current => Math.max(current - 1, -1))
+        } else if (event.key === 'Enter') {
+            event.preventDefault()
+            if (activeSuggestion >= 0) chooseSuggestion(flatSuggestions[activeSuggestion])
+            else submitSearch()
+        } else if (event.key === 'Escape') {
+            setShowSuggestions(false)
+        }
+    }
+
+    let suggestionIndex = -1
+
     return (
-        <section id="search" className="search-shell" ref={wrapperRef}>
-            <div className="search-heading">
-                <span>Encontre seu imovel</span>
-            </div>
-
-            <form className="search-panel" onSubmit={handleSearch}>
-                <div className="search-primary">
-                    <div className="field field-location">
-                        <label htmlFor="home-search-query">Localizacao</label>
-                        <div className="input-wrap">
-                            <MapPin size={17} />
-                            <input
-                                id="home-search-query"
-                                type="text"
-                                placeholder="Cidade, bairro ou empreendimento"
-                                value={query}
-                                onChange={(e) => handleInputChange(e.target.value)}
-                                onFocus={handleFocus}
-                                onKeyDown={handleKeyDown}
-                                autoComplete="off"
-                            />
-                        </div>
-
-                        {showSuggestions && suggestions.length > 0 && (
-                            <div className="suggestions-dropdown">
-                                {suggestions.map((s, i) => (
-                                    <button
-                                        key={`${s.type}-${s.label}-${i}`}
-                                        type="button"
-                                        className={`suggestion-item ${i === activeSuggestion ? 'active' : ''}`}
-                                        onMouseDown={() => handleSuggestionClick(s)}
-                                        onMouseEnter={() => setActiveSuggestion(i)}
-                                    >
-                                        <span className="suggestion-icon">
-                                            {s.type === 'city' && <MapPinned size={15} />}
-                                            {s.type === 'neighborhood' && <MapPin size={15} />}
-                                            {s.type === 'property' && <Building2 size={15} />}
-                                        </span>
-                                        <span className="suggestion-text">
-                                            <span className="suggestion-label">{s.label}</span>
-                                            {(s.type === 'city' || s.type === 'neighborhood') && s.count && (
-                                                <span className="suggestion-meta">{s.count} imoveis</span>
-                                            )}
-                                            {s.type === 'property' && s.price && (
-                                                <span className="suggestion-meta">{formatPrice(s.price)} | {s.city}</span>
-                                            )}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {showSuggestions && isLoading && suggestions.length === 0 && (
-                            <div className="suggestions-dropdown">
-                                <div className="suggestion-loading">Buscando...</div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="field">
-                        <label htmlFor="home-search-type">Tipo</label>
-                        <div className="select-wrap">
-                            <Home size={16} />
-                            <select
-                                id="home-search-type"
-                                value={propertyType}
-                                onChange={(e) => setPropertyType(e.target.value)}
-                            >
-                                {PROPERTY_TYPES.map(option => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={15} className="chevron" />
-                        </div>
-                    </div>
-
-                    <div className="field">
-                        <label htmlFor="home-search-price">Valor</label>
-                        <div className="select-wrap">
-                            <Sparkles size={16} />
-                            <select
-                                id="home-search-price"
-                                value={priceRange}
-                                onChange={(e) => setPriceRange(e.target.value)}
-                            >
-                                {PRICE_PRESETS.map(option => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={15} className="chevron" />
-                        </div>
-                    </div>
-
-                    <div className="purpose-switch" aria-label="Finalidade">
-                        <button
-                            type="button"
-                            className={purpose === 'sale' ? 'active' : ''}
-                            onClick={() => setPurpose('sale')}
-                        >
-                            Venda
-                        </button>
-                        <button
-                            type="button"
-                            className={purpose === 'rent' ? 'active' : ''}
-                            onClick={() => setPurpose('rent')}
-                        >
-                            Aluguel
-                        </button>
-                    </div>
-
-                    <button type="submit" className="search-submit" aria-label="Buscar imoveis">
-                        <Search size={18} strokeWidth={2.4} />
-                        <span>Buscar</span>
-                    </button>
+        <section className={`home-search-box home-search-box-${variant}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
+            <form className="home-search-panel" onSubmit={submitSearch}>
+                <div className="home-search-title">
+                    <span>Busca inteligente</span>
+                    <h2>Encontre seu Imovel!</h2>
                 </div>
 
-                <div className="search-actions">
-                    <button
-                        type="button"
-                        className="utility-button"
-                        onClick={toggleAdvancedFilters}
-                        aria-expanded={showAdvanced}
-                    >
-                        <Filter size={15} />
-                        <span>Mais filtros</span>
-                        {advancedCount > 0 && <strong>{advancedCount}</strong>}
-                    </button>
+                <div className="home-search-select-row">
+                    <label>
+                        <span>Tipo de imovel</span>
+                        <select value={typeValue} onChange={event => setTypeValue(event.target.value)}>
+                            <option value="all">Todos os Imoveis</option>
+                            {PROPERTY_TYPE_GROUPS.map(group => (
+                                <optgroup label={group.label} key={group.label}>
+                                    {group.options.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </optgroup>
+                            ))}
+                        </select>
+                        <ChevronDown className="home-search-chevron" size={16} />
+                    </label>
 
-                    <button type="button" className="utility-button muted" onClick={clearFilters}>
-                        <RotateCcw size={15} />
-                        <span>Limpar</span>
-                    </button>
+                    <label>
+                        <span>Faixa de valor</span>
+                        <select value={priceValue} onChange={event => setPriceValue(event.target.value)}>
+                            {PRICE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="home-search-chevron" size={16} />
+                    </label>
                 </div>
 
-                {showAdvanced && (
-                    <div className="advanced-grid">
-                        <div className="field compact">
-                            <label htmlFor="home-search-bedrooms">Dormitórios</label>
-                            <div className="select-wrap">
-                                <Bed size={15} />
-                                <select id="home-search-bedrooms" value={bedroomsMin} onChange={(e) => setBedroomsMin(e.target.value)}>
-                                    {ROOM_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
-                        </div>
+                <div className="home-search-location-row">
+                    <label>
+                        <span>Cidade, bairro ou empreendimento</span>
+                        <MapPin className="home-search-pin" size={18} />
+                        <input
+                            autoComplete="off"
+                            onChange={event => updateLocation(event.target.value)}
+                            onFocus={focusLocation}
+                            onKeyDown={handleKeyDown}
+                            placeholder="digite a cidade ou bairro..."
+                            type="text"
+                            value={locationLabel}
+                        />
+                    </label>
+                    <button type="submit" aria-label="Buscar imoveis">
+                        <Search size={20} />
+                    </button>
 
-                        <div className="field compact">
-                            <label htmlFor="home-search-suites">Suites</label>
-                            <div className="select-wrap">
-                                <Waves size={15} />
-                                <select id="home-search-suites" value={suitesMin} onChange={(e) => setSuitesMin(e.target.value)}>
-                                    {ROOM_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
+                    {showSuggestions && (groupedSuggestions.length > 0 || isLoading) && (
+                        <div className="home-search-suggestions">
+                            {isLoading && groupedSuggestions.length === 0 ? (
+                                <div className="home-search-loading">Buscando regioes...</div>
+                            ) : (
+                                groupedSuggestions.map(group => (
+                                    <div className="suggestion-group" key={group.key}>
+                                        <div className="suggestion-group-head">
+                                            <strong>{group.label}</strong>
+                                            <span>{group.meta}</span>
+                                        </div>
+                                        {group.items.map(suggestion => {
+                                            suggestionIndex += 1
+                                            const active = suggestionIndex === activeSuggestion
+                                            return (
+                                                <button
+                                                    className={active ? 'active' : ''}
+                                                    key={`${suggestion.type}-${suggestion.label}-${suggestionIndex}`}
+                                                    onMouseDown={() => chooseSuggestion(suggestion)}
+                                                    onMouseEnter={() => setActiveSuggestion(suggestionIndex)}
+                                                    type="button"
+                                                >
+                                                    {suggestion.type === 'property' ? <Building2 size={15} /> : <MapPin size={15} />}
+                                                    <span>
+                                                        <strong>{suggestion.label}</strong>
+                                                        {suggestion.type === 'property' && suggestion.price ? (
+                                                            <small>{formatPrice(suggestion.price)} {suggestion.city ? `| ${suggestion.city}` : ''}</small>
+                                                        ) : suggestion.count ? (
+                                                            <small>{suggestion.count} imoveis</small>
+                                                        ) : null}
+                                                    </span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                ))
+                            )}
                         </div>
-
-                        <div className="field compact">
-                            <label htmlFor="home-search-bathrooms">Banheiros</label>
-                            <div className="select-wrap">
-                                <Bath size={15} />
-                                <select id="home-search-bathrooms" value={bathroomsMin} onChange={(e) => setBathroomsMin(e.target.value)}>
-                                    {ROOM_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
-                        </div>
-
-                        <div className="field compact">
-                            <label htmlFor="home-search-parking">Vagas</label>
-                            <div className="select-wrap">
-                                <Car size={15} />
-                                <select id="home-search-parking" value={parkingMin} onChange={(e) => setParkingMin(e.target.value)}>
-                                    {ROOM_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
-                        </div>
-
-                        <div className="field compact">
-                            <label htmlFor="home-search-area">Area minima</label>
-                            <div className="select-wrap">
-                                <Maximize size={15} />
-                                <select id="home-search-area" value={areaMin} onChange={(e) => setAreaMin(e.target.value)}>
-                                    {AREA_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
-                        </div>
-
-                        <div className="field compact">
-                            <label htmlFor="home-search-tag">Diferenciais</label>
-                            <div className="select-wrap">
-                                <Sparkles size={15} />
-                                <select id="home-search-tag" value={tag} onChange={(e) => setTag(e.target.value)}>
-                                    {TAG_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                                </select>
-                                <ChevronDown size={14} className="chevron" />
-                            </div>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </form>
 
             <style jsx>{`
-                .search-shell {
-                    width: min(1120px, calc(100% - 32px));
-                    margin: 0 auto;
-                    padding: 18px 0;
-                }
-                .search-heading {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 10px;
-                    color: #b8945f;
-                    font-family: 'Inter', sans-serif;
-                    font-size: 0.72rem;
-                    font-weight: 800;
-                    letter-spacing: 0.34em;
-                    text-transform: uppercase;
-                }
-                .search-panel {
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
+                .home-search-box {
+                    margin: clamp(18px, 3vw, 34px) auto;
+                    padding: 0 clamp(16px, 3vw, 34px);
                     width: 100%;
-                    padding: 12px;
-                    border: 1px solid rgba(184, 148, 95, 0.24);
-                    border-radius: 8px;
+                }
+                .home-search-box-results {
+                    margin: 0;
+                    padding: 0;
+                }
+                .home-search-box-map {
+                    margin: 0;
+                    padding: 0;
+                }
+                .home-search-panel {
                     background:
-                        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,249,246,0.96)),
-                        #fbfaf7;
-                    box-shadow: 0 18px 45px rgba(22, 22, 24, 0.1);
-                }
-                .search-primary {
-                    display: grid;
-                    grid-template-columns: minmax(260px, 1.45fr) minmax(170px, 0.85fr) minmax(180px, 0.9fr) auto auto;
-                    align-items: end;
-                    gap: 10px;
-                }
-                .field {
+                        linear-gradient(135deg, rgba(18,17,16,0.92), rgba(47,43,36,0.9)),
+                        linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+                    border: 1px solid rgba(223,193,142,0.28);
+                    border-radius: 14px;
+                    box-sizing: border-box;
+                    box-shadow: 0 24px 70px rgba(24,20,15,0.2);
+                    margin: 0 auto;
+                    max-width: 820px;
+                    padding: clamp(18px, 2.5vw, 26px);
                     position: relative;
-                    min-width: 0;
                 }
-                .field label {
+                .home-search-box-results .home-search-panel {
+                    max-width: none;
+                    border-radius: 14px;
+                    box-shadow: 0 16px 34px rgba(24,20,15,0.12);
+                }
+                .home-search-box-map .home-search-panel {
+                    align-content: center;
+                    backdrop-filter: none;
+                    -webkit-backdrop-filter: none;
+                    background: transparent;
+                    border: 0;
+                    box-shadow: none;
+                    height: 100%;
+                    max-width: none;
+                    min-height: 0;
+                    padding: 12px;
+                }
+                .home-search-title {
+                    margin-bottom: 14px;
+                    text-align: center;
+                }
+                .home-search-title span {
+                    color: #dfc18e;
                     display: block;
-                    margin: 0 0 6px;
-                    color: #77736b;
-                    font-size: 0.68rem;
-                    font-weight: 800;
-                    letter-spacing: 0.12em;
+                    font: 900 0.66rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.18em;
+                    margin-bottom: 7px;
                     text-transform: uppercase;
                 }
-                .input-wrap,
-                .select-wrap {
-                    position: relative;
-                    display: flex;
-                    align-items: center;
+                .home-search-title h2 {
+                    color: #fff;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: clamp(1.45rem, 3vw, 2.15rem);
+                    font-weight: 800;
+                    letter-spacing: 0;
+                    line-height: 1;
+                    margin: 0;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                }
+                .home-search-select-row {
+                    display: grid;
                     gap: 8px;
-                    min-width: 0;
-                    height: 46px;
-                    padding: 0 13px;
-                    border: 1px solid #e4ded2;
-                    border-radius: 7px;
-                    background: #fff;
-                    color: #b8945f;
-                    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
-                .input-wrap:focus-within,
-                .select-wrap:focus-within {
-                    border-color: rgba(184, 148, 95, 0.7);
-                    box-shadow: 0 0 0 3px rgba(184, 148, 95, 0.12);
-                }
-                input,
-                select {
-                    width: 100%;
+                label {
+                    display: block;
                     min-width: 0;
-                    height: 100%;
-                    border: 0;
+                    position: relative;
+                }
+                label > span {
+                    color: rgba(255,255,255,0.66);
+                    display: block;
+                    font: 850 0.62rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.1em;
+                    margin-bottom: 6px;
+                    text-transform: uppercase;
+                }
+                select,
+                input {
+                    background: rgba(255,255,255,0.96);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 6px;
+                    box-sizing: border-box;
+                    color: #191817;
+                    font: 750 0.88rem/1 'Inter', sans-serif;
+                    height: 44px;
                     outline: 0;
-                    background: transparent;
-                    color: #181817;
-                    font: 600 0.88rem/1 'Inter', sans-serif;
-                }
-                input::placeholder {
-                    color: #9a968d;
-                    font-weight: 500;
+                    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+                    width: 100%;
                 }
                 select {
                     appearance: none;
-                    padding-right: 18px;
                     cursor: pointer;
+                    padding: 0 38px 0 12px;
                 }
-                select option {
-                    color: #181817;
-                    background: #fff;
+                input {
+                    padding: 0 12px 0 42px;
                 }
-                .chevron {
-                    position: absolute;
-                    right: 11px;
-                    color: #b8945f;
+                select:focus,
+                input:focus {
+                    border-color: #dfc18e;
+                    box-shadow: 0 0 0 3px rgba(223,193,142,0.18);
+                }
+                :global(.home-search-chevron),
+                :global(.home-search-pin) {
+                    color: #a88b4a;
                     pointer-events: none;
+                    position: absolute;
                 }
-                .purpose-switch {
+                :global(.home-search-chevron) {
+                    bottom: 14px;
+                    right: 12px;
+                }
+                :global(.home-search-pin) {
+                    bottom: 13px;
+                    left: 13px;
+                }
+                option,
+                optgroup {
+                    background: #fff;
+                    color: #191817;
+                    font-family: 'Inter', sans-serif;
+                }
+                .home-search-location-row {
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    min-width: 128px;
-                    height: 46px;
-                    padding: 4px;
-                    border: 1px solid #e4ded2;
-                    border-radius: 7px;
-                    background: #f3f0ea;
-                }
-                .purpose-switch button {
-                    border: 0;
-                    border-radius: 5px;
-                    background: transparent;
-                    color: #6f6a60;
-                    cursor: pointer;
-                    font: 800 0.76rem/1 'Inter', sans-serif;
-                    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
-                }
-                .purpose-switch button.active {
-                    background: #191817;
-                    color: #dfc18e;
-                    box-shadow: 0 6px 18px rgba(24, 24, 23, 0.16);
-                }
-                .search-submit {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
                     gap: 8px;
-                    height: 46px;
-                    min-width: 118px;
-                    padding: 0 18px;
+                    grid-template-columns: minmax(0, 1fr) 78px;
+                    margin-top: 9px;
+                    position: relative;
+                }
+                .home-search-location-row > button {
+                    align-self: end;
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
                     border: 0;
-                    border-radius: 7px;
-                    background: linear-gradient(135deg, #c9a96e 0%, #a88b4a 100%);
+                    border-radius: 6px;
                     color: #111;
                     cursor: pointer;
-                    font: 900 0.82rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.06em;
-                    text-transform: uppercase;
-                    transition: transform 0.18s ease, box-shadow 0.18s ease;
-                }
-                .search-submit:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 12px 24px rgba(184, 148, 95, 0.24);
-                }
-                .search-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding-top: 2px;
-                }
-                .utility-button {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 7px;
-                    height: 34px;
-                    padding: 0 11px;
-                    border: 1px solid rgba(184, 148, 95, 0.25);
-                    border-radius: 7px;
-                    background: #fff;
-                    color: #2a2926;
-                    cursor: pointer;
-                    font: 800 0.74rem/1 'Inter', sans-serif;
-                }
-                .utility-button.muted {
-                    color: #77736b;
-                    border-color: #e4ded2;
-                }
-                .utility-button strong {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 18px;
-                    height: 18px;
-                    border-radius: 50%;
-                    background: #191817;
-                    color: #dfc18e;
-                    font-size: 0.68rem;
-                }
-                .advanced-grid {
                     display: grid;
-                    grid-template-columns: repeat(6, minmax(0, 1fr));
-                    gap: 10px;
-                    padding-top: 12px;
-                    border-top: 1px solid #ebe6dc;
-                    animation: filtersIn 0.18s ease-out;
+                    height: 44px;
+                    place-items: center;
+                    transition: transform 0.16s ease, box-shadow 0.16s ease;
                 }
-                .field.compact .select-wrap {
-                    height: 42px;
-                    padding-inline: 11px;
-                    background: #fffdfa;
+                .home-search-location-row > button:hover {
+                    box-shadow: 0 14px 26px rgba(223,193,142,0.26);
+                    transform: translateY(-1px);
                 }
-                .field.compact select {
-                    font-size: 0.82rem;
-                }
-                .suggestions-dropdown {
-                    position: absolute;
-                    top: calc(100% + 8px);
-                    left: 0;
-                    right: 0;
-                    z-index: 1000;
-                    max-height: 330px;
-                    overflow-y: auto;
-                    border: 1px solid rgba(184, 148, 95, 0.22);
-                    border-radius: 8px;
+                .home-search-suggestions {
                     background: #fff;
-                    box-shadow: 0 18px 40px rgba(22, 22, 24, 0.14);
+                    border: 1px solid rgba(25,24,23,0.12);
+                    border-radius: 8px;
+                    box-shadow: 0 22px 46px rgba(0,0,0,0.22);
+                    left: 0;
+                    max-height: 360px;
+                    overflow: auto;
+                    position: absolute;
+                    right: 86px;
+                    top: calc(100% + 8px);
+                    z-index: 1200;
                 }
-                .suggestion-item {
-                    display: flex;
+                .suggestion-group {
+                    padding: 6px 0;
+                }
+                .suggestion-group + .suggestion-group {
+                    border-top: 1px solid #eee8dd;
+                }
+                .suggestion-group-head {
                     align-items: center;
-                    gap: 10px;
-                    width: 100%;
-                    padding: 11px 13px;
-                    border: 0;
-                    border-bottom: 1px solid #f1ede6;
+                    display: flex;
+                    gap: 8px;
+                    padding: 5px 12px 4px;
+                }
+                .suggestion-group-head strong {
+                    color: #1f1d1a;
+                    font: 900 0.78rem/1 'Inter', sans-serif;
+                }
+                .suggestion-group-head span {
+                    background: #3b3834;
+                    border-radius: 4px;
+                    color: #fff;
+                    font: 800 0.58rem/1 'Inter', sans-serif;
+                    padding: 4px 6px;
+                }
+                .suggestion-group button {
+                    align-items: center;
                     background: transparent;
-                    color: #24231f;
+                    border: 0;
+                    color: #23201c;
                     cursor: pointer;
+                    display: flex;
+                    gap: 9px;
+                    padding: 8px 12px;
                     text-align: left;
-                    transition: background 0.15s ease;
+                    width: 100%;
                 }
-                .suggestion-item:last-child {
-                    border-bottom: 0;
+                .suggestion-group button:hover,
+                .suggestion-group button.active {
+                    background: #f5efe5;
                 }
-                .suggestion-item:hover,
-                .suggestion-item.active {
-                    background: #f8f4ed;
-                }
-                .suggestion-icon {
-                    display: flex;
+                .suggestion-group button svg {
                     color: #b8945f;
-                    flex-shrink: 0;
+                    flex: 0 0 auto;
                 }
-                .suggestion-text {
-                    display: flex;
-                    flex-direction: column;
+                .suggestion-group button span {
+                    display: grid;
                     gap: 2px;
                     min-width: 0;
                 }
-                .suggestion-label {
+                .suggestion-group button strong {
+                    color: #211f1b;
+                    font: 800 0.82rem/1.1 'Inter', sans-serif;
                     overflow: hidden;
-                    color: #24231f;
-                    font-size: 0.85rem;
-                    font-weight: 800;
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 }
-                .suggestion-meta,
-                .suggestion-loading {
-                    color: #817b71;
-                    font-size: 0.74rem;
-                    font-weight: 600;
+                .suggestion-group button small,
+                .home-search-loading {
+                    color: #81786c;
+                    font: 700 0.68rem/1.2 'Inter', sans-serif;
                 }
-                .suggestion-loading {
-                    padding: 12px;
+                .home-search-loading {
+                    padding: 13px;
                     text-align: center;
                 }
-                @keyframes filtersIn {
-                    from { opacity: 0; transform: translateY(-4px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @media (max-width: 980px) {
-                    .search-primary {
-                        grid-template-columns: 1fr 1fr;
+                @media (max-width: 700px) {
+                    .home-search-box {
+                        margin: 14px auto 22px;
+                        padding: 0 12px;
                     }
-                    .field-location {
-                        grid-column: 1 / -1;
+                    .home-search-panel {
+                        padding: 16px;
                     }
-                    .purpose-switch,
-                    .search-submit {
+                    .home-search-select-row,
+                    .home-search-location-row {
+                        grid-template-columns: 1fr;
+                    }
+                    .home-search-location-row > button {
                         width: 100%;
                     }
-                    .advanced-grid {
-                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                    .home-search-suggestions {
+                        right: 0;
+                    }
+                    .home-search-box-map {
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .home-search-box-map .home-search-panel {
+                        padding: 10px;
+                    }
+                    .home-search-box-map .home-search-select-row {
+                        gap: 4px;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                    .home-search-box-map .home-search-location-row {
+                        gap: 4px;
+                        grid-template-columns: minmax(0, 1fr) 50px;
+                        margin-top: 4px;
+                    }
+                    .home-search-box-map .home-search-location-row > button {
+                        width: auto;
+                    }
+                    .home-search-box-map .home-search-suggestions {
+                        right: 54px;
                     }
                 }
-                @media (max-width: 640px) {
-                    .search-shell {
-                        width: min(100% - 22px, 520px);
-                        padding: 12px 0;
+                .home-search-box-map {
+                    margin: 0;
+                    padding: 0;
+                }
+                .home-search-box-map .home-search-panel {
+                    border-radius: 10px;
+                    padding: 12px;
+                    width: 100%;
+                }
+                .home-search-box-map .home-search-title {
+                    margin-bottom: 6px;
+                }
+                .home-search-box-map .home-search-title span {
+                    display: none;
+                }
+                .home-search-box-map .home-search-title h2 {
+                    background: rgba(255,255,255,0.9);
+                    border: 1px solid rgba(200,168,98,0.72);
+                    border-radius: 999px;
+                    box-shadow: 0 12px 24px rgba(20,16,10,0.12);
+                    color: #211c16;
+                    display: inline-flex;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: clamp(0.88rem, 1.05vw, 1.05rem);
+                    line-height: 1;
+                    padding: 6px 14px;
+                    text-shadow: none;
+                }
+                .home-search-box-map label > span {
+                    clip: rect(0 0 0 0);
+                    clip-path: inset(50%);
+                    height: 1px;
+                    margin: -1px;
+                    overflow: hidden;
+                    position: absolute;
+                    white-space: nowrap;
+                    width: 1px;
+                }
+                .home-search-box-map .home-search-select-row {
+                    gap: 4px;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .home-search-box-map select,
+                .home-search-box-map input {
+                    background: rgba(255,255,255,0.96);
+                    border: 1px solid rgba(200,168,98,0.86);
+                    border-radius: 3px;
+                    box-shadow: 0 10px 22px rgba(18,16,12,0.14);
+                    font-size: 0.78rem;
+                    height: 34px;
+                }
+                .home-search-box-map select:focus,
+                .home-search-box-map input:focus {
+                    border-color: #c8a862;
+                    box-shadow: 0 0 0 3px rgba(200,168,98,0.24), 0 10px 22px rgba(18,16,12,0.14);
+                }
+                .home-search-box-map select {
+                    padding-left: 10px;
+                    padding-right: 30px;
+                }
+                .home-search-box-map input {
+                    padding-left: 34px;
+                }
+                .home-search-box-map :global(.home-search-chevron) {
+                    bottom: auto;
+                    left: auto;
+                    right: 9px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .home-search-box-map :global(.home-search-pin) {
+                    bottom: auto;
+                    left: 10px;
+                    right: auto;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .home-search-box-map .home-search-location-row {
+                    box-sizing: border-box;
+                    display: block;
+                    gap: 4px;
+                    margin-top: 4px;
+                    padding-right: 54px;
+                }
+                .home-search-box-map .home-search-location-row > button {
+                    border-radius: 3px;
+                    box-shadow: 0 10px 22px rgba(18,16,12,0.16);
+                    height: 34px;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 50px;
+                }
+                .home-search-box-map .home-search-location-row label {
+                    display: block;
+                    width: 100%;
+                }
+                .home-search-box-map .home-search-location-row input {
+                    width: 100%;
+                }
+                .home-search-box-map .home-search-suggestions {
+                    bottom: calc(100% + 6px);
+                    max-height: 300px;
+                    right: 56px;
+                    top: auto;
+                    z-index: 1500;
+                }
+                @media (min-width: 701px) {
+                    .home-search-box-map {
+                        width: 100%;
                     }
-                    .search-heading {
-                        font-size: 0.66rem;
-                        letter-spacing: 0.22em;
-                        margin-bottom: 8px;
+                    .home-search-box-map .home-search-panel {
+                        display: grid;
+                        gap: 6px 6px;
+                        grid-template-areas:
+                            "title title"
+                            "selects location";
+                        grid-template-columns: minmax(320px, 0.82fr) minmax(420px, 1.18fr);
+                        max-width: 980px;
+                        padding: 0;
                     }
-                    .search-panel {
-                        padding: 10px;
-                        gap: 10px;
+                    .home-search-box-map .home-search-title {
+                        grid-area: title;
+                        margin-bottom: 0;
                     }
-                    .search-primary {
-                        grid-template-columns: 1fr;
-                        gap: 9px;
+                    .home-search-box-map .home-search-title h2 {
+                        font-size: clamp(0.9rem, 1vw, 1.05rem);
                     }
-                    .input-wrap,
-                    .select-wrap,
-                    .purpose-switch,
-                    .search-submit {
-                        height: 44px;
+                    .home-search-box-map .home-search-select-row {
+                        grid-area: selects;
                     }
-                    .search-actions {
-                        justify-content: space-between;
+                    .home-search-box-map .home-search-location-row {
+                        grid-area: location;
+                        margin-top: 0;
                     }
-                    .utility-button {
-                        flex: 1;
-                        justify-content: center;
+                }
+                @media (max-width: 700px) {
+                    .home-search-box-map .home-search-panel {
+                        max-width: calc(100vw - 20px);
+                        border-radius: 12px;
+                        box-shadow: none;
+                        padding: 0;
+                        width: 100%;
                     }
-                    .advanced-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 9px;
+                    .home-search-box-map .home-search-location-row {
+                        margin-top: 4px;
+                        padding-right: 52px;
+                    }
+                    .home-search-box-map .home-search-suggestions {
+                        bottom: calc(100% + 6px);
+                        max-height: min(240px, 34svh);
+                        right: 54px;
+                        top: auto;
+                        width: calc(100vw - 48px);
                     }
                 }
             `}</style>

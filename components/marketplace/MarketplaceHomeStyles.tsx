@@ -1332,13 +1332,18 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           box-shadow: 0 24px 70px rgba(31,27,21,0.11);
           isolation: isolate;
           margin: 0 auto;
-          max-width: 1560px;
+          max-width: 1680px;
           overflow: hidden;
           position: relative;
           z-index: 0;
         }
+        .map-search-shell:focus-within {
+          overflow: visible;
+          z-index: 20;
+        }
         .map-preview-panel {
           background: #1f1b16;
+          border-radius: 18px;
           height: clamp(320px, 42vw, 520px);
           overflow: hidden;
           position: relative;
@@ -1365,6 +1370,23 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           display: grid;
           gap: 10px;
           padding: 16px;
+        }
+        .map-search-panel-new {
+          align-content: center;
+          background: transparent;
+          bottom: 22px;
+          left: 50%;
+          max-width: 980px;
+          padding: 0;
+          pointer-events: none;
+          position: absolute;
+          transform: translateX(-50%);
+          width: min(980px, calc(100% - 440px));
+          z-index: 760;
+        }
+        .map-search-panel-new .home-search-box-map {
+          pointer-events: auto;
+          width: 100%;
         }
         .map-search-panel .search-heading {
           color: #5b3d12;
@@ -1568,16 +1590,16 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         /* ====== RESPONSIVE BREAKPOINTS ====== */
 
         @media (min-width: 900px) {
-          .map-search-shell {
-            display: grid;
-            grid-template-columns: minmax(0, 1.48fr) minmax(360px, 0.72fr);
-          }
           .map-preview-panel {
-            height: 535px;
+            height: clamp(520px, 38vw, 660px);
+            min-height: 520px;
           }
           .map-search-panel {
             align-content: center;
-            padding: 22px;
+            padding: 20px clamp(22px, 4vw, 54px) 24px;
+          }
+          .map-search-panel-new {
+            justify-items: stretch;
           }
           .map-search-panel .search-actions {
             grid-template-columns: 1fr;
@@ -1608,9 +1630,25 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .map-search-shell {
             border-radius: 14px;
+            overflow: visible;
           }
           .map-preview-panel {
+            border-radius: 14px;
             height: clamp(330px, 86vw, 380px);
+          }
+          .map-preview-stat {
+            bottom: 136px;
+            left: 12px;
+            padding: 9px 11px;
+            z-index: 650;
+          }
+          .map-search-panel-new {
+            inset: auto 8px 10px;
+            min-width: 0;
+            overflow: visible;
+            transform: none;
+            width: auto;
+            z-index: 760;
           }
           .map-search-panel {
             gap: 9px;
