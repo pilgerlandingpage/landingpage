@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Building2, Camera, Crown, Home, Palmtree, Sparkles } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
@@ -15,7 +16,6 @@ import AboutGuilhermeSection from '@/components/marketplace/AboutGuilhermeSectio
 import YoutubeFeedSection from '@/components/marketplace/YoutubeFeedSection'
 import PremiumCategoryAutoRail from '@/components/marketplace/PremiumCategoryAutoRail'
 import HeroVideoBackground from '@/components/marketplace/HeroVideoBackground'
-import { getPublicMarketRadarFeed } from '@/lib/market-radar/public-feed'
 import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
 import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
@@ -116,15 +116,43 @@ function compactHomeProperty(property: any) {
 // This is a Server Component
 export default async function MarketplaceHome() {
   const supabase = createSupabaseAdminClient()
-  const marketFeed = await getPublicMarketRadarFeed()
+  const [
+    configResult,
+    propertiesResult,
+    landingPagesResult,
+  ] = await Promise.all([
+    supabase
+      .from('app_config')
+      .select('key, value')
+      .like('key', 'homepage_%')
+      .abortSignal(createSupabaseAbortSignal()),
+    supabase
+      .from('properties')
+      .select(HOME_PROPERTY_FIELDS)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .abortSignal(createSupabaseAbortSignal()),
+    supabase
+      .from('landing_pages')
+      .select('id, slug, property_id')
+      .eq('status', 'published')
+      .abortSignal(createSupabaseAbortSignal()),
+  ])
 
-  // === LOAD CONFIG ===
-  const { data: configRows } = await supabase
-    .from('app_config')
-    .select('key, value')
-    .like('key', 'homepage_%')
+  if (configResult.error) {
+    console.warn('[Home] homepage config unavailable:', summarizeSupabaseError(configResult.error))
+  }
+
+  if (propertiesResult.error) {
+    console.warn('[Home] property feed unavailable:', summarizeSupabaseError(propertiesResult.error))
+  }
+
+  if (landingPagesResult.error) {
+    console.warn('[Home] landing page links unavailable:', summarizeSupabaseError(landingPagesResult.error))
+  }
 
   const configMap: Record<string, string> = {}
+  const configRows = configResult.data || []
   configRows?.forEach((row: any) => { configMap[row.key] = row.value })
 
   const featuredTitle = configMap.homepage_featured_title || 'Seleção Exclusiva'
@@ -142,13 +170,7 @@ export default async function MarketplaceHome() {
   let manualFeaturedIds: string[] = []
   try { manualFeaturedIds = JSON.parse(configMap.homepage_featured_ids || '[]') } catch { }
 
-  // Fetch all active properties
-  const { data: allProperties } = await supabase
-    .from('properties')
-    .select(HOME_PROPERTY_FIELDS)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-
+  const allProperties = propertiesResult.data || []
   const properties = (allProperties || []).map(compactHomeProperty)
   const homeProperties = properties.filter(isAllowedOnHome)
   const homeMapProperties = homeProperties.filter(property => Number(property.price || property.rent || 0) >= HOME_MAP_MIN_PRICE)
@@ -225,11 +247,7 @@ export default async function MarketplaceHome() {
   ]
 
   // Also fetch any landing pages linked to properties
-  const { data: landingPages } = await supabase
-    .from('landing_pages')
-    .select('id, slug, property_id')
-    .eq('status', 'published')
-
+  const landingPages = landingPagesResult.data || []
   const lpMap = new Map()
   landingPages?.forEach((lp: any) => {
     lpMap.set(lp.property_id, lp.slug)
@@ -238,14 +256,18 @@ export default async function MarketplaceHome() {
   let funnelEvents: any[] = []
   const landingPageIds = (landingPages || []).map((lp: any) => lp.id).filter(Boolean)
   if (landingPageIds.length > 0) {
-    const { data: eventRows } = await supabase
+    const { data: eventRows, error: eventRowsError } = await supabase
       .from('funnel_events')
       .select('landing_page_id, event_type, created_at')
       .in('landing_page_id', landingPageIds)
       .in('event_type', ['page_view', 'cookie_consent', 'chat_opened', 'form_submitted', 'whatsapp_property_click', 'whatsapp_link_click'])
       .order('created_at', { ascending: false })
       .limit(2000)
+      .abortSignal(createSupabaseAbortSignal())
 
+    if (eventRowsError) {
+      console.warn('[Home] demand events unavailable:', summarizeSupabaseError(eventRowsError))
+    }
     funnelEvents = eventRows || []
   }
 

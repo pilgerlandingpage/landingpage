@@ -5,7 +5,7 @@ import { CalendarDays, MessageCircle } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { BLOG_AUTHOR_IMAGE_URL, BLOG_AUTHOR_NAME } from '@/lib/blog/author'
 import { markdownToHtml } from '@/lib/blog/markdown'
 import { getMostVisitedBlogProperties, type BlogPropertyRecommendation } from '@/lib/blog/properties'
@@ -41,20 +41,26 @@ const BLOG_POST_SELECT = [
 ].join(',')
 
 async function getPost(slug: string) {
-    const supabase = createAdminClient()
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .select(BLOG_POST_SELECT)
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .maybeSingle()
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('blog_posts')
+            .select(BLOG_POST_SELECT)
+            .eq('slug', slug)
+            .eq('status', 'published')
+            .maybeSingle()
+            .abortSignal(createSupabaseAbortSignal())
 
-    if (error) {
-        console.warn('[Blog] public post unavailable:', error.message)
+        if (error) {
+            console.warn('[Blog] public post unavailable:', summarizeSupabaseError(error))
+            return null
+        }
+
+        return data as BlogPost | null
+    } catch (error) {
+        console.warn('[Blog] public post unavailable:', summarizeSupabaseError(error))
         return null
     }
-
-    return data as BlogPost | null
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

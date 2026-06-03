@@ -432,7 +432,7 @@ export default function PropertyLandingStyles() {
                 .plp-gallery-modal-backdrop {
                     position: fixed;
                     inset: 0;
-                    z-index: 120;
+                    z-index: 7000;
                     display: flex;
                     align-items: flex-end;
                     justify-content: center;

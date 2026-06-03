@@ -80,14 +80,38 @@ type FeatureFilter = {
 }
 
 const MINIMUM_FIRST_CONTACT_PRICE = 4000000
+const GUIDED_SEARCH_STORAGE_KEY = 'pilger_guided_search_seen_v1'
+
+const GUIDED_SEARCH_MESSAGES: Record<MobileFilterKey, { title: string; choose: string; next: string }> = {
+    location: {
+        title: 'Comece pela região',
+        choose: 'Escolha uma cidade para começar sua curadoria.',
+        next: 'Boa escolha. Agora toque em Próximo para passar ao tipo de imóvel.',
+    },
+    type: {
+        title: 'Agora o tipo de imóvel',
+        choose: 'Apartamento, casa, cobertura ou comercial: escolha o perfil que faz sentido para você.',
+        next: 'Perfeito. Toque em Próximo para ajustar a faixa de valor.',
+    },
+    price: {
+        title: 'Defina o orçamento',
+        choose: 'Arraste ou toque na faixa de valor para deixar a busca mais certeira.',
+        next: 'Valor definido. Toque em Próximo para a última escolha.',
+    },
+    purpose: {
+        title: 'Última escolha',
+        choose: 'Confirme se a busca é para compra ou aluguel. Depois eu abro a seleção certa.',
+        next: 'Tudo pronto. Toque no botão de imóveis para ver os resultados.',
+    },
+}
 
 const LOCATION_STEPS: StepOption[] = [
-    { value: '', label: 'Todas', shortLabel: 'Todas' },
     { value: 'Balneário Camboriú', label: 'B. Camboriú', shortLabel: 'B. Camboriú' },
     { value: 'Praia Brava', label: 'Praia Brava', shortLabel: 'Praia Brava' },
     { value: 'Itapema', label: 'Itapema', shortLabel: 'Itapema' },
     { value: 'Porto Belo', label: 'Porto Belo', shortLabel: 'Porto Belo' },
 ]
+const DEFAULT_LOCATION = LOCATION_STEPS[0]?.value || ''
 
 const TYPE_STEPS: StepOption[] = [
     { value: 'all', label: 'Todos', shortLabel: 'Todos' },
@@ -334,7 +358,7 @@ function FilterStepControl({
 
 export default function HomeMapSearchSection({ properties }: { properties: Property[] }) {
     const router = useRouter()
-    const [query, setQuery] = useState('')
+    const [query, setQuery] = useState(DEFAULT_LOCATION)
     const [type, setType] = useState('all')
     const [price, setPrice] = useState('')
     const [purpose, setPurpose] = useState<'sale' | 'rent'>('sale')
@@ -343,7 +367,10 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [mobileQuizStep, setMobileQuizStep] = useState(0)
     const [answeredQuizSteps, setAnsweredQuizSteps] = useState<MobileFilterKey[]>([])
     const [activeChips, setActiveChips] = useState<string[]>([])
+    const [isGuidedSearchActive, setIsGuidedSearchActive] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
+    const guidedSearchStartedRef = useRef(false)
+    const trackedGuideStepRef = useRef<number | null>(null)
     const applied = useMemo<AppliedFilters>(() => ({
         query: searchLocationName(query),
         type,
@@ -506,6 +533,59 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         ? 'Próximo'
         : filteredProperties.length ? `Ver ${filteredProperties.length} imóveis` : 'Buscar imóveis'
 
+    const currentGuideStepAnswered = answeredQuizSteps.includes(activeMobileQuizConfig.id)
+    const guidedSearchMessage = GUIDED_SEARCH_MESSAGES[activeMobileQuizConfig.id]
+    const guidedSearchBody = currentGuideStepAnswered
+        ? mobileQuizStep < mobileFilters.length - 1
+            ? guidedSearchMessage.next
+            : `Tudo pronto. Toque em "${searchSubmitLabel}" para ver os resultados.`
+        : guidedSearchMessage.choose
+    const shouldGuideSubmit = isGuidedSearchActive && currentGuideStepAnswered
+
+    const markGuidedSearchSeen = useCallback(() => {
+        try {
+            window.localStorage.setItem(GUIDED_SEARCH_STORAGE_KEY, 'true')
+        } catch {
+            // localStorage can be unavailable in restricted browser contexts.
+        }
+    }, [])
+
+    const startGuidedSearch = useCallback(() => {
+        if (guidedSearchStartedRef.current) return
+
+        guidedSearchStartedRef.current = true
+        markGuidedSearchSeen()
+        setIsGuidedSearchActive(true)
+        void trackEvent('home_guided_search_started', {
+            source: 'home_map_search',
+            step_total: mobileFilters.length,
+        })
+    }, [markGuidedSearchSeen, mobileFilters.length])
+
+    const finishGuidedSearch = useCallback(() => {
+        markGuidedSearchSeen()
+
+        if (!isGuidedSearchActive) return
+
+        setIsGuidedSearchActive(false)
+        void trackEvent('home_guided_search_completed', {
+            ...getSearchSnapshot(),
+            source: 'home_map_search',
+            step_number: mobileQuizStep + 1,
+            step_total: mobileFilters.length,
+            filter_id: activeMobileQuizConfig.id,
+            filter_label: activeMobileQuizConfig.label,
+        })
+    }, [
+        activeMobileQuizConfig.id,
+        activeMobileQuizConfig.label,
+        getSearchSnapshot,
+        isGuidedSearchActive,
+        markGuidedSearchSeen,
+        mobileFilters.length,
+        mobileQuizStep,
+    ])
+
     const buildSearchParams = useCallback((chips = activeChips) => {
         const params = new URLSearchParams()
         const term = searchLocationName(query.trim())
@@ -552,12 +632,13 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             ...getSearchSnapshot(),
             destination: queryString ? `/busca?${queryString}` : '/busca',
         })
+        if (isGuidedSearchActive) finishGuidedSearch()
         router.push(queryString ? `/busca?${queryString}` : '/busca')
     }
 
     const clearSearch = () => {
         void trackEvent('home_map_search_cleared', getSearchSnapshot())
-        setQuery('')
+        setQuery(DEFAULT_LOCATION)
         setType('all')
         setPrice('')
         setPurpose('sale')
@@ -604,6 +685,57 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }
 
     useEffect(() => {
+        const node = wrapperRef.current
+        if (!node) return
+
+        let alreadySeen = false
+        try {
+            alreadySeen = window.localStorage.getItem(GUIDED_SEARCH_STORAGE_KEY) === 'true'
+        } catch {
+            alreadySeen = false
+        }
+
+        if (alreadySeen) return
+
+        if (typeof window.IntersectionObserver === 'undefined') {
+            const frame = window.requestAnimationFrame(startGuidedSearch)
+            return () => window.cancelAnimationFrame(frame)
+        }
+
+        const observer = new window.IntersectionObserver((entries) => {
+            if (!entries.some(entry => entry.isIntersecting)) return
+            startGuidedSearch()
+            observer.disconnect()
+        }, { threshold: 0.36, rootMargin: '0px 0px -18% 0px' })
+
+        observer.observe(node)
+
+        return () => observer.disconnect()
+    }, [startGuidedSearch])
+
+    useEffect(() => {
+        if (!isGuidedSearchActive) return
+        if (trackedGuideStepRef.current === mobileQuizStep) return
+
+        trackedGuideStepRef.current = mobileQuizStep
+        void trackEvent('home_guided_search_step_viewed', {
+            ...getSearchSnapshot(),
+            source: 'home_map_search',
+            step_number: mobileQuizStep + 1,
+            step_total: mobileFilters.length,
+            filter_id: activeMobileQuizConfig.id,
+            filter_label: activeMobileQuizConfig.label,
+        })
+    }, [
+        activeMobileQuizConfig.id,
+        activeMobileQuizConfig.label,
+        getSearchSnapshot,
+        isGuidedSearchActive,
+        mobileFilters.length,
+        mobileQuizStep,
+    ])
+
+    useEffect(() => {
         const mediaQuery = window.matchMedia('(min-width: 900px)')
         const syncDesktopFilters = () => setIsDesktopFilters(mediaQuery.matches)
 
@@ -632,7 +764,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     {isMapInteractionLocked && <div className="map-interaction-lock" aria-hidden="true" />}
                 </div>
 
-                <form className="map-search-panel" onSubmit={applySearch}>
+                <form className={`map-search-panel ${isGuidedSearchActive ? 'is-guide-active' : ''} ${shouldGuideSubmit ? 'is-guide-submit-ready' : ''}`} onSubmit={applySearch}>
                     <div className="search-heading">
                         <span>Encontre sua seleção</span>
                     </div>
@@ -667,6 +799,16 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
                         </div>
                     </div>
+
+                    {isGuidedSearchActive && (
+                        <div className="guided-search-coach" aria-live="polite" aria-label="Guia da pesquisa">
+                            <div>
+                                <span>Guia rápido · {mobileQuizStep + 1} de {mobileFilters.length}</span>
+                                <strong>{guidedSearchMessage.title}</strong>
+                                <p>{guidedSearchBody}</p>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="step-filter-grid">
                         <FilterStepControl
@@ -896,6 +1038,43 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     display: grid;
                     gap: 7px;
                     padding: 9px;
+                }
+                .is-guide-active .mobile-quiz-panel {
+                    border-color: rgba(200,168,98,0.7);
+                    box-shadow: 0 0 0 3px rgba(200,168,98,0.18), 0 14px 30px rgba(31,27,21,0.12);
+                    position: relative;
+                    z-index: 2;
+                }
+                .guided-search-coach {
+                    background: #171410;
+                    border: 1px solid rgba(223,193,142,0.28);
+                    border-radius: 10px;
+                    box-shadow: 0 16px 34px rgba(31,27,21,0.22);
+                    color: #fff8ea;
+                    padding: 10px 11px;
+                }
+                .guided-search-coach span {
+                    color: #dfc18e;
+                    display: block;
+                    font: 900 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.12em;
+                    margin-bottom: 5px;
+                    text-transform: uppercase;
+                }
+                .guided-search-coach strong {
+                    color: #fff8ea;
+                    display: block;
+                    font: 900 0.86rem/1.08 'Inter', sans-serif;
+                    letter-spacing: 0;
+                }
+                .guided-search-coach p {
+                    color: rgba(255,248,234,0.78);
+                    font: 700 0.72rem/1.35 'Inter', sans-serif;
+                    margin: 4px 0 0;
+                }
+                .is-guide-submit-ready .search-submit {
+                    outline: 3px solid rgba(200,168,98,0.32);
+                    outline-offset: 2px;
                 }
                 .mobile-quiz-progress {
                     align-items: center;
@@ -1447,6 +1626,15 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     .mobile-quiz-panel {
                         gap: 6px;
                         padding: 8px;
+                    }
+                    .guided-search-coach {
+                        padding: 10px;
+                    }
+                    .guided-search-coach strong {
+                        font-size: 0.8rem;
+                    }
+                    .guided-search-coach p {
+                        font-size: 0.68rem;
                     }
                     .mobile-quiz-question {
                         grid-template-columns: 26px minmax(0, 1fr) auto;

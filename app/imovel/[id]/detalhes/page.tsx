@@ -21,7 +21,6 @@ import {
     Phone,
     Printer,
     Ruler,
-    Search,
     Share2,
     ShieldCheck,
     Star,
@@ -30,11 +29,11 @@ import {
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
-import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import { PropertyInstagramStrip, PropertyLatestYoutubeVideo } from '@/components/property/PropertySocialProof'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MapSearch from '@/components/marketplace/MapSearch'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import PropertyLandingStyles from '../PropertyLandingStyles'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
@@ -384,7 +383,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     ]
 
     return (
-        <main className="plp-page" data-property-landing-root="true">
+        <>
             <PropertyLandingStyles />
             <JsonLd data={propertyJsonLd} />
             <PropertyLandingTracker
@@ -395,42 +394,10 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 neighborhood={displayNeighborhood}
                 propertyType={property.property_type}
             />
+            <GlobalHeader />
 
-            {/*
-                <span>CRECI/SC 6772-J - Balneário Camboriú / SC</span>
-                <span><Phone size={13} /> (47) 9 9252-8080</span>
-                <span><Star size={13} /> Imóveis favoritos</span>
-            */}
-
+            <main className="plp-page" data-property-landing-root="true">
             <div className="plp-shell">
-                <header className="plp-header">
-                    <Link href="/" className="plp-logo" aria-label="Ir para a home">
-                        <span>Guilherme Pilger</span>
-                        <small>Corretor de imóveis</small>
-                    </Link>
-
-                    <nav className="plp-nav" aria-label="Navegação do imóvel">
-                        <Link href="/">Home</Link>
-                        <Link href="/busca">Vendas</Link>
-                        <Link href="/noticias">Notícias</Link>
-                        <Link href="/blog">Blog</Link>
-                        <WhatsAppCaptureLink
-                            phone={WHATSAPP_PHONE}
-                            message={`Olá! Quero falar sobre o imóvel: ${displayTitle}`}
-                            slug="imovel"
-                            template="property-classic-header-contato"
-                            metadata={propertyTrackingMetadata}
-                        >
-                            Contato
-                        </WhatsAppCaptureLink>
-                    </nav>
-
-                    <Link href="/busca" className="plp-search-link" aria-label="Busca rápida">
-                        <Search size={18} />
-                    </Link>
-                    <PropertyLandingMobileMenu title={displayTitle} metadata={propertyTrackingMetadata} />
-                </header>
-
                 <section className="plp-title-band">
                     <div className="plp-breadcrumbs">
                         <Link href="/">Início</Link>
@@ -720,6 +687,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
             <MobileNav />
         </main>
+        </>
     )
 }
 

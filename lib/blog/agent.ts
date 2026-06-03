@@ -696,7 +696,6 @@ export async function generateBlogArticleDraft(topic?: string) {
         title,
         slug: slugifyBlog(title),
         excerpt: pickPublicBlogSummary({
-            excerpt: draft.strategic_reason,
             meta_description: draft.meta_description,
             content_markdown: draft.article_markdown,
         }),
@@ -784,7 +783,6 @@ export async function generateNewsArticleDraft(topic?: string) {
         title,
         slug: slugifyBlog(title),
         excerpt: pickPublicBlogSummary({
-            excerpt: draft.strategic_reason,
             meta_description: draft.meta_description,
             content_markdown: draft.article_markdown,
         }),

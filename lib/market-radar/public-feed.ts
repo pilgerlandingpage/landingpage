@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 
 export type MarketTickerItem = {
   label: string
@@ -129,9 +130,10 @@ export async function getPublicMarketRadarFeed(): Promise<PublicMarketRadarFeed>
       .select('keyword,opportunity_score,market_temperature,summary,related_properties_count,trend_delta,created_at')
       .order('created_at', { ascending: false })
       .limit(24)
+      .abortSignal(createSupabaseAbortSignal())
 
     if (error) {
-      console.warn('[Public Market Feed] Falling back:', error.message)
+      console.warn('[Public Market Feed] Falling back:', summarizeSupabaseError(error))
       return { ...FALLBACK_FEED, updatedAt: new Date().toISOString() }
     }
 
@@ -165,7 +167,7 @@ export async function getPublicMarketRadarFeed(): Promise<PublicMarketRadarFeed>
       regions: buildRegionSignals(rows),
     }
   } catch (error) {
-    console.warn('[Public Market Feed] Unexpected fallback:', error)
+    console.warn('[Public Market Feed] Unexpected fallback:', summarizeSupabaseError(error))
     return { ...FALLBACK_FEED, updatedAt: new Date().toISOString() }
   }
 }

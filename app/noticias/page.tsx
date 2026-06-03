@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CalendarDays, Newspaper, Search } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
@@ -61,20 +61,26 @@ function isNewsPost(post: BlogPost) {
 }
 
 async function getNewsPosts() {
-    const supabase = createAdminClient()
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .select(NEWS_LIST_SELECT)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(80)
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('blog_posts')
+            .select(NEWS_LIST_SELECT)
+            .eq('status', 'published')
+            .order('published_at', { ascending: false })
+            .limit(80)
+            .abortSignal(createSupabaseAbortSignal())
 
-    if (error) {
-        console.warn('[Noticias] public list unavailable:', error.message)
+        if (error) {
+            console.warn('[Noticias] public list unavailable:', summarizeSupabaseError(error))
+            return []
+        }
+
+        return ((data || []) as BlogPost[]).filter(isNewsPost)
+    } catch (error) {
+        console.warn('[Noticias] public list unavailable:', summarizeSupabaseError(error))
         return []
     }
-
-    return ((data || []) as BlogPost[]).filter(isNewsPost)
 }
 
 function formatDate(value?: string | null) {

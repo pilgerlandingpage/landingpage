@@ -36,3 +36,27 @@ export function createAdminClient() {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 }
+
+export function createSupabaseAbortSignal(timeoutMs = 12000) {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+        return AbortSignal.timeout(timeoutMs)
+    }
+
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), timeoutMs)
+    return controller.signal
+}
+
+export function summarizeSupabaseError(error: unknown) {
+    const message = error && typeof error === 'object' && 'message' in error
+        ? String((error as { message?: unknown }).message || '')
+        : String(error || '')
+
+    const cleaned = message
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    if (!cleaned) return 'Erro desconhecido'
+    return cleaned.length > 260 ? `${cleaned.slice(0, 260).trim()}...` : cleaned
+}

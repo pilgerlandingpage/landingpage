@@ -53,6 +53,16 @@ function normalizeText(value: unknown) {
     .toLowerCase()
 }
 
+function createQuerySignal(timeoutMs = 12000) {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(timeoutMs)
+  }
+
+  const controller = new AbortController()
+  setTimeout(() => controller.abort(), timeoutMs)
+  return controller.signal
+}
+
 function eventWeight(eventType: string) {
   if (eventType === 'form_submitted' || eventType === 'whatsapp_property_click') return 6
   if (eventType === 'property_feed_whatsapp_clicked' || eventType === 'property_feed_message_clicked') return 5
@@ -119,12 +129,14 @@ export async function getMostVisitedBlogProperties(
       .from('properties')
       .select('id,title,city,state,neighborhood,price,property_type,bedrooms,bathrooms,suites,parking_spaces,area_m2,featured_image,exclusive,status,source_status,created_at')
       .eq('status', 'active')
-      .limit(400),
+      .limit(400)
+      .abortSignal(createQuerySignal()),
     supabase
       .from('landing_pages')
       .select('id,slug,property_id,status')
       .eq('status', 'published')
-      .limit(600),
+      .limit(600)
+      .abortSignal(createQuerySignal()),
   ])
 
   if (propertiesResult.error) throw new Error(propertiesResult.error.message)
@@ -145,6 +157,7 @@ export async function getMostVisitedBlogProperties(
     .in('event_type', PROPERTY_EVENT_TYPES)
     .order('created_at', { ascending: false })
     .limit(4000)
+    .abortSignal(createQuerySignal())
 
   const viewScores = new Map<string, number>()
   for (const event of events || []) {
@@ -212,7 +225,8 @@ export async function chooseBlogCoverImage(
       .from('blog_posts')
       .select('cover_image_url')
       .not('cover_image_url', 'is', null)
-      .limit(500),
+      .limit(500)
+      .abortSignal(createQuerySignal()),
     getMostVisitedBlogProperties(supabase, {
       limit: 12,
       days: 90,
