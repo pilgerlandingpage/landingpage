@@ -49,6 +49,115 @@ const PILGER_AI_CSS = `
   gap: 8px;
   padding: 10px 14px;
 }
+
+.pilger-ai-hero-detail {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 14px;
+}
+
+.pilger-ai-hero-detail > span {
+  color: var(--gold-light);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pilger-ai-hero-detail > strong {
+  align-items: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.78rem;
+  gap: 7px;
+  padding: 7px 10px;
+}
+
+.pilger-ai-hero-detail svg {
+  color: var(--gold-light);
+}
+
+.pilger-ai-hero-side {
+  align-items: flex-end;
+  display: grid;
+  flex: 0 0 auto;
+  gap: 12px;
+  justify-items: end;
+}
+
+.pilger-ai-hero-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pilger-ai-hero-actions .agent-org-live-badge {
+  background: rgba(37,99,235,0.16);
+  border-color: rgba(191,219,254,0.28);
+  color: #dbeafe;
+}
+
+.pilger-ai-hero-actions .agent-org-refresh {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.82);
+}
+
+.pilger-ai-hero-actions .agent-org-refresh strong {
+  color: #fff;
+}
+
+.pilger-ai-hero-actions .agent-org-refresh svg {
+  color: var(--gold-light);
+}
+
+.pilger-ai-hero-with-compact-metrics {
+  align-items: stretch;
+}
+
+.pilger-ai-hero-with-compact-metrics > div:first-child {
+  align-self: center;
+}
+
+.pilger-ai-hero-metrics {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  min-width: min(440px, 42vw);
+}
+
+.pilger-ai-hero-metric {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 12px;
+  display: grid;
+  gap: 2px;
+  padding: 9px 10px;
+}
+
+.pilger-ai-hero-metric strong {
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pilger-ai-hero-metric span {
+  color: rgba(255,255,255,0.66);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .pilger-ai-metrics {
   display: grid;
   gap: 14px;
@@ -689,6 +798,16 @@ const PILGER_AI_CSS = `
   .pilger-ai-hero,
   .agent-org-head {
     display: grid;
+  }
+
+  .pilger-ai-hero-side {
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .pilger-ai-hero-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-width: 0;
   }
 
   .pilger-ai-metrics,
@@ -2430,6 +2549,753 @@ const PILGER_AI_CSS = `
 
   .agent-workflow-data-row {
     justify-content: flex-start;
+  }
+}
+
+.agent-graph-panel {
+  overflow: hidden;
+}
+
+.agent-graph-panel .agent-org-head-compact {
+  align-items: center;
+  padding: 12px 18px;
+}
+
+.agent-graph-panel .agent-org-head-compact h2 {
+  font-size: 0.92rem;
+}
+
+.agent-graph-panel .agent-org-head-compact span {
+  font-size: 0.62rem;
+  margin-bottom: 3px;
+}
+
+.agent-graph-panel .agent-org-head-compact .agent-org-head-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.agent-graph-canvas {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(74,158,255,0.08), transparent 35%),
+    #0D1117;
+  border-radius: 16px;
+  border: 1px solid rgba(74,158,255,0.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 0 120px rgba(0,0,0,0.56),
+    0 30px 70px rgba(15,23,42,0.22);
+  cursor: grab;
+  height: clamp(900px, 88vh, 1320px);
+  overflow: hidden;
+  position: relative;
+}
+
+.agent-graph-canvas.is-panning {
+  cursor: grabbing;
+}
+
+.agent-graph-controls {
+  display: grid;
+  gap: 8px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 20;
+}
+
+.agent-graph-stage {
+  --agent-node-scale: 1;
+  background-color: #0D1117;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(74,158,255,0.16) 0%, rgba(0,212,170,0.08) 20%, transparent 44%),
+    radial-gradient(circle, rgba(74,158,255,0.075) 1px, transparent 1.25px),
+    linear-gradient(rgba(74,158,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74,158,255,0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 22px 22px, 110px 110px, 110px 110px;
+  left: 0;
+  overflow: visible;
+  position: absolute;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.agent-graph-stage::before,
+.agent-graph-stage::after {
+  border-radius: 0;
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.agent-graph-stage::before {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 13%, rgba(240,208,96,0.18) 13.05% 13.16%, transparent 13.24% 23%, rgba(74,158,255,0.16) 23.05% 23.16%, transparent 23.24% 34%, rgba(0,212,170,0.12) 34.05% 34.16%, transparent 34.24%),
+    linear-gradient(90deg, transparent 0 49.98%, rgba(240,208,96,0.12) 49.98% 50.02%, transparent 50.02%),
+    linear-gradient(0deg, transparent 0 49.98%, rgba(240,208,96,0.1) 49.98% 50.02%, transparent 50.02%);
+  opacity: 0.82;
+}
+
+.agent-graph-stage::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 0 38%, rgba(2,6,15,0.42) 76%),
+    linear-gradient(180deg, rgba(255,255,255,0.035), transparent 24%, rgba(0,0,0,0.28));
+  opacity: 1;
+}
+
+.agent-graph-links {
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+}
+
+.agent-graph-center-glow {
+  fill: url(#agentGraphGlow);
+  opacity: 0.86;
+}
+
+.agent-graph-link {
+  fill: none;
+  opacity: 0.68;
+  stroke: var(--link-color, #4A9EFF);
+  stroke-dasharray: 8 10;
+  stroke-linecap: round;
+  stroke-width: 2.05;
+  transition: filter 0.18s ease, opacity 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+  filter: drop-shadow(0 0 3px var(--link-color, #4A9EFF));
+}
+
+.agent-graph-link-input {
+  stroke-width: 2.35;
+}
+
+.agent-graph-link-memory,
+.agent-graph-link-sync {
+  stroke-width: 1.8;
+}
+
+.agent-graph-link-sector {
+  stroke-width: 2.4;
+}
+
+.agent-graph-link-agent {
+  stroke-width: 1.9;
+}
+
+.agent-graph-link-return {
+  stroke-width: 1.9;
+}
+
+.agent-graph-link-inbound {
+  stroke-dasharray: 6 12;
+}
+
+.agent-graph-link-entry {
+  stroke-dasharray: 9 9;
+}
+
+.agent-graph-link.is-dimmed {
+  opacity: 0.12;
+  filter: none;
+}
+
+.agent-graph-link.is-highlighted {
+  filter: drop-shadow(0 0 8px var(--link-color, #4A9EFF));
+  opacity: 1;
+  stroke-width: 3.2;
+}
+
+.agent-graph-node {
+  animation: agentGraphNodeEnter 0.42s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: var(--node-delay, 0ms);
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  position: absolute;
+  touch-action: none;
+  transform: translate(-50%, -50%) scale(var(--agent-node-scale, 1));
+  transition: filter 0.18s ease, opacity 0.18s ease;
+  user-select: none;
+  z-index: 4;
+}
+
+.agent-graph-node.is-dragging {
+  cursor: grabbing;
+  z-index: 30;
+}
+
+.agent-graph-node.is-dimmed {
+  filter: grayscale(0.35);
+  opacity: 0.28;
+}
+
+.agent-graph-node.is-related {
+  opacity: 1;
+}
+
+.agent-graph-node.is-focused {
+  filter: drop-shadow(0 0 20px var(--node-accent, #4A9EFF));
+  opacity: 1;
+}
+
+@keyframes agentGraphNodeEnter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(calc(var(--agent-node-scale, 1) * 0.72));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(var(--agent-node-scale, 1));
+  }
+}
+
+.agent-graph-central {
+  align-items: center;
+  animation:
+    agentGraphNodeEnter 0.42s cubic-bezier(.2,.8,.2,1) both,
+    agentGraphHubPulse 3s ease-in-out infinite;
+  background:
+    linear-gradient(#1A1F2E, #1A1F2E) padding-box,
+    linear-gradient(135deg, #C9A227, #F0D060) border-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 10px rgba(201,162,39,0.08),
+    0 0 42px rgba(240,208,96,0.34),
+    0 0 120px rgba(74,158,255,0.28),
+    0 24px 70px rgba(0,0,0,0.48);
+  color: #FFFFFF;
+  display: grid;
+  height: 214px;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+  width: 214px;
+}
+
+.agent-graph-orbit {
+  border: 1px solid rgba(240,208,96,0.28);
+  border-radius: 999px;
+  inset: -22px;
+  pointer-events: none;
+  position: absolute;
+}
+
+.agent-graph-orbit-one {
+  animation: agentGraphOrbit 13s linear infinite;
+}
+
+.agent-graph-orbit-two {
+  animation: agentGraphOrbit 17s linear infinite reverse;
+  border-color: rgba(74,158,255,0.22);
+  inset: -42px;
+}
+
+@keyframes agentGraphOrbit {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.02); }
+}
+
+@keyframes agentGraphHubPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(var(--agent-node-scale, 1)); }
+  50% { transform: translate(-50%, -50%) scale(calc(var(--agent-node-scale, 1) * 1.03)); }
+}
+
+.agent-graph-brain {
+  align-items: center;
+  background: rgba(240,208,96,0.1);
+  border: 1px solid rgba(240,208,96,0.28);
+  border-radius: 999px;
+  color: #F0D060;
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  width: 72px;
+}
+
+.agent-graph-central strong,
+.agent-graph-trigger strong,
+.agent-graph-data strong,
+.agent-graph-sector strong,
+.agent-graph-agent strong {
+  color: #E8EAF0;
+  display: block;
+  line-height: 1.15;
+}
+
+.agent-graph-central strong {
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.agent-graph-central small {
+  color: #8B9CB8;
+  display: block;
+  font-size: 11px;
+  line-height: 1.28;
+  max-width: 160px;
+}
+
+.agent-graph-central > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+
+.agent-graph-central > div:last-child span {
+  background: rgba(240,208,96,0.1);
+  border: 1px solid rgba(240,208,96,0.18);
+  border-radius: 999px;
+  color: #F0D060;
+  font-size: 0.62rem;
+  font-weight: 850;
+  padding: 4px 6px;
+}
+
+.agent-graph-trigger,
+.agent-graph-data,
+.agent-graph-sector {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 42%),
+    #1E2435;
+  border: 1px solid #2A3352;
+  border-left: 3px solid var(--node-accent, #4A9EFF);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 18px 42px rgba(0,0,0,0.28),
+    0 0 22px color-mix(in srgb, var(--node-accent, #4A9EFF) 22%, transparent);
+  color: #E8EAF0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  justify-items: start;
+  min-width: 154px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.agent-graph-trigger {
+  border-radius: 8px;
+  min-width: 168px;
+}
+
+.agent-graph-trigger svg {
+  color: var(--node-accent, #F59E0B);
+}
+
+.agent-graph-trigger strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.agent-graph-trigger small,
+.agent-graph-data small,
+.agent-graph-sector small,
+.agent-graph-agent small {
+  color: #6B7A99;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.agent-graph-data {
+  border-left-color: var(--node-accent, #F0D060);
+  border-radius: 8px;
+  min-width: 128px;
+}
+
+.agent-graph-data strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.agent-graph-data svg {
+  color: var(--node-accent, #F0D060);
+}
+
+.agent-graph-sector {
+  border-radius: 8px;
+  min-width: 150px;
+}
+
+.agent-graph-sector svg {
+  color: var(--node-accent, #00D4AA);
+}
+
+.agent-graph-sector strong {
+  color: #E8EAF0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.agent-graph-sector.is-collapsed {
+  opacity: 0.74;
+}
+
+.agent-graph-sector.is-collapsed small {
+  color: #F0D060;
+}
+
+.agent-graph-sector.pilger-ai-tone-success,
+.agent-graph-sector.pilger-ai-tone-warning,
+.agent-graph-sector.pilger-ai-tone-danger,
+.agent-graph-sector.pilger-ai-tone-info,
+.agent-graph-sector.pilger-ai-tone-muted {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 42%),
+    #1E2435;
+  color: #E8EAF0;
+}
+
+.agent-graph-sector.pilger-ai-tone-success,
+.agent-graph-sector.pilger-ai-tone-warning,
+.agent-graph-sector.pilger-ai-tone-danger,
+.agent-graph-sector.pilger-ai-tone-info,
+.agent-graph-sector.pilger-ai-tone-muted {
+  border-color: #2A3352;
+  border-left-color: var(--node-accent, #00D4AA);
+}
+
+.agent-graph-agent {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.045), transparent 48%),
+    #161B27 !important;
+  border: 1px solid #2A3352;
+  border-left: 3px solid var(--node-accent, #4A9EFF);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 14px 32px rgba(0,0,0,0.3);
+  color: #E8EAF0 !important;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  justify-items: stretch;
+  padding: 8px 10px;
+  text-align: left;
+  width: 198px;
+}
+
+.agent-graph-avatar-wrap {
+  align-items: center;
+  display: flex;
+  height: 44px;
+  justify-content: center;
+}
+
+.agent-graph-avatar {
+  align-items: center;
+  background: #0D1117;
+  border: 2px solid var(--node-accent, #4A9EFF);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.05),
+    0 0 16px color-mix(in srgb, var(--node-accent, #4A9EFF) 36%, transparent);
+  color: #E8EAF0;
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 900;
+  height: 40px;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 40px;
+}
+
+.agent-graph-agent.pilger-ai-tone-success .agent-graph-avatar,
+.agent-graph-agent.pilger-ai-tone-warning .agent-graph-avatar,
+.agent-graph-agent.pilger-ai-tone-danger .agent-graph-avatar,
+.agent-graph-agent.pilger-ai-tone-info .agent-graph-avatar {
+  border-color: var(--node-accent, #4A9EFF);
+}
+
+.agent-graph-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.agent-graph-status {
+  border: 2px solid #161B27;
+  border-radius: 999px;
+  bottom: -1px;
+  height: 11px;
+  position: absolute;
+  right: -1px;
+  width: 11px;
+}
+
+.agent-graph-status.pilger-ai-tone-success { background: #22c55e; }
+.agent-graph-status.pilger-ai-tone-warning { background: #f59e0b; }
+.agent-graph-status.pilger-ai-tone-danger { background: #ef4444; }
+.agent-graph-status.pilger-ai-tone-info { background: #60a5fa; }
+.agent-graph-status.pilger-ai-tone-muted { background: #94a3b8; }
+
+.agent-graph-agent-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.agent-graph-agent strong {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 130px;
+  overflow: hidden;
+  padding: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-graph-agent small {
+  background: transparent;
+  color: #8B9CB8;
+  max-width: 130px;
+  overflow: hidden;
+  padding: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-graph-tooltip {
+  background: rgba(13,17,23,0.96);
+  border: 1px solid #2A3352;
+  border-radius: 13px;
+  bottom: calc(100% + 12px);
+  box-shadow:
+    0 22px 60px rgba(0,0,0,0.46),
+    0 0 28px color-mix(in srgb, var(--node-accent, #4A9EFF) 24%, transparent);
+  color: #E8EAF0;
+  display: grid;
+  gap: 7px;
+  left: 50%;
+  opacity: 0;
+  padding: 12px;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  width: 300px;
+  z-index: 40;
+}
+
+.agent-graph-node:hover .agent-graph-tooltip,
+.agent-graph-node:focus .agent-graph-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.agent-graph-tooltip small {
+  color: var(--node-accent, #F0D060);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.agent-graph-tooltip p,
+.agent-graph-tooltip div span {
+  color: #8B9CB8;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.agent-graph-tooltip div {
+  display: grid;
+  gap: 5px;
+}
+
+.agent-graph-hud {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  left: 16px;
+  position: absolute;
+  top: 16px;
+  z-index: 5;
+}
+
+.agent-graph-hud span,
+.agent-graph-control {
+  align-items: center;
+  background: rgba(13,17,23,0.82);
+  border: 1px solid #2A3352;
+  border-radius: 999px;
+  color: #E8EAF0;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 850;
+  gap: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+}
+
+.agent-graph-hud svg,
+.agent-graph-control svg {
+  color: #F0D060;
+}
+
+.agent-graph-reset {
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  width: 34px;
+}
+
+.agent-graph-controls .agent-graph-control {
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  width: 34px;
+}
+
+.agent-graph-size-control {
+  align-items: center;
+  background: rgba(13,17,23,0.82);
+  border: 1px solid #2A3352;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+  color: #E8EAF0;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.agent-graph-size-control .agent-graph-control {
+  background: rgba(30,36,53,0.94);
+  border-color: rgba(74,158,255,0.24);
+  color: #E8EAF0;
+  font-size: 0.64rem;
+  font-weight: 900;
+  height: 30px;
+  width: 34px;
+}
+
+.agent-graph-size-control span {
+  color: #8B9CB8;
+  font-size: 0.68rem;
+  font-weight: 850;
+  min-width: 38px;
+  text-align: center;
+}
+
+.agent-graph-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.agent-graph-control:hover {
+  background: rgba(30,36,53,0.94);
+  border-color: rgba(74,158,255,0.48);
+  color: #FFFFFF;
+}
+
+.agent-graph-particle {
+  fill: #FFFFFF;
+  filter:
+    drop-shadow(0 0 4px #FFFFFF)
+    drop-shadow(0 0 10px var(--particle-color, #4A9EFF));
+  opacity: 0.92;
+  pointer-events: none;
+  stroke: var(--particle-color, #4A9EFF);
+  stroke-width: 2.2;
+}
+
+.agent-graph-particle.is-dimmed {
+  opacity: 0.16;
+}
+
+.agent-graph-gold-particle {
+  animation: agentGraphGoldPulse 1.6s ease-in-out infinite;
+  fill: #F0D060;
+  filter:
+    drop-shadow(0 0 5px #FFFFFF)
+    drop-shadow(0 0 12px #F0D060)
+    drop-shadow(0 0 24px #C9A227);
+  opacity: 0.98;
+  pointer-events: none;
+  stroke: #FFF7C2;
+  stroke-width: 2.4;
+}
+
+.agent-graph-gold-particle.is-dimmed {
+  opacity: 0.18;
+}
+
+@keyframes agentGraphGoldPulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 4px #FFFFFF)
+      drop-shadow(0 0 12px #F0D060)
+      drop-shadow(0 0 22px #C9A227);
+    opacity: 0.88;
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 8px #FFFFFF)
+      drop-shadow(0 0 20px #F0D060)
+      drop-shadow(0 0 34px #C9A227);
+    opacity: 1;
+  }
+}
+
+.agent-graph-legend {
+  align-items: center;
+  background: rgba(13,17,23,0.8);
+  border: 1px solid #2A3352;
+  border-radius: 12px;
+  bottom: 16px;
+  box-shadow: 0 18px 42px rgba(0,0,0,0.32);
+  color: #E8EAF0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  left: 16px;
+  padding: 9px 11px;
+  position: absolute;
+  z-index: 10;
+}
+
+.agent-graph-legend span {
+  align-items: center;
+  color: #8B9CB8;
+  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 750;
+  gap: 6px;
+}
+
+.agent-graph-legend i {
+  background: var(--legend-color, #4A9EFF);
+  border-radius: 999px;
+  box-shadow: 0 0 12px var(--legend-color, #4A9EFF);
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+}
+
+@media (max-width: 1180px) {
+  .agent-graph-canvas {
+    height: clamp(760px, 84vh, 1100px);
   }
 }
 

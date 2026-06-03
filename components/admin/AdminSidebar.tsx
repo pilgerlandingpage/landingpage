@@ -204,6 +204,8 @@ export default function AdminSidebar() {
     })
     const [expandedSubGroups, setExpandedSubGroups] = useState<Record<string, boolean>>({})
     const [mobileOpen, setMobileOpen] = useState(false)
+    const [autoCollapse, setAutoCollapse] = useState(true)
+    const [forceCollapsedRail, setForceCollapsedRail] = useState(false)
 
     const subGroupKey = (parentHref: string, groupLabel: string) => `${parentHref}::${groupLabel}`
 
@@ -237,6 +239,12 @@ export default function AdminSidebar() {
         }
 
         fetchPermissions()
+    }, [])
+
+    useEffect(() => {
+        const storedPreference = window.localStorage.getItem('admin-sidebar-auto-collapse')
+        if (storedPreference === null) return
+        setAutoCollapse(storedPreference === 'true')
     }, [])
 
     useEffect(() => {
@@ -279,6 +287,15 @@ export default function AdminSidebar() {
     }
 
     const closeMobileMenu = () => setMobileOpen(false)
+
+    const collapseSidebar = () => {
+        setAutoCollapse(true)
+        setForceCollapsedRail(true)
+        window.localStorage.setItem('admin-sidebar-auto-collapse', 'true')
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur()
+        }
+    }
 
     const handleLogout = async () => {
         await fetch('/api/admin/user-access', {
@@ -369,16 +386,29 @@ export default function AdminSidebar() {
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         {mobileOpen && <div className="admin-mobile-sidebar-backdrop" onClick={closeMobileMenu} />}
-        <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <aside
+            className={`admin-sidebar ${mobileOpen ? 'open' : ''} ${autoCollapse ? 'is-auto-collapsed' : 'is-pinned-open'} ${forceCollapsedRail ? 'is-rail-locked' : ''}`}
+            onMouseLeave={() => setForceCollapsedRail(false)}
+            style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+        >
+            <button
+                type="button"
+                className="admin-sidebar-collapse-button"
+                onClick={collapseSidebar}
+                aria-label="Esconder menu"
+                title="Esconder menu"
+            >
+                <Menu size={16} />
+            </button>
             <div className="admin-sidebar-logo">
                 <h2>Pilger Admin</h2>
                 {userName ? (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span className="admin-sidebar-user-name" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {isMaster && <Crown size={12} style={{ color: '#f59e0b' }} />}
                         {userName}
                     </span>
                 ) : (
-                    <span>Painel de Controle</span>
+                    <span className="admin-sidebar-user-name">Painel de Controle</span>
                 )}
             </div>
 
@@ -416,11 +446,13 @@ export default function AdminSidebar() {
                                                 }
                                             }}
                                             className={`admin-nav-item ${isParentActive ? 'active' : ''}`}
+                                            title={item.label}
                                         >
                                             <item.icon size={18} />
-                                            <span style={{ flex: 1 }}>{item.label}</span>
+                                            <span className="admin-nav-item-label" style={{ flex: 1 }}>{item.label}</span>
                                             {item.subItems && (
                                                 <ChevronDown
+                                                    className="admin-nav-chevron"
                                                     size={14}
                                                     style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
                                                 />
@@ -428,7 +460,7 @@ export default function AdminSidebar() {
                                         </Link>
 
                                         {item.subItems && isExpanded && (
-                                            <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '28px', marginTop: '4px', marginBottom: '8px', gap: '4px' }}>
+                                            <div className="admin-nav-submenu" style={{ display: 'flex', flexDirection: 'column', paddingLeft: '28px', marginTop: '4px', marginBottom: '8px', gap: '4px' }}>
                                                 {item.subItems.map((subItem, index) => {
                                                     if ('children' in subItem) {
                                                         const key = subGroupKey(item.href, subItem.label)
@@ -436,6 +468,7 @@ export default function AdminSidebar() {
                                                         return (
                                                             <div key={`subgroup-${subItem.label}-${index}`} style={{ marginTop: 6 }}>
                                                                 <button
+                                                                    className="admin-nav-subgroup-button"
                                                                     type="button"
                                                                     onClick={() => toggleSubGroup(item.href, subItem.label)}
                                                                     style={{
@@ -457,8 +490,9 @@ export default function AdminSidebar() {
                                                                         margin: '0 0 6px 0',
                                                                     }}
                                                                 >
-                                                                    <span>{subItem.label}</span>
+                                                                    <span className="admin-nav-item-label">{subItem.label}</span>
                                                                     <ChevronDown
+                                                                        className="admin-nav-chevron"
                                                                         size={12}
                                                                         style={{ transform: isGroupExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
                                                                     />
@@ -473,6 +507,7 @@ export default function AdminSidebar() {
                                                                                     href={child.href}
                                                                                     onClick={closeMobileMenu}
                                                                                     className={`admin-nav-item ${isChildActive ? 'active text-gold' : ''}`}
+                                                                                    title={child.label}
                                                                                     style={{
                                                                                         fontSize: '0.84rem',
                                                                                         padding: '6px 12px',
@@ -481,7 +516,7 @@ export default function AdminSidebar() {
                                                                                         borderLeft: isChildActive ? '2px solid var(--gold)' : '2px solid transparent',
                                                                                     }}
                                                                                 >
-                                                                                    {child.label}
+                                                                                    <span className="admin-nav-item-label">{child.label}</span>
                                                                                 </Link>
                                                                             )
                                                                         })}
@@ -498,6 +533,7 @@ export default function AdminSidebar() {
                                                             href={subItem.href}
                                                             onClick={closeMobileMenu}
                                                             className={`admin-nav-item ${isSubItemActive ? 'active text-gold' : ''}`}
+                                                            title={subItem.label}
                                                             style={{
                                                                 fontSize: '0.85rem',
                                                                 padding: '6px 12px',
@@ -508,7 +544,7 @@ export default function AdminSidebar() {
                                                                 fontWeight: 600,
                                                             }}
                                                         >
-                                                            {subItem.label}
+                                                            <span className="admin-nav-item-label">{subItem.label}</span>
                                                         </Link>
                                                     )
                                                 })}
@@ -537,7 +573,7 @@ export default function AdminSidebar() {
                     }}
                 >
                     <UserCog size={18} />
-                    Minha Conta
+                    <span className="admin-nav-item-label">Minha Conta</span>
                 </Link>
 
                 <button
@@ -553,7 +589,7 @@ export default function AdminSidebar() {
                     }}
                 >
                     <LogOut size={18} />
-                    Sair
+                    <span className="admin-nav-item-label">Sair</span>
                 </button>
             </div>
         </aside>

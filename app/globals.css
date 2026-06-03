@@ -770,6 +770,9 @@ h6 {
 
 /* ===== ADMIN PANEL ===== */
 .admin-wrapper {
+  --admin-sidebar-expanded-width: 260px;
+  --admin-sidebar-collapsed-width: 64px;
+  --admin-sidebar-collapsed-content-offset: 104px;
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-primary);
@@ -777,7 +780,7 @@ h6 {
 }
 
 .admin-sidebar {
-  width: 260px;
+  width: var(--admin-sidebar-expanded-width);
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   padding: 24px 0;
@@ -786,7 +789,128 @@ h6 {
   left: 0;
   bottom: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.24s ease, box-shadow 0.24s ease;
   z-index: 100;
+}
+
+.admin-sidebar.is-auto-collapsed {
+  width: var(--admin-sidebar-collapsed-width);
+}
+
+.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):hover,
+.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):focus-within {
+  width: var(--admin-sidebar-expanded-width);
+  box-shadow: 18px 0 42px rgba(15, 23, 42, 0.12);
+}
+
+.admin-sidebar.is-auto-collapsed + .admin-content {
+  margin-left: var(--admin-sidebar-collapsed-content-offset);
+}
+
+.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):hover + .admin-content,
+.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):focus-within + .admin-content {
+  margin-left: var(--admin-sidebar-expanded-width);
+}
+
+.admin-sidebar-collapse-button {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(201, 169, 110, 0.24);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--gold);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-sidebar-collapse-button:hover {
+  background: rgba(201, 169, 110, 0.13);
+  border-color: rgba(201, 169, 110, 0.38);
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-collapse-button,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-collapse-button {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 52px 8px 18px;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo::before,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo::before {
+  content: 'P';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(201, 169, 110, 0.12);
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  color: var(--gold);
+  font-family: var(--font-serif);
+  font-weight: 900;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo h2,
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-user-name,
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-section,
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-item-label,
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-chevron,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo h2,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-user-name,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-section,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-item-label,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-chevron {
+  display: none !important;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav {
+  padding: 0 8px;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav > div,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav > div {
+  margin: 8px 0;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-item,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-item {
+  justify-content: center !important;
+  gap: 0;
+  padding: 12px !important;
+  border-left-color: transparent !important;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-item svg,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-item svg {
+  flex: 0 0 auto;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-submenu,
+.admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-submenu {
+  display: none !important;
+}
+
+.admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) > div:last-child,
+.admin-sidebar.is-auto-collapsed.is-rail-locked > div:last-child {
+  padding: 12px 8px !important;
 }
 
 .admin-mobile-menu-button {
@@ -853,10 +977,11 @@ h6 {
 
 .admin-content {
   flex: 1;
-  margin-left: 260px;
+  margin-left: var(--admin-sidebar-expanded-width);
   padding: 32px;
   background: var(--bg-primary);
   min-height: 100vh;
+  transition: margin-left 0.24s ease;
 }
 
 .admin-header {
@@ -2147,6 +2272,65 @@ h6 {
     z-index: 1100;
     padding-top: 72px;
     box-shadow: 20px 0 60px rgba(0, 0, 0, 0.18);
+  }
+
+  .admin-sidebar.is-auto-collapsed {
+    width: min(86vw, 320px);
+  }
+
+  .admin-sidebar.is-auto-collapsed + .admin-content {
+    margin-left: 0;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo {
+    display: block;
+    padding: 0 24px 24px;
+  }
+
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo {
+    display: block;
+    padding: 0 24px 24px;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo::before {
+    display: none;
+  }
+
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo::before {
+    display: none;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-logo h2,
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-sidebar-user-name,
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-section,
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-item-label,
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-chevron,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-logo h2,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-sidebar-user-name,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-section,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-item-label,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-chevron {
+    display: revert !important;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-submenu,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-submenu {
+    display: flex !important;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav {
+    padding: 0 12px;
+  }
+
+  .admin-sidebar.is-auto-collapsed:not(:hover):not(:focus-within) .admin-nav-item,
+  .admin-sidebar.is-auto-collapsed.is-rail-locked .admin-nav-item {
+    justify-content: flex-start !important;
+    gap: 12px;
+  }
+
+  .admin-sidebar-collapse-button {
+    display: none;
   }
 
   .admin-sidebar.open {
