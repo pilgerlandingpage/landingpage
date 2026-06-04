@@ -131,20 +131,8 @@ function getPropertyLatLng(property: Property): [number, number] | null {
     return null
 }
 
-function formatCompactPrice(price: number | null | undefined) {
-    if (!price) return 'Consulte'
-
-    return new Intl.NumberFormat('pt-BR', {
-        notation: 'compact',
-        compactDisplay: 'short',
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 1,
-    }).format(price)
-}
-
 function formatFullPrice(price: number | null | undefined) {
-    if (!price) return 'Sob Consulta'
+    if (!price) return 'Consulte'
 
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
@@ -332,7 +320,7 @@ function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): Clust
 }
 
 function createClusterIcon(count: number, minPrice: number | null) {
-    const priceText = minPrice ? formatCompactPrice(minPrice) : 'Consulte'
+    const priceText = formatFullPrice(minPrice)
 
     return L.divIcon({
         className: 'premium-cluster-marker',
@@ -340,8 +328,8 @@ function createClusterIcon(count: number, minPrice: number | null) {
             <span class="cluster-count">${count}</span>
             <span class="cluster-label">${priceText}</span>
         </div>`,
-        iconSize: [96, 58],
-        iconAnchor: [48, 29],
+        iconSize: [136, 58],
+        iconAnchor: [68, 29],
     })
 }
 
@@ -554,7 +542,7 @@ export default function PropertyMap({
     }
 
     const createIcon = useCallback((property: Property, isHovered: boolean) => {
-        const priceText = formatCompactPrice(property.price)
+        const priceText = formatFullPrice(property.price)
         const badgeClass = property.exclusive ? ' marker-wrap--exclusive' : ''
 
         return L.divIcon({
@@ -563,8 +551,8 @@ export default function PropertyMap({
                 <span class="marker-pin"><span class="marker-glyph"></span></span>
                 <span class="marker-price">${priceText}</span>
             </div>`,
-            iconSize: [68, 78],
-            iconAnchor: [34, 74],
+            iconSize: [136, 78],
+            iconAnchor: [68, 74],
         })
     }, [])
 
@@ -1124,7 +1112,7 @@ export default function PropertyMap({
                     background: #d7ad42;
                 }
                 .marker-price {
-                    min-width: 58px;
+                    min-width: 112px;
                     padding: 3px 9px;
                     border: 1px solid rgba(223,193,142,0.54);
                     border-radius: 999px;
@@ -1157,7 +1145,7 @@ export default function PropertyMap({
                     position: relative;
                     display: grid;
                     place-items: center;
-                    min-width: 92px;
+                    min-width: 128px;
                     height: 54px;
                     padding: 7px 12px;
                     border: 1px solid rgba(223,193,142,0.56);

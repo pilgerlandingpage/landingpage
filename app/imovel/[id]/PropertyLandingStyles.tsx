@@ -299,7 +299,7 @@ export default function PropertyLandingStyles() {
                     display: grid;
                     justify-items: end;
                     gap: 6px;
-                    min-width: 180px;
+                    min-width: 210px;
                 }
 
                 .plp-title-status span {
@@ -318,6 +318,8 @@ export default function PropertyLandingStyles() {
                     color: var(--plp-ink);
                     font-size: 19px;
                     font-weight: 900;
+                    text-align: right;
+                    white-space: nowrap;
                 }
 
                 .plp-detail-layout {
@@ -1436,6 +1438,7 @@ export default function PropertyLandingStyles() {
                     grid-column: 1 / -1;
                     color: var(--plp-ink);
                     font-size: 13px;
+                    white-space: nowrap;
                 }
 
                 .plp-final-cta {
@@ -1560,6 +1563,7 @@ export default function PropertyLandingStyles() {
 
                     .plp-title-status {
                         justify-items: start;
+                        min-width: 0;
                     }
 
                     .plp-detail-layout,
@@ -1760,8 +1764,9 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-sticky-cta span {
                         display: block;
                         color: var(--plp-gold-dark);
-                        font-size: 13px;
+                        font-size: clamp(12px, 3.2vw, 13px);
                         font-weight: 900;
+                        white-space: nowrap;
                     }
 
                     .plp-mobile-sticky-cta strong {

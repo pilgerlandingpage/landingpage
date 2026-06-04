@@ -49,10 +49,6 @@ function formatPrice(price?: number | null) {
 
 function compactPrice(price?: number | null) {
     if (!price) return 'Sob consulta'
-    if (price >= 1000000) {
-        const value = price / 1000000
-        return `R$ ${value.toLocaleString('pt-BR', { maximumFractionDigits: value >= 10 ? 0 : 1 })} mi`
-    }
     return formatPrice(price)
 }
 
@@ -95,8 +91,8 @@ export default function PropertyFeedMap({ property, latLng }: Props) {
             <span class="property-feed-map-pin"><span></span></span>
             <strong>${compactPrice(property.price)}</strong>
         </div>`,
-        iconSize: [78, 76],
-        iconAnchor: [39, 70],
+        iconSize: [132, 76],
+        iconAnchor: [66, 70],
         popupAnchor: [0, -62],
     }), [property.exclusive, property.price])
 

@@ -113,10 +113,6 @@ function formatPrice(price?: number | null) {
 
 function compactPrice(price?: number | null) {
     if (!price) return 'Sob consulta'
-    if (price >= 1000000) {
-        const value = price / 1000000
-        return `R$ ${value.toLocaleString('pt-BR', { maximumFractionDigits: value >= 10 ? 0 : 1 })} mi`
-    }
     return formatPrice(price)
 }
 

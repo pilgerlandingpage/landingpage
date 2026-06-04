@@ -345,7 +345,7 @@ export default function PropertyFeedStyles() {
 
             .property-profile-stats {
                 display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: .7fr 1.65fr .8fr;
                 margin-top: 11px;
             }
 
@@ -372,12 +372,12 @@ export default function PropertyFeedStyles() {
             .property-profile-stats b {
                 color: #111;
                 display: block;
-                font-size: .92rem;
+                font-size: clamp(.74rem, 2.7vw, .88rem);
                 font-weight: 850;
                 line-height: 1;
                 margin-bottom: 4px;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                overflow: visible;
+                text-overflow: clip;
                 white-space: nowrap;
             }
 
@@ -1174,6 +1174,7 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-profile-stats {
+                    grid-template-columns: .7fr 1.65fr .8fr;
                     margin-top: 11px;
                 }
 
@@ -1182,7 +1183,7 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-profile-stats b {
-                    font-size: .86rem;
+                    font-size: clamp(.72rem, 2.7vw, .86rem);
                     margin-bottom: 4px;
                 }
 
@@ -1268,6 +1269,7 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-profile-stats {
+                    grid-template-columns: .7fr 1.65fr .8fr;
                     margin-top: 8px;
                 }
 
@@ -1276,7 +1278,7 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-profile-stats b {
-                    font-size: .9rem;
+                    font-size: clamp(.7rem, 2.5vw, .84rem);
                 }
 
                 .property-feed-bio {

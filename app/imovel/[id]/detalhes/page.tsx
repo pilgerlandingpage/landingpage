@@ -142,16 +142,6 @@ function formatMoney(value?: number | null, fallback = 'Sob consulta') {
         : fallback
 }
 
-function compactMoney(value?: number | null) {
-    const price = Number(value || 0)
-    if (!price) return 'Sob consulta'
-    if (price >= 1000000) {
-        const millions = price / 1000000
-        return `R$ ${millions.toLocaleString('pt-BR', { maximumFractionDigits: millions >= 10 ? 0 : 1 })} mi`
-    }
-    return formatMoney(price)
-}
-
 function formatBrokerPhone(value?: string | null) {
     const digits = String(value || '').replace(/\D/g, '')
     const local = digits.startsWith('55') ? digits.slice(2) : digits
@@ -440,7 +430,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         </div>
                         <div className="plp-title-status">
                             <span>{statusLabel}</span>
-                            <strong>{compactMoney(property.price)}</strong>
+                            <strong>{formatMoney(property.price)}</strong>
                         </div>
                     </div>
                 </section>
@@ -652,7 +642,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                             <div className="plp-related-meta">
                                                 <span>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m²` : 'Área sob consulta'}</span>
                                                 <span>{itemSuites ? `${itemSuites} suítes` : item.property_type || 'Imóvel'}</span>
-                                                <strong>{compactMoney(item.price)}</strong>
+                                                <strong>{formatMoney(item.price)}</strong>
                                             </div>
                                         </div>
                                     </Link>
@@ -686,7 +676,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
             <div className="plp-mobile-sticky-cta">
                 <div>
-                    <span>{compactMoney(property.price)}</span>
+                    <span>{formatMoney(property.price)}</span>
                     <strong>{property.property_type || 'Imóvel de luxo'}</strong>
                 </div>
                 <WhatsAppCaptureLink
