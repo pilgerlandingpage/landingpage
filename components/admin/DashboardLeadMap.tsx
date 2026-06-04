@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { Building2, Layers, MapPin, Satellite, Sparkles } from 'lucide-react'
+import { Building2, Layers, MapPin, Satellite, SlidersHorizontal, Sparkles } from 'lucide-react'
 
 export interface DashboardMapLocation {
     id?: string
@@ -219,6 +219,7 @@ export default function DashboardLeadMap({
 }) {
     const [mapStyle, setMapStyle] = useState<LeadMapStyle>('luxury')
     const [quickFilter, setQuickFilter] = useState<LeadQuickFilter>('all')
+    const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
     const mapped = useMemo(() => locations.map((location, index) => ({
         ...location,
         position: positionFor(location, index),
@@ -237,7 +238,7 @@ export default function DashboardLeadMap({
     }, [activeId, filteredMapped])
 
     return (
-        <div className={`dashboard-lead-map-block lead-map-style-${mapStyle}`}>
+        <div className={`dashboard-lead-map-block lead-map-style-${mapStyle}${mobileControlsOpen ? ' dashboard-lead-map-mobile-filters-open' : ''}`}>
             <div className="dashboard-lead-map-topbar" aria-label="Filtros rapidos do mapa de leads">
                 {QUICK_FILTERS.map(filter => (
                     <button
@@ -265,6 +266,47 @@ export default function DashboardLeadMap({
                 ))}
             </div>
 
+            <div className="dashboard-lead-map-mobile-style-stack" role="group" aria-label="Estilo do mapa de leads">
+                <div className="dashboard-lead-map-mobile-style-grid">
+                    {MAP_STYLES.map(style => (
+                        <button
+                            key={style.value}
+                            type="button"
+                            className={mapStyle === style.value ? 'active' : ''}
+                            onClick={() => setMapStyle(style.value)}
+                        >
+                            {getStyleIcon(style.icon)}
+                            <span>{style.label}</span>
+                        </button>
+                    ))}
+                </div>
+                <button
+                    type="button"
+                    className={`dashboard-lead-map-mobile-more-filter-button${mobileControlsOpen ? ' active' : ''}`}
+                    aria-label="Mais filtro"
+                    aria-expanded={mobileControlsOpen}
+                    onClick={() => setMobileControlsOpen(isOpen => !isOpen)}
+                >
+                    <SlidersHorizontal size={14} />
+                    <span>Mais filtro</span>
+                </button>
+            </div>
+
+            <div className={`dashboard-lead-map-mobile-filter-panel${mobileControlsOpen ? ' is-open' : ''}`} role="group" aria-label="Mais filtros do mapa de leads">
+                <div className="dashboard-lead-map-mobile-filter-grid">
+                    {QUICK_FILTERS.map(filter => (
+                        <button
+                            key={filter.value}
+                            type="button"
+                            className={quickFilter === filter.value ? 'active' : ''}
+                            onClick={() => setQuickFilter(filter.value)}
+                        >
+                            {filter.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="dashboard-real-map-label">
                 <Building2 size={14} />
                 <span>{filteredMapped.length} pontos no mapa</span>
@@ -280,7 +322,7 @@ export default function DashboardLeadMap({
             <MapContainer
                 center={center}
                 zoom={points.length > 1 ? 8 : 12}
-                zoomControl
+                zoomControl={false}
                 scrollWheelZoom
                 style={{ position: 'absolute', inset: 0, background: '#111' }}
             >

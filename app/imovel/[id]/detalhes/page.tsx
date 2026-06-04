@@ -25,11 +25,9 @@ import {
     ShieldCheck,
     Star,
     UserRound,
-    Video,
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
-import { PropertyInstagramStrip, PropertyLatestYoutubeVideo } from '@/components/property/PropertySocialProof'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MapSearch from '@/components/marketplace/MapSearch'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
@@ -429,7 +427,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 <section id="visao" className="plp-detail-layout">
                     <div className="plp-main-column">
                         <PropertyPhotoShowcase images={gallery.length ? gallery : [primaryImage]} title={displayTitle} metadata={propertyTrackingMetadata} />
-                        <PropertyInstagramStrip />
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
                             <a href="#galeria" className="plp-main-photo" aria-label="Abrir galeria completa">
                                 <img src={primaryImage} alt={displayTitle} />
@@ -443,21 +440,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 ))}
                             </div>
                         </div>}
-
-                        {youtubeId && (
-                            <section className="plp-video-card">
-                                <div className="plp-section-head compact">
-                                    <span className="plp-kicker">Vídeo do imóvel</span>
-                                    <h2>Assista antes de avançar para a visita.</h2>
-                                </div>
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-                                    title={`${displayTitle} - vídeo`}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                            </section>
-                        )}
 
                         <section id="experiencia" className="plp-section plp-copy-section">
                             <span className="plp-kicker">Visão geral</span>
@@ -491,8 +473,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 <SpecCard icon={<ShieldCheck size={21} />} label="Status" value={statusLabel} />
                             </div>
                         </section>
-
-                        <PropertyLatestYoutubeVideo />
 
                         <section className="plp-section plp-classic-lists">
                             <InfoList title="Detalhes do imóvel" items={detailItems} />
@@ -577,6 +557,21 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         </div>
                     </aside>
                 </section>
+
+                {youtubeId && (
+                    <section className="plp-video-card">
+                        <div className="plp-section-head compact">
+                            <span className="plp-kicker">Vídeo do imóvel</span>
+                            <h2>Assista antes de avançar para a visita.</h2>
+                        </div>
+                        <iframe
+                            src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+                            title={`${displayTitle} - vídeo`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </section>
+                )}
 
                 <section id="localizacao" className="plp-location-band">
                     <div className="plp-location-head">

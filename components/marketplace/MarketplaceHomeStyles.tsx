@@ -627,7 +627,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             flex: 0 0 calc(50% - 5px);
             min-width: calc(50% - 5px);
             min-height: 0;
-            aspect-ratio: 1 / 0.92;
+            aspect-ratio: 1 / 0.68;
             border-radius: 12px;
             scroll-snap-align: start;
           }
@@ -1074,7 +1074,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         }
         .premium-category-card {
           position: relative;
-          min-height: 210px;
+          min-height: 160px;
           overflow: hidden;
           border-radius: 14px;
           border: 1px solid rgba(255,255,255,0.42);
@@ -1089,7 +1089,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           width: 100%;
           height: 100%;
           object-fit: cover;
-          filter: saturate(0.92) contrast(1.05);
+          filter: saturate(1.04) contrast(1.04) brightness(1.08);
           transform: scale(1.02);
           transition: transform 0.55s ease, filter 0.55s ease;
           z-index: 0;
@@ -1103,8 +1103,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(to top, rgba(9,8,7,0.94), rgba(9,8,7,0.34) 62%, rgba(9,8,7,0.18)),
-            linear-gradient(90deg, rgba(9,8,7,0.46), rgba(9,8,7,0.08));
+            linear-gradient(to top, rgba(128,88,24,0.72), rgba(190,142,48,0.34) 52%, rgba(255,235,188,0.12) 78%, rgba(255,248,226,0.04)),
+            linear-gradient(90deg, rgba(105,70,18,0.34), rgba(223,193,142,0.08));
         }
         .premium-category-icon {
           position: absolute;
@@ -1822,7 +1822,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             flex: 0 0 calc(50% - 5px) !important;
             min-width: calc(50% - 5px);
             min-height: 0;
-            aspect-ratio: 1 / 0.92;
+            aspect-ratio: 1 / 0.68;
             border-radius: 12px;
             scroll-snap-align: start;
           }
@@ -1918,6 +1918,225 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             font-size: 0.38rem !important;
             letter-spacing: 0 !important;
             white-space: nowrap;
+          }
+        }
+
+        /* ====== LOCATION IMAGE CARDS ====== */
+        .gp-authority-strip {
+          display: grid !important;
+          align-items: stretch !important;
+          gap: 14px !important;
+          grid-template-columns: minmax(0, 1fr) !important;
+          box-sizing: border-box;
+          width: 100%;
+          max-width: 1360px !important;
+          margin: 20px auto 18px !important;
+          padding: 12px 32px 0 !important;
+          border: 0 !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        .gp-authority-copy {
+          width: 100%;
+          text-align: left !important;
+        }
+        .gp-authority-copy h2 {
+          margin: 0 !important;
+          max-width: none !important;
+          color: #1f1b16 !important;
+          font-family: 'Playfair Display', Georgia, serif !important;
+          font-size: clamp(1.42rem, 2.1vw, 2.08rem) !important;
+          font-weight: 760 !important;
+          line-height: 1.02 !important;
+          letter-spacing: 0 !important;
+          text-transform: none !important;
+          white-space: nowrap;
+        }
+        .gp-authority-stats {
+          display: grid !important;
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          gap: 14px !important;
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          margin: 0 !important;
+          justify-self: stretch !important;
+        }
+        .gp-authority-stats a.gp-location-card {
+          position: relative;
+          display: block !important;
+          min-height: 160px;
+          overflow: hidden;
+          padding: 0 !important;
+          border: 1px solid rgba(255,255,255,0.42) !important;
+          border-radius: 14px !important;
+          background: #14110d !important;
+          color: #fff !important;
+          text-align: left !important;
+          isolation: isolate;
+          box-shadow: 0 18px 40px rgba(25,20,14,0.16);
+        }
+        .gp-location-image {
+          position: absolute !important;
+          inset: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover;
+          filter: saturate(1.02) contrast(1.04) brightness(1.08);
+          transform: scale(1.02);
+          transition: transform 0.55s ease, filter 0.55s ease;
+          z-index: 0;
+        }
+        .gp-authority-stats a.gp-location-card:hover .gp-location-image {
+          transform: scale(1.08);
+          filter: saturate(1.06) contrast(1.1);
+        }
+        .gp-location-shade {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            linear-gradient(to top, rgba(128,88,24,0.72), rgba(190,142,48,0.34) 50%, rgba(255,235,188,0.12) 76%, rgba(255,248,226,0.04)),
+            linear-gradient(90deg, rgba(105,70,18,0.34), rgba(223,193,142,0.08));
+        }
+        .gp-location-copy {
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 15px;
+          display: grid;
+          gap: 5px;
+          z-index: 2;
+        }
+        .gp-authority-stats a.gp-location-card .gp-location-copy strong {
+          display: block;
+          margin: 0;
+          color: #fffdf8 !important;
+          font-family: 'Playfair Display', Georgia, serif !important;
+          font-size: clamp(1.16rem, 1.7vw, 1.52rem) !important;
+          font-weight: 850 !important;
+          line-height: 1 !important;
+          letter-spacing: 0 !important;
+          text-shadow: 0 2px 14px rgba(0,0,0,0.34);
+        }
+        .gp-authority-stats a.gp-location-card .gp-location-copy small {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 5px;
+          margin: 0;
+          color: #fff4d7 !important;
+          font: 950 0.7rem/1 'Inter', sans-serif !important;
+          letter-spacing: 0.06em !important;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .gp-location-copy b {
+          color: #dfc18e;
+          font-size: 0.96rem;
+          line-height: 1;
+        }
+
+        @media (max-width: 640px) {
+          .premium-categories-showcase,
+          .gp-authority-strip {
+            position: relative;
+          }
+          .premium-categories-showcase::after,
+          .gp-authority-strip::after {
+            align-items: center;
+            background: linear-gradient(90deg, rgba(247,247,245,0), rgba(247,247,245,0.62) 78%, rgba(247,247,245,0.96));
+            color: rgba(31,27,22,0.58);
+            content: '›';
+            display: flex;
+            font: 950 1.18rem/1 'Inter', sans-serif;
+            justify-content: flex-end;
+            padding-right: 5px;
+            pointer-events: none;
+            position: absolute;
+            right: 0;
+            width: 24px;
+            z-index: 8;
+          }
+          .gp-authority-strip::after {
+            bottom: 10px;
+            top: 52px;
+          }
+          .premium-categories-showcase::after {
+            bottom: 14px;
+            top: 54px;
+          }
+          .premium-category-card .premium-category-image {
+            filter: saturate(1.02) contrast(1.02) brightness(1.08) !important;
+          }
+          .premium-category-shade {
+            background:
+              linear-gradient(to top, rgba(128,88,24,0.68), rgba(190,142,48,0.3) 54%, rgba(255,235,188,0.1) 78%, rgba(255,248,226,0.03)),
+              linear-gradient(90deg, rgba(105,70,18,0.28), rgba(223,193,142,0.06)) !important;
+          }
+          .gp-authority-strip {
+            align-items: stretch !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 12px auto 12px !important;
+            padding: 16px 12px 0 !important;
+            gap: 10px !important;
+          }
+          .gp-authority-copy {
+            text-align: left !important;
+          }
+          .gp-authority-copy h2 {
+            color: #1f1b16 !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+            font-size: clamp(0.96rem, 4.8vw, 1.23rem) !important;
+            font-weight: 760 !important;
+            line-height: 1.02 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+            white-space: nowrap;
+          }
+          .gp-authority-stats {
+            display: flex !important;
+            grid-template-columns: none !important;
+            gap: 10px !important;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x proximity;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            width: 100% !important;
+            max-width: none !important;
+          }
+          .gp-authority-stats::-webkit-scrollbar {
+            display: none;
+          }
+          .gp-authority-stats a.gp-location-card {
+            flex: 0 0 calc(50% - 5px) !important;
+            min-width: calc(50% - 5px) !important;
+            min-height: 0 !important;
+            aspect-ratio: 1 / 0.68;
+            border-radius: 12px !important;
+            scroll-snap-align: start;
+          }
+          .gp-location-copy {
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            gap: 3px;
+          }
+          .gp-authority-stats a.gp-location-card .gp-location-copy strong {
+            font-size: 0.9rem !important;
+            line-height: 1.02 !important;
+          }
+          .gp-authority-stats a.gp-location-card .gp-location-copy small {
+            gap: 4px;
+            font-size: 0.48rem !important;
+            line-height: 1.1 !important;
+            letter-spacing: 0.04em !important;
+          }
+          .gp-location-copy b {
+            font-size: 0.68rem;
           }
         }
 `

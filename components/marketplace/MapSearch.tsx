@@ -52,15 +52,32 @@ interface MapBounds {
     west: number
 }
 
+type OfficeMarker = {
+    latLng: [number, number]
+    title: string
+    subtitle?: string
+    address: string
+}
+
 interface MapSearchProps {
     properties: any[]
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     refitKey?: string
+    interactionEnabled?: boolean
+    officeMarker?: OfficeMarker | null
 }
 
-export default function MapSearch({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange, refitKey }: MapSearchProps) {
+export default function MapSearch({
+    properties,
+    hoveredPropertyId,
+    onMarkerHover,
+    onBoundsChange,
+    refitKey,
+    interactionEnabled = true,
+    officeMarker = null,
+}: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>
             <PropertyMap
@@ -69,6 +86,8 @@ export default function MapSearch({ properties, hoveredPropertyId, onMarkerHover
                 onMarkerHover={onMarkerHover}
                 onBoundsChange={onBoundsChange}
                 refitKey={refitKey}
+                interactionEnabled={interactionEnabled}
+                officeMarker={officeMarker}
             />
         </div>
     )

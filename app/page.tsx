@@ -164,7 +164,7 @@ export default async function MarketplaceHome() {
   let sectionsEnabled: string[] = ['featured', 'newest', 'cta', 'by_city']
   try { sectionsEnabled = JSON.parse(configMap.homepage_sections_enabled || '[]') } catch { }
 
-  let featuredCities: string[] = ['Balneário Camboriú', 'Itajaí', 'Itapema', 'Porto Belo']
+  let featuredCities: string[] = ['Balneário Camboriú', 'Praia Brava', 'Itapema', 'Porto Belo']
   try { featuredCities = JSON.parse(configMap.homepage_featured_cities || '[]') } catch { }
 
   let manualFeaturedIds: string[] = []
@@ -176,10 +176,30 @@ export default async function MarketplaceHome() {
   const homeMapProperties = homeProperties.filter(property => Number(property.price || property.rent || 0) >= HOME_MAP_MIN_PRICE)
   const luxuryCount = homeProperties.filter(p => Number(p.price || 0) >= 5000000).length
   const authorityCities = [
-    { label: 'Balneário', searchCity: 'Balneário Camboriú', aliases: ['balneario camboriu'] },
-    { label: 'Praia Brava', searchCity: 'Itajaí', aliases: ['itajai', 'praia brava'] },
-    { label: 'Itapema', searchCity: 'Itapema', aliases: ['itapema'] },
-    { label: 'Porto Belo', searchCity: 'Porto Belo', aliases: ['porto belo'] },
+    {
+      label: 'Balneário',
+      searchCity: 'Balneário Camboriú',
+      aliases: ['balneario camboriu'],
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-balneario-pixabay-5084547.jpg',
+    },
+    {
+      label: 'Praia Brava',
+      searchCity: 'Praia Brava',
+      aliases: ['itajai', 'praia brava'],
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-praia-brava-pexels-35912699.jpg',
+    },
+    {
+      label: 'Itapema',
+      searchCity: 'Itapema',
+      aliases: ['itapema'],
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-itapema-pixabay-4913509.jpg',
+    },
+    {
+      label: 'Porto Belo',
+      searchCity: 'Porto Belo',
+      aliases: ['porto belo'],
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-porto-belo-pexels-34054775.jpg',
+    },
   ].map(city => ({
     ...city,
     href: `/busca?city=${encodeURIComponent(city.searchCity)}`,
@@ -199,28 +219,28 @@ export default async function MarketplaceHome() {
       subtitle: 'Vista, desejo e liquidez',
       href: '/busca?tag=frente-mar',
       icon: Palmtree,
-      image: '/images/brava-concetto/15_CL_BC_PISCINA_EF_web.jpg',
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-frente-mar-pexels-27349378.jpg',
     },
     {
       title: 'Coberturas',
       subtitle: 'Privacidade no alto',
       href: '/busca?subtype=cobertura',
       icon: Building2,
-      image: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg',
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-coberturas-pexels-36362.jpg',
     },
     {
       title: 'Lançamentos',
       subtitle: `${launchCount || 'Novas'} oportunidades`,
       href: '/busca?tag=lancamento',
       icon: Sparkles,
-      image: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-lancamentos-pexels-34775531.jpg',
     },
     {
       title: 'Casas de alto padrão',
       subtitle: `${luxuryCount || 'Curadoria'} acima de R$ 5 mi`,
       href: '/busca?type=casa&priceMin=5000000',
       icon: Home,
-      image: '/images/brava-concetto/25_CL_BC_LIVING_TERRACO_COBERTURA_R01_web.jpg',
+      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-casas-alto-padrao-pexels-36394726.jpg',
     },
   ]
   const homeJsonLd = [
@@ -374,9 +394,19 @@ export default async function MarketplaceHome() {
         </div>
         <div className="gp-authority-stats">
           {authorityCities.map(city => (
-            <Link href={city.href} key={city.label}>
-              <strong>{city.count.toLocaleString('pt-BR')}</strong>
-              <span>{city.label}</span>
+            <Link href={city.href} key={city.label} className="gp-location-card">
+              <Image
+                src={city.image}
+                alt={`Imóveis em ${city.label}`}
+                className="gp-location-image"
+                fill
+                sizes="(max-width: 649px) 44vw, 25vw"
+              />
+              <span className="gp-location-shade" />
+              <span className="gp-location-copy">
+                <strong>{city.label}</strong>
+                <small><b>{city.count.toLocaleString('pt-BR')}</b> imóveis</small>
+              </span>
             </Link>
           ))}
         </div>
@@ -481,23 +511,28 @@ export default async function MarketplaceHome() {
 
 // === Helper: Build city sections ===
 function buildCitySections(properties: any[], cities: string[], limit: number) {
-  const cityMap = new Map<string, any[]>()
+  const cityMap = new Map<string, { searchCity: string; items: any[] }>()
 
   for (const p of properties) {
-    const city = p.city?.trim()
-    if (!city) continue
-    const match = cities.find(c => city.toLowerCase() === c.toLowerCase())
+    const propertyCity = p.city?.trim()
+    if (!propertyCity) continue
+    const normalizedCity = propertyCity.toLowerCase()
+    const normalizedDisplayCity = displayLocationName(propertyCity).toLowerCase()
+    const match = cities.find(c => {
+      const normalizedTarget = c.toLowerCase()
+      return normalizedCity === normalizedTarget || normalizedDisplayCity === normalizedTarget
+    })
     if (!match) continue
-    if (!cityMap.has(match)) cityMap.set(match, [])
-    cityMap.get(match)!.push(p)
+    if (!cityMap.has(match)) cityMap.set(match, { searchCity: propertyCity, items: [] })
+    cityMap.get(match)!.items.push(p)
   }
 
   return cities
-    .filter(city => cityMap.has(city) && cityMap.get(city)!.length >= 2)
+    .filter(city => cityMap.has(city) && cityMap.get(city)!.items.length >= 2)
     .map(city => ({
       city: displayLocationName(city),
-      searchCity: city,
-      items: cityMap.get(city)!.slice(0, limit),
+      searchCity: displayLocationName(cityMap.get(city)!.searchCity),
+      items: cityMap.get(city)!.items.slice(0, limit),
     }))
 }
 

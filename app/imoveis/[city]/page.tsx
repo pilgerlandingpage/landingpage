@@ -92,7 +92,7 @@ function applyGeoFilters(query: any, page: NonNullable<ReturnType<typeof getGeoP
     const city = normalizeLocationName(page.filters.city)
     if (city === 'balneario camboriu') {
       query = query.or('city.ilike.%Balneario Camboriu%,city.ilike.%Balneário Camboriú%')
-    } else if (city === 'itajai') {
+    } else if (city === 'itajai' || city === 'praia brava') {
       query = query.or('city.ilike.%Itajai%,city.ilike.%Itajaí%')
     } else {
       query = query.ilike('city', `%${page.filters.city}%`)

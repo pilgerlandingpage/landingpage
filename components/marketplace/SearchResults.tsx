@@ -1,16 +1,24 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { MapPinned, Search, SearchX, Sparkles, X } from 'lucide-react'
 import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
-import HomeSearchBar from './HomeSearchBar'
+import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
+import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { trackEvent } from '@/lib/tracking/client'
 
 const MAX_RENDERED_CARDS = 60
+const OFFICE_SEARCH_PARAM_VALUE = '1'
+const OFFICE_LOCATION_MARKER = {
+    latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
+    title: 'Imobiliária Guilherme Pilger',
+    subtitle: 'Praia Brava',
+    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Balneário Camboriú - SC, 88306-800',
+}
 
 function toCoordinate(value: number | string | null | undefined) {
     if (typeof value === 'string') return Number(value.replace(',', '.'))
@@ -50,6 +58,7 @@ function getFilterLabel(key: string, value: string) {
     const cityLabels: Record<string, string> = {
         'Balneário Camboriú': 'B. Camboriú',
         'Itajaí': 'Praia Brava',
+        Itajai: 'Praia Brava',
         Itapema: 'Itapema',
         'Porto Belo': 'Porto Belo',
     }
@@ -63,8 +72,8 @@ function getFilterLabel(key: string, value: string) {
     }
 
     const labels: Record<string, string> = {
-        q: `Busca: ${value}`,
-        city: cityLabels[value] || value,
+        q: `Busca: ${replaceItajaiWithPraiaBrava(value)}`,
+        city: cityLabels[value] || replaceItajaiWithPraiaBrava(value),
         type: value,
         price: `Valor: ${priceLabels[value] || value.replace('-', ' ate ')}`,
         offer: value === 'rent' ? 'Aluguel' : 'Venda',
@@ -76,6 +85,7 @@ function getFilterLabel(key: string, value: string) {
         areaMax: `Ate ${value}m2`,
         priceMin: `Min. R$ ${Number(value).toLocaleString('pt-BR')}`,
         priceMax: `Max. R$ ${Number(value).toLocaleString('pt-BR')}`,
+        office: 'Imobiliária Guilherme Pilger',
         subtype: value.replace(/-/g, ' '),
         tag: value.replace(/-/g, ' '),
     }
@@ -98,10 +108,18 @@ interface SearchResultsProps {
 
 export default function SearchResults({ properties, propertiesWithCoords, lpMap }: SearchResultsProps) {
     const searchParams = useSearchParams()
+    const searchKey = searchParams.toString()
+    const isOfficeSearch = searchParams.get('office') === OFFICE_SEARCH_PARAM_VALUE
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
-    const [mapBounds, setMapBounds] = useState<MapBounds | null>(null)
+    const [mapBoundsState, setMapBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
     const [showRefineSearch, setShowRefineSearch] = useState(false)
+    const [refineOfficeSelection, setRefineOfficeSelection] = useState<{ key: string; selected: boolean }>({ key: '', selected: false })
+    const refinePanelRef = useRef<HTMLDivElement>(null)
+    const isOfficeSelectedInRefine = refineOfficeSelection.key === searchKey && refineOfficeSelection.selected
+    const shouldShowOfficeOnMap = isOfficeSearch || isOfficeSelectedInRefine
+    const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : 'properties'}`
+    const mapBounds = mapBoundsState.key === mapViewKey ? mapBoundsState.bounds : null
 
     const activeFilters = useMemo(() => {
         const ignored = new Set(['page'])
@@ -113,7 +131,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                 value,
                 label: getFilterLabel(key, value),
             }))
-    }, [searchParams])
+    }, [searchKey, searchParams])
 
     const makeRemoveFilterHref = useCallback((key: string) => {
         const params = new URLSearchParams(searchParams.toString())
@@ -131,8 +149,12 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     }, [])
 
     const handleBoundsChange = useCallback((bounds: MapBounds) => {
-        setMapBounds(bounds)
-    }, [])
+        setMapBoundsState({ key: mapViewKey, bounds })
+    }, [mapViewKey])
+
+    const handleRefineSearchValuesChange = useCallback((values: HomeSearchValues) => {
+        setRefineOfficeSelection({ key: searchKey, selected: values.locationType === 'office' })
+    }, [searchKey])
 
     const visibleProperties = useMemo(() => {
         if (!mapBounds) return properties
@@ -156,6 +178,24 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
     const countLabel = mapBounds && visibleCount < totalCount ? 'imoveis nesta area' : 'imoveis encontrados'
+
+    const handleSearchButtonClick = useCallback(() => {
+        const nextOpen = !showRefineSearch
+        setShowRefineSearch(nextOpen)
+
+        if (nextOpen) {
+            window.setTimeout(() => {
+                refinePanelRef.current?.querySelector('input')?.focus()
+            }, 0)
+        }
+
+        void trackEvent('search_results_adjust_filters_clicked', {
+            active_filters: activeFilters,
+            total_count: totalCount,
+            visible_count: visibleCount,
+            opened: nextOpen,
+        })
+    }, [activeFilters, showRefineSearch, totalCount, visibleCount])
 
     return (
         <>
@@ -415,10 +455,12 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
             <SearchViews
                 map={
                     <MapSearch
-                        properties={propertiesWithCoords}
+                        properties={shouldShowOfficeOnMap ? [] : propertiesWithCoords}
                         hoveredPropertyId={hoveredPropertyId}
                         onMarkerHover={handleMarkerHover}
                         onBoundsChange={handleBoundsChange}
+                        refitKey={mapViewKey}
+                        officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
                     />
                 }
             >
@@ -458,26 +500,20 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                             <button
                                 type="button"
                                 className="result-action result-action--gold result-action-button"
-                                aria-label="Nova pesquisa"
-                                onClick={() => {
-                                    setShowRefineSearch(open => !open)
-                                    void trackEvent('search_results_adjust_filters_clicked', {
-                                        active_filters: activeFilters,
-                                        total_count: totalCount,
-                                        visible_count: visibleCount,
-                                        opened: !showRefineSearch,
-                                    })
-                                }}
+                                aria-expanded={showRefineSearch}
+                                aria-label="Buscar imóveis"
+                                onClick={handleSearchButtonClick}
                             >
                                 <Search size={15} />
-                                <span>Nova pesquisa</span>
+                                <span>Buscar</span>
                             </button>
                         </div>
                     </div>
                     {showRefineSearch && (
-                        <div className="result-refine-panel">
+                        <div className="result-refine-panel" ref={refinePanelRef}>
                             <HomeSearchBar
                                 initialSearchParams={searchParams.toString()}
+                                onValuesChange={handleRefineSearchValuesChange}
                                 variant="results"
                             />
                         </div>

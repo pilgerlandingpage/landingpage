@@ -4,11 +4,12 @@ import { Building2, ChevronDown, MapPin, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
+import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDestinationForViewport, propertyFeedPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Suggestion = {
-    type: 'city' | 'neighborhood' | 'property'
+    type: 'city' | 'neighborhood' | 'property' | 'office'
     label: string
     count?: number
     id?: string
@@ -18,7 +19,7 @@ type Suggestion = {
 
 export type HomeSearchValues = {
     locationLabel: string
-    locationType?: 'city' | 'neighborhood'
+    locationType?: 'city' | 'neighborhood' | 'office'
     locationValue?: string
     typeValue: string
     priceValue: string
@@ -80,7 +81,7 @@ const PRICE_OPTIONS = [
 
 const FALLBACK_CITIES = [
     { label: 'Balneario Camboriu / SC', value: 'Balneario Camboriu' },
-    { label: 'Itajai / SC', value: 'Itajai' },
+    { label: 'Praia Brava / SC', value: 'Praia Brava' },
     { label: 'Itapema / SC', value: 'Itapema' },
     { label: 'Porto Belo / SC', value: 'Porto Belo' },
     { label: 'Camboriu / SC', value: 'Camboriu' },
@@ -88,6 +89,15 @@ const FALLBACK_CITIES = [
     { label: 'Navegantes / SC', value: 'Navegantes' },
     { label: 'Penha / SC', value: 'Penha' },
 ]
+
+const OFFICE_SUGGESTION: Suggestion = {
+    type: 'office',
+    label: 'Imobiliária Guilherme Pilger',
+    city: 'Praia Brava',
+}
+const OFFICE_SEARCH_PARAM_VALUE = '1'
+const OFFICE_AREA_SEARCH_TERMS = normalize('Balneario Camboriu BC Praia dos Amores Ponta Brava endereco localizacao Carlos Drummond')
+const OFFICE_SEARCH_TERMS = normalize('Imobiliária Guilherme Pilger Praia Brava loja endereço localização Carlos Drummond')
 
 function normalize(value: unknown) {
     return String(value || '')
@@ -104,21 +114,53 @@ function typeLabel(value: string) {
     return PROPERTY_TYPE_OPTIONS.find(option => option.value === value)?.label || 'Todos os Imoveis'
 }
 
+function stripStateSuffix(value: string) {
+    return value
+        .replace(/\s*\/\s*SC$/i, '')
+        .replace(/\s*,\s*SC$/i, '')
+        .trim()
+}
+
+function canonicalCityValue(value: string) {
+    const clean = stripStateSuffix(value)
+    const normalized = normalize(clean)
+
+    if (normalized === 'balneario camboriu' || normalized === 'bc') return 'Balneario Camboriu'
+    if (normalized === 'itajai' || normalized === 'praia brava') return 'Praia Brava'
+    if (normalized === 'itapema') return 'Itapema'
+    if (normalized === 'porto belo') return 'Porto Belo'
+    if (normalized === 'camboriu') return 'Camboriu'
+    if (normalized === 'bombinhas') return 'Bombinhas'
+    if (normalized === 'navegantes') return 'Navegantes'
+    if (normalized === 'penha') return 'Penha'
+
+    return ''
+}
+
 function valuesFromParams(initialSearchParams?: string): HomeSearchValues {
     const params = new URLSearchParams(initialSearchParams || '')
     const subtype = params.get('subtype')
     const type = params.get('type')
     const city = params.get('city')
     const query = params.get('q')
+    const office = params.get('office') === OFFICE_SEARCH_PARAM_VALUE
     const price = params.get('price') || 'all'
     const priceValue = PRICE_OPTIONS.some(option => option.value === price) ? price : 'all'
 
     return {
-        locationLabel: city || query || '',
-        locationType: city ? 'city' : undefined,
-        locationValue: city || query || '',
+        locationLabel: office ? OFFICE_SUGGESTION.label : replaceItajaiWithPraiaBrava(city || query || ''),
+        locationType: office ? 'office' : city ? 'city' : undefined,
+        locationValue: office ? 'office-location' : city || query || '',
         typeValue: subtype ? `subtype:${subtype}` : type ? `type:${type}` : 'all',
         priceValue,
+    }
+}
+
+function displaySuggestion(suggestion: Suggestion): Suggestion {
+    return {
+        ...suggestion,
+        label: replaceItajaiWithPraiaBrava(suggestion.label),
+        city: suggestion.city ? replaceItajaiWithPraiaBrava(suggestion.city) : suggestion.city,
     }
 }
 
@@ -195,7 +237,7 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
             const response = await fetch(url)
             if (!response.ok) return
             const data = await response.json()
-            setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : [])
+            setSuggestions(Array.isArray(data.suggestions) ? data.suggestions.map(displaySuggestion) : [])
         } catch {
             setSuggestions([])
         } finally {
@@ -204,22 +246,31 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
     }, [])
 
     const displayedSuggestions = useMemo(() => {
-        if (suggestions.length > 0) return suggestions
-        if (locationLabel.trim()) return []
+        const term = normalize(locationLabel)
+        const shouldShowOfficeSuggestion = !term || OFFICE_SEARCH_TERMS.includes(term) || OFFICE_AREA_SEARCH_TERMS.includes(term) || variant === 'results'
+        const officeSuggestions = shouldShowOfficeSuggestion ? [OFFICE_SUGGESTION] : []
 
-        return FALLBACK_CITIES.map<Suggestion>(city => ({
-            type: 'city' as const,
-            label: city.label,
-            city: city.value,
-        }))
-    }, [locationLabel, suggestions])
+        if (suggestions.length > 0) return [...officeSuggestions, ...suggestions]
+        if (locationLabel.trim()) return officeSuggestions
+
+        return [
+            ...officeSuggestions,
+            ...FALLBACK_CITIES.map<Suggestion>(city => ({
+                type: 'city' as const,
+                label: city.label,
+                city: city.value,
+            })),
+        ]
+    }, [locationLabel, suggestions, variant])
 
     const groupedSuggestions = useMemo(() => {
+        const offices = displayedSuggestions.filter(suggestion => suggestion.type === 'office')
         const cities = displayedSuggestions.filter(suggestion => suggestion.type === 'city')
         const neighborhoods = displayedSuggestions.filter(suggestion => suggestion.type === 'neighborhood')
         const properties = displayedSuggestions.filter(suggestion => suggestion.type === 'property')
 
         return [
+            { key: 'office', label: 'Imobiliária', meta: 'Localização', items: offices },
             { key: 'cities', label: 'Cidades', meta: 'Regiao da Busca', items: cities },
             { key: 'neighborhoods', label: 'Bairros', meta: 'Regiao da Busca', items: neighborhoods },
             { key: 'properties', label: 'Imoveis', meta: 'Match direto', items: properties },
@@ -231,6 +282,7 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
         setLocationType(undefined)
         setLocationValue('')
         setActiveSuggestion(-1)
+        setShowSuggestions(true)
 
         if (debounceRef.current) clearTimeout(debounceRef.current)
         debounceRef.current = setTimeout(() => {
@@ -240,15 +292,28 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
 
     function focusLocation() {
         setShowSuggestions(true)
-        if (displayedSuggestions.length === 0) void fetchSuggestions(locationLabel)
+        if (displayedSuggestions.length === 0 || (locationLabel.trim() && suggestions.length === 0)) {
+            void fetchSuggestions(locationLabel)
+        }
     }
 
     function buildSearchHref() {
         const params = new URLSearchParams()
         const cleanLocation = locationLabel.trim()
 
-        if (locationType === 'city' && locationValue) params.set('city', locationValue)
-        else if (cleanLocation) params.set('q', cleanLocation)
+        if (locationType === 'office') {
+            if (variant !== 'results') return '/#mapa'
+            params.set('office', OFFICE_SEARCH_PARAM_VALUE)
+        } else {
+            const cityValue = locationType === 'city'
+                ? canonicalCityValue(locationValue || cleanLocation)
+                : locationType === 'neighborhood'
+                    ? ''
+                    : canonicalCityValue(cleanLocation)
+
+            if (cityValue) params.set('city', cityValue)
+            else if (cleanLocation) params.set('q', cleanLocation)
+        }
 
         if (typeValue !== 'all') {
             const [key, value] = typeValue.split(':')
@@ -297,10 +362,24 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
             return
         }
 
+        if (suggestion.type === 'office') {
+            setLocationLabel(suggestion.label)
+            setLocationType('office')
+            setLocationValue('office-location')
+            const destination = variant === 'results' ? `/busca?office=${OFFICE_SEARCH_PARAM_VALUE}` : '/#mapa'
+            void trackEvent('property_search_suggestion_clicked', {
+                destination,
+                suggestion_type: suggestion.type,
+                source: variant,
+            })
+            return
+        }
+
         const cityFallback = FALLBACK_CITIES.find(city => city.label === suggestion.label)
+        const nextLocationValue = cityFallback?.value || suggestion.city || stripStateSuffix(suggestion.label)
         setLocationLabel(suggestion.label)
         setLocationType(suggestion.type === 'city' ? 'city' : 'neighborhood')
-        setLocationValue(cityFallback?.value || suggestion.city || suggestion.label.replace(/\s*\/\s*SC$/i, ''))
+        setLocationValue(suggestion.type === 'city' ? canonicalCityValue(nextLocationValue) || nextLocationValue : nextLocationValue)
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -331,10 +410,12 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
     return (
         <section className={`home-search-box home-search-box-${variant}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
             <form className="home-search-panel" onSubmit={submitSearch}>
-                <div className="home-search-title">
-                    <span>Busca inteligente</span>
-                    <h2>Encontre seu Imovel!</h2>
-                </div>
+                {variant === 'home' && (
+                    <div className="home-search-title">
+                        <span>Busca inteligente</span>
+                        <h2>Encontre seu Imovel!</h2>
+                    </div>
+                )}
 
                 <div className="home-search-select-row">
                     <label>
@@ -403,11 +484,13 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                                                     onMouseEnter={() => setActiveSuggestion(suggestionIndex)}
                                                     type="button"
                                                 >
-                                                    {suggestion.type === 'property' ? <Building2 size={15} /> : <MapPin size={15} />}
+                                                    {suggestion.type === 'property' || suggestion.type === 'office' ? <Building2 size={15} /> : <MapPin size={15} />}
                                                     <span>
                                                         <strong>{suggestion.label}</strong>
-                                                        {suggestion.type === 'property' && suggestion.price ? (
-                                                            <small>{formatPrice(suggestion.price)} {suggestion.city ? `| ${suggestion.city}` : ''}</small>
+                                                        {suggestion.type === 'office' ? (
+                                                            <small>Localização da imobiliária</small>
+                                                        ) : suggestion.type === 'property' && suggestion.price ? (
+                                                            <small>{formatPrice(suggestion.price)} {suggestion.city ? `| ${replaceItajaiWithPraiaBrava(suggestion.city)}` : ''}</small>
                                                         ) : suggestion.count ? (
                                                             <small>{suggestion.count} imoveis</small>
                                                         ) : null}
@@ -452,8 +535,11 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                 }
                 .home-search-box-results .home-search-panel {
                     max-width: none;
-                    border-radius: 14px;
-                    box-shadow: 0 16px 34px rgba(24,20,15,0.12);
+                    background: transparent;
+                    border: 0;
+                    border-radius: 0;
+                    box-shadow: none;
+                    padding: 0;
                 }
                 .home-search-box-map .home-search-panel {
                     align-content: center;
@@ -653,6 +739,66 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                     padding: 13px;
                     text-align: center;
                 }
+                .home-search-box-results .home-search-select-row {
+                    gap: 6px;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .home-search-box-results label > span {
+                    clip: rect(0 0 0 0);
+                    clip-path: inset(50%);
+                    height: 1px;
+                    margin: -1px;
+                    overflow: hidden;
+                    position: absolute;
+                    white-space: nowrap;
+                    width: 1px;
+                }
+                .home-search-box-results select,
+                .home-search-box-results input {
+                    background: rgba(255,255,255,0.98);
+                    border: 1px solid rgba(200,168,98,0.72);
+                    border-radius: 6px;
+                    box-shadow: 0 8px 18px rgba(34,27,18,0.08);
+                    font-size: 0.78rem;
+                    height: 38px;
+                }
+                .home-search-box-results select {
+                    padding-left: 10px;
+                    padding-right: 30px;
+                }
+                .home-search-box-results input {
+                    padding-left: 34px;
+                }
+                .home-search-box-results :global(.home-search-chevron) {
+                    bottom: auto;
+                    left: auto;
+                    right: 9px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .home-search-box-results :global(.home-search-pin) {
+                    bottom: auto;
+                    left: 10px;
+                    right: auto;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .home-search-box-results .home-search-location-row {
+                    display: grid;
+                    gap: 6px;
+                    grid-template-columns: minmax(0, 1fr) 46px;
+                    margin-top: 7px;
+                }
+                .home-search-box-results .home-search-location-row > button {
+                    border-radius: 6px;
+                    height: 38px;
+                    width: 46px;
+                }
+                .home-search-box-results .home-search-suggestions {
+                    right: 52px;
+                    top: calc(100% + 7px);
+                    z-index: 1500;
+                }
                 @media (max-width: 700px) {
                     .home-search-box {
                         margin: 14px auto 22px;
@@ -692,6 +838,29 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                     }
                     .home-search-box-map .home-search-suggestions {
                         right: 54px;
+                    }
+                    .home-search-box-results {
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .home-search-box-results .home-search-panel {
+                        padding: 0;
+                    }
+                    .home-search-box-results .home-search-select-row {
+                        gap: 6px;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                    .home-search-box-results .home-search-location-row {
+                        gap: 6px;
+                        grid-template-columns: minmax(0, 1fr) 46px;
+                        margin-top: 7px;
+                    }
+                    .home-search-box-results .home-search-location-row > button {
+                        width: 46px;
+                    }
+                    .home-search-box-results .home-search-suggestions {
+                        max-height: min(260px, 36svh);
+                        right: 52px;
                     }
                 }
                 .home-search-box-map {
@@ -809,7 +978,6 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                         display: grid;
                         gap: 6px 6px;
                         grid-template-areas:
-                            "title title"
                             "selects location";
                         grid-template-columns: minmax(320px, 0.82fr) minmax(420px, 1.18fr);
                         max-width: 980px;

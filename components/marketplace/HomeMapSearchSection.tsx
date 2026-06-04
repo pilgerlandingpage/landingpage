@@ -113,7 +113,12 @@ const LOCATION_STEPS: StepOption[] = [
     { value: 'Porto Belo', label: 'Porto Belo', shortLabel: 'Porto Belo' },
 ]
 const DEFAULT_LOCATION = LOCATION_STEPS[0]?.value || ''
-
+const OFFICE_LOCATION_MARKER = {
+    latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
+    title: 'Imobiliária Guilherme Pilger',
+    subtitle: 'Praia Brava',
+    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Balneário Camboriú - SC, 88306-800',
+}
 const TYPE_STEPS: StepOption[] = [
     { value: 'all', label: 'Todos', shortLabel: 'Todos' },
     { value: 'Apartamento', label: 'Apartamento', shortLabel: 'Apto' },
@@ -236,11 +241,8 @@ function toCoordinate(value: number | string | null | undefined) {
     return Number(value)
 }
 
-function hasHomeMapCoordinate(property: Property) {
-    const lat = toCoordinate(property.latitude)
-    const lng = toCoordinate(property.longitude)
-
-    const insideServiceArea = (nextLat: number, nextLng: number) => (
+function isInsideServiceArea(nextLat: number, nextLng: number) {
+    return (
         Number.isFinite(nextLat) &&
         Number.isFinite(nextLng) &&
         nextLat >= -30.5 &&
@@ -248,8 +250,19 @@ function hasHomeMapCoordinate(property: Property) {
         nextLng >= -54.5 &&
         nextLng <= -47.0
     )
+}
 
-    return insideServiceArea(lat, lng) || insideServiceArea(lng, lat)
+function getHomeMapLatLng(property: Property): [number, number] | null {
+    const lat = toCoordinate(property.latitude)
+    const lng = toCoordinate(property.longitude)
+
+    if (isInsideServiceArea(lat, lng)) return [lat, lng]
+    if (isInsideServiceArea(lng, lat)) return [lng, lat]
+    return null
+}
+
+function hasHomeMapCoordinate(property: Property) {
+    return Boolean(getHomeMapLatLng(property))
 }
 
 function hasCoordinates(property: Property) {
@@ -391,9 +404,13 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [answeredQuizSteps, setAnsweredQuizSteps] = useState<MobileFilterKey[]>([])
     const [activeChips, setActiveChips] = useState<string[]>([])
     const [isGuidedSearchActive, setIsGuidedSearchActive] = useState(false)
+    const [isHomeMapInteractionUnlocked, setIsHomeMapInteractionUnlocked] = useState(false)
+    const [isOfficeLocationSelected, setIsOfficeLocationSelected] = useState(false)
+    const [showMapLockedHint, setShowMapLockedHint] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const guidedSearchStartedRef = useRef(false)
     const trackedGuideStepRef = useRef<number | null>(null)
+    const mapLockedHintTimerRef = useRef<number | null>(null)
     const applied = useMemo<AppliedFilters>(() => ({
         query: searchLocationName(query),
         type,
@@ -453,10 +470,27 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     )
 
     const syncOverlaySearchWithMap = useCallback((values: HomeSearchValues) => {
-        const nextLocation = (values.locationValue || values.locationLabel).trim()
+        const nextLocation = (values.locationType === 'office'
+            ? values.locationLabel
+            : values.locationValue || values.locationLabel
+        ).trim()
         setQuery(nextLocation)
         setType(mapOverlayTypeToMapFilter(values.typeValue))
         setPrice(values.priceValue === 'all' ? '' : values.priceValue)
+
+        if (values.locationType === 'office') {
+            setShowMapLockedHint(false)
+            setIsOfficeLocationSelected(true)
+            setIsHomeMapInteractionUnlocked(true)
+            return
+        }
+
+        setIsOfficeLocationSelected(false)
+
+        if (nextLocation && (values.locationType === 'city' || values.locationType === 'neighborhood')) {
+            setShowMapLockedHint(false)
+            setIsHomeMapInteractionUnlocked(true)
+        }
     }, [])
 
     const markQuizStepAnswered = useCallback((step: MobileFilterKey) => {
@@ -553,7 +587,13 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     ], [markQuizStepAnswered, price, purpose, query, trackFilterChanged, type])
 
     const activeMobileQuizConfig = mobileFilters[mobileQuizStep] || mobileFilters[0]
-    const isMapInteractionLocked = mobileQuizStep < mobileFilters.length - 1
+    const isMapInteractionLocked = !isHomeMapInteractionUnlocked
+    const homeMapProperties = isOfficeLocationSelected || isMapInteractionLocked ? [] : filteredProperties
+    const homeOfficeMarker = isMapInteractionLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
+    const homeMapRefitKey = isOfficeLocationSelected ? 'home-office-location-selected' : isMapInteractionLocked ? 'home-office-location' : mapRefitKey
+    const mapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
+        ? 'Imobiliária Guilherme Pilger'
+        : `${filteredMappedTotal} de ${mappedTotal} no mapa`
     const shouldRenderMap = true
     const shouldPulseNextButton = mobileQuizStep < mobileFilters.length - 1 && answeredQuizSteps.includes(activeMobileQuizConfig.id)
     const mobileQuizProgressStyle = {
@@ -571,6 +611,21 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             : `Tudo pronto. Toque em "${searchSubmitLabel}" para ver os resultados.`
         : guidedSearchMessage.choose
     const shouldGuideSubmit = isGuidedSearchActive && currentGuideStepAnswered
+
+    const showLockedMapHint = useCallback(() => {
+        if (!isMapInteractionLocked) return
+
+        setShowMapLockedHint(true)
+
+        if (mapLockedHintTimerRef.current) {
+            window.clearTimeout(mapLockedHintTimerRef.current)
+        }
+
+        mapLockedHintTimerRef.current = window.setTimeout(() => {
+            setShowMapLockedHint(false)
+            mapLockedHintTimerRef.current = null
+        }, 2600)
+    }, [isMapInteractionLocked])
 
     const markGuidedSearchSeen = useCallback(() => {
         try {
@@ -675,6 +730,9 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setActiveChips([])
         setMobileQuizStep(0)
         setAnsweredQuizSteps([])
+        setIsOfficeLocationSelected(false)
+        setShowMapLockedHint(false)
+        setIsHomeMapInteractionUnlocked(false)
     }
 
     const toggleAdvancedFilters = () => {
@@ -775,12 +833,25 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         return () => mediaQuery.removeEventListener('change', syncDesktopFilters)
     }, [])
 
+    useEffect(() => {
+        return () => {
+            if (mapLockedHintTimerRef.current) {
+                window.clearTimeout(mapLockedHintTimerRef.current)
+            }
+        }
+    }, [])
+
     return (
         <section className="home-map-search" id="mapa">
             <div className="map-search-shell" ref={wrapperRef}>
                 <div className={`map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
                     {shouldRenderMap ? (
-                        <MapSearch properties={filteredProperties} refitKey={mapRefitKey} />
+                        <MapSearch
+                            properties={homeMapProperties}
+                            refitKey={homeMapRefitKey}
+                            interactionEnabled={!isMapInteractionLocked}
+                            officeMarker={homeOfficeMarker}
+                        />
                     ) : (
                         <div className="map-preview-placeholder" aria-hidden="true">
                             <div className="map-placeholder-grid" />
@@ -789,9 +860,26 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     )}
                     <div className="map-preview-stat">
                         <Building2 size={14} />
-                        <span>{filteredMappedTotal} de {mappedTotal} no mapa</span>
+                        <span>{mapPreviewStatLabel}</span>
                     </div>
-                    {isMapInteractionLocked && <div className="map-interaction-lock" aria-hidden="true" />}
+                    {isMapInteractionLocked && (
+                        <>
+                            <div
+                                className={`map-lock-hint ${showMapLockedHint ? 'is-visible' : ''}`}
+                                role="status"
+                                aria-live="polite"
+                            >
+                                Pesquise uma cidade ou bairro para mover o mapa.
+                            </div>
+                            <button
+                                type="button"
+                                className="map-interaction-lock"
+                                aria-label="Pesquise uma cidade ou bairro para mover o mapa"
+                                onClick={showLockedMapHint}
+                                onPointerDown={showLockedMapHint}
+                            />
+                        </>
+                    )}
                     <div className="map-search-panel map-search-panel-new">
                         <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
                     </div>
@@ -1024,25 +1112,60 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .map-preview-stat {
                     align-items: center;
-                    background: rgba(23,20,16,0.82);
-                    border: 1px solid rgba(223,193,142,0.24);
+                    background: rgba(23,20,16,0.58);
+                    border: 1px solid rgba(223,193,142,0.16);
                     border-radius: 999px;
-                    bottom: 16px;
+                    bottom: 12px;
                     color: #fff8ea;
                     display: inline-flex;
-                    font: 850 0.72rem/1 'Inter', sans-serif;
-                    gap: 8px;
-                    left: 16px;
-                    letter-spacing: 0.08em;
-                    padding: 10px 13px;
+                    font: 800 0.52rem/1 'Inter', sans-serif;
+                    gap: 5px;
+                    left: 12px;
+                    letter-spacing: 0.05em;
+                    opacity: 0.74;
+                    padding: 5px 7px;
                     position: absolute;
                     text-transform: uppercase;
-                    z-index: 650;
+                    z-index: 545;
+                }
+                .map-preview-stat svg {
+                    height: 10px;
+                    width: 10px;
+                }
+                .map-lock-hint {
+                    align-items: center;
+                    background: rgba(18,18,18,0.9);
+                    border: 1px solid rgba(223,193,142,0.36);
+                    border-radius: 999px;
+                    box-shadow: 0 16px 34px rgba(0,0,0,0.26);
+                    color: #fff8ea;
+                    display: inline-flex;
+                    font: 850 0.72rem/1.18 'Inter', sans-serif;
+                    justify-content: center;
+                    left: 50%;
+                    max-width: calc(100% - 36px);
+                    opacity: 0;
+                    padding: 10px 14px;
+                    pointer-events: none;
+                    position: absolute;
+                    text-align: center;
+                    top: 64px;
+                    transform: translate(-50%, -8px);
+                    transition: opacity 0.2s ease, transform 0.2s ease;
+                    width: max-content;
+                    z-index: 755;
+                }
+                .map-lock-hint.is-visible {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
                 }
                 .map-interaction-lock {
                     background: transparent;
+                    border: 0;
                     cursor: default;
                     inset: 0;
+                    margin: 0;
+                    padding: 0;
                     position: absolute;
                     touch-action: pan-y;
                     z-index: 700;
@@ -1671,10 +1794,10 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         height: clamp(390px, 68svh, 460px);
                     }
                     .map-preview-stat {
-                        bottom: 136px;
-                        left: 12px;
-                        padding: 9px 11px;
-                        z-index: 650;
+                        bottom: 104px;
+                        left: 10px;
+                        padding: 4px 6px;
+                        z-index: 545;
                     }
                     .map-search-panel {
                         gap: 7px;

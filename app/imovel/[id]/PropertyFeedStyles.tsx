@@ -758,12 +758,12 @@ export default function PropertyFeedStyles() {
                 color: #e8dcc7;
                 cursor: pointer;
                 display: inline-flex;
-                font: 850 .68rem/1 Inter, sans-serif;
-                gap: 7px;
-                height: 34px;
+                font: 850 .64rem/1 Inter, sans-serif;
+                gap: 5px;
+                height: 32px;
                 justify-content: flex-start;
-                min-width: 88px;
-                padding: 0 10px;
+                min-width: 0;
+                padding: 0 9px;
                 transition: background .18s ease, color .18s ease, transform .18s ease;
                 white-space: nowrap;
             }
@@ -1089,6 +1089,16 @@ export default function PropertyFeedStyles() {
 
                 .property-feed-card {
                     box-shadow: none;
+                }
+
+                .property-feed-map-style-control {
+                    right: 8px;
+                    top: 8px;
+                }
+
+                .property-feed-map-style-control button {
+                    height: 31px;
+                    padding: 0 8px;
                 }
 
                 .property-feed-header {

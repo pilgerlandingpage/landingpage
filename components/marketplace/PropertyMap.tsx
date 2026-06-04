@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Bath, Bed, Building2, Layers, Maximize, Satellite, Sparkles } from 'lucide-react'
+import { Bath, Bed, Building2, Layers, Maximize, Satellite, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { isPlainLeftClick, propertyDetailsPath, propertyFeedPath, shouldOpenPropertyDetailsOnDesktop } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
@@ -50,11 +50,20 @@ interface PropertyMapProps {
     onMarkerHover?: (id: string | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     refitKey?: string
+    interactionEnabled?: boolean
+    officeMarker?: OfficeMarker | null
 }
 
 type MappedProperty = {
     property: Property
     latLng: [number, number]
+}
+
+type OfficeMarker = {
+    latLng: [number, number]
+    title: string
+    subtitle?: string
+    address: string
 }
 
 type ClusterItem =
@@ -77,6 +86,8 @@ const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'sa
     { value: 'satellite', label: 'Satélite', icon: 'satellite' },
     { value: 'classic', label: 'Claro', icon: 'layers' },
 ]
+const AGENCY_MARKER_ICON_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png'
+const AGENCY_CARD_IMAGE_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/unnamed.webp'
 
 const SERVICE_AREA_BOUNDS = {
     north: -25.0,
@@ -175,6 +186,16 @@ function getStyleIcon(icon: 'sparkles' | 'satellite' | 'layers') {
     return <Sparkles size={14} />
 }
 
+function escapeHtml(value: string) {
+    return value.replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[char] || char))
+}
+
 function MapUpdater({ points, refitKey = '' }: { points: [number, number][], refitKey?: string }) {
     const map = useMap()
     const lastPointsKey = useRef('')
@@ -242,16 +263,36 @@ function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds
             })
         }
 
-        const timer = setTimeout(emitBounds, 500)
         map.on('moveend', emitBounds)
         map.on('zoomend', emitBounds)
 
         return () => {
-            clearTimeout(timer)
             map.off('moveend', emitBounds)
             map.off('zoomend', emitBounds)
         }
     }, [map, onBoundsChange])
+
+    return null
+}
+
+function MapInteractionController({ enabled }: { enabled: boolean }) {
+    const map = useMap()
+
+    useEffect(() => {
+        const handlers = [
+            map.dragging,
+            map.touchZoom,
+            map.scrollWheelZoom,
+            map.doubleClickZoom,
+            map.boxZoom,
+            map.keyboard,
+        ].filter(Boolean)
+
+        handlers.forEach(handler => {
+            if (enabled) handler.enable()
+            else handler.disable()
+        })
+    }, [enabled, map])
 
     return null
 }
@@ -437,9 +478,38 @@ function PropertyPopup({ property }: { property: Property }) {
     )
 }
 
-export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHover, onBoundsChange, refitKey }: PropertyMapProps) {
+function AgencyLocationPopup({ officeMarker }: { officeMarker: OfficeMarker }) {
+    return (
+        <article className="agency-location-card">
+            <div className="agency-location-card-media">
+                <img
+                    src={AGENCY_CARD_IMAGE_URL}
+                    alt={officeMarker.title}
+                    className="agency-location-card-img"
+                    loading="lazy"
+                />
+            </div>
+            <div className="agency-location-card-info">
+                <div className="agency-location-card-kicker">Localiza&ccedil;&atilde;o da imobili&aacute;ria</div>
+                <h3>{officeMarker.title}</h3>
+                <p>{officeMarker.address}</p>
+            </div>
+        </article>
+    )
+}
+
+export default function PropertyMap({
+    properties,
+    hoveredPropertyId,
+    onMarkerHover,
+    onBoundsChange,
+    refitKey,
+    interactionEnabled = true,
+    officeMarker = null,
+}: PropertyMapProps) {
     const [mapStyle, setMapStyle] = useState<MapStyle>('luxury')
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
+    const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
 
     const validProperties = useMemo<MappedProperty[]>(
         () => properties
@@ -452,8 +522,16 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
         () => validProperties.filter(item => matchesQuickFilter(item, quickFilter)),
         [validProperties, quickFilter]
     )
-    const mapPoints = useMemo(() => filteredProperties.map(item => item.latLng), [filteredProperties])
+    const mapPoints = useMemo(() => {
+        const points = filteredProperties.map(item => item.latLng)
+        return officeMarker ? [officeMarker.latLng, ...points] : points
+    }, [filteredProperties, officeMarker])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
+    const mapWatermarkLabel = filteredProperties.length > 0
+        ? `${filteredProperties.length} no mapa`
+        : officeMarker
+            ? officeMarker.title
+            : '0 no mapa'
 
     const handleQuickFilterChange = (filter: QuickFilter) => {
         const option = QUICK_FILTERS.find(item => item.value === filter)
@@ -490,8 +568,28 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
         })
     }, [])
 
+    const officeIcon = useMemo(() => {
+        if (!officeMarker) return null
+
+        const subtitle = officeMarker.subtitle || 'Imobiliaria'
+
+        return L.divIcon({
+            className: 'agency-location-marker',
+            html: `<div class="agency-marker-wrap">
+                <span class="agency-marker-pin">
+                    <img src="${AGENCY_MARKER_ICON_URL}" alt="" loading="lazy" draggable="false" />
+                </span>
+                <strong>${escapeHtml(officeMarker.title)}</strong>
+                <small>${escapeHtml(subtitle)}</small>
+            </div>`,
+            iconSize: [210, 118],
+            iconAnchor: [105, 96],
+            popupAnchor: [0, -84],
+        })
+    }, [officeMarker])
+
     return (
-        <div className={`map-shell map-style-${mapStyle}`}>
+        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}`}>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
             <div className="map-topbar" role="group" aria-label="Filtros rápidos do mapa">
@@ -522,9 +620,51 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 ))}
             </div>
 
+            <div className="map-mobile-style-stack" role="group" aria-label="Estilo do mapa">
+                <div className="map-mobile-style-grid">
+                    {MAP_STYLES.map(style => (
+                        <button
+                            key={style.value}
+                            type="button"
+                            className={mapStyle === style.value ? 'active' : ''}
+                            aria-label={`Mapa ${style.label}`}
+                            onClick={() => handleMapStyleChange(style.value)}
+                        >
+                            {getStyleIcon(style.icon)}
+                            <span>{style.label}</span>
+                        </button>
+                    ))}
+                </div>
+                <button
+                    type="button"
+                    className={`map-mobile-more-filter-button${mobileControlsOpen ? ' active' : ''}`}
+                    aria-label="Mais filtro"
+                    aria-expanded={mobileControlsOpen}
+                    onClick={() => setMobileControlsOpen(isOpen => !isOpen)}
+                >
+                    <SlidersHorizontal size={14} />
+                    <span>Mais filtro</span>
+                </button>
+            </div>
+
+            <div className={`map-mobile-filter-panel${mobileControlsOpen ? ' is-open' : ''}`} role="group" aria-label="Mais filtros do mapa">
+                <div className="map-mobile-filter-grid">
+                    {QUICK_FILTERS.map(filter => (
+                        <button
+                            key={filter.value}
+                            type="button"
+                            className={quickFilter === filter.value ? 'active' : ''}
+                            onClick={() => handleQuickFilterChange(filter.value)}
+                        >
+                            {filter.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="map-watermark">
                 <Building2 size={14} />
-                <span>{filteredProperties.length} no mapa</span>
+                <span>{mapWatermarkLabel}</span>
             </div>
 
             <style>{`
@@ -639,29 +779,287 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                     padding: 0 12px;
                     border-radius: 10px;
                 }
+                .map-mobile-style-stack,
+                .map-mobile-filter-panel {
+                    display: none;
+                }
+                .map-mobile-style-stack {
+                    position: absolute;
+                    top: 12px;
+                    left: 12px;
+                    right: 12px;
+                    z-index: 900;
+                    width: auto;
+                    display: none;
+                    align-items: center;
+                    gap: 5px;
+                    justify-content: center;
+                    overflow-x: auto;
+                    padding-bottom: 3px;
+                    scrollbar-width: none;
+                }
+                .map-mobile-style-stack::-webkit-scrollbar {
+                    display: none;
+                }
+                .map-shell:has(.leaflet-popup-pane .leaflet-popup) .map-mobile-style-stack,
+                .map-shell:has(.leaflet-popup-pane .leaflet-popup) .map-mobile-filter-panel {
+                    opacity: 0;
+                    pointer-events: none;
+                    transform: translateY(-6px);
+                }
+                .map-mobile-style-grid {
+                    display: flex;
+                    gap: 5px;
+                    flex: 0 0 auto;
+                }
+                .map-mobile-style-grid button,
+                .map-mobile-more-filter-button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 4px;
+                    min-width: 0;
+                    height: 29px;
+                    padding: 0 8px;
+                    border: 1px solid rgba(184,148,95,0.22);
+                    border-radius: 8px;
+                    background: rgba(247,244,239,0.94);
+                    color: #2f2a23;
+                    cursor: pointer;
+                    font: 900 0.56rem/1 'Inter', sans-serif;
+                    white-space: nowrap;
+                    box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+                    backdrop-filter: blur(16px);
+                }
+                .map-mobile-style-grid button svg,
+                .map-mobile-more-filter-button svg {
+                    width: 13px;
+                    height: 13px;
+                }
+                .map-mobile-style-grid button.active,
+                .map-mobile-more-filter-button.active {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    border-color: rgba(255,255,255,0.28);
+                }
+                .map-mobile-more-filter-button {
+                    width: auto;
+                }
+                .map-mobile-filter-panel {
+                    position: absolute;
+                    top: 47px;
+                    right: 12px;
+                    z-index: 900;
+                    width: min(220px, calc(100% - 24px));
+                    padding: 7px;
+                    border: 1px solid rgba(184,148,95,0.26);
+                    border-radius: 12px;
+                    background: rgba(247,244,239,0.94);
+                    box-shadow: 0 18px 38px rgba(0,0,0,0.22);
+                    backdrop-filter: blur(18px);
+                }
+                .map-mobile-filter-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 5px;
+                    justify-content: center;
+                }
+                .map-mobile-filter-grid button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 0;
+                    min-height: 29px;
+                    padding: 0 6px;
+                    border: 1px solid rgba(184,148,95,0.22);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.72);
+                    color: #3c362e;
+                    cursor: pointer;
+                    font: 900 0.56rem/1 'Inter', sans-serif;
+                    text-align: center;
+                    white-space: nowrap;
+                }
+                .map-mobile-filter-grid button.active {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    border-color: rgba(255,255,255,0.28);
+                }
                 .map-watermark {
                     position: absolute;
-                    left: 14px;
-                    bottom: 14px;
+                    left: 10px;
+                    bottom: 10px;
                     z-index: 600;
                     display: inline-flex;
                     align-items: center;
-                    gap: 7px;
-                    height: 34px;
-                    padding: 0 12px;
-                    border: 1px solid rgba(232,220,199,0.14);
+                    gap: 5px;
+                    height: 24px;
+                    padding: 0 8px;
+                    border: 1px solid rgba(232,220,199,0.1);
                     border-radius: 999px;
-                    background: rgba(18,18,18,0.76);
+                    background: rgba(18,18,18,0.54);
                     color: #e8dcc7;
-                    font: 800 0.72rem/1 'Inter', sans-serif;
+                    font: 800 0.56rem/1 'Inter', sans-serif;
+                    opacity: 0.74;
                     backdrop-filter: blur(16px);
-                    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+                    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+                }
+                .map-watermark svg {
+                    height: 10px;
+                    width: 10px;
+                }
+                .map-shell .leaflet-popup-pane {
+                    z-index: 1200;
                 }
 
                 .custom-price-marker,
-                .premium-cluster-marker {
+                .premium-cluster-marker,
+                .agency-location-marker {
                     background: none !important;
                     border: none !important;
+                }
+                .agency-marker-wrap {
+                    display: grid;
+                    justify-items: center;
+                    gap: 4px;
+                    cursor: pointer;
+                    filter: drop-shadow(0 14px 20px rgba(8,14,30,0.42));
+                    animation: markerRise 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+                    transform-origin: center bottom;
+                }
+                .agency-marker-pin {
+                    position: relative;
+                    display: grid;
+                    place-items: center;
+                    width: 72px;
+                    height: 76px;
+                    overflow: hidden;
+                }
+                .agency-marker-pin img {
+                    display: block;
+                    height: auto !important;
+                    left: 50%;
+                    max-width: none;
+                    object-fit: cover;
+                    object-position: center;
+                    position: absolute;
+                    top: 50%;
+                    transform: translate(-50%, -47%);
+                    width: 164px !important;
+                    filter: saturate(1.16) contrast(1.08);
+                }
+                .agency-marker-wrap strong,
+                .agency-marker-wrap small {
+                    display: block;
+                    max-width: 176px;
+                    padding: 4px 9px;
+                    border: 1px solid rgba(223,193,142,0.44);
+                    border-radius: 999px;
+                    background: rgba(13,13,13,0.9);
+                    color: #f1d693;
+                    font-family: 'Inter', sans-serif;
+                    text-align: center;
+                    white-space: nowrap;
+                    backdrop-filter: blur(12px);
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+                }
+                .agency-marker-wrap strong {
+                    font-size: 0.66rem;
+                    font-weight: 950;
+                    line-height: 1;
+                }
+                .agency-marker-wrap small {
+                    margin-top: -2px;
+                    padding: 3px 8px;
+                    color: rgba(244,239,231,0.86);
+                    font-size: 0.56rem;
+                    font-weight: 850;
+                    line-height: 1;
+                }
+                .agency-location-popup .leaflet-popup-content-wrapper {
+                    width: 292px;
+                    border: 1px solid rgba(223,193,142,0.22);
+                    border-radius: 18px;
+                    padding: 0;
+                    overflow: hidden;
+                    background: #131313;
+                    color: #f4efe7;
+                    box-shadow: 0 18px 52px rgba(0,0,0,0.5);
+                }
+                .agency-location-popup .leaflet-popup-content {
+                    width: 292px !important;
+                    margin: 0;
+                }
+                .agency-location-popup .leaflet-popup-tip {
+                    background: #131313;
+                    border: 1px solid rgba(223,193,142,0.2);
+                }
+                .agency-location-popup .leaflet-popup-close-button {
+                    top: 8px !important;
+                    right: 8px !important;
+                    z-index: 3;
+                    width: 28px !important;
+                    height: 28px !important;
+                    border-radius: 50%;
+                    background: rgba(12,12,12,0.72) !important;
+                    color: #f4efe7 !important;
+                    font-size: 18px !important;
+                    line-height: 26px !important;
+                }
+                .agency-location-card {
+                    display: block;
+                    overflow: hidden;
+                    font-family: 'Inter', sans-serif;
+                }
+                .agency-location-card-media {
+                    position: relative;
+                    width: 100%;
+                    height: 158px;
+                    overflow: hidden;
+                    background: #221b12;
+                }
+                .agency-location-card-media::after {
+                    content: '';
+                    position: absolute;
+                    inset: auto 0 0;
+                    height: 62px;
+                    background: linear-gradient(to top, #131313, transparent);
+                }
+                .agency-location-card-img {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transform: scale(1.02);
+                }
+                .agency-location-card-info {
+                    display: grid;
+                    gap: 7px;
+                    padding: 14px 15px 15px;
+                    background:
+                        linear-gradient(180deg, rgba(223,193,142,0.08), transparent 34%),
+                        #131313;
+                }
+                .agency-location-card-kicker {
+                    color: #bda36b;
+                    font: 900 0.62rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                }
+                .agency-location-card h3 {
+                    margin: 0;
+                    color: #f0d08f;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: 0.98rem;
+                    font-weight: 800;
+                    line-height: 1.2;
+                }
+                .agency-location-card p {
+                    margin: 0;
+                    color: rgba(244,239,231,0.78);
+                    font-size: 0.72rem;
+                    font-weight: 750;
+                    line-height: 1.35;
                 }
                 .marker-wrap {
                     display: flex;
@@ -917,31 +1315,31 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 }
                 @media (max-width: 720px) {
                     .map-topbar {
-                        left: 64px;
-                        right: 14px;
-                        top: 12px;
+                        display: none;
                     }
                     .map-style-control {
-                        top: 56px;
-                        right: 12px;
-                    }
-                    .map-style-control button {
-                        min-width: 40px;
-                        width: 40px;
-                        justify-content: center;
-                        padding: 0;
-                    }
-                    .map-style-control span {
                         display: none;
+                    }
+                    .map-mobile-style-stack {
+                        display: flex;
+                    }
+                    .map-mobile-filter-panel.is-open {
+                        display: grid;
+                    }
+                    .map-mobile-filters-open .leaflet-control-zoom {
+                        display: none !important;
                     }
                     .map-watermark {
                         display: none;
                     }
                     .property-popup .leaflet-popup-content-wrapper,
-                    .property-popup .leaflet-popup-content {
+                    .property-popup .leaflet-popup-content,
+                    .agency-location-popup .leaflet-popup-content-wrapper,
+                    .agency-location-popup .leaflet-popup-content {
                         width: 260px !important;
                     }
-                    .popup-img-wrapper {
+                    .popup-img-wrapper,
+                    .agency-location-card-media {
                         height: 132px;
                     }
                 }
@@ -950,7 +1348,13 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
             <MapContainer
                 center={defaultCenter}
                 zoom={14}
-                zoomControl
+                zoomControl={false}
+                dragging={interactionEnabled}
+                touchZoom={interactionEnabled}
+                scrollWheelZoom={interactionEnabled}
+                doubleClickZoom={interactionEnabled}
+                boxZoom={interactionEnabled}
+                keyboard={interactionEnabled}
                 style={{ position: 'absolute', inset: 0, background: '#111' }}
             >
                 {mapStyle === 'luxury' && (
@@ -976,7 +1380,15 @@ export default function PropertyMap({ properties, hoveredPropertyId, onMarkerHov
                 )}
 
                 <MapUpdater points={mapPoints} refitKey={refitKey} />
+                <MapInteractionController enabled={interactionEnabled} />
                 <BoundsEmitter onBoundsChange={onBoundsChange} />
+                {officeMarker && officeIcon && (
+                    <Marker position={officeMarker.latLng} icon={officeIcon} zIndexOffset={1200}>
+                        <Popup className="agency-location-popup" minWidth={260} maxWidth={292}>
+                            <AgencyLocationPopup officeMarker={officeMarker} />
+                        </Popup>
+                    </Marker>
+                )}
                 <ClusterLayer
                     items={filteredProperties}
                     hoveredPropertyId={hoveredPropertyId}

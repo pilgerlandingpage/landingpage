@@ -254,7 +254,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
         { q: 'Qual a previsão de entrega?', a: 'Previsão para Março 2030. Consulte nossa equipe de vendas para obter o cronograma atualizado e as condições do empreendimento.' },
         { q: 'Quais as condições de pagamento?', a: 'Condição: 20% de entrada e saldo em 78x. Consulte um especialista e saiba mais sobre condições diferenciadas.' },
         { q: 'Quais as informações técnicas do projeto?', a: '• Unidades: 22 apartamentos, 1 garden e 2 coberturas duplex (Total 25 unidades)\n• Apartamentos por andar: 2\n• Pavimentos: 16\n• Tamanho do terreno: 1.600m²\n• Área da obra: 7.000m²\n• Altura: 52m' },
-        { q: 'Onde fica exatamente?', a: 'Na Avenida Carlos Drummond de Andrade, 111, no coração da Praia Brava, Itajaí, a apenas 200m da orla.' },
+        { q: 'Onde fica exatamente?', a: 'Na Avenida Carlos Drummond de Andrade, 111, no coração da Praia Brava, a apenas 200m da orla.' },
         { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos a possibilidade de personalizar o layout interno.' },
         { q: 'O empreendimento possui certificação?', a: 'Sim, o Brava Concetto possui o Selo Internacional GBC (Green Building Council).' },
         { q: 'Quem assina a arquitetura do projeto?', a: 'O projeto arquitetônico é assinado por Antonio José Gonçalves e Frederico Cartens (realiza arquitetura), com interiores por Débora Aguiar e paisagismo por Ana Holzer.' },
@@ -762,7 +762,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                         {/* Embedded map */}
                         <iframe
                             title="Localização Brava Concetto"
-                            src="https://maps.google.com/maps?q=Av.+Carlos+Drummond+de+Andrade,+111,+Praia+Brava,+Itajaí&z=15&output=embed&hl=pt-BR"
+                            src="https://maps.google.com/maps?q=Av.+Carlos+Drummond+de+Andrade,+111,+Praia+Brava,+SC&z=15&output=embed&hl=pt-BR"
                             width="100%"
                             height="100%"
                             style={{ border: 0, pointerEvents: 'none' }}
@@ -797,7 +797,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
                             <p style={{ color: C.white, fontWeight: 700, fontSize: '0.95rem', margin: 0 }}>Av. Carlos Drummond de Andrade, 111</p>
                             <p style={{ color: C.textLight, fontSize: '0.8rem', margin: 0, marginTop: 4 }}>200m da orla da Praia Brava</p>
                         </div>
-                        <a href="https://www.google.com/maps/search/Brava+Concetto+Praia+Brava+Itajai" target="_blank" rel="noopener noreferrer" style={{
+                        <a href="https://www.google.com/maps/search/Brava+Concetto+Praia+Brava+SC" target="_blank" rel="noopener noreferrer" style={{
                             flexShrink: 0, background: C.primaryMuted, padding: 12, borderRadius: '50%'
                         }}>
                             <Navigation size={20} color={C.primary} />

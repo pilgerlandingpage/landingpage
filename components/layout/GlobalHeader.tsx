@@ -119,7 +119,7 @@ const locationSections: MenuSection[] = [
     {
         links: [
             { label: 'Balneário Camboriú', href: busca({ city: 'Balneário Camboriú' }), count: '631' },
-            { label: 'Itajaí', href: busca({ city: 'Itajaí' }), count: '307' },
+            { label: 'Praia Brava', href: busca({ city: 'Praia Brava' }), count: '307' },
             { label: 'Itapema', href: busca({ city: 'Itapema' }), count: '210' },
             { label: 'Porto Belo', href: busca({ city: 'Porto Belo' }), count: '147' },
             { label: 'Camboriú', href: busca({ city: 'Camboriú' }), count: '41' },

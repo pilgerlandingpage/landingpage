@@ -44,13 +44,13 @@ export const geoPages: GeoPageConfig[] = [
     h1: 'Imoveis de luxo na Praia Brava',
     eyebrow: 'Natureza, desejo e exclusividade',
     description: 'Curadoria de casas, apartamentos e oportunidades de alto padrao na Praia Brava para quem busca praia, privacidade e vida sofisticada.',
-    searchHref: '/busca?city=Itajai',
-    filters: { city: 'Itajai' },
+    searchHref: '/busca?city=Praia%20Brava',
+    filters: { city: 'Praia Brava' },
     highlights: ['Lifestyle de praia', 'Condominios e casas premium', 'Proximidade de Balneario Camboriu'],
     faqs: [
       {
-        question: 'Praia Brava e Itajai sao a mesma busca no sistema?',
-        answer: 'No cadastro oficial muitos imoveis aparecem como Itajai, mas comercialmente a busca do alto padrao usa Praia Brava como referencia de desejo e localizacao.',
+        question: 'Como funciona a curadoria de imoveis na Praia Brava?',
+        answer: 'A busca destaca os empreendimentos e enderecos da Praia Brava com foco em alto padrao, lifestyle de praia, privacidade e localizacao desejada.',
       },
       {
         question: 'Quem compra na Praia Brava procura que tipo de experiencia?',

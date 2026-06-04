@@ -3,6 +3,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
+import { normalizeLocationName } from '@/lib/locations/display'
 
 export const metadata: Metadata = {
     title: 'Busca de imóveis de luxo',
@@ -66,6 +67,48 @@ function applyTextFilter(query: any, tag: string | undefined) {
         .join(',')
 
     return orFilter ? query.or(orFilter) : query
+}
+
+function applyLocationFilter(query: any, value: string | undefined) {
+    if (!value) return query
+
+    const term = safeSearch(value)
+    const normalized = normalizeLocationName(term)
+
+    if (normalized === 'balneario camboriu' || normalized === 'bc') {
+        return query.ilike('city', '%Balne%').ilike('city', '%Cambori%')
+    }
+
+    if (normalized === 'itajai' || normalized === 'praia brava') {
+        return query.or('city.ilike.%Itaja%,neighborhood.ilike.%Praia Brava%,title.ilike.%Praia Brava%,description.ilike.%Praia Brava%')
+    }
+
+    if (normalized === 'porto belo') return query.ilike('city', '%Porto Belo%')
+    if (normalized === 'itapema') return query.ilike('city', '%Itapema%')
+    if (normalized === 'camboriu') return query.ilike('city', '%Cambori%')
+
+    return query.or(`city.ilike.%${term}%,neighborhood.ilike.%${term}%`)
+}
+
+function applySearchTermFilter(query: any, value: string | undefined) {
+    if (!value) return query
+
+    const term = safeSearch(value)
+    const normalized = normalizeLocationName(term)
+
+    if ([
+        'balneario camboriu',
+        'bc',
+        'itajai',
+        'praia brava',
+        'porto belo',
+        'itapema',
+        'camboriu',
+    ].includes(normalized)) {
+        return applyLocationFilter(query, term)
+    }
+
+    return query.or(`title.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,neighborhood.ilike.%${term}%,description.ilike.%${term}%,property_type.ilike.%${term}%,source_reference.ilike.%${term}%`)
 }
 
 const SEARCH_PROPERTY_FIELDS = [
@@ -139,12 +182,9 @@ export default async function SearchPage({
 
     let query = supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
 
-    if (q) {
-        const term = safeSearch(q)
-        query = query.or(`title.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,neighborhood.ilike.%${term}%,description.ilike.%${term}%,property_type.ilike.%${term}%,source_reference.ilike.%${term}%`)
-    }
+    query = applySearchTermFilter(query, q)
 
-    if (city) query = query.ilike('city', city)
+    query = applyLocationFilter(query, city)
 
     if (type && type !== 'Todos os Imoveis' && type !== 'Todos os Imóveis') {
         const normalizedType = type.toLowerCase()

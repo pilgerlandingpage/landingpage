@@ -119,7 +119,7 @@ export default function PropertyFeedMap({ property, latLng }: Props) {
             <MapContainer
                 center={latLng}
                 zoom={16}
-                zoomControl
+                zoomControl={false}
                 className="property-feed-map-canvas"
             >
                 {mapStyle === 'luxury' && (
