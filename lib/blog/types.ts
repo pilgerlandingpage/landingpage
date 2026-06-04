@@ -100,30 +100,36 @@ type BlogSlugLookup = {
     from: (table: string) => any
 }
 
+const MAX_BLOG_SLUG_LENGTH = 110
+const MAX_BLOG_SLUG_ATTEMPTS = 500
+
 function slugWithSuffix(base: string, index: number) {
     const suffix = `-${index}`
-    return `${base.slice(0, Math.max(1, 110 - suffix.length)).replace(/-+$/g, '')}${suffix}`
+    return `${base.slice(0, Math.max(1, MAX_BLOG_SLUG_LENGTH - suffix.length)).replace(/-+$/g, '')}${suffix}`
 }
 
 export async function getAvailableBlogSlug(supabase: BlogSlugLookup, value: string) {
     const baseSlug = slugifyBlog(value)
+    const longestCheckedSuffix = `-${MAX_BLOG_SLUG_ATTEMPTS - 1}`
+    const lookupPrefixLength = Math.max(1, MAX_BLOG_SLUG_LENGTH - longestCheckedSuffix.length)
+    const lookupPrefix = baseSlug.slice(0, Math.min(baseSlug.length, lookupPrefixLength))
     const { data, error } = await supabase
         .from('blog_posts')
         .select('slug')
-        .like('slug', `${baseSlug}%`)
-        .limit(500)
+        .like('slug', `${lookupPrefix}%`)
+        .limit(1000)
 
     if (error) throw error
 
     const used = new Set<string>(
         (data || [])
             .map((row: any) => String(row.slug || ''))
-            .filter((slug: string) => slug === baseSlug || slug.startsWith(`${baseSlug}-`))
+            .filter(Boolean)
     )
 
     if (!used.has(baseSlug)) return baseSlug
 
-    for (let index = 2; index < 500; index += 1) {
+    for (let index = 2; index < MAX_BLOG_SLUG_ATTEMPTS; index += 1) {
         const candidate = slugWithSuffix(baseSlug, index)
         if (!used.has(candidate)) return candidate
     }
