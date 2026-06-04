@@ -16,6 +16,7 @@ function parseArgs(argv) {
         offset: 0,
         apply: false,
         skipImages: false,
+        onlyMissing: false,
         concurrency: 4,
         encoding: 'utf8',
     }
@@ -29,6 +30,7 @@ function parseArgs(argv) {
         else if (arg === '--encoding') args.encoding = argv[++i] || 'utf8'
         else if (arg === '--apply') args.apply = true
         else if (arg === '--skip-images') args.skipImages = true
+        else if (arg === '--only-missing') args.onlyMissing = true
     }
 
     args.limit = Math.max(1, Math.min(args.limit, 500))
@@ -83,6 +85,27 @@ async function getAppConfigs(supabase) {
         acc[row.key] = row.value
         return acc
     }, {})
+}
+
+async function getExistingSourceReferences(supabase) {
+    const refs = new Set()
+    const pageSize = 1000
+
+    for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+            .from('properties')
+            .select('source_reference')
+            .eq('source_system', SOURCE_SYSTEM)
+            .range(from, from + pageSize - 1)
+
+        if (error) throw error
+        for (const row of data || []) {
+            if (row?.source_reference) refs.add(String(row.source_reference))
+        }
+        if (!data || data.length < pageSize) break
+    }
+
+    return refs
 }
 
 function getR2Config(configs) {
@@ -348,10 +371,19 @@ async function main() {
     }
 
     const { properties } = await readMappedProperties(args.file, { encoding: args.encoding })
-    const selected = properties.slice(args.offset, args.offset + args.limit)
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+    let importPool = properties
+
+    if (args.onlyMissing) {
+        const existingRefs = await getExistingSourceReferences(supabase)
+        importPool = properties.filter(mapped => !existingRefs.has(String(mapped.source_reference || '')))
+        console.log(`Modo only-missing: ${importPool.length} imoveis ainda nao cadastrados de ${properties.length}.`)
+    }
+
+    const selected = importPool.slice(args.offset, args.offset + args.limit)
     const report = buildImportReport(selected)
 
-    console.log(`Selecionados: ${selected.length} imoveis de ${properties.length}`)
+    console.log(`Selecionados: ${selected.length} imoveis de ${importPool.length}`)
     console.log(`Offset: ${args.offset} | Limit: ${args.limit}`)
     console.log(`Imagens neste lote: ${report.counters.images}`)
     console.log(`Modo: ${args.apply ? 'APLICAR' : 'DRY-RUN'}${args.skipImages ? ' | sem upload de imagens' : ''}`)
@@ -362,7 +394,6 @@ async function main() {
         return
     }
 
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
     const configs = await getAppConfigs(supabase)
     const r2Config = getR2Config(configs)
     const r2 = !args.skipImages && r2Config ? createR2Client(r2Config) : null

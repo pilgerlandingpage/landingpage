@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 import PropertyFeedExperience, { type PropertyFeedItem } from '@/components/property/PropertyFeedExperience'
 import PropertyFeedStyles from './PropertyFeedStyles'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_IMAGE, webPageJsonLd } from '@/lib/seo/json-ld'
@@ -8,6 +8,7 @@ import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/location
 import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
 import { compactPropertyText } from '@/lib/properties/text'
 import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { enrichPropertiesWithResponsibleBrokers } from '@/lib/properties/responsible-broker'
 
 export const dynamic = 'force-dynamic'
 
@@ -257,10 +258,12 @@ async function getRelatedProperties(property: PropertyFeedItem) {
 
 export default async function PropertyFeedPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const property = await getProperty(id)
-    if (!property) return notFound()
+    const baseProperty = await getProperty(id)
+    if (!baseProperty) return notFound()
 
-    const related = await getRelatedProperties(property)
+    const adminSupabase = createAdminClient()
+    const [property] = await enrichPropertiesWithResponsibleBrokers(adminSupabase, [baseProperty])
+    const related = await enrichPropertiesWithResponsibleBrokers(adminSupabase, await getRelatedProperties(property))
     const title = formatTitle(property)
     const city = displayLocationName(property.city)
     const neighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)

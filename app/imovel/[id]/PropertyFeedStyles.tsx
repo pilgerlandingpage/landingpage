@@ -312,6 +312,37 @@ export default function PropertyFeedStyles() {
                 white-space: nowrap;
             }
 
+            .property-broker-chip {
+                align-items: center;
+                background: #f6f1e8;
+                border: 1px solid #e5dccf;
+                border-radius: 999px;
+                color: #2a241d;
+                display: inline-flex;
+                font-size: .74rem;
+                font-weight: 800;
+                gap: 7px;
+                line-height: 1;
+                margin-top: 8px;
+                max-width: 100%;
+                min-height: 28px;
+                padding: 4px 10px 4px 5px;
+                vertical-align: top;
+            }
+
+            .property-broker-chip img {
+                border-radius: 999px;
+                height: 20px;
+                object-fit: cover;
+                width: 20px;
+            }
+
+            .property-broker-chip span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
             .property-profile-stats {
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));

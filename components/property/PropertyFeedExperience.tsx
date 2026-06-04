@@ -57,6 +57,15 @@ export type PropertyFeedItem = {
     status?: string | null
     created_at?: string | null
     updated_at?: string | null
+    responsible_broker?: {
+        name: string
+        phone: string
+        photo_url?: string | null
+        email?: string | null
+        is_connected: boolean
+        legacy_name?: string | null
+        source?: string | null
+    }
 }
 
 type Props = {
@@ -73,7 +82,7 @@ type GalleryState = {
 const FAVORITES_KEY = 'pilger_property_favorites'
 const DISLIKES_KEY = 'pilger_property_dislikes'
 const HISTORY_KEY = 'pilger_property_history'
-const WHATSAPP_PHONE = '5548999999999'
+const WHATSAPP_PHONE = '5547992528080'
 const MAX_FEED_ITEMS = 72
 const GALLERY_SWIPE_THRESHOLD = 44
 const FEED_SWIPE_THRESHOLD = 56
@@ -238,6 +247,14 @@ function FeatureIcon({ index }: { index: number }) {
 
 function storyLabelFor(property: PropertyFeedItem) {
     return cleanText(buildPropertyFeedCopy(property).title, 24)
+}
+
+function contactPhoneFor(property: PropertyFeedItem) {
+    return property.responsible_broker?.phone || WHATSAPP_PHONE
+}
+
+function connectedBrokerFor(property: PropertyFeedItem) {
+    return property.responsible_broker?.is_connected ? property.responsible_broker : null
 }
 
 function scrollToProperty(propertyId: string) {
@@ -549,6 +566,8 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                 const bullets = featureBullets(item)
                 const detailsHref = `/imovel/${item.id}/detalhes`
                 const copy = buildPropertyFeedCopy(item)
+                const contactPhone = contactPhoneFor(item)
+                const connectedBroker = connectedBrokerFor(item)
                 const storyItems = feedItems
                     .filter(story => story.id !== item.id && !dislikedIds.includes(story.id))
                     .slice(0, 12)
@@ -587,7 +606,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                         <ThumbsDown size={19} fill={isDisliked ? 'currentColor' : 'none'} />
                                     </button>
                                     <WhatsAppCaptureLink
-                                        phone={WHATSAPP_PHONE}
+                                        phone={contactPhone}
                                         message={`Olá! Quero saber mais sobre ${copy.title}.`}
                                         slug={`imovel-${item.id}`}
                                         template="property-feed-message"
@@ -658,7 +677,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                                     </span>
                                                 </button>
                                                 <WhatsAppCaptureLink
-                                                    phone={WHATSAPP_PHONE}
+                                                    phone={contactPhone}
                                                     message={`Olá! Quero falar com um especialista sobre ${copy.title}.`}
                                                     slug={`imovel-${item.id}`}
                                                     template="property-feed-menu-specialist"
@@ -695,6 +714,12 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                 <div className="property-profile-copy">
                                     <h1>{copy.title}</h1>
                                     <p>{copy.subtitle}</p>
+                                    {connectedBroker && (
+                                        <div className="property-broker-chip">
+                                            {connectedBroker.photo_url && <img src={connectedBroker.photo_url} alt={connectedBroker.name} />}
+                                            <span>Atendimento com {connectedBroker.name}</span>
+                                        </div>
+                                    )}
                                     <div className="property-profile-stats">
                                         <span><b>{gallery.length}</b>Fotos</span>
                                         <span><b>{compactPrice(item.price)}</b>Valor</span>
@@ -720,7 +745,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
 
                             <section className="property-feed-actions" aria-label="Ações de contato">
                                 <WhatsAppCaptureLink
-                                    phone={WHATSAPP_PHONE}
+                                    phone={contactPhone}
                                     message={`Olá! Quero saber mais sobre ${copy.title}.`}
                                     slug={`imovel-${item.id}`}
                                     template="property-feed-whatsapp"

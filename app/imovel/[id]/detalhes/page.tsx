@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -38,10 +38,10 @@ import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/location
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_IMAGE, webPageJsonLd } from '@/lib/seo/json-ld'
 import { cleanPropertyText, compactPropertyText } from '@/lib/properties/text'
 import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 
 export const dynamic = 'force-dynamic'
 
-const WHATSAPP_PHONE = '5547992528080'
 const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
 
 async function getPropertyForSeo(id: string) {
@@ -152,6 +152,14 @@ function compactMoney(value?: number | null) {
     return formatMoney(price)
 }
 
+function formatBrokerPhone(value?: string | null) {
+    const digits = String(value || '').replace(/\D/g, '')
+    const local = digits.startsWith('55') ? digits.slice(2) : digits
+    if (local.length === 11) return `(${local.slice(0, 2)}) ${local.slice(2, 3)} ${local.slice(3, 7)}-${local.slice(7)}`
+    if (local.length === 10) return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`
+    return value || '(47) 9 9252-8080'
+}
+
 function getGallery(property: any) {
     return Array.from(new Set([property.featured_image, ...(property.images || [])].filter(Boolean) as string[]))
 }
@@ -238,6 +246,17 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
     if (!property) return notFound()
 
+    const responsibleBroker = await getResponsibleBrokerForProperty(createAdminClient(), property.id)
+    const contactPhone = responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
+    const brokerCardName = responsibleBroker.is_connected
+        ? responsibleBroker.name
+        : responsibleBroker.legacy_name || 'Comercial Guilherme Pilger'
+    const brokerCardImage = responsibleBroker.is_connected && responsibleBroker.photo_url
+        ? responsibleBroker.photo_url
+        : BROKER_IMAGE
+    const brokerCardPhone = responsibleBroker.is_connected
+        ? responsibleBroker.phone
+        : GLOBAL_PROPERTY_WHATSAPP_PHONE
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
@@ -268,6 +287,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         city: displayCity || null,
         neighborhood: displayNeighborhood || null,
         property_type: property.property_type || null,
+        responsible_broker: responsibleBroker.name,
+        responsible_broker_connected: responsibleBroker.is_connected,
         source: 'property_details_classic_premium',
     }
     const mapProperties = hasMapCoordinates(property)
@@ -506,7 +527,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             </div>
 
                             <WhatsAppCaptureLink
-                                phone={WHATSAPP_PHONE}
+                                phone={contactPhone}
                                 message={`Olá! Quero mais informações sobre: ${displayTitle} - Ref. ${referenceLabel(property)}`}
                                 slug="imovel"
                                 template="property-classic-sidebar"
@@ -535,7 +556,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 <span>Telefone</span>
                             </div>
                             <WhatsAppCaptureLink
-                                phone={WHATSAPP_PHONE}
+                                phone={contactPhone}
                                 message={`Olá! Tenho interesse no imóvel ${displayTitle}. Aguardo contato.`}
                                 slug="imovel"
                                 template="property-classic-form"
@@ -547,12 +568,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         </div>}
 
                         <div className="plp-side-card plp-broker-card">
-                            <img src={BROKER_IMAGE} alt="Guilherme Pilger" />
+                            <img src={brokerCardImage} alt={brokerCardName} />
                             <div>
-                                <h3>Comercial Guilherme Pilger</h3>
-                                <p><Phone size={14} /> (47) 9 9252-8080</p>
+                                <h3>{brokerCardName}</h3>
+                                <p><Phone size={14} /> {formatBrokerPhone(brokerCardPhone)}</p>
                                 <p><Mail size={14} /> contato@guilhermepilger.com</p>
-                                <small>CRECI/SC 6772-J</small>
+                                <small>{responsibleBroker.is_connected ? 'Corretor responsavel conectado' : 'Atendimento pelo WhatsApp global'}</small>
                             </div>
                         </div>
                     </aside>
@@ -648,7 +669,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         <p>{brokerInsight.text}</p>
                     </div>
                     <WhatsAppCaptureLink
-                        phone={WHATSAPP_PHONE}
+                        phone={contactPhone}
                         message={`Olá! Quero receber a apresentação completa do ${displayTitle}`}
                         slug="imovel"
                         template="property-classic-final"
@@ -669,7 +690,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     <strong>{property.property_type || 'Imóvel de luxo'}</strong>
                 </div>
                 <WhatsAppCaptureLink
-                    phone={WHATSAPP_PHONE}
+                    phone={contactPhone}
                     message={`Olá! Quero falar sobre o imóvel: ${displayTitle}`}
                     slug="imovel"
                     template="property-classic-sticky"
