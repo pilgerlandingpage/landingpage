@@ -225,6 +225,15 @@ function formatPreviewDate(value?: string | null) {
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value))
 }
 
+function markdownWithoutLeadingHeading(markdown: string) {
+    const lines = String(markdown || '').split(/\r?\n/)
+    const firstContentLine = lines.findIndex(line => line.trim())
+    if (firstContentLine >= 0 && /^#\s+/.test(lines[firstContentLine].trim())) {
+        lines.splice(firstContentLine, 1)
+    }
+    return lines.join('\n')
+}
+
 export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode }) {
     const config = CONTENT_CONFIG[mode]
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -357,7 +366,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     const isDraft = currentStatus === 'draft'
     const isUnderReview = currentStatus === 'under_review'
     const isArchived = currentStatus === 'archived'
-    const previewHtml = useMemo(() => markdownToHtml(form.content_markdown || ''), [form.content_markdown])
+    const previewHtml = useMemo(() => markdownToHtml(markdownWithoutLeadingHeading(form.content_markdown || '')), [form.content_markdown])
     const previewCover = form.cover_image_url || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/fundo%20imobiliaria.jpeg'
     const publicPath = mode === 'news' ? `/noticias/${form.slug || ''}` : `/blog/${form.slug || ''}`
     const actionButtons = (
@@ -635,25 +644,25 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                 .admin-blog-two { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .admin-blog-content { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; min-height: 430px; }
                 .admin-blog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-                .admin-blog-preview { background: #f7f3eb; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 0; overflow: hidden; }
-                .admin-blog-preview-hero { align-items: stretch; background: linear-gradient(135deg, #17120d, #2b241c); color: #fff; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr) minmax(280px, .55fr); padding: 28px; }
-                .admin-blog-preview-hero span { color: #c9a96e; display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; margin-bottom: 10px; text-transform: uppercase; }
-                .admin-blog-preview-hero h2 { font-family: var(--font-serif); font-size: clamp(1.55rem, 2.8vw, 2.5rem); line-height: 1.02; margin: 0; }
-                .admin-blog-preview-hero p { color: rgba(255,255,255,.74); line-height: 1.58; margin: 12px 0 0; }
-                .admin-blog-preview-hero small { align-items: center; color: rgba(255,255,255,.68); display: flex; font-size: .76rem; font-weight: 800; margin-top: 16px; }
-                .admin-blog-preview-cover { background-position: center; background-size: cover; border-radius: 14px; min-height: 260px; }
-                .admin-blog-preview-content { background: #fff; padding: clamp(22px, 4vw, 44px); }
-                .admin-blog-preview-content h1, .admin-blog-preview-content h2, .admin-blog-preview-content h3 { color: #171512; font-family: var(--font-serif); line-height: 1.08; }
-                .admin-blog-preview-content h1 { font-size: 2rem; }
-                .admin-blog-preview-content h2 { font-size: 1.48rem; margin-top: 30px; }
-                .admin-blog-preview-content h3 { font-size: 1.14rem; margin-top: 22px; }
-                .admin-blog-preview-content p, .admin-blog-preview-content li { color: #50483e; font-size: 1rem; line-height: 1.78; }
-                .admin-blog-preview-content p { margin: 0 0 14px; }
+                .admin-blog-preview { background: #fff; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 0; overflow: hidden; }
+                .admin-blog-preview-hero { align-items: center; background: linear-gradient(180deg, #fff, #faf7f0); border-bottom: 1px solid rgba(201,169,110,.16); display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) 220px; padding: 22px; }
+                .admin-blog-preview-hero span { color: var(--gold-dark); display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; margin-bottom: 8px; text-transform: uppercase; }
+                .admin-blog-preview-hero h2 { color: #171512; font-family: var(--font-serif); font-size: clamp(1.32rem, 2.1vw, 2rem); line-height: 1.06; margin: 0; max-width: 860px; }
+                .admin-blog-preview-hero p { color: var(--text-secondary); font-size: .92rem; line-height: 1.56; margin: 10px 0 0; max-width: 860px; }
+                .admin-blog-preview-hero small { align-items: center; color: var(--text-muted); display: flex; font-size: .74rem; font-weight: 850; margin-top: 12px; }
+                .admin-blog-preview-cover { background-position: center; background-size: cover; border: 1px solid rgba(201,169,110,.18); border-radius: 12px; min-height: 132px; }
+                .admin-blog-preview-content { background: #fff; margin: 0 auto; max-width: 860px; padding: 24px 26px 30px; width: 100%; }
+                .admin-blog-preview-content h1, .admin-blog-preview-content h2, .admin-blog-preview-content h3 { color: #171512; font-family: var(--font-serif); line-height: 1.12; }
+                .admin-blog-preview-content h1 { font-size: 1.7rem; }
+                .admin-blog-preview-content h2 { font-size: 1.32rem; margin: 26px 0 10px; }
+                .admin-blog-preview-content h3 { font-size: 1.08rem; margin: 20px 0 8px; }
+                .admin-blog-preview-content p, .admin-blog-preview-content li { color: #50483e; font-size: .94rem; line-height: 1.72; }
+                .admin-blog-preview-content p { margin: 0 0 12px; }
                 .admin-blog-preview-content a { color: #9b7635; font-weight: 900; }
                 .admin-blog-preview-content ul { margin: 0 0 16px; padding-left: 22px; }
-                .admin-blog-preview-content .blog-inline-image { margin: 30px 0 12px; }
-                .admin-blog-preview-content .blog-inline-image img { aspect-ratio: 16 / 9; border-radius: 14px; display: block; object-fit: cover; width: 100%; }
-                .admin-blog-preview-notes { background: #fff; border-top: 1px solid rgba(201,169,110,.18); display: grid; gap: 10px; padding: 18px 22px; }
+                .admin-blog-preview-content .blog-inline-image { margin: 22px 0 10px; }
+                .admin-blog-preview-content .blog-inline-image img { aspect-ratio: 16 / 9; border: 1px solid rgba(201,169,110,.14); border-radius: 12px; display: block; max-height: 360px; object-fit: cover; width: 100%; }
+                .admin-blog-preview-notes { background: #faf7f0; border-top: 1px solid rgba(201,169,110,.18); display: grid; gap: 10px; padding: 16px 22px; }
                 .admin-blog-preview-notes strong { color: var(--gold-dark); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
                 .admin-blog-preview-notes ul { color: var(--text-secondary); display: grid; gap: 7px; font-size: .84rem; line-height: 1.5; margin: 0; padding-left: 18px; }
                 .danger { color: #dc2626 !important; }
@@ -663,7 +672,9 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                     .admin-blog-view-toggle { justify-content: center; width: 100%; }
                     .admin-blog-view-toggle button { justify-content: center; width: 100%; }
                     .admin-blog-kpis, .admin-blog-shell, .admin-blog-two, .admin-blog-preview-hero { grid-template-columns: 1fr; }
-                    .admin-blog-preview-cover { min-height: 210px; }
+                    .admin-blog-preview-cover { min-height: 190px; }
+                    .admin-blog-preview-content { padding: 20px 16px 24px; }
+                    .admin-blog-preview-content .blog-inline-image img { max-height: 260px; }
                 }
             `}</style>
         </div>
