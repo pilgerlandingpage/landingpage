@@ -309,6 +309,85 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
     return { sent: true, reason: null }
 }
 
+async function generateFirstAccessLinkForUser(admin: any, request: NextRequest, params: { email: string, name: string, phone: string }) {
+    const firstAccessRedirectUrl = getFirstAccessRedirectUrl(request)
+    let firstAccessLinkType: 'invite' | 'recovery' = 'invite'
+
+    const { data: inviteLinkData, error: inviteLinkError } = await admin.auth.admin.generateLink({
+        type: 'invite',
+        email: params.email,
+        options: {
+            redirectTo: firstAccessRedirectUrl,
+            data: {
+                full_name: params.name || '',
+                phone: params.phone || null,
+            },
+        },
+    })
+
+    let linkData = inviteLinkData
+
+    if (inviteLinkError) {
+        console.warn('[users] manual first access invite failed, falling back to recovery:', inviteLinkError)
+        firstAccessLinkType = 'recovery'
+        const resetRedirectUrl = getPasswordResetRedirectUrl(request)
+        const { data: recoveryLinkData, error: recoveryLinkError } = await admin.auth.admin.generateLink({
+            type: 'recovery',
+            email: params.email,
+            options: {
+                redirectTo: resetRedirectUrl,
+            },
+        })
+
+        if (recoveryLinkError) throw recoveryLinkError
+        linkData = recoveryLinkData
+    }
+
+    const rawFirstAccessLink = linkData?.properties?.action_link
+    const firstAccessLink = rawFirstAccessLink
+        ? buildAuthActionBridgeLink(
+            rawFirstAccessLink,
+            firstAccessLinkType === 'invite' ? 'first_access' : 'password_reset',
+            request.nextUrl.origin
+        )
+        : null
+
+    if (!firstAccessLink) throw new Error('Nao foi possivel gerar link de acesso.')
+
+    return { firstAccessLink, firstAccessLinkType }
+}
+
+async function sendManualAccessLinkTextWhatsAppMessage(admin: any, params: {
+    phone: string
+    name: string
+    accessLink: string
+    linkType: 'invite' | 'recovery'
+}) {
+    const { phone, name, accessLink, linkType } = params
+    if (!phone || !accessLink) return { sent: false, reason: 'missing_phone_or_link' }
+
+    const instanceToken = await resolveGlobalAgentInstanceToken(admin)
+    if (!instanceToken) return { sent: false, reason: 'global_instance_not_available' }
+
+    const safeName = String(name || '').trim() || 'tudo bem'
+    const actionLabel = linkType === 'invite'
+        ? 'definir sua senha de primeiro acesso'
+        : 'redefinir sua senha'
+
+    await sendWhatsAppMessage({
+        phone,
+        instanceToken,
+        message: `Ola ${safeName}!
+
+Conforme solicitado pelo administrador, segue o link direto para ${actionLabel}:
+${accessLink}
+
+Se voce nao solicitou este acesso, ignore esta mensagem.`,
+    })
+
+    return { sent: true, reason: null }
+}
+
 async function syncAlertContacts(admin: any, userId: string, name: string, phone: string | null) {
     if (!phone) return
 
@@ -693,7 +772,7 @@ export async function PATCH(request: NextRequest) {
         if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { action, id } = await request.json()
-        if (!['send_password_reset', 'resend_first_access'].includes(action)) {
+        if (!['send_password_reset', 'resend_first_access', 'send_access_link_text'].includes(action)) {
             return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })
         }
 
@@ -725,6 +804,61 @@ export async function PATCH(request: NextRequest) {
         }
         if (!normalizedPhone) {
             return NextResponse.json({ error: 'Usuario sem telefone cadastrado para envio no WhatsApp.' }, { status: 400 })
+        }
+
+        if (action === 'send_access_link_text') {
+            const { firstAccessLink, firstAccessLinkType } = await generateFirstAccessLinkForUser(admin, request, {
+                email: normalizedEmail,
+                name: targetUser.name,
+                phone: normalizedPhone,
+            })
+
+            let whatsappLinkSent = false
+            let linkWarning: string | null = null
+            try {
+                const sendResult = await sendManualAccessLinkTextWhatsAppMessage(admin, {
+                    phone: normalizedPhone,
+                    name: targetUser.name,
+                    accessLink: firstAccessLink,
+                    linkType: firstAccessLinkType,
+                })
+                whatsappLinkSent = Boolean(sendResult.sent)
+
+                if (!sendResult.sent && sendResult.reason === 'global_instance_not_available') {
+                    linkWarning = 'Link gerado, mas a instancia global do agente nao esta conectada para envio no WhatsApp.'
+                }
+                if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
+                    linkWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
+                }
+            } catch (sendError) {
+                console.error('[users][PATCH] manual text access link failed:', sendError)
+                linkWarning = 'Link gerado, mas houve falha ao enviar o link direto no WhatsApp.'
+            }
+
+            await logUserAccessEvent(admin, request, {
+                event_type: firstAccessLinkType === 'invite' ? 'first_access_link_sent' : 'password_reset_link_sent',
+                target_admin_user_id: targetUser.id,
+                target_auth_user_id: targetUser.auth_user_id,
+                target_email: normalizedEmail,
+                actor_admin_user_id: access.id,
+                metadata: {
+                    manual: true,
+                    delivery_mode: 'manual_text_link',
+                    link_type: firstAccessLinkType,
+                    whatsapp_sent: whatsappLinkSent,
+                    has_warning: Boolean(linkWarning),
+                },
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: whatsappLinkSent
+                    ? 'Link direto enviado no WhatsApp com sucesso.'
+                    : 'Link direto gerado com sucesso.',
+                whatsapp_link_sent: whatsappLinkSent,
+                link_warning: linkWarning,
+                ...(whatsappLinkSent ? {} : { access_link: firstAccessLink }),
+            })
         }
 
         if (action === 'resend_first_access') {

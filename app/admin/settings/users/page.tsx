@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
-    Smartphone, Wifi, WifiOff, RefreshCw, Send
+    Smartphone, Wifi, WifiOff, RefreshCw, Send, Link2
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -38,6 +38,7 @@ export default function UsersPage() {
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
     const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
     const [sendingFirstAccessUserId, setSendingFirstAccessUserId] = useState<string | null>(null)
+    const [sendingManualLinkUserId, setSendingManualLinkUserId] = useState<string | null>(null)
     const formCardRef = useRef<HTMLDivElement | null>(null)
 
     const [form, setForm] = useState({
@@ -310,6 +311,47 @@ export default function UsersPage() {
         }
     }
 
+    const sendManualAccessLink = async (u: AdminUser) => {
+        if (!canCreateUsers) {
+            showToast('Somente Master e Diretoria podem enviar link direto.', 'error')
+            return
+        }
+
+        if (!u.phone) {
+            showToast('Este usuario nao possui telefone para envio no WhatsApp.', 'error')
+            return
+        }
+
+        const confirmed = window.confirm(
+            `Enviar link direto para "${u.name}" no WhatsApp?\n\nUse esta opcao apenas quando o botao nao aparecer no celular do usuario.`
+        )
+        if (!confirmed) return
+
+        setSendingManualLinkUserId(u.id)
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'send_access_link_text', id: u.id })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao enviar link direto')
+
+            if (data?.link_warning) {
+                const warningMessage = data?.access_link
+                    ? `${data.message} Aviso: ${data.link_warning} Link manual: ${data.access_link}`
+                    : `${data.message} Aviso: ${data.link_warning}`
+                showToast(warningMessage, 'error')
+            } else {
+                showToast(data?.message || 'Link direto enviado com sucesso.', 'success')
+            }
+        } catch (err: any) {
+            showToast(err.message, 'error')
+        } finally {
+            setSendingManualLinkUserId(null)
+        }
+    }
+
     const filtered = users.filter(u =>
         u.name.toLowerCase().includes(search.toLowerCase()) ||
         u.email.toLowerCase().includes(search.toLowerCase())
@@ -552,7 +594,7 @@ export default function UsersPage() {
                                         </div>
                                     )}
                                 </div>
-                                <div style={{ display: 'flex', gap: 6 }}>
+                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                     <button onClick={() => startEdit(u)} title="Editar"
                                         style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}>
                                         <Edit3 size={14} />
@@ -594,6 +636,28 @@ export default function UsersPage() {
                                                 opacity: sendingResetUserId === u.id ? 0.7 : 1
                                             }}>
                                             {sendingResetUserId === u.id ? <Loader2 size={14} className="spin" /> : <KeyRound size={14} />}
+                                        </button>
+                                    )}
+                                    {canCreateUsers && (canGrantMaster || !u.is_master) && (
+                                        <button
+                                            onClick={() => sendManualAccessLink(u)}
+                                            title="Enviar link direto"
+                                            disabled={sendingManualLinkUserId === u.id}
+                                            style={{
+                                                padding: '8px 10px', borderRadius: 6, cursor: 'pointer',
+                                                border: '1px solid rgba(245,158,11,0.4)',
+                                                background: 'rgba(245,158,11,0.12)',
+                                                color: '#b45309',
+                                                opacity: sendingManualLinkUserId === u.id ? 0.7 : 1,
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 6,
+                                                whiteSpace: 'nowrap',
+                                                fontSize: '0.78rem',
+                                                fontWeight: 700
+                                            }}>
+                                            {sendingManualLinkUserId === u.id ? <Loader2 size={14} className="spin" /> : <Link2 size={14} />}
+                                            Enviar link
                                         </button>
                                     )}
                                     {canGrantMaster && !u.is_master && (
