@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Archive, Bot, CheckCircle2, Edit3, Eye, FileText, Loader2, Plus, RotateCcw, Save, Send, Sparkles, Trash2 } from 'lucide-react'
+import { Archive, Bot, CalendarDays, CheckCircle2, Edit3, Eye, FileText, Loader2, MessageCircle, Plus, RotateCcw, Save, Send, Sparkles, Trash2 } from 'lucide-react'
+import { BLOG_AUTHOR_IMAGE_URL, BLOG_AUTHOR_NAME } from '@/lib/blog/author'
 import { markdownToHtml } from '@/lib/blog/markdown'
 
 type BlogPost = {
@@ -22,6 +23,8 @@ type BlogPost = {
     secondary_keywords?: string[]
     local_entities?: string[]
     approval_notes?: string[]
+    created_at?: string | null
+    updated_at?: string | null
     published_at?: string | null
     generated_by?: string | null
 }
@@ -29,11 +32,6 @@ type BlogPost = {
 type BlogStatusFilter = 'all' | 'under_review' | 'published' | 'draft' | 'archived'
 type AdminContentMode = 'blog' | 'news'
 type EditorialViewMode = 'preview' | 'edit'
-type EditorialPreviewImage = {
-    url: string
-    alt: string
-    credit?: string
-}
 
 const DEFAULT_AUTHOR_NAME = 'Guilherme Pilger'
 
@@ -230,63 +228,6 @@ function formatPreviewDate(value?: string | null) {
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value))
 }
 
-function markdownWithoutLeadingHeading(markdown: string) {
-    const lines = String(markdown || '').split(/\r?\n/)
-    const firstContentLine = lines.findIndex(line => line.trim())
-    if (firstContentLine >= 0 && /^#\s+/.test(lines[firstContentLine].trim())) {
-        lines.splice(firstContentLine, 1)
-    }
-    return lines.join('\n')
-}
-
-function cleanPreviewImageCredit(value: string) {
-    return value
-        .replace(/^Fonte da imagem:\s*/i, '')
-        .replace(/\s*[-\u2013\u2014]\s*\[ver origem\]\((https?:\/\/[^\s)]+)\)\.?/gi, '.')
-        .replace(/\s*[-\u2013\u2014]\s*ver origem\.?/gi, '.')
-        .replace(/\s+/g, ' ')
-        .trim()
-}
-
-function buildApprovalPreview(markdown: string) {
-    const lines = markdownWithoutLeadingHeading(markdown).split(/\r?\n/)
-    const bodyLines: string[] = []
-    const images: EditorialPreviewImage[] = []
-
-    for (const line of lines) {
-        const trimmed = line.trim()
-        const image = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)$/)
-
-        if (image) {
-            images.push({ alt: image[1] || 'Imagem editorial', url: image[2] })
-            continue
-        }
-
-        if (/^Fonte da imagem:/i.test(trimmed)) {
-            const lastImage = images[images.length - 1]
-            if (lastImage) lastImage.credit = cleanPreviewImageCredit(trimmed)
-            continue
-        }
-
-        bodyLines.push(line)
-    }
-
-    const bodyMarkdown = bodyLines.join('\n').trim()
-    const plainText = bodyMarkdown
-        .replace(/https?:\/\/\S+/g, ' ')
-        .replace(/[#*_>`[\]()]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-    const wordCount = plainText ? plainText.split(' ').filter(word => word.length > 1).length : 0
-
-    return {
-        html: markdownToHtml(bodyMarkdown),
-        images,
-        readingMinutes: Math.max(1, Math.ceil(wordCount / 180)),
-        wordCount,
-    }
-}
-
 export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode }) {
     const config = CONTENT_CONFIG[mode]
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -419,16 +360,10 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     const isDraft = currentStatus === 'draft'
     const isUnderReview = currentStatus === 'under_review'
     const isArchived = currentStatus === 'archived'
-    const approvalPreview = useMemo(() => buildApprovalPreview(form.content_markdown || ''), [form.content_markdown])
+    const previewHtml = useMemo(() => markdownToHtml(form.content_markdown || ''), [form.content_markdown])
     const previewCover = form.cover_image_url || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/fundo%20imobiliaria.jpeg'
-    const previewImages = useMemo(() => {
-        const uniqueImages = new Map<string, EditorialPreviewImage>()
-        if (previewCover) uniqueImages.set(previewCover, { alt: 'Imagem de capa', url: previewCover })
-        approvalPreview.images.forEach(image => {
-            if (!uniqueImages.has(image.url)) uniqueImages.set(image.url, image)
-        })
-        return Array.from(uniqueImages.values())
-    }, [approvalPreview.images, previewCover])
+    const previewAuthor = form.author_name || BLOG_AUTHOR_NAME
+    const previewDate = formatPreviewDate(form.published_at || form.created_at || form.updated_at)
     const publicPath = mode === 'news' ? `/noticias/${form.slug || ''}` : `/blog/${form.slug || ''}`
     const actionButtons = (
         <div className="admin-blog-actions">
@@ -583,46 +518,51 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
 
                     {viewMode === 'preview' ? (
                         <section className="admin-blog-preview">
-                            <article className="admin-blog-preview-article">
-                                <header className="admin-blog-preview-hero">
-                                    <span>{form.category || config.defaultCategory}</span>
-                                    <h2>{form.title || `Titulo do ${config.itemSingular.toLowerCase()}`}</h2>
-                                    {form.excerpt ? <p>{form.excerpt}</p> : null}
-                                    <div className="admin-blog-preview-meta">
-                                        <small>{statusLabels[currentStatus] || currentStatus}</small>
-                                        <small>{formatPreviewDate(form.published_at)}</small>
-                                        <small>{approvalPreview.wordCount} palavras</small>
-                                        <small>{approvalPreview.readingMinutes} min leitura</small>
+                            <main className="blog-post-page">
+                                <section className="blog-post-hero">
+                                    <div>
+                                        <span>{form.category || config.defaultCategory}</span>
+                                        <h1>{form.title || `Titulo do ${config.itemSingular.toLowerCase()}`}</h1>
+                                        {form.excerpt ? <p>{form.excerpt}</p> : null}
+                                        <div className="blog-post-meta">
+                                            <CalendarDays size={15} />
+                                            {previewDate}
+                                            {previewAuthor ? ` - ${previewAuthor}` : ''}
+                                        </div>
                                     </div>
-                                </header>
-                                <div className="admin-blog-preview-content" dangerouslySetInnerHTML={{ __html: approvalPreview.html || '<p>Sem conteudo para visualizar.</p>' }} />
-                            </article>
+                                    <div className="blog-post-cover" style={{ backgroundImage: `url(${previewCover})` }} />
+                                </section>
 
-                            <aside className="admin-blog-preview-panel">
-                                <div className="admin-blog-preview-cover" style={{ backgroundImage: `url(${previewCover})` }} />
+                                <section className="blog-post-shell">
+                                    <article className="blog-post-content" dangerouslySetInnerHTML={{ __html: previewHtml || '<p>Sem conteudo para visualizar.</p>' }} />
 
-                                <div className="admin-blog-preview-box">
-                                    <strong>Imagens da materia</strong>
-                                    <p>{previewImages.length} imagem{previewImages.length === 1 ? '' : 's'} separada{previewImages.length === 1 ? '' : 's'} do texto para facilitar a leitura.</p>
-                                    <div className="admin-blog-preview-media">
-                                        {previewImages.slice(0, 6).map((image, index) => (
-                                            <figure key={`${image.url}-${index}`}>
-                                                <span style={{ backgroundImage: `url(${image.url})` }} />
-                                                <figcaption>{image.credit || image.alt || `Imagem ${index + 1}`}</figcaption>
-                                            </figure>
-                                        ))}
-                                    </div>
+                                    <aside className="blog-post-aside">
+                                        <div className="blog-author-card">
+                                            <img src={BLOG_AUTHOR_IMAGE_URL} alt={BLOG_AUTHOR_NAME} />
+                                            <span>Autor do blog</span>
+                                            <h2>{BLOG_AUTHOR_NAME}</h2>
+                                            <p>Curadoria imobiliaria, leitura de mercado e oportunidades premium no litoral catarinense.</p>
+                                        </div>
+
+                                        <div>
+                                            <h2>Fale com um especialista</h2>
+                                            <p>Transforme leitura de mercado em uma curadoria real de oportunidades.</p>
+                                            <span className="blog-post-cta">
+                                                <MessageCircle size={17} />
+                                                Falar agora
+                                            </span>
+                                        </div>
+                                    </aside>
+                                </section>
+                            </main>
+                            {form.approval_notes?.length ? (
+                                <div className="admin-blog-preview-notes">
+                                    <strong>Notas para aprovacao</strong>
+                                    <ul>
+                                        {form.approval_notes.map(note => <li key={note}>{note}</li>)}
+                                    </ul>
                                 </div>
-
-                                {form.approval_notes?.length ? (
-                                    <div className="admin-blog-preview-box admin-blog-preview-notes">
-                                        <strong>Notas para aprovacao</strong>
-                                        <ul>
-                                            {form.approval_notes.map(note => <li key={note}>{note}</li>)}
-                                        </ul>
-                                    </div>
-                                ) : null}
-                            </aside>
+                            ) : null}
                         </section>
                     ) : (
                         <>
@@ -732,54 +672,52 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                 .admin-blog-approval-bar { background: #fffaf2; border: 1px solid rgba(201,169,110,.2); border-radius: 12px; padding: 10px; position: sticky; top: 10px; z-index: 3; }
                 .admin-blog-approval-bar .admin-blog-actions { gap: 8px; }
                 .admin-blog-approval-bar :global(.btn) { min-height: 34px; padding: 8px 10px; }
-                .admin-blog-preview { align-items: start; background: #faf8f3; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 300px; overflow: visible; padding: 14px; }
-                .admin-blog-preview-article { background: #fff; border: 1px solid rgba(201,169,110,.16); border-radius: 12px; min-width: 0; overflow: hidden; }
-                .admin-blog-preview-hero { background: linear-gradient(180deg, #fff, #fbf7ef); border-bottom: 1px solid rgba(201,169,110,.14); display: grid; gap: 9px; padding: 22px 24px 18px; }
-                .admin-blog-preview-hero span { color: var(--gold-dark); display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; text-transform: uppercase; }
-                .admin-blog-preview-hero h2 { color: #171512; font-family: var(--font-serif); font-size: clamp(1.38rem, 2vw, 2rem); line-height: 1.08; margin: 0; max-width: 760px; }
-                .admin-blog-preview-hero p { color: var(--text-secondary); font-size: .95rem; line-height: 1.58; margin: 0; max-width: 760px; }
-                .admin-blog-preview-meta { align-items: center; display: flex; flex-wrap: wrap; gap: 7px; padding-top: 4px; }
-                .admin-blog-preview-meta small { background: #f5efe4; border: 1px solid rgba(201,169,110,.18); border-radius: 999px; color: var(--text-secondary); display: inline-flex; font-size: .72rem; font-weight: 850; padding: 5px 9px; }
-                .admin-blog-preview-content { background: #fff; margin: 0 auto; max-width: 760px; padding: 24px 30px 34px; width: 100%; }
-                .admin-blog-preview-content :global(h1),
-                .admin-blog-preview-content :global(h2),
-                .admin-blog-preview-content :global(h3) { color: #171512; font-family: var(--font-serif); line-height: 1.16; }
-                .admin-blog-preview-content :global(h1) { font-size: 1.7rem; margin: 0 0 12px; }
-                .admin-blog-preview-content :global(h2) { font-size: 1.36rem; margin: 28px 0 10px; }
-                .admin-blog-preview-content :global(h3) { font-size: 1.12rem; margin: 20px 0 8px; }
-                .admin-blog-preview-content :global(p),
-                .admin-blog-preview-content :global(li) { color: #4d463d; font-size: 1rem; line-height: 1.76; }
-                .admin-blog-preview-content :global(p) { margin: 0 0 13px; }
-                .admin-blog-preview-content :global(a) { color: #9b7635; font-weight: 900; }
-                .admin-blog-preview-content :global(ul) { margin: 0 0 17px; padding-left: 22px; }
-                .admin-blog-preview-content :global(.blog-inline-image),
-                .admin-blog-preview-content :global(img) { display: none; }
-                .admin-blog-preview-panel { align-self: start; display: grid; gap: 12px; position: sticky; top: 78px; }
-                .admin-blog-preview-cover { aspect-ratio: 16 / 10; background-position: center; background-size: cover; border: 1px solid rgba(201,169,110,.18); border-radius: 12px; min-height: 0; }
-                .admin-blog-preview-box { background: #fff; border: 1px solid rgba(201,169,110,.16); border-radius: 12px; display: grid; gap: 10px; padding: 12px; }
-                .admin-blog-preview-box > strong { color: var(--gold-dark); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
-                .admin-blog-preview-box > p { color: var(--text-muted); font-size: .8rem; line-height: 1.45; margin: 0; }
-                .admin-blog-preview-media { display: grid; gap: 10px; max-height: 420px; overflow: auto; padding-right: 2px; }
-                .admin-blog-preview-media figure { display: grid; gap: 6px; margin: 0; }
-                .admin-blog-preview-media span { aspect-ratio: 16 / 9; background-position: center; background-size: cover; border-radius: 10px; display: block; }
-                .admin-blog-preview-media figcaption { color: var(--text-muted); font-size: .72rem; line-height: 1.35; }
-                .admin-blog-preview-notes { background: #fffdf8; }
+                .admin-blog-preview { background: #f7f3eb; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; overflow: hidden; }
+                .blog-post-page { background: #f7f3eb; color: #171512; }
+                .blog-post-hero { align-items: end; background: linear-gradient(135deg, #17120d, #2b241c); color: #fff; display: grid; gap: 34px; grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr); padding: 84px 42px 42px; }
+                .blog-post-hero span { color: #c9a96e; display: block; font-size: .72rem; font-weight: 900; letter-spacing: .15em; margin-bottom: 14px; text-transform: uppercase; }
+                .blog-post-hero h1 { color: #fff; font-family: var(--font-serif); font-size: clamp(2rem, 4.3vw, 3.9rem); line-height: 1; margin: 0; }
+                .blog-post-hero p { color: rgba(255,255,255,.72); font-size: 1.04rem; line-height: 1.6; max-width: 790px; }
+                .blog-post-meta { align-items: center; color: rgba(255,255,255,.7); display: flex; gap: 8px; font-weight: 800; }
+                .blog-post-cover { background-position: center; background-size: cover; border-radius: 20px; min-height: 430px; }
+                .blog-post-shell { align-items: start; display: grid; gap: 38px; grid-template-columns: minmax(0, 1fr) 340px; padding: 58px 42px; }
+                .blog-post-content { background: #fff; border: 1px solid rgba(201,169,110,.18); border-radius: 18px; padding: clamp(24px, 5vw, 56px); }
+                .blog-post-content :global(h1),
+                .blog-post-content :global(h2),
+                .blog-post-content :global(h3) { color: #171512; font-family: var(--font-serif); line-height: 1.05; }
+                .blog-post-content :global(h1) { font-size: 2rem; }
+                .blog-post-content :global(h2) { font-size: 1.55rem; margin-top: 34px; }
+                .blog-post-content :global(h3) { font-size: 1.18rem; margin-top: 26px; }
+                .blog-post-content :global(p),
+                .blog-post-content :global(li) { color: #50483e; font-size: 1rem; line-height: 1.82; }
+                .blog-post-content :global(a) { color: #9b7635; font-weight: 800; }
+                .blog-post-content :global(.blog-inline-image) { margin: 34px 0 12px; }
+                .blog-post-content :global(.blog-inline-image img) { aspect-ratio: 16 / 9; border-radius: 18px; display: block; object-fit: cover; width: 100%; }
+                .blog-post-aside { display: grid; gap: 16px; position: sticky; top: 96px; }
+                .blog-post-aside > div { background: #fff; border: 1px solid rgba(201,169,110,.2); border-radius: 16px; display: grid; gap: 12px; padding: 20px; }
+                .blog-post-aside h2 { font-size: 1.05rem; margin: 0; }
+                .blog-post-aside p { color: #756a5f; line-height: 1.5; margin: 0; }
+                .blog-post-aside a { color: #9b7635; font-weight: 900; text-decoration: none; }
+                .blog-author-card { justify-items: center; text-align: center; }
+                .blog-author-card img { aspect-ratio: 1 / 1; border: 3px solid rgba(201,169,110,.35); border-radius: 999px; height: 116px; object-fit: cover; width: 116px; }
+                .blog-author-card span { color: #9b7635; font-size: .68rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+                .blog-author-card h2 { font-family: var(--font-serif); font-size: 1.45rem; }
+                .blog-post-cta { align-items: center; background: #25d366; border-radius: 999px; color: #fff !important; display: inline-flex; font-weight: 900; gap: 8px; justify-content: center; padding: 12px 14px; }
                 .admin-blog-preview-notes ul { color: var(--text-secondary); display: grid; gap: 7px; font-size: .82rem; line-height: 1.48; margin: 0; padding-left: 18px; }
                 .danger { color: #dc2626 !important; }
-                @media (max-width: 1180px) {
-                    .admin-blog-preview { grid-template-columns: 1fr; }
-                    .admin-blog-preview-panel { position: static; }
-                    .admin-blog-preview-media { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; }
-                }
                 @media (max-width: 900px) {
                     .admin-header, .admin-blog-agent, .admin-blog-editor-head { grid-template-columns: 1fr; flex-direction: column; }
                     .admin-blog-editor-head { align-items: stretch; }
                     .admin-blog-view-toggle { justify-content: center; width: 100%; }
                     .admin-blog-view-toggle button { justify-content: center; width: 100%; }
-                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two { grid-template-columns: 1fr; }
-                    .admin-blog-preview { padding: 10px; }
-                    .admin-blog-preview-content { padding: 20px 16px 24px; }
-                    .admin-blog-preview-media { grid-template-columns: 1fr; }
+                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two, .blog-post-hero, .blog-post-shell { grid-template-columns: 1fr; }
+                    .blog-post-hero { padding: 52px 20px 28px; }
+                    .blog-post-hero h1 { font-size: 2rem; }
+                    .blog-post-content :global(h1) { font-size: 1.65rem; }
+                    .blog-post-content :global(h2) { font-size: 1.35rem; }
+                    .blog-post-cover { min-height: 280px; }
+                    .blog-post-shell { padding: 28px 16px; }
+                    .blog-post-aside { position: static; }
                 }
             `}</style>
         </div>
