@@ -5,7 +5,7 @@ import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
-import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
+import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
     title: 'Blog | Imobiliaria Guilherme Pilger',
@@ -54,7 +54,7 @@ async function getPublishedPosts() {
             .select(BLOG_LIST_SELECT)
             .eq('status', 'published')
             .order('published_at', { ascending: false })
-            .limit(60)
+            .limit(120)
             .abortSignal(createSupabaseAbortSignal())
 
         if (error) {
@@ -62,7 +62,7 @@ async function getPublishedPosts() {
             return []
         }
 
-        return (data || []) as BlogPost[]
+        return ((data || []) as BlogPost[]).filter(post => !isNewsLikeContent(post)).slice(0, 60)
     } catch (error) {
         console.warn('[Blog] public list unavailable:', summarizeSupabaseError(error))
         return []
