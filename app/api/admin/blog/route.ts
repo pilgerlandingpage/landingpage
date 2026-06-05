@@ -7,7 +7,28 @@ import { runNewsAgentDraft } from '@/lib/news/runner'
 import { slugifyBlog } from '@/lib/blog/types'
 import { enqueueEditorialCampaignForPost } from '@/lib/editorial-distribution'
 
-const BLOG_SELECT = '*'
+const BLOG_SELECT = [
+    'id',
+    'title',
+    'slug',
+    'excerpt',
+    'content_markdown',
+    'status',
+    'cover_image_url',
+    'author_name',
+    'category',
+    'tags',
+    'seo_title',
+    'meta_description',
+    'primary_keyword',
+    'secondary_keywords',
+    'local_entities',
+    'approval_notes',
+    'generated_by',
+    'created_at',
+    'updated_at',
+    'published_at',
+].join(',')
 const BLOG_STATUSES = new Set(['draft', 'under_review', 'published', 'archived'])
 
 function normalizeBlogStatus(value: unknown) {
@@ -23,9 +44,13 @@ function parseJsonArray(value: unknown) {
     return []
 }
 
-function normalizePostPayload(body: any) {
+function hasBodyField(body: any, field: string) {
+    return Object.prototype.hasOwnProperty.call(body || {}, field)
+}
+
+function normalizePostPayload(body: any, options: { preserveMissingMetadata?: boolean } = {}) {
     const title = String(body?.title || '').trim()
-    return {
+    const payload: Record<string, unknown> = {
         title,
         slug: slugifyBlog(body?.slug || title),
         excerpt: String(body?.excerpt || '').trim() || null,
@@ -40,12 +65,21 @@ function normalizePostPayload(body: any) {
         primary_keyword: String(body?.primary_keyword || '').trim() || null,
         secondary_keywords: parseJsonArray(body?.secondary_keywords).map(String),
         local_entities: parseJsonArray(body?.local_entities).map(String),
-        aeo_questions: parseJsonArray(body?.aeo_questions),
-        internal_links: parseJsonArray(body?.internal_links),
-        source_summary: body?.source_summary || null,
         approval_notes: parseJsonArray(body?.approval_notes).map(String),
         generated_by: body?.generated_by || null,
     }
+
+    if (!options.preserveMissingMetadata || hasBodyField(body, 'aeo_questions')) {
+        payload.aeo_questions = parseJsonArray(body?.aeo_questions)
+    }
+    if (!options.preserveMissingMetadata || hasBodyField(body, 'internal_links')) {
+        payload.internal_links = parseJsonArray(body?.internal_links)
+    }
+    if (!options.preserveMissingMetadata || hasBodyField(body, 'source_summary')) {
+        payload.source_summary = body?.source_summary || null
+    }
+
+    return payload
 }
 
 function isLegacyBenchmarkBriefing(post: any) {
@@ -170,7 +204,7 @@ export async function PATCH(request: NextRequest) {
         if (!id) return NextResponse.json({ error: 'ID obrigatorio.' }, { status: 400 })
 
         const supabase = createAdminClient()
-        const payload = normalizePostPayload(body)
+        const payload = normalizePostPayload(body, { preserveMissingMetadata: true })
         const status = normalizeBlogStatus(body?.status || payload.status)
         const publishedAt = status === 'published'
             ? (body?.published_at || new Date().toISOString())

@@ -28,6 +28,8 @@ type BlogPost = {
 type BlogStatusFilter = 'all' | 'under_review' | 'published' | 'draft' | 'archived'
 type AdminContentMode = 'blog' | 'news'
 
+const DEFAULT_AUTHOR_NAME = 'Guilherme Pilger'
+
 const BASE_EMPTY_POST: Partial<BlogPost> = {
     title: '',
     slug: '',
@@ -35,7 +37,7 @@ const BASE_EMPTY_POST: Partial<BlogPost> = {
     content_markdown: '',
     status: 'draft',
     cover_image_url: '',
-    author_name: 'Guilherme Pilger',
+    author_name: DEFAULT_AUTHOR_NAME,
     category: 'Mercado Imobiliario',
     tags: [],
     seo_title: '',
@@ -113,6 +115,26 @@ function splitCsv(value: string) {
     return value.split(',').map(item => item.trim()).filter(Boolean)
 }
 
+async function readBlogApiResponse(response: Response, fallbackMessage: string) {
+    const text = await response.text()
+    let data: any = {}
+
+    if (text) {
+        try {
+            data = JSON.parse(text)
+        } catch {
+            const cleanText = text.replace(/\s+/g, ' ').trim()
+            if (response.status === 413 || /^request entity too large/i.test(cleanText)) {
+                throw new Error('A requisicao ficou grande demais para o servidor. Recarregue a pagina e tente novamente.')
+            }
+            throw new Error(cleanText || fallbackMessage)
+        }
+    }
+
+    if (!response.ok) throw new Error(data?.error || fallbackMessage)
+    return data
+}
+
 const statusLabels: Record<string, string> = {
     draft: 'Rascunho',
     under_review: 'Em analise',
@@ -145,6 +167,33 @@ function buildEmptyPost(mode: AdminContentMode): Partial<BlogPost> {
         category: config.defaultCategory,
         tags: config.defaultTags,
         generated_by: mode === 'news' ? 'manual-news' : null,
+    }
+}
+
+function buildEditablePostPayload(form: Partial<BlogPost>, statusOverride: string | undefined, mode: AdminContentMode) {
+    const config = CONTENT_CONFIG[mode]
+    const normalizedTags = splitCsv(csv(form.tags))
+    const nextTags = mode === 'news'
+        ? [...new Set([...config.defaultTags, ...normalizedTags])]
+        : normalizedTags
+
+    return {
+        title: form.title || '',
+        slug: form.slug || '',
+        excerpt: form.excerpt || '',
+        content_markdown: form.content_markdown || '',
+        status: statusOverride || form.status || 'draft',
+        cover_image_url: form.cover_image_url || '',
+        author_name: form.author_name || DEFAULT_AUTHOR_NAME,
+        category: form.category || config.defaultCategory,
+        tags: nextTags,
+        seo_title: form.seo_title || '',
+        meta_description: form.meta_description || '',
+        primary_keyword: form.primary_keyword || '',
+        secondary_keywords: splitCsv(csv(form.secondary_keywords)),
+        local_entities: splitCsv(csv(form.local_entities)),
+        approval_notes: splitCsv(csv(form.approval_notes)),
+        generated_by: form.generated_by || (mode === 'news' ? 'manual-news' : null),
     }
 }
 
@@ -183,8 +232,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
         setLoading(true)
         try {
             const response = await fetch('/api/admin/blog?status=all', { cache: 'no-store' })
-            const data = await response.json()
-            if (!response.ok) throw new Error(data?.error || `Erro ao carregar ${config.title.toLowerCase()}.`)
+            const data = await readBlogApiResponse(response, `Erro ao carregar ${config.title.toLowerCase()}.`)
             const nextPosts = (data.posts || []).filter((post: BlogPost) => postMatchesMode(post, mode))
             setPosts(nextPosts)
             if (selectedId !== 'new') {
@@ -225,8 +273,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: config.generateAction, topic }),
             })
-            const data = await response.json()
-            if (!response.ok) throw new Error(data?.error || `Erro ao gerar ${config.itemSingular.toLowerCase()}.`)
+            const data = await readBlogApiResponse(response, `Erro ao gerar ${config.itemSingular.toLowerCase()}.`)
             setMessage(data.notification?.sent
                 ? `${config.generatedMessage} e Marketing avisado no WhatsApp.`
                 : `${config.generatedMessage}. Aviso WhatsApp: ${data.notification?.reason || 'nao enviado'}.`)
@@ -244,26 +291,13 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
         setSaving(true)
         setMessage(`Salvando ${config.itemSingular.toLowerCase()}...`)
         try {
-            const normalizedTags = splitCsv(csv(form.tags))
-            const nextTags = mode === 'news'
-                ? [...new Set([...config.defaultTags, ...normalizedTags])]
-                : normalizedTags
-            const payload = {
-                ...form,
-                status: statusOverride || form.status || 'draft',
-                category: form.category || config.defaultCategory,
-                tags: nextTags,
-                secondary_keywords: splitCsv(csv(form.secondary_keywords)),
-                local_entities: splitCsv(csv(form.local_entities)),
-                approval_notes: splitCsv(csv(form.approval_notes)),
-            }
+            const payload = buildEditablePostPayload(form, statusOverride, mode)
             const response = await fetch('/api/admin/blog', {
                 method: selectedId === 'new' ? 'POST' : 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedId === 'new' ? payload : { ...payload, id: selectedId }),
             })
-            const data = await response.json()
-            if (!response.ok) throw new Error(data?.error || `Erro ao salvar ${config.itemSingular.toLowerCase()}.`)
+            const data = await readBlogApiResponse(response, `Erro ao salvar ${config.itemSingular.toLowerCase()}.`)
             setMessage(saveMessage(statusOverride, mode))
             await fetchPosts()
             setSelectedId(data.post.id)
@@ -280,8 +314,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
         setSaving(true)
         try {
             const response = await fetch(`/api/admin/blog?id=${selectedPost.id}`, { method: 'DELETE' })
-            const data = await response.json()
-            if (!response.ok) throw new Error(data?.error || `Erro ao remover ${config.itemSingular.toLowerCase()}.`)
+            await readBlogApiResponse(response, `Erro ao remover ${config.itemSingular.toLowerCase()}.`)
             setMessage(`${config.itemSingular} removido.`)
             newPost()
             await fetchPosts()
