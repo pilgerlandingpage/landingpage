@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
+import {
+    buildCentralContextPrompt,
+    getAgentCentralContext,
+    recordAgentCentralSignal,
+} from '@/lib/intelligence/agent-runtime'
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const DEFAULT_MODEL = 'gemini-2.5-flash'
@@ -170,7 +175,24 @@ export async function extractLeadData(
     const basePrompt = String(promptConfig?.value || '').trim()
     if (!basePrompt) return {}
 
-    const extractionPrompt = `${basePrompt}\n\nConversa:\n${conversationText}`
+    const centralPrompt = await getAgentCentralContext({
+        supabase: supabase as any,
+        agentId: 'whatsapp-lead-extraction',
+        days: 30,
+        limit: 80,
+    })
+        .then(context => buildCentralContextPrompt(context))
+        .catch((error: any) => {
+            console.warn('[Lead Extraction] Central context unavailable:', error?.message || error)
+            return ''
+        })
+
+    const extractionPrompt = [
+        basePrompt,
+        centralPrompt,
+        'Conversa:',
+        conversationText,
+    ].filter(Boolean).join('\n\n')
     const modelName = await getGeminiModel()
 
     const response = await fetch(
@@ -197,7 +219,26 @@ export async function extractLeadData(
 
     try {
         const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-        return JSON.parse(cleaned) as ExtractedLeadData
+        const parsed = JSON.parse(cleaned) as ExtractedLeadData
+        await recordAgentCentralSignal({
+            supabase: supabase as any,
+            agentId: 'whatsapp-lead-extraction',
+            eventType: 'lead_profile_extracted',
+            entityType: 'lead_extraction',
+            entityId: parsed.phone || parsed.name || 'lead_extraction',
+            source: 'lead-extraction-agent',
+            label: parsed.name ? `Laura extraiu dados do lead ${parsed.name}` : 'Laura extraiu dados de lead',
+            importanceScore: parsed.is_vip ? 82 : parsed.budget || parsed.preferences?.length ? 66 : 52,
+            metadata: {
+                extracted: parsed,
+                conversation_preview: conversationText.replace(/\s+/g, ' ').slice(0, 700),
+                central_context_used: Boolean(centralPrompt),
+            },
+            handoffTargets: ['whatsapp-global-agent', 'ads-analyst', 'blog-intelligence', 'ceo-agent'],
+        }).catch((error: any) => {
+            console.warn('[Lead Extraction] central signal failed:', error?.message || error)
+        })
+        return parsed
     } catch {
         return {}
     }

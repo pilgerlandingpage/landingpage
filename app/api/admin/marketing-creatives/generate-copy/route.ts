@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { chatWithGemini } from '@/lib/gemini'
+import { createAdminClient } from '@/lib/supabase/server'
+import {
+  buildCentralContextPrompt,
+  getAgentCentralContext,
+  recordAgentCentralSignal,
+} from '@/lib/intelligence/agent-runtime'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,17 +71,32 @@ export async function POST(request: NextRequest) {
       platform_targets: cleanArray(body.platform_targets),
     }
 
+    const supabase = createAdminClient()
+    const centralContext = await getAgentCentralContext({
+      supabase,
+      agentId: 'creative-strategy-agent',
+      days: 30,
+      limit: 100,
+    })
+      .then(context => buildCentralContextPrompt(context))
+      .catch((error: any) => {
+        console.warn('[Creative Copy] Central context unavailable:', error?.message || error)
+        return ''
+      })
+
     const raw = await chatWithGemini({
       systemPrompt: [
         'Voce e o estrategista de conteudo da Pilger Luxury Search.',
         'Escreva em portugues do Brasil, tom premium, direto e sem exageros.',
         'Nunca invente dados do imovel. Se algo faltar, use linguagem consultiva.',
+        'Use a Central de Inteligencia para conectar copy com sinais reais de leads, imoveis, campanhas, benchmark e radar.',
         'Responda somente JSON valido, sem markdown.',
       ].join('\n'),
       history: [],
       userMessage: [
         'Gere uma copy pronta para publicar e uma versao para trafego pago com este briefing:',
         JSON.stringify(payload, null, 2),
+        centralContext,
         '',
         'Formato obrigatorio:',
         '{',
@@ -99,6 +120,25 @@ export async function POST(request: NextRequest) {
     } catch {
       copy = fallbackCopy(body)
     }
+
+    await recordAgentCentralSignal({
+      supabase,
+      agentId: 'creative-strategy-agent',
+      eventType: 'creative_copy_generated',
+      entityType: 'marketing_creative_copy',
+      entityId: title,
+      source: 'creative-strategy-agent',
+      label: `Clara Criativos gerou copy para ${title}`,
+      importanceScore: 64,
+      metadata: {
+        briefing: payload,
+        copy,
+        central_context_used: Boolean(centralContext),
+      },
+      handoffTargets: ['content-publisher-agent', 'ads-analyst', 'organic-report-agent'],
+    }).catch((error: any) => {
+      console.warn('[Creative Copy] central signal failed:', error?.message || error)
+    })
 
     return NextResponse.json({ success: true, copy, raw })
   } catch (error) {

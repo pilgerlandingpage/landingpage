@@ -4,6 +4,7 @@ import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import { buildPasswordResetWhatsAppMessage, type UserAccessWhatsAppPayload } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 const MATCHED_RECOVERY_MESSAGE =
     'Dados confirmados. Verifique seu WhatsApp ou seu email para continuar a recuperacao.'
@@ -281,6 +282,27 @@ export async function POST(request: NextRequest) {
 
                 await sendUserAccessWhatsAppPayload(String(adminUser.phone || ''), payload, instanceToken)
                 whatsappSent = true
+                await recordAgentCentralSignal({
+                    supabase: admin,
+                    agentId: 'user-password-reset-agent',
+                    eventType: 'password_recovery_whatsapp_sent',
+                    entityType: 'admin_user',
+                    entityId: adminUser.id,
+                    source: 'password-recovery',
+                    label: `Bruno enviou recuperacao de senha para ${adminUser.name || targetEmail}`,
+                    importanceScore: 62,
+                    metadata: {
+                        admin_user_id: adminUser.id,
+                        auth_user_id: adminUser.auth_user_id || null,
+                        target_email: targetEmail,
+                        user_phone: adminUser.phone || null,
+                        message_preview: payload.text.slice(0, 500),
+                        buttons_count: payload.buttons.length,
+                    },
+                    handoffTargets: ['internal-notifier', 'pilger-ai-rules'],
+                }).catch((centralError: any) => {
+                    console.warn('[password-recovery] central signal failed:', centralError?.message || centralError)
+                })
             }
         } catch (whatsappErr) {
             console.error('[password-recovery] whatsapp send failed:', whatsappErr)

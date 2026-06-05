@@ -4,6 +4,7 @@ import {
     resolveSectorWhatsappInstance,
 } from '@/lib/notifications/sector-recipients'
 import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 type SupabaseAdmin = {
     from: (table: string) => any
@@ -85,6 +86,28 @@ export async function notifyBlogReviewReady({ supabase, post, origin }: BlogRevi
             }
         }
 
+        await recordAgentCentralSignal({
+            supabase,
+            agentId: 'internal-notifier',
+            eventType: newsPost ? 'internal_news_review_notification_sent' : 'internal_blog_review_notification_sent',
+            entityType: 'blog_post',
+            entityId: post.id || null,
+            source: 'internal-notifier',
+            label: `Nina avisou Marketing sobre ${newsPost ? 'noticia' : 'blog'} em analise`,
+            importanceScore: sentCount > 0 ? 58 : 42,
+            metadata: {
+                post_id: post.id || null,
+                title: post.title || null,
+                sent_count: sentCount,
+                error_count: errorCount,
+                category: post.category || null,
+                generated_by: post.generated_by || null,
+            },
+            handoffTargets: ['blog-intelligence', 'news-intelligence', 'content-publisher-agent'],
+        }).catch((error: any) => {
+            console.warn('[Blog Review Notification] central signal failed:', error?.message || error)
+        })
+
         return { sent: sentCount > 0, sent_count: sentCount, error_count: errorCount }
     } catch (error: any) {
         console.error('[Blog Review Notification] failed:', error)
@@ -153,6 +176,29 @@ export async function notifyBlogPublished({ supabase, post, origin, actorName }:
                 }
             }
         }
+
+        await recordAgentCentralSignal({
+            supabase,
+            agentId: 'internal-notifier',
+            eventType: newsPost ? 'internal_news_published_notification_sent' : 'internal_blog_published_notification_sent',
+            entityType: 'blog_post',
+            entityId: post.id || null,
+            source: 'internal-notifier',
+            label: `Nina avisou equipe sobre ${newsPost ? 'noticia' : 'blog'} publicado`,
+            importanceScore: sentCount > 0 ? 64 : 46,
+            metadata: {
+                post_id: post.id || null,
+                title: post.title || null,
+                slug: post.slug || null,
+                sent_count: sentCount,
+                error_count: errorCount,
+                category: post.category || null,
+                published_by: actorName || post.published_by || post.updated_by || null,
+            },
+            handoffTargets: ['email-orchestrator', 'organic-report-agent', 'ceo-agent'],
+        }).catch((error: any) => {
+            console.warn('[Blog Published Notification] central signal failed:', error?.message || error)
+        })
 
         return { sent: sentCount > 0, sent_count: sentCount, error_count: errorCount }
     } catch (error: any) {

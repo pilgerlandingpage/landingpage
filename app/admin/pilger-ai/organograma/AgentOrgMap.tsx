@@ -108,7 +108,7 @@ const POSITION_STORAGE_KEY = 'pilger-ai-org-graph-positions-v3'
 
 const SECTOR_ORDER = [
     'Diretoria',
-    'Pilger AI',
+    'Compliance e Governança',
     'Inteligencia',
     'Comercial',
     'WhatsApp',
@@ -185,7 +185,7 @@ function inferAgentFlow(agent: AgentOfficeItem): AgentFlow {
     if (sector === 'Diretoria' || source.includes('ceo') || source.includes('daily') || source.includes('weekly')) {
         receives.push('KPIs', 'eventos dos agentes', 'relatorios')
         sends.push('prioridades', 'alertas internos', 'direcionamento')
-    } else if (sector === 'Pilger AI' || source.includes('pilger ai') || source.includes('regras')) {
+    } else if (sector === 'Compliance e Governança' || source.includes('pilger ai') || source.includes('regras')) {
         receives.push('contexto do painel', 'permissoes', 'regras globais')
         sends.push('governanca', 'respostas orientadas', 'acoes preparadas')
     } else if (sector === 'Inteligencia' || source.includes('radar') || source.includes('research') || source.includes('benchmark')) {

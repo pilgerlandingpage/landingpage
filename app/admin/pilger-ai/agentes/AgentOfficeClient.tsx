@@ -44,7 +44,7 @@ import {
     type PushEditorialTemplateDefinition,
 } from '@/lib/push/editorial-templates'
 
-const SECTOR_ORDER = ['Todos', 'Diretoria', 'Pilger AI', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
+const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
 const MAX_AVATAR_SIZE = 20 * 1024 * 1024
 
 type SaveState = {
@@ -2719,6 +2719,41 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                         </div>
                     </div>
 
+                    {selectedAgent.centralContract && (
+                        <div className="agent-office-central-card">
+                            <div className="agent-office-prompt-head">
+                                <div>
+                                    <h3><CircleDot size={17} /> Central de Inteligencia</h3>
+                                    <p>
+                                        {selectedAgent.centralContract.name} opera como agente de {selectedAgent.centralContract.ecosystemAgent}
+                                        {' '}e participa do ciclo de coleta, consumo e handoff de dados.
+                                    </p>
+                                </div>
+                                <span className={`agent-office-central-status ${selectedAgent.centralContract.status}`}>
+                                    {selectedAgent.centralContract.status === 'full'
+                                        ? 'Ciclo completo'
+                                        : selectedAgent.centralContract.status === 'contracted'
+                                            ? 'Contrato definido'
+                                            : 'Parcial'}
+                                </span>
+                            </div>
+                            <div className="agent-office-central-grid">
+                                <div>
+                                    <span>Consome da Central</span>
+                                    <p>{selectedAgent.centralContract.consumes.join(', ')}</p>
+                                </div>
+                                <div>
+                                    <span>Alimenta a Central</span>
+                                    <p>{selectedAgent.centralContract.produces.join(', ')}</p>
+                                </div>
+                                <div>
+                                    <span>Entrega para</span>
+                                    <p>{selectedAgent.centralContract.defaultHandoffTargets.join(', ')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {isEventAgent && (
                         <div className="agent-office-event-card">
                             <div className="agent-office-prompt-head">
@@ -3608,7 +3643,10 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                         <strong>{group.title}</strong>
                                         <div className="agent-office-control-grid">
                                             {group.controls?.map(control => (
-                                                <label key={control.key} className="agent-office-control">
+                                                <label
+                                                    key={control.key}
+                                                    className={`agent-office-control ${control.type === 'textarea' ? 'agent-office-control-wide' : ''}`}
+                                                >
                                                     <span className="agent-office-control-label">
                                                         <span>{control.label}</span>
                                                         {control.help && (
@@ -3651,6 +3689,12 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                                                 )
                                                             })}
                                                         </div>
+                                                    ) : control.type === 'textarea' ? (
+                                                        <textarea
+                                                            value={behaviorDraft[control.key] ?? control.fallback}
+                                                            onChange={event => updateBehaviorControl(control.key, event.target.value)}
+                                                            rows={4}
+                                                        />
                                                     ) : (
                                                         <input
                                                             type={control.type}

@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { getAgentCentralContext, recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 const META_API_VERSION = 'v21.0'
 
@@ -180,6 +180,17 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
     return { published: false, platform: row.platform, reason: 'autopilot_disabled' }
   }
 
+  const centralContext = await getAgentCentralContext({
+    supabase,
+    agentId: 'content-publisher-agent',
+    days: 30,
+    limit: 80,
+    recordRead: true,
+  }).catch((error: any) => {
+    console.warn('[Meta Publisher] central context unavailable:', error?.message || error)
+    return null
+  })
+
   await supabase
     .from('marketing_scheduled_posts')
     .update({ status: 'publishing', updated_at: new Date().toISOString(), error_message: null })
@@ -207,10 +218,10 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
       })
       .eq('id', row.id)
 
-    await recordEcosystemEvent({
+    await recordAgentCentralSignal({
       supabase,
+      agentId: 'content-publisher-agent',
       eventType: 'social_post_published',
-      actorType: 'agent',
       entityType: 'marketing_scheduled_post',
       entityId: row.id,
       source: 'marketing-publisher-agent',
@@ -223,7 +234,10 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
         scheduled_for: row.scheduled_for,
         caption_preview: firstText(row.caption, row.ai_context).slice(0, 500),
         creative: normalizeCreative(row.marketing_creatives),
+        central_context_used: Boolean(centralContext),
+        central_source_counts: centralContext?.context?.source_counts || null,
       },
+      handoffTargets: ['organic-report-agent', 'ads-analyst', 'ceo-agent'],
     }).catch((eventError: any) => {
       console.warn('[Meta Publisher] ecosystem event failed:', eventError?.message || eventError)
     })
@@ -239,10 +253,10 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
         updated_at: new Date().toISOString(),
       })
       .eq('id', row.id)
-    await recordEcosystemEvent({
+    await recordAgentCentralSignal({
       supabase,
+      agentId: 'content-publisher-agent',
       eventType: 'social_post_publish_failed',
-      actorType: 'agent',
       entityType: 'marketing_scheduled_post',
       entityId: row.id,
       source: 'marketing-publisher-agent',
@@ -252,7 +266,9 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
         platform: row.platform,
         scheduled_for: row.scheduled_for,
         error: errorMessage,
+        central_context_used: Boolean(centralContext),
       },
+      handoffTargets: ['internal-notifier', 'ceo-agent'],
     }).catch((eventError: any) => {
       console.warn('[Meta Publisher] failed ecosystem event failed:', eventError?.message || eventError)
     })

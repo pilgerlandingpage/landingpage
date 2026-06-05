@@ -21,19 +21,24 @@ import {
     DEFAULT_PASSWORD_RESET_MESSAGE,
 } from '@/lib/user-whatsapp-messages'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '@/lib/whatsapp/agent-global-prompt'
+import {
+    DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
+    DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
+} from '@/lib/whatsapp/commercial-automation-prompts'
 import { getDefaultResearchPilgerTopicsJson } from '@/lib/research/topics'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from '@/lib/events/agent-prompt'
 import { DEFAULT_BROKER_CANDIDATE_AGENT_PROMPT } from '@/lib/broker-candidates/agent-prompt'
 import { getDefaultEmailAgentTemplatesJson, parseEmailAgentTemplatesJson } from '@/lib/email/agent-templates'
 import { getDefaultWhatsAppEditorialTemplatesJson, parseWhatsAppEditorialTemplatesJson } from '@/lib/whatsapp/editorial-templates'
 import { getDefaultPushEditorialTemplatesJson, parsePushEditorialTemplatesJson } from '@/lib/push/editorial-templates'
+import { resolveAgentCentralProfile, type AgentCentralProfile } from '@/lib/intelligence/agent-runtime'
 
 export type AgentOfficeTone = 'success' | 'warning' | 'danger' | 'info' | 'muted'
 
 export type AgentOfficeBehaviorControl = {
     key: string
     label: string
-    type: 'number' | 'select' | 'text' | 'date' | 'time' | 'multiselect'
+    type: 'number' | 'select' | 'text' | 'date' | 'time' | 'multiselect' | 'textarea'
     value: string
     fallback: string
     help?: string
@@ -85,6 +90,7 @@ export type AgentOfficeItem = {
     emailTemplates?: string
     whatsappTemplates?: string
     pushTemplates?: string
+    centralContract?: AgentCentralProfile
 }
 
 export type AgentOfficeSnapshot = {
@@ -430,7 +436,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         id: 'pilger-ai-core',
         name: 'Pilger AI',
         role: 'Assistente administrativo central',
-        sector: 'Pilger AI',
+        sector: 'Compliance e Governança',
         promptKey: 'pilger_ai_system_prompt',
         fallback: PILGER_AI_PROMPT,
         detail: 'Orquestra respostas dentro do painel e entende o ecossistema administrativo.',
@@ -442,7 +448,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         id: 'pilger-ai-rules',
         name: 'Pilger AI - Regras',
         role: 'Camada de governanca do assistente',
-        sector: 'Pilger AI',
+        sector: 'Compliance e Governança',
         promptKey: 'pilger_ai_rules_prompt',
         fallback: PILGER_AI_RULES_PROMPT,
         detail: 'Define limites, tom, seguranca e regras complementares do assistente.',
@@ -503,26 +509,42 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         name: 'Agente de Resgate WhatsApp',
         role: 'Recuperacao de leads sem resposta',
         sector: 'WhatsApp',
-        promptKey: 'whatsapp_rescue_message_template',
-        fallback: 'Oi {nome_lead}! Vi seu cadastro e estou por aqui para te ajudar. Se quiser, ja te explico tudo rapidinho por aqui.',
-        identityPrompt: false,
-        detail: 'Mensagem disparada quando o lead cadastra contato mas nao inicia conversa.',
+        promptKey: 'whatsapp_rescue_system_prompt',
+        fallback: DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
+        detail: 'Gera a mensagem inteligente de resgate quando o lead cadastra contato mas nao inicia conversa.',
         tools: ['WhatsApp', 'funil', 'follow-up'],
-        autonomy: 'Pode acionar resgate conforme janela configurada no WhatsApp.',
+        autonomy: 'A automacao decide quando acionar; Nara usa IA, Central de Inteligencia e template aprovado para escrever o texto final.',
         editHref: '/admin/whatsapp/agent-config',
+        behaviorControls: [
+            {
+                key: 'whatsapp_rescue_message_template',
+                label: 'Template base de resgate',
+                type: 'textarea',
+                fallback: 'Oi {nome_lead}! Vi seu cadastro e estou por aqui para te ajudar. Se quiser, ja te explico tudo rapidinho por aqui.',
+                help: 'Texto aprovado pelo admin que Nara usa como base. A IA pode adaptar o tom, mas deve respeitar este conteudo.',
+            },
+        ],
     },
     {
         id: 'whatsapp-followup-agent',
         name: 'Agente de Follow-up WhatsApp',
         role: 'Retomada programada de conversa',
         sector: 'WhatsApp',
-        promptKey: 'whatsapp_followup_message_template',
-        fallback: 'Oi {nome_lead}, passando para retomar seu atendimento. Quer que eu siga te ajudando por aqui?',
-        identityPrompt: false,
-        detail: 'Mensagem usada em follow-ups programados para leads que precisam ser retomados.',
+        promptKey: 'whatsapp_followup_system_prompt',
+        fallback: DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
+        detail: 'Gera a mensagem inteligente de follow-up para leads que precisam ser retomados.',
         tools: ['WhatsApp', 'agenda de follow-up', 'CRM'],
-        autonomy: 'Envia mensagens conforme agenda configurada no modulo WhatsApp.',
+        autonomy: 'A agenda decide quando acionar; Caio usa IA, Central de Inteligencia, historico do lead e template aprovado para escrever cada tentativa.',
         editHref: '/admin/whatsapp/agent-config',
+        behaviorControls: [
+            {
+                key: 'whatsapp_followup_message_template',
+                label: 'Template base de follow-up',
+                type: 'textarea',
+                fallback: 'Oi {nome_lead}, passando para retomar seu atendimento. Quer que eu siga te ajudando por aqui?',
+                help: 'Texto aprovado pelo admin que Caio usa como base. A IA adapta a mensagem conforme tentativa e contexto.',
+            },
+        ],
     },
     {
         id: 'user-first-access-agent',
@@ -1618,6 +1640,7 @@ function normalizeBrokerAgent(broker: any, globalProvider: string, globalModel: 
             ? 'Conversa com leads e tem concierge do dono configurado por telefones autorizados.'
             : 'Conversa com leads conforme prompt, tags e regras do agente global.',
         llmPolicy: `Herda ${globalProvider} / ${globalModel} da Sala de Manutencao`,
+        centralContract: resolveAgentCentralProfile(`broker-${broker?.id || 'whatsapp'}`),
     }
 }
 
@@ -1698,6 +1721,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
             })),
             runtimeFacts: agent.runtimeFacts?.(configs),
             behaviorActions: agent.behaviorActions,
+            centralContract: resolveAgentCentralProfile(agent.id),
             researchTopics: agent.id === 'research-pilger'
                 ? getConfig(configs, 'research_pilger_topics', getDefaultResearchPilgerTopicsJson())
                 : undefined,

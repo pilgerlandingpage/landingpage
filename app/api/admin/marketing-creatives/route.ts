@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 export const dynamic = 'force-dynamic'
 
@@ -107,6 +108,25 @@ export async function POST(request: NextRequest) {
 
       if (scheduledError) throw new Error(scheduledError.message)
     }
+
+    await recordAgentCentralSignal({
+      supabase,
+      agentId: 'creative-strategy-agent',
+      eventType: 'marketing_creative_created',
+      entityType: 'marketing_creative',
+      entityId: data.id,
+      source: 'creative-strategy-agent',
+      label: `Clara Criativos cadastrou ${data.title}`,
+      importanceScore: status === 'approved' || status === 'scheduled' ? 68 : 56,
+      metadata: {
+        creative: data,
+        scheduled_for: body.scheduled_for || null,
+        scheduled_platforms: row.platform_targets,
+      },
+      handoffTargets: ['content-publisher-agent', 'ads-analyst', 'organic-report-agent'],
+    }).catch((error: any) => {
+      console.warn('[Marketing Creatives] central signal failed:', error?.message || error)
+    })
 
     return NextResponse.json({ success: true, creative: data })
   } catch (error) {

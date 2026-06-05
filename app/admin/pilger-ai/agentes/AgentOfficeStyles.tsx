@@ -576,6 +576,76 @@
   overflow: visible;
 }
 
+.agent-office-central-card {
+  background: #fff;
+  border: 1px solid rgba(201,169,110,0.24);
+  border-radius: 16px;
+  box-shadow: 0 16px 44px rgba(15,23,42,0.04);
+  overflow: hidden;
+}
+
+.agent-office-central-status {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.66rem;
+  font-weight: 950;
+  justify-content: center;
+  min-height: 30px;
+  padding: 7px 10px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.agent-office-central-status.full {
+  background: rgba(16,185,129,0.12);
+  color: #047857;
+}
+
+.agent-office-central-status.contracted {
+  background: rgba(201,169,110,0.18);
+  color: #8a6420;
+}
+
+.agent-office-central-status.partial {
+  background: rgba(245,158,11,0.14);
+  color: #92400e;
+}
+
+.agent-office-central-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 14px;
+}
+
+.agent-office-central-grid div {
+  background: linear-gradient(135deg, rgba(249,246,239,0.78), rgba(255,255,255,0.94));
+  border: 1px solid rgba(201,169,110,0.16);
+  border-radius: 12px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.agent-office-central-grid span {
+  color: var(--gold-dark);
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.agent-office-central-grid p {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0;
+}
+
 .agent-office-topic-bank {
   border: 1px solid rgba(201,169,110,0.24);
   border-radius: 16px;

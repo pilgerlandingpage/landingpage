@@ -8,6 +8,7 @@ import {
     type UserAccessWhatsAppPayload,
 } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 const USERS_SETTINGS_PERMISSION_KEYS = new Set([
     'settings_users',
@@ -247,6 +248,26 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
 
     await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
 
+    await recordAgentCentralSignal({
+        supabase: admin,
+        agentId: 'user-first-access-agent',
+        eventType: 'user_first_access_whatsapp_sent',
+        entityType: 'admin_user',
+        entityId: phone,
+        source: 'user-first-access-agent',
+        label: `Sofia enviou primeiro acesso para ${name || phone}`,
+        importanceScore: 52,
+        metadata: {
+            user_name: name || null,
+            user_phone: phone,
+            message_preview: payload.text.slice(0, 500),
+            buttons_count: payload.buttons.length,
+        },
+        handoffTargets: ['internal-notifier', 'pilger-ai-core'],
+    }).catch((error: any) => {
+        console.warn('[Users] first access central signal failed:', error?.message || error)
+    })
+
     return { sent: true, reason: null }
 }
 
@@ -264,6 +285,26 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
     })
 
     await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
+
+    await recordAgentCentralSignal({
+        supabase: admin,
+        agentId: 'user-password-reset-agent',
+        eventType: 'user_password_reset_whatsapp_sent',
+        entityType: 'admin_user',
+        entityId: phone,
+        source: 'user-password-reset-agent',
+        label: `Bruno enviou reset de senha para ${name || phone}`,
+        importanceScore: 58,
+        metadata: {
+            user_name: name || null,
+            user_phone: phone,
+            message_preview: payload.text.slice(0, 500),
+            buttons_count: payload.buttons.length,
+        },
+        handoffTargets: ['internal-notifier', 'pilger-ai-rules'],
+    }).catch((error: any) => {
+        console.warn('[Users] password reset central signal failed:', error?.message || error)
+    })
 
     return { sent: true, reason: null }
 }

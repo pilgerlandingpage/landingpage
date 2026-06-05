@@ -34,6 +34,13 @@ import {
     whatsappKeepOnline
 } from './whatsapp-agent'
 import { whatsappInstanceSetup } from './whatsapp-setup'
+import { chatWithGemini } from '../gemini'
+import {
+    buildCentralContextPrompt,
+    getAgentCentralContext,
+    recordAgentCentralSignal,
+} from '../intelligence/agent-runtime'
+import { getDefaultCommercialAutomationPrompt } from '../whatsapp/commercial-automation-prompts'
 
 function getSupabase() {
     return createClient(
@@ -153,6 +160,173 @@ function buildFollowupOffsetsFromConfig(rawConfig: string | undefined): number[]
 
     const list = Array.from(offsets).sort((a, b) => a - b)
     return list.length ? list : [5, 4320, 10080]
+}
+
+type CommercialAutomationMode = 'rescue' | 'followup'
+
+interface BuildCommercialAutomationAiMessageInput {
+    supabase: any
+    agentId: 'whatsapp-rescue-agent' | 'whatsapp-followup-agent'
+    mode: CommercialAutomationMode
+    lead: any
+    phoneFallback?: string | null
+    nameFallback?: string | null
+    templateMessage: string
+    systemPromptTemplate?: string | null
+    attempt?: number
+    minuteOffset?: number
+}
+
+interface CommercialAutomationAiMessage {
+    message: string
+    usedAi: boolean
+    centralContextUsed: boolean
+    fallbackReason: string | null
+}
+
+function compactPromptValue(value: unknown, maxLength = 1200): string {
+    if (value === null || value === undefined) return ''
+    const text = typeof value === 'string' ? value : JSON.stringify(value)
+    const compacted = text.replace(/\s+/g, ' ').trim()
+    if (compacted.length <= maxLength) return compacted
+    return `${compacted.slice(0, maxLength).trim()}...`
+}
+
+function normalizeAiWhatsAppText(raw: string): string {
+    return String(raw || '')
+        .replace(/```[\s\S]*?```/g, match => match.replace(/```[a-z]*|```/gi, '').trim())
+        .replace(/^["']+|["']+$/g, '')
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .join('\n')
+        .trim()
+}
+
+function hasInternalLeak(text: string): boolean {
+    const lower = text.toLowerCase()
+    return [
+        'central de inteligencia',
+        'crm interno',
+        'metadata',
+        'metadados',
+        'prompt',
+        'score',
+        'handoff',
+        'lead_id',
+        'visitor_id',
+        'fonte interna',
+        'sinal interno',
+    ].some(term => lower.includes(term))
+}
+
+function sanitizeAiWhatsAppMessage(raw: string, fallback: string): string {
+    let message = normalizeAiWhatsAppText(raw)
+    if (!message || hasInternalLeak(message)) return fallback
+
+    const maxChars = 420
+    if (message.length > maxChars) {
+        message = message.slice(0, maxChars).replace(/\s+\S*$/, '').trim()
+    }
+
+    return message || fallback
+}
+
+async function buildCommercialAutomationAiMessage({
+    supabase,
+    agentId,
+    mode,
+    lead,
+    phoneFallback,
+    nameFallback,
+    templateMessage,
+    systemPromptTemplate,
+    attempt,
+    minuteOffset,
+}: BuildCommercialAutomationAiMessageInput): Promise<CommercialAutomationAiMessage> {
+    const phone = (lead?.phone_e164 as string) || (lead?.phone as string) || phoneFallback || null
+    const leadName = lead?.name || nameFallback || 'visitante'
+
+    let centralPrompt = ''
+    let centralContextUsed = false
+    try {
+        const centralContext = await getAgentCentralContext({
+            supabase,
+            agentId,
+            leadId: lead?.id || null,
+            phone,
+            days: 30,
+            limit: 80,
+        })
+        centralPrompt = buildCentralContextPrompt(centralContext)
+        centralContextUsed = Boolean(centralPrompt)
+    } catch (error: any) {
+        console.warn('[WhatsApp Automation] central context failed:', error?.message || error)
+    }
+
+    const adminPrompt = String(systemPromptTemplate || '').trim() || getDefaultCommercialAutomationPrompt(agentId)
+    const mission = mode === 'rescue'
+        ? 'recuperar um lead que cadastrou contato, mas ainda nao iniciou conversa'
+        : 'retomar um lead que ainda nao respondeu ao atendimento'
+
+    const systemPrompt = [
+        adminPrompt,
+        '',
+        'CONTEXTO DE EXECUCAO DESTA ROTINA',
+        `Missao: ${mission}.`,
+        'Gere somente uma mensagem final de WhatsApp para o lead.',
+        '',
+        'GUARDRAILS DO SISTEMA',
+        '- Maximo de 300 caracteres sempre que possivel.',
+        '- Portugues do Brasil, tom humano, consultivo, premium e direto.',
+        '- Faca uma pergunta simples que facilite resposta.',
+        '- Use o template aprovado como base editorial.',
+        '- Use a Central apenas para contexto, sem revelar bastidores.',
+        '- Nao invente imovel, preco, desconto, disponibilidade, corretor ou promessa comercial.',
+        '- Nao mencione Central de Inteligencia, CRM, metadados, score, prompts, automacao ou fontes internas.',
+        '- Nao use markdown, hashtags, listas ou assinatura longa.',
+        '- Se faltar contexto util, preserve a mensagem proxima ao template.',
+    ].join('\n')
+
+    const userMessage = [
+        `Template aprovado pelo admin: ${templateMessage}`,
+        `Nome permitido do lead: ${leadName}`,
+        attempt ? `Tentativa: ${attempt}` : '',
+        minuteOffset ? `Minutos desde o cadastro conforme agenda: ${minuteOffset}` : '',
+        `Dados publicos/resumidos do lead: ${compactPromptValue({
+            name: lead?.name || nameFallback || null,
+            landing_page_id: lead?.landing_page_id || null,
+            metadata: lead?.metadata || null,
+        }, 900)}`,
+        centralPrompt ? `Contexto da Central para orientar a mensagem:\n${compactPromptValue(centralPrompt, 2200)}` : '',
+        '',
+        'Responda apenas com o texto final da mensagem.',
+    ].filter(Boolean).join('\n')
+
+    try {
+        const raw = await chatWithGemini({
+            systemPrompt,
+            history: [],
+            userMessage,
+            temperature: 0.45,
+            maxTokens: 220,
+        })
+        const message = sanitizeAiWhatsAppMessage(raw, templateMessage)
+        return {
+            message,
+            usedAi: message !== templateMessage,
+            centralContextUsed,
+            fallbackReason: message === templateMessage ? 'ai_output_rejected_or_empty' : null,
+        }
+    } catch (error: any) {
+        console.warn('[WhatsApp Automation] AI message fallback:', error?.message || error)
+        return {
+            message: templateMessage,
+            usedAi: false,
+            centralContextUsed,
+            fallbackReason: error?.message || 'ai_generation_failed',
+        }
+    }
 }
 
 function normalizeWorkflowPhone(raw: unknown): string {
@@ -608,6 +782,7 @@ export const sendWhatsAppRescue = inngest.createFunction(
                 'whatsapp_rescue_enabled',
                 'whatsapp_rescue_delay_minutes',
                 'whatsapp_rescue_max_attempts',
+                'whatsapp_rescue_system_prompt',
                 'whatsapp_rescue_message_template',
             ])
 
@@ -651,9 +826,22 @@ export const sendWhatsAppRescue = inngest.createFunction(
             nome_lead: lead.name || name || 'visitante',
         })
 
+        const aiMessage = await buildCommercialAutomationAiMessage({
+            supabase,
+            agentId: 'whatsapp-rescue-agent',
+            mode: 'rescue',
+            lead,
+            phoneFallback: phone,
+            nameFallback: name,
+            templateMessage: message,
+            systemPromptTemplate: rescueConfigMap.get('whatsapp_rescue_system_prompt'),
+            attempt: rescueCount + 1,
+            minuteOffset: delayMinutes,
+        })
+
         await sendWhatsAppMessage({
             phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
-            message,
+            message: aiMessage.message,
         })
 
         const now = new Date().toISOString()
@@ -681,6 +869,33 @@ export const sendWhatsAppRescue = inngest.createFunction(
             })
         }
 
+        await recordAgentCentralSignal({
+            supabase: supabase as any,
+            agentId: 'whatsapp-rescue-agent',
+            eventType: 'whatsapp_rescue_sent',
+            leadId: lead.id,
+            visitorId: lead.visitor_id || null,
+            entityType: 'lead',
+            entityId: lead.id,
+            source: 'whatsapp-rescue-agent',
+            label: `Nara enviou resgate WhatsApp${lead.name ? ` para ${lead.name}` : ''}`,
+            importanceScore: 58,
+            metadata: {
+                lead_id: lead.id,
+                lead_name: lead.name || name || null,
+                lead_phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
+                attempts: rescueCount + 1,
+                landing_page_id: lead.landing_page_id || null,
+                message_preview: aiMessage.message.slice(0, 500),
+                ai_used: aiMessage.usedAi,
+                central_context_used: aiMessage.centralContextUsed,
+                template_fallback_reason: aiMessage.fallbackReason,
+            },
+            handoffTargets: ['whatsapp-global-agent', 'whatsapp-lead-extraction', 'ceo-agent'],
+        }).catch((error: any) => {
+            console.warn('[WhatsApp Rescue] central signal failed:', error?.message || error)
+        })
+
         return { success: true, lead_id: lead.id, attempts: rescueCount + 1 }
     }
 )
@@ -700,6 +915,7 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                 'whatsapp_rescue_enabled',
                 'whatsapp_followup_enabled',
                 'whatsapp_followup_schedule_json',
+                'whatsapp_followup_system_prompt',
                 'whatsapp_followup_message_template',
                 'whatsapp_rescue_message_template',
                 'agent_default_instance_id',
@@ -766,9 +982,22 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                 nome_lead: lead.name || name || 'visitante',
             })
 
+            const aiMessage = await buildCommercialAutomationAiMessage({
+                supabase,
+                agentId: 'whatsapp-followup-agent',
+                mode: 'followup',
+                lead,
+                phoneFallback: phone,
+                nameFallback: name,
+                templateMessage: msg,
+                systemPromptTemplate: cfg.get('whatsapp_followup_system_prompt'),
+                attempt: attemptsSent + 1,
+                minuteOffset: targetMinutes,
+            })
+
             await sendWhatsAppMessage({
                 phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
-                message: msg,
+                message: aiMessage.message,
                 instanceToken: defaultInstanceToken || undefined,
             })
 
@@ -801,6 +1030,35 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
             }
 
             // Garante memória do follow-up na conversa para o agente não soar "primeiro contato".
+            await recordAgentCentralSignal({
+                supabase: supabase as any,
+                agentId: 'whatsapp-followup-agent',
+                eventType: 'whatsapp_followup_sent',
+                leadId: lead.id,
+                visitorId: lead.visitor_id || null,
+                entityType: 'lead',
+                entityId: lead.id,
+                source: 'whatsapp-followup-agent',
+                label: `Caio enviou follow-up WhatsApp${lead.name ? ` para ${lead.name}` : ''}`,
+                importanceScore: 60,
+                metadata: {
+                    lead_id: lead.id,
+                    lead_name: lead.name || name || null,
+                    lead_phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
+                    attempt: attemptsSent,
+                    minute_offset: targetMinutes,
+                    instance_id: defaultInstanceId || null,
+                    broker_id: defaultBrokerId || null,
+                    message_preview: aiMessage.message.slice(0, 500),
+                    ai_used: aiMessage.usedAi,
+                    central_context_used: aiMessage.centralContextUsed,
+                    template_fallback_reason: aiMessage.fallbackReason,
+                },
+                handoffTargets: ['whatsapp-global-agent', 'whatsapp-lead-extraction', 'ads-analyst', 'ceo-agent'],
+            }).catch((error: any) => {
+                console.warn('[WhatsApp Follow-up] central signal failed:', error?.message || error)
+            })
+
             if (defaultBrokerId) {
                 const cleanPhone = ((lead.phone_e164 as string) || (lead.phone as string) || phone || '').replace(/\D/g, '')
                 if (cleanPhone) {
@@ -816,7 +1074,7 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
 
                     const assistantMsg = {
                         role: 'assistant',
-                        content: msg,
+                        content: aiMessage.message,
                         type: 'text',
                         source: 'followup',
                         timestamp: now,

@@ -4,6 +4,7 @@ import {
     resolveSectorWhatsappInstance,
 } from '@/lib/notifications/sector-recipients'
 import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 type SupabaseAdmin = {
     from: (table: string) => any
@@ -150,6 +151,29 @@ export async function notifyPropertyReviewReady({
                 }
             }
         }
+
+        await recordAgentCentralSignal({
+            supabase,
+            agentId: 'internal-notifier',
+            eventType: 'internal_property_review_notification_sent',
+            entityType: 'property',
+            entityId: property.id || null,
+            source: 'internal-notifier',
+            label: `Nina avisou Marketing sobre imovel em analise: ${property.title || 'sem titulo'}`,
+            importanceScore: sentCount > 0 ? 60 : 44,
+            metadata: {
+                property_id: property.id || null,
+                title: property.title || null,
+                city: property.city || null,
+                state: property.state || null,
+                price: property.price || null,
+                sent_count: sentCount,
+                error_count: errorCount,
+            },
+            handoffTargets: ['property-register', 'creative-strategy-agent', 'ceo-agent'],
+        }).catch((error: any) => {
+            console.warn('[Property Review Notification] central signal failed:', error?.message || error)
+        })
 
         return { sent: sentCount > 0, sent_count: sentCount, error_count: errorCount }
     } catch (error: any) {

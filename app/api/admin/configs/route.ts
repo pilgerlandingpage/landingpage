@@ -19,6 +19,10 @@ import {
 import { DEFAULT_PROPERTY_REGISTER_AGENT_PROMPT } from '@/lib/properties/ai-registration'
 import { DEFAULT_SECTOR_NOTIFICATION_RECIPIENTS } from '@/lib/notifications/sector-recipients'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '@/lib/whatsapp/agent-global-prompt'
+import {
+    DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
+    DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
+} from '@/lib/whatsapp/commercial-automation-prompts'
 import { getDefaultResearchPilgerTopicsJson } from '@/lib/research/topics'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from '@/lib/events/agent-prompt'
 import { getDefaultEmailAgentTemplatesJson, normalizeEmailAgentTemplatesJson } from '@/lib/email/agent-templates'
@@ -26,6 +30,7 @@ import { getDefaultWhatsAppEditorialTemplatesJson, normalizeWhatsAppEditorialTem
 import { getDefaultPushEditorialTemplatesJson, normalizePushEditorialTemplatesJson } from '@/lib/push/editorial-templates'
 import { normalizeAgentNamesInConfig } from '@/lib/ai/config'
 import { DEFAULT_BENCHMARK_COMPETITORS, DEFAULT_BENCHMARK_KEYWORDS } from '@/lib/benchmark-editorial/defaults'
+import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 function getSupabase() {
     return createClient(
@@ -125,7 +130,41 @@ const DEFAULT_PROMPTS: Record<string, string> = {
     internal_notifier_system_prompt: INTERNAL_NOTIFIER_SYSTEM_PROMPT,
     email_orchestrator_system_prompt: EMAIL_ORCHESTRATOR_SYSTEM_PROMPT,
     whatsapp_global_system_prompt: DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT,
+    whatsapp_rescue_system_prompt: DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
+    whatsapp_followup_system_prompt: DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
     event_agent_system_prompt: DEFAULT_EVENT_AGENT_SYSTEM_PROMPT,
+}
+
+const CONFIG_AGENT_CENTRAL_MAP: Record<string, string> = {
+    pilger_ai_system_prompt: 'pilger-ai-core',
+    pilger_ai_rules_prompt: 'pilger-ai-rules',
+    property_register_triage_prompt: 'property-triage',
+    property_register_system_prompt: 'property-register',
+    lead_extraction_prompt: 'whatsapp-lead-extraction',
+    whatsapp_global_system_prompt: 'whatsapp-global-agent',
+    whatsapp_rescue_system_prompt: 'whatsapp-rescue-agent',
+    whatsapp_followup_system_prompt: 'whatsapp-followup-agent',
+    whatsapp_rescue_message_template: 'whatsapp-rescue-agent',
+    whatsapp_followup_message_template: 'whatsapp-followup-agent',
+    user_first_access_whatsapp_message: 'user-first-access-agent',
+    user_password_reset_whatsapp_message: 'user-password-reset-agent',
+    ads_analyst_system_prompt: 'ads-analyst',
+    meta_social_agent_system_prompt: 'social-attendance-agent',
+    organic_report_agent_system_prompt: 'organic-report-agent',
+    creative_strategy_agent_system_prompt: 'creative-strategy-agent',
+    content_publisher_agent_system_prompt: 'content-publisher-agent',
+    event_agent_system_prompt: 'event-agent',
+    broker_candidate_agent_system_prompt: 'broker-candidate-agent',
+    internal_notifier_system_prompt: 'internal-notifier',
+    email_orchestrator_system_prompt: 'email-orchestrator',
+    pilger_daily_system_prompt: 'pilger-daily-report',
+    pilger_weekly_system_prompt: 'pilger-weekly-report',
+    ceo_agent_system_prompt: 'ceo-agent',
+    radar_analyst_system_prompt: 'market-radar',
+    blog_intelligence_system_prompt: 'blog-intelligence',
+    news_intelligence_system_prompt: 'news-intelligence',
+    research_pilger_system_prompt: 'research-pilger',
+    benchmark_editorial_system_prompt: 'benchmark-editorial',
 }
 
 const DEFAULT_CONFIGS: Record<string, string> = {
@@ -530,6 +569,26 @@ export async function POST(request: NextRequest) {
                 error: error?.message,
             })
         }
+
+        await Promise.all(results
+            .filter(result => result.success && CONFIG_AGENT_CENTRAL_MAP[result.key])
+            .map(result => recordAgentCentralSignal({
+                supabase: supabase as any,
+                agentId: CONFIG_AGENT_CENTRAL_MAP[result.key],
+                eventType: 'agent_configuration_updated',
+                entityType: 'app_config',
+                entityId: result.key,
+                source: 'agent-office-config',
+                label: `Configuracao de agente atualizada: ${result.key}`,
+                importanceScore: 50,
+                metadata: {
+                    config_key: result.key,
+                    value_length: String(configs[result.key] || '').length,
+                },
+            }).catch((error: any) => {
+                console.warn('[Configs] central signal failed:', result.key, error?.message || error)
+                return null
+            })))
 
         const allSuccess = results.every(r => r.success)
         return NextResponse.json({
