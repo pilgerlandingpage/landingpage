@@ -281,6 +281,141 @@ function buildSourceCounts(results: SafeQueryResult[]) {
   )
 }
 
+function dateValue(value: unknown) {
+  const parsed = Date.parse(safeText(value))
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function normalizeBenchmarkOpportunity(value: unknown, source: string, createdAt?: unknown) {
+  const opportunity = parseMetadata(value)
+  const title = safeText(opportunity.title || opportunity.keyword || opportunity.summary)
+  const keyword = safeText(opportunity.keyword || opportunity.topic || title)
+  if (!title && !keyword) return null
+
+  return {
+    id: safeText(opportunity.id),
+    title: truncateText(title || keyword, 220),
+    keyword,
+    intent: safeText(opportunity.intent || opportunity.target_agent || opportunity.type),
+    score: numberValue(opportunity.opportunity_score || opportunity.score),
+    summary: truncateText(opportunity.summary || opportunity.executive_summary, 700),
+    recommended_angle: truncateText(opportunity.recommended_angle, 460),
+    strategy_notes: truncateText(opportunity.strategy_notes, 460),
+    source_url: safeText(opportunity.source_url),
+    source_domain: safeText(opportunity.source_domain),
+    sources: safeArray(opportunity.sources, 10),
+    queries: safeArray(opportunity.queries, 10).map(String),
+    created_at: safeText(opportunity.created_at || createdAt),
+    source,
+  }
+}
+
+function extractBenchmarkOpportunityFromEvent(event: any) {
+  const metadata = parseMetadata(event?.metadata)
+  const opportunity = metadata.opportunity || {
+    id: metadata.opportunity_id,
+    title: event?.label || metadata.opportunity_title,
+    keyword: metadata.benchmark_keyword || metadata.topic,
+    intent: metadata.intent || metadata.type,
+    opportunity_score: event?.importance_score,
+    summary: metadata.summary || metadata.executive_summary,
+    source_url: metadata.benchmark_source_url,
+    source_domain: metadata.benchmark_source_domain,
+  }
+  return normalizeBenchmarkOpportunity(opportunity, 'ecosystem_event', event?.occurred_at)
+}
+
+function compactCentralSnapshot(snapshot: any) {
+  const signals = parseMetadata(snapshot?.signals)
+  return {
+    id: snapshot?.id,
+    agent: snapshot?.agent,
+    scope: snapshot?.scope,
+    summary: truncateText(snapshot?.summary, 900),
+    created_by: snapshot?.created_by,
+    generated_at: snapshot?.generated_at || snapshot?.created_at,
+    source_counts: parseMetadata(snapshot?.source_counts),
+    latest_benchmark_opportunity: normalizeBenchmarkOpportunity(
+      signals.latest_benchmark_opportunity,
+      'ecosystem_snapshot',
+      snapshot?.generated_at || snapshot?.created_at,
+    ),
+    latest_benchmark_handoff: signals.latest_benchmark_handoff || null,
+    latest_blog_draft: signals.latest_blog_draft || null,
+    latest_news_draft: signals.latest_news_draft || null,
+  }
+}
+
+function buildCentralIntelligenceContext(snapshots: any[], ecosystemEvents: any[], agent: EcosystemAgent) {
+  const relevantAgents = new Set([
+    'global',
+    agent,
+    'benchmark',
+    'research',
+    'radar',
+    'traffic',
+    'creative',
+    'blog',
+    'news',
+  ])
+  const compactSnapshots = snapshots
+    .filter(snapshot => relevantAgents.has(String(snapshot?.agent || '')) || String(snapshot?.scope || '') === 'global')
+    .sort((a, b) => dateValue(b?.generated_at || b?.created_at) - dateValue(a?.generated_at || a?.created_at))
+    .map(compactCentralSnapshot)
+
+  const benchmarkFromSnapshots = compactSnapshots
+    .map(snapshot => snapshot.latest_benchmark_opportunity)
+    .filter(Boolean)
+
+  const benchmarkFromEvents = ecosystemEvents
+    .filter(event =>
+      String(event?.event_type || '').includes('benchmark')
+      || String(event?.source || '').includes('benchmark')
+    )
+    .map(extractBenchmarkOpportunityFromEvent)
+    .filter(Boolean)
+
+  const byKey = new Map<string, any>()
+  for (const opportunity of [...benchmarkFromSnapshots, ...benchmarkFromEvents]) {
+    if (!opportunity) continue
+    const key = opportunity.id
+      || opportunity.source_url
+      || [opportunity.keyword, opportunity.title].filter(Boolean).join('|')
+    if (!key) continue
+    const previous = byKey.get(key)
+    if (!previous || dateValue(opportunity.created_at) >= dateValue(previous.created_at)) {
+      byKey.set(key, opportunity)
+    }
+  }
+
+  const laraBenchmarkOpportunities = Array.from(byKey.values())
+    .sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || numberValue(b.score) - numberValue(a.score))
+    .slice(0, 10)
+
+  return {
+    generated_at: new Date().toISOString(),
+    source: 'ecosystem_context_snapshots+ecosystem_events',
+    snapshot_count: compactSnapshots.length,
+    latest_agent_summaries: compactSnapshots
+      .filter(snapshot => snapshot.summary)
+      .slice(0, 12)
+      .map(snapshot => ({
+        agent: snapshot.agent,
+        summary: snapshot.summary,
+        created_by: snapshot.created_by,
+        generated_at: snapshot.generated_at,
+      })),
+    snapshots: compactSnapshots.slice(0, 16),
+    lara_benchmark_latest: laraBenchmarkOpportunities[0] || null,
+    lara_benchmark_opportunities: laraBenchmarkOpportunities,
+    editorial_guidance: [
+      'Use snapshots da Central como contexto consolidado antes de escolher pauta.',
+      'Use oportunidades da Lara como inteligencia competitiva, nunca como texto final.',
+      'Separe fato publico, inferencia editorial e recomendacao comercial.',
+    ],
+  }
+}
+
 function summarizeSignals(params: {
   leads: any[]
   visitors: any[]
@@ -529,6 +664,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     safeQuery('meta_social_ai_suggestions', supabase.from('meta_social_ai_suggestions').select('id, platform, intent, sentiment, priority, lead_score, summary, recommended_action, status, updated_at').order('updated_at', { ascending: false }).limit(60)),
     safeQuery('broker_candidates', supabase.from('broker_candidates').select('id, full_name, email, phone, city, state, creci, creci_state, broker_type, current_company, experience_years, market_focus, regions, specialties, social_links, source, utm_source, utm_medium, utm_campaign, status, potential_score, potential_level, ai_summary, ai_recommendation, visitor_id, metadata, created_at, updated_at, last_activity_at').gte('created_at', since).order('created_at', { ascending: false }).limit(limit)),
     safeQuery('ecosystem_events', supabase.from('ecosystem_events').select('id, event_type, actor_type, entity_type, entity_id, source, label, metadata, importance_score, occurred_at').gte('occurred_at', since).order('occurred_at', { ascending: false }).limit(120)),
+    safeQuery('ecosystem_context_snapshots', supabase.from('ecosystem_context_snapshots').select('id, agent, scope, summary, signals, source_counts, source_summary, created_by, generated_at, created_at').order('generated_at', { ascending: false }).limit(50)),
     safeQuery('virtual_brokers', supabase.from('virtual_brokers').select('id, name, is_active, whatsapp_instance_id, created_at').order('created_at', { ascending: false }).limit(80)),
   ])
 
@@ -550,6 +686,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
   const socialSuggestions = safeArray(byLabel.meta_social_ai_suggestions?.data, 60)
   const brokerCandidates = safeArray(byLabel.broker_candidates?.data, limit)
   const ecosystemEvents = safeArray(byLabel.ecosystem_events?.data, 120)
+  const ecosystemSnapshots = safeArray(byLabel.ecosystem_context_snapshots?.data, 50)
   const virtualBrokers = safeArray(byLabel.virtual_brokers?.data, 80)
 
   const normalizedPhone = normalize(options.phone).replace(/\D/g, '')
@@ -582,6 +719,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     brokerCandidates,
     virtualBrokers,
   })
+  const centralIntelligence = buildCentralIntelligenceContext(ecosystemSnapshots, ecosystemEvents, agent)
 
   const context = {
     version: '2026-05-16',
@@ -597,7 +735,16 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     unavailable_sources: results.filter(result => !result.ok).map(result => ({ source: result.label, error: result.error })),
     source_counts: buildSourceCounts(results),
     executive_summary: buildExecutiveSummary(signals, agent),
-    signals,
+    signals: {
+      ...signals,
+      central_intelligence: {
+        snapshot_count: centralIntelligence.snapshot_count,
+        latest_agent_summaries: centralIntelligence.latest_agent_summaries,
+        lara_benchmark_latest: centralIntelligence.lara_benchmark_latest,
+        lara_benchmark_opportunities: centralIntelligence.lara_benchmark_opportunities,
+      },
+    },
+    central_intelligence: centralIntelligence,
     lead_profile: leadProfile,
     lead_events: leadEvents.slice(-120),
     leads,
@@ -620,6 +767,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     broker_candidates: brokerCandidates,
     virtual_brokers: virtualBrokers,
     ecosystem_events: ecosystemEvents,
+    ecosystem_context_snapshots: centralIntelligence.snapshots,
   }
 
   return context
@@ -627,10 +775,13 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
 
 export function buildAgentContextBrief(context: any) {
   const signals = context?.signals || {}
+  const central = context?.central_intelligence || signals.central_intelligence || {}
   const lines = [
     context?.executive_summary,
     '',
     'Sinais prioritarios:',
+    ...(central.latest_agent_summaries || []).slice(0, 4).map((item: any) => `- Central ${item.agent || 'global'}: ${safeText(item.summary).slice(0, 180)}`),
+    ...(central.lara_benchmark_opportunities || []).slice(0, 4).map((item: any) => `- Lara benchmark: ${item.keyword || item.title} | score ${item.score || 'n/a'} | ${safeText(item.summary).slice(0, 180)}`),
     ...(signals.top_lead_cities || []).slice(0, 5).map((item: any) => `- Cidade: ${item.label} (${item.count})`),
     ...(signals.top_search_terms || []).slice(0, 5).map((item: any) => `- Busca/filtro: ${item.label} (${item.count})`),
     ...(signals.hot_properties || []).slice(0, 5).map((item: any) => `- Imovel quente: ${item.title} | score ${item.score}`),

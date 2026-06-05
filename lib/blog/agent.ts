@@ -9,7 +9,7 @@ import {
 } from '@/lib/ai/config'
 import { createAdminClient } from '@/lib/supabase/server'
 import { chooseResearchTopicFromBank, createResearchReport, getResearchTopicBank } from '@/lib/research/pilger'
-import { getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
+import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intelligence/ecosystem'
 import { BLOG_AUTHOR_NAME } from './author'
 import { pickPublicBlogSummary, slugifyBlog } from './types'
 import { buildEditorialVisualPlan } from '@/lib/media/editorial-visual-plan'
@@ -77,7 +77,10 @@ function contextCity(context: any, fallback = 'Santa Catarina') {
 
 function contextResearchSummary(context: any) {
     return cleanContextText(
-        context.external_research?.summary
+        context.lara_benchmark_handoff?.opportunity?.summary
+        || context.central_intelligence?.lara_benchmark_latest?.summary
+        || context.central_intelligence?.latest_agent_summaries?.find((item: any) => item?.summary)?.summary
+        || context.external_research?.summary
         || context.external_research?.executive_summary
         || context.external_research?.report_markdown
         || context.executive_summary
@@ -619,6 +622,9 @@ function appendEditorialLinkSections(
 
 function inferResearchTopic(context: any, topic?: string) {
     if (topic?.trim()) return topic.trim()
+    const laraOpportunity = context.central_intelligence?.lara_benchmark_opportunities?.find((item: any) => item?.keyword || item?.title)
+    if (laraOpportunity?.keyword) return String(laraOpportunity.keyword)
+    if (laraOpportunity?.title) return String(laraOpportunity.title)
     const radar = context.market_radar_insights?.find((item: any) => item?.keyword)
     if (radar?.keyword) return String(radar.keyword)
     const property = context.properties?.find((item: any) => item?.city || item?.property_type)
@@ -734,6 +740,12 @@ async function enrichWithExternalResearch(
                 landing_pages: context.landing_pages?.slice(0, 20),
                 existing_blog_posts: context.existing_blog_posts?.slice(0, 20),
                 marketing_creatives: context.marketing_creatives?.slice(0, 12),
+                central_intelligence: {
+                    snapshot_count: context.central_intelligence?.snapshot_count || 0,
+                    latest_agent_summaries: context.central_intelligence?.latest_agent_summaries?.slice(0, 8),
+                    lara_benchmark_opportunities: context.central_intelligence?.lara_benchmark_opportunities?.slice(0, 8),
+                    editorial_guidance: context.central_intelligence?.editorial_guidance,
+                },
             },
         })
 
@@ -758,9 +770,14 @@ async function enrichWithExternalResearch(
 
 async function callBlogAgent(prompt: string, context: any, topic?: string): Promise<BlogAgentDraft> {
     const provider = await getActiveAIProvider()
+    const centralBrief = buildAgentContextBrief(context)
     const userPrompt = [
         topic ? `Tema sugerido pelo admin: ${topic}` : 'Escolha a melhor pauta com base nos dados.',
         'Regra de profundidade: se a decisao for create_article, entregue article_markdown completo. Blog deve ter pelo menos 950 palavras; noticia deve ter pelo menos 650 palavras. Se nao houver base factual/contextual suficiente, retorne observe ou reject.',
+        'Use primeiro a Central de Inteligencia: priorize central_intelligence, lara_benchmark_opportunities, latest_research, market_radar_insights, sinais de leads e estoque real. Quando usar Lara/benchmark, trate como inteligencia competitiva interna e nao mencione Lara, Benchmark Editorial ou pauta de benchmark para o leitor.',
+        '',
+        'Briefing consolidado da Central de Inteligencia:',
+        centralBrief || 'Sem briefing consolidado disponivel; use o JSON bruto com prudencia.',
         '',
         'Contexto do ecossistema em JSON:',
         JSON.stringify(context, null, 2),
