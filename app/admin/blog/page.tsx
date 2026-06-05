@@ -29,6 +29,11 @@ type BlogPost = {
 type BlogStatusFilter = 'all' | 'under_review' | 'published' | 'draft' | 'archived'
 type AdminContentMode = 'blog' | 'news'
 type EditorialViewMode = 'preview' | 'edit'
+type EditorialPreviewImage = {
+    url: string
+    alt: string
+    credit?: string
+}
 
 const DEFAULT_AUTHOR_NAME = 'Guilherme Pilger'
 
@@ -234,6 +239,54 @@ function markdownWithoutLeadingHeading(markdown: string) {
     return lines.join('\n')
 }
 
+function cleanPreviewImageCredit(value: string) {
+    return value
+        .replace(/^Fonte da imagem:\s*/i, '')
+        .replace(/\s*[-\u2013\u2014]\s*\[ver origem\]\((https?:\/\/[^\s)]+)\)\.?/gi, '.')
+        .replace(/\s*[-\u2013\u2014]\s*ver origem\.?/gi, '.')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function buildApprovalPreview(markdown: string) {
+    const lines = markdownWithoutLeadingHeading(markdown).split(/\r?\n/)
+    const bodyLines: string[] = []
+    const images: EditorialPreviewImage[] = []
+
+    for (const line of lines) {
+        const trimmed = line.trim()
+        const image = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)$/)
+
+        if (image) {
+            images.push({ alt: image[1] || 'Imagem editorial', url: image[2] })
+            continue
+        }
+
+        if (/^Fonte da imagem:/i.test(trimmed)) {
+            const lastImage = images[images.length - 1]
+            if (lastImage) lastImage.credit = cleanPreviewImageCredit(trimmed)
+            continue
+        }
+
+        bodyLines.push(line)
+    }
+
+    const bodyMarkdown = bodyLines.join('\n').trim()
+    const plainText = bodyMarkdown
+        .replace(/https?:\/\/\S+/g, ' ')
+        .replace(/[#*_>`[\]()]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    const wordCount = plainText ? plainText.split(' ').filter(word => word.length > 1).length : 0
+
+    return {
+        html: markdownToHtml(bodyMarkdown),
+        images,
+        readingMinutes: Math.max(1, Math.ceil(wordCount / 180)),
+        wordCount,
+    }
+}
+
 export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode }) {
     const config = CONTENT_CONFIG[mode]
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -366,8 +419,16 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     const isDraft = currentStatus === 'draft'
     const isUnderReview = currentStatus === 'under_review'
     const isArchived = currentStatus === 'archived'
-    const previewHtml = useMemo(() => markdownToHtml(markdownWithoutLeadingHeading(form.content_markdown || '')), [form.content_markdown])
+    const approvalPreview = useMemo(() => buildApprovalPreview(form.content_markdown || ''), [form.content_markdown])
     const previewCover = form.cover_image_url || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/fundo%20imobiliaria.jpeg'
+    const previewImages = useMemo(() => {
+        const uniqueImages = new Map<string, EditorialPreviewImage>()
+        if (previewCover) uniqueImages.set(previewCover, { alt: 'Imagem de capa', url: previewCover })
+        approvalPreview.images.forEach(image => {
+            if (!uniqueImages.has(image.url)) uniqueImages.set(image.url, image)
+        })
+        return Array.from(uniqueImages.values())
+    }, [approvalPreview.images, previewCover])
     const publicPath = mode === 'news' ? `/noticias/${form.slug || ''}` : `/blog/${form.slug || ''}`
     const actionButtons = (
         <div className="admin-blog-actions">
@@ -491,7 +552,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                             <span className="admin-blog-list-copy">
                                 <strong>{post.title}</strong>
                                 <small>{statusLabels[post.status] || post.status}</small>
-                                <em>/blog/{post.slug}</em>
+                                <em>/{mode === 'news' ? 'noticias' : 'blog'}/{post.slug}</em>
                             </span>
                         </button>
                     ))}
@@ -518,26 +579,50 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                         </div>
                     </div>
 
+                    {viewMode === 'preview' ? <div className="admin-blog-approval-bar">{actionButtons}</div> : null}
+
                     {viewMode === 'preview' ? (
                         <section className="admin-blog-preview">
-                            <div className="admin-blog-preview-hero">
-                                <div>
+                            <article className="admin-blog-preview-article">
+                                <header className="admin-blog-preview-hero">
                                     <span>{form.category || config.defaultCategory}</span>
                                     <h2>{form.title || `Titulo do ${config.itemSingular.toLowerCase()}`}</h2>
                                     {form.excerpt ? <p>{form.excerpt}</p> : null}
-                                    <small>{statusLabels[currentStatus] || currentStatus} - {formatPreviewDate(form.published_at)}</small>
-                                </div>
+                                    <div className="admin-blog-preview-meta">
+                                        <small>{statusLabels[currentStatus] || currentStatus}</small>
+                                        <small>{formatPreviewDate(form.published_at)}</small>
+                                        <small>{approvalPreview.wordCount} palavras</small>
+                                        <small>{approvalPreview.readingMinutes} min leitura</small>
+                                    </div>
+                                </header>
+                                <div className="admin-blog-preview-content" dangerouslySetInnerHTML={{ __html: approvalPreview.html || '<p>Sem conteudo para visualizar.</p>' }} />
+                            </article>
+
+                            <aside className="admin-blog-preview-panel">
                                 <div className="admin-blog-preview-cover" style={{ backgroundImage: `url(${previewCover})` }} />
-                            </div>
-                            <article className="admin-blog-preview-content" dangerouslySetInnerHTML={{ __html: previewHtml || '<p>Sem conteudo para visualizar.</p>' }} />
-                            {form.approval_notes?.length ? (
-                                <div className="admin-blog-preview-notes">
-                                    <strong>Notas para aprovacao</strong>
-                                    <ul>
-                                        {form.approval_notes.map(note => <li key={note}>{note}</li>)}
-                                    </ul>
+
+                                <div className="admin-blog-preview-box">
+                                    <strong>Imagens da materia</strong>
+                                    <p>{previewImages.length} imagem{previewImages.length === 1 ? '' : 's'} separada{previewImages.length === 1 ? '' : 's'} do texto para facilitar a leitura.</p>
+                                    <div className="admin-blog-preview-media">
+                                        {previewImages.slice(0, 6).map((image, index) => (
+                                            <figure key={`${image.url}-${index}`}>
+                                                <span style={{ backgroundImage: `url(${image.url})` }} />
+                                                <figcaption>{image.credit || image.alt || `Imagem ${index + 1}`}</figcaption>
+                                            </figure>
+                                        ))}
+                                    </div>
                                 </div>
-                            ) : null}
+
+                                {form.approval_notes?.length ? (
+                                    <div className="admin-blog-preview-box admin-blog-preview-notes">
+                                        <strong>Notas para aprovacao</strong>
+                                        <ul>
+                                            {form.approval_notes.map(note => <li key={note}>{note}</li>)}
+                                        </ul>
+                                    </div>
+                                ) : null}
+                            </aside>
                         </section>
                     ) : (
                         <>
@@ -591,7 +676,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                         </>
                     )}
 
-                    {actionButtons}
+                    {viewMode === 'edit' ? actionButtons : null}
                 </main>
             </section>
 
@@ -644,37 +729,57 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                 .admin-blog-two { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .admin-blog-content { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; min-height: 430px; }
                 .admin-blog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-                .admin-blog-preview { background: #fff; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 0; overflow: hidden; }
-                .admin-blog-preview-hero { align-items: center; background: linear-gradient(180deg, #fff, #faf7f0); border-bottom: 1px solid rgba(201,169,110,.16); display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) 220px; padding: 22px; }
-                .admin-blog-preview-hero span { color: var(--gold-dark); display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; margin-bottom: 8px; text-transform: uppercase; }
-                .admin-blog-preview-hero h2 { color: #171512; font-family: var(--font-serif); font-size: clamp(1.32rem, 2.1vw, 2rem); line-height: 1.06; margin: 0; max-width: 860px; }
-                .admin-blog-preview-hero p { color: var(--text-secondary); font-size: .92rem; line-height: 1.56; margin: 10px 0 0; max-width: 860px; }
-                .admin-blog-preview-hero small { align-items: center; color: var(--text-muted); display: flex; font-size: .74rem; font-weight: 850; margin-top: 12px; }
-                .admin-blog-preview-cover { background-position: center; background-size: cover; border: 1px solid rgba(201,169,110,.18); border-radius: 12px; min-height: 132px; }
-                .admin-blog-preview-content { background: #fff; margin: 0 auto; max-width: 860px; padding: 24px 26px 30px; width: 100%; }
-                .admin-blog-preview-content h1, .admin-blog-preview-content h2, .admin-blog-preview-content h3 { color: #171512; font-family: var(--font-serif); line-height: 1.12; }
-                .admin-blog-preview-content h1 { font-size: 1.7rem; }
-                .admin-blog-preview-content h2 { font-size: 1.32rem; margin: 26px 0 10px; }
-                .admin-blog-preview-content h3 { font-size: 1.08rem; margin: 20px 0 8px; }
-                .admin-blog-preview-content p, .admin-blog-preview-content li { color: #50483e; font-size: .94rem; line-height: 1.72; }
-                .admin-blog-preview-content p { margin: 0 0 12px; }
-                .admin-blog-preview-content a { color: #9b7635; font-weight: 900; }
-                .admin-blog-preview-content ul { margin: 0 0 16px; padding-left: 22px; }
-                .admin-blog-preview-content .blog-inline-image { margin: 22px 0 10px; }
-                .admin-blog-preview-content .blog-inline-image img { aspect-ratio: 16 / 9; border: 1px solid rgba(201,169,110,.14); border-radius: 12px; display: block; max-height: 360px; object-fit: cover; width: 100%; }
-                .admin-blog-preview-notes { background: #faf7f0; border-top: 1px solid rgba(201,169,110,.18); display: grid; gap: 10px; padding: 16px 22px; }
-                .admin-blog-preview-notes strong { color: var(--gold-dark); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
-                .admin-blog-preview-notes ul { color: var(--text-secondary); display: grid; gap: 7px; font-size: .84rem; line-height: 1.5; margin: 0; padding-left: 18px; }
+                .admin-blog-approval-bar { background: #fffaf2; border: 1px solid rgba(201,169,110,.2); border-radius: 12px; padding: 10px; position: sticky; top: 10px; z-index: 3; }
+                .admin-blog-approval-bar .admin-blog-actions { gap: 8px; }
+                .admin-blog-approval-bar :global(.btn) { min-height: 34px; padding: 8px 10px; }
+                .admin-blog-preview { align-items: start; background: #faf8f3; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 300px; overflow: visible; padding: 14px; }
+                .admin-blog-preview-article { background: #fff; border: 1px solid rgba(201,169,110,.16); border-radius: 12px; min-width: 0; overflow: hidden; }
+                .admin-blog-preview-hero { background: linear-gradient(180deg, #fff, #fbf7ef); border-bottom: 1px solid rgba(201,169,110,.14); display: grid; gap: 9px; padding: 22px 24px 18px; }
+                .admin-blog-preview-hero span { color: var(--gold-dark); display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; text-transform: uppercase; }
+                .admin-blog-preview-hero h2 { color: #171512; font-family: var(--font-serif); font-size: clamp(1.38rem, 2vw, 2rem); line-height: 1.08; margin: 0; max-width: 760px; }
+                .admin-blog-preview-hero p { color: var(--text-secondary); font-size: .95rem; line-height: 1.58; margin: 0; max-width: 760px; }
+                .admin-blog-preview-meta { align-items: center; display: flex; flex-wrap: wrap; gap: 7px; padding-top: 4px; }
+                .admin-blog-preview-meta small { background: #f5efe4; border: 1px solid rgba(201,169,110,.18); border-radius: 999px; color: var(--text-secondary); display: inline-flex; font-size: .72rem; font-weight: 850; padding: 5px 9px; }
+                .admin-blog-preview-content { background: #fff; margin: 0 auto; max-width: 760px; padding: 24px 30px 34px; width: 100%; }
+                .admin-blog-preview-content :global(h1),
+                .admin-blog-preview-content :global(h2),
+                .admin-blog-preview-content :global(h3) { color: #171512; font-family: var(--font-serif); line-height: 1.16; }
+                .admin-blog-preview-content :global(h1) { font-size: 1.7rem; margin: 0 0 12px; }
+                .admin-blog-preview-content :global(h2) { font-size: 1.36rem; margin: 28px 0 10px; }
+                .admin-blog-preview-content :global(h3) { font-size: 1.12rem; margin: 20px 0 8px; }
+                .admin-blog-preview-content :global(p),
+                .admin-blog-preview-content :global(li) { color: #4d463d; font-size: 1rem; line-height: 1.76; }
+                .admin-blog-preview-content :global(p) { margin: 0 0 13px; }
+                .admin-blog-preview-content :global(a) { color: #9b7635; font-weight: 900; }
+                .admin-blog-preview-content :global(ul) { margin: 0 0 17px; padding-left: 22px; }
+                .admin-blog-preview-content :global(.blog-inline-image),
+                .admin-blog-preview-content :global(img) { display: none; }
+                .admin-blog-preview-panel { align-self: start; display: grid; gap: 12px; position: sticky; top: 78px; }
+                .admin-blog-preview-cover { aspect-ratio: 16 / 10; background-position: center; background-size: cover; border: 1px solid rgba(201,169,110,.18); border-radius: 12px; min-height: 0; }
+                .admin-blog-preview-box { background: #fff; border: 1px solid rgba(201,169,110,.16); border-radius: 12px; display: grid; gap: 10px; padding: 12px; }
+                .admin-blog-preview-box > strong { color: var(--gold-dark); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+                .admin-blog-preview-box > p { color: var(--text-muted); font-size: .8rem; line-height: 1.45; margin: 0; }
+                .admin-blog-preview-media { display: grid; gap: 10px; max-height: 420px; overflow: auto; padding-right: 2px; }
+                .admin-blog-preview-media figure { display: grid; gap: 6px; margin: 0; }
+                .admin-blog-preview-media span { aspect-ratio: 16 / 9; background-position: center; background-size: cover; border-radius: 10px; display: block; }
+                .admin-blog-preview-media figcaption { color: var(--text-muted); font-size: .72rem; line-height: 1.35; }
+                .admin-blog-preview-notes { background: #fffdf8; }
+                .admin-blog-preview-notes ul { color: var(--text-secondary); display: grid; gap: 7px; font-size: .82rem; line-height: 1.48; margin: 0; padding-left: 18px; }
                 .danger { color: #dc2626 !important; }
+                @media (max-width: 1180px) {
+                    .admin-blog-preview { grid-template-columns: 1fr; }
+                    .admin-blog-preview-panel { position: static; }
+                    .admin-blog-preview-media { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; }
+                }
                 @media (max-width: 900px) {
                     .admin-header, .admin-blog-agent, .admin-blog-editor-head { grid-template-columns: 1fr; flex-direction: column; }
                     .admin-blog-editor-head { align-items: stretch; }
                     .admin-blog-view-toggle { justify-content: center; width: 100%; }
                     .admin-blog-view-toggle button { justify-content: center; width: 100%; }
-                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two, .admin-blog-preview-hero { grid-template-columns: 1fr; }
-                    .admin-blog-preview-cover { min-height: 190px; }
+                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two { grid-template-columns: 1fr; }
+                    .admin-blog-preview { padding: 10px; }
                     .admin-blog-preview-content { padding: 20px 16px 24px; }
-                    .admin-blog-preview-content .blog-inline-image img { max-height: 260px; }
+                    .admin-blog-preview-media { grid-template-columns: 1fr; }
                 }
             `}</style>
         </div>
