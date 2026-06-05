@@ -357,6 +357,14 @@ function buildCentralIntelligenceContext(snapshots: any[], ecosystemEvents: any[
     'creative',
     'blog',
     'news',
+    'whatsapp',
+    'social',
+    'distribution',
+    'publisher',
+    'property',
+    'events',
+    'recruiting',
+    'ceo',
   ])
   const compactSnapshots = snapshots
     .filter(snapshot => relevantAgents.has(String(snapshot?.agent || '')) || String(snapshot?.scope || '') === 'global')

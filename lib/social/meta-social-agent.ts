@@ -1,5 +1,6 @@
 import { chatWithGemini } from '@/lib/gemini'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type PlatformKey = 'instagram' | 'facebook'
@@ -229,9 +230,11 @@ export async function analyzeMetaSocialInbox({
   }
 
   let ecosystemContext: Record<string, unknown> | null = null
+  let centralSnapshotContext: any = null
   try {
     const supabase = createAdminClient()
-    const context = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 80 })
+    const context = await getAgentEcosystemContext({ supabase, agent: 'social', days: 30, limit: 80 })
+    centralSnapshotContext = context
     ecosystemContext = {
       brief: buildAgentContextBrief(context),
       signals: context.signals,
@@ -273,6 +276,42 @@ export async function analyzeMetaSocialInbox({
       },
     }).catch((error) => {
       console.warn('[Meta Social Agent] Ecosystem event failed:', error?.message || error)
+    })
+    await saveAgentCentralSnapshot({
+      agentId: 'social-attendance-agent',
+      createdBy: 'meta-social-agent',
+      context: centralSnapshotContext || {
+        agent: 'social',
+        period: { label: 'ultimos 30 dias' },
+        signals: ecosystemContext?.signals || {},
+        source_counts: ecosystemContext?.source_counts || {},
+      },
+      summary: `Atendimento social analisou ${items.length} itens e gerou ${saved.length} sugestao(oes). Principal sinal: ${truncate(top?.summary, 240) || top?.intent || 'sem destaque'}.`,
+      signals: {
+        latest_social_inbox_analysis: {
+          analyzed: items.length,
+          saved: saved.length,
+          top_platform: top?.platform || null,
+          top_intent: top?.intent || null,
+          top_priority: top?.priority || null,
+          top_score: top?.lead_score || null,
+          top_summary: truncate(top?.summary, 500),
+          suggestions: saved.slice(0, 8).map((item: any) => ({
+            id: item.id,
+            platform: item.platform,
+            source_type: item.source_type,
+            intent: item.intent,
+            sentiment: item.sentiment,
+            priority: item.priority,
+            lead_score: item.lead_score,
+            summary: truncate(item.summary, 360),
+            recommended_action: truncate(item.recommended_action, 360),
+            created_at: item.created_at,
+          })),
+        },
+      },
+    }).catch((error) => {
+      console.warn('[Meta Social Agent] central snapshot failed:', error?.message || error)
     })
   }
 

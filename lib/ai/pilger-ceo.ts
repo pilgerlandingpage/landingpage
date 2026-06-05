@@ -9,6 +9,7 @@ import {
 import { sendAlertToAdmins } from '../ads/whatsapp-alerts'
 import { getCeoGeminiModel, getCeoOpenAIModel, getCeoProvider } from './config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '../intelligence/ecosystem'
+import { saveAgentCentralSnapshot } from '../intelligence/agent-runtime'
 
 function getSupabase() {
   return createClient(
@@ -331,13 +332,64 @@ export async function collectMarketRadarData(timeSlot?: string) {
           })
 
           if (insight.ai_used) aiInsightsUsed += 1
-          results.push({ ...trend, insight })
+          results.push({
+            ...trend,
+            keyword: radar.keyword,
+            location: radar.location || 'BR',
+            insight,
+          })
         }
       } catch (err) {
         console.error(`[Radar] Erro ao coletar keyword "${radar.keyword}":`, err)
       }
     }
   }
+
+  if (results.length > 0) {
+    const topOpportunities = results
+      .map((result: any) => ({
+        keyword: result.keyword,
+        location: result.location,
+        trend_score: result.currentScore,
+        opportunity_score: result.insight?.opportunity_score,
+        temperature: result.insight?.market_temperature,
+        summary: result.insight?.summary,
+        content_opportunities: result.insight?.content_opportunities || [],
+      }))
+      .sort((a: any, b: any) => Number(b.opportunity_score || 0) - Number(a.opportunity_score || 0))
+      .slice(0, 12)
+
+    await saveAgentCentralSnapshot({
+      supabase,
+      agentId: 'market-radar',
+      createdBy: 'market-radar-agent',
+      context: {
+        agent: 'radar',
+        period: {
+          label: `radar ${todayStr} ${timeSlot}`,
+          start: todayStr,
+          end: todayStr,
+        },
+        source_counts: {
+          market_radars_checked: results.length,
+          ai_insights_used: aiInsightsUsed,
+        },
+      },
+      summary: `Radar de mercado coletou ${results.length} sinais no slot ${timeSlot}. Maior oportunidade: ${topOpportunities[0]?.keyword || 'sem destaque'}.`,
+      signals: {
+        latest_market_radar_run: {
+          date: todayStr,
+          time_slot: timeSlot,
+          collected: results.length,
+          ai_insights_used: aiInsightsUsed,
+          top_opportunities: topOpportunities,
+        },
+      },
+    }).catch((snapshotError: any) => {
+      console.warn('[Market Radar] central snapshot failed:', snapshotError?.message || snapshotError)
+    })
+  }
+
   return results
 }
 

@@ -7,6 +7,7 @@ import {
 } from '@/lib/ai/config'
 import { createAdminClient } from '@/lib/supabase/server'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import OpenAI from 'openai'
 
 type ResearchDepth = 'leve' | 'media' | 'profunda'
@@ -382,6 +383,32 @@ export async function createResearchReport(input: ResearchReportInput) {
             },
         }).catch((eventError: any) => {
             console.warn('[Research Pilger] ecosystem event failed:', eventError?.message || eventError)
+        })
+        await saveAgentCentralSnapshot({
+            supabase,
+            agentId: 'research-pilger',
+            createdBy: input.requester || 'research-pilger',
+            context: ecosystemContext || {
+                agent: 'research',
+                period: { label: 'ultimos 30 dias' },
+                source_counts: {},
+            },
+            summary: `Pesquisa externa concluida: "${report.topic}". ${report.executive_summary || ''}`.trim(),
+            signals: {
+                latest_research_report: {
+                    id: report.id,
+                    topic: report.topic,
+                    requester: input.requester || 'manual',
+                    depth,
+                    summary: report.executive_summary,
+                    sources_count: Array.isArray(report.sources) ? report.sources.length : 0,
+                    queries: report.queries || [],
+                    created_at: report.created_at,
+                    updated_at: report.updated_at,
+                },
+            },
+        }).catch((snapshotError: any) => {
+            console.warn('[Research Pilger] central snapshot failed:', snapshotError?.message || snapshotError)
         })
         return report
     } catch (error: any) {

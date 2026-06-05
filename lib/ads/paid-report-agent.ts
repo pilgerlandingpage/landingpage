@@ -1,5 +1,6 @@
 import { chatWithGemini } from '@/lib/gemini'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type PlatformKey = 'meta' | 'google'
@@ -435,6 +436,30 @@ export async function generatePaidMarketingReport({
     },
   }).catch((eventError) => {
     console.warn('[Paid Report Agent] ecosystem event failed:', eventError?.message || eventError)
+  })
+
+  await saveAgentCentralSnapshot({
+    supabase,
+    agentId: 'ads-analyst',
+    createdBy: 'paid-report-agent',
+    context: ecosystemContext,
+    summary: `Relatorio de trafego pago criado: "${data.title}". ${report.summary || ''}`.trim(),
+    signals: {
+      latest_paid_marketing_report: {
+        id: data.id,
+        title: data.title,
+        report_type: data.report_type,
+        period_start: data.period_start,
+        period_end: data.period_end,
+        summary: report.summary,
+        insights: report.insights.slice(0, 6),
+        recommendations: report.recommendations.slice(0, 6),
+        metrics: report.metrics || {},
+        created_at: data.created_at,
+      },
+    },
+  }).catch((snapshotError) => {
+    console.warn('[Paid Report Agent] central snapshot failed:', snapshotError?.message || snapshotError)
   })
 
   return {
