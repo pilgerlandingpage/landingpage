@@ -13,6 +13,7 @@ import {
     BenchmarkCompetitor,
     BenchmarkKeyword,
     BenchmarkOpportunity,
+    BenchmarkGeneratedPost,
     BenchmarkRun,
     BenchmarkIntent,
     getDomainFromUrl,
@@ -21,6 +22,9 @@ import {
     normalizeBenchmarkStatus,
     parseBenchmarkArray,
 } from '@/lib/benchmark-editorial/defaults'
+
+export const dynamic = 'force-dynamic'
+export const maxDuration = 800
 
 type BenchmarkState = {
     competitors: BenchmarkCompetitor[]
@@ -31,6 +35,8 @@ type BenchmarkState = {
 
 const ALL_KEYS = Object.values(BENCHMARK_CONFIG_KEYS)
 const BENCHMARK_PROMPT_MARKER = 'vigiar a internet publica'
+
+type HandoffType = 'blog' | 'news'
 
 function nowIso() {
     return new Date().toISOString()
@@ -101,6 +107,24 @@ async function readState(supabase: ReturnType<typeof createAdminClient>): Promis
     }
 }
 
+async function readRuntimeSettings(supabase: ReturnType<typeof createAdminClient>) {
+    const { data, error } = await supabase
+        .from('app_config')
+        .select('key,value')
+        .in('key', [
+            'benchmark_editorial_auto_handoff_enabled',
+            'benchmark_editorial_min_score',
+        ])
+
+    if (error) throw error
+
+    const rows = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    return {
+        autoHandoffEnabled: rows.benchmark_editorial_auto_handoff_enabled !== 'false',
+        minScore: clampScore(rows.benchmark_editorial_min_score, 70),
+    }
+}
+
 async function saveState(supabase: ReturnType<typeof createAdminClient>, state: Partial<BenchmarkState>) {
     const rows = Object.entries({
         [BENCHMARK_CONFIG_KEYS.competitors]: state.competitors,
@@ -127,6 +151,8 @@ async function saveState(supabase: ReturnType<typeof createAdminClient>, state: 
 async function ensureBenchmarkRuntimeConfig(supabase: ReturnType<typeof createAdminClient>) {
     const keys = [
         'benchmark_editorial_system_prompt',
+        'benchmark_editorial_auto_handoff_enabled',
+        'benchmark_editorial_min_score',
         'benchmark_editorial_weekdays',
         'benchmark_editorial_run_times',
         BENCHMARK_CONFIG_KEYS.competitors,
@@ -147,6 +173,22 @@ async function ensureBenchmarkRuntimeConfig(supabase: ReturnType<typeof createAd
         updates.push({
             key: 'benchmark_editorial_system_prompt',
             value: BENCHMARK_EDITORIAL_SYSTEM_PROMPT,
+            updated_at: updatedAt,
+        })
+    }
+
+    if (!rows.benchmark_editorial_auto_handoff_enabled) {
+        updates.push({
+            key: 'benchmark_editorial_auto_handoff_enabled',
+            value: 'true',
+            updated_at: updatedAt,
+        })
+    }
+
+    if (!rows.benchmark_editorial_min_score) {
+        updates.push({
+            key: 'benchmark_editorial_min_score',
+            value: '70',
             updated_at: updatedAt,
         })
     }
@@ -306,6 +348,125 @@ function buildHandoffContext(opportunity: BenchmarkOpportunity, type: 'blog' | '
     }
 }
 
+function handoffTypesForIntent(intent: BenchmarkIntent): HandoffType[] {
+    if (intent === 'blog') return ['blog']
+    if (intent === 'news') return ['news']
+    return ['blog', 'news']
+}
+
+function hasGeneratedPost(opportunity: BenchmarkOpportunity, type: HandoffType) {
+    if (opportunity.status === 'sent_to_both') return true
+    if (type === 'blog' && opportunity.status === 'sent_to_blog') return true
+    if (type === 'news' && opportunity.status === 'sent_to_news') return true
+    return Boolean(opportunity.generated_posts?.some(post => post.type === type))
+}
+
+function getHandoffStatus(posts: BenchmarkGeneratedPost[], previousStatus: BenchmarkOpportunity['status']) {
+    const hasBlog = posts.some(post => post.type === 'blog') || previousStatus === 'sent_to_blog' || previousStatus === 'sent_to_both'
+    const hasNews = posts.some(post => post.type === 'news') || previousStatus === 'sent_to_news' || previousStatus === 'sent_to_both'
+    if (hasBlog && hasNews) return 'sent_to_both' as const
+    if (hasBlog) return 'sent_to_blog' as const
+    if (hasNews) return 'sent_to_news' as const
+    return 'new' as const
+}
+
+async function runHandoffForType(params: {
+    supabase: ReturnType<typeof createAdminClient>
+    origin: string
+    opportunity: BenchmarkOpportunity
+    type: HandoffType
+    auto: boolean
+}) {
+    const handoffContext = buildHandoffContext(params.opportunity, params.type)
+    const result = params.type === 'news'
+        ? await runNewsAgentDraft({
+            topic: params.opportunity.keyword,
+            origin: params.origin,
+            source: params.auto ? 'lara_benchmark_auto_handoff' : 'lara_benchmark_handoff',
+            contextAugmentation: handoffContext,
+        })
+        : await runBlogAgentDraft({
+            topic: params.opportunity.keyword,
+            origin: params.origin,
+            source: params.auto ? 'lara_benchmark_auto_handoff' : 'lara_benchmark_handoff',
+            contextAugmentation: handoffContext,
+        })
+
+    const post = result.post
+    await recordEcosystemEvent({
+        supabase: params.supabase,
+        eventType: params.type === 'news' ? 'benchmark_sent_to_news' : 'benchmark_sent_to_blog',
+        actorType: 'agent',
+        entityType: 'blog_post',
+        entityId: post.id,
+        source: 'benchmark-editorial',
+        label: post.title,
+        importanceScore: 68,
+        metadata: {
+            opportunity_id: params.opportunity.id,
+            opportunity_title: params.opportunity.title,
+            benchmark_keyword: params.opportunity.keyword,
+            benchmark_source_url: params.opportunity.source_url,
+            handoff_target: params.type === 'news' ? 'clara-news' : 'isadora-blog',
+            handoff_mode: params.auto ? 'automatic' : 'manual',
+            type: params.type,
+            generated_by: params.type === 'news' ? 'news-intelligence' : 'blog-intelligence',
+            handoff_context: handoffContext,
+            status: post.status,
+        },
+    }).catch((eventError: any) => {
+        console.warn('[Benchmark Editorial] send ecosystem event failed:', eventError?.message || eventError)
+    })
+
+    return {
+        type: params.type,
+        id: post.id,
+        title: post.title,
+        status: post.status,
+        created_at: nowIso(),
+    } satisfies BenchmarkGeneratedPost
+}
+
+async function dispatchOpportunityToAgents(params: {
+    supabase: ReturnType<typeof createAdminClient>
+    origin: string
+    opportunity: BenchmarkOpportunity
+    targets: HandoffType[]
+    auto: boolean
+    skipExisting?: boolean
+}) {
+    const generatedPosts = [...(params.opportunity.generated_posts || [])]
+    const generatedTypes = new Set(generatedPosts.map(post => post.type))
+    const errors: string[] = []
+
+    for (const type of params.targets) {
+        if (params.skipExisting && (generatedTypes.has(type) || hasGeneratedPost(params.opportunity, type))) continue
+        try {
+            const generated = await runHandoffForType({
+                supabase: params.supabase,
+                origin: params.origin,
+                opportunity: params.opportunity,
+                type,
+                auto: params.auto,
+            })
+            generatedPosts.push(generated)
+            generatedTypes.add(type)
+        } catch (error: any) {
+            errors.push(`${type}: ${error?.message || String(error)}`)
+        }
+    }
+
+    return {
+        ...params.opportunity,
+        generated_posts: generatedPosts,
+        auto_handoff: params.auto || params.opportunity.auto_handoff,
+        handoff_last_run_at: nowIso(),
+        handoff_error: errors.length ? errors.join(' | ').slice(0, 500) : '',
+        status: getHandoffStatus(generatedPosts, params.opportunity.status),
+        updated_at: nowIso(),
+    } satisfies BenchmarkOpportunity
+}
+
 function isDefaultCompetitor(id: string) {
     return DEFAULT_BENCHMARK_COMPETITORS.some(item => item.id === id)
 }
@@ -445,8 +606,8 @@ export async function POST(request: NextRequest) {
                     },
                 })
 
-                const opportunity = buildOpportunityFromReport({ topic, intent, report, competitors: state.competitors })
-                const opportunities = [opportunity, ...state.opportunities].slice(0, 100)
+                let opportunity = buildOpportunityFromReport({ topic, intent, report, competitors: state.competitors })
+                let opportunities = [opportunity, ...state.opportunities].slice(0, 100)
                 const run: BenchmarkRun = {
                     id: randomUUID(),
                     topic,
@@ -524,7 +685,37 @@ export async function POST(request: NextRequest) {
                     })
                 }
 
-                return NextResponse.json({ opportunity, opportunities, runs, report })
+                const runtimeSettings = await readRuntimeSettings(supabase)
+                let autoHandoff: {
+                    enabled: boolean
+                    skipped?: boolean
+                    reason?: string
+                    minScore: number
+                    targets: HandoffType[]
+                } = {
+                    enabled: runtimeSettings.autoHandoffEnabled,
+                    minScore: runtimeSettings.minScore,
+                    targets: handoffTypesForIntent(intent),
+                }
+
+                if (!runtimeSettings.autoHandoffEnabled) {
+                    autoHandoff = { ...autoHandoff, skipped: true, reason: 'auto_handoff_disabled' }
+                } else if (opportunity.opportunity_score < runtimeSettings.minScore) {
+                    autoHandoff = { ...autoHandoff, skipped: true, reason: 'score_below_minimum' }
+                } else {
+                    opportunity = await dispatchOpportunityToAgents({
+                        supabase,
+                        origin: request.nextUrl.origin,
+                        opportunity,
+                        targets: autoHandoff.targets,
+                        auto: true,
+                        skipExisting: true,
+                    })
+                    opportunities = opportunities.map(item => item.id === opportunity.id ? opportunity : item)
+                    await saveState(supabase, { opportunities })
+                }
+
+                return NextResponse.json({ opportunity, opportunities, runs, report, autoHandoff })
             } catch (error: any) {
                 const run: BenchmarkRun = {
                     id: randomUUID(),
@@ -547,53 +738,27 @@ export async function POST(request: NextRequest) {
             const opportunity = state.opportunities.find(item => item.id === String(body?.id || ''))
             if (!opportunity) return NextResponse.json({ error: 'Oportunidade nao encontrada.' }, { status: 404 })
 
-            const handoffContext = buildHandoffContext(opportunity, type)
-            const result = type === 'news'
-                ? await runNewsAgentDraft({
-                    topic: opportunity.keyword,
-                    origin: request.nextUrl.origin,
-                    source: 'lara_benchmark_handoff',
-                    contextAugmentation: handoffContext,
-                })
-                : await runBlogAgentDraft({
-                    topic: opportunity.keyword,
-                    origin: request.nextUrl.origin,
-                    source: 'lara_benchmark_handoff',
-                    contextAugmentation: handoffContext,
-                })
-            const post = result.post
+            const updatedOpportunity = await dispatchOpportunityToAgents({
+                supabase,
+                origin: request.nextUrl.origin,
+                opportunity,
+                targets: [type],
+                auto: false,
+                skipExisting: false,
+            })
+            const post = [...(updatedOpportunity.generated_posts || [])].reverse().find(item => item.type === type)
+            if (!post) {
+                return NextResponse.json({
+                    error: updatedOpportunity.handoff_error || 'Nao foi possivel gerar o conteudo com a agente editorial.',
+                }, { status: 500 })
+            }
 
-            const status = type === 'news' ? 'sent_to_news' : 'sent_to_blog'
             const opportunities = state.opportunities.map(item =>
-                item.id === opportunity.id ? { ...item, status: status as any, updated_at: nowIso() } : item
+                item.id === opportunity.id ? updatedOpportunity : item
             )
             await saveState(supabase, { opportunities })
 
-            await recordEcosystemEvent({
-                supabase,
-                eventType: type === 'news' ? 'benchmark_sent_to_news' : 'benchmark_sent_to_blog',
-                actorType: 'agent',
-                entityType: 'blog_post',
-                entityId: post.id,
-                source: 'benchmark-editorial',
-                label: post.title,
-                importanceScore: 68,
-                metadata: {
-                    opportunity_id: opportunity.id,
-                    opportunity_title: opportunity.title,
-                    benchmark_keyword: opportunity.keyword,
-                    benchmark_source_url: opportunity.source_url,
-                    handoff_target: type === 'news' ? 'clara-news' : 'isadora-blog',
-                    type,
-                    generated_by: type === 'news' ? 'news-intelligence' : 'blog-intelligence',
-                    handoff_context: handoffContext,
-                    status: post.status,
-                },
-            }).catch((eventError: any) => {
-                console.warn('[Benchmark Editorial] send ecosystem event failed:', eventError?.message || eventError)
-            })
-
-            return NextResponse.json({ post, result, opportunities })
+            return NextResponse.json({ post, opportunity: updatedOpportunity, opportunities })
         }
 
         return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })

@@ -1,6 +1,14 @@
 export type BenchmarkIntent = 'blog' | 'news' | 'both'
 export type BenchmarkStatus = 'active' | 'paused'
-export type BenchmarkOpportunityStatus = 'new' | 'briefed' | 'sent_to_blog' | 'sent_to_news' | 'archived'
+export type BenchmarkOpportunityStatus = 'new' | 'briefed' | 'sent_to_blog' | 'sent_to_news' | 'sent_to_both' | 'archived'
+
+export type BenchmarkGeneratedPost = {
+    type: 'blog' | 'news'
+    id: string
+    title: string
+    status: string
+    created_at: string
+}
 
 export type BenchmarkCompetitor = {
     id: string
@@ -41,6 +49,10 @@ export type BenchmarkOpportunity = {
     queries: string[]
     outline: string[]
     status: BenchmarkOpportunityStatus
+    generated_posts?: BenchmarkGeneratedPost[]
+    auto_handoff?: boolean
+    handoff_last_run_at?: string
+    handoff_error?: string
     created_at: string
     updated_at?: string
 }
@@ -403,7 +415,7 @@ export function normalizeBenchmarkStatus(value: unknown): BenchmarkStatus {
 
 export function normalizeOpportunityStatus(value: unknown): BenchmarkOpportunityStatus {
     const selected = String(value || '').trim()
-    if (selected === 'briefed' || selected === 'sent_to_blog' || selected === 'sent_to_news' || selected === 'archived') return selected
+    if (selected === 'briefed' || selected === 'sent_to_blog' || selected === 'sent_to_news' || selected === 'sent_to_both' || selected === 'archived') return selected
     return 'new'
 }
 

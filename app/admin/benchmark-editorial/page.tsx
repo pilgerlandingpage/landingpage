@@ -80,11 +80,19 @@ function domainFromUrl(url?: string) {
 }
 
 function statusLabel(status: string) {
+    if (status === 'sent_to_both') return 'Blog e Noticias gerados'
     if (status === 'sent_to_blog') return 'Enviado para Blog'
     if (status === 'sent_to_news') return 'Enviado para Noticias'
     if (status === 'archived') return 'Arquivado'
     if (status === 'briefed') return 'Briefing pronto'
     return 'Novo'
+}
+
+function hasGeneratedPost(item: BenchmarkOpportunity, type: 'blog' | 'news') {
+    if (item.status === 'sent_to_both') return true
+    if (type === 'blog' && item.status === 'sent_to_blog') return true
+    if (type === 'news' && item.status === 'sent_to_news') return true
+    return Boolean(item.generated_posts?.some(post => post.type === type))
 }
 
 export default function BenchmarkEditorialPage() {
@@ -156,7 +164,7 @@ export default function BenchmarkEditorialPage() {
     const runBenchmark = async (event: FormEvent) => {
         event.preventDefault()
         try {
-            await postAction({ action: 'run_benchmark', topic, intent, depth }, 'Varredura da Lara concluida. Inteligencia registrada para Clara e Isadora.')
+            await postAction({ action: 'run_benchmark', topic, intent, depth }, 'Varredura concluida. Se bateu o score minimo, Isadora e Clara ja foram acionadas automaticamente.')
             setTopic('')
         } catch (error: any) {
             setAction({ status: 'error', message: error?.message || String(error) })
@@ -208,7 +216,7 @@ export default function BenchmarkEditorialPage() {
                 <div>
                     <span><Bot size={15} /> Inteligencia competitiva</span>
                     <h1>Benchmark Editorial</h1>
-                    <p>Lara monitora portais, concorrentes, rankings organicos e respostas de IA, registra a inteligencia e deixa material para Clara e Isadora trabalharem.</p>
+                    <p>Lara monitora portais, rankings organicos e respostas de IA, registra a inteligencia e aciona Clara e Isadora automaticamente quando encontra oportunidade forte.</p>
                 </div>
                 <button type="button" className="btn btn-outline" onClick={load} disabled={loading}>
                     {loading ? <Loader2 size={16} className="spin" /> : <Search size={16} />}
@@ -220,7 +228,7 @@ export default function BenchmarkEditorialPage() {
                 <div>
                     <span>Rodar agora</span>
                     <h2><Sparkles size={20} /> Rodar varredura competitiva</h2>
-                    <p>Use um tema especifico ou deixe vazio para a Lara escolher o termo monitorado mais importante e mapear fontes, lacunas e oportunidades.</p>
+                    <p>Use um tema especifico ou deixe vazio para a Lara escolher o termo monitorado mais importante. Oportunidades acima do score minimo viram rascunho com Isadora e/ou Clara automaticamente.</p>
                 </div>
                 <form onSubmit={runBenchmark} className="benchmark-run-form">
                     <input
@@ -333,7 +341,7 @@ export default function BenchmarkEditorialPage() {
                 <div className="panel-head">
                     <div>
                         <span><Target size={14} /> Oportunidades</span>
-                        <h3>Material pronto para Clara e Isadora</h3>
+                        <h3>Oportunidades e conteudos gerados</h3>
                     </div>
                 </div>
                 <div className="opportunity-list">
@@ -365,13 +373,19 @@ export default function BenchmarkEditorialPage() {
                                         <span>Sem fonte principal</span>
                                     )}
                                     {item.queries.slice(0, 4).map(query => <small key={query}>{query}</small>)}
+                                    {item.generated_posts?.map(post => (
+                                        <small key={`${post.type}-${post.id}`}>
+                                            {post.type === 'blog' ? 'Blog' : 'Noticia'}: {post.title}
+                                        </small>
+                                    ))}
+                                    {item.handoff_error && <small>Erro handoff: {item.handoff_error}</small>}
                                 </div>
                             </div>
                             <div className="opportunity-actions">
-                                <button type="button" onClick={() => sendOpportunity(item.id, 'blog')} disabled={item.status === 'sent_to_blog'}>
+                                <button type="button" onClick={() => sendOpportunity(item.id, 'blog')} disabled={hasGeneratedPost(item, 'blog')}>
                                     <FileText size={15} /> Isadora
                                 </button>
-                                <button type="button" onClick={() => sendOpportunity(item.id, 'news')} disabled={item.status === 'sent_to_news'}>
+                                <button type="button" onClick={() => sendOpportunity(item.id, 'news')} disabled={hasGeneratedPost(item, 'news')}>
                                     <Newspaper size={15} /> Clara
                                 </button>
                                 <button type="button" className="ghost" onClick={() => removeItem(item.id, 'archive_opportunity', 'Oportunidade arquivada.')}>
@@ -442,6 +456,7 @@ export default function BenchmarkEditorialPage() {
                 .opportunity-meta span, .source-row small {
                     background: rgba(201,169,110,.12); border-radius: 999px; color: var(--gold-dark); font-size: .68rem; font-weight: 900; padding: 6px 9px; text-transform: uppercase;
                 }
+                .source-row small { max-width: min(100%, 420px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
                 .opportunity-body h4 { font-family: var(--font-serif); font-size: 1.28rem; line-height: 1.12; margin: 0; }
                 .opportunity-body p { color: var(--text-secondary); line-height: 1.48; margin: 0; }
                 .source-row { align-items: center; display: flex; flex-wrap: wrap; gap: 7px; }

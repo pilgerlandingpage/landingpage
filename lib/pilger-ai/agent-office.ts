@@ -1468,6 +1468,17 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 ],
             },
             {
+                key: 'benchmark_editorial_auto_handoff_enabled',
+                label: 'Handoff automatico',
+                type: 'select',
+                fallback: 'true',
+                options: [
+                    { label: 'Ativado', value: 'true' },
+                    { label: 'Desativado', value: 'false' },
+                ],
+                help: 'Quando a Lara encontrar oportunidade acima do score minimo, aciona Isadora e/ou Clara automaticamente.',
+            },
+            {
                 key: 'benchmark_editorial_depth',
                 label: 'Profundidade padrao',
                 type: 'select',

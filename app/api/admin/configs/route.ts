@@ -191,6 +191,7 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     research_pilger_depth: 'media',
     research_pilger_topics: getDefaultResearchPilgerTopicsJson(),
     benchmark_editorial_enabled: 'true',
+    benchmark_editorial_auto_handoff_enabled: 'true',
     benchmark_editorial_schedule_enabled: 'true',
     benchmark_editorial_weekdays: 'mon,tue,wed,thu,fri',
     benchmark_editorial_run_times: '09,15',
@@ -332,6 +333,7 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'research_pilger_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'research_pilger_schedule_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'benchmark_editorial_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'benchmark_editorial_auto_handoff_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'benchmark_editorial_schedule_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'meta_social_inbox_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'meta_social_agent_enabled') return value === 'true' ? 'true' : 'false'
