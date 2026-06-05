@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Archive, Bot, CheckCircle2, Eye, FileText, Loader2, Plus, RotateCcw, Save, Send, Sparkles, Trash2 } from 'lucide-react'
+import { Archive, Bot, CheckCircle2, Edit3, Eye, FileText, Loader2, Plus, RotateCcw, Save, Send, Sparkles, Trash2 } from 'lucide-react'
+import { markdownToHtml } from '@/lib/blog/markdown'
 
 type BlogPost = {
     id: string
@@ -27,6 +28,7 @@ type BlogPost = {
 
 type BlogStatusFilter = 'all' | 'under_review' | 'published' | 'draft' | 'archived'
 type AdminContentMode = 'blog' | 'news'
+type EditorialViewMode = 'preview' | 'edit'
 
 const DEFAULT_AUTHOR_NAME = 'Guilherme Pilger'
 
@@ -214,6 +216,15 @@ function saveMessage(statusOverride: string | undefined, mode: AdminContentMode)
     return `${label} salvo.`
 }
 
+function shouldOpenPreview(post?: Partial<BlogPost> | null) {
+    return post?.status === 'under_review' || post?.status === 'published'
+}
+
+function formatPreviewDate(value?: string | null) {
+    if (!value) return 'Ainda nao publicado'
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value))
+}
+
 export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode }) {
     const config = CONTENT_CONFIG[mode]
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -225,6 +236,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     const [saving, setSaving] = useState(false)
     const [generating, setGenerating] = useState<'blog' | 'news' | null>(null)
     const [message, setMessage] = useState('')
+    const [viewMode, setViewMode] = useState<EditorialViewMode>('edit')
 
     const selectedPost = useMemo(() => posts.find(post => post.id === selectedId), [posts, selectedId])
 
@@ -249,18 +261,21 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     useEffect(() => {
         setSelectedId('new')
         setForm(buildEmptyPost(mode))
+        setViewMode('edit')
         void fetchPosts()
     }, [mode])
 
     function selectPost(post: BlogPost) {
         setSelectedId(post.id)
         setForm(post)
+        setViewMode(shouldOpenPreview(post) ? 'preview' : 'edit')
         setMessage('')
     }
 
     function newPost() {
         setSelectedId('new')
         setForm(buildEmptyPost(mode))
+        setViewMode('edit')
         setMessage('')
     }
 
@@ -280,6 +295,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
             await fetchPosts()
             setSelectedId(data.post.id)
             setForm(data.post)
+            setViewMode(shouldOpenPreview(data.post) ? 'preview' : 'edit')
         } catch (error: any) {
             setMessage(error?.message || `Erro ao gerar ${config.itemSingular.toLowerCase()}.`)
         } finally {
@@ -302,6 +318,7 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
             await fetchPosts()
             setSelectedId(data.post.id)
             setForm(data.post)
+            setViewMode(shouldOpenPreview(data.post) ? 'preview' : 'edit')
         } catch (error: any) {
             setMessage(error?.message || `Erro ao salvar ${config.itemSingular.toLowerCase()}.`)
         } finally {
@@ -340,6 +357,48 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
     const isDraft = currentStatus === 'draft'
     const isUnderReview = currentStatus === 'under_review'
     const isArchived = currentStatus === 'archived'
+    const previewHtml = useMemo(() => markdownToHtml(form.content_markdown || ''), [form.content_markdown])
+    const previewCover = form.cover_image_url || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/fundo%20imobiliaria.jpeg'
+    const publicPath = mode === 'news' ? `/noticias/${form.slug || ''}` : `/blog/${form.slug || ''}`
+    const actionButtons = (
+        <div className="admin-blog-actions">
+            <button className="btn btn-gold" disabled={saving} onClick={() => savePost()}>
+                {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
+                Salvar edicoes
+            </button>
+            {!isUnderReview && !isPublished && (
+                <button className="btn btn-outline" disabled={saving} onClick={() => savePost('under_review')}>
+                    <Send size={15} /> Enviar para analise
+                </button>
+            )}
+            {isPublished ? (
+                <>
+                    <button className="btn btn-outline" disabled>
+                        <CheckCircle2 size={15} /> Publicado
+                    </button>
+                    <button className="btn btn-outline" disabled={saving} onClick={() => savePost('draft')}>
+                        <RotateCcw size={15} /> Despublicar
+                    </button>
+                </>
+            ) : (
+                <button className="btn btn-outline" disabled={saving} onClick={() => savePost('published')}>
+                    <CheckCircle2 size={15} /> Publicar
+                </button>
+            )}
+            {!isDraft && !isPublished && (
+                <button className="btn btn-outline" disabled={saving} onClick={() => savePost('draft')}>
+                    <FileText size={15} /> Rascunho
+                </button>
+            )}
+            {!isArchived && (
+                <button className="btn btn-outline" disabled={saving} onClick={() => savePost('archived')}>
+                    <Archive size={15} /> Arquivar
+                </button>
+            )}
+            {isPublished && form.slug && <Link className="btn btn-outline" href={publicPath} target="_blank"><Eye size={15} /> Ver no site</Link>}
+            {selectedPost && <button className="btn btn-outline danger" disabled={saving} onClick={deletePost}><Trash2 size={15} /> Remover</button>}
+        </div>
+    )
 
     return (
         <div className="admin-blog-page">
@@ -435,91 +494,95 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                             O {config.itemSingular.toLowerCase()} selecionado esta fora do filtro <strong>{activeFilterLabel}</strong>. Limpe o filtro ou selecione outro item da lista.
                         </div>
                     )}
-                    <label>Titulo
-                        <input value={form.title || ''} onChange={event => setForm({ ...form, title: event.target.value })} />
-                    </label>
-                    <div className="admin-blog-two">
-                        <label>Slug
-                            <input value={form.slug || ''} onChange={event => setForm({ ...form, slug: event.target.value })} />
-                        </label>
-                        <label>Status
-                            <select value={form.status || 'draft'} onChange={event => setForm({ ...form, status: event.target.value })}>
-                                <option value="draft">Rascunho</option>
-                                <option value="under_review">Em analise</option>
-                                <option value="published">Publicado</option>
-                                <option value="archived">Arquivado</option>
-                            </select>
-                        </label>
+                    <div className="admin-blog-editor-head">
+                        <div>
+                            <span>{viewMode === 'preview' ? 'Previa para aprovacao' : 'Editor do conteudo'}</span>
+                            <strong>{form.title || `Novo ${config.itemSingular.toLowerCase()}`}</strong>
+                        </div>
+                        <div className="admin-blog-view-toggle" role="group" aria-label="Modo de visualizacao">
+                            <button type="button" className={viewMode === 'preview' ? 'active' : ''} onClick={() => setViewMode('preview')}>
+                                <Eye size={15} /> Previa
+                            </button>
+                            <button type="button" className={viewMode === 'edit' ? 'active' : ''} onClick={() => setViewMode('edit')}>
+                                <Edit3 size={15} /> Editar
+                            </button>
+                        </div>
                     </div>
-                    <label>Resumo
-                        <textarea rows={3} value={form.excerpt || ''} onChange={event => setForm({ ...form, excerpt: event.target.value })} />
-                    </label>
-                    <div className="admin-blog-two">
-                        <label>SEO title
-                            <input value={form.seo_title || ''} onChange={event => setForm({ ...form, seo_title: event.target.value })} />
-                        </label>
-                        <label>Palavra-chave principal
-                            <input value={form.primary_keyword || ''} onChange={event => setForm({ ...form, primary_keyword: event.target.value })} />
-                        </label>
-                    </div>
-                    <label>Meta description
-                        <textarea rows={2} value={form.meta_description || ''} onChange={event => setForm({ ...form, meta_description: event.target.value })} />
-                    </label>
-                    <div className="admin-blog-two">
-                        <label>Tags
-                            <input value={csv(form.tags)} onChange={event => setForm({ ...form, tags: splitCsv(event.target.value) })} />
-                        </label>
-                        <label>Entidades locais
-                            <input value={csv(form.local_entities)} onChange={event => setForm({ ...form, local_entities: splitCsv(event.target.value) })} />
-                        </label>
-                    </div>
-                    <label>Imagem de capa URL
-                        <input value={form.cover_image_url || ''} onChange={event => setForm({ ...form, cover_image_url: event.target.value })} />
-                    </label>
-                    <label>Conteudo Markdown
-                        <textarea className="admin-blog-content" value={form.content_markdown || ''} onChange={event => setForm({ ...form, content_markdown: event.target.value })} />
-                    </label>
-                    <label>Notas de aprovacao
-                        <textarea rows={3} value={csv(form.approval_notes)} onChange={event => setForm({ ...form, approval_notes: splitCsv(event.target.value) })} />
-                    </label>
 
-                    <div className="admin-blog-actions">
-                        <button className="btn btn-gold" disabled={saving} onClick={() => savePost()}>
-                            {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
-                            Salvar edicoes
-                        </button>
-                        {!isUnderReview && !isPublished && (
-                            <button className="btn btn-outline" disabled={saving} onClick={() => savePost('under_review')}>
-                                <Send size={15} /> Enviar para analise
-                            </button>
-                        )}
-                        {isPublished ? (
-                            <>
-                                <button className="btn btn-outline" disabled>
-                                    <CheckCircle2 size={15} /> Publicado
-                                </button>
-                                <button className="btn btn-outline" disabled={saving} onClick={() => savePost('draft')}>
-                                    <RotateCcw size={15} /> Despublicar
-                                </button>
-                            </>
-                        ) : (
-                            <button className="btn btn-outline" disabled={saving} onClick={() => savePost('published')}>
-                                <CheckCircle2 size={15} /> Publicar
-                            </button>
-                        )}
-                        {!isDraft && !isPublished && (
-                            <button className="btn btn-outline" disabled={saving} onClick={() => savePost('draft')}>
-                                <FileText size={15} /> Rascunho
-                            </button>
-                        )}
-                        {!isArchived && (
-                            <button className="btn btn-outline" disabled={saving} onClick={() => savePost('archived')}>
-                                <Archive size={15} /> Arquivar
-                            </button>
-                        )}
-                        {isPublished && form.slug && <Link className="btn btn-outline" href={`/blog/${form.slug}`} target="_blank"><Eye size={15} /> Ver no site</Link>}
-                        {selectedPost && <button className="btn btn-outline danger" disabled={saving} onClick={deletePost}><Trash2 size={15} /> Remover</button>}
-                    </div>
+                    {viewMode === 'preview' ? (
+                        <section className="admin-blog-preview">
+                            <div className="admin-blog-preview-hero">
+                                <div>
+                                    <span>{form.category || config.defaultCategory}</span>
+                                    <h2>{form.title || `Titulo do ${config.itemSingular.toLowerCase()}`}</h2>
+                                    {form.excerpt ? <p>{form.excerpt}</p> : null}
+                                    <small>{statusLabels[currentStatus] || currentStatus} - {formatPreviewDate(form.published_at)}</small>
+                                </div>
+                                <div className="admin-blog-preview-cover" style={{ backgroundImage: `url(${previewCover})` }} />
+                            </div>
+                            <article className="admin-blog-preview-content" dangerouslySetInnerHTML={{ __html: previewHtml || '<p>Sem conteudo para visualizar.</p>' }} />
+                            {form.approval_notes?.length ? (
+                                <div className="admin-blog-preview-notes">
+                                    <strong>Notas para aprovacao</strong>
+                                    <ul>
+                                        {form.approval_notes.map(note => <li key={note}>{note}</li>)}
+                                    </ul>
+                                </div>
+                            ) : null}
+                        </section>
+                    ) : (
+                        <>
+                            <label>Titulo
+                                <input value={form.title || ''} onChange={event => setForm({ ...form, title: event.target.value })} />
+                            </label>
+                            <div className="admin-blog-two">
+                                <label>Slug
+                                    <input value={form.slug || ''} onChange={event => setForm({ ...form, slug: event.target.value })} />
+                                </label>
+                                <label>Status
+                                    <select value={form.status || 'draft'} onChange={event => setForm({ ...form, status: event.target.value })}>
+                                        <option value="draft">Rascunho</option>
+                                        <option value="under_review">Em analise</option>
+                                        <option value="published">Publicado</option>
+                                        <option value="archived">Arquivado</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <label>Resumo
+                                <textarea rows={3} value={form.excerpt || ''} onChange={event => setForm({ ...form, excerpt: event.target.value })} />
+                            </label>
+                            <div className="admin-blog-two">
+                                <label>SEO title
+                                    <input value={form.seo_title || ''} onChange={event => setForm({ ...form, seo_title: event.target.value })} />
+                                </label>
+                                <label>Palavra-chave principal
+                                    <input value={form.primary_keyword || ''} onChange={event => setForm({ ...form, primary_keyword: event.target.value })} />
+                                </label>
+                            </div>
+                            <label>Meta description
+                                <textarea rows={2} value={form.meta_description || ''} onChange={event => setForm({ ...form, meta_description: event.target.value })} />
+                            </label>
+                            <div className="admin-blog-two">
+                                <label>Tags
+                                    <input value={csv(form.tags)} onChange={event => setForm({ ...form, tags: splitCsv(event.target.value) })} />
+                                </label>
+                                <label>Entidades locais
+                                    <input value={csv(form.local_entities)} onChange={event => setForm({ ...form, local_entities: splitCsv(event.target.value) })} />
+                                </label>
+                            </div>
+                            <label>Imagem de capa URL
+                                <input value={form.cover_image_url || ''} onChange={event => setForm({ ...form, cover_image_url: event.target.value })} />
+                            </label>
+                            <label>Conteudo Markdown
+                                <textarea className="admin-blog-content" value={form.content_markdown || ''} onChange={event => setForm({ ...form, content_markdown: event.target.value })} />
+                            </label>
+                            <label>Notas de aprovacao
+                                <textarea rows={3} value={csv(form.approval_notes)} onChange={event => setForm({ ...form, approval_notes: splitCsv(event.target.value) })} />
+                            </label>
+                        </>
+                    )}
+
+                    {actionButtons}
                 </main>
             </section>
 
@@ -561,14 +624,46 @@ export function AdminEditorialPage({ mode = 'blog' }: { mode?: AdminContentMode 
                 .admin-blog-list-copy em { color: var(--text-muted); font-size: .7rem; font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
                 .admin-blog-empty { align-items: center; background: #faf8f3; border: 1px dashed rgba(201,169,110,.35); border-radius: 12px; color: var(--text-muted); display: flex; gap: 8px; justify-content: center; min-height: 120px; padding: 14px; text-align: center; }
                 .admin-blog-editor { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; display: grid; gap: 14px; padding: 16px; }
+                .admin-blog-editor-head { align-items: center; border-bottom: 1px solid rgba(201,169,110,.16); display: flex; gap: 12px; justify-content: space-between; padding-bottom: 12px; }
+                .admin-blog-editor-head > div:first-child { display: grid; gap: 4px; min-width: 0; }
+                .admin-blog-editor-head span { color: var(--gold-dark); font-size: .68rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+                .admin-blog-editor-head strong { color: var(--text-primary); font-family: var(--font-serif); font-size: 1.15rem; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                .admin-blog-view-toggle { align-items: center; background: #f8f4ec; border: 1px solid rgba(201,169,110,.18); border-radius: 999px; display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; }
+                .admin-blog-view-toggle button { align-items: center; background: transparent; border: 0; border-radius: 999px; color: var(--text-secondary); cursor: pointer; display: inline-flex; font: inherit; font-size: .78rem; font-weight: 900; gap: 7px; min-height: 32px; padding: 7px 11px; white-space: nowrap; }
+                .admin-blog-view-toggle button.active { background: #171512; color: #fff; }
                 .admin-blog-filter-note { background: rgba(201,169,110,.1); border: 1px solid rgba(201,169,110,.22); border-radius: 12px; color: var(--text-secondary); font-size: .86rem; padding: 12px 14px; }
                 .admin-blog-two { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .admin-blog-content { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; min-height: 430px; }
                 .admin-blog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+                .admin-blog-preview { background: #f7f3eb; border: 1px solid rgba(201,169,110,.18); border-radius: 14px; display: grid; gap: 0; overflow: hidden; }
+                .admin-blog-preview-hero { align-items: stretch; background: linear-gradient(135deg, #17120d, #2b241c); color: #fff; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr) minmax(280px, .55fr); padding: 28px; }
+                .admin-blog-preview-hero span { color: #c9a96e; display: block; font-size: .68rem; font-weight: 950; letter-spacing: .15em; margin-bottom: 10px; text-transform: uppercase; }
+                .admin-blog-preview-hero h2 { font-family: var(--font-serif); font-size: clamp(1.55rem, 2.8vw, 2.5rem); line-height: 1.02; margin: 0; }
+                .admin-blog-preview-hero p { color: rgba(255,255,255,.74); line-height: 1.58; margin: 12px 0 0; }
+                .admin-blog-preview-hero small { align-items: center; color: rgba(255,255,255,.68); display: flex; font-size: .76rem; font-weight: 800; margin-top: 16px; }
+                .admin-blog-preview-cover { background-position: center; background-size: cover; border-radius: 14px; min-height: 260px; }
+                .admin-blog-preview-content { background: #fff; padding: clamp(22px, 4vw, 44px); }
+                .admin-blog-preview-content h1, .admin-blog-preview-content h2, .admin-blog-preview-content h3 { color: #171512; font-family: var(--font-serif); line-height: 1.08; }
+                .admin-blog-preview-content h1 { font-size: 2rem; }
+                .admin-blog-preview-content h2 { font-size: 1.48rem; margin-top: 30px; }
+                .admin-blog-preview-content h3 { font-size: 1.14rem; margin-top: 22px; }
+                .admin-blog-preview-content p, .admin-blog-preview-content li { color: #50483e; font-size: 1rem; line-height: 1.78; }
+                .admin-blog-preview-content p { margin: 0 0 14px; }
+                .admin-blog-preview-content a { color: #9b7635; font-weight: 900; }
+                .admin-blog-preview-content ul { margin: 0 0 16px; padding-left: 22px; }
+                .admin-blog-preview-content .blog-inline-image { margin: 30px 0 12px; }
+                .admin-blog-preview-content .blog-inline-image img { aspect-ratio: 16 / 9; border-radius: 14px; display: block; object-fit: cover; width: 100%; }
+                .admin-blog-preview-notes { background: #fff; border-top: 1px solid rgba(201,169,110,.18); display: grid; gap: 10px; padding: 18px 22px; }
+                .admin-blog-preview-notes strong { color: var(--gold-dark); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+                .admin-blog-preview-notes ul { color: var(--text-secondary); display: grid; gap: 7px; font-size: .84rem; line-height: 1.5; margin: 0; padding-left: 18px; }
                 .danger { color: #dc2626 !important; }
                 @media (max-width: 900px) {
-                    .admin-header, .admin-blog-agent { grid-template-columns: 1fr; flex-direction: column; }
-                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two { grid-template-columns: 1fr; }
+                    .admin-header, .admin-blog-agent, .admin-blog-editor-head { grid-template-columns: 1fr; flex-direction: column; }
+                    .admin-blog-editor-head { align-items: stretch; }
+                    .admin-blog-view-toggle { justify-content: center; width: 100%; }
+                    .admin-blog-view-toggle button { justify-content: center; width: 100%; }
+                    .admin-blog-kpis, .admin-blog-shell, .admin-blog-two, .admin-blog-preview-hero { grid-template-columns: 1fr; }
+                    .admin-blog-preview-cover { min-height: 210px; }
                 }
             `}</style>
         </div>
