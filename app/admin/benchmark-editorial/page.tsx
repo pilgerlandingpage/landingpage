@@ -156,7 +156,7 @@ export default function BenchmarkEditorialPage() {
     const runBenchmark = async (event: FormEvent) => {
         event.preventDefault()
         try {
-            await postAction({ action: 'run_benchmark', topic, intent, depth }, 'Benchmark executado. Oportunidade editorial criada.')
+            await postAction({ action: 'run_benchmark', topic, intent, depth }, 'Varredura da Lara concluida. Inteligencia registrada para Clara e Isadora.')
             setTopic('')
         } catch (error: any) {
             setAction({ status: 'error', message: error?.message || String(error) })
@@ -166,7 +166,7 @@ export default function BenchmarkEditorialPage() {
     const saveCompetitor = async (event: FormEvent) => {
         event.preventDefault()
         try {
-            await postAction({ action: 'save_competitor', competitor: competitorForm }, 'Concorrente salvo para monitoramento.')
+            await postAction({ action: 'save_competitor', competitor: competitorForm }, 'Fonte salva para monitoramento da Lara.')
             setCompetitorForm(emptyCompetitor)
         } catch (error: any) {
             setAction({ status: 'error', message: error?.message || String(error) })
@@ -208,7 +208,7 @@ export default function BenchmarkEditorialPage() {
                 <div>
                     <span><Bot size={15} /> Inteligencia competitiva</span>
                     <h1>Benchmark Editorial</h1>
-                    <p>Lara observa concorrentes publicos, buscas e respostas de IA para transformar sinais em pautas para Blog e Noticias.</p>
+                    <p>Lara monitora portais, concorrentes, rankings organicos e respostas de IA, registra a inteligencia e deixa material para Clara e Isadora trabalharem.</p>
                 </div>
                 <button type="button" className="btn btn-outline" onClick={load} disabled={loading}>
                     {loading ? <Loader2 size={16} className="spin" /> : <Search size={16} />}
@@ -219,8 +219,8 @@ export default function BenchmarkEditorialPage() {
             <section className="benchmark-command admin-card">
                 <div>
                     <span>Rodar agora</span>
-                    <h2><Sparkles size={20} /> Criar nova oportunidade editorial</h2>
-                    <p>Use um tema especifico ou deixe vazio para a Lara escolher o termo monitorado mais importante.</p>
+                    <h2><Sparkles size={20} /> Rodar varredura competitiva</h2>
+                    <p>Use um tema especifico ou deixe vazio para a Lara escolher o termo monitorado mais importante e mapear fontes, lacunas e oportunidades.</p>
                 </div>
                 <form onSubmit={runBenchmark} className="benchmark-run-form">
                     <input
@@ -253,8 +253,8 @@ export default function BenchmarkEditorialPage() {
             )}
 
             <section className="benchmark-kpis">
-                <div><span>Concorrentes ativos</span><strong>{activeCompetitors.length}</strong></div>
-                <div><span>Termos ativos</span><strong>{activeKeywords.length}</strong></div>
+                <div><span>Fontes ativas</span><strong>{activeCompetitors.length}</strong></div>
+                <div><span>Consultas ativas</span><strong>{activeKeywords.length}</strong></div>
                 <div><span>Oportunidades abertas</span><strong>{topOpportunities.length}</strong></div>
                 <div><span>Ultima execucao</span><strong>{formatDate(state.runs[0]?.created_at)}</strong></div>
             </section>
@@ -263,18 +263,18 @@ export default function BenchmarkEditorialPage() {
                 <div className="admin-card benchmark-panel">
                     <div className="panel-head">
                         <div>
-                            <span><Globe2 size={14} /> Concorrentes</span>
-                            <h3>Sites observados</h3>
+                            <span><Globe2 size={14} /> Portais e fontes</span>
+                            <h3>Sites monitorados</h3>
                         </div>
                     </div>
                     <form onSubmit={saveCompetitor} className="compact-form">
                         <input value={competitorForm.name} onChange={event => setCompetitorForm(prev => ({ ...prev, name: event.target.value }))} placeholder="Nome" />
                         <input value={competitorForm.site_url} onChange={event => setCompetitorForm(prev => ({ ...prev, site_url: event.target.value }))} placeholder="https://site.com.br" />
-                        <input value={competitorForm.focus} onChange={event => setCompetitorForm(prev => ({ ...prev, focus: event.target.value }))} placeholder="Foco: luxo, lancamentos, bairro..." />
+                        <input value={competitorForm.focus} onChange={event => setCompetitorForm(prev => ({ ...prev, focus: event.target.value }))} placeholder="Foco: luxo, SERP, IA, bairro..." />
                         <button type="submit"><Plus size={15} /> Adicionar</button>
                     </form>
                     <div className="mini-list">
-                        {state.competitors.length === 0 && <p>Nenhum concorrente cadastrado ainda.</p>}
+                        {state.competitors.length === 0 && <p>Nenhum portal ou fonte cadastrado ainda.</p>}
                         {state.competitors.map(item => (
                             <article key={item.id}>
                                 <div>
@@ -282,7 +282,7 @@ export default function BenchmarkEditorialPage() {
                                     <a href={item.site_url} target="_blank" rel="noreferrer">{domainFromUrl(item.site_url)} <ExternalLink size={12} /></a>
                                     {item.focus && <small>{item.focus}</small>}
                                 </div>
-                                <button type="button" onClick={() => removeItem(item.id, 'delete_competitor', 'Concorrente removido.')}>
+                                <button type="button" onClick={() => removeItem(item.id, 'delete_competitor', 'Fonte pausada ou removida.')}>
                                     <Trash2 size={14} />
                                 </button>
                             </article>
@@ -293,7 +293,7 @@ export default function BenchmarkEditorialPage() {
                 <div className="admin-card benchmark-panel">
                     <div className="panel-head">
                         <div>
-                            <span><Search size={14} /> Termos</span>
+                            <span><Search size={14} /> Consultas</span>
                             <h3>Buscas monitoradas</h3>
                         </div>
                     </div>
@@ -320,7 +320,7 @@ export default function BenchmarkEditorialPage() {
                                     <strong>{item.term}</strong>
                                     <span>{item.region || 'sem regiao'} - {item.intent} - prioridade {item.priority}</span>
                                 </div>
-                                <button type="button" onClick={() => removeItem(item.id, 'delete_keyword', 'Termo removido.')}>
+                                <button type="button" onClick={() => removeItem(item.id, 'delete_keyword', 'Consulta pausada ou removida.')}>
                                     <Trash2 size={14} />
                                 </button>
                             </article>
@@ -333,14 +333,14 @@ export default function BenchmarkEditorialPage() {
                 <div className="panel-head">
                     <div>
                         <span><Target size={14} /> Oportunidades</span>
-                        <h3>Briefings prontos para os agentes editoriais</h3>
+                        <h3>Material pronto para Clara e Isadora</h3>
                     </div>
                 </div>
                 <div className="opportunity-list">
                     {loading ? (
                         <div className="empty-state"><Loader2 className="spin" /> Carregando benchmark...</div>
                     ) : topOpportunities.length === 0 ? (
-                        <div className="empty-state">Rode o primeiro benchmark para gerar oportunidades.</div>
+                        <div className="empty-state">Rode a primeira varredura para a Lara registrar inteligencia e entregar material.</div>
                     ) : topOpportunities.map(item => (
                         <article key={item.id} className="opportunity-card">
                             <div className="opportunity-score">

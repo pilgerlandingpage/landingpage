@@ -89,11 +89,11 @@ export async function GET(request: NextRequest) {
       ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
-    const targetHours = (config.benchmark_editorial_run_times || '10,16')
+    const targetHours = (config.benchmark_editorial_run_times || '09,15')
       .split(',')
       .map((hour: string) => hour.trim().padStart(2, '0'))
       .filter(Boolean)
-    const targetDays = (config.benchmark_editorial_weekdays || 'tue,thu')
+    const targetDays = (config.benchmark_editorial_weekdays || 'mon,tue,wed,thu,fri')
       .split(',')
       .map((day: string) => day.trim())
       .filter(Boolean)

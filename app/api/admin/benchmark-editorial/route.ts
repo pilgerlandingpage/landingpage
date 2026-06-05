@@ -17,6 +17,7 @@ import {
     BenchmarkIntent,
     buildBenchmarkMarkdownSummary,
     getDomainFromUrl,
+    mergeBenchmarkDefaults,
     normalizeBenchmarkIntent,
     normalizeBenchmarkStatus,
     parseBenchmarkArray,
@@ -30,6 +31,7 @@ type BenchmarkState = {
 }
 
 const ALL_KEYS = Object.values(BENCHMARK_CONFIG_KEYS)
+const BENCHMARK_PROMPT_MARKER = 'vigiar a internet publica'
 
 function nowIso() {
     return new Date().toISOString()
@@ -87,11 +89,14 @@ async function readState(supabase: ReturnType<typeof createAdminClient>): Promis
 
     const rows = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
 
-    const keywords = parseBenchmarkArray<BenchmarkKeyword>(rows[BENCHMARK_CONFIG_KEYS.keywords], DEFAULT_BENCHMARK_KEYWORDS)
+    const configuredCompetitors = parseBenchmarkArray<BenchmarkCompetitor>(rows[BENCHMARK_CONFIG_KEYS.competitors], [])
+    const configuredKeywords = parseBenchmarkArray<BenchmarkKeyword>(rows[BENCHMARK_CONFIG_KEYS.keywords], [])
 
     return {
-        competitors: parseBenchmarkArray<BenchmarkCompetitor>(rows[BENCHMARK_CONFIG_KEYS.competitors], DEFAULT_BENCHMARK_COMPETITORS),
-        keywords: keywords.length > 0 ? keywords : DEFAULT_BENCHMARK_KEYWORDS,
+        competitors: mergeBenchmarkDefaults(configuredCompetitors, DEFAULT_BENCHMARK_COMPETITORS)
+            .sort((a, b) => b.priority - a.priority),
+        keywords: mergeBenchmarkDefaults(configuredKeywords, DEFAULT_BENCHMARK_KEYWORDS)
+            .sort((a, b) => priorityWeight(b.priority) - priorityWeight(a.priority)),
         opportunities: parseBenchmarkArray<BenchmarkOpportunity>(rows[BENCHMARK_CONFIG_KEYS.opportunities], []),
         runs: parseBenchmarkArray<BenchmarkRun>(rows[BENCHMARK_CONFIG_KEYS.runs], []),
     }
@@ -118,6 +123,76 @@ async function saveState(supabase: ReturnType<typeof createAdminClient>, state: 
         .upsert(rows, { onConflict: 'key' })
 
     if (error) throw error
+}
+
+async function ensureBenchmarkRuntimeConfig(supabase: ReturnType<typeof createAdminClient>) {
+    const keys = [
+        'benchmark_editorial_system_prompt',
+        'benchmark_editorial_weekdays',
+        'benchmark_editorial_run_times',
+        BENCHMARK_CONFIG_KEYS.competitors,
+        BENCHMARK_CONFIG_KEYS.keywords,
+    ]
+    const { data, error } = await supabase
+        .from('app_config')
+        .select('key,value')
+        .in('key', keys)
+
+    if (error) throw error
+
+    const rows = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    const updates: Array<{ key: string; value: string; updated_at: string }> = []
+    const updatedAt = nowIso()
+
+    if (!rows.benchmark_editorial_system_prompt || !rows.benchmark_editorial_system_prompt.includes(BENCHMARK_PROMPT_MARKER)) {
+        updates.push({
+            key: 'benchmark_editorial_system_prompt',
+            value: BENCHMARK_EDITORIAL_SYSTEM_PROMPT,
+            updated_at: updatedAt,
+        })
+    }
+
+    const configuredCompetitors = parseBenchmarkArray<BenchmarkCompetitor>(rows[BENCHMARK_CONFIG_KEYS.competitors], [])
+    if (configuredCompetitors.length === 0) {
+        updates.push({
+            key: BENCHMARK_CONFIG_KEYS.competitors,
+            value: JSON.stringify(DEFAULT_BENCHMARK_COMPETITORS),
+            updated_at: updatedAt,
+        })
+    }
+
+    const configuredKeywords = parseBenchmarkArray<BenchmarkKeyword>(rows[BENCHMARK_CONFIG_KEYS.keywords], [])
+    if (configuredKeywords.length === 0) {
+        updates.push({
+            key: BENCHMARK_CONFIG_KEYS.keywords,
+            value: JSON.stringify(DEFAULT_BENCHMARK_KEYWORDS),
+            updated_at: updatedAt,
+        })
+    }
+
+    if (!rows.benchmark_editorial_weekdays || rows.benchmark_editorial_weekdays === 'tue,thu') {
+        updates.push({
+            key: 'benchmark_editorial_weekdays',
+            value: 'mon,tue,wed,thu,fri',
+            updated_at: updatedAt,
+        })
+    }
+
+    if (!rows.benchmark_editorial_run_times || rows.benchmark_editorial_run_times === '10,16') {
+        updates.push({
+            key: 'benchmark_editorial_run_times',
+            value: '09,15',
+            updated_at: updatedAt,
+        })
+    }
+
+    if (updates.length === 0) return
+
+    const { error: upsertError } = await supabase
+        .from('app_config')
+        .upsert(updates, { onConflict: 'key' })
+
+    if (upsertError) throw upsertError
 }
 
 function normalizeCompetitor(input: any, existing?: BenchmarkCompetitor): BenchmarkCompetitor {
@@ -178,8 +253,8 @@ function buildOpportunityFromReport(params: {
         opportunity_score: score,
         format: params.intent === 'news' ? 'noticia curta verificavel' : params.intent === 'blog' ? 'artigo evergreen SEO/AEO/GEO' : 'pauta editorial para blog ou noticia',
         summary: cleanText(params.report?.executive_summary || markdown, 900),
-        strategy_notes: 'Criar conteudo original com leitura editorial especializada, fontes no corpo do texto, links internos para estoque/regioes e resposta direta para buscas conversacionais.',
-        recommended_angle: `Transformar "${params.topic}" em uma pauta premium, util e local, conectando contexto publico com oportunidades reais da Imobiliaria Guilherme Pilger.`,
+        strategy_notes: 'Material de inteligencia para Clara e Isadora: usar o achado para criar conteudo original, com fontes no corpo do texto, links internos para estoque/regioes e respostas diretas para buscas conversacionais. Separar fato, inferencia e recomendacao antes de publicar.',
+        recommended_angle: `Superar as fontes observadas para "${params.topic}" com uma pauta premium, util e local, conectando contexto publico com oportunidades reais da Imobiliaria Guilherme Pilger.`,
         sources: sources.slice(0, 12),
         queries: queries.slice(0, 12),
         outline: extractOutline(markdown),
@@ -191,8 +266,9 @@ function buildOpportunityFromReport(params: {
 
 function buildBlogPayload(opportunity: BenchmarkOpportunity, type: 'blog' | 'news') {
     const baseTitle = type === 'news'
-        ? `Noticia a partir de benchmark: ${opportunity.title}`
-        : `Pauta de blog a partir de benchmark: ${opportunity.title}`
+        ? `Material Lara para Clara: ${opportunity.title}`
+        : `Material Lara para Isadora: ${opportunity.title}`
+    const targetAgent = type === 'news' ? 'Clara Edicao Noticias' : 'Isadora Edicao Blog'
 
     return {
         title: baseTitle.slice(0, 180),
@@ -226,19 +302,36 @@ function buildBlogPayload(opportunity: BenchmarkOpportunity, type: 'blog' | 'new
             benchmark_source_url: opportunity.source_url,
             benchmark_sources: opportunity.sources,
             benchmark_queries: opportunity.queries,
-            note: 'Briefing criado pelo agente Lara Benchmark Editorial. Revisar, enriquecer e escrever conteudo final original antes de publicar.',
+            benchmark_target_agent: targetAgent,
+            note: `Briefing criado pela Lara Benchmark Editorial para ${targetAgent}. Transformar em conteudo final original antes de publicar.`,
         },
         approval_notes: [
-            'Usar este briefing como inteligencia competitiva, nao como texto final.',
-            'Revisar fatos, fontes, acentuacao, imagens e links internos antes de publicar.',
+            `Este item e material operacional para ${targetAgent}; nao publicar como texto final sem reescrita editorial.`,
+            'Manter apenas fatos verificados, citar fontes publicas no corpo do texto e nao copiar concorrentes.',
+            'Revisar acentuacao, imagens, links internos, disponibilidade de estoque e riscos antes de publicar.',
         ],
         generated_by: 'benchmark-editorial',
     }
 }
 
+function isDefaultCompetitor(id: string) {
+    return DEFAULT_BENCHMARK_COMPETITORS.some(item => item.id === id)
+}
+
+function isDefaultKeyword(id: string) {
+    return DEFAULT_BENCHMARK_KEYWORDS.some(item => item.id === id)
+}
+
+function handoffTargets(intent: BenchmarkIntent) {
+    if (intent === 'blog') return ['isadora-blog']
+    if (intent === 'news') return ['clara-news']
+    return ['isadora-blog', 'clara-news']
+}
+
 export async function GET() {
     try {
         const supabase = createAdminClient()
+        await ensureBenchmarkRuntimeConfig(supabase)
         const state = await readState(supabase)
 
         return NextResponse.json({
@@ -260,6 +353,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json().catch(() => ({}))
         const action = String(body?.action || '')
         const supabase = createAdminClient()
+        await ensureBenchmarkRuntimeConfig(supabase)
         const state = await readState(supabase)
 
         if (action === 'save_competitor') {
@@ -276,7 +370,10 @@ export async function POST(request: NextRequest) {
         }
 
         if (action === 'delete_competitor') {
-            const competitors = state.competitors.filter(item => item.id !== String(body?.id || ''))
+            const id = String(body?.id || '')
+            const competitors = isDefaultCompetitor(id)
+                ? state.competitors.map(item => item.id === id ? { ...item, status: 'paused' as const } : item)
+                : state.competitors.filter(item => item.id !== id)
             await saveState(supabase, { competitors })
             return NextResponse.json({ competitors })
         }
@@ -295,7 +392,10 @@ export async function POST(request: NextRequest) {
         }
 
         if (action === 'delete_keyword') {
-            const keywords = state.keywords.filter(item => item.id !== String(body?.id || ''))
+            const id = String(body?.id || '')
+            const keywords = isDefaultKeyword(id)
+                ? state.keywords.map(item => item.id === id ? { ...item, status: 'paused' as const } : item)
+                : state.keywords.filter(item => item.id !== id)
             await saveState(supabase, { keywords })
             return NextResponse.json({ keywords })
         }
@@ -341,10 +441,14 @@ export async function POST(request: NextRequest) {
                         active_competitors: state.competitors.filter(item => item.status === 'active'),
                         active_keywords: state.keywords.filter(item => item.status === 'active').slice(0, 20),
                         instruction: [
-                            'Pesquise somente fontes publicas.',
-                            'Procure padroes de conteudo ranqueado, perguntas respondidas, lacunas, formatos e oportunidades para SEO/AEO/GEO.',
-                            'Nao copie concorrentes. Gere leitura original para alimentar Isadora Edicao Blog e Clara Edicao Noticias.',
-                            'Liste links externos e ideias de links internos para o ecossistema Guilherme Pilger.',
+                            'Pesquise somente fontes publicas, sem login, scraping proibido por termos ou dados privados.',
+                            'Varra resultados organicos, paginas ranqueadas, portais de luxo, concorrentes locais e fontes que respostas de IA tenderiam a citar.',
+                            'Mapeie consultas SEO, AEO e GEO: termos transacionais, perguntas conversacionais, comparativos, bairros, empreendimentos e cidades.',
+                            'Para cada fonte importante, registre URL, dominio, tipo de pagina, sinais de autoridade, estrutura, perguntas respondidas, entidades locais e motivo provavel de ranqueamento.',
+                            'Identifique lacunas para a Pilger: perguntas sem boa resposta, paginas fracas, dados desatualizados, ausencia de leitura local, falta de links internos ou falta de estoque conectado.',
+                            'Nao copie concorrentes. Converta o achado em inteligencia original para a Central de Inteligencia.',
+                            'Entregue material separado para Isadora Edicao Blog e Clara Edicao Noticias, dizendo quando o achado deve virar blog, noticia ou apenas observacao.',
+                            'Liste fontes externas, queries usadas, ideias de links internos e riscos de validacao humana.',
                         ].join(' '),
                     },
                 })
@@ -379,6 +483,17 @@ export async function POST(request: NextRequest) {
                         intent,
                         depth,
                         report_id: report.id,
+                        intelligence_use: 'public_serp_ai_benchmark',
+                        handoff_targets: handoffTargets(intent),
+                        source_domains: opportunity.sources.map(source => getDomainFromUrl(source.uri)).filter(Boolean),
+                        monitored_competitors: state.competitors
+                            .filter(item => item.status === 'active')
+                            .map(item => ({ name: item.name, site_url: item.site_url, focus: item.focus }))
+                            .slice(0, 20),
+                        monitored_keywords: state.keywords
+                            .filter(item => item.status === 'active')
+                            .map(item => ({ term: item.term, region: item.region, intent: item.intent }))
+                            .slice(0, 20),
                         opportunity,
                     },
                 }).catch((eventError: any) => {
@@ -400,6 +515,16 @@ export async function POST(request: NextRequest) {
                             signals: {
                                 ...(ecosystemContext.signals || {}),
                                 latest_benchmark_opportunity: opportunity,
+                                latest_benchmark_handoff: {
+                                    topic,
+                                    targets: handoffTargets(intent),
+                                    for_isadora: intent === 'blog' || intent === 'both'
+                                        ? 'Criar artigo evergreen SEO/AEO/GEO a partir do achado publico, conectando a estoque real e links internos.'
+                                        : null,
+                                    for_clara: intent === 'news' || intent === 'both'
+                                        ? 'Criar noticia somente se houver fato publico atual e verificavel; caso contrario observar.'
+                                        : null,
+                                },
                             },
                         },
                     }).catch((snapshotError: any) => {
@@ -464,6 +589,9 @@ export async function POST(request: NextRequest) {
                 metadata: {
                     opportunity_id: opportunity.id,
                     opportunity_title: opportunity.title,
+                    benchmark_keyword: opportunity.keyword,
+                    benchmark_source_url: opportunity.source_url,
+                    handoff_target: type === 'news' ? 'clara-news' : 'isadora-blog',
                     type,
                     slug: post.slug,
                     status: post.status,

@@ -25,6 +25,7 @@ import { getDefaultEmailAgentTemplatesJson, normalizeEmailAgentTemplatesJson } f
 import { getDefaultWhatsAppEditorialTemplatesJson, normalizeWhatsAppEditorialTemplatesJson } from '@/lib/whatsapp/editorial-templates'
 import { getDefaultPushEditorialTemplatesJson, normalizePushEditorialTemplatesJson } from '@/lib/push/editorial-templates'
 import { normalizeAgentNamesInConfig } from '@/lib/ai/config'
+import { DEFAULT_BENCHMARK_COMPETITORS, DEFAULT_BENCHMARK_KEYWORDS } from '@/lib/benchmark-editorial/defaults'
 
 function getSupabase() {
     return createClient(
@@ -191,13 +192,13 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     research_pilger_topics: getDefaultResearchPilgerTopicsJson(),
     benchmark_editorial_enabled: 'true',
     benchmark_editorial_schedule_enabled: 'true',
-    benchmark_editorial_weekdays: 'tue,thu',
-    benchmark_editorial_run_times: '10,16',
+    benchmark_editorial_weekdays: 'mon,tue,wed,thu,fri',
+    benchmark_editorial_run_times: '09,15',
     benchmark_editorial_daily_limit: '6',
     benchmark_editorial_depth: 'media',
     benchmark_editorial_min_score: '70',
-    benchmark_editorial_competitors: '[]',
-    benchmark_editorial_keywords: '[]',
+    benchmark_editorial_competitors: JSON.stringify(DEFAULT_BENCHMARK_COMPETITORS),
+    benchmark_editorial_keywords: JSON.stringify(DEFAULT_BENCHMARK_KEYWORDS),
     benchmark_editorial_opportunities: '[]',
     benchmark_editorial_runs: '[]',
     meta_webhook_verify_token: 'pilger-meta-webhook',

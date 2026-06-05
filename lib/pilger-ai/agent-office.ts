@@ -336,8 +336,8 @@ const AGENT_PERSONAS: Record<string, AgentPersona> = {
     },
     'benchmark-editorial': {
         personaName: 'Lara Benchmark Editorial',
-        jobTitle: 'Inteligencia Competitiva Editorial',
-        bio: 'Observa concorrentes publicos, buscas e respostas de IA para criar oportunidades originais para Blog e Noticias.',
+        jobTitle: 'Inteligencia Competitiva SEO/AEO/GEO',
+        bio: 'Vigia portais, concorrentes, buscas organicas e respostas de IA, registra achados na Central de Inteligencia e entrega briefings para Clara e Isadora.',
         avatarTone: 'teal',
     },
 }
@@ -1307,8 +1307,8 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         sector: 'Marketing',
         promptKey: 'blog_intelligence_system_prompt',
         fallback: BLOG_INTELLIGENCE_SYSTEM_PROMPT,
-        detail: 'Analisa WhatsApp, leads, radar, trafego, localizacao, estoque e empreendimentos para decidir e criar artigos de blog com SEO, AEO e GEO.',
-        tools: ['WhatsApp', 'CRM', 'Radar', 'trafego pago', 'estoque', 'blog'],
+        detail: 'Analisa WhatsApp, leads, radar, benchmark da Lara, trafego, localizacao, estoque e empreendimentos para decidir e criar artigos de blog com SEO, AEO e GEO.',
+        tools: ['WhatsApp', 'CRM', 'Radar', 'Lara Benchmark', 'trafego pago', 'estoque', 'blog'],
         autonomy: 'Pode sugerir pautas e gerar rascunhos completos; publicacao exige aprovacao humana.',
         behaviorControls: [
             {
@@ -1332,8 +1332,8 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         sector: 'Marketing',
         promptKey: 'news_intelligence_system_prompt',
         fallback: NEWS_INTELLIGENCE_SYSTEM_PROMPT,
-        detail: 'Analisa Research Pilger, noticias publicas, prefeitura, economia, turismo e mercado para criar rascunhos de noticias em revisao.',
-        tools: ['Research Pilger', 'fontes publicas', 'Radar', 'blog_posts', 'noticias'],
+        detail: 'Analisa Research Pilger, benchmark da Lara, noticias publicas, prefeitura, economia, turismo e mercado para criar rascunhos de noticias em revisao.',
+        tools: ['Research Pilger', 'Lara Benchmark', 'fontes publicas', 'Radar', 'blog_posts', 'noticias'],
         autonomy: 'Pode sugerir e gerar rascunhos de noticias; publicacao exige aprovacao humana antes de distribuir aos leads.',
         behaviorControls: [
             {
@@ -1452,9 +1452,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         sector: 'Inteligencia',
         promptKey: 'benchmark_editorial_system_prompt',
         fallback: BENCHMARK_EDITORIAL_SYSTEM_PROMPT,
-        detail: 'Observa concorrentes publicos, conteudos ranqueados, buscas e respostas de IA para gerar oportunidades originais para Blog e Noticias.',
-        tools: ['Gemini Google Search', 'Pesquisa Profunda IA', 'concorrentes publicos', 'SEO', 'AEO', 'GEO'],
-        autonomy: 'Pode gerar oportunidades e briefings; blog e noticias seguem aprovacao humana antes de publicar.',
+        detail: 'Monitora portais, concorrentes publicos, conteudos ranqueados e respostas de IA para explicar por que aparecem, registrar inteligencia e preparar material para Blog e Noticias.',
+        tools: ['Gemini Google Search', 'Pesquisa Profunda IA', 'SERP publica', 'portais de luxo', 'Central de Inteligencia', 'SEO', 'AEO', 'GEO'],
+        autonomy: 'Pode pesquisar, registrar oportunidades na Central e deixar briefings; Clara e Isadora transformam o material em conteudo sob aprovacao humana.',
         editHref: '/admin/benchmark-editorial',
         behaviorControls: [
             {
@@ -1487,13 +1487,13 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                     { label: 'Ativada', value: 'true' },
                     { label: 'Desativada', value: 'false' },
                 ],
-                help: 'Permite que a Lara Benchmark Editorial rode pesquisas competitivas conforme agenda.',
+                help: 'Permite que a Lara monitore rankings, portais e respostas de IA conforme agenda, salvando achados para Clara e Isadora.',
             },
             {
                 key: 'benchmark_editorial_weekdays',
                 label: 'Dias de benchmark',
                 type: 'multiselect',
-                fallback: 'tue,thu',
+                fallback: 'mon,tue,wed,thu,fri',
                 options: [
                     { label: 'Seg', value: 'mon' },
                     { label: 'Ter', value: 'tue' },
@@ -1508,7 +1508,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 key: 'benchmark_editorial_run_times',
                 label: 'Horarios',
                 type: 'multiselect',
-                fallback: '10,16',
+                fallback: '09,15',
                 options: [
                     { label: '08h', value: '08' },
                     { label: '10h', value: '10' },

@@ -22,7 +22,7 @@ const ADMIN_MENU_PERMISSIONS = [
     { module_key: 'radar', label: 'Radar de Mercado', description: 'Acessar radar de mercado', category: 'inteligencia' },
     { module_key: 'intelligence', label: 'Central de Inteligencia', description: 'Acessar memoria sincronizada dos agentes e sinais do ecossistema', category: 'inteligencia' },
     { module_key: 'research', label: 'Pesquisa Profunda IA', description: 'Executar e consultar pesquisas externas do Research Pilger', category: 'inteligencia' },
-    { module_key: 'benchmark_editorial', label: 'Benchmark Editorial', description: 'Monitorar concorrentes publicos e criar oportunidades para Blog e Noticias', category: 'inteligencia' },
+    { module_key: 'benchmark_editorial', label: 'Benchmark Editorial', description: 'Monitorar portais, rankings e respostas de IA para entregar inteligencia a Clara e Isadora', category: 'inteligencia' },
     { module_key: 'whatsapp', label: 'WhatsApp Web', description: 'Gerenciar WhatsApp Web, agente, campanhas, agenda e etiquetas', category: 'atendimento' },
     { module_key: 'feedback', label: 'Feedback', description: 'Acessar feedbacks do sistema', category: 'sistema' },
     { module_key: 'maintenance', label: 'Sala de Manutencao', description: 'Acessar sala de manutencao e diagnosticos tecnicos', category: 'sistema' },
