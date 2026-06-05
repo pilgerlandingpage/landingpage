@@ -46,6 +46,34 @@ import {
 
 const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
 const MAX_AVATAR_SIZE = 20 * 1024 * 1024
+const DATA_ROLE_OPTIONS = [
+    { value: 'all', label: 'Todos', description: 'Todos os colaboradores digitais' },
+    { value: 'collector', label: 'Coletores', description: 'Buscam ou normalizam dados externos para a Central' },
+    { value: 'consumer', label: 'Consumidores', description: 'Usam dados da Central para produzir trabalho' },
+    { value: 'hybrid', label: 'Hibridos', description: 'Coletam sinais durante a operacao e tambem produzem entregas' },
+] as const
+const DATA_ROLE_COLLECTOR_IDS = new Set([
+    'gaia-analytics-web',
+    'maya-meta-connections',
+    'otto-integrations',
+    'iris-media-voice',
+    'teo-webhooks-events',
+    'market-radar',
+    'research-pilger',
+    'benchmark-editorial',
+])
+const DATA_ROLE_HYBRID_IDS = new Set([
+    'whatsapp-lead-extraction',
+    'whatsapp-global-agent',
+    'ads-analyst',
+    'social-attendance-agent',
+    'organic-report-agent',
+    'event-agent',
+    'broker-candidate-agent',
+])
+
+type DataRoleFilter = (typeof DATA_ROLE_OPTIONS)[number]['value']
+type AgentDataRole = Exclude<DataRoleFilter, 'all'>
 
 type SaveState = {
     status: 'idle' | 'saving' | 'success' | 'error'
@@ -1230,11 +1258,25 @@ function groupBehaviorControls(agent: AgentOfficeItem) {
     return others.length ? [...grouped, { title: 'Outros', keys: [], controls: others }] : grouped
 }
 
+function getAgentDataRole(agent: AgentOfficeItem): AgentDataRole {
+    if (agent.source === 'virtual_brokers') return 'hybrid'
+    if (DATA_ROLE_COLLECTOR_IDS.has(agent.id)) return 'collector'
+    if (DATA_ROLE_HYBRID_IDS.has(agent.id)) return 'hybrid'
+    return 'consumer'
+}
+
+function dataRoleLabel(role: AgentDataRole) {
+    if (role === 'collector') return 'Coletor'
+    if (role === 'hybrid') return 'Hibrido'
+    return 'Consumidor'
+}
+
 export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeSnapshot }) {
     const searchParams = useSearchParams()
     const initialSector = searchParams.get('setor') || (searchParams.get('tipo') === 'corretores' ? 'Comercial' : 'Todos')
     const initialAgentId = searchParams.get('agent') || ''
     const [activeSector, setActiveSector] = useState(SECTOR_ORDER.includes(initialSector) ? initialSector : 'Todos')
+    const [activeDataRole, setActiveDataRole] = useState<DataRoleFilter>('all')
     const [query, setQuery] = useState('')
     const [agents, setAgents] = useState(snapshot.agents)
     const [selectedId, setSelectedId] = useState(
@@ -1632,26 +1674,47 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
         }
     }
 
-    const sectorCounts = useMemo(() => {
-        const counts = new Map<string, number>()
-        for (const sector of SECTOR_ORDER) counts.set(sector, sector === 'Todos' ? agents.length : 0)
-        for (const agent of agents) counts.set(agent.sector, (counts.get(agent.sector) || 0) + 1)
+    const dataRoleCounts = useMemo(() => {
+        const counts = new Map<DataRoleFilter, number>()
+        for (const option of DATA_ROLE_OPTIONS) counts.set(option.value, option.value === 'all' ? agents.length : 0)
+        for (const agent of agents) {
+            const role = getAgentDataRole(agent)
+            counts.set(role, (counts.get(role) || 0) + 1)
+        }
         return counts
     }, [agents])
+
+    const sectorCounts = useMemo(() => {
+        const roleFilteredAgents = activeDataRole === 'all'
+            ? agents
+            : agents.filter(agent => getAgentDataRole(agent) === activeDataRole)
+        const counts = new Map<string, number>()
+        for (const sector of SECTOR_ORDER) counts.set(sector, sector === 'Todos' ? roleFilteredAgents.length : 0)
+        for (const agent of roleFilteredAgents) counts.set(agent.sector, (counts.get(agent.sector) || 0) + 1)
+        return counts
+    }, [activeDataRole, agents])
 
     const filteredAgents = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase()
         return agents.filter(agent => {
+            const role = getAgentDataRole(agent)
+            const dataRoleMatch = activeDataRole === 'all' || role === activeDataRole
+            if (!dataRoleMatch) return false
             const sectorMatch = activeSector === 'Todos' || agent.sector === activeSector
             if (!sectorMatch) return false
             if (!normalizedQuery) return true
             return [agent.name, agent.role, agent.sector, agent.detail]
-                .concat([agent.personaName, agent.jobTitle, agent.bio])
+                .concat([agent.personaName, agent.jobTitle, agent.bio, dataRoleLabel(role)])
                 .join(' ')
                 .toLowerCase()
                 .includes(normalizedQuery)
         })
-    }, [activeSector, agents, query])
+    }, [activeDataRole, activeSector, agents, query])
+
+    const selectDataRole = (role: DataRoleFilter) => {
+        setActiveDataRole(role)
+        setActiveSector('Todos')
+    }
 
     const selectAgent = (agent: AgentOfficeItem) => {
         setSelectedId(agent.id)
@@ -2644,6 +2707,21 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                     </div>
                 </div>
 
+                <div className="agent-office-data-roles" role="group" aria-label="Papel dos agentes na Central de Inteligencia">
+                    {DATA_ROLE_OPTIONS.map(option => (
+                        <button
+                            type="button"
+                            key={option.value}
+                            className={activeDataRole === option.value ? 'active' : ''}
+                            onClick={() => selectDataRole(option.value)}
+                            title={option.description}
+                        >
+                            <span>{option.label}</span>
+                            <strong>{dataRoleCounts.get(option.value) || 0}</strong>
+                        </button>
+                    ))}
+                </div>
+
                 <div className="agent-office-sectors agent-office-sector-rail">
                     {SECTOR_ORDER.map(sector => (
                         <button
@@ -2672,6 +2750,9 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                             <div>
                                 <strong>{agent.personaName}</strong>
                                 <small>{agent.jobTitle}</small>
+                                <span className={`agent-office-data-role-badge ${getAgentDataRole(agent)}`}>
+                                    {dataRoleLabel(getAgentDataRole(agent))}
+                                </span>
                             </div>
                             <ChevronRight size={15} />
                         </button>

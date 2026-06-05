@@ -236,6 +236,67 @@
   color: #fff;
 }
 
+.agent-office-data-roles {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+}
+
+.agent-office-data-roles button {
+  align-items: center;
+  appearance: none;
+  background: #fff;
+  border: 1px solid rgba(201,169,110,0.22);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 42px;
+  min-width: 0;
+  padding: 9px 11px;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.agent-office-data-roles button:hover {
+  border-color: rgba(201,169,110,0.54);
+  transform: translateY(-1px);
+}
+
+.agent-office-data-roles button.active {
+  background: #171410;
+  border-color: #171410;
+  color: #fff;
+}
+
+.agent-office-data-roles span {
+  font-size: 0.74rem;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.agent-office-data-roles strong {
+  align-items: center;
+  background: rgba(201,169,110,0.14);
+  border-radius: 999px;
+  color: inherit;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  justify-content: center;
+  min-width: 26px;
+  padding: 3px 7px;
+}
+
+.agent-office-data-roles button.active strong {
+  background: rgba(255,255,255,0.16);
+}
+
 .agent-office-list {
   display: grid;
   gap: 9px;
@@ -303,6 +364,10 @@
   scroll-snap-align: start;
 }
 
+.agent-office-agent-rail button > div {
+  min-width: 0;
+}
+
 .agent-office-agent-rail button.active {
   background: linear-gradient(135deg, rgba(201,169,110,0.18), rgba(255,255,255,0.96));
   border-color: rgba(201,169,110,0.72);
@@ -312,6 +377,33 @@
 
 .agent-office-agent-rail small {
   color: var(--text-muted);
+}
+
+.agent-office-data-role-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.62rem;
+  font-weight: 950;
+  line-height: 1;
+  margin-top: 7px;
+  max-width: 100%;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
+.agent-office-data-role-badge.collector {
+  background: rgba(20,184,166,0.11);
+  color: #0f766e;
+}
+
+.agent-office-data-role-badge.consumer {
+  background: rgba(201,169,110,0.13);
+  color: var(--gold-dark);
+}
+
+.agent-office-data-role-badge.hybrid {
+  background: rgba(37,99,235,0.1);
+  color: #1d4ed8;
 }
 
 .agent-office-agent-rail .agent-office-no-results {
