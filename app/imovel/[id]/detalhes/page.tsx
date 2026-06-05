@@ -96,30 +96,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 function formatDescription(raw: string): string[] {
-    let text = cleanPropertyText(raw)
+    const text = cleanPropertyText(raw)
+    if (!text) return []
 
-    text = text.replace(/•[^•\n.]*/g, '')
-    text = text.replace(/\b(UNIDADE|EMPREENDIMENTO|LAZER|INFRAESTRUTURA|SEGURANÇA|ACABAMENTO|DIFERENCIAIS?)\b/gi, '')
-    text = text.replace(/Características\s*(do|da)?\s*(Apartamento|Imóvel|Casa|Cobertura|Empreendimento)?/gi, '')
-    text = text.replace(/\bLocalização\b/gi, '')
-    text = text.replace(/Valor\s*de\s*Investimento/gi, '')
-    text = text.replace(/Área\s*privativa\s*:?/gi, '')
-    text = text.replace(/\d+[\s.,]*\d*\s*m[²2]\s*(de\s*área\s*)?(privativa|total|útil|construída)?/gi, '')
-    text = text.replace(/\d+\s*(suítes?|quartos?|banheiros?|vagas?\s*(de\s*garagem)?|salas?\s*de\s*estar|dormitórios?)/gi, '')
-    text = text.replace(/R\$[\s\d.,]+/g, '')
-    text = text.replace(/Entre\s*em\s*contato[^.]*\./gi, '')
-    text = text.replace(/Agende\s*(sua|uma)\s*visita[^.]*\./gi, '')
-    text = text.replace(/Fale\s*com[^.]*\./gi, '')
-    text = text.replace(/[^.!?]*[–—][^.!?]*/g, '')
-    text = text.replace(/\b(Vista\s*mar|Piso\s*aquecido|Fechadura\s*com\s*senha|Acabamento\s*em\s*gesso)\b[^.]*/gi, '')
-    text = text.replace(/[,;:]\s*[,;:]/g, '')
-    text = text.replace(/\s+/g, ' ')
-    text = text.replace(/^\s*[,;.:–—-]\s*/gm, '')
-    text = text.trim()
+    const existingParagraphs = text
+        .split('\n')
+        .map(paragraph => paragraph.trim())
+        .filter(paragraph => paragraph.length >= 40)
 
-    const sentences = text
+    if (existingParagraphs.length >= 2) return existingParagraphs.slice(0, 5)
+
+    const protectedText = text.replace(/\b(Av|Dr|Dra|Ed|Ref|R|Sr|Sra)\./g, '$1<DOT>')
+
+    const sentences = protectedText
+        .replace(/\s+/g, ' ')
         .split(/(?<=[.!?])\s+/)
-        .map(s => s.trim().replace(/^[,;:\s]+/, ''))
+        .map(s => s.replace(/<DOT>/g, '.').trim().replace(/^[,;:\s]+/, ''))
         .filter(s => {
             if (s.length < 40) return false
             if (/^\d/.test(s)) return false
@@ -133,7 +125,7 @@ function formatDescription(raw: string): string[] {
         const chunk = sentences.slice(i, i + 2).join(' ').trim()
         if (chunk.length > 40) paragraphs.push(chunk)
     }
-    return paragraphs.slice(0, 3)
+    return paragraphs.slice(0, 5)
 }
 
 function formatMoney(value?: number | null, fallback = 'Sob consulta') {

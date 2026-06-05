@@ -14,6 +14,8 @@
     "editorial:copy:apply": "node scripts/review-editorial-copy.mjs --apply",
     "properties:copy:review": "node scripts/property-copy-review.mjs",
     "properties:copy:apply": "node scripts/property-copy-review.mjs --apply",
+    "properties:description:review": "node scripts/property-description-rank-copy.mjs",
+    "properties:description:apply": "node scripts/property-description-rank-copy.mjs --apply",
     "import:properties:dry-run": "node scripts/property-import-dry-run.mjs",
     "import:properties:check-db": "node scripts/property-import-check-db.mjs",
     "import:properties:apply": "node scripts/property-import-apply.mjs",
