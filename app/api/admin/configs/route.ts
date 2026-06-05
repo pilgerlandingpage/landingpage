@@ -15,6 +15,11 @@ import {
     RESEARCH_PILGER_SYSTEM_PROMPT,
     BENCHMARK_EDITORIAL_SYSTEM_PROMPT,
     NEWS_INTELLIGENCE_SYSTEM_PROMPT,
+    GAIA_ANALYTICS_WEB_SYSTEM_PROMPT,
+    MAYA_META_CONNECTIONS_SYSTEM_PROMPT,
+    OTTO_INTEGRATIONS_SYSTEM_PROMPT,
+    IRIS_MEDIA_VOICE_SYSTEM_PROMPT,
+    TEO_WEBHOOKS_EVENTS_SYSTEM_PROMPT,
 } from '@/lib/ai/prompts'
 import { DEFAULT_PROPERTY_REGISTER_AGENT_PROMPT } from '@/lib/properties/ai-registration'
 import { DEFAULT_SECTOR_NOTIFICATION_RECIPIENTS } from '@/lib/notifications/sector-recipients'
@@ -127,6 +132,11 @@ const DEFAULT_PROMPTS: Record<string, string> = {
     news_intelligence_system_prompt: NEWS_INTELLIGENCE_SYSTEM_PROMPT,
     research_pilger_system_prompt: RESEARCH_PILGER_SYSTEM_PROMPT,
     benchmark_editorial_system_prompt: BENCHMARK_EDITORIAL_SYSTEM_PROMPT,
+    gaia_analytics_web_system_prompt: GAIA_ANALYTICS_WEB_SYSTEM_PROMPT,
+    maya_meta_connections_system_prompt: MAYA_META_CONNECTIONS_SYSTEM_PROMPT,
+    otto_integrations_system_prompt: OTTO_INTEGRATIONS_SYSTEM_PROMPT,
+    iris_media_voice_system_prompt: IRIS_MEDIA_VOICE_SYSTEM_PROMPT,
+    teo_webhooks_events_system_prompt: TEO_WEBHOOKS_EVENTS_SYSTEM_PROMPT,
     internal_notifier_system_prompt: INTERNAL_NOTIFIER_SYSTEM_PROMPT,
     email_orchestrator_system_prompt: EMAIL_ORCHESTRATOR_SYSTEM_PROMPT,
     whatsapp_global_system_prompt: DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT,
@@ -165,6 +175,16 @@ const CONFIG_AGENT_CENTRAL_MAP: Record<string, string> = {
     news_intelligence_system_prompt: 'news-intelligence',
     research_pilger_system_prompt: 'research-pilger',
     benchmark_editorial_system_prompt: 'benchmark-editorial',
+    gaia_analytics_web_system_prompt: 'gaia-analytics-web',
+    gaia_analytics_web_enabled: 'gaia-analytics-web',
+    maya_meta_connections_system_prompt: 'maya-meta-connections',
+    maya_meta_connections_enabled: 'maya-meta-connections',
+    otto_integrations_system_prompt: 'otto-integrations',
+    otto_integrations_enabled: 'otto-integrations',
+    iris_media_voice_system_prompt: 'iris-media-voice',
+    iris_media_voice_enabled: 'iris-media-voice',
+    teo_webhooks_events_system_prompt: 'teo-webhooks-events',
+    teo_webhooks_events_enabled: 'teo-webhooks-events',
 }
 
 const DEFAULT_CONFIGS: Record<string, string> = {
@@ -241,6 +261,11 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     benchmark_editorial_keywords: JSON.stringify(DEFAULT_BENCHMARK_KEYWORDS),
     benchmark_editorial_opportunities: '[]',
     benchmark_editorial_runs: '[]',
+    gaia_analytics_web_enabled: 'true',
+    maya_meta_connections_enabled: 'true',
+    otto_integrations_enabled: 'true',
+    iris_media_voice_enabled: 'true',
+    teo_webhooks_events_enabled: 'true',
     meta_webhook_verify_token: 'pilger-meta-webhook',
     meta_connection_logs: '[]',
     public_site_url: 'https://guilhermepilger.ai',
@@ -374,6 +399,11 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'benchmark_editorial_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'benchmark_editorial_auto_handoff_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'benchmark_editorial_schedule_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'gaia_analytics_web_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'maya_meta_connections_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'otto_integrations_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'iris_media_voice_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'teo_webhooks_events_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'meta_social_inbox_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'meta_social_agent_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'meta_social_agent_autopilot') return value === 'true' ? 'true' : 'false'
