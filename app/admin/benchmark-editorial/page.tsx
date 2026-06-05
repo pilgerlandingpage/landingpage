@@ -372,7 +372,9 @@ export default function BenchmarkEditorialPage() {
                                     ) : (
                                         <span>Sem fonte principal</span>
                                     )}
-                                    {item.queries.slice(0, 4).map(query => <small key={query}>{query}</small>)}
+                                    {item.queries.slice(0, 4).map((query, index) => (
+                                        <small key={`query-${item.id}-${index}-${query}`}>{query}</small>
+                                    ))}
                                     {item.generated_posts?.map(post => (
                                         <small key={`${post.type}-${post.id}`}>
                                             {post.type === 'blog' ? 'Blog' : 'Noticia'}: {post.title}
