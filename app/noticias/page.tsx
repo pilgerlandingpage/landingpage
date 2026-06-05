@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CalendarDays, Newspaper, Search } from 'lucide-react'
+import { BookOpen, CalendarDays, Newspaper, Search } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
@@ -193,6 +193,15 @@ export default async function NoticiasPage() {
                         ))}
                     </section>
                 )}
+
+                <section className="news-crosslink">
+                    <div>
+                        <span>Analise Pilger</span>
+                        <h2>Quer ir alem da noticia?</h2>
+                        <p>Leia artigos com contexto de mercado, investimento, bairros e oportunidades para entender melhor cada movimento do litoral catarinense.</p>
+                    </div>
+                    <Link href="/blog"><BookOpen size={17} /> Ler o blog</Link>
+                </section>
             </main>
             <Footer />
 
@@ -217,12 +226,19 @@ export default async function NoticiasPage() {
                 .news-empty h2 { font-family: var(--font-serif); font-size: 2.15rem; margin: 14px 0 4px; }
                 .news-empty p { color: #756a5f; max-width: 560px; }
                 .news-empty a { align-items: center; background: #c9a96e; border-radius: 999px; color: #111; display: inline-flex; font-weight: 950; gap: 8px; margin-top: 12px; padding: 12px 16px; text-decoration: none; text-transform: uppercase; }
+                .news-crosslink { align-items: center; background: #171512; color: #fff8ea; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) auto; margin: 0 7vw 72px; padding: 34px 38px; }
+                .news-crosslink span { color: #d7b674; display: block; font-size: .72rem; font-weight: 950; letter-spacing: .16em; margin-bottom: 10px; text-transform: uppercase; }
+                .news-crosslink h2 { font-family: var(--font-serif); font-size: clamp(1.45rem, 2.4vw, 2.45rem); line-height: 1.05; margin: 0; max-width: 760px; }
+                .news-crosslink p { color: rgba(255,248,234,.68); line-height: 1.6; margin: 12px 0 0; max-width: 720px; }
+                .news-crosslink a { align-items: center; background: #c9a96e; border-radius: 999px; color: #111; display: inline-flex; font-weight: 950; gap: 8px; justify-self: end; padding: 13px 18px; text-decoration: none; text-transform: uppercase; white-space: nowrap; }
                 @media (max-width: 900px) {
                     .news-hero, .news-featured, .news-grid { grid-template-columns: 1fr; }
                     .news-hero { padding-top: 110px; }
                     .news-hero h1 { font-size: 2rem; }
                     .news-featured h2 { font-size: 1.55rem; }
                     .news-featured-media { min-height: 270px; }
+                    .news-crosslink { grid-template-columns: 1fr; margin: 0 7vw 52px; padding: 28px 24px; }
+                    .news-crosslink a { justify-self: start; }
                 }
             `}</style>
         </>

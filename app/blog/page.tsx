@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CalendarDays, Search } from 'lucide-react'
+import { CalendarDays, Newspaper, Search } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
@@ -157,6 +157,15 @@ export default async function BlogPage() {
                         ))}
                     </section>
                 )}
+
+                <section className="blog-crosslink">
+                    <div>
+                        <span>Radar de mercado</span>
+                        <h2>Noticias para acompanhar o que esta mudando no litoral.</h2>
+                        <p>Veja atualizacoes sobre lancamentos, infraestrutura, construtoras e sinais que ajudam a ler o momento antes de decidir.</p>
+                    </div>
+                    <Link href="/noticias"><Newspaper size={17} /> Ver noticias</Link>
+                </section>
             </main>
             <Footer />
 
@@ -181,12 +190,19 @@ export default async function BlogPage() {
                 .blog-empty { align-items: center; display: grid; justify-items: center; min-height: 340px; padding: 70px 7vw; text-align: center; }
                 .blog-empty h2 { font-family: var(--font-serif); font-size: 2rem; margin: 14px 0 4px; }
                 .blog-empty p { color: #756a5f; }
+                .blog-crosslink { align-items: center; background: #171512; color: #fff8ea; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) auto; margin: 0 7vw 70px; padding: 34px 38px; }
+                .blog-crosslink span { color: #c9a96e; display: block; font-size: .72rem; font-weight: 950; letter-spacing: .15em; margin-bottom: 10px; text-transform: uppercase; }
+                .blog-crosslink h2 { font-family: var(--font-serif); font-size: clamp(1.45rem, 2.4vw, 2.45rem); line-height: 1.05; margin: 0; max-width: 760px; }
+                .blog-crosslink p { color: rgba(255,248,234,.68); line-height: 1.6; margin: 12px 0 0; max-width: 720px; }
+                .blog-crosslink a { align-items: center; background: #c9a96e; border-radius: 999px; color: #111; display: inline-flex; font-weight: 950; gap: 8px; justify-self: end; padding: 13px 18px; text-decoration: none; text-transform: uppercase; white-space: nowrap; }
                 @media (max-width: 900px) {
                     .blog-hero { padding-top: 110px; }
                     .blog-hero h1 { font-size: 2rem; }
                     .blog-featured h2 { font-size: 1.55rem; }
                     .blog-featured, .blog-grid { grid-template-columns: 1fr; }
                     .blog-featured-media { min-height: 280px; }
+                    .blog-crosslink { grid-template-columns: 1fr; margin: 0 7vw 52px; padding: 28px 24px; }
+                    .blog-crosslink a { justify-self: start; }
                 }
             `}</style>
         </>
