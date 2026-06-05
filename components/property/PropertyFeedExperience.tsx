@@ -84,6 +84,8 @@ const DISLIKES_KEY = 'pilger_property_dislikes'
 const HISTORY_KEY = 'pilger_property_history'
 const WHATSAPP_PHONE = '5547992528080'
 const MAX_FEED_ITEMS = 72
+const STORIES_PER_PAGE = 5
+const DEFAULT_BROKER_PHOTO = '/images/eventos/guilherme-pilger.png'
 const GALLERY_SWIPE_THRESHOLD = 44
 const FEED_SWIPE_THRESHOLD = 56
 const FEED_VERTICAL_DOMINANCE = 1.1
@@ -149,15 +151,6 @@ function getPropertyLatLng(property: PropertyFeedItem): [number, number] | null 
     if (isValidLatLng(lng, lat) && isInsideServiceArea(lng, lat)) return [lng, lat]
 
     return null
-}
-
-function cleanText(value?: string | null, max = 155) {
-    const text = String(value || '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-    if (!text) return ''
-    return text.length > max ? `${text.slice(0, max - 3).trim()}...` : text
 }
 
 function locationLabel(property: PropertyFeedItem) {
@@ -241,16 +234,29 @@ function FeatureIcon({ index }: { index: number }) {
     return <Icon className={`property-feature-icon feature-icon-${index}`} size={18} />
 }
 
-function storyLabelFor(property: PropertyFeedItem) {
-    return cleanText(buildPropertyFeedCopy(property).title, 24)
-}
-
 function contactPhoneFor(property: PropertyFeedItem) {
     return property.responsible_broker?.phone || WHATSAPP_PHONE
 }
 
 function connectedBrokerFor(property: PropertyFeedItem) {
     return property.responsible_broker?.is_connected ? property.responsible_broker : null
+}
+
+function brokerPhotoFor(property: PropertyFeedItem) {
+    return connectedBrokerFor(property)?.photo_url || DEFAULT_BROKER_PHOTO
+}
+
+function brokerPhotoAltFor(property: PropertyFeedItem) {
+    const broker = connectedBrokerFor(property)
+    return broker?.photo_url ? `Foto de ${broker.name}` : 'Foto do corretor responsavel'
+}
+
+function storyPagesFor(storyItems: PropertyFeedItem[]) {
+    const pages: PropertyFeedItem[][] = []
+    for (let index = 0; index < storyItems.length; index += STORIES_PER_PAGE) {
+        pages.push(storyItems.slice(index, index + STORIES_PER_PAGE))
+    }
+    return pages
 }
 
 function scrollToProperty(propertyId: string) {
@@ -567,6 +573,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                 const storyItems = feedItems
                     .filter(story => story.id !== item.id && !dislikedIds.includes(story.id))
                     .slice(0, 12)
+                const storyPages = storyPagesFor(storyItems)
                 const similarTarget = storyItems[0]
 
                 return (
@@ -703,9 +710,15 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                             </header>
 
                             <section className="property-feed-profile">
-                                <button className="property-profile-photo" type="button" onClick={() => openGallery(item, 0)} aria-label="Abrir fotos do imóvel">
-                                    <img src={primaryImage(item)} alt={copy.title} onError={event => fallbackImage(event, item)} />
-                                </button>
+                                <div className="property-profile-photo" aria-label="Corretor responsavel">
+                                    <img
+                                        src={brokerPhotoFor(item)}
+                                        alt={brokerPhotoAltFor(item)}
+                                        onError={event => {
+                                            event.currentTarget.src = DEFAULT_BROKER_PHOTO
+                                        }}
+                                    />
+                                </div>
 
                                 <div className="property-profile-copy">
                                     <h1>{copy.title}</h1>
@@ -750,7 +763,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                 >
                                     <MessageCircle size={20} /> WhatsApp
                                 </WhatsAppCaptureLink>
-                                <Link className="property-action" href={detailsHref} onClick={() => trackEvent('property_details_clicked', { property_id: item.id, title: copy.title })}>
+                                <Link className="property-action details" href={detailsHref} onClick={() => trackEvent('property_details_clicked', { property_id: item.id, title: copy.title })}>
                                     <FileText size={19} /> Descrição completa
                                 </Link>
                                 <button className="property-action square" type="button" onClick={() => shareProperty(item)} aria-label="Mais opções">
@@ -758,27 +771,37 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                 </button>
                             </section>
 
-                            <section className="property-feed-stories" aria-label="Imóveis semelhantes">
-                                {storyItems.map((story, storyIndex) => {
-                                    const storyGallery = galleryFor(story)
-                                    return (
-                                        <button
-                                            key={`${item.id}-story-${story.id}`}
-                                            type="button"
-                                            onClick={() => scrollToProperty(story.id)}
-                                        >
-                                            <span>
-                                                <img
-                                                    src={storyGallery[storyIndex % storyGallery.length]}
-                                                    alt=""
-                                                    onError={event => fallbackImage(event, story)}
-                                                />
-                                            </span>
-                                            <em>{storyLabelFor(story)}</em>
-                                        </button>
-                                    )
-                                })}
-                            </section>
+                            {storyPages.length > 0 && (
+                                <section className="property-feed-stories" aria-label="Imóveis semelhantes">
+                                    <strong className="property-feed-stories-label">Semelhantes</strong>
+                                    <div className="property-feed-stories-pages">
+                                        {storyPages.map((page, pageIndex) => (
+                                            <div className="property-feed-story-page" key={`${item.id}-story-page-${pageIndex}`}>
+                                                {page.map((story, storyIndex) => {
+                                                    const storyGallery = galleryFor(story)
+                                                    const absoluteIndex = pageIndex * STORIES_PER_PAGE + storyIndex
+                                                    return (
+                                                        <button
+                                                            key={`${item.id}-story-${story.id}`}
+                                                            type="button"
+                                                            aria-label={`Ver imovel semelhante ${absoluteIndex + 1}`}
+                                                            onClick={() => scrollToProperty(story.id)}
+                                                        >
+                                                            <span>
+                                                                <img
+                                                                    src={storyGallery[absoluteIndex % storyGallery.length]}
+                                                                    alt=""
+                                                                    onError={event => fallbackImage(event, story)}
+                                                                />
+                                                            </span>
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
 
                             <section className={`property-feed-tabs ${mapLatLng ? 'has-map' : ''}`} aria-label="Conteúdos do imóvel">
                                 <button className={activeTab === 'photos' ? 'active' : ''} type="button" onClick={() => setTab(item, 'photos')}>

@@ -254,7 +254,7 @@ export default function PropertyFeedStyles() {
                 border-radius: 999px;
                 box-shadow: 0 0 0 3px #fff, 0 10px 24px rgba(230, 0, 35, .15);
                 box-sizing: border-box;
-                cursor: zoom-in;
+                cursor: default;
                 display: block;
                 isolation: isolate;
                 overflow: visible;
@@ -499,6 +499,17 @@ export default function PropertyFeedStyles() {
                 color: #fff;
             }
 
+            .property-action.details {
+                background: linear-gradient(135deg, #dfc18e, #b8945f);
+                border-color: rgba(255,255,255,.28);
+                box-shadow: 0 8px 16px rgba(184, 148, 95, .24);
+                color: #101010;
+            }
+
+            .property-action.details svg {
+                stroke-width: 2.25;
+            }
+
             .property-action.square {
                 display: inline-flex;
                 padding: 0;
@@ -510,22 +521,41 @@ export default function PropertyFeedStyles() {
             }
 
             .property-feed-stories {
+                display: grid;
+                gap: 6px;
+                padding: 6px 16px 9px;
+            }
+
+            .property-feed-stories-label {
+                color: #151515;
+                display: block;
+                font-size: .72rem;
+                font-weight: 900;
+                letter-spacing: 0;
+                line-height: 1;
+                padding-left: 1px;
+            }
+
+            .property-feed-stories-pages {
                 display: flex;
-                gap: 10px;
+                gap: 12px;
                 overflow-x: auto;
-                padding: 8px 16px 10px;
-                scroll-snap-type: x proximity;
+                scroll-snap-type: x mandatory;
                 scrollbar-width: none;
                 touch-action: pan-x;
                 -webkit-overflow-scrolling: touch;
             }
 
-            .property-feed-stories::-webkit-scrollbar {
+            .property-feed-stories-pages::-webkit-scrollbar {
                 display: none;
             }
 
-            .property-feed-stories:empty {
-                padding: 0;
+            .property-feed-story-page {
+                display: grid;
+                flex: 0 0 100%;
+                gap: 8px;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                scroll-snap-align: start;
             }
 
             .property-feed-stories button {
@@ -537,12 +567,10 @@ export default function PropertyFeedStyles() {
                 display: flex;
                 flex-direction: column;
                 font-size: .65rem;
-                flex: 0 0 62px;
                 font-weight: 650;
                 gap: 6px;
-                min-width: 62px;
+                min-width: 0;
                 padding: 0;
-                scroll-snap-align: start;
                 text-align: center;
             }
 
@@ -556,7 +584,7 @@ export default function PropertyFeedStyles() {
                 display: inline-flex;
                 justify-content: center;
                 overflow: hidden;
-                width: clamp(46px, 14vw, 56px);
+                width: min(100%, 56px);
             }
 
             .property-feed-stories img {
@@ -564,15 +592,6 @@ export default function PropertyFeedStyles() {
                 height: 100%;
                 object-fit: cover;
                 width: 100%;
-            }
-
-            .property-feed-stories em {
-                display: -webkit-box;
-                font-style: normal;
-                min-height: 1.45em;
-                overflow: hidden;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
             }
 
             .property-feed-tabs {
@@ -1223,17 +1242,20 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-feed-stories {
+                    gap: 6px;
+                    padding: 6px 16px 9px;
+                }
+
+                .property-feed-story-page {
                     gap: 8px;
-                    padding: 8px 16px 9px;
                 }
 
                 .property-feed-stories span {
-                    width: clamp(46px, 14vw, 56px);
+                    width: min(100%, 56px);
                 }
 
                 .property-feed-stories button {
-                    font-size: .65rem;
-                    gap: 6px;
+                    gap: 0;
                 }
 
                 .property-feed-tabs {
@@ -1311,11 +1333,7 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-feed-stories span {
-                    width: 44px;
-                }
-
-                .property-feed-stories button {
-                    font-size: .6rem;
+                    width: min(100%, 44px);
                 }
 
                 .property-feed-tabs {
@@ -1344,8 +1362,12 @@ export default function PropertyFeedStyles() {
                     gap: 6px;
                 }
 
+                .property-feed-story-page {
+                    gap: 6px;
+                }
+
                 .property-feed-stories span {
-                    width: 42px;
+                    width: min(100%, 42px);
                 }
             }
         `}</style>
