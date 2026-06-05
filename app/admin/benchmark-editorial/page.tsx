@@ -187,7 +187,7 @@ export default function BenchmarkEditorialPage() {
         try {
             await postAction(
                 { action: target === 'blog' ? 'send_to_blog' : 'send_to_news', id },
-                target === 'blog' ? 'Briefing enviado para a Isadora.' : 'Briefing enviado para a Clara.'
+                target === 'blog' ? 'Isadora gerou um artigo em analise a partir da Lara.' : 'Clara gerou uma noticia em analise a partir da Lara.'
             )
         } catch (error: any) {
             setAction({ status: 'error', message: error?.message || String(error) })

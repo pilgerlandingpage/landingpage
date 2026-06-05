@@ -40,6 +40,10 @@ type BlogAgentDraft = {
     approval_notes: string[]
 }
 
+type EditorialAgentDraftOptions = {
+    contextAugmentation?: Record<string, unknown> | null
+}
+
 function safeArray(value: unknown, limit = 20) {
     return Array.isArray(value) ? value.slice(0, limit) : []
 }
@@ -452,6 +456,19 @@ function inferResearchTopic(context: any, topic?: string) {
     return 'mercado imobiliario de luxo em Santa Catarina'
 }
 
+function applyEditorialContextAugmentation(context: any, augmentation?: Record<string, unknown> | null) {
+    if (!augmentation) return context
+
+    return {
+        ...context,
+        lara_benchmark_handoff: augmentation,
+        signals: {
+            ...(context.signals || {}),
+            lara_benchmark_handoff: augmentation,
+        },
+    }
+}
+
 async function loadReusableBlogResearchReport(topic?: string, requester = 'blog-intelligence') {
     if (topic?.trim()) return null
 
@@ -638,13 +655,14 @@ async function callBlogAgent(prompt: string, context: any, topic?: string): Prom
     return polishPortugueseCopyIfNeeded(normalizeEditorialDraft(draft, 'Guia imobiliario de alto padrao'))
 }
 
-export async function generateBlogArticleDraft(topic?: string) {
+export async function generateBlogArticleDraft(topic?: string, options: EditorialAgentDraftOptions = {}) {
     const supabase = createAdminClient()
     const baseContext = await getAgentEcosystemContext({ supabase, agent: 'blog', days: 30 })
-    const context = await enrichWithExternalResearch(baseContext, topic, {
+    const enrichedContext = await enrichWithExternalResearch(baseContext, topic, {
         requester: 'blog-intelligence',
         topicIntent: 'blog',
     })
+    const context = applyEditorialContextAugmentation(enrichedContext, options.contextAugmentation)
     const prompt = `${(await getAIConfig('blog_intelligence_system_prompt')) || BLOG_INTELLIGENCE_SYSTEM_PROMPT}${EDITORIAL_VISUAL_PROMPT_APPENDIX}`
 
     let draft: BlogAgentDraft
@@ -724,13 +742,14 @@ export async function generateBlogArticleDraft(topic?: string) {
     }
 }
 
-export async function generateNewsArticleDraft(topic?: string) {
+export async function generateNewsArticleDraft(topic?: string, options: EditorialAgentDraftOptions = {}) {
     const supabase = createAdminClient()
     const baseContext = await getAgentEcosystemContext({ supabase, agent: 'news', days: 30 })
-    const context = await enrichWithExternalResearch(baseContext, topic, {
+    const enrichedContext = await enrichWithExternalResearch(baseContext, topic, {
         requester: 'news-intelligence',
         topicIntent: 'noticias',
     })
+    const context = applyEditorialContextAugmentation(enrichedContext, options.contextAugmentation)
     const prompt = `${(await getAIConfig('news_intelligence_system_prompt')) || NEWS_INTELLIGENCE_SYSTEM_PROMPT}${EDITORIAL_VISUAL_PROMPT_APPENDIX}`
 
     let draft: BlogAgentDraft

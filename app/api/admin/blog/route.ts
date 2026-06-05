@@ -48,6 +48,12 @@ function normalizePostPayload(body: any) {
     }
 }
 
+function isLegacyBenchmarkBriefing(post: any) {
+    return String(post?.generated_by || '') === 'benchmark-editorial'
+        || /^pauta de blog a partir de benchmark:/i.test(String(post?.title || ''))
+        || /^material lara para (isadora|clara):/i.test(String(post?.title || ''))
+}
+
 function tableMissingResponse(error: any) {
     if (!error?.message?.includes('blog_posts')) return null
     return NextResponse.json({
@@ -85,7 +91,11 @@ export async function GET(request: NextRequest) {
             throw error
         }
 
-        return NextResponse.json({ posts: data || [] })
+        const posts = request.nextUrl.searchParams.get('include_benchmark_briefings') === 'true'
+            ? data || []
+            : (data || []).filter((post: any) => !isLegacyBenchmarkBriefing(post))
+
+        return NextResponse.json({ posts })
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || String(error) }, { status: 500 })
     }

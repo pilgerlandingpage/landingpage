@@ -9,6 +9,7 @@ type RunNewsAgentOptions = {
   topic?: string
   origin?: string | null
   source?: string
+  contextAugmentation?: Record<string, unknown> | null
 }
 
 export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
@@ -18,7 +19,9 @@ export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
   await markAgentStarted(supabase, 'news_agent')
 
   try {
-    const draft = await generateNewsArticleDraft(options.topic)
+    const draft = await generateNewsArticleDraft(options.topic, {
+      contextAugmentation: options.contextAugmentation,
+    })
     const slug = await getAvailableBlogSlug(supabase, draft.slug || draft.title)
     const { data: post, error } = await supabase
       .from('blog_posts')
@@ -52,6 +55,7 @@ export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
             category: post.category,
             primary_keyword: post.primary_keyword,
             origin: options.origin || null,
+            context_source: options.contextAugmentation ? 'lara_benchmark_handoff' : null,
           },
         })
         const context = await getAgentEcosystemContext({ supabase, agent: 'news', days: 30 })
@@ -75,6 +79,7 @@ export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
                 status: post.status,
                 category: post.category,
                 primary_keyword: post.primary_keyword,
+                source: options.contextAugmentation ? 'lara_benchmark_handoff' : source,
                 created_at: post.created_at,
               },
             },

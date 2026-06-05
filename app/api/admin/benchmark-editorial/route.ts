@@ -4,8 +4,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { BENCHMARK_EDITORIAL_SYSTEM_PROMPT } from '@/lib/ai/prompts'
 import { createResearchReport } from '@/lib/research/pilger'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
-import { getAvailableBlogSlug, slugifyBlog } from '@/lib/blog/types'
-import { notifyBlogReviewReady } from '@/lib/blog/review-notifications'
+import { runBlogAgentDraft } from '@/lib/blog/runner'
+import { runNewsAgentDraft } from '@/lib/news/runner'
 import {
     BENCHMARK_CONFIG_KEYS,
     DEFAULT_BENCHMARK_COMPETITORS,
@@ -15,7 +15,6 @@ import {
     BenchmarkOpportunity,
     BenchmarkRun,
     BenchmarkIntent,
-    buildBenchmarkMarkdownSummary,
     getDomainFromUrl,
     mergeBenchmarkDefaults,
     normalizeBenchmarkIntent,
@@ -264,53 +263,46 @@ function buildOpportunityFromReport(params: {
     }
 }
 
-function buildBlogPayload(opportunity: BenchmarkOpportunity, type: 'blog' | 'news') {
-    const baseTitle = type === 'news'
-        ? `Material Lara para Clara: ${opportunity.title}`
-        : `Material Lara para Isadora: ${opportunity.title}`
+function buildHandoffContext(opportunity: BenchmarkOpportunity, type: 'blog' | 'news') {
     const targetAgent = type === 'news' ? 'Clara Edicao Noticias' : 'Isadora Edicao Blog'
+    const sourceDomains = opportunity.sources
+        .map(source => getDomainFromUrl(source.uri))
+        .filter(Boolean)
 
     return {
-        title: baseTitle.slice(0, 180),
-        slug: slugifyBlog(baseTitle),
-        excerpt: opportunity.summary.slice(0, 280),
-        content_markdown: buildBenchmarkMarkdownSummary(opportunity),
-        status: 'under_review',
-        cover_image_url: null,
-        author_name: 'Lara Benchmark Editorial',
-        category: type === 'news' ? 'Noticias' : 'Mercado Imobiliario',
-        tags: [
-            'Benchmark Editorial',
-            type === 'news' ? 'Noticias' : 'Blog',
-            opportunity.keyword,
-            opportunity.format,
-            ...opportunity.queries.slice(0, 4),
-        ].filter(Boolean),
-        seo_title: baseTitle.slice(0, 180),
-        meta_description: opportunity.summary.slice(0, 280),
-        primary_keyword: opportunity.keyword,
-        secondary_keywords: opportunity.queries,
-        local_entities: [],
-        aeo_questions: [],
-        internal_links: [
-            { label: 'ver imoveis de luxo no litoral', target: '/', reason: 'Conectar pauta ao estoque e a homepage.' },
-            { label: 'acompanhar noticias do mercado', target: '/noticias', reason: 'Fortalecer cluster editorial.' },
-            { label: 'ler artigos do blog', target: '/blog', reason: 'Fortalecer interligacao editorial.' },
-        ],
-        source_summary: {
-            benchmark_opportunity_id: opportunity.id,
-            benchmark_source_url: opportunity.source_url,
-            benchmark_sources: opportunity.sources,
-            benchmark_queries: opportunity.queries,
-            benchmark_target_agent: targetAgent,
-            note: `Briefing criado pela Lara Benchmark Editorial para ${targetAgent}. Transformar em conteudo final original antes de publicar.`,
+        source: 'lara_benchmark_editorial',
+        target_agent: targetAgent,
+        instruction: [
+            'Use este material como inteligencia competitiva, nao como texto final.',
+            'Crie conteudo original com titulo proprio, estrutura editorial completa e linguagem premium.',
+            'Nao use "Benchmark Editorial", "Lara" ou "pauta a partir de benchmark" no titulo, resumo, SEO title ou primeiro paragrafo.',
+            'Nao copie texto, titulo, imagens, estrutura ou listas de terceiros.',
+            type === 'news'
+                ? 'Gere noticia somente se houver fato publico verificavel; se o achado for educativo, trate como contexto e produza uma leitura jornalistica prudente.'
+                : 'Gere artigo evergreen SEO/AEO/GEO com resposta direta, FAQ, links internos, estoque relacionado e leitura local.',
+        ].join(' '),
+        opportunity: {
+            id: opportunity.id,
+            title: opportunity.title,
+            keyword: opportunity.keyword,
+            intent: opportunity.intent,
+            format: opportunity.format,
+            score: opportunity.opportunity_score,
+            summary: opportunity.summary,
+            recommended_angle: opportunity.recommended_angle,
+            strategy_notes: opportunity.strategy_notes,
+            source_url: opportunity.source_url,
+            source_domain: opportunity.source_domain,
+            competitor_name: opportunity.competitor_name,
+            sources: opportunity.sources,
+            source_domains: sourceDomains,
+            queries: opportunity.queries,
+            outline: opportunity.outline,
+            created_at: opportunity.created_at,
         },
-        approval_notes: [
-            `Este item e material operacional para ${targetAgent}; nao publicar como texto final sem reescrita editorial.`,
-            'Manter apenas fatos verificados, citar fontes publicas no corpo do texto e nao copiar concorrentes.',
-            'Revisar acentuacao, imagens, links internos, disponibilidade de estoque e riscos antes de publicar.',
-        ],
-        generated_by: 'benchmark-editorial',
+        required_output: type === 'news'
+            ? 'noticia final em revisao, escrita pela Clara, com fatos verificados e fontes no corpo'
+            : 'artigo final em revisao, escrito pela Isadora, com SEO/AEO/GEO e links internos',
     }
 }
 
@@ -555,21 +547,21 @@ export async function POST(request: NextRequest) {
             const opportunity = state.opportunities.find(item => item.id === String(body?.id || ''))
             if (!opportunity) return NextResponse.json({ error: 'Oportunidade nao encontrada.' }, { status: 404 })
 
-            const payload = buildBlogPayload(opportunity, type)
-            const slug = await getAvailableBlogSlug(supabase, payload.slug || payload.title)
-            const { data: post, error } = await supabase
-                .from('blog_posts')
-                .insert({ ...payload, slug })
-                .select('*')
-                .single()
-
-            if (error) throw error
-
-            const notification = await notifyBlogReviewReady({
-                supabase,
-                post,
-                origin: request.nextUrl.origin,
-            })
+            const handoffContext = buildHandoffContext(opportunity, type)
+            const result = type === 'news'
+                ? await runNewsAgentDraft({
+                    topic: opportunity.keyword,
+                    origin: request.nextUrl.origin,
+                    source: 'lara_benchmark_handoff',
+                    contextAugmentation: handoffContext,
+                })
+                : await runBlogAgentDraft({
+                    topic: opportunity.keyword,
+                    origin: request.nextUrl.origin,
+                    source: 'lara_benchmark_handoff',
+                    contextAugmentation: handoffContext,
+                })
+            const post = result.post
 
             const status = type === 'news' ? 'sent_to_news' : 'sent_to_blog'
             const opportunities = state.opportunities.map(item =>
@@ -593,14 +585,15 @@ export async function POST(request: NextRequest) {
                     benchmark_source_url: opportunity.source_url,
                     handoff_target: type === 'news' ? 'clara-news' : 'isadora-blog',
                     type,
-                    slug: post.slug,
+                    generated_by: type === 'news' ? 'news-intelligence' : 'blog-intelligence',
+                    handoff_context: handoffContext,
                     status: post.status,
                 },
             }).catch((eventError: any) => {
                 console.warn('[Benchmark Editorial] send ecosystem event failed:', eventError?.message || eventError)
             })
 
-            return NextResponse.json({ post, notification, opportunities })
+            return NextResponse.json({ post, result, opportunities })
         }
 
         return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })
