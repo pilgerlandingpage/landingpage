@@ -41,6 +41,7 @@ import {
     recordAgentCentralSignal,
 } from '../intelligence/agent-runtime'
 import { getDefaultCommercialAutomationPrompt } from '../whatsapp/commercial-automation-prompts'
+import { sendBrevoEmail } from '../email/brevo'
 
 function getSupabase() {
     return createClient(
@@ -1681,6 +1682,128 @@ export const runAgentWorkflow = inngest.createFunction(
     }
 )
 
+// ─── Finance: alerta diário de contas a pagar vencendo ───────────────────────
+const financeDailyAlerts = inngest.createFunction(
+    { id: 'finance-daily-alerts', name: 'Finance: Alertas Diários de Vencimento' },
+    { cron: '0 8 * * *' },
+    async () => {
+        const supabase = getSupabase()
+
+        const today = new Date().toISOString().slice(0, 10)
+        const addDays = (base: string, n: number) => {
+            const d = new Date(`${base}T12:00:00Z`)
+            d.setUTCDate(d.getUTCDate() + n)
+            return d.toISOString().slice(0, 10)
+        }
+
+        const upperDate = addDays(today, 3)
+
+        const { data: payables } = await supabase
+            .from('finance_payables')
+            .select('id, description, amount, paid_amount, due_date, counterparty_name, category')
+            .lte('due_date', upperDate)
+            .order('due_date', { ascending: true })
+            .limit(200)
+
+        const items = (payables || []).filter((row: any) => {
+            const status = String(row.status || '').toLowerCase()
+            if (status === 'paid' || status === 'cancelled') return false
+            const settled = Number(row.paid_amount || 0)
+            const amount = Number(row.amount || 0)
+            return settled < amount
+        }).map((row: any) => {
+            const dueDate = new Date(`${row.due_date}T12:00:00Z`)
+            const todayDate = new Date(`${today}T12:00:00Z`)
+            const daysUntilDue = Math.round((dueDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
+            const amount = Number(row.amount || 0)
+            const settled = Number(row.paid_amount || 0)
+            return {
+                id: row.id,
+                description: row.description || 'Sem descrição',
+                counterparty_name: row.counterparty_name || null,
+                category: row.category || null,
+                amount,
+                remaining_amount: Math.max(0, amount - settled),
+                due_date: row.due_date,
+                days_until_due: daysUntilDue,
+            }
+        })
+
+        if (items.length === 0) return { skipped: true, reason: 'no_due_items' }
+
+        const { data: masterAdmins } = await supabase
+            .from('admin_users')
+            .select('id, name, email')
+            .eq('is_master', true)
+            .eq('is_active', true)
+
+        const recipients = (masterAdmins || [])
+            .filter((u: any) => u.email)
+            .map((u: any) => ({ email: u.email, name: u.name }))
+
+        if (recipients.length === 0) return { skipped: true, reason: 'no_recipients' }
+
+        const formatBRL = (v: number) =>
+            new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
+
+        const formatDate = (iso: string) => {
+            const [y, m, d] = (iso || '').split('-')
+            return `${d}/${m}/${y}`
+        }
+
+        const overdue = items.filter((i: any) => i.days_until_due < 0)
+        const upcoming = items.filter((i: any) => i.days_until_due >= 0)
+        const totalAmount = items.reduce((s: number, i: any) => s + i.remaining_amount, 0)
+
+        const rowsHtml = (section: any[], label: string, color: string) => section.length === 0 ? '' : `
+            <h3 style="color:${color};margin:16px 0 8px">${label} (${section.length})</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr style="background:#f5f5f5">
+                <th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e0e0e0">Descrição</th>
+                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid #e0e0e0">Valor</th>
+                <th style="padding:6px 10px;text-align:center;border-bottom:1px solid #e0e0e0">Vencimento</th>
+              </tr></thead>
+              <tbody>
+                ${section.map((i: any) => `
+                  <tr>
+                    <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0">${i.description}${i.counterparty_name ? ` — ${i.counterparty_name}` : ''}</td>
+                    <td style="padding:6px 10px;text-align:right;border-bottom:1px solid #f0f0f0">${formatBRL(i.remaining_amount)}</td>
+                    <td style="padding:6px 10px;text-align:center;border-bottom:1px solid #f0f0f0">${formatDate(i.due_date)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>`
+
+        const htmlContent = `
+            <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;padding:20px">
+              <div style="background:#1a1a2e;color:white;padding:20px 24px;border-radius:8px 8px 0 0">
+                <h2 style="margin:0;font-size:18px">Alerta Financeiro — Vencimentos do Dia</h2>
+                <p style="margin:4px 0 0;opacity:.7;font-size:13px">${formatDate(today)} · ${items.length} título(s) requerem atenção · Total: ${formatBRL(totalAmount)}</p>
+              </div>
+              <div style="background:#fff;padding:20px 24px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px">
+                ${rowsHtml(overdue, 'Vencidos', '#d32f2f')}
+                ${rowsHtml(upcoming, 'Vencendo em até 3 dias', '#f57c00')}
+                <p style="margin-top:24px;font-size:12px;color:#999">Alerta automático gerado às 08h pelo sistema Pilger. Acesse o financeiro para efetuar os pagamentos.</p>
+              </div>
+            </div>`
+
+        await sendBrevoEmail({
+            to: recipients,
+            subject: `[Pilger Finance] ${items.length} conta(s) vencendo — ${formatDate(today)}`,
+            htmlContent,
+        })
+
+        await supabase.from('finance_alert_logs').insert({
+            alert_type: 'due_date_cron',
+            payable_ids: items.map((i: any) => i.id),
+            recipient_email: recipients.map((r: any) => r.email).join(', '),
+            items_count: items.length,
+            notes: 'Alerta automático diário (cron 08h)',
+        })
+
+        return { sent: true, items_count: items.length, recipients: recipients.length }
+    },
+)
+
 // EXPORT ALL FUNCTIONS
 export const functions = [
     sendWelcome,
@@ -1719,5 +1842,7 @@ export const functions = [
     // Eventos
     ...eventFunctions,
     // Trabalhe Conosco / Corretores
-    ...candidateFunctions
+    ...candidateFunctions,
+    // Finance
+    financeDailyAlerts,
 ]

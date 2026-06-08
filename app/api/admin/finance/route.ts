@@ -20,6 +20,7 @@ interface FinancePayload {
     competence_date?: string | null
     cost_center_id?: string | null
     bank_account_id?: string | null
+    entity_id?: string | null
     notes?: string | null
     attachment_url?: string | null
 }
@@ -40,6 +41,7 @@ interface FinanceSchema {
     hasCompetenceDate: boolean
     hasCostCenterId: boolean
     hasBankAccountId: boolean
+    hasEntityId: boolean
     hasSourceModule: boolean
     hasExternalReference: boolean
     hasNotes: boolean
@@ -118,6 +120,7 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         hasCompetenceDate,
         hasCostCenterId,
         hasBankAccountId,
+        hasEntityId,
         hasSourceModule,
         hasExternalReference,
         hasNotes,
@@ -140,6 +143,7 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         columnExists(admin, 'competence_date'),
         columnExists(admin, 'cost_center_id'),
         columnExists(admin, 'bank_account_id'),
+        columnExists(admin, 'entity_id'),
         columnExists(admin, 'source_module'),
         columnExists(admin, 'external_reference'),
         columnExists(admin, 'notes'),
@@ -168,6 +172,7 @@ async function getFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         hasCompetenceDate,
         hasCostCenterId,
         hasBankAccountId,
+        hasEntityId,
         hasSourceModule,
         hasExternalReference,
         hasNotes,
@@ -209,6 +214,7 @@ function normalizePayload(raw: any): FinancePayload {
         competence_date: String(raw?.competence_date || '').trim() || null,
         cost_center_id: String(raw?.cost_center_id || '').trim() || null,
         bank_account_id: String(raw?.bank_account_id || '').trim() || null,
+        entity_id: String(raw?.entity_id || '').trim() || null,
         notes: String(raw?.notes || '').trim() || null,
         attachment_url: String(raw?.attachment_url || '').trim() || null,
     }
@@ -248,6 +254,7 @@ function mapEntryRow(row: any, schema: FinanceSchema) {
         competence_date: schema.hasCompetenceDate ? (row.competence_date || rawDate || null) : (rawDate || null),
         cost_center_id: schema.hasCostCenterId ? row.cost_center_id : null,
         bank_account_id: schema.hasBankAccountId ? row.bank_account_id : null,
+        entity_id: schema.hasEntityId ? row.entity_id : null,
         source_module: schema.hasSourceModule ? row.source_module : null,
         external_reference: schema.hasExternalReference ? row.external_reference : null,
         notes: schema.hasNotes ? row.notes : null,
@@ -271,6 +278,7 @@ function buildSelectColumns(schema: FinanceSchema) {
     if (schema.hasCompetenceDate) columns.push('competence_date')
     if (schema.hasCostCenterId) columns.push('cost_center_id')
     if (schema.hasBankAccountId) columns.push('bank_account_id')
+    if (schema.hasEntityId) columns.push('entity_id')
     if (schema.hasSourceModule) columns.push('source_module')
     if (schema.hasExternalReference) columns.push('external_reference')
     if (schema.hasNotes) columns.push('notes')
@@ -288,6 +296,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const startDate = searchParams.get('start_date')
         const endDate = searchParams.get('end_date')
+        const entityId = searchParams.get('entity_id')
         const limitRaw = Number(searchParams.get('limit') || 500)
         const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 2000)) : 500
 
@@ -316,6 +325,10 @@ export async function GET(request: NextRequest) {
         if (endDate) {
             if (schema.dateField === 'created_at' || schema.dateField === 'occurred_at') query = query.lte(schema.dateField, `${endDate}T23:59:59.999Z`)
             else query = query.lte(schema.dateField, endDate)
+        }
+
+        if (entityId && schema.hasEntityId) {
+            query = query.eq('entity_id', entityId)
         }
 
         const { data, error } = await query
@@ -372,6 +385,7 @@ export async function POST(request: NextRequest) {
         if (schema.hasCompetenceDate) insertData.competence_date = payload.competence_date || payload.entry_date
         if (schema.hasCostCenterId) insertData.cost_center_id = payload.cost_center_id || null
         if (schema.hasBankAccountId) insertData.bank_account_id = payload.bank_account_id || null
+        if (schema.hasEntityId) insertData.entity_id = payload.entity_id || null
         if (schema.hasNotes) insertData.notes = payload.notes
         if (schema.hasAttachmentUrl) insertData.attachment_url = payload.attachment_url
         if (schema.hasCreatedBy) insertData.created_by = access.adminUser!.id
@@ -455,6 +469,7 @@ export async function PUT(request: NextRequest) {
         if (schema.hasCompetenceDate) updateData.competence_date = payload.competence_date || payload.entry_date
         if (schema.hasCostCenterId) updateData.cost_center_id = payload.cost_center_id || null
         if (schema.hasBankAccountId) updateData.bank_account_id = payload.bank_account_id || null
+        if (schema.hasEntityId) updateData.entity_id = payload.entity_id || null
         if (schema.hasNotes) updateData.notes = payload.notes
         if (schema.hasAttachmentUrl) updateData.attachment_url = payload.attachment_url
         if (schema.hasUpdatedAt) updateData.updated_at = new Date().toISOString()

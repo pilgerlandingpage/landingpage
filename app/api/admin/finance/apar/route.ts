@@ -30,6 +30,7 @@ interface AparSchema {
     hasCostCenterId: boolean
     hasBankAccountId: boolean
     hasNotes: boolean
+    hasEntityId: boolean
     hasCreatedBy: boolean
     hasUpdatedAt: boolean
     hasSettledAmount: boolean
@@ -133,6 +134,7 @@ async function getAparSchema(admin: any, type: AparType): Promise<AparSchema> {
         hasUpdatedAt,
         hasSettledAmount,
         hasSettledAt,
+        hasEntityId,
     ] = await Promise.all([
         columnExistsOnTable(admin, tableName, 'description'),
         columnExistsOnTable(admin, tableName, 'amount'),
@@ -151,6 +153,7 @@ async function getAparSchema(admin: any, type: AparType): Promise<AparSchema> {
         columnExistsOnTable(admin, tableName, 'updated_at'),
         columnExistsOnTable(admin, tableName, settledAmountColumn),
         columnExistsOnTable(admin, tableName, settledAtColumn),
+        columnExistsOnTable(admin, tableName, 'entity_id'),
     ])
 
     return {
@@ -177,6 +180,7 @@ async function getAparSchema(admin: any, type: AparType): Promise<AparSchema> {
         hasUpdatedAt,
         hasSettledAmount,
         hasSettledAt,
+        hasEntityId,
     }
 }
 
@@ -194,6 +198,7 @@ function buildAparSelectColumns(schema: AparSchema): string {
     if (schema.hasPaymentMethod) columns.push('payment_method')
     if (schema.hasCostCenterId) columns.push('cost_center_id')
     if (schema.hasBankAccountId) columns.push('bank_account_id')
+    if (schema.hasEntityId) columns.push('entity_id')
     if (schema.hasNotes) columns.push('notes')
     if (schema.hasSettledAmount) columns.push(schema.settledAmountColumn)
     if (schema.hasSettledAt) columns.push(schema.settledAtColumn)
@@ -219,6 +224,7 @@ function mapAparRow(row: any, schema: AparSchema) {
         payment_method: row.payment_method || null,
         cost_center_id: row.cost_center_id || null,
         bank_account_id: row.bank_account_id || null,
+        entity_id: schema.hasEntityId ? (row.entity_id || null) : null,
         notes: row.notes || null,
         settled_at: schema.hasSettledAt ? (row[schema.settledAtColumn] || null) : null,
         created_at: row.created_at,
@@ -350,6 +356,7 @@ export async function GET(request: NextRequest) {
         const type = toAparType(searchParams.get('type'))
         const startDate = toNullableText(searchParams.get('start_date'))
         const endDate = toNullableText(searchParams.get('end_date'))
+        const entityId = toNullableText(searchParams.get('entity_id'))
         const limitRaw = Number(searchParams.get('limit') || 2000)
         const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 3000)) : 2000
 
@@ -369,6 +376,7 @@ export async function GET(request: NextRequest) {
 
         if (startDate && schema.hasDueDate) query = query.gte('due_date', startDate)
         if (endDate && schema.hasDueDate) query = query.lte('due_date', endDate)
+        if (entityId && schema.hasEntityId) query = query.eq('entity_id', entityId)
 
         const { data, error } = await query
         if (error) throw error
@@ -427,6 +435,7 @@ export async function POST(request: NextRequest) {
         if (schema.hasPaymentMethod) insertData.payment_method = toNullableText(body?.payment_method)
         if (schema.hasCostCenterId) insertData.cost_center_id = toNullableText(body?.cost_center_id)
         if (schema.hasBankAccountId) insertData.bank_account_id = toNullableText(body?.bank_account_id)
+        if (schema.hasEntityId) insertData.entity_id = toNullableText(body?.entity_id)
         if (schema.hasNotes) insertData.notes = toNullableText(body?.notes)
         if (schema.hasCreatedBy) insertData.created_by = access.adminUser?.id || null
         if (schema.hasUpdatedAt) insertData.updated_at = new Date().toISOString()

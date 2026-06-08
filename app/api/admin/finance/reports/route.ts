@@ -10,6 +10,7 @@ interface FinanceSchema {
     hasPaymentStatus: boolean
     hasCategory: boolean
     hasSubcategory: boolean
+    hasEntityId: boolean
 }
 
 interface NormalizedEntry {
@@ -117,7 +118,7 @@ async function columnExists(admin: any, tableName: string, columnName: string): 
 }
 
 async function resolveFinanceSchema(admin: any): Promise<FinanceSchema | null> {
-    const [hasEntryDate, hasDate, hasOccurredAt, hasCreatedAt, hasPaymentStatus, hasCategory, hasSubcategory] = await Promise.all([
+    const [hasEntryDate, hasDate, hasOccurredAt, hasCreatedAt, hasPaymentStatus, hasCategory, hasSubcategory, hasEntityId] = await Promise.all([
         columnExists(admin, 'finance_entries', 'entry_date'),
         columnExists(admin, 'finance_entries', 'date'),
         columnExists(admin, 'finance_entries', 'occurred_at'),
@@ -125,6 +126,7 @@ async function resolveFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         columnExists(admin, 'finance_entries', 'payment_status'),
         columnExists(admin, 'finance_entries', 'category'),
         columnExists(admin, 'finance_entries', 'subcategory'),
+        columnExists(admin, 'finance_entries', 'entity_id'),
     ])
 
     if (!hasEntryDate && !hasDate && !hasOccurredAt && !hasCreatedAt) return null
@@ -138,6 +140,7 @@ async function resolveFinanceSchema(admin: any): Promise<FinanceSchema | null> {
         hasPaymentStatus,
         hasCategory,
         hasSubcategory,
+        hasEntityId,
     }
 }
 
@@ -146,6 +149,7 @@ function buildFinanceSelectColumns(schema: FinanceSchema) {
     if (schema.hasPaymentStatus) columns.push('payment_status')
     if (schema.hasCategory) columns.push('category')
     if (schema.hasSubcategory) columns.push('subcategory')
+    if (schema.hasEntityId) columns.push('entity_id')
     return columns.join(', ')
 }
 
@@ -154,6 +158,7 @@ async function fetchEntriesByPeriod(
     schema: FinanceSchema,
     startDate: string,
     endDate: string,
+    entityId?: string | null,
 ): Promise<NormalizedEntry[]> {
     let query = admin
         .from('finance_entries')
@@ -169,6 +174,10 @@ async function fetchEntriesByPeriod(
         query = query
             .gte(schema.dateField, startDate)
             .lte(schema.dateField, endDate)
+    }
+
+    if (entityId && schema.hasEntityId) {
+        query = query.eq('entity_id', entityId)
     }
 
     const { data, error } = await query
@@ -254,17 +263,19 @@ async function fetchOpenAparItems(
         settledStatus: 'paid' | 'received'
         startDate: string
         endDate: string
+        entityId?: string | null
     },
 ): Promise<OpenAparItem[]> {
     const hasAmount = await columnExists(admin, params.tableName, 'amount')
     const hasDueDate = await columnExists(admin, params.tableName, 'due_date')
     if (!hasAmount || !hasDueDate) return []
 
-    const [hasStatus, hasSettledAmount, hasDescription, hasCounterpartyName] = await Promise.all([
+    const [hasStatus, hasSettledAmount, hasDescription, hasCounterpartyName, hasEntityIdCol] = await Promise.all([
         columnExists(admin, params.tableName, 'status'),
         columnExists(admin, params.tableName, params.settledAmountColumn),
         columnExists(admin, params.tableName, 'description'),
         columnExists(admin, params.tableName, 'counterparty_name'),
+        columnExists(admin, params.tableName, 'entity_id'),
     ])
 
     const columns = ['id', 'amount', 'due_date']
@@ -273,7 +284,7 @@ async function fetchOpenAparItems(
     if (hasDescription) columns.push('description')
     if (hasCounterpartyName) columns.push('counterparty_name')
 
-    const { data, error } = await admin
+    let query = admin
         .from(params.tableName)
         .select(columns.join(', '))
         .gte('due_date', params.startDate)
@@ -281,7 +292,13 @@ async function fetchOpenAparItems(
         .order('due_date', { ascending: true })
         .limit(100000)
 
-    if (error) return []
+    if (params.entityId && hasEntityIdCol) {
+        query = query.eq('entity_id', params.entityId)
+    }
+
+    const { data, error } = await query
+
+    if (error || !data) return []
 
     const out: OpenAparItem[] = []
     for (const row of (data || [])) {
@@ -406,6 +423,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const reportRaw = String(searchParams.get('report') || '').trim().toLowerCase()
         const report: ReportType = reportRaw === 'cashflow' ? 'cashflow' : 'dre'
+        const entityId = searchParams.get('entity_id') || null
 
         const startDate = normalizeDate(searchParams.get('start_date')) || firstDayOfCurrentMonthISO()
         const endDate = normalizeDate(searchParams.get('end_date')) || todayISO()
@@ -422,7 +440,7 @@ export async function GET(request: NextRequest) {
             }, { status: 400 })
         }
 
-        const entries = await fetchEntriesByPeriod(admin, schema, startDate, endDate)
+        const entries = await fetchEntriesByPeriod(admin, schema, startDate, endDate, entityId)
 
         if (report === 'dre') {
             const dre = buildDre(entries)
@@ -430,6 +448,7 @@ export async function GET(request: NextRequest) {
                 success: true,
                 report,
                 period: { start_date: startDate, end_date: endDate },
+                entity_id: entityId,
                 data: dre,
             })
         }
@@ -441,6 +460,7 @@ export async function GET(request: NextRequest) {
                 settledStatus: 'paid',
                 startDate,
                 endDate,
+                entityId,
             }),
             fetchOpenAparItems(admin, {
                 tableName: 'finance_receivables',
@@ -448,6 +468,7 @@ export async function GET(request: NextRequest) {
                 settledStatus: 'received',
                 startDate,
                 endDate,
+                entityId,
             }),
         ])
 
@@ -456,6 +477,7 @@ export async function GET(request: NextRequest) {
             success: true,
             report,
             period: { start_date: startDate, end_date: endDate },
+            entity_id: entityId,
             data: cashflow,
         })
     } catch (err: any) {

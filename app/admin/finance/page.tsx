@@ -27,6 +27,19 @@ type CounterpartyType = 'pessoa_fisica' | 'pessoa_juridica'
 type SettlementStatus = 'paid' | 'pending' | 'overdue' | 'cancelled'
 type ReconciliationStatus = 'pending' | 'matched' | 'ignored'
 type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty' | 'cost_center' | 'bank_account'
+type EntityType = 'pf' | 'pj'
+
+interface FinanceEntity {
+    id: string
+    name: string
+    entity_type: EntityType
+    cpf_cnpj: string | null
+    description: string | null
+    is_active: boolean
+    is_default: boolean
+    created_at?: string
+    updated_at?: string
+}
 
 interface FinanceEntry {
     id: string
@@ -45,6 +58,7 @@ interface FinanceEntry {
     reference_company: string | null
     cost_center_id: string | null
     bank_account_id: string | null
+    entity_id: string | null
     source_module: string | null
     external_reference: string | null
     notes: string | null
@@ -76,6 +90,9 @@ interface FinanceCounterparty {
     id: string
     name: string
     party_type: CounterpartyType
+    cpf_cnpj?: string | null
+    email?: string | null
+    phone?: string | null
     is_active: boolean
 }
 
@@ -134,6 +151,7 @@ interface FinancePayable {
     payment_method: string | null
     cost_center_id: string | null
     bank_account_id: string | null
+    entity_id: string | null
     notes: string | null
     settled_at: string | null
     created_at: string
@@ -155,6 +173,7 @@ interface FinanceReceivable {
     payment_method: string | null
     cost_center_id: string | null
     bank_account_id: string | null
+    entity_id: string | null
     notes: string | null
     settled_at: string | null
     created_at: string
@@ -172,6 +191,7 @@ type FinanceSectionView =
     | 'subcategorias'
     | 'pagamentos'
     | 'favorecidos'
+    | 'entidades'
     | 'novo-lancamento'
     | 'contas-a-pagar'
     | 'contas-a-receber'
@@ -189,6 +209,7 @@ function normalizeFinanceSection(value?: string): FinanceSectionView {
         v === 'subcategorias' ||
         v === 'pagamentos' ||
         v === 'favorecidos' ||
+        v === 'entidades' ||
         v === 'novo-lancamento' ||
         v === 'contas-a-pagar' ||
         v === 'contas-a-receber' ||
@@ -296,6 +317,8 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [reconciliations, setReconciliations] = useState<FinanceReconciliation[]>([])
     const [payables, setPayables] = useState<FinancePayable[]>([])
     const [receivables, setReceivables] = useState<FinanceReceivable[]>([])
+    const [entities, setEntities] = useState<FinanceEntity[]>([])
+    const [alertItems, setAlertItems] = useState<any[]>([])
 
     const [loading, setLoading] = useState(true)
     const [lookupsLoading, setLookupsLoading] = useState(true)
@@ -314,6 +337,11 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [categoryFilter, setCategoryFilter] = useState('all')
     const [subcategoryFilter, setSubcategoryFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
+    const [entityFilter, setEntityFilter] = useState('all')
+    const [importCsvModal, setImportCsvModal] = useState(false)
+    const [importResult, setImportResult] = useState<{ imported: number; errors: any[]; message: string } | null>(null)
+    const [importLoading, setImportLoading] = useState(false)
+    const [sendingAlerts, setSendingAlerts] = useState(false)
     const [reconciliationStatusFilter, setReconciliationStatusFilter] = useState<'all' | ReconciliationStatus>('all')
     const [reconciliationBankAccountFilter, setReconciliationBankAccountFilter] = useState('all')
     const [reconciliationStartDate, setReconciliationStartDate] = useState('')
@@ -335,6 +363,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
         reference_company: '',
         cost_center_id: '',
         bank_account_id: '',
+        entity_id: '',
         notes: '',
     })
 
@@ -345,6 +374,15 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [newPaymentMethodName, setNewPaymentMethodName] = useState('')
     const [newCounterpartyName, setNewCounterpartyName] = useState('')
     const [newCounterpartyType, setNewCounterpartyType] = useState<CounterpartyType>('pessoa_juridica')
+    const [newCounterpartyCpfCnpj, setNewCounterpartyCpfCnpj] = useState('')
+    const [newCounterpartyEmail, setNewCounterpartyEmail] = useState('')
+    const [newCounterpartyPhone, setNewCounterpartyPhone] = useState('')
+    const [newEntityName, setNewEntityName] = useState('')
+    const [newEntityType, setNewEntityType] = useState<EntityType>('pj')
+    const [newEntityCpfCnpj, setNewEntityCpfCnpj] = useState('')
+    const [newEntityDescription, setNewEntityDescription] = useState('')
+    const [editingEntityId, setEditingEntityId] = useState<string | null>(null)
+    const [editEntityData, setEditEntityData] = useState<Partial<FinanceEntity>>({})
     const [newCostCenterName, setNewCostCenterName] = useState('')
     const [newCostCenterCode, setNewCostCenterCode] = useState('')
     const [newBankAccountName, setNewBankAccountName] = useState('')
@@ -369,11 +407,12 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
         return normalizeFinanceSection(sectionFromPath)
     }, [initialSection, pathname])
     const showResumo = activeSection === 'dashboard'
-    const showCadastros = activeSection === 'cadastros' || activeSection === 'categorias' || activeSection === 'subcategorias' || activeSection === 'pagamentos' || activeSection === 'favorecidos'
+    const showCadastros = activeSection === 'cadastros' || activeSection === 'categorias' || activeSection === 'subcategorias' || activeSection === 'pagamentos' || activeSection === 'favorecidos' || activeSection === 'entidades'
     const showCategorias = activeSection === 'cadastros' || activeSection === 'categorias'
     const showSubcategorias = activeSection === 'cadastros' || activeSection === 'categorias' || activeSection === 'subcategorias'
     const showPagamentos = activeSection === 'cadastros' || activeSection === 'pagamentos'
     const showFavorecidos = activeSection === 'cadastros' || activeSection === 'favorecidos'
+    const showEntidades = activeSection === 'cadastros' || activeSection === 'entidades'
     const showNovoLancamento = activeSection === 'novo-lancamento'
     const showContasPagar = activeSection === 'contas-a-pagar'
     const showContasReceber = activeSection === 'contas-a-receber'
@@ -398,6 +437,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             const params = new URLSearchParams()
             if (startDate) params.set('start_date', startDate)
             if (endDate) params.set('end_date', endDate)
+            if (entityFilter !== 'all') params.set('entity_id', entityFilter)
             params.set('limit', '2000')
             const res = await fetch(`/api/admin/finance?${params.toString()}`)
             const data = await res.json()
@@ -427,6 +467,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             setCounterparties(data.counterparties || [])
             setCostCenters(data.cost_centers || [])
             setBankAccounts(data.bank_accounts || [])
+            setEntities(data.entities || [])
 
             if (!newSubcategoryCategoryId && Array.isArray(data.categories) && data.categories.length > 0) {
                 setNewSubcategoryCategoryId(data.categories[0].id)
@@ -478,6 +519,10 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             if (endDate) {
                 payableParams.set('end_date', endDate)
                 receivableParams.set('end_date', endDate)
+            }
+            if (entityFilter !== 'all') {
+                payableParams.set('entity_id', entityFilter)
+                receivableParams.set('entity_id', entityFilter)
             }
 
             const [payablesRes, receivablesRes] = await Promise.all([
@@ -712,6 +757,25 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
 
         return { total, paid, pending, overdue, cancelled, count: filteredPayables.length, paidCount, pendingCount, overdueCount, cancelledCount }
     }, [filteredPayables, todayDate])
+
+    const upcomingPayablesSummary = useMemo(() => {
+        const today = new Date(`${todayDate}T12:00:00Z`)
+        const cutoff = new Date(today)
+        cutoff.setDate(today.getDate() + 3)
+        const upcoming = payables.filter(entry => {
+            if (!entry.due_date) return false
+            const settlement = getPayableSettlementStatus(entry, todayDate)
+            if (settlement === 'paid' || settlement === 'cancelled') return false
+            const due = new Date(`${entry.due_date}T12:00:00Z`)
+            return due <= cutoff
+        })
+        const overdue = upcoming.filter(e => new Date(`${e.due_date}T12:00:00Z`) < today)
+        return {
+            count: upcoming.length,
+            overdueCount: overdue.length,
+            total: upcoming.reduce((s, e) => s + Number(e.remaining_amount || 0), 0),
+        }
+    }, [payables, todayDate])
 
     const receivablesSummary = useMemo(() => {
         let total = 0
@@ -1006,6 +1070,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
         setCategoryFilter('all')
         setSubcategoryFilter('all')
         setSearchTerm('')
+        setEntityFilter('all')
     }
 
     const createLookup = async (entity: LookupEntity, payload: Record<string, any>) => {
@@ -1091,10 +1156,110 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
         const ok = await createLookup('counterparty', {
             name: newCounterpartyName.trim(),
             party_type: newCounterpartyType,
+            cpf_cnpj: newCounterpartyCpfCnpj.trim(),
+            email: newCounterpartyEmail.trim(),
+            phone: newCounterpartyPhone.trim(),
         })
         if (ok) {
             setNewCounterpartyName('')
+            setNewCounterpartyCpfCnpj('')
+            setNewCounterpartyEmail('')
+            setNewCounterpartyPhone('')
             showToast('Favorecido cadastrado', 'success')
+        }
+    }
+
+    const onCreateEntity = async () => {
+        if (!newEntityName.trim()) {
+            showToast('Informe o nome da entidade', 'error')
+            return
+        }
+        try {
+            const res = await fetch('/api/admin/finance/entities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newEntityName.trim(),
+                    entity_type: newEntityType,
+                    cpf_cnpj: newEntityCpfCnpj.trim(),
+                    description: newEntityDescription.trim(),
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erro ao criar entidade')
+            setEntities(prev => [...prev, data.entity])
+            setNewEntityName('')
+            setNewEntityCpfCnpj('')
+            setNewEntityDescription('')
+            showToast('Entidade criada com sucesso', 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao criar entidade', 'error')
+        }
+    }
+
+    const onUpdateEntity = async (id: string, data: Partial<FinanceEntity>) => {
+        try {
+            const res = await fetch('/api/admin/finance/entities', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...data }),
+            })
+            const json = await res.json()
+            if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao atualizar entidade')
+            setEntities(prev => prev.map(e => e.id === id ? { ...e, ...json.entity } : e))
+            setEditingEntityId(null)
+            setEditEntityData({})
+            showToast('Entidade atualizada', 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao atualizar entidade', 'error')
+        }
+    }
+
+    const onDeleteEntity = async (id: string) => {
+        if (!window.confirm('Desativar esta entidade?')) return
+        try {
+            const res = await fetch(`/api/admin/finance/entities?id=${id}`, { method: 'DELETE' })
+            const json = await res.json()
+            if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao desativar entidade')
+            setEntities(prev => prev.filter(e => e.id !== id))
+            showToast('Entidade desativada', 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao desativar entidade', 'error')
+        }
+    }
+
+    const onSendAlerts = async () => {
+        setSendingAlerts(true)
+        try {
+            const res = await fetch('/api/admin/finance/alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ days: 3 }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erro ao enviar alertas')
+            showToast(data.message || 'Alertas enviados com sucesso', 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao enviar alertas', 'error')
+        } finally {
+            setSendingAlerts(false)
+        }
+    }
+
+    const onImportCsv = async (file: File) => {
+        setImportLoading(true)
+        setImportResult(null)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const res = await fetch('/api/admin/finance/import', { method: 'POST', body: formData })
+            const data = await res.json()
+            setImportResult({ imported: data.imported || 0, errors: data.errors || [], message: data.message || '' })
+            if (data.imported > 0) await fetchEntries()
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao importar CSV', 'error')
+        } finally {
+            setImportLoading(false)
         }
     }
 
@@ -1345,6 +1510,19 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 ))}
                             </select>
                         </div>
+                        {entities.length > 0 && (
+                            <div className="finance-filter-field">
+                                <label className="form-label">Entidade (PF/PJ)</label>
+                                <select className="form-input" value={entityFilter} onChange={e => setEntityFilter(e.target.value)}>
+                                    <option value="all">Todas entidades</option>
+                                    {entities.map(entity => (
+                                        <option key={entity.id} value={entity.id}>
+                                            {entity.name} ({entity.entity_type.toUpperCase()})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         {showTextSearchFilter && (
                             <div className="finance-filter-field finance-filter-search" style={{ gridColumn: '1 / -1' }}>
                                 <label className="form-label">Busca textual</label>
@@ -1490,21 +1668,45 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                         {showFavorecidos && (
                             <div id="finance-favorecidos" className="lookup-box" style={{ scrollMarginTop: 96 }}>
                             <div className="lookup-title">Favorecidos (empresa/pessoa)</div>
-                            <div className="lookup-row">
+                            <div className="lookup-row" style={{ flexWrap: 'wrap', gap: 8 }}>
                                 <input
                                     className="form-input"
                                     placeholder="Nome do favorecido"
                                     value={newCounterpartyName}
                                     onChange={e => setNewCounterpartyName(e.target.value)}
+                                    style={{ minWidth: 160 }}
                                 />
                                 <select
                                     className="form-input"
                                     value={newCounterpartyType}
                                     onChange={e => setNewCounterpartyType(e.target.value as CounterpartyType)}
+                                    style={{ minWidth: 140 }}
                                 >
                                     <option value="pessoa_juridica">Pessoa juridica</option>
                                     <option value="pessoa_fisica">Pessoa fisica</option>
                                 </select>
+                                <input
+                                    className="form-input"
+                                    placeholder={newCounterpartyType === 'pessoa_fisica' ? 'CPF (somente números)' : 'CNPJ (somente números)'}
+                                    value={newCounterpartyCpfCnpj}
+                                    onChange={e => setNewCounterpartyCpfCnpj(e.target.value.replace(/\D/g, ''))}
+                                    maxLength={newCounterpartyType === 'pessoa_fisica' ? 11 : 14}
+                                    style={{ minWidth: 160 }}
+                                />
+                                <input
+                                    className="form-input"
+                                    placeholder="Email (opcional)"
+                                    value={newCounterpartyEmail}
+                                    onChange={e => setNewCounterpartyEmail(e.target.value)}
+                                    style={{ minWidth: 160 }}
+                                />
+                                <input
+                                    className="form-input"
+                                    placeholder="Telefone (opcional)"
+                                    value={newCounterpartyPhone}
+                                    onChange={e => setNewCounterpartyPhone(e.target.value)}
+                                    style={{ minWidth: 130 }}
+                                />
                                 <button className="btn btn-outline" onClick={onCreateCounterparty}>
                                     <Plus size={14} />
                                 </button>
@@ -1583,6 +1785,115 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                 ))}
                             </div>
                         </div>
+
+                        {showEntidades && (
+                        <div id="finance-entidades" className="lookup-box" style={{ scrollMarginTop: 96 }}>
+                            <div className="lookup-title">Entidades da empresa (PF / PJ)</div>
+                            <div className="lookup-row" style={{ flexWrap: 'wrap', gap: 8 }}>
+                                <input
+                                    className="form-input"
+                                    placeholder="Nome da entidade"
+                                    value={newEntityName}
+                                    onChange={e => setNewEntityName(e.target.value)}
+                                    style={{ minWidth: 160 }}
+                                />
+                                <select
+                                    className="form-input"
+                                    value={newEntityType}
+                                    onChange={e => setNewEntityType(e.target.value as EntityType)}
+                                    style={{ minWidth: 90 }}
+                                >
+                                    <option value="pj">PJ</option>
+                                    <option value="pf">PF</option>
+                                </select>
+                                <input
+                                    className="form-input"
+                                    placeholder="CNPJ / CPF (só números)"
+                                    value={newEntityCpfCnpj}
+                                    onChange={e => setNewEntityCpfCnpj(e.target.value.replace(/\D/g, ''))}
+                                    maxLength={14}
+                                    style={{ minWidth: 160 }}
+                                />
+                                <input
+                                    className="form-input"
+                                    placeholder="Descricao (opcional)"
+                                    value={newEntityDescription}
+                                    onChange={e => setNewEntityDescription(e.target.value)}
+                                    style={{ minWidth: 160 }}
+                                />
+                                <button className="btn btn-outline" onClick={onCreateEntity}>
+                                    <Plus size={14} />
+                                </button>
+                            </div>
+                            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {entities.length === 0 && (
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                        Nenhuma entidade cadastrada. Adicione a empresa PF e PJ acima.
+                                    </div>
+                                )}
+                                {entities.map(entity => (
+                                    <div key={entity.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-secondary)', borderRadius: 8, padding: '8px 12px' }}>
+                                        {editingEntityId === entity.id ? (
+                                            <>
+                                                <input
+                                                    className="form-input"
+                                                    value={editEntityData.name ?? entity.name}
+                                                    onChange={e => setEditEntityData(prev => ({ ...prev, name: e.target.value }))}
+                                                    style={{ flex: 1, minWidth: 120 }}
+                                                />
+                                                <select
+                                                    className="form-input"
+                                                    value={editEntityData.entity_type ?? entity.entity_type}
+                                                    onChange={e => setEditEntityData(prev => ({ ...prev, entity_type: e.target.value as EntityType }))}
+                                                    style={{ minWidth: 70 }}
+                                                >
+                                                    <option value="pj">PJ</option>
+                                                    <option value="pf">PF</option>
+                                                </select>
+                                                <input
+                                                    className="form-input"
+                                                    value={editEntityData.cpf_cnpj ?? entity.cpf_cnpj ?? ''}
+                                                    onChange={e => setEditEntityData(prev => ({ ...prev, cpf_cnpj: e.target.value.replace(/\D/g, '') }))}
+                                                    placeholder="CNPJ/CPF"
+                                                    maxLength={14}
+                                                    style={{ minWidth: 140 }}
+                                                />
+                                                <button className="btn btn-gold" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onUpdateEntity(entity.id, editEntityData)}>
+                                                    Salvar
+                                                </button>
+                                                <button className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => { setEditingEntityId(null); setEditEntityData({}) }}>
+                                                    Cancelar
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span style={{ fontWeight: 600, minWidth: 120 }}>{entity.name}</span>
+                                                <span style={{ fontSize: '0.78rem', background: entity.entity_type === 'pj' ? '#1d4ed8' : '#15803d', color: '#fff', borderRadius: 4, padding: '2px 7px' }}>
+                                                    {entity.entity_type.toUpperCase()}
+                                                </span>
+                                                {entity.cpf_cnpj && (
+                                                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                                        {entity.entity_type === 'pj'
+                                                            ? entity.cpf_cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+                                                            : entity.cpf_cnpj.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')}
+                                                    </span>
+                                                )}
+                                                {entity.description && <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', flex: 1 }}>{entity.description}</span>}
+                                                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                                                    <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '0.78rem' }} onClick={() => { setEditingEntityId(entity.id); setEditEntityData({}) }}>
+                                                        Editar
+                                                    </button>
+                                                    <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '0.78rem', color: '#ef4444' }} onClick={() => onDeleteEntity(entity.id)}>
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        )}
                         </div>
                     )}
                 </div>
@@ -1776,6 +2087,21 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                             <option value="pessoa_fisica">Pessoa fisica</option>
                         </select>
                     </div>
+                    <div>
+                        <label className="form-label">Entidade (PF / PJ)</label>
+                        <select
+                            className="form-input"
+                            value={form.entity_id}
+                            onChange={e => setForm(prev => ({ ...prev, entity_id: e.target.value }))}
+                        >
+                            <option value="">Consolidado (todas)</option>
+                            {entities.map(entity => (
+                                <option key={entity.id} value={entity.id}>
+                                    {entity.name} ({entity.entity_type.toUpperCase()})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div style={{ gridColumn: '1 / -1' }}>
                         <label className="form-label">Empresa / centro de custo</label>
                         <input
@@ -1805,7 +2131,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             )}
 
             {showResumo && (
-            <div id="finance-resumo" className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))', marginBottom: 18, scrollMarginTop: 96 }}>
+            <div id="finance-resumo" className="kpi-grid finance-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 18, scrollMarginTop: 96 }}>
                 <div className="kpi-card">
                     <div className="kpi-label">Receitas</div>
                     <div className="kpi-value" style={{ color: '#22c55e' }}>{formatCurrency(summary.income)}</div>
@@ -1834,6 +2160,17 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     <div className="kpi-value">{formatCurrency(summary.total)}</div>
                     <div className="kpi-change" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}>
                         <Wallet size={14} /> {filteredEntries.length} lancamentos
+                    </div>
+                </div>
+                <div className="kpi-card" style={upcomingPayablesSummary.count > 0 ? { borderLeft: `3px solid ${upcomingPayablesSummary.overdueCount > 0 ? '#ef4444' : '#f59e0b'}` } : undefined}>
+                    <div className="kpi-label">Vencimentos proximos</div>
+                    <div className="kpi-value" style={{ color: upcomingPayablesSummary.overdueCount > 0 ? '#ef4444' : upcomingPayablesSummary.count > 0 ? '#f59e0b' : 'var(--text-muted)' }}>
+                        {upcomingPayablesSummary.count}
+                    </div>
+                    <div className="kpi-change" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}>
+                        {upcomingPayablesSummary.count === 0
+                            ? 'Sem vencimentos em 3 dias'
+                            : `${formatCurrency(upcomingPayablesSummary.total)} em aberto${upcomingPayablesSummary.overdueCount > 0 ? ` · ${upcomingPayablesSummary.overdueCount} vencido(s)` : ''}`}
                     </div>
                 </div>
             </div>
@@ -1886,8 +2223,27 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
             </div>
 
             <div id="finance-contas-pagar" className="chart-card" style={{ marginTop: 18, scrollMarginTop: 96 }}>
-                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="chart-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <CircleDollarSign size={18} /> Contas a Pagar
+                    <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button
+                            className="btn btn-outline"
+                            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+                            onClick={onSendAlerts}
+                            disabled={sendingAlerts}
+                            title="Enviar alerta de vencimentos por e-mail para admins"
+                        >
+                            {sendingAlerts ? 'Enviando...' : 'Enviar alertas'}
+                        </button>
+                        <button
+                            className="btn btn-outline"
+                            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+                            onClick={() => setImportCsvModal(true)}
+                            title="Importar lancamentos via CSV"
+                        >
+                            Importar CSV
+                        </button>
+                    </div>
                 </div>
                 {aparLoading ? (
                     <div style={{ padding: 24, color: 'var(--text-muted)' }}>Carregando contas a pagar...</div>
@@ -1920,9 +2276,29 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                     const settlement = getPayableSettlementStatus(entry, todayDate)
                                     const badgeStyle = getSettlementBadgeStyle(settlement)
                                     const isSettling = settlingAparId === entry.id
+                                    const daysUntilDue = entry.due_date
+                                        ? Math.round((new Date(`${entry.due_date}T12:00:00Z`).getTime() - new Date(`${todayDate}T12:00:00Z`).getTime()) / 86400000)
+                                        : null
+                                    const isUnpaid = settlement !== 'paid' && settlement !== 'cancelled'
+                                    const dueBadge = isUnpaid && daysUntilDue !== null
+                                        ? daysUntilDue < 0
+                                            ? { label: `${Math.abs(daysUntilDue)}d vencido`, bg: '#ef4444' }
+                                            : daysUntilDue <= 3
+                                                ? { label: `vence em ${daysUntilDue}d`, bg: '#f59e0b' }
+                                                : null
+                                        : null
                                     return (
-                                        <tr key={entry.id}>
-                                            <td>{entry.due_date ? formatDate(entry.due_date) : '-'}</td>
+                                        <tr key={entry.id} style={dueBadge ? { background: dueBadge.bg === '#ef4444' ? 'rgba(239,68,68,0.06)' : 'rgba(245,158,11,0.06)' } : undefined}>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    {entry.due_date ? formatDate(entry.due_date) : '-'}
+                                                    {dueBadge && (
+                                                        <span style={{ fontSize: '0.7rem', fontWeight: 700, background: dueBadge.bg, color: '#fff', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                                            {dueBadge.label}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td>{entry.competence_date ? formatDate(entry.competence_date) : '-'}</td>
                                             <td>{entry.description}</td>
                                             <td>{entry.counterparty_name || '-'}</td>
@@ -2559,6 +2935,66 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     </div>
                 )}
             </div>
+            )}
+
+            {importCsvModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => { setImportCsvModal(false); setImportResult(null) }}>
+                    <div style={{ background: 'var(--bg-card, #1e293b)', borderRadius: 14, padding: 28, maxWidth: 540, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                            <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>Importar Lancamentos via CSV</div>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }} onClick={() => { setImportCsvModal(false); setImportResult(null) }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                            Importe varios lancamentos de uma vez via planilha CSV. Campos obrigatorios: <strong>description, entry_type, amount, entry_date</strong>.
+                            Tipos aceitos: receita / despesa (ou income / expense). Data: DD/MM/AAAA ou AAAA-MM-DD.
+                        </p>
+                        <a
+                            href="/api/admin/finance/import"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'inline-block', marginBottom: 16, fontSize: '0.82rem', color: '#c4a84b', textDecoration: 'underline' }}
+                        >
+                            Baixar template CSV de exemplo
+                        </a>
+                        {!importResult ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <input
+                                    type="file"
+                                    accept=".csv,text/csv"
+                                    className="form-input"
+                                    disabled={importLoading}
+                                    onChange={async e => {
+                                        const file = e.target.files?.[0]
+                                        if (file) await onImportCsv(file)
+                                    }}
+                                />
+                                {importLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Importando...</div>}
+                            </div>
+                        ) : (
+                            <div>
+                                <div style={{ marginBottom: 10, fontWeight: 600, color: importResult.imported > 0 ? '#22c55e' : '#ef4444' }}>
+                                    {importResult.message}
+                                </div>
+                                {importResult.errors.length > 0 && (
+                                    <div style={{ maxHeight: 200, overflowY: 'auto', fontSize: '0.8rem', color: '#ef4444' }}>
+                                        {importResult.errors.map((err, i) => (
+                                            <div key={i}>Linha {err.row}: {err.error}</div>
+                                        ))}
+                                    </div>
+                                )}
+                                <button
+                                    className="btn btn-outline"
+                                    style={{ marginTop: 14 }}
+                                    onClick={() => setImportResult(null)}
+                                >
+                                    Importar outro arquivo
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
 
             <style>{`

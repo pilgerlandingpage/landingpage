@@ -10,6 +10,7 @@ const allowedSections = new Set([
     'subcategorias',
     'pagamentos',
     'favorecidos',
+    'entidades',
     'novo-lancamento',
     'contas-a-pagar',
     'contas-a-receber',

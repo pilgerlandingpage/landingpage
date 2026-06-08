@@ -62,6 +62,7 @@ const MODULE_NAV: Record<string, NavItem> = {
                     { href: '/admin/finance/categorias', label: 'Categorias' },
                     { href: '/admin/finance/pagamentos', label: 'Pagamentos' },
                     { href: '/admin/finance/favorecidos', label: 'Favorecidos' },
+                    { href: '/admin/finance/entidades', label: 'Entidades PF/PJ' },
                 ],
             },
             {
@@ -87,6 +88,7 @@ const MODULE_NAV: Record<string, NavItem> = {
                 children: [
                     { href: '/admin/finance/fluxo-caixa', label: 'Fluxo de Caixa' },
                     { href: '/admin/finance/dre-gerencial', label: 'DRE Gerencial' },
+                    { href: '/admin/finance/relatorio-corretores', label: 'Relatorio Corretores' },
                 ],
             },
             { href: '/admin/finance/manual', label: 'Manual Financeiro' },

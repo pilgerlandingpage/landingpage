@@ -5,6 +5,11 @@ type FinanceType = 'income' | 'expense' | 'both'
 type PartyType = 'pessoa_fisica' | 'pessoa_juridica'
 type LookupEntity = 'category' | 'subcategory' | 'payment_method' | 'counterparty' | 'cost_center' | 'bank_account'
 
+async function columnExists(admin: any, table: string, column: string): Promise<boolean> {
+    const { error } = await admin.from(table).select(column).limit(1)
+    return !error
+}
+
 async function getCurrentAdminUser() {
     const supabase = await createServerSupabase()
     const { data: authData, error: authError } = await supabase.auth.getUser()
@@ -72,13 +77,19 @@ export async function GET() {
 
         const admin = createAdminClient()
 
-        const [categoriesRes, subcategoriesRes, paymentMethodsRes, counterpartiesRes, costCentersRes, bankAccountsRes] = await Promise.all([
+        const hasCpfCnpj = await columnExists(admin, 'finance_counterparties', 'cpf_cnpj')
+        const counterpartySelect = hasCpfCnpj
+            ? 'id, name, party_type, cpf_cnpj, email, phone, is_active'
+            : 'id, name, party_type, is_active'
+
+        const [categoriesRes, subcategoriesRes, paymentMethodsRes, counterpartiesRes, costCentersRes, bankAccountsRes, entitiesRes] = await Promise.all([
             admin.from('finance_categories').select('id, name, entry_type, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_subcategories').select('id, category_id, name, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_payment_methods').select('id, name, is_active').eq('is_active', true).order('name', { ascending: true }),
-            admin.from('finance_counterparties').select('id, name, party_type, is_active').eq('is_active', true).order('name', { ascending: true }),
+            admin.from('finance_counterparties').select(counterpartySelect).eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_cost_centers').select('id, name, code, is_active').eq('is_active', true).order('name', { ascending: true }),
             admin.from('finance_bank_accounts').select('id, name, bank_name, is_active').eq('is_active', true).order('name', { ascending: true }),
+            admin.from('finance_entities').select('id, name, entity_type, cpf_cnpj, is_active, is_default').eq('is_active', true).order('is_default', { ascending: false }).order('name', { ascending: true }),
         ])
 
         if (categoriesRes.error) throw categoriesRes.error
@@ -96,6 +107,7 @@ export async function GET() {
             counterparties: counterpartiesRes.data || [],
             cost_centers: costCentersRes.data || [],
             bank_accounts: bankAccountsRes.data || [],
+            entities: (entitiesRes.error ? [] : entitiesRes.data) || [],
         })
     } catch (err: any) {
         console.error('[admin/finance/lookups GET]', err)
@@ -168,15 +180,31 @@ export async function POST(request: NextRequest) {
         }
 
         if (entity === 'counterparty') {
+            const cpfCnpj = String(body?.cpf_cnpj || '').replace(/\D/g, '') || null
+            const email = String(body?.email || '').trim() || null
+            const phone = String(body?.phone || '').trim() || null
+            const hasCpfCnpjCol = await columnExists(admin, 'finance_counterparties', 'cpf_cnpj')
+
+            const insertPayload: any = {
+                name,
+                party_type: normalizePartyType(body?.party_type),
+                is_active: true,
+                updated_at: new Date().toISOString(),
+            }
+            if (hasCpfCnpjCol) {
+                insertPayload.cpf_cnpj = cpfCnpj
+                insertPayload.email = email
+                insertPayload.phone = phone
+            }
+
+            const selectCols = hasCpfCnpjCol
+                ? 'id, name, party_type, cpf_cnpj, email, phone, is_active'
+                : 'id, name, party_type, is_active'
+
             const { data, error } = await admin
                 .from('finance_counterparties')
-                .insert({
-                    name,
-                    party_type: normalizePartyType(body?.party_type),
-                    is_active: true,
-                    updated_at: new Date().toISOString(),
-                })
-                .select('id, name, party_type, is_active')
+                .insert(insertPayload)
+                .select(selectCols)
                 .single()
 
             if (error) throw error

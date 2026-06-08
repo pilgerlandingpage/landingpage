@@ -62,10 +62,14 @@ function formatDate(date: string) {
     return new Date(`${date}T00:00:00`).toLocaleDateString('pt-BR')
 }
 
+interface FinanceEntity { id: string; name: string; entity_type: string }
+
 export default function FinanceCashflowPage() {
     const [loading, setLoading] = useState(true)
     const [startDate, setStartDate] = useState(firstDayOfMonthISO())
     const [endDate, setEndDate] = useState(todayISO())
+    const [entityFilter, setEntityFilter] = useState('all')
+    const [entities, setEntities] = useState<FinanceEntity[]>([])
     const [data, setData] = useState<CashflowResponseData | null>(null)
     const [toast, setToast] = useState<ToastState | null>(null)
 
@@ -73,6 +77,13 @@ export default function FinanceCashflowPage() {
         setToast({ msg, type })
         setTimeout(() => setToast(null), 3000)
     }
+
+    useEffect(() => {
+        fetch('/api/admin/finance/lookups')
+            .then(r => r.json())
+            .then(d => { if (d.entities) setEntities(d.entities) })
+            .catch(() => {})
+    }, [])
 
     const fetchReport = async () => {
         setLoading(true)
@@ -82,6 +93,7 @@ export default function FinanceCashflowPage() {
                 start_date: startDate,
                 end_date: endDate,
             })
+            if (entityFilter !== 'all') params.set('entity_id', entityFilter)
             const res = await fetch(`/api/admin/finance/reports?${params.toString()}`)
             const payload = await res.json()
             if (!res.ok || !payload.success) {
@@ -119,7 +131,7 @@ export default function FinanceCashflowPage() {
 
             <div className="chart-card" style={{ marginBottom: 14 }}>
                 <div className="chart-title">Filtro de periodo</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '220px 220px auto', gap: 10 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
                     <div>
                         <label className="label">Data inicial</label>
                         <input type="date" className="input" value={startDate} onChange={e => setStartDate(e.target.value)} />
@@ -128,7 +140,18 @@ export default function FinanceCashflowPage() {
                         <label className="label">Data final</label>
                         <input type="date" className="input" value={endDate} onChange={e => setEndDate(e.target.value)} />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'end' }}>
+                    {entities.length > 0 && (
+                        <div>
+                            <label className="label">Entidade (PF/PJ)</label>
+                            <select className="input" value={entityFilter} onChange={e => setEntityFilter(e.target.value)} style={{ minWidth: 160 }}>
+                                <option value="all">Consolidado (todas)</option>
+                                {entities.map(e => (
+                                    <option key={e.id} value={e.id}>{e.name} ({e.entity_type.toUpperCase()})</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    <div>
                         <button className="btn btn-gold" onClick={fetchReport} disabled={loading}>
                             Recalcular fluxo
                         </button>
