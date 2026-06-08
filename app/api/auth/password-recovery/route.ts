@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import {
+    extractUazapiWhatsAppRestriction,
+    formatUazapiWhatsAppRestrictionMessage,
+    sendMenuMessage,
+    sendWhatsAppMessage,
+} from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import { buildPasswordResetWhatsAppMessage, type UserAccessWhatsAppPayload } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'
@@ -79,17 +84,42 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
     return instance.instance_token
 }
 
+function buildWhatsAppRestrictionDelivery(error: unknown) {
+    const restriction = extractUazapiWhatsAppRestriction(error)
+    if (!restriction) return null
+
+    return {
+        sent: false as const,
+        delivery_mode: 'blocked' as const,
+        reason: 'whatsapp_reachout_timelock' as const,
+        warning: formatUazapiWhatsAppRestrictionMessage(restriction),
+        restriction_until: restriction.until,
+        error_key: restriction.errorKey,
+    }
+}
+
 async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
     if (payload.buttons.length > 0) {
         try {
-            return sendMenuMessage({
+            const response = await sendMenuMessage({
                 phone,
                 text: payload.text || 'Acesse pelo botao abaixo:',
                 type: 'button',
                 choices: payload.buttons.map(button => `${button.text}|${button.url}`),
                 instanceToken,
             })
+
+            return { sent: true as const, response, delivery_mode: 'button' as const }
         } catch (menuError) {
+            const blockedDelivery = buildWhatsAppRestrictionDelivery(menuError)
+            if (blockedDelivery) {
+                console.warn('[password-recovery] whatsapp reset link blocked by provider:', {
+                    error_key: blockedDelivery.error_key,
+                    restriction_until: blockedDelivery.restriction_until,
+                })
+                return blockedDelivery
+            }
+
             const safeErrorMessage = menuError instanceof Error
                 ? menuError.message.replace(/https?:\/\/\S+/g, '[link-redacted]')
                 : 'unknown error'
@@ -99,19 +129,34 @@ async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessW
                 .map(button => `${button.text}: ${button.url}`)
                 .join('\n')
 
-            return sendWhatsAppMessage({
-                phone,
-                message: [payload.text, linkText].filter(Boolean).join('\n\n'),
-                instanceToken,
-            })
+            try {
+                const response = await sendWhatsAppMessage({
+                    phone,
+                    message: [payload.text, linkText].filter(Boolean).join('\n\n'),
+                    instanceToken,
+                })
+                return { sent: true as const, response, delivery_mode: 'text_fallback' as const }
+            } catch (textError) {
+                const textBlockedDelivery = buildWhatsAppRestrictionDelivery(textError)
+                if (textBlockedDelivery) return textBlockedDelivery
+                throw textError
+            }
         }
     }
 
-    return sendWhatsAppMessage({
-        phone,
-        message: payload.text,
-        instanceToken,
-    })
+    try {
+        const response = await sendWhatsAppMessage({
+            phone,
+            message: payload.text,
+            instanceToken,
+        })
+
+        return { sent: true as const, response, delivery_mode: 'text' as const }
+    } catch (textError) {
+        const textBlockedDelivery = buildWhatsAppRestrictionDelivery(textError)
+        if (textBlockedDelivery) return textBlockedDelivery
+        throw textError
+    }
 }
 
 function onlyDigits(value: string) {
@@ -287,6 +332,7 @@ export async function POST(request: NextRequest) {
         }
 
         let whatsappSent = false
+        let whatsappWarning: string | null = null
         try {
             const instanceToken = await resolveGlobalAgentInstanceToken(admin)
             if (instanceToken) {
@@ -297,29 +343,36 @@ export async function POST(request: NextRequest) {
                     link: resetLink,
                 })
 
-                await sendUserAccessWhatsAppPayload(String(adminUser.phone || ''), payload, instanceToken)
-                whatsappSent = true
-                await recordAgentCentralSignal({
-                    supabase: admin,
-                    agentId: 'user-password-reset-agent',
-                    eventType: 'password_recovery_whatsapp_sent',
-                    entityType: 'admin_user',
-                    entityId: adminUser.id,
-                    source: 'password-recovery',
-                    label: `Bruno enviou recuperacao de senha para ${adminUser.name || targetEmail}`,
-                    importanceScore: 62,
-                    metadata: {
-                        admin_user_id: adminUser.id,
-                        auth_user_id: adminUser.auth_user_id || null,
-                        target_email: targetEmail,
-                        user_phone: adminUser.phone || null,
-                        message_preview: payload.text.slice(0, 500),
-                        buttons_count: payload.buttons.length,
-                    },
-                    handoffTargets: ['internal-notifier', 'pilger-ai-rules'],
-                }).catch((centralError: any) => {
-                    console.warn('[password-recovery] central signal failed:', centralError?.message || centralError)
-                })
+                const sendResult = await sendUserAccessWhatsAppPayload(String(adminUser.phone || ''), payload, instanceToken)
+                whatsappSent = Boolean(sendResult.sent)
+                if (!sendResult.sent) {
+                    whatsappWarning = sendResult.warning || sendResult.reason || 'whatsapp_send_failed'
+                }
+
+                if (sendResult.sent) {
+                    await recordAgentCentralSignal({
+                        supabase: admin,
+                        agentId: 'user-password-reset-agent',
+                        eventType: 'password_recovery_whatsapp_sent',
+                        entityType: 'admin_user',
+                        entityId: adminUser.id,
+                        source: 'password-recovery',
+                        label: `Bruno enviou recuperacao de senha para ${adminUser.name || targetEmail}`,
+                        importanceScore: 62,
+                        metadata: {
+                            admin_user_id: adminUser.id,
+                            auth_user_id: adminUser.auth_user_id || null,
+                            target_email: targetEmail,
+                            user_phone: adminUser.phone || null,
+                            message_preview: payload.text.slice(0, 500),
+                            buttons_count: payload.buttons.length,
+                            delivery_mode: sendResult.delivery_mode,
+                        },
+                        handoffTargets: ['internal-notifier', 'pilger-ai-rules'],
+                    }).catch((centralError: any) => {
+                        console.warn('[password-recovery] central signal failed:', centralError?.message || centralError)
+                    })
+                }
             }
         } catch (whatsappErr) {
             console.error('[password-recovery] whatsapp send failed:', whatsappErr)
@@ -345,6 +398,7 @@ export async function POST(request: NextRequest) {
                 metadata: {
                     whatsapp_sent: whatsappSent,
                     email_sent: emailSent,
+                    whatsapp_warning: whatsappWarning,
                 },
             })
             return NextResponse.json(
@@ -361,6 +415,7 @@ export async function POST(request: NextRequest) {
             metadata: {
                 whatsapp_sent: whatsappSent,
                 email_sent: emailSent,
+                whatsapp_warning: whatsappWarning,
             },
         })
 

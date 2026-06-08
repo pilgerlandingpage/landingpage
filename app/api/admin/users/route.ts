@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
-import { deleteInstance as deleteUazapiInstance, sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import {
+    deleteInstance as deleteUazapiInstance,
+    extractUazapiWhatsAppRestriction,
+    formatUazapiWhatsAppRestrictionMessage,
+    sendMenuMessage,
+    sendWhatsAppMessage,
+} from '@/lib/uazapi'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
@@ -215,6 +221,21 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
     return instance.instance_token
 }
 
+function buildWhatsAppRestrictionDelivery(error: unknown) {
+    const restriction = extractUazapiWhatsAppRestriction(error)
+    if (!restriction) return null
+
+    return {
+        response: null,
+        delivery_mode: 'blocked' as const,
+        blocked: true as const,
+        reason: 'whatsapp_reachout_timelock' as const,
+        warning: formatUazapiWhatsAppRestrictionMessage(restriction),
+        restriction_until: restriction.until,
+        error_key: restriction.errorKey,
+    }
+}
+
 async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
     if (payload.buttons.length > 0) {
         try {
@@ -226,8 +247,17 @@ async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessW
                 instanceToken,
             })
 
-            return { response, delivery_mode: 'button' as const }
+            return { response, delivery_mode: 'button' as const, blocked: false as const }
         } catch (menuError) {
+            const blockedDelivery = buildWhatsAppRestrictionDelivery(menuError)
+            if (blockedDelivery) {
+                console.warn('[users] whatsapp access link blocked by provider:', {
+                    error_key: blockedDelivery.error_key,
+                    restriction_until: blockedDelivery.restriction_until,
+                })
+                return blockedDelivery
+            }
+
             const safeErrorMessage = menuError instanceof Error
                 ? menuError.message.replace(/https?:\/\/\S+/g, '[link-redacted]')
                 : 'unknown error'
@@ -237,23 +267,35 @@ async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessW
                 .map(button => `${button.text}: ${button.url}`)
                 .join('\n')
 
-            const response = await sendWhatsAppMessage({
-                phone,
-                message: [payload.text, linkText].filter(Boolean).join('\n\n'),
-                instanceToken,
-            })
+            try {
+                const response = await sendWhatsAppMessage({
+                    phone,
+                    message: [payload.text, linkText].filter(Boolean).join('\n\n'),
+                    instanceToken,
+                })
 
-            return { response, delivery_mode: 'text_fallback' as const }
+                return { response, delivery_mode: 'text_fallback' as const, blocked: false as const }
+            } catch (textError) {
+                const textBlockedDelivery = buildWhatsAppRestrictionDelivery(textError)
+                if (textBlockedDelivery) return textBlockedDelivery
+                throw textError
+            }
         }
     }
 
-    const response = await sendWhatsAppMessage({
-        phone,
-        message: payload.text,
-        instanceToken,
-    })
+    try {
+        const response = await sendWhatsAppMessage({
+            phone,
+            message: payload.text,
+            instanceToken,
+        })
 
-    return { response, delivery_mode: 'text' as const }
+        return { response, delivery_mode: 'text' as const, blocked: false as const }
+    } catch (textError) {
+        const textBlockedDelivery = buildWhatsAppRestrictionDelivery(textError)
+        if (textBlockedDelivery) return textBlockedDelivery
+        throw textError
+    }
 }
 
 async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: string, name: string, firstAccessLink: string }) {
@@ -270,6 +312,15 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
     })
 
     const delivery = await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
+    if (delivery.blocked) {
+        return {
+            sent: false,
+            reason: delivery.reason,
+            warning: delivery.warning,
+            restriction_until: delivery.restriction_until,
+            delivery_mode: delivery.delivery_mode,
+        }
+    }
 
     await recordAgentCentralSignal({
         supabase: admin,
@@ -309,6 +360,15 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
     })
 
     const delivery = await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
+    if (delivery.blocked) {
+        return {
+            sent: false,
+            reason: delivery.reason,
+            warning: delivery.warning,
+            restriction_until: delivery.restriction_until,
+            delivery_mode: delivery.delivery_mode,
+        }
+    }
 
     await recordAgentCentralSignal({
         supabase: admin,
@@ -399,16 +459,29 @@ async function sendManualAccessLinkTextWhatsAppMessage(admin: any, params: {
         ? 'definir sua senha de primeiro acesso'
         : 'redefinir sua senha'
 
-    await sendWhatsAppMessage({
-        phone,
-        instanceToken,
-        message: `Ola ${safeName}!
+    try {
+        await sendWhatsAppMessage({
+            phone,
+            instanceToken,
+            message: `Ola ${safeName}!
 
 Conforme solicitado pelo administrador, segue o link direto para ${actionLabel}:
 ${accessLink}
 
 Se voce nao solicitou este acesso, ignore esta mensagem.`,
-    })
+        })
+    } catch (sendError) {
+        const blockedDelivery = buildWhatsAppRestrictionDelivery(sendError)
+        if (blockedDelivery) {
+            return {
+                sent: false,
+                reason: blockedDelivery.reason,
+                warning: blockedDelivery.warning,
+                restriction_until: blockedDelivery.restriction_until,
+            }
+        }
+        throw sendError
+    }
 
     return { sent: true, reason: null }
 }
@@ -639,6 +712,9 @@ export async function POST(request: NextRequest) {
             if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
                 inviteWarning = 'Usuario criado, mas faltou telefone ou link para enviar o primeiro acesso.'
             }
+            if (!sendResult.sent && sendResult.reason === 'whatsapp_reachout_timelock') {
+                inviteWarning = sendResult.warning || 'Usuario criado, mas o WhatsApp esta temporariamente restrito para iniciar novas conversas.'
+            }
         } catch (sendError) {
             console.error('[users][POST] first-access whatsapp failed:', sendError)
             inviteWarning = 'Usuario criado, mas houve falha ao enviar o link de primeiro acesso no WhatsApp.'
@@ -855,6 +931,9 @@ export async function PATCH(request: NextRequest) {
                 if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
                     linkWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
                 }
+                if (!sendResult.sent && sendResult.reason === 'whatsapp_reachout_timelock') {
+                    linkWarning = sendResult.warning || 'Link gerado, mas o WhatsApp esta temporariamente restrito para iniciar novas conversas.'
+                }
             } catch (sendError) {
                 console.error('[users][PATCH] manual text access link failed:', sendError)
                 linkWarning = 'Link gerado, mas houve falha ao enviar o link direto no WhatsApp.'
@@ -947,6 +1026,9 @@ export async function PATCH(request: NextRequest) {
                 if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
                     inviteWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
                 }
+                if (!sendResult.sent && sendResult.reason === 'whatsapp_reachout_timelock') {
+                    inviteWarning = sendResult.warning || 'Link gerado, mas o WhatsApp esta temporariamente restrito para iniciar novas conversas.'
+                }
             } catch (sendError) {
                 console.error('[users][PATCH] first-access resend whatsapp failed:', sendError)
                 inviteWarning = 'Link gerado, mas houve falha ao enviar no WhatsApp.'
@@ -1009,6 +1091,9 @@ export async function PATCH(request: NextRequest) {
             }
             if (!sendResult.sent && sendResult.reason === 'missing_phone_or_link') {
                 resetWarning = 'Link gerado, mas faltou telefone ou link para enviar no WhatsApp.'
+            }
+            if (!sendResult.sent && sendResult.reason === 'whatsapp_reachout_timelock') {
+                resetWarning = sendResult.warning || 'Link gerado, mas o WhatsApp esta temporariamente restrito para iniciar novas conversas.'
             }
         } catch (sendError) {
             console.error('[users][PATCH] password reset whatsapp failed:', sendError)

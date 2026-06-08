@@ -167,6 +167,79 @@ async function uazapiFetch(
 // ═══════════════════════════════════════════════════════════════
 
 /** Criar nova instância (requer admin token) */
+export interface UazapiWhatsAppRestrictionInfo {
+    errorKey: string | null
+    providerCode: number | null
+    messagePtBr: string | null
+    providerMessagePtBr: string | null
+    diagnosticsEndpoint: string | null
+    until: string | null
+}
+
+function parseUazapiErrorPayload(error: unknown): any | null {
+    if (error && typeof error === 'object' && ('error_key' in error || 'details' in error)) {
+        return error
+    }
+
+    const message = error instanceof Error ? error.message : String(error || '')
+    const start = message.indexOf('{')
+    const end = message.lastIndexOf('}')
+    if (start < 0 || end <= start) return null
+
+    try {
+        return JSON.parse(message.slice(start, end + 1))
+    } catch {
+        return null
+    }
+}
+
+export function extractUazapiWhatsAppRestriction(error: unknown): UazapiWhatsAppRestrictionInfo | null {
+    const payload = parseUazapiErrorPayload(error)
+    if (!payload || typeof payload !== 'object') return null
+
+    const details = payload.details && typeof payload.details === 'object' ? payload.details : {}
+    const reachoutTimelock = details.reachout_timelock || payload.reachout_timelock || null
+    const errorKey = String(payload.error_key || '').trim() || null
+    const providerCode = Number(payload.provider_code || 0) || null
+    const isRestricted =
+        errorKey === 'WHATSAPP_REACHOUT_TIMELOCK' ||
+        providerCode === 463 ||
+        payload.can_send_new_messages === false ||
+        Boolean(reachoutTimelock?.active)
+
+    if (!isRestricted) return null
+
+    return {
+        errorKey,
+        providerCode,
+        messagePtBr: String(payload.message_ptbr || '').trim() || null,
+        providerMessagePtBr: String(payload.provider_message_ptbr || '').trim() || null,
+        diagnosticsEndpoint: String(payload.diagnostics_endpoint || '').trim() || null,
+        until: String(reachoutTimelock?.until || '').trim() || null,
+    }
+}
+
+export function formatUazapiWhatsAppRestrictionMessage(info: UazapiWhatsAppRestrictionInfo): string {
+    const base = info.providerMessagePtBr || info.messagePtBr ||
+        'O WhatsApp recusou o envio pela conta conectada.'
+    const until = info.until ? formatRestrictionUntil(info.until) : ''
+    return until
+        ? `${base} Liberacao indicada: ${until} (horario de Brasilia).`
+        : base
+}
+
+function formatRestrictionUntil(value: string) {
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ''
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(date)
+}
+
+/** Criar nova instancia (requer admin token) */
 export async function createInstance(instanceName: string) {
     const config = await getUazapiConfig()
     return uazapiFetch('/instance/init', {
