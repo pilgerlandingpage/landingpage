@@ -81,13 +81,30 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
 
 async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
     if (payload.buttons.length > 0) {
-        return sendMenuMessage({
-            phone,
-            text: payload.text || 'Acesse pelo botao abaixo:',
-            type: 'button',
-            choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
-            instanceToken,
-        })
+        try {
+            return sendMenuMessage({
+                phone,
+                text: payload.text || 'Acesse pelo botao abaixo:',
+                type: 'button',
+                choices: payload.buttons.map(button => `${button.text}|${button.url}`),
+                instanceToken,
+            })
+        } catch (menuError) {
+            const safeErrorMessage = menuError instanceof Error
+                ? menuError.message.replace(/https?:\/\/\S+/g, '[link-redacted]')
+                : 'unknown error'
+            console.warn('[password-recovery] reset link button send failed, falling back to text:', safeErrorMessage)
+
+            const linkText = payload.buttons
+                .map(button => `${button.text}: ${button.url}`)
+                .join('\n')
+
+            return sendWhatsAppMessage({
+                phone,
+                message: [payload.text, linkText].filter(Boolean).join('\n\n'),
+                instanceToken,
+            })
+        }
     }
 
     return sendWhatsAppMessage({

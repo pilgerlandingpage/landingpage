@@ -222,7 +222,7 @@ async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessW
                 phone,
                 text: payload.text || 'Acesse pelo botao abaixo:',
                 type: 'button',
-                choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
+                choices: payload.buttons.map(button => `${button.text}|${button.url}`),
                 instanceToken,
             })
 
