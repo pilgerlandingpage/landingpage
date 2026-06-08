@@ -217,20 +217,43 @@ async function resolveGlobalAgentInstanceToken(admin: any) {
 
 async function sendUserAccessWhatsAppPayload(phone: string, payload: UserAccessWhatsAppPayload, instanceToken: string) {
     if (payload.buttons.length > 0) {
-        return sendMenuMessage({
-            phone,
-            text: payload.text || 'Acesse pelo botao abaixo:',
-            type: 'button',
-            choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
-            instanceToken,
-        })
+        try {
+            const response = await sendMenuMessage({
+                phone,
+                text: payload.text || 'Acesse pelo botao abaixo:',
+                type: 'button',
+                choices: payload.buttons.map(button => `${button.text}|url:${button.url}`),
+                instanceToken,
+            })
+
+            return { response, delivery_mode: 'button' as const }
+        } catch (menuError) {
+            const safeErrorMessage = menuError instanceof Error
+                ? menuError.message.replace(/https?:\/\/\S+/g, '[link-redacted]')
+                : 'unknown error'
+            console.warn('[users] access link button send failed, falling back to text:', safeErrorMessage)
+
+            const linkText = payload.buttons
+                .map(button => `${button.text}: ${button.url}`)
+                .join('\n')
+
+            const response = await sendWhatsAppMessage({
+                phone,
+                message: [payload.text, linkText].filter(Boolean).join('\n\n'),
+                instanceToken,
+            })
+
+            return { response, delivery_mode: 'text_fallback' as const }
+        }
     }
 
-    return sendWhatsAppMessage({
+    const response = await sendWhatsAppMessage({
         phone,
         message: payload.text,
         instanceToken,
     })
+
+    return { response, delivery_mode: 'text' as const }
 }
 
 async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: string, name: string, firstAccessLink: string }) {
@@ -246,7 +269,7 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
         link: firstAccessLink,
     })
 
-    await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
+    const delivery = await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
 
     await recordAgentCentralSignal({
         supabase: admin,
@@ -262,13 +285,14 @@ async function sendFirstAccessWhatsAppMessage(admin: any, params: { phone: strin
             user_phone: phone,
             message_preview: payload.text.slice(0, 500),
             buttons_count: payload.buttons.length,
+            delivery_mode: delivery.delivery_mode,
         },
         handoffTargets: ['internal-notifier', 'pilger-ai-core'],
     }).catch((error: any) => {
         console.warn('[Users] first access central signal failed:', error?.message || error)
     })
 
-    return { sent: true, reason: null }
+    return { sent: true, reason: null, delivery_mode: delivery.delivery_mode }
 }
 
 async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: string, name: string, resetLink: string }) {
@@ -284,7 +308,7 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
         link: resetLink,
     })
 
-    await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
+    const delivery = await sendUserAccessWhatsAppPayload(phone, payload, instanceToken)
 
     await recordAgentCentralSignal({
         supabase: admin,
@@ -300,13 +324,14 @@ async function sendPasswordResetWhatsAppMessage(admin: any, params: { phone: str
             user_phone: phone,
             message_preview: payload.text.slice(0, 500),
             buttons_count: payload.buttons.length,
+            delivery_mode: delivery.delivery_mode,
         },
         handoffTargets: ['internal-notifier', 'pilger-ai-rules'],
     }).catch((error: any) => {
         console.warn('[Users] password reset central signal failed:', error?.message || error)
     })
 
-    return { sent: true, reason: null }
+    return { sent: true, reason: null, delivery_mode: delivery.delivery_mode }
 }
 
 async function generateFirstAccessLinkForUser(admin: any, request: NextRequest, params: { email: string, name: string, phone: string }) {

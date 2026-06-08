@@ -32,7 +32,7 @@ export default function UsersPage() {
     const [editing, setEditing] = useState<string | null>(null)
     const [saving, setSaving] = useState(false)
     const [search, setSearch] = useState('')
-    const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
+    const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error'; link?: string } | null>(null)
     // WhatsApp status state
     const [userWhatsapp, setUserWhatsapp] = useState<WhatsAppUserInstance | null>(null)
     const [userWhatsappLoading, setUserWhatsappLoading] = useState(false)
@@ -40,14 +40,26 @@ export default function UsersPage() {
     const [sendingFirstAccessUserId, setSendingFirstAccessUserId] = useState<string | null>(null)
     const [sendingManualLinkUserId, setSendingManualLinkUserId] = useState<string | null>(null)
     const formCardRef = useRef<HTMLDivElement | null>(null)
+    const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const [form, setForm] = useState({
         name: '', email: '', phone: '',
         is_master: false, sector_ids: [] as string[],
     })
 
-    const showToast = (msg: string, type: 'success' | 'error') => {
-        setToast({ msg, type }); setTimeout(() => setToast(null), 3500)
+    const showToast = (msg: string, type: 'success' | 'error', link?: string) => {
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+        setToast({ msg, type, link })
+        toastTimerRef.current = setTimeout(() => setToast(null), link ? 12000 : 3500)
+    }
+
+    const copyLinkToClipboard = async (link: string) => {
+        try {
+            await navigator.clipboard.writeText(link)
+            showToast('Link manual copiado para a area de transferencia.', 'success')
+        } catch {
+            showToast('Nao foi possivel copiar automaticamente. Abra o link manual e copie pela barra do navegador.', 'error', link)
+        }
     }
 
     const fetchData = async () => {
@@ -175,9 +187,9 @@ export default function UsersPage() {
             const successMessage = data?.message || (creating ? 'Usuario criado!' : 'Usuario atualizado!')
             if (creating && data?.invite_warning) {
                 const warningMessage = data?.first_access_link
-                    ? `${successMessage} Aviso: ${data.invite_warning} Link manual: ${data.first_access_link}`
+                    ? `${successMessage} Aviso: ${data.invite_warning} Use o botao para copiar o link manual.`
                     : `${successMessage} Aviso: ${data.invite_warning}`
-                showToast(warningMessage, 'error')
+                showToast(warningMessage, 'error', data?.first_access_link)
             } else {
                 showToast(successMessage, 'success')
             }
@@ -257,9 +269,9 @@ export default function UsersPage() {
 
             if (data?.reset_warning) {
                 const warningMessage = data?.reset_link
-                    ? `${data.message} Aviso: ${data.reset_warning} Link manual: ${data.reset_link}`
+                    ? `${data.message} Aviso: ${data.reset_warning} Use o botao para copiar o link manual.`
                     : `${data.message} Aviso: ${data.reset_warning}`
-                showToast(warningMessage, 'error')
+                showToast(warningMessage, 'error', data?.reset_link)
             } else {
                 showToast(data?.message || 'Link de redefinicao enviado com sucesso.', 'success')
             }
@@ -298,9 +310,9 @@ export default function UsersPage() {
 
             if (data?.invite_warning) {
                 const warningMessage = data?.first_access_link
-                    ? `${data.message} Aviso: ${data.invite_warning} Link manual: ${data.first_access_link}`
+                    ? `${data.message} Aviso: ${data.invite_warning} Use o botao para copiar o link manual.`
                     : `${data.message} Aviso: ${data.invite_warning}`
-                showToast(warningMessage, 'error')
+                showToast(warningMessage, 'error', data?.first_access_link)
             } else {
                 showToast(data?.message || 'Link de primeiro acesso reenviado com sucesso.', 'success')
             }
@@ -339,9 +351,9 @@ export default function UsersPage() {
 
             if (data?.link_warning) {
                 const warningMessage = data?.access_link
-                    ? `${data.message} Aviso: ${data.link_warning} Link manual: ${data.access_link}`
+                    ? `${data.message} Aviso: ${data.link_warning} Use o botao para copiar o link manual.`
                     : `${data.message} Aviso: ${data.link_warning}`
-                showToast(warningMessage, 'error')
+                showToast(warningMessage, 'error', data?.access_link)
             } else {
                 showToast(data?.message || 'Link direto enviado com sucesso.', 'success')
             }
@@ -364,7 +376,14 @@ export default function UsersPage() {
             {toast && (
                 <div className={`admin-toast ${toast.type}`}>
                     {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                    {toast.msg}
+                    <div className="admin-toast-body">
+                        <span>{toast.msg}</span>
+                        {toast.link && (
+                            <button type="button" onClick={() => copyLinkToClipboard(toast.link!)} className="admin-toast-action">
+                                <Link2 size={13} /> Copiar link
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -690,7 +709,9 @@ export default function UsersPage() {
                 .rbac-toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
                 .rbac-toggle input:checked + .rbac-toggle-slider { background: #f59e0b; }
                 .rbac-toggle input:checked + .rbac-toggle-slider:before { transform: translateX(20px); }
-                .admin-toast { position: fixed; top: 24px; right: 24px; padding: 14px 24px; border-radius: 12px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 10px; z-index: 10000; animation: toastIn 0.35s ease-out; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+                .admin-toast { position: fixed; top: 24px; right: 24px; max-width: min(560px, calc(100vw - 48px)); padding: 14px 18px; border-radius: 12px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: flex-start; gap: 10px; z-index: 10000; animation: toastIn 0.35s ease-out; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+                .admin-toast-body { min-width: 0; display: grid; gap: 10px; line-height: 1.35; }
+                .admin-toast-action { width: fit-content; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 8px; border: 1px solid currentColor; background: rgba(255,255,255,0.64); color: inherit; cursor: pointer; font-size: 0.78rem; font-weight: 800; }
                 .admin-toast.success { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); color: var(--success); }
                 .admin-toast.error { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: var(--danger); }
                 @keyframes toastIn { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
