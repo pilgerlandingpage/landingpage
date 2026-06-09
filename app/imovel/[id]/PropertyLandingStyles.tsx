@@ -322,6 +322,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-gallery-composer {
+                    position: relative;
                     display: grid;
                     grid-template-columns: minmax(0, 1fr) 104px;
                     gap: 12px;
@@ -379,21 +380,73 @@ export default function PropertyLandingStyles() {
                     font-weight: 850;
                 }
 
-                .plp-gallery-view-button {
-                    position: absolute;
-                    top: 14px;
-                    right: 14px;
+                .plp-gallery-view-btn-top {
                     display: inline-flex;
                     align-items: center;
-                    gap: 8px;
-                    min-height: 38px;
-                    padding: 0 14px;
-                    border-radius: var(--plp-radius);
-                    background: rgba(255, 255, 255, 0.94);
+                    gap: 6px;
+                    margin-bottom: 8px;
+                    padding: 5px 11px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: 20px;
+                    background: rgba(255, 255, 255, 0.92);
                     color: var(--plp-ink);
-                    box-shadow: 0 12px 28px rgba(19, 24, 29, 0.18);
-                    font-size: 13px;
+                    font: inherit;
+                    font-size: 11px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: background 0.18s;
+                }
+
+                .plp-gallery-view-btn-top:hover {
+                    background: #fff;
+                }
+
+                .plp-gallery-view-btn-top svg {
+                    color: var(--plp-gold-dark);
+                    flex-shrink: 0;
+                }
+
+                .plp-gallery-count {
+                    background: var(--plp-gold-dark);
+                    color: #fff;
+                    font-size: 10px;
                     font-weight: 900;
+                    line-height: 1.4;
+                    border-radius: 10px;
+                    padding: 1px 5px;
+                }
+
+                .plp-favorite-btn {
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    z-index: 2;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 34px;
+                    height: 34px;
+                    border: none;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.88);
+                    color: #e53e3e;
+                    cursor: pointer;
+                    backdrop-filter: blur(3px);
+                    transition: background 0.18s, transform 0.15s;
+                }
+
+                .plp-favorite-btn:hover {
+                    background: rgba(255, 255, 255, 0.97);
+                    transform: scale(1.08);
+                }
+
+                .plp-favorite-btn.active {
+                    background: rgba(229, 62, 62, 0.12);
+                }
+
+                .plp-favorite-btn svg {
+                    width: 16px;
+                    height: 16px;
                 }
 
                 .plp-thumb-rail {
@@ -953,61 +1006,75 @@ export default function PropertyLandingStyles() {
 
                 .plp-side-facts {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    gap: 5px;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 4px;
                     padding: 7px 0 9px;
                     border-bottom: 1px solid var(--plp-line);
                 }
 
                 .plp-side-facts div {
-                    display: grid;
-                    grid-template-columns: 18px minmax(0, 1fr);
-                    grid-template-rows: auto auto;
+                    display: flex;
+                    flex-direction: column;
                     align-items: center;
-                    gap: 0 5px;
-                    min-height: 42px;
-                    padding: 6px 7px;
+                    justify-content: center;
+                    gap: 1px;
+                    min-height: 0;
+                    padding: 5px 4px;
                     border: 1px solid rgba(53, 64, 73, 0.08);
                     border-radius: 7px;
                     background: #f6f8f7;
                     color: #354049;
-                    font-size: 12px;
+                    font-size: 11px;
+                    text-align: center;
                 }
 
                 .plp-side-facts svg {
-                    grid-row: 1 / span 2;
-                    width: 14px;
-                    height: 14px;
+                    width: 13px;
+                    height: 13px;
                     color: var(--plp-muted);
+                    margin-bottom: 1px;
                 }
 
                 .plp-side-facts strong {
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 900;
-                    line-height: 1.05;
+                    line-height: 1.1;
                 }
 
                 .plp-side-facts span {
                     color: var(--plp-muted);
-                    font-size: 9px;
-                    line-height: 1.15;
+                    font-size: 8px;
+                    line-height: 1.1;
                 }
 
                 .plp-side-facts .plp-side-fact-price {
                     grid-column: 1 / -1;
-                    min-height: 58px;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    gap: 6px;
+                    padding: 7px 10px;
                     background: linear-gradient(135deg, rgba(201, 169, 110, 0.12), rgba(255, 255, 255, 0.98));
                     border-color: rgba(201, 169, 110, 0.28);
+                    text-align: left;
                 }
 
                 .plp-side-facts .plp-side-fact-price svg {
                     color: var(--plp-gold-dark);
+                    margin-bottom: 0;
+                    align-self: center;
+                    flex-shrink: 0;
                 }
 
                 .plp-side-facts .plp-side-fact-price strong {
                     color: var(--plp-ink);
-                    font-size: 19px;
+                    font-size: 18px;
                     line-height: 1.05;
+                }
+
+                .plp-side-facts .plp-side-fact-price span {
+                    font-size: 9px;
+                    align-self: flex-end;
+                    padding-bottom: 1px;
                 }
 
                 .plp-price-extras {

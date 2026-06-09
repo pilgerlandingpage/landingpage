@@ -7,14 +7,10 @@ import {
     ArrowRight,
     Bath,
     BedDouble,
-    Building2,
-    CalendarDays,
     Camera,
     Car,
     CheckCircle2,
-    ClipboardList,
     Eye,
-    Heart,
     Home,
     MapPin,
     MessageCircle,
@@ -484,7 +480,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 <MapPin size={18} />
                                 <div>
                                     <h2>{displayNeighborhood || displayCity || 'Litoral catarinense'}</h2>
-                                    <p>{locationLabel || 'Endereço sob curadoria'}</p>
+                                    <p>{[displayCity, property.state].filter(Boolean).join(' - ') || 'Endereço sob curadoria'}</p>
                                 </div>
                             </div>
 
@@ -507,8 +503,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                             <div className="plp-action-list">
                                 <PropertyLandingShareButton propertyId={property.id} title={displayTitle} />
-                                <button type="button"><Heart size={16} /> Adicionar aos favoritos</button>
-                                <button type="button"><ClipboardList size={16} /> Financiamentos</button>
                             </div>
                         </div>
 

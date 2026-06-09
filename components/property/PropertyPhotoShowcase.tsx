@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Images, X } from 'lucide-react'
+import { Heart, Images, X } from 'lucide-react'
 import { trackEvent } from '@/lib/tracking/client'
 
 type PropertyPhotoShowcaseProps = {
@@ -14,6 +14,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
     const gallery = useMemo(() => Array.from(new Set((images || []).filter(Boolean))), [images])
     const [activeIndex, setActiveIndex] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const [isFavorited, setIsFavorited] = useState(false)
 
     const activeImage = gallery[0]
 
@@ -54,10 +55,22 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
 
     return (
         <>
+            <button type="button" className="plp-gallery-view-btn-top" onClick={() => openGallery()}>
+                <Images size={13} /> Ver galeria
+                {gallery.length > 1 && <span className="plp-gallery-count">{gallery.length}</span>}
+            </button>
+
             <div className="plp-gallery-composer single">
                 <button type="button" className="plp-main-photo" onClick={() => openGallery()} aria-label="Ver galeria de fotos">
                     <img src={activeImage} alt={title} />
-                    <span className="plp-gallery-view-button"><Images size={17} /> Ver galeria</span>
+                </button>
+                <button
+                    type="button"
+                    className={`plp-favorite-btn${isFavorited ? ' active' : ''}`}
+                    onClick={() => setIsFavorited(prev => !prev)}
+                    aria-label={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                >
+                    <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
                 </button>
             </div>
 
