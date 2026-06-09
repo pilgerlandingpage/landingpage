@@ -33,6 +33,11 @@ export const inngest = new Inngest({
                 lead_id: string
                 phone: string
                 name?: string
+                property_id?: string
+                whatsapp_phone?: string
+                broker_id?: string
+                admin_user_id?: string
+                whatsapp_instance_id?: string
             }
         }
         'lead/vip-detected': {

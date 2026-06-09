@@ -41,6 +41,7 @@ import {
     recordAgentCentralSignal,
 } from '../intelligence/agent-runtime'
 import { getDefaultCommercialAutomationPrompt } from '../whatsapp/commercial-automation-prompts'
+import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '../properties/responsible-broker'
 import { sendBrevoEmail } from '../email/brevo'
 
 function getSupabase() {
@@ -901,6 +902,86 @@ export const sendWhatsAppRescue = inngest.createFunction(
     }
 )
 
+function objectRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, any>
+        : {}
+}
+
+function textValue(value: unknown): string | null {
+    const text = String(value || '').trim()
+    return text || null
+}
+
+async function resolveFollowupSender(params: {
+    supabase: any
+    cfg: Map<string, string>
+    lead: any
+    eventData: Record<string, unknown>
+}) {
+    const captureContext = objectRecord(params.lead?.metadata?.capture_context)
+    const savedDestination = objectRecord(captureContext.whatsapp_destination)
+
+    let propertyId = textValue(params.eventData.property_id) || textValue(captureContext.property_id)
+    let brokerId = textValue(params.eventData.broker_id) || textValue(savedDestination.broker_id)
+    let adminUserId = textValue(params.eventData.admin_user_id) || textValue(savedDestination.admin_user_id)
+    let instanceId = textValue(params.eventData.whatsapp_instance_id) || textValue(savedDestination.whatsapp_instance_id)
+    let senderPhone = textValue(params.eventData.whatsapp_phone) || textValue(savedDestination.phone)
+    let source = textValue(savedDestination.source) || 'unknown'
+
+    if (propertyId && (!instanceId || !senderPhone)) {
+        try {
+            const responsibleBroker = await getResponsibleBrokerForProperty(params.supabase, propertyId)
+            brokerId = responsibleBroker.broker_id || brokerId
+            adminUserId = responsibleBroker.admin_user_id || adminUserId
+            instanceId = responsibleBroker.whatsapp_instance_id || instanceId
+            senderPhone = responsibleBroker.phone || senderPhone
+            source = responsibleBroker.source
+        } catch (error: any) {
+            console.warn('[WhatsApp Follow-up] responsible broker resolution failed:', error?.message || error)
+        }
+    }
+
+    const loadInstance = async (column: 'id' | 'broker_id' | 'admin_user_id', value: string) => {
+        const { data } = await params.supabase
+            .from('whatsapp_instances')
+            .select('id, instance_token, broker_id, admin_user_id, phone_number, status')
+            .eq(column, value)
+            .eq('status', 'connected')
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        return data || null
+    }
+
+    let instance: any = null
+    if (instanceId) {
+        instance = await loadInstance('id', instanceId)
+    }
+    if (!instance?.instance_token && brokerId) {
+        instance = await loadInstance('broker_id', brokerId)
+    }
+    if (!instance?.instance_token && adminUserId) {
+        instance = await loadInstance('admin_user_id', adminUserId)
+    }
+
+    const defaultInstanceCfgId = params.cfg.get('agent_default_instance_id') || null
+    if (!instance?.instance_token && defaultInstanceCfgId) {
+        instance = await loadInstance('id', defaultInstanceCfgId)
+        source = source === 'unknown' ? 'global' : source
+    }
+
+    return {
+        propertyId,
+        source,
+        senderPhone: senderPhone || instance?.phone_number || GLOBAL_PROPERTY_WHATSAPP_PHONE,
+        instanceToken: instance?.instance_token || null,
+        instanceId: instance?.id || instanceId || null,
+        brokerId: instance?.broker_id || brokerId || null,
+        adminUserId: instance?.admin_user_id || adminUserId || null,
+    }
+}
+
 export const runWhatsAppFollowupFlow = inngest.createFunction(
     { id: 'run-whatsapp-followup-flow', name: 'Run WhatsApp Follow-up Flow' },
     { event: 'lead/schedule-whatsapp-followup-flow' },
@@ -933,23 +1014,6 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
             || cfg.get('whatsapp_rescue_message_template')
             || 'Oi {nome_lead}! Passando para saber se posso te ajudar com mais detalhes.'
 
-        let defaultInstanceToken: string | null = null
-        let defaultInstanceId: string | null = null
-        let defaultBrokerId: string | null = null
-        const defaultInstanceCfgId = cfg.get('agent_default_instance_id') || null
-        if (defaultInstanceCfgId) {
-            const { data: inst } = await supabase
-                .from('whatsapp_instances')
-                .select('id, instance_token, broker_id')
-                .eq('id', defaultInstanceCfgId)
-                .maybeSingle()
-            if (inst?.instance_token) {
-                defaultInstanceToken = inst.instance_token
-                defaultInstanceId = inst.id
-                defaultBrokerId = inst.broker_id || null
-            }
-        }
-
         let previous = 0
         let attemptsSent = 0
         for (let i = 0; i < schedule.length; i++) {
@@ -978,6 +1042,13 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                 return { success: true, stopped: 'lead_replied', attemptsSent }
             }
 
+            const followupSender = await resolveFollowupSender({
+                supabase,
+                cfg,
+                lead,
+                eventData: event.data as Record<string, unknown>,
+            })
+
             const msg = interpolateTemplate(template, {
                 name: lead.name || name || 'visitante',
                 nome_lead: lead.name || name || 'visitante',
@@ -999,7 +1070,7 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
             await sendWhatsAppMessage({
                 phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
                 message: aiMessage.message,
-                instanceToken: defaultInstanceToken || undefined,
+                instanceToken: followupSender.instanceToken || undefined,
             })
 
             attemptsSent += 1
@@ -1048,8 +1119,12 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                     lead_phone: (lead.phone_e164 as string) || (lead.phone as string) || phone,
                     attempt: attemptsSent,
                     minute_offset: targetMinutes,
-                    instance_id: defaultInstanceId || null,
-                    broker_id: defaultBrokerId || null,
+                    instance_id: followupSender.instanceId || null,
+                    broker_id: followupSender.brokerId || null,
+                    admin_user_id: followupSender.adminUserId || null,
+                    property_id: followupSender.propertyId || null,
+                    sender_phone: followupSender.senderPhone || null,
+                    sender_source: followupSender.source || null,
                     message_preview: aiMessage.message.slice(0, 500),
                     ai_used: aiMessage.usedAi,
                     central_context_used: aiMessage.centralContextUsed,
@@ -1060,13 +1135,13 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                 console.warn('[WhatsApp Follow-up] central signal failed:', error?.message || error)
             })
 
-            if (defaultBrokerId) {
+            if (followupSender.brokerId) {
                 const cleanPhone = ((lead.phone_e164 as string) || (lead.phone as string) || phone || '').replace(/\D/g, '')
                 if (cleanPhone) {
                     const { data: existingConv } = await supabase
                         .from('whatsapp_ai_conversations')
                         .select('id, messages')
-                        .eq('broker_id', defaultBrokerId)
+                        .eq('broker_id', followupSender.brokerId)
                         .eq('lead_phone', cleanPhone)
                         .in('status', ['active', 'human_takeover', 'transferred'])
                         .order('updated_at', { ascending: false })
@@ -1092,8 +1167,8 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
                             .from('whatsapp_ai_conversations')
                             .insert({
                                 lead_id: lead.id,
-                                broker_id: defaultBrokerId,
-                                instance_id: defaultInstanceId,
+                                broker_id: followupSender.brokerId,
+                                instance_id: followupSender.instanceId,
                                 lead_phone: cleanPhone,
                                 messages: [assistantMsg],
                                 bot_message_ids: [],

@@ -4,6 +4,7 @@ import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
 import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
 import { inngest } from '@/lib/inngest/client'
+import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 
 function getSupabase() {
     return createClient(
@@ -23,6 +24,76 @@ function metadataRecord(value: unknown): Record<string, unknown> {
     return value && typeof value === 'object' && !Array.isArray(value)
         ? value as Record<string, unknown>
         : {}
+}
+
+function metadataText(value: unknown): string | null {
+    const text = String(value || '').trim()
+    return text || null
+}
+
+function propertyIdFromLandingSlug(slug?: string | null): string | null {
+    const match = String(slug || '').match(/^imovel-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)
+    return match?.[1] || null
+}
+
+function propertyIdFromMetadata(metadata: Record<string, unknown>): string | null {
+    const property = metadata.property && typeof metadata.property === 'object' && !Array.isArray(metadata.property)
+        ? metadata.property as Record<string, unknown>
+        : {}
+
+    return metadataText(metadata.property_id)
+        || metadataText(metadata.propertyId)
+        || metadataText(property.id)
+}
+
+async function resolveWhatsAppDestination(params: {
+    supabase: ReturnType<typeof getSupabase>
+    captureMetadata: Record<string, unknown>
+    landingPageSlug: string | null
+    requestedPhone: string
+}) {
+    const propertyId = propertyIdFromMetadata(params.captureMetadata) || propertyIdFromLandingSlug(params.landingPageSlug)
+    const fallbackPhone = normalizePhoneBR(params.requestedPhone || GLOBAL_PROPERTY_WHATSAPP_PHONE)
+
+    if (!propertyId) {
+        return {
+            property_id: null,
+            phone: fallbackPhone || GLOBAL_PROPERTY_WHATSAPP_PHONE,
+            broker_name: null,
+            broker_id: null,
+            admin_user_id: null,
+            whatsapp_instance_id: null,
+            source: 'provided',
+            is_connected: false,
+        }
+    }
+
+    try {
+        const responsibleBroker = await getResponsibleBrokerForProperty(params.supabase, propertyId)
+        const phone = normalizePhoneBR(responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE)
+        return {
+            property_id: propertyId,
+            phone: phone || GLOBAL_PROPERTY_WHATSAPP_PHONE,
+            broker_name: responsibleBroker.name || null,
+            broker_id: responsibleBroker.broker_id || null,
+            admin_user_id: responsibleBroker.admin_user_id || null,
+            whatsapp_instance_id: responsibleBroker.whatsapp_instance_id || null,
+            source: responsibleBroker.source,
+            is_connected: responsibleBroker.is_connected,
+        }
+    } catch (error) {
+        console.warn('[Lead Capture] responsible broker resolution failed:', error)
+        return {
+            property_id: propertyId,
+            phone: GLOBAL_PROPERTY_WHATSAPP_PHONE,
+            broker_name: 'Comercial Guilherme Pilger',
+            broker_id: null,
+            admin_user_id: null,
+            whatsapp_instance_id: null,
+            source: 'global',
+            is_connected: false,
+        }
+    }
 }
 
 function buildPhoneOrFilter(candidates: string[]): string {
@@ -81,6 +152,26 @@ export async function POST(request: NextRequest) {
         const phone = normalizePhoneBR(phoneRaw)
         if (phone.length < 12) {
             return NextResponse.json({ success: false, error: 'Telefone inválido' }, { status: 400 })
+        }
+
+        const whatsappDestination = await resolveWhatsAppDestination({
+            supabase,
+            captureMetadata,
+            landingPageSlug,
+            requestedPhone: String(body?.whatsapp_phone || body?.destination_phone || body?.target_phone || ''),
+        })
+        const enrichedCaptureContext = {
+            ...captureMetadata,
+            ...(whatsappDestination.property_id ? { property_id: whatsappDestination.property_id } : {}),
+            whatsapp_destination: {
+                phone: whatsappDestination.phone,
+                broker_name: whatsappDestination.broker_name,
+                broker_id: whatsappDestination.broker_id,
+                admin_user_id: whatsappDestination.admin_user_id,
+                whatsapp_instance_id: whatsappDestination.whatsapp_instance_id,
+                source: whatsappDestination.source,
+                is_connected: whatsappDestination.is_connected,
+            },
         }
 
         const trackingData = extractTrackingData(request.headers, searchParams, referrer)
@@ -145,7 +236,7 @@ export async function POST(request: NextRequest) {
             capture_source: 'site_form',
             landing_page_slug: landingPageSlug,
             visitor_cookie_id: visitorCookieId,
-            ...(Object.keys(captureMetadata).length ? { capture_context: captureMetadata } : {}),
+            ...(Object.keys(enrichedCaptureContext).length ? { capture_context: enrichedCaptureContext } : {}),
             tracking: {
                 detected_source: trackingData.detected_source || null,
                 utm_source: trackingData.utm_source || null,
@@ -218,7 +309,7 @@ export async function POST(request: NextRequest) {
                 landing_page_slug: landingPageSlug,
                 visitor_cookie_id: visitorCookieId,
                 tracking: metadataPatch.tracking,
-                ...captureMetadata,
+                ...enrichedCaptureContext,
             },
         })
 
@@ -252,7 +343,12 @@ export async function POST(request: NextRequest) {
             data: {
                 lead_id: leadId,
                 phone,
-                name
+                name,
+                property_id: whatsappDestination.property_id || undefined,
+                whatsapp_phone: whatsappDestination.phone,
+                broker_id: whatsappDestination.broker_id || undefined,
+                admin_user_id: whatsappDestination.admin_user_id || undefined,
+                whatsapp_instance_id: whatsappDestination.whatsapp_instance_id || undefined,
             },
         })
 
@@ -277,6 +373,8 @@ export async function POST(request: NextRequest) {
                         context: {
                             landing_page_slug: landingPageSlug,
                             visitor_cookie_id: visitorCookieId,
+                            property_id: whatsappDestination.property_id,
+                            whatsapp_destination: enrichedCaptureContext.whatsapp_destination,
                         },
                     },
                 })
@@ -290,6 +388,8 @@ export async function POST(request: NextRequest) {
             lead_id: leadId,
             visitor_id: visitor.id,
             visitor_cookie_id: visitorCookieId,
+            whatsapp_phone: whatsappDestination.phone,
+            whatsapp_contact: whatsappDestination,
         })
     } catch (error) {
         console.error('[Lead Capture] Error:', error)

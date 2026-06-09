@@ -570,6 +570,17 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                 const copy = buildPropertyFeedCopy(item)
                 const contactPhone = contactPhoneFor(item)
                 const connectedBroker = connectedBrokerFor(item)
+                const whatsappMetadata = {
+                    property_id: item.id,
+                    title: copy.title,
+                    price: item.price || null,
+                    city: item.city || null,
+                    neighborhood: item.neighborhood || null,
+                    property_type: item.property_type || null,
+                    responsible_broker: item.responsible_broker?.name || null,
+                    responsible_broker_connected: item.responsible_broker?.is_connected || false,
+                    source: 'property_feed',
+                }
                 const storyItems = feedItems
                     .filter(story => story.id !== item.id && !dislikedIds.includes(story.id))
                     .slice(0, 12)
@@ -613,6 +624,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                         message={`Olá! Quero saber mais sobre ${copy.title}.`}
                                         slug={`imovel-${item.id}`}
                                         template="property-feed-message"
+                                        metadata={whatsappMetadata}
                                         className="property-icon-button"
                                         onClick={() => trackEvent('property_feed_message_clicked', { property_id: item.id, title: copy.title })}
                                     >
@@ -684,6 +696,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                                     message={`Olá! Quero falar com um especialista sobre ${copy.title}.`}
                                                     slug={`imovel-${item.id}`}
                                                     template="property-feed-menu-specialist"
+                                                    metadata={whatsappMetadata}
                                                     className="property-more-menu-link"
                                                     onClick={() => {
                                                         setOpenMenuFor(null)
@@ -758,6 +771,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                     message={`Olá! Quero saber mais sobre ${copy.title}.`}
                                     slug={`imovel-${item.id}`}
                                     template="property-feed-whatsapp"
+                                    metadata={whatsappMetadata}
                                     className="property-action primary"
                                     onClick={() => trackEvent('property_feed_whatsapp_clicked', { property_id: item.id, title: copy.title })}
                                 >

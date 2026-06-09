@@ -88,12 +88,14 @@ export default function WhatsAppLeadCaptureModal() {
                     referrer: document.referrer,
                     search_params: window.location.search,
                     consent_lgpd: true,
+                    whatsapp_phone: state.phone,
                     metadata: state.metadata || null,
                 }),
             })
 
+            const data = await response.json().catch(() => ({}))
+
             if (!response.ok) {
-                const data = await response.json().catch(() => ({}))
                 throw new Error(data?.error || 'Não foi possível salvar seus dados.')
             }
 
@@ -112,8 +114,9 @@ export default function WhatsAppLeadCaptureModal() {
                 // no-op
             }
 
+            const destinationPhone = normalizePhone(data?.whatsapp_contact?.phone || data?.whatsapp_phone || state.phone)
             const text = encodeURIComponent(state.message || '')
-            window.open(`https://wa.me/${state.phone}?text=${text}`, '_blank')
+            window.open(`https://wa.me/${destinationPhone}?text=${text}`, '_blank')
             setState({ open: false })
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro inesperado.')

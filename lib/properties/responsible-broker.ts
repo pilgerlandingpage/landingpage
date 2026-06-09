@@ -1,6 +1,9 @@
 export const GLOBAL_PROPERTY_WHATSAPP_PHONE = '5547992528080'
 
 export type ResponsibleBrokerContact = {
+    broker_id: string | null
+    admin_user_id: string | null
+    whatsapp_instance_id: string | null
     legacy_name: string | null
     legacy_login: string | null
     name: string
@@ -84,6 +87,9 @@ function connectedInstanceFor(instances: any[], match: { id?: string | null; wha
 
 function globalContact(legacyName?: string | null, legacyLogin?: string | null): ResponsibleBrokerContact {
     return {
+        broker_id: null,
+        admin_user_id: null,
+        whatsapp_instance_id: null,
         legacy_name: legacyName || null,
         legacy_login: legacyLogin || null,
         name: legacyName || 'Comercial Guilherme Pilger',
@@ -146,6 +152,9 @@ async function resolveBrokerContactsByPropertyId(supabase: SupabaseLike, propert
 
         if (virtualBroker && virtualInstance) {
             contactByPropertyId.set(row.property_id, {
+                broker_id: virtualBroker.id || null,
+                admin_user_id: null,
+                whatsapp_instance_id: virtualInstance.id || null,
                 legacy_name: legacyName,
                 legacy_login: legacyLogin,
                 name: virtualBroker.name || legacyName || 'Corretor responsavel',
@@ -169,6 +178,9 @@ async function resolveBrokerContactsByPropertyId(supabase: SupabaseLike, propert
 
         if (adminUser && adminInstance) {
             contactByPropertyId.set(row.property_id, {
+                broker_id: null,
+                admin_user_id: adminUser.id || null,
+                whatsapp_instance_id: adminInstance.id || null,
                 legacy_name: legacyName,
                 legacy_login: legacyLogin,
                 name: adminUser.name || legacyName || 'Corretor responsavel',
