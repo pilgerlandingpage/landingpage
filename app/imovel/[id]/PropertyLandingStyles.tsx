@@ -2410,22 +2410,29 @@ export default function PropertyLandingStyles() {
                         aspect-ratio: 1.08 / 1;
                     }
 
-                    .plp-content-column {
-                        order: 2;
-                    }
-
+                    /* Dissolve sidebar: cards viram filhos diretos do grid */
                     .plp-sidebar {
+                        display: contents;
+                    }
+
+                    /* Ordem no mobile:
+                       1 = foto | 2 = card localização/preço | 3 = descrição
+                       10 = formulário | 11 = corretor               */
+                    .plp-price-card {
+                        order: 2;
+                        border-radius: var(--plp-radius);
+                    }
+
+                    .plp-content-column {
                         order: 3;
-                        grid-template-columns: 1fr;
-                        gap: 8px;
                     }
 
-                    #ficha {
-                        order: 4;
+                    .plp-lead-card {
+                        order: 10;
                     }
 
-                    .plp-classic-lists {
-                        order: 5;
+                    .plp-broker-card {
+                        order: 11;
                     }
 
                     .plp-section {
