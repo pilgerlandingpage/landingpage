@@ -2362,13 +2362,13 @@ export default function PropertyLandingStyles() {
                         grid-row: auto;
                     }
 
-                    .plp-sidebar {
+                    .plp-content-column {
                         order: 2;
                         grid-column: auto;
                         grid-row: auto;
                     }
 
-                    .plp-content-column {
+                    .plp-sidebar {
                         order: 3;
                         grid-column: auto;
                         grid-row: auto;
@@ -2424,14 +2424,14 @@ export default function PropertyLandingStyles() {
                         aspect-ratio: 1.08 / 1;
                     }
 
-                    .plp-sidebar {
+                    .plp-content-column {
                         order: 2;
-                        grid-template-columns: 1fr;
-                        gap: 8px;
                     }
 
-                    .plp-content-column {
+                    .plp-sidebar {
                         order: 3;
+                        grid-template-columns: 1fr;
+                        gap: 8px;
                     }
 
                     #ficha {
