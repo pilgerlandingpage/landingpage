@@ -124,9 +124,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                 loading={imagePriority ? undefined : 'lazy'}
                                 decoding="async"
                             />
-                            <span className="compact-image-pill">
-                                {property.exclusive ? 'Exclusivo' : 'Curadoria Pilger'}
-                            </span>
                             <span className="compact-heart" aria-hidden="true">
                                 <Heart size={22} />
                             </span>
@@ -430,23 +427,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     flex: 0 0 auto;
                     stroke-width: 2.25;
                 }
-                .compact-image-pill {
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    z-index: 2;
-                    max-width: calc(100% - 58px);
-                    padding: 7px 11px;
-                    border-radius: 999px;
-                    background: rgba(255, 255, 255, 0.92);
-                    color: #342d25;
-                    font: 560 0.68rem/1 'Inter', sans-serif;
-                    letter-spacing: -0.005em;
-                    box-shadow: 0 5px 14px rgba(31, 27, 21, 0.11);
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
                 .compact-heart {
                     position: absolute;
                     top: 10px;
@@ -546,13 +526,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         font-size: 0.58rem;
                         gap: 4px 6px;
                         margin-top: 5px;
-                    }
-                    .compact-image-pill {
-                        top: 8px;
-                        left: 8px;
-                        max-width: calc(100% - 48px);
-                        padding: 6px 9px;
-                        font-size: 0.56rem;
                     }
                     .compact-heart {
                         top: 7px;

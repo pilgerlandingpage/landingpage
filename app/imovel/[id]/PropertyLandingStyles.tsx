@@ -295,6 +295,20 @@ export default function PropertyLandingStyles() {
                     font-weight: 700;
                 }
 
+                .plp-view-count {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    white-space: nowrap;
+                }
+
+                .plp-view-count svg {
+                    width: 14px;
+                    height: 14px;
+                    color: var(--plp-muted);
+                    stroke-width: 2.35;
+                }
+
                 .plp-title-status {
                     display: grid;
                     justify-items: end;
@@ -1792,6 +1806,586 @@ export default function PropertyLandingStyles() {
                 @media (min-width: 761px) {
                     .plp-page .mobile-nav {
                         display: none;
+                    }
+                }
+
+                .plp-shell {
+                    width: min(calc(100% - clamp(24px, 4vw, 72px)), 1220px);
+                }
+
+                .plp-title-band {
+                    padding: 12px 22px 14px;
+                }
+
+                .plp-breadcrumbs {
+                    gap: 6px;
+                    margin-bottom: 7px;
+                    font-size: 11px;
+                }
+
+                .plp-title-row {
+                    gap: 16px;
+                }
+
+                .plp-kicker {
+                    margin-bottom: 4px;
+                    font-size: 10px;
+                    letter-spacing: 0.06em;
+                }
+
+                .plp-title-row h1 {
+                    font-size: 21px;
+                    line-height: 1.18;
+                }
+
+                .plp-rating-row {
+                    gap: 6px;
+                    margin-top: 5px;
+                    font-size: 11px;
+                }
+
+                .plp-title-status {
+                    min-width: 170px;
+                    gap: 4px;
+                }
+
+                .plp-title-status span {
+                    min-height: 24px;
+                    padding: 0 10px;
+                    font-size: 11px;
+                }
+
+                .plp-title-status strong {
+                    font-size: 16px;
+                }
+
+                .plp-detail-layout {
+                    grid-template-columns: minmax(0, 1fr) 330px;
+                    gap: 22px;
+                    padding: 14px 22px 24px;
+                }
+
+                .plp-gallery-column,
+                .plp-content-column {
+                    min-width: 0;
+                }
+
+                .plp-gallery-column {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+
+                .plp-content-column {
+                    grid-column: 1;
+                    grid-row: 2;
+                }
+
+                .plp-sidebar {
+                    grid-column: 2;
+                    grid-row: 1 / span 2;
+                }
+
+                .plp-gallery-composer {
+                    grid-template-columns: minmax(0, 1fr) 82px;
+                    gap: 9px;
+                    min-height: clamp(350px, 31vw, 430px);
+                }
+
+                .plp-main-photo {
+                    min-height: clamp(350px, 31vw, 430px);
+                }
+
+                .plp-thumb-rail {
+                    gap: 7px;
+                }
+
+                .plp-photo-badge {
+                    left: 10px;
+                    bottom: 10px;
+                    min-height: 28px;
+                    padding: 0 10px;
+                    font-size: 11px;
+                }
+
+                .plp-gallery-view-button {
+                    top: 10px;
+                    right: 10px;
+                    min-height: 32px;
+                    padding: 0 10px;
+                    font-size: 12px;
+                }
+
+                .plp-section {
+                    padding-top: 22px;
+                }
+
+                .plp-section-head {
+                    gap: 14px;
+                    margin-bottom: 12px;
+                }
+
+                .plp-section-head h2,
+                .plp-copy-section h2,
+                .plp-related-head h2,
+                .plp-final-cta h2 {
+                    font-size: 20px;
+                    line-height: 1.18;
+                }
+
+                .plp-copy-section h2 {
+                    margin-bottom: 6px;
+                }
+
+                .plp-intro-line {
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                    line-height: 1.38;
+                }
+
+                .plp-highlight-list {
+                    gap: 5px;
+                    margin: 10px 0 12px;
+                }
+
+                .plp-highlight-list li {
+                    grid-template-columns: 18px minmax(0, 1fr);
+                    gap: 6px;
+                    font-size: 13px;
+                    line-height: 1.36;
+                }
+
+                .plp-highlight-list svg {
+                    width: 14px;
+                    height: 14px;
+                }
+
+                .plp-narrative {
+                    gap: 8px;
+                    max-width: 760px;
+                }
+
+                .plp-narrative p,
+                .plp-thesis-card p,
+                .plp-final-cta p {
+                    font-size: 13px;
+                    line-height: 1.5;
+                }
+
+                .plp-spec-grid {
+                    gap: 8px;
+                }
+
+                .plp-spec-card {
+                    grid-template-columns: 32px minmax(0, 1fr);
+                    gap: 8px;
+                    min-height: 58px;
+                    padding: 9px 10px;
+                }
+
+                .plp-spec-card > span {
+                    width: 32px;
+                    height: 32px;
+                }
+
+                .plp-spec-card > span svg {
+                    width: 17px;
+                    height: 17px;
+                }
+
+                .plp-spec-card small {
+                    margin-bottom: 2px;
+                    font-size: 9px;
+                }
+
+                .plp-spec-card strong {
+                    font-size: 13px;
+                }
+
+                .plp-classic-lists {
+                    gap: 15px;
+                }
+
+                .plp-info-list h3 {
+                    margin-bottom: 8px;
+                    padding-bottom: 5px;
+                    font-size: 16px;
+                }
+
+                .plp-info-list > div {
+                    gap: 12px;
+                }
+
+                .plp-info-list ul {
+                    gap: 4px;
+                }
+
+                .plp-info-list li {
+                    padding-left: 13px;
+                    font-size: 13px;
+                    line-height: 1.34;
+                }
+
+                .plp-sidebar {
+                    gap: 10px;
+                }
+
+                .plp-side-card {
+                    box-shadow: none;
+                }
+
+                .plp-price-card,
+                .plp-lead-card {
+                    padding: 12px;
+                }
+
+                .plp-side-location {
+                    grid-template-columns: 22px minmax(0, 1fr);
+                    gap: 7px;
+                    padding-bottom: 9px;
+                }
+
+                .plp-side-location h2 {
+                    margin-bottom: 2px;
+                    font-size: 18px;
+                }
+
+                .plp-side-location p,
+                .plp-payment-note,
+                .plp-lead-card p,
+                .plp-broker-card p {
+                    font-size: 11px;
+                    line-height: 1.38;
+                }
+
+                .plp-side-facts {
+                    gap: 5px;
+                    padding: 9px 0;
+                }
+
+                .plp-side-facts div {
+                    grid-template-columns: 20px 36px minmax(0, 1fr);
+                    gap: 6px;
+                    font-size: 12px;
+                }
+
+                .plp-side-facts strong {
+                    font-size: 12px;
+                }
+
+                .plp-price-box {
+                    gap: 3px;
+                    padding: 10px 0;
+                }
+
+                .plp-price-box span,
+                .plp-price-box small {
+                    font-size: 11px;
+                }
+
+                .plp-price-box strong {
+                    font-size: 21px;
+                }
+
+                .plp-whatsapp-button,
+                .plp-primary-btn,
+                .plp-dark-button,
+                .plp-mobile-cta-button {
+                    min-height: 36px;
+                    font-size: 12px;
+                }
+
+                .plp-payment-note {
+                    margin-top: 7px;
+                    font-size: 9px;
+                }
+
+                .plp-action-list {
+                    gap: 5px;
+                    margin-top: 9px;
+                }
+
+                .plp-action-list button {
+                    min-height: 30px;
+                    border-radius: 999px;
+                    font-size: 11px;
+                }
+
+                .plp-lead-card h3 {
+                    margin-bottom: 7px;
+                    font-size: 15px;
+                }
+
+                .plp-form-preview {
+                    gap: 6px;
+                    margin: 10px 0;
+                }
+
+                .plp-form-preview span {
+                    min-height: 32px;
+                    padding: 0 9px;
+                    font-size: 11px;
+                    border-radius: 3px;
+                }
+
+                .plp-form-preview .plp-form-message {
+                    min-height: 54px;
+                    align-items: flex-start;
+                    padding: 8px 9px;
+                    line-height: 1.35;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-broker-card {
+                    grid-template-columns: 78px minmax(0, 1fr);
+                    gap: 10px;
+                    padding: 9px;
+                }
+
+                .plp-broker-card img {
+                    width: 78px;
+                    height: 86px;
+                }
+
+                .plp-broker-card h3 {
+                    margin-bottom: 5px;
+                    font-size: 15px;
+                }
+
+                .plp-gallery-section,
+                .plp-thesis-section {
+                    padding-left: 22px;
+                    padding-right: 22px;
+                }
+
+                .plp-location-band {
+                    margin-top: 24px;
+                    padding: 22px 22px 28px;
+                }
+
+                .plp-location-head {
+                    margin-bottom: 10px;
+                }
+
+                .plp-location-head span {
+                    font-size: 18px;
+                }
+
+                .plp-map-frame {
+                    min-height: clamp(220px, 24vw, 320px);
+                    height: clamp(220px, 24vw, 320px);
+                    box-shadow: none;
+                }
+
+                .plp-thesis-grid {
+                    gap: 9px;
+                }
+
+                .plp-thesis-card {
+                    min-height: 126px;
+                    padding: 14px;
+                }
+
+                .plp-thesis-card span {
+                    margin-bottom: 7px;
+                    font-size: 10px;
+                }
+
+                .plp-thesis-card h3 {
+                    margin-bottom: 6px;
+                    font-size: 15px;
+                }
+
+                .plp-related-band {
+                    margin: 26px 22px 0;
+                    padding: 22px;
+                }
+
+                .plp-related-head {
+                    margin-bottom: 12px;
+                }
+
+                .plp-related-grid {
+                    gap: 10px;
+                }
+
+                .plp-related-card img {
+                    height: 145px;
+                }
+
+                .plp-related-card > div {
+                    padding: 10px;
+                }
+
+                .plp-related-card h3 {
+                    min-height: 34px;
+                    font-size: 13px;
+                }
+
+                .plp-final-cta {
+                    margin: 24px 22px 0;
+                    padding: 18px;
+                }
+
+                @media (max-width: 1120px) {
+                    .plp-detail-layout {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-gallery-column {
+                        order: 1;
+                        grid-column: auto;
+                        grid-row: auto;
+                    }
+
+                    .plp-sidebar {
+                        order: 2;
+                        grid-column: auto;
+                        grid-row: auto;
+                    }
+
+                    .plp-content-column {
+                        order: 3;
+                        grid-column: auto;
+                        grid-row: auto;
+                    }
+                }
+
+                @media (max-width: 760px) {
+                    .plp-page {
+                        padding-bottom: 112px;
+                    }
+
+                    .plp-title-band {
+                        padding: 10px 9px 11px;
+                    }
+
+                    .plp-breadcrumbs {
+                        margin-bottom: 5px;
+                        font-size: 10px;
+                    }
+
+                    .plp-title-row {
+                        gap: 8px;
+                    }
+
+                    .plp-title-row h1 {
+                        font-size: 18px;
+                    }
+
+                    .plp-rating-row {
+                        margin-top: 4px;
+                    }
+
+                    .plp-view-count {
+                        font-size: 10px;
+                    }
+
+                    .plp-title-status span {
+                        min-height: 22px;
+                        font-size: 10px;
+                    }
+
+                    .plp-title-status strong {
+                        font-size: 14px;
+                    }
+
+                    .plp-detail-layout {
+                        display: grid;
+                        gap: 10px;
+                        padding: 8px 9px 18px;
+                    }
+
+                    .plp-gallery-column {
+                        order: 1;
+                    }
+
+                    .plp-gallery-composer {
+                        min-height: 0;
+                    }
+
+                    .plp-main-photo {
+                        min-height: 260px;
+                        aspect-ratio: 1.08 / 1;
+                    }
+
+                    .plp-sidebar {
+                        order: 2;
+                        grid-template-columns: 1fr;
+                        gap: 8px;
+                    }
+
+                    .plp-content-column {
+                        order: 3;
+                    }
+
+                    #ficha {
+                        order: 4;
+                    }
+
+                    .plp-classic-lists {
+                        order: 5;
+                    }
+
+                    .plp-section {
+                        padding-top: 16px;
+                    }
+
+                    .plp-section-head h2,
+                    .plp-copy-section h2,
+                    .plp-related-head h2,
+                    .plp-final-cta h2 {
+                        font-size: 18px;
+                    }
+
+                    .plp-intro-line {
+                        font-size: 13px;
+                    }
+
+                    .plp-spec-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    .plp-info-list > div {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-location-band {
+                        margin-top: 18px;
+                        padding: 18px 9px 22px;
+                    }
+
+                    .plp-map-frame {
+                        min-height: 220px;
+                        height: 220px;
+                    }
+
+                    .plp-gallery-section,
+                    .plp-thesis-section {
+                        padding-left: 9px;
+                        padding-right: 9px;
+                    }
+
+                    .plp-thesis-grid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-related-band {
+                        margin: 20px 9px 0;
+                        padding: 16px 10px 18px;
+                    }
+
+                    .plp-related-grid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-final-cta {
+                        margin: 20px 9px 0;
+                        padding: 16px;
+                    }
+
+                    .plp-mobile-sticky-cta {
+                        bottom: calc(54px + env(safe-area-inset-bottom));
+                        padding: 8px 10px;
                     }
                 }
             ` }} />

@@ -13,6 +13,7 @@ import {
     Car,
     CheckCircle2,
     ClipboardList,
+    Eye,
     Heart,
     Home,
     Mail,
@@ -24,7 +25,6 @@ import {
     Share2,
     ShieldCheck,
     Star,
-    UserRound,
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
@@ -179,6 +179,10 @@ function statusLabelFor(status?: string | null) {
     return status || 'Sob consulta'
 }
 
+function formatViewCount(value: number) {
+    return `${value.toLocaleString('pt-BR')} ${value === 1 ? 'visualização' : 'visualizações'}`
+}
+
 function hasUsableCoordinate(value: unknown) {
     const coordinate = typeof value === 'string' ? Number(value.replace(',', '.')) : Number(value)
     return Number.isFinite(coordinate)
@@ -228,7 +232,19 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
     if (!property) return notFound()
 
-    const responsibleBroker = await getResponsibleBrokerForProperty(createAdminClient(), property.id)
+    const adminSupabase = createAdminClient()
+    const responsibleBroker = await getResponsibleBrokerForProperty(adminSupabase, property.id)
+    const { count: propertyViewCountRaw, error: propertyViewCountError } = await adminSupabase
+        .from('funnel_events')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_type', 'property_details_landing_viewed')
+        .contains('metadata', { property_id: property.id })
+
+    if (propertyViewCountError) {
+        console.warn('[Property Detail] view count unavailable:', propertyViewCountError.message)
+    }
+
+    const propertyViewCount = propertyViewCountRaw || 0
     const contactPhone = responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
     const brokerCardName = responsibleBroker.is_connected
         ? responsibleBroker.name
@@ -262,8 +278,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const featureItems = amenities.slice(0, 24)
     const projectItems = amenities.slice(24, 48)
     const openingBullets = buildOpeningBullets(property, opportunityHighlights)
+    const propertyPath = buildPropertySeoPath(property)
+    const propertyUrl = absoluteUrl(propertyPath)
     const propertyTrackingMetadata = {
         property_id: property.id,
+        property_url: propertyUrl,
         title: displayTitle,
         price: property.price || null,
         city: displayCity || null,
@@ -302,8 +321,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         .limit(4)
 
     const related = relatedProps || []
-    const propertyPath = buildPropertySeoPath(property)
-    const propertyUrl = absoluteUrl(propertyPath)
     const propertyJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -417,7 +434,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             <div className="plp-rating-row" aria-label="Avaliação editorial">
                                 <span><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /></span>
                                 <strong>4,8</strong>
-                                <small>curadoria Pilger</small>
+                                <small className="plp-view-count"><Eye size={14} /> {formatViewCount(propertyViewCount)}</small>
                             </div>
                         </div>
                         <div className="plp-title-status">
@@ -428,7 +445,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 </section>
 
                 <section id="visao" className="plp-detail-layout">
-                    <div className="plp-main-column">
+                    <div className="plp-gallery-column">
                         <PropertyPhotoShowcase images={gallery.length ? gallery : [primaryImage]} title={displayTitle} metadata={propertyTrackingMetadata} />
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
                             <a href="#galeria" className="plp-main-photo" aria-label="Abrir galeria completa">
@@ -444,6 +461,9 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             </div>
                         </div>}
 
+                    </div>
+
+                    <div className="plp-main-column plp-content-column">
                         <section id="experiencia" className="plp-section plp-copy-section">
                             <span className="plp-kicker">Visão geral</span>
                             <h2>{displayTitle}</h2>
@@ -510,7 +530,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                             <WhatsAppCaptureLink
                                 phone={contactPhone}
-                                message={`Olá! Quero mais informações sobre: ${displayTitle} - Ref. ${referenceLabel(property)}`}
+                                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
                                 slug="imovel"
                                 template="property-classic-sidebar"
                                 metadata={propertyTrackingMetadata}
@@ -529,17 +549,18 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             </div>
                         </div>
 
-                        {false && <div className="plp-side-card plp-lead-card">
+                        <div className="plp-side-card plp-lead-card">
                             <h3><MessageCircle size={18} /> Mais informações sobre este imóvel</h3>
-                            <p>Receba a apresentação completa, disponibilidade atual e uma leitura de negociação.</p>
+                            <p>Envie seus dados para receber disponibilidade, condições e atendimento direto pelo WhatsApp.</p>
                             <div className="plp-form-preview" aria-hidden="true">
-                                <span>Nome completo</span>
-                                <span>E-mail</span>
-                                <span>Telefone</span>
+                                <span className="plp-form-message">Ola, tenho interesse no imovel {propertyUrl}</span>
+                                <span>Nome completo *</span>
+                                <span>Telefone *</span>
+                                <span>Email *</span>
                             </div>
                             <WhatsAppCaptureLink
                                 phone={contactPhone}
-                                message={`Olá! Tenho interesse no imóvel ${displayTitle}. Aguardo contato.`}
+                                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
                                 slug="imovel"
                                 template="property-classic-form"
                                 metadata={propertyTrackingMetadata}
@@ -547,7 +568,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             >
                                 Enviar interesse
                             </WhatsAppCaptureLink>
-                        </div>}
+                        </div>
 
                         <div className="plp-side-card plp-broker-card">
                             <img src={brokerCardImage} alt={brokerCardName} />
@@ -652,7 +673,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     </div>
                     <WhatsAppCaptureLink
                         phone={contactPhone}
-                        message={`Olá! Quero receber a apresentação completa do ${displayTitle}`}
+                        message={`Ola, tenho interesse no imovel ${propertyUrl}`}
                         slug="imovel"
                         template="property-classic-final"
                         metadata={propertyTrackingMetadata}
@@ -673,7 +694,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 </div>
                 <WhatsAppCaptureLink
                     phone={contactPhone}
-                    message={`Olá! Quero falar sobre o imóvel: ${displayTitle}`}
+                    message={`Ola, tenho interesse no imovel ${propertyUrl}`}
                     slug="imovel"
                     template="property-classic-sticky"
                     metadata={propertyTrackingMetadata}
