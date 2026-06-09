@@ -6195,19 +6195,16 @@ h6 {
                     font-weight: 900;
                     line-height: 0.98;
                     letter-spacing: 0.05em;
-                    background: linear-gradient(90deg, #fff4b8 0%, #d6aa42 28%, #8e6117 50%, #ffebb0 68%, #c89532 100%);
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;
-                    text-shadow: 0 8px 24px rgba(142,97,23,0.16);
+                    color: #bd8f32;
+                    text-shadow: none;
                 }
                 .gh-logo-sub {
                     font-family: 'Inter', sans-serif;
-                    font-size: 0.72rem;
-                    color: #7a5316;
+                    font-size: 0.66rem;
+                    color: rgba(122, 83, 22, 0.72);
                     line-height: 1;
-                    font-weight: 800;
-                    letter-spacing: 0.08em;
+                    font-weight: 600;
+                    letter-spacing: 0.07em;
                     text-transform: uppercase;
                 }
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { propertyDestinationForViewport, propertyFeedPath } from '@/lib/properties/responsive-destination'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Suggestion = {
@@ -350,10 +350,9 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
         setActiveSuggestion(-1)
 
         if (suggestion.type === 'property' && suggestion.id) {
-            const destination = propertyDestinationForViewport(suggestion.id)
+            const destination = propertyDetailsPath(suggestion.id)
             void trackEvent('property_search_suggestion_clicked', {
                 destination,
-                mobile_fallback_destination: propertyFeedPath(suggestion.id),
                 property_id: suggestion.id,
                 suggestion_type: suggestion.type,
                 source: variant,

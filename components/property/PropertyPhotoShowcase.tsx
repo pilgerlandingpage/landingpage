@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Camera, Images, X } from 'lucide-react'
+import { Images, X } from 'lucide-react'
 import { trackEvent } from '@/lib/tracking/client'
 
 type PropertyPhotoShowcaseProps = {
@@ -15,8 +15,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
     const [activeIndex, setActiveIndex] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
 
-    const activeImage = gallery[activeIndex] || gallery[0]
-    const visibleThumbs = gallery.slice(1, 6)
+    const activeImage = gallery[0]
 
     useEffect(() => {
         if (!isOpen) return
@@ -43,7 +42,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
 
     if (!gallery.length) return null
 
-    const openGallery = (index = activeIndex) => {
+    const openGallery = (index = 0) => {
         setActiveIndex(index)
         setIsOpen(true)
         void trackEvent('property_details_landing_gallery_opened', {
@@ -53,37 +52,13 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
         })
     }
 
-    const previewImage = (index: number) => {
-        setActiveIndex(index)
-    }
-
     return (
         <>
-            <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
-                <button type="button" className="plp-main-photo" onClick={() => openGallery(activeIndex)} aria-label="Ver galeria de fotos">
+            <div className="plp-gallery-composer single">
+                <button type="button" className="plp-main-photo" onClick={() => openGallery()} aria-label="Ver galeria de fotos">
                     <img src={activeImage} alt={title} />
-                    <span className="plp-photo-badge"><Camera size={16} /> {gallery.length} fotos</span>
                     <span className="plp-gallery-view-button"><Images size={17} /> Ver galeria</span>
                 </button>
-
-                {gallery.length > 1 && (
-                    <div className="plp-thumb-rail" aria-label="Previa de fotos">
-                        {visibleThumbs.map((image, index) => {
-                            const imageIndex = index + 1
-                            return (
-                                <button
-                                    type="button"
-                                    key={`${image}-${imageIndex}`}
-                                    className={`plp-thumb-item ${activeIndex === imageIndex ? 'active' : ''}`}
-                                    onClick={() => previewImage(imageIndex)}
-                                    aria-label={`Ver foto ${imageIndex + 1}`}
-                                >
-                                    <img src={image} alt={`${title} - previa ${imageIndex + 1}`} loading="lazy" />
-                                </button>
-                            )
-                        })}
-                    </div>
-                )}
             </div>
 
             {isOpen && (
@@ -97,9 +72,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
                     >
                         <header className="plp-gallery-modal-header">
                             <div>
-                                <span>Galeria do imovel</span>
                                 <strong>{title}</strong>
-                                <small>{gallery.length} fotos</small>
                             </div>
                             <button type="button" onClick={() => setIsOpen(false)} aria-label="Fechar galeria">
                                 <X size={21} />
@@ -110,7 +83,6 @@ export default function PropertyPhotoShowcase({ images, title, metadata }: Prope
                             {gallery.map((image, index) => (
                                 <figure key={`${image}-${index}`} className="plp-gallery-modal-item" data-plp-gallery-image={index}>
                                     <img src={image} alt={`${title} - foto ${index + 1}`} loading={index < 2 ? 'eager' : 'lazy'} />
-                                    <figcaption>Foto {index + 1} de {gallery.length}</figcaption>
                                 </figure>
                             ))}
                         </div>

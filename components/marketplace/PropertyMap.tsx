@@ -7,7 +7,7 @@ import L from 'leaflet'
 import Link from 'next/link'
 import { Bath, Bed, Building2, Layers, Maximize, Satellite, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { isPlainLeftClick, propertyDetailsPath, propertyFeedPath, shouldOpenPropertyDetailsOnDesktop } from '@/lib/properties/responsive-destination'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -413,7 +413,6 @@ function ClusterLayer({
 
 function PropertyPopup({ property }: { property: Property }) {
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
-    const feedHref = propertyFeedPath(property.id)
     const detailsHref = propertyDetailsPath(property.id)
     const displayKicker = replaceItajaiWithPraiaBrava(property.neighborhood || property.property_type || 'Seleção premium')
 
@@ -440,23 +439,17 @@ function PropertyPopup({ property }: { property: Property }) {
                     {property.area_m2 && <span><Maximize size={12} /> {property.area_m2}m²</span>}
                 </div>
                 <Link
-                    href={feedHref}
+                    href={detailsHref}
                     className="popup-link"
-                    onClick={(event) => {
-                        const opensDetails = shouldOpenPropertyDetailsOnDesktop()
-                        const destination = opensDetails ? detailsHref : feedHref
+                    onClick={() => {
                         void trackEvent('property_map_popup_opened', {
                             property_id: property.id,
                             title: displayTitle,
                             price: property.price,
                             neighborhood: property.neighborhood,
                             property_type: property.property_type,
-                            destination,
+                            destination: detailsHref,
                         })
-                        if (opensDetails && isPlainLeftClick(event)) {
-                            event.preventDefault()
-                            window.location.assign(detailsHref)
-                        }
                     }}
                 >
                     Ver detalhes
@@ -495,7 +488,7 @@ export default function PropertyMap({
     interactionEnabled = true,
     officeMarker = null,
 }: PropertyMapProps) {
-    const [mapStyle, setMapStyle] = useState<MapStyle>('luxury')
+    const [mapStyle, setMapStyle] = useState<MapStyle>('satellite')
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
 

@@ -864,7 +864,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           align-items: center;
           justify-content: center;
           margin-bottom: 7px;
-          color: #a78042;
+          color: #111;
           font-family: 'Inter', sans-serif;
           font-size: clamp(0.7rem, 1.6vw, 0.84rem);
           font-weight: 900;

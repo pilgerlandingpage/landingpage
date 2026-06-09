@@ -40,6 +40,18 @@ export default function PropertyLandingTracker({
     propertyType,
 }: PropertyLandingTrackerProps) {
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const urlTracking = {
+            utm_source: params.get('utm_source') || null,
+            utm_medium: params.get('utm_medium') || null,
+            utm_campaign: params.get('utm_campaign') || null,
+            utm_term: params.get('utm_term') || null,
+            utm_content: params.get('utm_content') || null,
+            lead_id: params.get('lead_id') || null,
+            lead_phone: params.get('lead_phone') || params.get('wa_phone') || params.get('wpp_phone') || null,
+            event_type: params.get('event_type') || null,
+            link_type: params.get('link_type') || null,
+        }
         const baseMetadata = {
             property_id: propertyId,
             title,
@@ -48,6 +60,7 @@ export default function PropertyLandingTracker({
             neighborhood: neighborhood || null,
             property_type: propertyType || null,
             source: 'property_details_landing',
+            tracking: urlTracking,
         }
 
         void trackEvent('property_details_landing_viewed', baseMetadata)

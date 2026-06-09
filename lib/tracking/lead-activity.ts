@@ -113,6 +113,8 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
     if (
         eventType === 'home_property_mobile_feed_clicked'
         || eventType === 'home_property_desktop_details_clicked'
+        || eventType === 'home_property_details_clicked'
+        || eventType === 'site_property_share_click'
         || eventType === 'property_feed_desktop_redirected_to_details'
         || eventType === 'property_details_landing_viewed'
         || eventType === 'property_details_landing_anchor_clicked'
@@ -121,6 +123,7 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
         || eventType === 'property_details_landing_related_clicked'
     ) {
         return asString(metadata.title)
+            || asString(metadata.link_title)
             || asString(metadata.link_label)
             || asString(metadata.target_section)
             || asString(metadata.destination)
@@ -199,6 +202,10 @@ function eventLabel(eventType: string, metadata: JsonRecord): string {
             return 'Abriu imovel pela home'
         case 'home_property_desktop_details_clicked':
             return 'Abriu descricao pela home'
+        case 'home_property_details_clicked':
+            return 'Abriu imovel pela home'
+        case 'site_property_share_click':
+            return 'Abriu link compartilhado de imovel'
         case 'property_details_landing_viewed':
             return 'Visualizou landing completa do imovel'
         case 'property_details_landing_anchor_clicked':
@@ -306,7 +313,7 @@ export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEn
         occurred_at: row.created_at || new Date().toISOString(),
         ...(propertyId ? { property_id: propertyId } : {}),
         ...(targetPropertyId ? { target_property_id: targetPropertyId } : {}),
-        ...(asString(metadata.title) ? { property_title: asString(metadata.title) } : {}),
+        ...(asString(metadata.title) || asString(metadata.link_title) ? { property_title: asString(metadata.title) || asString(metadata.link_title) } : {}),
         ...(asString(metadata.page_path) ? { page_path: asString(metadata.page_path) } : {}),
         ...(asString(metadata.page_title) ? { page_title: asString(metadata.page_title) } : {}),
         ...(eventDetail(row.event_type, metadata) ? { detail: eventDetail(row.event_type, metadata) } : {}),
@@ -388,6 +395,8 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         if (
             entry.event_type === 'property_feed_slide_viewed'
             || entry.event_type === 'home_property_mobile_feed_clicked'
+            || entry.event_type === 'home_property_details_clicked'
+            || entry.event_type === 'site_property_share_click'
             || entry.event_type === 'property_details_landing_viewed'
         ) {
             viewed_property_ids = addRecent(viewed_property_ids, propertyId)
@@ -420,6 +429,8 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         if (
             entry.event_type === 'property_details_clicked'
             || entry.event_type === 'home_property_desktop_details_clicked'
+            || entry.event_type === 'home_property_details_clicked'
+            || entry.event_type === 'site_property_share_click'
             || entry.event_type === 'property_feed_desktop_redirected_to_details'
             || entry.event_type === 'property_details_landing_viewed'
             || entry.event_type === 'property_details_landing_anchor_clicked'

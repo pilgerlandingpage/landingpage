@@ -16,18 +16,16 @@ import {
     Eye,
     Heart,
     Home,
-    Mail,
     MapPin,
     MessageCircle,
-    Phone,
-    Printer,
     Ruler,
-    Share2,
-    ShieldCheck,
     Star,
+    Tag,
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
+import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlTracker'
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
+import PropertyLandingShareButton from '@/components/property/PropertyLandingShareButton'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MapSearch from '@/components/marketplace/MapSearch'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
@@ -134,14 +132,6 @@ function formatMoney(value?: number | null, fallback = 'Sob consulta') {
         : fallback
 }
 
-function formatBrokerPhone(value?: string | null) {
-    const digits = String(value || '').replace(/\D/g, '')
-    const local = digits.startsWith('55') ? digits.slice(2) : digits
-    if (local.length === 11) return `(${local.slice(0, 2)}) ${local.slice(2, 3)} ${local.slice(3, 7)}-${local.slice(7)}`
-    if (local.length === 10) return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`
-    return value || '(47) 9 9252-8080'
-}
-
 function getGallery(property: any) {
     return Array.from(new Set([property.featured_image, ...(property.images || [])].filter(Boolean) as string[]))
 }
@@ -170,13 +160,6 @@ function statLabel(value: number, singular: string, plural: string) {
 
 function referenceLabel(property: any) {
     return String(property.source_reference || property.source_slug || property.id || '').slice(0, 8).toUpperCase()
-}
-
-function statusLabelFor(status?: string | null) {
-    if (status === 'active') return 'Disponível'
-    if (status === 'sold') return 'Vendido'
-    if (status === 'reserved') return 'Reservado'
-    return status || 'Sob consulta'
 }
 
 function formatViewCount(value: number) {
@@ -252,9 +235,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const brokerCardImage = responsibleBroker.is_connected && responsibleBroker.photo_url
         ? responsibleBroker.photo_url
         : BROKER_IMAGE
-    const brokerCardPhone = responsibleBroker.is_connected
-        ? responsibleBroker.phone
-        : GLOBAL_PROPERTY_WHATSAPP_PHONE
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
@@ -262,7 +242,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
     const mapLocation = [property.neighborhood, property.city, property.state].filter(Boolean).join(', ')
     const opportunityHighlights = buildOpportunityHighlights(property)
-    const investmentThesis = buildInvestmentThesis(property)
     const brokerInsight = buildBrokerInsight(property)
     const primaryImage = gallery[0] || DEFAULT_OG_IMAGE
     const area = Number(property.area_private_m2 || property.area_m2 || 0)
@@ -272,7 +251,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const bedroomCount = Number(property.bedrooms || 0)
     const narrativeParagraphs = property.description ? formatDescription(property.description) : []
     const locationLabel = [displayNeighborhood, displayCity, property.state].filter(Boolean).join(' - ')
-    const statusLabel = statusLabelFor(property.status)
     const youtubeId = extractYouTubeId(property.video_url)
     const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
@@ -404,6 +382,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         <>
             <PropertyLandingStyles />
             <JsonLd data={propertyJsonLd} />
+            <PropertyLandingUrlTracker propertyId={property.id} />
             <PropertyLandingTracker
                 propertyId={property.id}
                 title={displayTitle}
@@ -436,10 +415,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 <strong>4,8</strong>
                                 <small className="plp-view-count"><Eye size={14} /> {formatViewCount(propertyViewCount)}</small>
                             </div>
-                        </div>
-                        <div className="plp-title-status">
-                            <span>{statusLabel}</span>
-                            <strong>{formatMoney(property.price)}</strong>
                         </div>
                     </div>
                 </section>
@@ -493,7 +468,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 {bathroomsCount > 0 && <SpecCard icon={<Bath size={21} />} label="Banheiros" value={String(bathroomsCount)} />}
                                 {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
                                 <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
-                                <SpecCard icon={<ShieldCheck size={21} />} label="Status" value={statusLabel} />
                             </div>
                         </section>
 
@@ -515,36 +489,25 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             </div>
 
                             <div className="plp-side-facts">
+                                <SideFact icon={<Tag size={17} />} value={formatMoney(property.price)} label="valor anunciado" variant="price" />
                                 {bedroomCount > 0 && <SideFact icon={<BedDouble size={17} />} value={String(bedroomCount)} label={statLabel(bedroomCount, 'dormitório', 'dormitórios')} />}
                                 {suiteCount > 0 && <SideFact icon={<Home size={17} />} value={String(suiteCount)} label={statLabel(suiteCount, 'suíte', 'suítes')} />}
                                 {parkingCount > 0 && <SideFact icon={<Car size={17} />} value={String(parkingCount)} label={statLabel(parkingCount, 'vaga', 'vagas')} />}
                                 {area > 0 && <SideFact icon={<Ruler size={17} />} value={`${area.toLocaleString('pt-BR')} m²`} label="área privativa" />}
                             </div>
 
-                            <div className="plp-price-box">
-                                <span>Valor anunciado</span>
-                                <strong>{formatMoney(property.price)}</strong>
-                                {property.condo_fee && <small>Condomínio: {formatMoney(Number(property.condo_fee))}</small>}
-                                {property.iptu && <small>IPTU: {formatMoney(Number(property.iptu))}</small>}
-                            </div>
-
-                            <WhatsAppCaptureLink
-                                phone={contactPhone}
-                                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
-                                slug="imovel"
-                                template="property-classic-sidebar"
-                                metadata={propertyTrackingMetadata}
-                                className="plp-whatsapp-button"
-                            >
-                                <MessageCircle size={18} /> Mais informações via WhatsApp
-                            </WhatsAppCaptureLink>
+                            {(property.condo_fee || property.iptu) && (
+                                <div className="plp-price-extras">
+                                    {property.condo_fee && <small>Condomínio: {formatMoney(Number(property.condo_fee))}</small>}
+                                    {property.iptu && <small>IPTU: {formatMoney(Number(property.iptu))}</small>}
+                                </div>
+                            )}
 
                             <p className="plp-payment-note">Preço, disponibilidade e condições podem ser alterados sem aviso prévio.</p>
 
                             <div className="plp-action-list">
-                                <button type="button"><Share2 size={16} /> Compartilhar</button>
+                                <PropertyLandingShareButton propertyId={property.id} title={displayTitle} />
                                 <button type="button"><Heart size={16} /> Adicionar aos favoritos</button>
-                                <button type="button"><Printer size={16} /> Imprimir</button>
                                 <button type="button"><ClipboardList size={16} /> Financiamentos</button>
                             </div>
                         </div>
@@ -574,9 +537,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             <img src={brokerCardImage} alt={brokerCardName} />
                             <div>
                                 <h3>{brokerCardName}</h3>
-                                <p><Phone size={14} /> {formatBrokerPhone(brokerCardPhone)}</p>
-                                <p><Mail size={14} /> contato@guilhermepilger.com</p>
-                                <small>{responsibleBroker.is_connected ? 'Corretor responsavel conectado' : 'Atendimento pelo WhatsApp global'}</small>
                             </div>
                         </div>
                     </aside>
@@ -615,22 +575,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     </div>
                 </section>
 
-                <section className="plp-section plp-thesis-section">
-                    <div className="plp-section-head">
-                        <span className="plp-kicker">Tese de compra</span>
-                        <h2>Como este imóvel entra na sua estratégia.</h2>
-                    </div>
-                    <div className="plp-thesis-grid">
-                        {investmentThesis.map((item) => (
-                            <article key={item.title} className="plp-thesis-card">
-                                <span>{item.label}</span>
-                                <h3>{item.title}</h3>
-                                <p>{item.text}</p>
-                            </article>
-                        ))}
-                    </div>
-                </section>
-
                 {related.length > 0 && (
                     <section className="plp-related-band">
                         <div className="plp-related-head">
@@ -665,33 +609,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     </section>
                 )}
 
-                <section className="plp-final-cta">
-                    <div>
-                        <span className="plp-kicker">Próximo passo</span>
-                        <h2>{brokerInsight.title}</h2>
-                        <p>{brokerInsight.text}</p>
-                    </div>
-                    <WhatsAppCaptureLink
-                        phone={contactPhone}
-                        message={`Ola, tenho interesse no imovel ${propertyUrl}`}
-                        slug="imovel"
-                        template="property-classic-final"
-                        metadata={propertyTrackingMetadata}
-                        className="plp-primary-btn"
-                    >
-                        Falar no WhatsApp
-                    </WhatsAppCaptureLink>
-                </section>
-
             </div>
 
             <Footer />
 
             <div className="plp-mobile-sticky-cta">
-                <div>
-                    <span>{formatMoney(property.price)}</span>
-                    <strong>{property.property_type || 'Imóvel de luxo'}</strong>
-                </div>
                 <WhatsAppCaptureLink
                     phone={contactPhone}
                     message={`Ola, tenho interesse no imovel ${propertyUrl}`}
@@ -700,13 +622,31 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     metadata={propertyTrackingMetadata}
                     className="plp-mobile-cta-button"
                 >
-                    Falar
+                    <span className="plp-mobile-cta-prompt" aria-hidden="true">
+                        Receba as <strong>condições de pagamento</strong> deste imóvel em seu WhatsApp.
+                        <CheckCircle2 size={16} />
+                    </span>
+                    <span className="plp-mobile-cta-icon">
+                        <WhatsAppIcon />
+                    </span>
+                    <span className="plp-mobile-cta-label">Receba as condições de pagamento deste imóvel em seu WhatsApp apos o cadastro</span>
                 </WhatsAppCaptureLink>
             </div>
 
             <MobileNav />
         </main>
         </>
+    )
+}
+
+function WhatsAppIcon({ size = 28 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <path
+                fill="currentColor"
+                d="M16 3.2c-6.86 0-12.43 5.48-12.43 12.23 0 2.3.66 4.55 1.91 6.49l-1.31 4.82 4.98-1.28A12.59 12.59 0 0 0 16 27.66c6.86 0 12.43-5.49 12.43-12.23S22.86 3.2 16 3.2Zm0 22.39c-2.1 0-4.05-.62-5.68-1.69l-.4-.26-2.95.76.78-2.85-.27-.43a10.03 10.03 0 0 1-1.84-5.69c0-5.6 4.64-10.16 10.36-10.16s10.36 4.56 10.36 10.16S21.72 25.59 16 25.59Zm5.79-7.6c-.31-.15-1.85-.9-2.14-1-.29-.11-.5-.15-.71.15-.21.31-.81 1-.99 1.2-.18.21-.36.23-.67.08-.31-.15-1.31-.47-2.5-1.51-.92-.81-1.55-1.81-1.73-2.12-.18-.31-.02-.47.14-.62.14-.14.31-.36.47-.54.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.54-.08-.15-.71-1.68-.97-2.3-.26-.6-.51-.52-.71-.53h-.6c-.21 0-.55.08-.84.39-.29.31-1.1 1.06-1.1 2.59s1.13 3 1.28 3.21c.16.21 2.23 3.35 5.4 4.69.75.32 1.34.51 1.8.65.76.24 1.45.2 1.99.12.61-.09 1.85-.75 2.11-1.47.26-.72.26-1.34.18-1.47-.08-.13-.29-.21-.6-.36Z"
+            />
+        </svg>
     )
 }
 
@@ -722,9 +662,9 @@ function SpecCard({ icon, label, value }: { icon: ReactNode; label: string; valu
     )
 }
 
-function SideFact({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
+function SideFact({ icon, value, label, variant }: { icon: ReactNode; value: string; label: string; variant?: 'price' }) {
     return (
-        <div>
+        <div className={variant === 'price' ? 'plp-side-fact-price' : undefined}>
             {icon}
             <strong>{value}</strong>
             <span>{label}</span>
@@ -785,30 +725,6 @@ function buildOpportunityHighlights(property: any) {
             text: isLaunch
                 ? 'Lançamentos bem posicionados permitem leitura antecipada de valorização e escolha de unidade.'
                 : 'Ideal para avançar rápido em visita, negociação e validação documental.',
-        },
-    ]
-}
-
-function buildInvestmentThesis(property: any) {
-    const city = displayLocationName(property.city) || 'região'
-    const neighborhood = replaceItajaiWithPraiaBrava(property.neighborhood) || 'bairro'
-    const type = property.property_type || 'imóvel'
-
-    return [
-        {
-            label: 'Tese 01',
-            title: 'Liquidez regional',
-            text: `${city} segue concentrando demanda por imóveis de alto padrão e endereços bem posicionados.`,
-        },
-        {
-            label: 'Tese 02',
-            title: 'Produto comparável',
-            text: `${type} em ${neighborhood} precisa ser avaliado por raridade, planta e experiência, não só por metro quadrado.`,
-        },
-        {
-            label: 'Tese 03',
-            title: 'Compra assistida',
-            text: 'A curadoria reduz ruído, antecipa objeções e ajuda a negociar com mais clareza.',
         },
     ]
 }

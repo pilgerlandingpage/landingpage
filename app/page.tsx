@@ -380,7 +380,7 @@ export default async function MarketplaceHome() {
           <span><Crown size={14} /> Curadoria de luxo</span>
         </div>
         <div className="hero-content home-hero-content">
-          <span className="home-hero-eyebrow">Guilherme Pilger apresenta</span>
+          <span className="home-hero-eyebrow">Guilherme Pilger</span>
           <h1 className="hero-subtitle-top">Luxo em Balneário Camboriú</h1>
           <h2 className="hero-title-script">experiência única!</h2>
         </div>

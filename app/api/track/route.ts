@@ -341,12 +341,27 @@ function buildClickMetadata(params: {
     searchParams: URLSearchParams
 }) {
     const redirectUrl = params.searchParams.get('redirect') || params.searchParams.get('to') || null
+    const contentType = normalizeTrackedContentType(
+        params.searchParams.get('content_type')
+        || params.searchParams.get('link_type')
+    )
+    const contentId = String(
+        params.searchParams.get('content_id')
+        || params.searchParams.get('post_id')
+        || params.searchParams.get('property_id')
+        || ''
+    ).trim()
+    const propertyId = resolvePropertyIdFromClick(params.searchParams, redirectUrl, contentType, contentId)
+
     return {
         clicked_at: new Date().toISOString(),
         event_type: params.searchParams.get('event_type') || 'whatsapp_link_click',
         link_type: params.searchParams.get('link_type') || null,
         link_label: params.searchParams.get('link_label') || null,
         link_title: params.searchParams.get('link_title') || null,
+        content_type: contentType || null,
+        content_id: contentId || null,
+        property_id: propertyId || null,
         target_url: redirectUrl,
         lead_id: normalizeLeadId(params.searchParams.get('lead_id')) || null,
         lead_phone: normalizeLeadPhone(
@@ -360,6 +375,22 @@ function buildClickMetadata(params: {
         utm_content: params.searchParams.get('utm_content') || null,
         landing_page_id: params.landingPageId,
     }
+}
+
+function resolvePropertyIdFromClick(
+    searchParams: URLSearchParams,
+    redirectUrl: string | null,
+    contentType: string,
+    contentId: string
+) {
+    const explicitPropertyId = String(searchParams.get('property_id') || '').trim()
+    if (isUuid(explicitPropertyId)) return explicitPropertyId
+
+    if (contentType === 'property' && isUuid(contentId)) return contentId
+
+    const target = redirectUrl || searchParams.get('to') || ''
+    const uuid = String(target).match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0]
+    return uuid || null
 }
 
 function isTrackedClickFromSearchParams(searchParams: URLSearchParams) {
@@ -456,6 +487,8 @@ async function attachTrackedVisitorToLead(params: {
         params.searchParams.get('utm_campaign') === 'property_recommendation'
         || whatsappClick.event_type === 'whatsapp_property_click'
         || whatsappClick.link_type === 'property'
+        || whatsappClick.content_type === 'property'
+        || Boolean(whatsappClick.property_id)
     const contentClick = isContentClick(whatsappClick)
 
     const { error: updateError } = await supabase

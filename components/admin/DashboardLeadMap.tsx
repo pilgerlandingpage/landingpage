@@ -217,7 +217,7 @@ export default function DashboardLeadMap({
     locations: DashboardMapLocation[]
     title?: string
 }) {
-    const [mapStyle, setMapStyle] = useState<LeadMapStyle>('luxury')
+    const [mapStyle, setMapStyle] = useState<LeadMapStyle>('satellite')
     const [quickFilter, setQuickFilter] = useState<LeadQuickFilter>('all')
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
     const mapped = useMemo(() => locations.map((location, index) => ({

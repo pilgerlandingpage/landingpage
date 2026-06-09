@@ -84,7 +84,7 @@ function PropertyFeedMapUpdater({ center }: { center: [number, number] }) {
 
 export default function PropertyFeedMap({ property, latLng }: Props) {
     const copy = buildPropertyFeedCopy(property)
-    const [mapStyle, setMapStyle] = useState<PropertyFeedMapStyle>('luxury')
+    const [mapStyle, setMapStyle] = useState<PropertyFeedMapStyle>('satellite')
     const markerIcon = useMemo(() => L.divIcon({
         className: 'property-feed-map-marker',
         html: `<div class="property-feed-map-marker-wrap${property.exclusive ? ' is-exclusive' : ''}">

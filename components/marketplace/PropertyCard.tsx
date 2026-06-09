@@ -2,10 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { MouseEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Bath, BedDouble, Camera, Car, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { isPlainLeftClick, propertyDetailsPath, propertyFeedPath, shouldOpenPropertyDetailsOnDesktop } from '@/lib/properties/responsive-destination'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
 interface PropertyCardProps {
@@ -54,9 +54,8 @@ function formatCompactNumber(value: number) {
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
-    const feedHref = propertyFeedPath(property.id)
     const detailsHref = propertyDetailsPath(property.id)
-    const href = isHomeCompact ? feedHref : landingPageSlug ? `/${landingPageSlug}` : feedHref
+    const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
     const imageSrc = property.featured_image || '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
     const displayCity = displayLocationName(property.city)
@@ -90,22 +89,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         property.parking_spaces ? { key: 'parking', icon: <Car size={14} aria-hidden="true" />, label: `${property.parking_spaces}` } : null,
         compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m2` } : null,
     ].filter(Boolean) as { key: string; icon: ReactNode; label: string }[]
-    const handlePropertyClick = (event: MouseEvent<HTMLAnchorElement>) => {
-        if (!isHomeCompact || !isPlainLeftClick(event)) return
+    const handlePropertyClick = () => {
+        if (!isHomeCompact) return
 
-        const opensDetails = shouldOpenPropertyDetailsOnDesktop()
-        const destination = opensDetails ? detailsHref : feedHref
-        void trackEvent(opensDetails ? 'home_property_desktop_details_clicked' : 'home_property_mobile_feed_clicked', {
+        void trackEvent('home_property_details_clicked', {
             property_id: property.id,
             title: displayTitle,
-            destination,
+            destination: detailsHref,
             source: 'home_property_card',
         })
-
-        if (!opensDetails) return
-
-        event.preventDefault()
-        window.location.assign(detailsHref)
     }
 
     return (

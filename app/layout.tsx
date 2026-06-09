@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import MainTracker from '@/components/tracking/MainTracker'
+import PropertyLinkTrackingDecorator from '@/components/tracking/PropertyLinkTrackingDecorator'
 import WhatsAppLeadCaptureModal from '@/components/landing/WhatsAppLeadCaptureModal'
 import UserAccessTracker from '@/components/admin/UserAccessTracker'
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/seo/json-ld'
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <MainTracker />
+        <PropertyLinkTrackingDecorator />
         <UserAccessTracker />
         <WhatsAppLeadCaptureModal />
         {children}

@@ -10,7 +10,7 @@ type PlainClickLike = {
 }
 
 export function propertyFeedPath(propertyId: string) {
-    return `/imovel/${propertyId}`
+    return propertyDetailsPath(propertyId)
 }
 
 export function propertyDetailsPath(propertyId: string) {
@@ -22,7 +22,7 @@ export function shouldOpenPropertyDetailsOnDesktop() {
 }
 
 export function propertyDestinationForViewport(propertyId: string) {
-    return shouldOpenPropertyDetailsOnDesktop() ? propertyDetailsPath(propertyId) : propertyFeedPath(propertyId)
+    return propertyDetailsPath(propertyId)
 }
 
 export function isPlainLeftClick(event: PlainClickLike) {
