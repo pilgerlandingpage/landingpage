@@ -21,15 +21,24 @@ function ContinueAuthContent() {
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
     const actionLink = searchParams.get('link') || ''
-    const flow = searchParams.get('flow') === 'first_access' ? 'first_access' : 'password_reset'
+    const rawFlow = searchParams.get('flow')
+    const flow = rawFlow === 'first_access' || rawFlow === 'maintenance_login'
+        ? rawFlow
+        : 'password_reset'
     const errorCode = searchParams.get('error_code') || searchParams.get('error')
 
     const isValidLink = useMemo(() => isAllowedSupabaseLink(actionLink), [actionLink])
     const isExpiredLink = errorCode === 'otp_expired'
-    const title = flow === 'first_access' ? 'Criar senha de acesso' : 'Redefinir senha'
+    const title = flow === 'first_access'
+        ? 'Criar senha de acesso'
+        : flow === 'maintenance_login'
+            ? 'Acesso de manutencao'
+            : 'Redefinir senha'
     const description = flow === 'first_access'
         ? 'Clique no botao abaixo para validar seu convite e criar sua senha.'
-        : 'Clique no botao abaixo para validar o pedido e criar uma nova senha.'
+        : flow === 'maintenance_login'
+            ? 'Clique no botao abaixo para entrar no painel do usuario selecionado.'
+            : 'Clique no botao abaixo para validar o pedido e criar uma nova senha.'
     const invalidMessage = isExpiredLink
         ? 'Link expirado ou ja utilizado. Solicite um novo link ao administrador.'
         : 'Este link nao parece valido. Solicite um novo link de acesso ao administrador.'

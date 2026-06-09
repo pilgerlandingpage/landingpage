@@ -7,7 +7,7 @@ import {
     sendMenuMessage,
     sendWhatsAppMessage,
 } from '@/lib/uazapi'
-import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
+import { buildAuthActionBridgeLink, buildMaintenanceLoginBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
     buildPasswordResetWhatsAppMessage,
@@ -594,6 +594,8 @@ export async function GET(request: NextRequest) {
                 access: {
                     can_grant_master: Boolean(access.can_grant_master),
                     can_create_users: Boolean(access.can_create_users),
+                    can_impersonate_users: Boolean(access.can_grant_master),
+                    current_admin_user_id: access.id,
                     is_diretoria: Boolean(access.is_diretoria),
                 },
             })
@@ -873,11 +875,15 @@ export async function PATCH(request: NextRequest) {
         if (!access) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
 
         const { action, id } = await request.json()
-        if (!['send_password_reset', 'resend_first_access', 'send_access_link_text'].includes(action)) {
+        if (!['send_password_reset', 'resend_first_access', 'send_access_link_text', 'create_impersonation_link'].includes(action)) {
             return NextResponse.json({ error: 'Acao invalida.' }, { status: 400 })
         }
 
-        if (!access.can_grant_master && !access.can_create_users) {
+        if (action === 'create_impersonation_link' && !access.can_grant_master) {
+            return NextResponse.json({ error: 'Somente admin master pode acessar painel de outro usuario.' }, { status: 403 })
+        }
+
+        if (action !== 'create_impersonation_link' && !access.can_grant_master && !access.can_create_users) {
             return NextResponse.json({ error: 'Somente master e diretoria podem enviar links de acesso.' }, { status: 403 })
         }
 
@@ -886,7 +892,7 @@ export async function PATCH(request: NextRequest) {
         const admin = createAdminClient()
         const { data: targetUser, error: targetUserError } = await admin
             .from('admin_users')
-            .select('id, auth_user_id, name, email, phone, is_master')
+            .select('id, auth_user_id, name, email, phone, is_master, is_active')
             .eq('id', id)
             .single()
 
@@ -903,6 +909,56 @@ export async function PATCH(request: NextRequest) {
         if (!normalizedEmail) {
             return NextResponse.json({ error: 'Usuario sem email cadastrado para redefinicao de senha.' }, { status: 400 })
         }
+
+        if (action === 'create_impersonation_link') {
+            if (targetUser.id === access.id) {
+                return NextResponse.json({ error: 'Voce ja esta logado nesta conta.' }, { status: 400 })
+            }
+
+            if (!targetUser.is_active) {
+                return NextResponse.json({ error: 'Nao e permitido acessar painel de usuario desativado.' }, { status: 400 })
+            }
+
+            const maintenanceRedirectUrl = getLoginRedirectUrl('/login?impersonation=1', request.nextUrl.origin)
+            const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+                type: 'magiclink',
+                email: normalizedEmail,
+                options: {
+                    redirectTo: maintenanceRedirectUrl,
+                },
+            })
+
+            if (linkError) throw linkError
+
+            const rawImpersonationLink = linkData.properties?.action_link
+            const impersonationLink = rawImpersonationLink
+                ? buildMaintenanceLoginBridgeLink(rawImpersonationLink, request.nextUrl.origin)
+                : null
+
+            if (!impersonationLink) {
+                throw new Error('Nao foi possivel gerar link de acesso de manutencao.')
+            }
+
+            await logUserAccessEvent(admin, request, {
+                event_type: 'login_success',
+                target_admin_user_id: targetUser.id,
+                target_auth_user_id: targetUser.auth_user_id,
+                target_email: normalizedEmail,
+                actor_admin_user_id: access.id,
+                metadata: {
+                    admin_impersonation_link_created: true,
+                    target_user_name: targetUser.name || null,
+                    target_is_master: Boolean(targetUser.is_master),
+                },
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: `Acesso de manutencao gerado para ${targetUser.name || normalizedEmail}.`,
+                impersonation_link: impersonationLink,
+            })
+        }
+
         if (!normalizedPhone) {
             return NextResponse.json({ error: 'Usuario sem telefone cadastrado para envio no WhatsApp.' }, { status: 400 })
         }

@@ -29,6 +29,8 @@ function LoginPageContent() {
     const [passwordFlowLoading, setPasswordFlowLoading] = useState(false)
     const [passwordFlowReady, setPasswordFlowReady] = useState(false)
     const [passwordFlowMessage, setPasswordFlowMessage] = useState<string | null>(null)
+    const [impersonationFlowLoading, setImpersonationFlowLoading] = useState(false)
+    const [impersonationFlowMessage, setImpersonationFlowMessage] = useState<string | null>(null)
 
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -42,7 +44,8 @@ function LoginPageContent() {
         searchParams.get('password_reset') === '1' ||
         modeType === 'invite' ||
         modeType === 'recovery'
-    const isRecoveryMode = !isPasswordSetupMode && showRecoveryForm
+    const isImpersonationMode = searchParams.get('impersonation') === '1' || modeType === 'magiclink'
+    const isRecoveryMode = !isPasswordSetupMode && !isImpersonationMode && showRecoveryForm
 
     const getAuthHashParams = () => {
         if (typeof window === 'undefined') return new URLSearchParams()
@@ -72,7 +75,7 @@ function LoginPageContent() {
     }, [passwordUpdated, isPasswordSetupMode])
 
     useEffect(() => {
-        if (!authError || isPasswordSetupMode) return
+        if (!authError || isPasswordSetupMode || isImpersonationMode) return
 
         if (authError === 'otp_expired') {
             setError('Link expirado ou ja utilizado. Solicite um novo link ao administrador.')
@@ -80,7 +83,99 @@ function LoginPageContent() {
         }
 
         setError('Nao foi possivel validar o link. Solicite um novo link ao administrador.')
-    }, [authError, isPasswordSetupMode])
+    }, [authError, isPasswordSetupMode, isImpersonationMode])
+
+    useEffect(() => {
+        if (!isImpersonationMode) return
+
+        let cancelled = false
+
+        const prepareImpersonationLogin = async () => {
+            setImpersonationFlowLoading(true)
+            setImpersonationFlowMessage('Validando acesso de manutencao...')
+            setError(null)
+
+            try {
+                const code = searchParams.get('code')
+                const tokenHash = searchParams.get('token_hash')
+                const hashParams = getAuthHashParams()
+                const accessToken = hashParams.get('access_token')
+                const refreshToken = hashParams.get('refresh_token')
+                const hashError = hashParams.get('error_description') || hashParams.get('error')
+
+                if (hashError) {
+                    throw new Error(getFriendlyAuthError(hashParams))
+                }
+
+                let consumedAuthLink = false
+
+                if (code) {
+                    const { error: codeError } = await supabase.auth.exchangeCodeForSession(code)
+                    if (codeError) throw codeError
+                    consumedAuthLink = true
+                } else if (accessToken && refreshToken) {
+                    const { error: sessionError } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    })
+                    if (sessionError) throw sessionError
+                    consumedAuthLink = true
+                } else if (tokenHash) {
+                    const { error: verifyError } = await supabase.auth.verifyOtp({
+                        token_hash: tokenHash,
+                        type: 'magiclink',
+                    })
+                    if (verifyError) throw verifyError
+                    consumedAuthLink = true
+                }
+
+                if (!consumedAuthLink) {
+                    throw new Error('Link de manutencao incompleto. Gere um novo acesso na gestao de usuarios.')
+                }
+
+                const {
+                    data: { session },
+                } = await supabase.auth.getSession()
+
+                if (cancelled) return
+
+                if (!session?.user) {
+                    throw new Error('Nao foi possivel validar o acesso de manutencao.')
+                }
+
+                await fetch('/api/admin/user-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'login_success',
+                        path: '/login',
+                        referrer: document.referrer,
+                        search_params: window.location.search,
+                        metadata: {
+                            flow: 'admin_impersonation',
+                            maintenance_access: true,
+                        },
+                    }),
+                }).catch(() => {})
+
+                setImpersonationFlowMessage('Acesso validado. Abrindo painel do usuario...')
+                router.replace('/admin?maintenance_login=1')
+                router.refresh()
+            } catch (flowErr: any) {
+                if (cancelled) return
+                setImpersonationFlowMessage('Nao foi possivel validar o acesso de manutencao.')
+                setError(flowErr?.message || 'Link invalido ou expirado. Gere um novo acesso na gestao de usuarios.')
+            } finally {
+                if (!cancelled) setImpersonationFlowLoading(false)
+            }
+        }
+
+        prepareImpersonationLogin()
+
+        return () => {
+            cancelled = true
+        }
+    }, [isImpersonationMode, router, searchParams, supabase])
 
     useEffect(() => {
         if (!isPasswordSetupMode) return
@@ -303,6 +398,10 @@ function LoginPageContent() {
                 <div className="login-card">
                     <form
                         onSubmit={(event) => {
+                            if (isImpersonationMode) {
+                                event.preventDefault()
+                                return
+                            }
                             if (isPasswordSetupMode) {
                                 handleSetPassword(event)
                                 return
@@ -322,6 +421,15 @@ function LoginPageContent() {
                             </div>
                         )}
 
+                        {isImpersonationMode && (
+                            <div className="login-form-group" style={{ marginBottom: 16 }}>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    {impersonationFlowLoading && <Loader2 className="animate-spin" size={16} />}
+                                    <span>{impersonationFlowMessage || 'Preparando acesso de manutencao...'}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {isPasswordSetupMode && (
                             <div className="login-form-group" style={{ marginBottom: 16 }}>
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -330,7 +438,7 @@ function LoginPageContent() {
                             </div>
                         )}
 
-                        {!isPasswordSetupMode && !showRecoveryForm && (
+                        {!isPasswordSetupMode && !isImpersonationMode && !showRecoveryForm && (
                             <>
                                 <div className="login-form-group">
                                     <label className="login-label">Email</label>
@@ -547,7 +655,7 @@ function LoginPageContent() {
                             </>
                         )}
 
-                        {!isRecoveryMode && (
+                        {!isRecoveryMode && !isImpersonationMode && (
                             <button
                                 type="submit"
                                 disabled={loading || (isPasswordSetupMode && (!passwordFlowReady || passwordFlowLoading))}

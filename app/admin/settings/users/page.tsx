@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
     Users, UserPlus, Mail, Phone, CheckCircle, AlertCircle,
     Loader2, Save, X, Edit3, User, Power, Crown, Search, Trash2, KeyRound,
-    Smartphone, Wifi, WifiOff, RefreshCw, Send, Link2
+    Smartphone, Wifi, WifiOff, RefreshCw, Send, Link2, LogIn
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -27,6 +27,8 @@ export default function UsersPage() {
     const [sectors, setSectors] = useState<Sector[]>([])
     const [canGrantMaster, setCanGrantMaster] = useState(false)
     const [canCreateUsers, setCanCreateUsers] = useState(false)
+    const [canImpersonateUsers, setCanImpersonateUsers] = useState(false)
+    const [currentAdminUserId, setCurrentAdminUserId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [creating, setCreating] = useState(false)
     const [editing, setEditing] = useState<string | null>(null)
@@ -39,6 +41,7 @@ export default function UsersPage() {
     const [sendingResetUserId, setSendingResetUserId] = useState<string | null>(null)
     const [sendingFirstAccessUserId, setSendingFirstAccessUserId] = useState<string | null>(null)
     const [sendingManualLinkUserId, setSendingManualLinkUserId] = useState<string | null>(null)
+    const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null)
     const formCardRef = useRef<HTMLDivElement | null>(null)
     const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -75,10 +78,14 @@ export default function UsersPage() {
                 setUsers(usersData)
                 setSectors([])
                 setCanCreateUsers(isMaster)
+                setCanImpersonateUsers(isMaster)
+                setCurrentAdminUserId(null)
             } else {
                 setUsers(Array.isArray(usersData?.users) ? usersData.users : [])
                 setSectors(Array.isArray(usersData?.sectors) ? usersData.sectors : [])
                 setCanCreateUsers(isMaster || Boolean(usersData?.access?.can_create_users))
+                setCanImpersonateUsers(isMaster || Boolean(usersData?.access?.can_impersonate_users))
+                setCurrentAdminUserId(usersData?.access?.current_admin_user_id || null)
             }
             setCanGrantMaster(isMaster)
         } catch { showToast('Erro ao carregar dados', 'error') }
@@ -361,6 +368,46 @@ export default function UsersPage() {
             showToast(err.message, 'error')
         } finally {
             setSendingManualLinkUserId(null)
+        }
+    }
+
+    const impersonateUser = async (u: AdminUser) => {
+        if (!canImpersonateUsers) {
+            showToast('Somente Admin Master pode acessar painel de outro usuario.', 'error')
+            return
+        }
+
+        if (u.id === currentAdminUserId) {
+            showToast('Voce ja esta logado nesta conta.', 'error')
+            return
+        }
+
+        if (!u.is_active) {
+            showToast('Nao e permitido acessar painel de usuario desativado.', 'error')
+            return
+        }
+
+        const confirmed = window.confirm(
+            `Acessar o painel como "${u.name}"?\n\nSua sessao atual sera substituida pela conta deste usuario. Use apenas para manutencao autorizada.`
+        )
+        if (!confirmed) return
+
+        setImpersonatingUserId(u.id)
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'create_impersonation_link', id: u.id })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data?.error || 'Erro ao gerar acesso de manutencao')
+            if (!data?.impersonation_link) throw new Error('A API nao retornou o link de acesso.')
+
+            showToast(data?.message || 'Acesso de manutencao gerado. Redirecionando...', 'success')
+            window.location.assign(data.impersonation_link)
+        } catch (err: any) {
+            showToast(err.message, 'error')
+            setImpersonatingUserId(null)
         }
     }
 
@@ -677,6 +724,28 @@ export default function UsersPage() {
                                             }}>
                                             {sendingManualLinkUserId === u.id ? <Loader2 size={14} className="spin" /> : <Link2 size={14} />}
                                             Enviar link
+                                        </button>
+                                    )}
+                                    {canImpersonateUsers && u.id !== currentAdminUserId && u.is_active && (
+                                        <button
+                                            onClick={() => impersonateUser(u)}
+                                            title="Acessar painel do usuario"
+                                            disabled={impersonatingUserId === u.id}
+                                            style={{
+                                                padding: '8px 10px', borderRadius: 6, cursor: 'pointer',
+                                                border: '1px solid rgba(99,102,241,0.35)',
+                                                background: 'rgba(99,102,241,0.12)',
+                                                color: '#6366f1',
+                                                opacity: impersonatingUserId === u.id ? 0.7 : 1,
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 6,
+                                                whiteSpace: 'nowrap',
+                                                fontSize: '0.78rem',
+                                                fontWeight: 700
+                                            }}>
+                                            {impersonatingUserId === u.id ? <Loader2 size={14} className="spin" /> : <LogIn size={14} />}
+                                            Acessar painel
                                         </button>
                                     )}
                                     {canGrantMaster && !u.is_master && (

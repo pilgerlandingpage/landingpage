@@ -68,3 +68,15 @@ export function buildAuthActionBridgeLink(
     url.searchParams.set('link', safeActionLink)
     return url.toString()
 }
+
+export function buildMaintenanceLoginBridgeLink(
+    actionLink: string,
+    origin?: string | null
+): string {
+    const redirectPath = '/login?impersonation=1'
+    const safeActionLink = sanitizeAuthActionLink(actionLink, redirectPath, origin)
+    const url = new URL('/auth/continue', getPublicAppUrl(origin))
+    url.searchParams.set('flow', 'maintenance_login')
+    url.searchParams.set('link', safeActionLink)
+    return url.toString()
+}
