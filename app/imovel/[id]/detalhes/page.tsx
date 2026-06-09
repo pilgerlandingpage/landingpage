@@ -16,7 +16,6 @@ import {
     MessageCircle,
     Ruler,
     Star,
-    Tag,
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlTracker'
@@ -417,7 +416,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                 <section id="visao" className="plp-detail-layout">
                     <div className="plp-gallery-column">
-                        <PropertyPhotoShowcase images={gallery.length ? gallery : [primaryImage]} title={displayTitle} metadata={propertyTrackingMetadata} />
+                        <PropertyPhotoShowcase
+                            images={gallery.length ? gallery : [primaryImage]}
+                            title={displayTitle}
+                            metadata={propertyTrackingMetadata}
+                            shareSlot={<PropertyLandingShareButton propertyId={property.id} title={displayTitle} />}
+                        />
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
                             <a href="#galeria" className="plp-main-photo" aria-label="Abrir galeria completa">
                                 <img src={primaryImage} alt={displayTitle} />
@@ -477,15 +481,18 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     <aside className="plp-sidebar" aria-label="Atendimento e resumo comercial">
                         <div className="plp-side-card plp-price-card">
                             <div className="plp-side-location">
-                                <MapPin size={18} />
-                                <div>
-                                    <h2>{displayNeighborhood || displayCity || 'Litoral catarinense'}</h2>
-                                    <p>{[displayCity, property.state].filter(Boolean).join(' - ') || 'Endereço sob curadoria'}</p>
+                                <MapPin size={13} />
+                                <div className="plp-side-loc-text">
+                                    <span className="plp-loc-name">{displayNeighborhood || displayCity || 'Litoral catarinense'}</span>
+                                    <span className="plp-loc-sub">{[displayCity, property.state].filter(Boolean).join(' - ')}</span>
+                                </div>
+                                <div className="plp-loc-price">
+                                    <strong>{formatMoney(property.price)}</strong>
+                                    <span>valor anunciado</span>
                                 </div>
                             </div>
 
                             <div className="plp-side-facts">
-                                <SideFact icon={<Tag size={17} />} value={formatMoney(property.price)} label="valor anunciado" variant="price" />
                                 {bedroomCount > 0 && <SideFact icon={<BedDouble size={17} />} value={String(bedroomCount)} label={statLabel(bedroomCount, 'dormitório', 'dormitórios')} />}
                                 {suiteCount > 0 && <SideFact icon={<Home size={17} />} value={String(suiteCount)} label={statLabel(suiteCount, 'suíte', 'suítes')} />}
                                 {parkingCount > 0 && <SideFact icon={<Car size={17} />} value={String(parkingCount)} label={statLabel(parkingCount, 'vaga', 'vagas')} />}
@@ -501,9 +508,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                             <p className="plp-payment-note">Preço, disponibilidade e condições podem ser alterados sem aviso prévio.</p>
 
-                            <div className="plp-action-list">
-                                <PropertyLandingShareButton propertyId={property.id} title={displayTitle} />
-                            </div>
                         </div>
 
                         <div className="plp-side-card plp-lead-card">

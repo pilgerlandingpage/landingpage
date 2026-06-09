@@ -380,11 +380,17 @@ export default function PropertyLandingStyles() {
                     font-weight: 850;
                 }
 
-                .plp-gallery-view-btn-top {
-                    display: inline-flex;
+                .plp-gallery-top-bar {
+                    display: flex;
                     align-items: center;
                     gap: 6px;
                     margin-bottom: 8px;
+                }
+
+                .plp-gallery-top-bar button {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
                     padding: 5px 11px;
                     border: 1px solid var(--plp-line);
                     border-radius: 20px;
@@ -397,11 +403,11 @@ export default function PropertyLandingStyles() {
                     transition: background 0.18s;
                 }
 
-                .plp-gallery-view-btn-top:hover {
+                .plp-gallery-top-bar button:hover {
                     background: #fff;
                 }
 
-                .plp-gallery-view-btn-top svg {
+                .plp-gallery-top-bar button svg {
                     color: var(--plp-gold-dark);
                     flex-shrink: 0;
                 }
@@ -970,31 +976,70 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-side-location {
-                    display: grid;
-                    grid-template-columns: 22px minmax(0, 1fr);
-                    gap: 8px;
-                    align-items: start;
-                    padding: 9px 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    padding: 8px 10px;
                     border: 1px solid rgba(201, 169, 110, 0.2);
                     border-radius: 8px;
                     background: linear-gradient(135deg, rgba(201, 169, 110, 0.1), rgba(248, 250, 249, 0.96));
                 }
 
-                .plp-side-location svg {
-                    width: 15px;
-                    height: 15px;
-                    margin-top: 1px;
+                .plp-side-location > svg {
+                    width: 13px;
+                    height: 13px;
+                    flex-shrink: 0;
                     color: var(--plp-gold-dark);
                 }
 
-                .plp-side-location h2 {
-                    margin: 0 0 2px;
-                    color: var(--plp-ink);
-                    font-size: 15px;
-                    line-height: 1.15;
+                .plp-side-loc-text {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1px;
                 }
 
-                .plp-side-location p,
+                .plp-loc-name {
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: var(--plp-ink);
+                    line-height: 1.2;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .plp-loc-sub {
+                    font-size: 10px;
+                    font-weight: 400;
+                    color: var(--plp-muted);
+                    line-height: 1.2;
+                }
+
+                .plp-loc-price {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    flex-shrink: 0;
+                    padding-left: 9px;
+                    border-left: 1px solid rgba(201, 169, 110, 0.3);
+                }
+
+                .plp-loc-price strong {
+                    font-size: 13px;
+                    font-weight: 900;
+                    color: var(--plp-ink);
+                    line-height: 1.15;
+                    white-space: nowrap;
+                }
+
+                .plp-loc-price > span {
+                    font-size: 8px;
+                    color: var(--plp-muted);
+                    line-height: 1.2;
+                }
+
                 .plp-payment-note,
                 .plp-lead-card p,
                 .plp-broker-card p {
@@ -1006,7 +1051,7 @@ export default function PropertyLandingStyles() {
 
                 .plp-side-facts {
                     display: grid;
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
                     gap: 4px;
                     padding: 7px 0 9px;
                     border-bottom: 1px solid var(--plp-line);
@@ -1019,7 +1064,7 @@ export default function PropertyLandingStyles() {
                     justify-content: center;
                     gap: 1px;
                     min-height: 0;
-                    padding: 5px 4px;
+                    padding: 5px 3px;
                     border: 1px solid rgba(53, 64, 73, 0.08);
                     border-radius: 7px;
                     background: #f6f8f7;
@@ -1045,36 +1090,6 @@ export default function PropertyLandingStyles() {
                     color: var(--plp-muted);
                     font-size: 8px;
                     line-height: 1.1;
-                }
-
-                .plp-side-facts .plp-side-fact-price {
-                    grid-column: 1 / -1;
-                    flex-direction: row;
-                    justify-content: flex-start;
-                    gap: 6px;
-                    padding: 7px 10px;
-                    background: linear-gradient(135deg, rgba(201, 169, 110, 0.12), rgba(255, 255, 255, 0.98));
-                    border-color: rgba(201, 169, 110, 0.28);
-                    text-align: left;
-                }
-
-                .plp-side-facts .plp-side-fact-price svg {
-                    color: var(--plp-gold-dark);
-                    margin-bottom: 0;
-                    align-self: center;
-                    flex-shrink: 0;
-                }
-
-                .plp-side-facts .plp-side-fact-price strong {
-                    color: var(--plp-ink);
-                    font-size: 18px;
-                    line-height: 1.05;
-                }
-
-                .plp-side-facts .plp-side-fact-price span {
-                    font-size: 9px;
-                    align-self: flex-end;
-                    padding-bottom: 1px;
                 }
 
                 .plp-price-extras {
@@ -1575,7 +1590,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-side-facts {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
                     }
 
                     .plp-related-grid,
@@ -1755,7 +1770,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-side-facts {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
                     }
 
                     .plp-photo-count {
