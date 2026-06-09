@@ -1973,19 +1973,21 @@ export default function PropertyLandingStyles() {
                     min-width: 0;
                 }
 
-                .plp-gallery-column {
-                    grid-column: 1;
-                    grid-row: 1;
-                }
+                @media (min-width: 761px) {
+                    .plp-gallery-column {
+                        grid-column: 1;
+                        grid-row: 1;
+                    }
 
-                .plp-content-column {
-                    grid-column: 1;
-                    grid-row: 2;
-                }
+                    .plp-content-column {
+                        grid-column: 1;
+                        grid-row: 2;
+                    }
 
-                .plp-sidebar {
-                    grid-column: 2;
-                    grid-row: 1 / span 2;
+                    .plp-sidebar {
+                        grid-column: 2;
+                        grid-row: 1 / span 2;
+                    }
                 }
 
                 .plp-gallery-composer {
@@ -2146,17 +2148,10 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-side-location {
-                    grid-template-columns: 18px minmax(0, 1fr);
                     gap: 6px;
                     padding: 8px;
                 }
 
-                .plp-side-location h2 {
-                    margin-bottom: 2px;
-                    font-size: 14px;
-                }
-
-                .plp-side-location p,
                 .plp-payment-note,
                 .plp-lead-card p,
                 .plp-broker-card p {
@@ -2165,16 +2160,15 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-side-facts {
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
                     gap: 4px;
                     padding: 6px 0 8px;
                 }
 
                 .plp-side-facts div {
-                    grid-template-columns: 16px minmax(0, 1fr);
-                    min-height: 40px;
-                    gap: 0 5px;
-                    padding: 6px;
+                    min-height: 0;
+                    gap: 1px;
+                    padding: 5px 3px;
                     font-size: 11px;
                 }
 
@@ -2183,15 +2177,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-side-facts span {
-                    font-size: 9px;
-                }
-
-                .plp-side-facts .plp-side-fact-price {
-                    min-height: 48px;
-                }
-
-                .plp-side-facts .plp-side-fact-price strong {
-                    font-size: 15px;
+                    font-size: 8px;
                 }
 
                 .plp-price-extras {
