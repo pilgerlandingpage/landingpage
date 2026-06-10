@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Great+Vibes&family=Montserrat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -6089,8 +6089,9 @@ h6 {
                     background:
                         linear-gradient(135deg, #c49a58 0%, #d7b36f 48%, #b68a49 100%);
                     color: #18120b;
-                    font-size: 0.68rem;
-                    font-weight: 650;
+                    font-size: 0.72rem;
+                    font-weight: 500;
+                    font-family: 'Montserrat', sans-serif;
                     padding: 0 32px;
                     align-items: center;
                     justify-content: space-between;

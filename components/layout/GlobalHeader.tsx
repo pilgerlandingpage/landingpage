@@ -219,7 +219,7 @@ export default function GlobalHeader() {
         <>
             <header className={`gh-wrap ${pathname === '/' || pathname === '/busca' ? 'gh-home-mobile' : ''} ${pathname === '/' ? 'gh-home-topbar-mobile' : ''}`}>
                 <div className="gh-topbar">
-                    <div>CRECI/SC 6772-J - Balneário Camboriú / SC</div>
+                    <div>CRECI/SC 6772-J - Guilherme Pilger Corretor de Imóveis</div>
                     <div className="gh-topbar-right">
                         <WhatsAppCaptureLink
                             phone="5547992528080"

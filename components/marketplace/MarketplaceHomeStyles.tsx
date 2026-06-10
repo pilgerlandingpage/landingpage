@@ -553,8 +553,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             filter: contrast(1.04) saturate(0.96);
           }
           .home-premium-hero .hero-overlay {
-            background:
-              linear-gradient(to top, rgba(247,247,245,0.88) 0%, rgba(247,247,245,0.52) 32%, rgba(247,247,245,0.14) 60%, rgba(247,247,245,0.02) 100%);
+            background: none;
           }
           .home-hero-content {
             padding-bottom: 8px;
@@ -734,9 +733,10 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           background: linear-gradient(
             to top,
-            rgba(247, 247, 245, 0.95) 0%,
-            rgba(247, 247, 245, 0.3) 35%,
-            rgba(247, 247, 245, 0) 60%
+            rgba(184,148,95,0.90) 0%,
+            rgba(184,148,95,0.55) 22%,
+            rgba(184,148,95,0.10) 40%,
+            transparent 55%
           );
           z-index: 2;
         }
@@ -852,8 +852,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           filter: drop-shadow(0 24px 42px rgba(0,0,0,0.28));
         }
         .home-premium-hero .hero-overlay {
-          background:
-            linear-gradient(to top, rgba(247,247,245,0.88) 0%, rgba(247,247,245,0.48) 28%, rgba(247,247,245,0.06) 62%, rgba(247,247,245,0) 100%);
+          background: linear-gradient(to top, rgba(247,247,245,0.96) 0%, rgba(247,247,245,0.65) 22%, rgba(247,247,245,0.15) 38%, transparent 52%);
         }
         .home-hero-content {
           z-index: 4;
@@ -1763,8 +1762,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             filter: contrast(1.04) saturate(0.96);
           }
           .home-premium-hero .hero-overlay {
-            background:
-              linear-gradient(to top, rgba(247,247,245,0.88) 0%, rgba(247,247,245,0.52) 32%, rgba(247,247,245,0.14) 60%, rgba(247,247,245,0.02) 100%) !important;
+            background: linear-gradient(to top, rgba(247,247,245,0.96) 0%, rgba(247,247,245,0.65) 22%, rgba(247,247,245,0.15) 38%, transparent 52%) !important;
           }
           .home-hero-content {
             padding-bottom: 8px;

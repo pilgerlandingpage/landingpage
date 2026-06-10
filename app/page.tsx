@@ -372,7 +372,7 @@ export default async function MarketplaceHome() {
           fetchPriority="high"
           quality={68}
           sizes="(max-width: 768px) 86vw, 820px"
-          style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', height: '100%', width: 'auto', maxWidth: 'none', objectFit: 'contain' as const, zIndex: 1 }}
+          style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%) scale(1.2)', transformOrigin: 'top center', height: '100%', width: 'auto', maxWidth: 'none', objectFit: 'contain' as const, zIndex: 1 }}
         />
         <div className="hero-overlay" />
         <div className="home-hero-social-proof">
@@ -380,9 +380,9 @@ export default async function MarketplaceHome() {
           <span><Crown size={14} /> Curadoria de luxo</span>
         </div>
         <div className="hero-content home-hero-content">
-          <span className="home-hero-eyebrow">Guilherme Pilger</span>
-          <h1 className="hero-subtitle-top">Luxo em Balneário Camboriú</h1>
-          <h2 className="hero-title-script">experiência única!</h2>
+          <Image src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/LOGO%20PILGER.png" alt="Guilherme Pilger" width={420} height={60} style={{ objectFit: 'contain', objectPosition: 'center bottom', width: 'min(650px, 92vw)', height: '220px', display: 'block', margin: '0 auto -72px' }} />
+          <h1 className="hero-subtitle-top hero-title-imoveis" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(2rem, 9vw, 3.2rem)', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.1, marginBottom: '2px' }}>Imóveis de alto padrão</h1>
+          <p className="hero-subtitle-region" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(0.78rem, 3.4vw, 1.1rem)', fontWeight: 500, color: '#16130f', margin: 0, lineHeight: 1.3 }}>em Balneário Camboriú e Região</p>
         </div>
       </div>
 
