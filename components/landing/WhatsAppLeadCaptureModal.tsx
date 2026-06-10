@@ -45,6 +45,7 @@ function isValidEmail(raw: string) {
 
 export default function WhatsAppLeadCaptureModal() {
     const [state, setState] = useState<ModalState>({ open: false })
+    const [step, setStep] = useState<1 | 2>(1)
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [email, setEmail] = useState('')
@@ -104,6 +105,7 @@ export default function WhatsAppLeadCaptureModal() {
     const close = () => {
         if (submitting) return
         setState({ open: false })
+        setStep(1)
     }
 
     const submit = async (e: React.FormEvent) => {
@@ -184,80 +186,85 @@ export default function WhatsAppLeadCaptureModal() {
                     </button>
                 </header>
 
-                <div style={chatAreaStyle}>
-                    <div style={incomingBubbleStyle}>Olá <small style={bubbleTimeStyle}>13:46</small></div>
-                    <div style={incomingBubbleStyle}>Quer saber mais sobre este imóvel? <small style={bubbleTimeStyle}>13:46</small></div>
-                    <div style={incomingBubbleStyle}>Entre em contato via WhatsApp <small style={bubbleTimeStyle}>13:46</small></div>
+                {step === 1 ? (
+                    <div style={chatAreaStyle}>
+                        <div style={incomingBubbleStyle}>Olá 👋 <small style={bubbleTimeStyle}>agora</small></div>
+                        <div style={incomingBubbleStyle}>Quer saber mais sobre este imóvel? <small style={bubbleTimeStyle}>agora</small></div>
+                        <div style={incomingBubbleStyle}>Entre em contato via WhatsApp <small style={bubbleTimeStyle}>agora</small></div>
 
-                    <div style={previewRowStyle}>
-                        <div style={outgoingBubbleStyle}>
-                            <span>{messagePreview}</span>
-                            {propertyTitle ? <strong style={previewTitleStyle}>{propertyTitle}</strong> : null}
+                        <div style={previewRowStyle}>
+                            <div style={outgoingBubbleStyle}>
+                                <span>{messagePreview}</span>
+                                {propertyTitle ? <strong style={previewTitleStyle}>{propertyTitle}</strong> : null}
+                            </div>
+                            <button type="button" onClick={() => setStep(2)} style={sendButtonStyle} aria-label="Continuar">
+                                <Send size={18} />
+                            </button>
                         </div>
-                        <span style={previewSendStyle}><Send size={18} /></span>
                     </div>
-                </div>
+                ) : (
+                    <form onSubmit={submit} style={formStyle}>
+                        <label style={fieldStyle}>
+                            <span>Nome Completo *</span>
+                            <div style={inputWrapStyle}>
+                                <input
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Seu nome"
+                                    style={inputStyle}
+                                    disabled={submitting}
+                                    autoComplete="name"
+                                    autoFocus
+                                />
+                                <User size={15} />
+                            </div>
+                        </label>
 
-                <form onSubmit={submit} style={formStyle}>
-                    <label style={fieldStyle}>
-                        <span>Nome Completo *</span>
-                        <div style={inputWrapStyle}>
-                            <input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Seu nome"
-                                style={inputStyle}
-                                disabled={submitting}
-                                autoComplete="name"
-                            />
-                            <User size={15} />
-                        </div>
-                    </label>
+                        <label style={fieldStyle}>
+                            <span>Telefone *</span>
+                            <div style={inputWrapStyle}>
+                                <input
+                                    value={phone}
+                                    onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+                                    placeholder="+55 (47) 99999-9999"
+                                    style={inputStyle}
+                                    disabled={submitting}
+                                    autoComplete="tel"
+                                    inputMode="tel"
+                                />
+                                <Phone size={15} />
+                            </div>
+                        </label>
 
-                    <label style={fieldStyle}>
-                        <span>Telefone *</span>
-                        <div style={inputWrapStyle}>
-                            <input
-                                value={phone}
-                                onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-                                placeholder="+55 (47) 99999-9999"
-                                style={inputStyle}
-                                disabled={submitting}
-                                autoComplete="tel"
-                                inputMode="tel"
-                            />
-                            <Phone size={15} />
-                        </div>
-                    </label>
+                        <label style={fieldStyle}>
+                            <span>Email {requiresEmail ? '*' : ''}</span>
+                            <div style={inputWrapStyle}>
+                                <input
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="seu@email.com"
+                                    style={inputStyle}
+                                    disabled={submitting}
+                                    autoComplete="email"
+                                    inputMode="email"
+                                    type="email"
+                                />
+                                <Mail size={15} />
+                            </div>
+                        </label>
 
-                    <label style={fieldStyle}>
-                        <span>Email {requiresEmail ? '*' : ''}</span>
-                        <div style={inputWrapStyle}>
-                            <input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="seu@email.com"
-                                style={inputStyle}
-                                disabled={submitting}
-                                autoComplete="email"
-                                inputMode="email"
-                                type="email"
-                            />
-                            <Mail size={15} />
-                        </div>
-                    </label>
+                        <p style={privacyStyle}>Ao enviar você está aceitando a <span style={{ textDecoration: 'underline' }}>política de privacidade</span>. * campos obrigatórios</p>
+                        {error ? <div style={errorStyle}>{error}</div> : null}
 
-                    <p style={privacyStyle}>Ao enviar você está aceitando a política de privacidade.</p>
-                    {error ? <div style={errorStyle}>{error}</div> : null}
-
-                    <button type="submit" style={{
-                        ...buttonStyle,
-                        opacity: canSubmit && !submitting ? 1 : 0.62,
-                        cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed',
-                    }} disabled={!canSubmit || submitting}>
-                        <Send size={15} /> {submitting ? 'enviando...' : 'enviar'}
-                    </button>
-                </form>
+                        <button type="submit" style={{
+                            ...buttonStyle,
+                            opacity: canSubmit && !submitting ? 1 : 0.62,
+                            cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed',
+                        }} disabled={!canSubmit || submitting}>
+                            <Send size={15} /> {submitting ? 'enviando...' : 'Enviar'}
+                        </button>
+                    </form>
+                )}
             </section>
         </div>
     )
@@ -281,7 +288,7 @@ const widgetStyle: CSSProperties = {
     gridTemplateRows: 'auto minmax(0, auto) auto',
     overflow: 'hidden',
     border: '1px solid rgba(0,0,0,0.18)',
-    borderRadius: 0,
+    borderRadius: 16,
     background: '#f2f2f2',
     boxShadow: '0 18px 50px rgba(0,0,0,0.34)',
     fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -317,6 +324,7 @@ const closeButtonStyle: CSSProperties = {
     alignItems: 'center',
     justifyContent: 'center',
     border: 0,
+    borderRadius: 6,
     background: 'rgba(255,255,255,0.16)',
     color: '#fff',
     cursor: 'pointer',
@@ -406,7 +414,9 @@ const inputWrapStyle: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 1fr) 34px',
     alignItems: 'center',
     border: '1px solid #cfd4d7',
+    borderRadius: 8,
     background: '#fff',
+    overflow: 'hidden',
     boxShadow: '0 1px 3px rgba(0,0,0,0.12) inset',
 }
 
@@ -428,21 +438,35 @@ const privacyStyle: CSSProperties = {
     lineHeight: 1.35,
 }
 
+const sendButtonStyle: CSSProperties = {
+    width: 38,
+    height: 38,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: 0,
+    borderRadius: 999,
+    background: '#0f9f7a',
+    color: '#fff',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(15,159,122,0.4)',
+}
+
 const buttonStyle: CSSProperties = {
     justifySelf: 'end',
-    minWidth: 82,
-    height: 34,
+    minWidth: 90,
+    height: 36,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
     border: 0,
-    borderRadius: 3,
-    background: '#171a1d',
+    borderRadius: 10,
+    background: '#0f9f7a',
     color: '#fff',
-    fontSize: 12,
-    fontWeight: 800,
-    textTransform: 'lowercase',
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: 'pointer',
 }
 
 const errorStyle: CSSProperties = {
