@@ -177,7 +177,7 @@ export default async function MarketplaceHome() {
   const luxuryCount = homeProperties.filter(p => Number(p.price || 0) >= 5000000).length
   const authorityCities = [
     {
-      label: 'Balneário',
+      label: 'Balneário Camboriú',
       searchCity: 'Balneário Camboriú',
       aliases: ['balneario camboriu'],
       image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-balneario-pixabay-5084547.jpg',

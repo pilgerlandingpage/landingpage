@@ -1984,9 +1984,14 @@ export default function PropertyLandingStyles() {
                         grid-row: 2;
                     }
 
+                    #localizacao.plp-location-band {
+                        grid-column: 1;
+                        grid-row: 3;
+                    }
+
                     .plp-sidebar {
                         grid-column: 2;
-                        grid-row: 1 / span 2;
+                        grid-row: 1 / span 3;
                     }
                 }
 
@@ -2354,8 +2359,14 @@ export default function PropertyLandingStyles() {
                         grid-row: auto;
                     }
 
-                    .plp-sidebar {
+                    #localizacao.plp-location-band {
                         order: 3;
+                        grid-column: auto;
+                        grid-row: auto;
+                    }
+
+                    .plp-sidebar {
+                        order: 4;
                         grid-column: auto;
                         grid-row: auto;
                     }

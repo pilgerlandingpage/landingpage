@@ -478,6 +478,24 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         </section>
                     </div>
 
+                    <section id="localizacao" className="plp-location-band">
+                        <div className="plp-location-head">
+                            <span>Localização</span>
+                            <strong>{[displayNeighborhood, displayCity].filter(Boolean).join(' — ') || 'Localização estratégica'}</strong>
+                        </div>
+                        <div className="plp-map-frame">
+                            {mapProperties.length > 0 ? (
+                                <MapSearch properties={mapProperties} refitKey={`property-detail-${property.id}`} />
+                            ) : (
+                                <div className="plp-map-empty">
+                                    <MapPin size={22} />
+                                    <strong>{locationLabel || mapLocation || 'Localizacao sob curadoria'}</strong>
+                                    <span>Endereco exato apresentado pelo agente durante o atendimento.</span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
                     <aside className="plp-sidebar" aria-label="Atendimento e resumo comercial">
                         <div className="plp-side-card plp-price-card">
                             <div className="plp-side-location">
@@ -494,7 +512,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
                             <div className="plp-side-facts">
                                 {bedroomCount > 0 && <SideFact icon={<BedDouble size={17} />} value={String(bedroomCount)} label={statLabel(bedroomCount, 'dormitório', 'dormitórios')} />}
-                                {suiteCount > 0 && <SideFact icon={<Home size={17} />} value={String(suiteCount)} label={statLabel(suiteCount, 'suíte', 'suítes')} />}
+                                {bathroomsCount > 0 && <SideFact icon={<Bath size={17} />} value={String(bathroomsCount)} label={statLabel(bathroomsCount, 'banheiro', 'banheiros')} />}
                                 {parkingCount > 0 && <SideFact icon={<Car size={17} />} value={String(parkingCount)} label={statLabel(parkingCount, 'vaga', 'vagas')} />}
                                 {area > 0 && <SideFact icon={<Ruler size={17} />} value={`${area.toLocaleString('pt-BR')} m²`} label="área privativa" />}
                             </div>
@@ -554,24 +572,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                         />
                     </section>
                 )}
-
-                <section id="localizacao" className="plp-location-band">
-                    <div className="plp-location-head">
-                        <span>Imediações</span>
-                        <strong>{displayNeighborhood || displayCity || 'Localização estratégica'}</strong>
-                    </div>
-                    <div className="plp-map-frame">
-                        {mapProperties.length > 0 ? (
-                            <MapSearch properties={mapProperties} refitKey={`property-detail-${property.id}`} />
-                        ) : (
-                            <div className="plp-map-empty">
-                                <MapPin size={22} />
-                                <strong>{locationLabel || mapLocation || 'Localizacao sob curadoria'}</strong>
-                                <span>Endereco exato apresentado pelo agente durante o atendimento.</span>
-                            </div>
-                        )}
-                    </div>
-                </section>
 
                 {related.length > 0 && (
                     <section className="plp-related-band">

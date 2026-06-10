@@ -51,6 +51,28 @@ function formatCompactNumber(value: number) {
     })
 }
 
+const BOLD_KEYWORDS = [
+    'Casa em Condomínio', 'Casa em condominio', 'Apartamento Garden', 'Apartamento Duplex',
+    'Cobertura Duplex', 'Cobertura', 'Apartamento', 'Terreno', 'Duplex',
+    'Casa', 'Flat', 'Studio', 'Estúdio', 'Sala Comercial', 'Loja', 'Penthouse', 'Kitnet',
+]
+
+function boldifyTitle(title: string): ReactNode {
+    for (const kw of BOLD_KEYWORDS) {
+        const idx = title.toLowerCase().indexOf(kw.toLowerCase())
+        if (idx !== -1) {
+            return (
+                <>
+                    {title.slice(0, idx)}
+                    <strong>{title.slice(idx, idx + kw.length)}</strong>
+                    {title.slice(idx + kw.length)}
+                </>
+            )
+        }
+    }
+    return title
+}
+
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
@@ -69,6 +91,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
     const cardTitle = displayTitle
+    const isFrenteMar = /frente.?mar|frente ao mar/i.test(displayTitle) || amenities.some(a => /frente.?mar/i.test(a))
     /*
         ? [property.property_type || 'Imóvel', compactPlace].filter(Boolean).join(' · ')
         : displayTitle
@@ -85,7 +108,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const compactArea = Number(property.area_private_m2 || property.area_m2 || 0)
     const compactFeatureItems = [
         property.bedrooms ? { key: 'bedrooms', icon: <BedDouble size={14} aria-hidden="true" />, label: `${property.bedrooms}` } : null,
-        property.suites ? { key: 'suites', icon: <Bath size={14} aria-hidden="true" />, label: `${property.suites}` } : null,
         property.parking_spaces ? { key: 'parking', icon: <Car size={14} aria-hidden="true" />, label: `${property.parking_spaces}` } : null,
         compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m2` } : null,
     ].filter(Boolean) as { key: string; icon: ReactNode; label: string }[]
@@ -125,18 +147,22 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                     {imageCount}
                                 </span>
                             )}
+                            {isFrenteMar && <span className="frente-mar-badge">🌊 Frente Mar</span>}
                         </>
                     ) : (
-                        <Image
-                            src={imageSrc}
-                            alt={displayTitle}
-                            className="property-image"
-                            fill
-                            sizes="(max-width: 649px) 50vw, 420px"
-                            priority={imagePriority}
-                            loading={imagePriority ? undefined : 'lazy'}
-                            decoding="async"
-                        />
+                        <>
+                            <Image
+                                src={imageSrc}
+                                alt={displayTitle}
+                                className="property-image"
+                                fill
+                                sizes="(max-width: 649px) 50vw, 420px"
+                                priority={imagePriority}
+                                loading={imagePriority ? undefined : 'lazy'}
+                                decoding="async"
+                            />
+                            {isFrenteMar && <span className="frente-mar-badge">🌊 Frente Mar</span>}
+                        </>
                     )}
                 </Link>
 
@@ -145,7 +171,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             <Link href={href} className="card-content-link" onClick={handlePropertyClick}>
                 <div className="property-head">
                     <div className="property-heading-copy">
-                        <div className="property-title">{isHomeCompact ? displayTitle : cardTitle}</div>
+                        <div className="property-title">{boldifyTitle(isHomeCompact ? displayTitle : cardTitle)}</div>
                         <div className={`property-location ${isHomeCompact ? 'compact-location-row' : ''}`}>
                             {isHomeCompact && <MapPin size={13} aria-hidden="true" />}
                             <span>{isHomeCompact ? compactLocation || locationLabel : locationLabel}</span>
@@ -538,6 +564,23 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     .property-card-compact .property-meta span:not(:last-child)::after {
                         margin-left: 3px;
                     }
+                }
+                .frente-mar-badge {
+                    position: absolute;
+                    bottom: 9px;
+                    left: 9px;
+                    z-index: 2;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 5px 10px;
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #1a6fa8cc, #0d4f7ecc);
+                    color: #fff;
+                    font: 700 0.66rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.04em;
+                    backdrop-filter: blur(8px);
+                    text-transform: uppercase;
                 }
                 @media (min-width: 1024px) {
                     .card-image-container {
