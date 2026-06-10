@@ -2124,8 +2124,10 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             gap: 3px;
           }
           .gp-authority-stats a.gp-location-card .gp-location-copy strong {
-            font-size: 0.9rem !important;
-            line-height: 1.02 !important;
+            font-size: clamp(0.6rem, 3.2vw, 0.82rem) !important;
+            line-height: 1.1 !important;
+            word-break: break-word;
+            overflow-wrap: break-word;
           }
           .gp-authority-stats a.gp-location-card .gp-location-copy small {
             gap: 4px;
