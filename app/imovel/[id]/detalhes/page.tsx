@@ -36,6 +36,67 @@ import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from 
 export const dynamic = 'force-dynamic'
 
 const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
+const RELATED_PROPERTY_SELECT = [
+    'id',
+    'title',
+    'seo_title',
+    'city',
+    'state',
+    'neighborhood',
+    'price',
+    'bedrooms',
+    'bathrooms',
+    'suites',
+    'parking_spaces',
+    'area_m2',
+    'area_private_m2',
+    'featured_image',
+    'images',
+    'property_type',
+    'exclusive',
+    'source_status',
+    'description',
+    'latitude',
+    'longitude',
+    'created_at',
+    'updated_at',
+].join(', ')
+
+type RelatedPropertyCandidate = {
+    id: string
+    title?: string | null
+    seo_title?: string | null
+    city?: string | null
+    state?: string | null
+    neighborhood?: string | null
+    price?: number | string | null
+    bedrooms?: number | string | null
+    bathrooms?: number | string | null
+    suites?: number | string | null
+    parking_spaces?: number | string | null
+    area_m2?: number | string | null
+    area_private_m2?: number | string | null
+    featured_image?: string | null
+    images?: string[] | null
+    property_type?: string | null
+    exclusive?: boolean | null
+    source_status?: string | null
+    description?: string | null
+    latitude?: number | string | null
+    longitude?: number | string | null
+    created_at?: string | null
+    updated_at?: string | null
+}
+
+type RelatedPropertyScore = {
+    property: RelatedPropertyCandidate
+    score: number
+    locationScore: number
+    typeScore: number
+    priceScore: number
+    qualityScore: number
+    premiumAlternative: boolean
+}
 
 async function getPropertyForSeo(id: string) {
     const supabase = await createServerSupabase()
@@ -201,6 +262,217 @@ function hasMapCoordinates(property: any) {
     return hasUsableCoordinate(property.latitude) && hasUsableCoordinate(property.longitude)
 }
 
+function numericValue(value: unknown) {
+    const parsed = typeof value === 'string' ? Number(value.replace(',', '.')) : Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function normalizedRecommendationText(value: unknown) {
+    return normalizeLocationName(replaceItajaiWithPraiaBrava(value))
+}
+
+function propertyTypeGroup(value: unknown) {
+    const type = normalizedRecommendationText(value)
+    if (!type) return ''
+    if (/(apartamento|apto|cobertura|duplex|triplex|flat|studio|loft)/.test(type)) return 'vertical'
+    if (/(casa|sobrado|mansao|residencia)/.test(type)) return 'house'
+    if (/(terreno|lote|area)/.test(type)) return 'land'
+    if (/(sala|loja|comercial|galpao|ponto)/.test(type)) return 'commercial'
+    return type
+}
+
+function scoreLocationMatch(current: any, candidate: RelatedPropertyCandidate) {
+    const currentNeighborhood = normalizedRecommendationText(current.neighborhood)
+    const candidateNeighborhood = normalizedRecommendationText(candidate.neighborhood)
+    const currentCity = normalizedRecommendationText(current.city)
+    const candidateCity = normalizedRecommendationText(candidate.city)
+    const currentState = normalizedRecommendationText(current.state)
+    const candidateState = normalizedRecommendationText(candidate.state)
+
+    if (currentNeighborhood && candidateNeighborhood && currentNeighborhood === candidateNeighborhood) return 35
+    if (currentCity && candidateCity && currentCity === candidateCity) return 24
+    if (currentState && candidateState && currentState === candidateState) return 10
+    return 0
+}
+
+function scorePropertyTypeMatch(current: any, candidate: RelatedPropertyCandidate) {
+    const currentType = normalizedRecommendationText(current.property_type)
+    const candidateType = normalizedRecommendationText(candidate.property_type)
+    if (!currentType || !candidateType) return 0
+    if (currentType === candidateType) return 20
+    return propertyTypeGroup(currentType) === propertyTypeGroup(candidateType) ? 12 : 0
+}
+
+function scoreNumericSimilarity(currentValue: unknown, candidateValue: unknown, maxScore: number, tolerance: number) {
+    const currentNumber = numericValue(currentValue)
+    const candidateNumber = numericValue(candidateValue)
+    if (!currentNumber || !candidateNumber) return 0
+
+    const difference = Math.abs(candidateNumber - currentNumber)
+    if (difference === 0) return maxScore
+    if (difference <= tolerance) return Math.round(maxScore * 0.75)
+    if (difference <= tolerance * 2) return Math.round(maxScore * 0.45)
+    return 0
+}
+
+function scoreAreaSimilarity(current: any, candidate: RelatedPropertyCandidate) {
+    const currentArea = numericValue(current.area_private_m2 || current.area_m2)
+    const candidateArea = numericValue(candidate.area_private_m2 || candidate.area_m2)
+    if (!currentArea || !candidateArea) return 0
+
+    const ratio = Math.abs(candidateArea - currentArea) / currentArea
+    if (ratio <= 0.12) return 10
+    if (ratio <= 0.25) return 7
+    if (ratio <= 0.4) return 4
+    return 0
+}
+
+function scorePriceCompatibility(currentPriceValue: unknown, candidatePriceValue: unknown) {
+    const currentPrice = numericValue(currentPriceValue)
+    const candidatePrice = numericValue(candidatePriceValue)
+    if (!currentPrice || !candidatePrice) return 0
+
+    const ratio = candidatePrice / currentPrice
+    if (ratio >= 0.8 && ratio <= 1.3) return 10
+    if (ratio >= 0.65 && ratio <= 1.5) return 6
+    if (ratio >= 0.5 && ratio <= 1.75) return 3
+    return 0
+}
+
+function scoreCommercialQuality(candidate: RelatedPropertyCandidate) {
+    let score = 0
+    const hasGallery = Boolean(candidate.featured_image || candidate.images?.some(Boolean))
+    if (hasGallery) score += 4
+    if (candidate.exclusive) score += 3
+    if (String(candidate.description || '').trim().length >= 80) score += 2
+    if (hasMapCoordinates(candidate)) score += 1
+    return Math.min(score, 10)
+}
+
+function scoreRelatedProperty(current: any, candidate: RelatedPropertyCandidate): RelatedPropertyScore {
+    const locationScore = scoreLocationMatch(current, candidate)
+    const typeScore = scorePropertyTypeMatch(current, candidate)
+    const layoutScore = Math.min(
+        15,
+        scoreNumericSimilarity(current.suites || current.bedrooms, candidate.suites || candidate.bedrooms, 6, 1)
+        + scoreNumericSimilarity(current.bedrooms, candidate.bedrooms, 4, 1)
+        + scoreNumericSimilarity(current.parking_spaces, candidate.parking_spaces, 5, 1)
+    )
+    const areaScore = scoreAreaSimilarity(current, candidate)
+    const priceScore = scorePriceCompatibility(current.price, candidate.price)
+    const qualityScore = scoreCommercialQuality(candidate)
+    const score = locationScore + typeScore + layoutScore + areaScore + priceScore + qualityScore
+    const premiumAlternative = numericValue(candidate.price) > numericValue(current.price)
+        && (candidate.exclusive || qualityScore >= 6 || priceScore >= 6)
+
+    return {
+        property: candidate,
+        score,
+        locationScore,
+        typeScore,
+        priceScore,
+        qualityScore,
+        premiumAlternative,
+    }
+}
+
+function pickBestUnselected(
+    ranked: RelatedPropertyScore[],
+    selectedIds: Set<string>,
+    matcher: (item: RelatedPropertyScore) => boolean
+) {
+    return ranked.find(item => !selectedIds.has(item.property.id) && matcher(item))
+}
+
+function selectRelatedProperties(current: any, candidates: RelatedPropertyCandidate[]) {
+    const ranked = candidates
+        .filter(candidate => candidate.id && candidate.id !== current.id)
+        .map(candidate => scoreRelatedProperty(current, candidate))
+        .filter(item => item.score >= 20)
+        .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score
+            if (b.locationScore !== a.locationScore) return b.locationScore - a.locationScore
+            if (b.typeScore !== a.typeScore) return b.typeScore - a.typeScore
+            if (b.qualityScore !== a.qualityScore) return b.qualityScore - a.qualityScore
+            return numericValue(b.property.price) - numericValue(a.property.price)
+        })
+
+    const selected: RelatedPropertyScore[] = []
+    const selectedIds = new Set<string>()
+    const slots: Array<(item: RelatedPropertyScore) => boolean> = [
+        item => item.locationScore >= 35 && item.typeScore >= 12,
+        item => item.locationScore >= 24 && item.typeScore >= 12,
+        item => item.locationScore >= 24 && item.priceScore >= 3,
+        item => item.premiumAlternative || item.property.exclusive === true,
+    ]
+
+    for (const matcher of slots) {
+        const match = pickBestUnselected(ranked, selectedIds, matcher)
+        if (!match) continue
+        selected.push(match)
+        selectedIds.add(match.property.id)
+    }
+
+    for (const item of ranked) {
+        if (selected.length >= 4) break
+        if (selectedIds.has(item.property.id)) continue
+        selected.push(item)
+        selectedIds.add(item.property.id)
+    }
+
+    return selected.slice(0, 4).map(item => item.property)
+}
+
+async function getRelatedPropertyCandidates(supabase: any, property: any) {
+    const candidates = new Map<string, RelatedPropertyCandidate>()
+    const currentPrice = numericValue(property.price)
+    const addCandidates = (items?: RelatedPropertyCandidate[] | null) => {
+        for (const item of items || []) {
+            if (!item?.id || item.id === property.id) continue
+            candidates.set(item.id, item)
+        }
+    }
+    const baseQuery = (limit: number) => supabase
+        .from('properties')
+        .select(RELATED_PROPERTY_SELECT)
+        .eq('status', 'active')
+        .neq('id', property.id)
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .limit(limit)
+
+    const queries = []
+    if (property.city && property.neighborhood) {
+        queries.push(baseQuery(80).eq('city', property.city).eq('neighborhood', property.neighborhood))
+    }
+    if (property.city && property.property_type) {
+        queries.push(baseQuery(100).eq('city', property.city).eq('property_type', property.property_type))
+    }
+    if (property.city) {
+        queries.push(baseQuery(120).eq('city', property.city))
+    }
+    if (property.property_type) {
+        queries.push(baseQuery(100).eq('property_type', property.property_type))
+    }
+    if (currentPrice) {
+        queries.push(baseQuery(120).gte('price', Math.round(currentPrice * 0.5)).lte('price', Math.round(currentPrice * 1.75)))
+    }
+
+    if (queries.length === 0) {
+        queries.push(baseQuery(160))
+    }
+
+    const results = await Promise.all(queries)
+    for (const result of results) {
+        if (result?.error) {
+            console.warn('[Property Detail] related property query unavailable:', result.error.message)
+            continue
+        }
+        addCandidates(result?.data)
+    }
+
+    return Array.from(candidates.values())
+}
+
 function buildDetailItems(property: any, locationLabel: string, area: number) {
     return [
         property.property_type ? `Tipo: ${property.property_type}` : null,
@@ -327,14 +599,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         }]
         : []
 
-    const { data: relatedProps } = await supabase
-        .from('properties')
-        .select('id, title, seo_title, city, state, neighborhood, price, bedrooms, suites, parking_spaces, area_m2, area_private_m2, featured_image, images, property_type, exclusive')
-        .eq('status', 'active')
-        .neq('id', id)
-        .limit(4)
-
-    const related = relatedProps || []
+    const relatedCandidates = await getRelatedPropertyCandidates(supabase, property)
+    const related = selectRelatedProperties(property, relatedCandidates)
     const propertyJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
