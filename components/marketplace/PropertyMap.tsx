@@ -52,6 +52,7 @@ interface PropertyMapProps {
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
+    initialMapStyle?: MapStyle
 }
 
 type MappedProperty = {
@@ -70,7 +71,7 @@ type ClusterItem =
     | { kind: 'single'; item: MappedProperty }
     | { kind: 'cluster'; id: string; items: MappedProperty[]; latLng: [number, number]; minPrice: number | null }
 
-type MapStyle = 'luxury' | 'satellite' | 'classic'
+export type MapStyle = 'luxury' | 'satellite' | 'classic'
 type QuickFilter = 'all' | 'exclusive' | 'waterfront' | 'launch' | 'premium'
 
 const QUICK_FILTERS: Array<{ value: QuickFilter; label: string }> = [
@@ -487,8 +488,9 @@ export default function PropertyMap({
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
+    initialMapStyle = 'satellite',
 }: PropertyMapProps) {
-    const [mapStyle, setMapStyle] = useState<MapStyle>('satellite')
+    const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
 

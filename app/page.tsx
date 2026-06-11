@@ -370,8 +370,8 @@ export default async function MarketplaceHome() {
           height={1080}
           priority
           fetchPriority="high"
-          quality={68}
-          sizes="(max-width: 768px) 86vw, 820px"
+          unoptimized
+          sizes="(max-width: 900px) 980px, 1180px"
           style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%) scale(1.2)', transformOrigin: 'top center', height: '100%', width: 'auto', maxWidth: 'none', objectFit: 'contain' as const, zIndex: 1 }}
         />
         <div className="hero-overlay" />

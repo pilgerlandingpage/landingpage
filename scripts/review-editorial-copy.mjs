@@ -9,9 +9,13 @@ dotenv.config()
 const args = new Set(process.argv.slice(2))
 const apply = args.has('--apply')
 const limitArg = process.argv.find(arg => arg.startsWith('--limit='))
+const offsetArg = process.argv.find(arg => arg.startsWith('--offset='))
 const statusArg = process.argv.find(arg => arg.startsWith('--status='))
+const idsArg = process.argv.find(arg => arg.startsWith('--ids='))
 const limit = Math.max(1, Math.min(200, Number.parseInt(limitArg?.split('=')[1] || '80', 10) || 80))
+const offset = Math.max(0, Number.parseInt(offsetArg?.split('=')[1] || '0', 10) || 0)
 const statusFilter = statusArg?.split('=')[1]?.trim()
+const idFilter = idsArg?.split('=')[1]?.split(',').map(id => id.trim()).filter(Boolean) || []
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -172,9 +176,11 @@ async function loadPosts() {
     .from('blog_posts')
     .select('id,title,slug,status,excerpt,content_markdown,category,tags,seo_title,meta_description,primary_keyword,secondary_keywords,local_entities,aeo_questions,internal_links,approval_notes,source_summary,generated_by,created_at,published_at')
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .range(offset, offset + limit - 1)
 
-  if (statusFilter) {
+  if (idFilter.length > 0) {
+    query = query.in('id', idFilter)
+  } else if (statusFilter) {
     query = query.eq('status', statusFilter)
   } else {
     query = query.neq('status', 'archived')
@@ -264,9 +270,10 @@ async function main() {
   const posts = await loadPosts()
   const results = []
 
-  for (const post of posts) {
+  for (const [index, post] of posts.entries()) {
     const before = pickPostPayload(post)
     try {
+      console.error(`[copy-review] ${offset + index + 1}/${offset + posts.length} revisando ${post.status || 'sem_status'} ${post.slug || post.id}: ${compactText(post.title, 90)}`)
       const reviewedRaw = await reviewPayload(config, {
         slug: post.slug,
         generated_by: post.generated_by,
@@ -278,6 +285,7 @@ async function main() {
       after = restoreMissingUrls(after, firstUrlValidation.missing)
       const urlValidation = validateUrls(before, after)
       if (!urlValidation.ok) {
+        console.error(`[copy-review] falhou por URL alterada/removida: ${post.slug || post.id}`)
         results.push({
           id: post.id,
           title: post.title,
@@ -290,6 +298,7 @@ async function main() {
 
       const changed = hasMeaningfulChanges(before, after)
       if (!apply) {
+        console.error(`[copy-review] dry-run ${changed ? 'alteraria' : 'sem mudancas'}: ${post.slug || post.id}`)
         results.push({
           id: post.id,
           title: post.title,
@@ -306,6 +315,7 @@ async function main() {
       }
 
       if (!changed) {
+        console.error(`[copy-review] sem mudancas: ${post.slug || post.id}`)
         results.push({ id: post.id, title: post.title, status: post.status, ok: true, changed: false, skipped: true })
         continue
       }
@@ -321,6 +331,7 @@ async function main() {
 
       if (error) throw error
 
+      console.error(`[copy-review] atualizado: ${post.slug || post.id}`)
       results.push({
         id: post.id,
         title: post.title,
@@ -333,12 +344,14 @@ async function main() {
         changedFields: Object.keys(before).filter(key => JSON.stringify(before[key]) !== JSON.stringify(after[key])),
       })
     } catch (error) {
+      console.error(`[copy-review] erro em ${post.slug || post.id}: ${error?.message || String(error)}`)
       results.push({ id: post.id, title: post.title, ok: false, error: error?.message || String(error) })
     }
   }
 
   const summary = {
     mode: apply ? 'apply' : 'dry-run',
+    offset,
     total: results.length,
     changed: results.filter(result => result.ok && result.changed).length,
     unchanged: results.filter(result => result.ok && !result.changed).length,

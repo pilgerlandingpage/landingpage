@@ -461,6 +461,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                         onBoundsChange={handleBoundsChange}
                         refitKey={mapViewKey}
                         officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
+                        initialMapStyle="luxury"
                     />
                 }
             >

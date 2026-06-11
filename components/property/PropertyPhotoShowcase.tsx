@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Heart, Images, X } from 'lucide-react'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -61,7 +61,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata, shareSl
                     <Images size={13} /> Fotos
                     {gallery.length > 1 && <span className="plp-gallery-count">{gallery.length}</span>}
                 </button>
-                {shareSlot}
+                {shareSlot && <Fragment key="share-slot">{shareSlot}</Fragment>}
             </div>
 
             <div className="plp-gallery-composer single">

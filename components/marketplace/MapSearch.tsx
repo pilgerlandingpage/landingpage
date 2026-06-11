@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import type { MapStyle } from './PropertyMap'
 
 const PropertyMap = dynamic(
     () => import('./PropertyMap'),
@@ -67,6 +68,7 @@ interface MapSearchProps {
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
+    initialMapStyle?: MapStyle
 }
 
 export default function MapSearch({
@@ -77,6 +79,7 @@ export default function MapSearch({
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
+    initialMapStyle = 'satellite',
 }: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>
@@ -88,6 +91,7 @@ export default function MapSearch({
                 refitKey={refitKey}
                 interactionEnabled={interactionEnabled}
                 officeMarker={officeMarker}
+                initialMapStyle={initialMapStyle}
             />
         </div>
     )

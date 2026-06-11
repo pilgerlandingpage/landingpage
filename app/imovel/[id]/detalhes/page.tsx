@@ -27,7 +27,7 @@ import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import PropertyLandingStyles from '../PropertyLandingStyles'
-import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_IMAGE, webPageJsonLd } from '@/lib/seo/json-ld'
 import { cleanPropertyText, compactPropertyText } from '@/lib/properties/text'
 import { buildPropertySeoPath } from '@/lib/properties/seo-url'
@@ -52,12 +52,29 @@ function shortText(value?: string | null, fallback = '') {
     return compactPropertyText(value, fallback, 160)
 }
 
+function buildDisplayLocationParts(neighborhood: unknown, city: unknown) {
+    const displayNeighborhood = replaceItajaiWithPraiaBrava(neighborhood)
+    const displayCity = displayLocationName(city)
+
+    if (normalizeLocationName(displayNeighborhood) === normalizeLocationName(displayCity)) {
+        return [displayNeighborhood || displayCity].filter(Boolean)
+    }
+
+    return [displayNeighborhood, displayCity].filter(Boolean)
+}
+
+function cleanRepeatedPraiaBravaText(value: unknown) {
+    return replaceItajaiWithPraiaBrava(value)
+        .replace(/\b(na|no|em)\s+Praia Brava\s+em\s+Praia Brava\b/gi, '$1 Praia Brava')
+        .replace(/\bPraia Brava\s+em\s+Praia Brava\b/gi, 'Praia Brava')
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
     const property = await getPropertyForSeo(id)
     if (!property) return { title: 'Imóvel não encontrado' }
 
-    const title = replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imóvel de luxo')
+    const title = cleanRepeatedPraiaBravaText(property.seo_title || property.title || 'Imóvel de luxo')
     const city = displayLocationName(property.city)
     const description = shortText(
         property.seo_description || property.description,
@@ -232,10 +249,16 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         : BROKER_IMAGE
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
-    const displayTitle = replaceItajaiWithPraiaBrava(property.title)
+    const displayTitle = cleanRepeatedPraiaBravaText(property.title)
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
     const mapLocation = [property.neighborhood, property.city, property.state].filter(Boolean).join(', ')
+    const locationParts = buildDisplayLocationParts(property.neighborhood, property.city)
+    const locationHeadline = locationParts.join(' — ')
+    const locationPrimary = locationParts[0] || 'Litoral catarinense'
+    const locationSecondary = locationParts.length > 1
+        ? [...locationParts.slice(1), property.state].filter(Boolean).join(' - ')
+        : property.state || ''
     const opportunityHighlights = buildOpportunityHighlights(property)
     const brokerInsight = buildBrokerInsight(property)
     const primaryImage = gallery[0] || DEFAULT_OG_IMAGE
@@ -245,7 +268,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const bathroomsCount = Number(property.bathrooms || 0)
     const bedroomCount = Number(property.bedrooms || 0)
     const narrativeParagraphs = property.description ? formatDescription(property.description) : []
-    const locationLabel = [displayNeighborhood, displayCity, property.state].filter(Boolean).join(' - ')
+    const locationLabel = [...locationParts, property.state].filter(Boolean).join(' - ')
     const youtubeId = extractYouTubeId(property.video_url)
     const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
@@ -481,7 +504,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                     <section id="localizacao" className="plp-location-band">
                         <div className="plp-location-head">
                             <span>Localização</span>
-                            <strong>{[displayNeighborhood, displayCity].filter(Boolean).join(' — ') || 'Localização estratégica'}</strong>
+                            <strong>{locationHeadline || 'Localização estratégica'}</strong>
                         </div>
                         <div className="plp-map-frame">
                             {mapProperties.length > 0 ? (
@@ -501,8 +524,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             <div className="plp-side-location">
                                 <MapPin size={13} />
                                 <div className="plp-side-loc-text">
-                                    <span className="plp-loc-name">{displayNeighborhood || displayCity || 'Litoral catarinense'}</span>
-                                    <span className="plp-loc-sub">{[displayCity, property.state].filter(Boolean).join(' - ')}</span>
+                                    <span className="plp-loc-name">{locationPrimary}</span>
+                                    {locationSecondary && <span className="plp-loc-sub">{locationSecondary}</span>}
                                 </div>
                                 <div className="plp-loc-price">
                                     <strong>{formatMoney(property.price)}</strong>
@@ -587,13 +610,15 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 const image = item.featured_image || item.images?.[0] || DEFAULT_OG_IMAGE
                                 const itemArea = Number(item.area_private_m2 || item.area_m2 || 0)
                                 const itemSuites = Number(item.suites || item.bedrooms || 0)
+                                const relatedLocation = buildDisplayLocationParts(item.neighborhood, item.city).join(' - ')
+                                const relatedTitle = cleanRepeatedPraiaBravaText(item.title)
                                 return (
                                     <Link key={item.id} href={buildPropertySeoPath(item)} className="plp-related-card">
-                                        <img src={image} alt={replaceItajaiWithPraiaBrava(item.title)} loading="lazy" />
+                                        <img src={image} alt={relatedTitle} loading="lazy" />
                                         {item.exclusive && <span className="plp-card-ribbon">Exclusivo</span>}
                                         <div>
-                                            <small><MapPin size={13} /> {[replaceItajaiWithPraiaBrava(item.neighborhood), displayLocationName(item.city)].filter(Boolean).join(' - ')}</small>
-                                            <h3>{replaceItajaiWithPraiaBrava(item.title)}</h3>
+                                            <small><MapPin size={13} /> {relatedLocation || 'Litoral catarinense'}</small>
+                                            <h3>{relatedTitle}</h3>
                                             <div className="plp-related-meta">
                                                 <span>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m²` : 'Área sob consulta'}</span>
                                                 <span>{itemSuites ? `${itemSuites} suítes` : item.property_type || 'Imóvel'}</span>

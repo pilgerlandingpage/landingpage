@@ -85,6 +85,15 @@ function connectedInstanceFor(instances: any[], match: { id?: string | null; wha
     )) || null
 }
 
+function connectedVirtualBrokerMatch(instances: any[], brokers: any[]) {
+    for (const broker of brokers) {
+        const instance = connectedInstanceFor(instances, broker, 'broker_id')
+        if (instance) return { broker, instance }
+    }
+
+    return null
+}
+
 function globalContact(legacyName?: string | null, legacyLogin?: string | null): ResponsibleBrokerContact {
     return {
         broker_id: null,
@@ -142,13 +151,15 @@ async function resolveBrokerContactsByPropertyId(supabase: SupabaseLike, propert
         const legacyLogin = row?.broker_login || null
         const candidates = candidateNames(legacyName, legacyLogin)
 
-        const virtualBroker = virtualBrokers.find(broker => (
-            broker?.is_active !== false &&
+        const matchingVirtualBrokers = virtualBrokers.filter(broker => (
             namesMatch(normalizeName(broker?.name), candidates)
-        )) || null
-        const virtualInstance = virtualBroker
+        ))
+        const connectedVirtualBroker = connectedVirtualBrokerMatch(instances, matchingVirtualBrokers)
+        const activeVirtualBroker = matchingVirtualBrokers.find(broker => broker?.is_active !== false) || null
+        const virtualBroker = connectedVirtualBroker?.broker || activeVirtualBroker
+        const virtualInstance = connectedVirtualBroker?.instance || (virtualBroker
             ? connectedInstanceFor(instances, virtualBroker, 'broker_id')
-            : null
+            : null)
 
         if (virtualBroker && virtualInstance) {
             contactByPropertyId.set(row.property_id, {

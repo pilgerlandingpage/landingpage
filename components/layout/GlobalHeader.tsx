@@ -181,7 +181,15 @@ export default function GlobalHeader() {
     const [mobileInstagramPosts, setMobileInstagramPosts] = useState<HeaderInstagramPost[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
 
-    const closeMobileMenu = () => setMobileMenuOpen(false)
+    const closeMobileMenu = () => {
+        setMobileMenuOpen(false)
+        setOpenAccordion(null)
+    }
+
+    const handleMobileHomeClick = () => {
+        closeMobileMenu()
+        window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
+    }
 
     const toggleAccordion = (val: string) => {
         setOpenAccordion(openAccordion === val ? null : val)
@@ -217,7 +225,7 @@ export default function GlobalHeader() {
 
     return (
         <>
-            <header className={`gh-wrap ${pathname === '/' || pathname === '/busca' ? 'gh-home-mobile' : ''} ${pathname === '/' ? 'gh-home-topbar-mobile' : ''}`}>
+            <header className={`gh-wrap ${pathname === '/busca' ? 'gh-home-mobile' : ''}`}>
                 <div className="gh-topbar">
                     <div>CRECI/SC 6772-J - Guilherme Pilger Corretor de Imóveis</div>
                     <div className="gh-topbar-right">
@@ -357,7 +365,7 @@ export default function GlobalHeader() {
                             </button>
                         </div>
                         <div className="gh-mobile-links">
-                            <Link href="/" className="gh-mobile-nav-item" onClick={closeMobileMenu}>
+                            <Link href="/" className="gh-mobile-nav-item" onClick={handleMobileHomeClick}>
                                 <span className="gh-mobile-link-main"><Home size={17} strokeWidth={1.75} /><span>Home</span></span>
                             </Link>
 

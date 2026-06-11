@@ -14,7 +14,7 @@ export default function HeroVideoBackground() {
       fill
       priority
       fetchPriority="high"
-      quality={58}
+      quality={88}
       sizes="(max-width: 768px) 100vw, 1360px"
       style={{
         objectFit: 'cover',

@@ -16,6 +16,7 @@ export default function PropertyLandingStyles() {
                     --plp-green: #0f9f7a;
                     --plp-radius: 8px;
                     --plp-shadow: 0 16px 44px rgba(19, 24, 29, 0.12);
+                    --plp-photo-aspect: 4 / 3;
                 }
 
                 .plp-page {
@@ -326,7 +327,7 @@ export default function PropertyLandingStyles() {
                     display: grid;
                     grid-template-columns: minmax(0, 1fr) 104px;
                     gap: 12px;
-                    min-height: clamp(500px, 37vw, 660px);
+                    min-height: 0;
                 }
 
                 .plp-gallery-composer.single {
@@ -348,7 +349,8 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-main-photo {
-                    min-height: clamp(500px, 37vw, 660px);
+                    aspect-ratio: var(--plp-photo-aspect);
+                    min-height: 0;
                 }
 
                 .plp-main-photo img,
@@ -356,6 +358,7 @@ export default function PropertyLandingStyles() {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    object-position: center;
                     display: block;
                 }
 
@@ -535,26 +538,28 @@ export default function PropertyLandingStyles() {
 
                 .plp-gallery-modal-scroll {
                     overflow-y: auto;
-                    padding: 10px 12px 16px;
+                    padding: 12px 12px 18px;
                     background: #f6f7f5;
                     scroll-behavior: smooth;
                 }
 
                 .plp-gallery-modal-item {
-                    margin: 0 0 8px;
+                    width: min(100%, 960px);
+                    aspect-ratio: var(--plp-photo-aspect);
+                    margin: 0 auto 10px;
                     padding: 0;
                     border-radius: 8px;
                     overflow: hidden;
-                    background: transparent;
+                    background: #eceff1;
                     border: 0;
                 }
 
                 .plp-gallery-modal-item img {
                     display: block;
                     width: 100%;
-                    max-height: 82vh;
-                    object-fit: contain;
-                    background: #eceff1;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
                 }
 
                 @keyframes plp-gallery-rise {
@@ -1285,6 +1290,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-page .pd-gallery-item {
+                    aspect-ratio: var(--plp-photo-aspect);
                     border-radius: var(--plp-radius);
                     box-shadow: none;
                 }
@@ -1455,8 +1461,10 @@ export default function PropertyLandingStyles() {
                 .plp-related-card img {
                     display: block;
                     width: 100%;
-                    height: 180px;
+                    aspect-ratio: var(--plp-photo-aspect);
+                    height: auto;
                     object-fit: cover;
+                    object-position: center;
                 }
 
                 .plp-card-ribbon {
@@ -1545,7 +1553,109 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-mobile-sticky-cta {
-                    display: none;
+                    position: fixed;
+                    right: clamp(22px, 3vw, 44px);
+                    bottom: calc(26px + env(safe-area-inset-bottom));
+                    z-index: 80;
+                    display: flex;
+                    justify-content: flex-end;
+                    pointer-events: none;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-button {
+                    position: relative;
+                    pointer-events: auto;
+                    width: 58px;
+                    min-width: 58px;
+                    height: 58px;
+                    min-height: 58px;
+                    padding: 0;
+                    border-radius: 0;
+                    background: transparent;
+                    color: var(--plp-ink) !important;
+                    box-shadow: none;
+                    overflow: visible;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-prompt {
+                    position: absolute;
+                    right: 66px;
+                    bottom: 0;
+                    display: block;
+                    width: max-content;
+                    max-width: min(320px, calc(100vw - 128px));
+                    min-height: 58px;
+                    padding: 10px 13px 10px 15px;
+                    border: 1px solid rgba(31, 36, 40, 0.12);
+                    border-radius: calc(var(--plp-radius) + 2px);
+                    background: rgba(255, 255, 255, 0.97);
+                    color: #343b42;
+                    font-size: 11px;
+                    font-weight: 800;
+                    line-height: 1.32;
+                    box-shadow: 0 16px 38px rgba(18, 24, 31, 0.16);
+                    opacity: 0;
+                    pointer-events: none;
+                    transform: translateX(12px) scale(0.96);
+                    transform-origin: right center;
+                    animation: plp-mobile-cta-prompt-loop 10s ease-in-out 3s infinite;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-prompt strong {
+                    color: #3d454c;
+                    font-weight: 900;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-prompt svg {
+                    display: inline;
+                    margin-left: 4px;
+                    vertical-align: -2px;
+                    color: #7067d9;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-icon {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 58px;
+                    min-width: 58px;
+                    height: 58px;
+                    border-radius: 999px;
+                    background: var(--plp-green);
+                    color: #fff;
+                    box-shadow: 0 16px 34px rgba(15, 159, 122, 0.32);
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-icon svg {
+                    width: 30px;
+                    height: 30px;
+                }
+
+                .plp-mobile-sticky-cta .plp-mobile-cta-label {
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    margin: -1px;
+                    padding: 0;
+                    overflow: hidden;
+                    clip: rect(0, 0, 0, 0);
+                    white-space: nowrap;
+                }
+
+                @keyframes plp-mobile-cta-prompt-loop {
+                    0%,
+                    48% {
+                        opacity: 1;
+                        pointer-events: auto;
+                        transform: translateX(0) scale(1);
+                    }
+
+                    52%,
+                    100% {
+                        opacity: 0;
+                        pointer-events: none;
+                        transform: translateX(12px) scale(0.96);
+                    }
                 }
 
                 .plp-page .mobile-nav {
@@ -1657,8 +1767,8 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-main-photo {
-                        min-height: 360px;
-                        aspect-ratio: 4 / 5;
+                        min-height: 0;
+                        aspect-ratio: var(--plp-photo-aspect);
                     }
 
                     .plp-instagram-strip {
@@ -1825,7 +1935,7 @@ export default function PropertyLandingStyles() {
                         justify-content: flex-end;
                     }
 
-                    .plp-mobile-cta-button {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-button {
                         position: relative;
                         width: 58px;
                         min-width: 58px;
@@ -1839,7 +1949,7 @@ export default function PropertyLandingStyles() {
                         overflow: visible;
                     }
 
-                    .plp-mobile-cta-prompt {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-prompt {
                         position: absolute;
                         right: 66px;
                         bottom: 0;
@@ -1863,19 +1973,19 @@ export default function PropertyLandingStyles() {
                         animation: plp-mobile-cta-prompt-loop 10s ease-in-out 3s infinite;
                     }
 
-                    .plp-mobile-cta-prompt strong {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-prompt strong {
                         color: #3d454c;
                         font-weight: 900;
                     }
 
-                    .plp-mobile-cta-prompt svg {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-prompt svg {
                         display: inline;
                         margin-left: 4px;
                         vertical-align: -2px;
                         color: #7067d9;
                     }
 
-                    .plp-mobile-cta-icon {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-icon {
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
@@ -1888,12 +1998,12 @@ export default function PropertyLandingStyles() {
                         box-shadow: 0 16px 34px rgba(15, 159, 122, 0.32);
                     }
 
-                    .plp-mobile-cta-icon svg {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-icon svg {
                         width: 30px;
                         height: 30px;
                     }
 
-                    .plp-mobile-cta-label {
+                    .plp-mobile-sticky-cta .plp-mobile-cta-label {
                         position: absolute;
                         width: 1px;
                         height: 1px;
@@ -1973,7 +2083,7 @@ export default function PropertyLandingStyles() {
                     min-width: 0;
                 }
 
-                @media (min-width: 761px) {
+                @media (min-width: 1121px) {
                     .plp-gallery-column {
                         grid-column: 1;
                         grid-row: 1;
@@ -1985,24 +2095,24 @@ export default function PropertyLandingStyles() {
                     }
 
                     #localizacao.plp-location-band {
-                        grid-column: 1;
+                        grid-column: 1 / -1;
                         grid-row: 3;
                     }
 
                     .plp-sidebar {
                         grid-column: 2;
-                        grid-row: 1 / span 3;
+                        grid-row: 1 / span 2;
                     }
                 }
 
                 .plp-gallery-composer {
                     grid-template-columns: minmax(0, 1fr) 82px;
                     gap: 9px;
-                    min-height: clamp(350px, 31vw, 430px);
+                    min-height: 0;
                 }
 
                 .plp-main-photo {
-                    min-height: clamp(350px, 31vw, 430px);
+                    min-height: 0;
                 }
 
                 .plp-thumb-rail {
@@ -2292,6 +2402,13 @@ export default function PropertyLandingStyles() {
                     box-shadow: none;
                 }
 
+                @media (min-width: 1121px) {
+                    #localizacao .plp-map-frame {
+                        min-height: clamp(420px, 34vw, 560px);
+                        height: clamp(420px, 34vw, 560px);
+                    }
+                }
+
                 .plp-thesis-grid {
                     gap: 9px;
                 }
@@ -2325,7 +2442,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-related-card img {
-                    height: 145px;
+                    height: auto;
                 }
 
                 .plp-related-card > div {
@@ -2417,8 +2534,8 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-main-photo {
-                        min-height: 260px;
-                        aspect-ratio: 1.08 / 1;
+                        min-height: 0;
+                        aspect-ratio: var(--plp-photo-aspect);
                     }
 
                     /* Dissolve sidebar: cards viram filhos diretos do grid */
