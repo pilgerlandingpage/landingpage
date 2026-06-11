@@ -69,6 +69,20 @@ function cleanRepeatedPraiaBravaText(value: unknown) {
         .replace(/\bPraia Brava\s+em\s+Praia Brava\b/gi, 'Praia Brava')
 }
 
+function formatBrokerCreci(value?: string | null) {
+    const raw = String(value || '').trim()
+    if (!raw || /^n\/?a$/i.test(raw) || /^nao informado$/i.test(raw)) return ''
+
+    const withoutPrefix = raw
+        .replace(/^creci\s*\/?\s*/i, '')
+        .replace(/^sc\s*\/?\s*/i, '')
+        .trim()
+
+    if (!withoutPrefix) return ''
+
+    return `CRECI/SC ${withoutPrefix}`
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
     const property = await getPropertyForSeo(id)
@@ -247,6 +261,10 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const brokerCardImage = responsibleBroker.is_connected && responsibleBroker.photo_url
         ? responsibleBroker.photo_url
         : BROKER_IMAGE
+    const brokerCreci = formatBrokerCreci(responsibleBroker.creci)
+    const brokerCredentialLine = brokerCreci
+        ? `Corretor de imóveis | ${brokerCreci}`
+        : 'Corretor de imóveis'
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
     const displayTitle = cleanRepeatedPraiaBravaText(property.title)
@@ -576,6 +594,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                             <img src={brokerCardImage} alt={brokerCardName} />
                             <div>
                                 <h3>{brokerCardName}</h3>
+                                <p>{brokerCredentialLine}</p>
                             </div>
                         </div>
                     </aside>

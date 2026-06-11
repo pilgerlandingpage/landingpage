@@ -105,7 +105,7 @@ function globalContact(legacyName?: string | null, legacyLogin?: string | null):
         phone: GLOBAL_PROPERTY_WHATSAPP_PHONE,
         photo_url: null,
         email: null,
-        creci: null,
+        creci: 'SC 6772-J',
         is_connected: false,
         source: 'global',
     }
