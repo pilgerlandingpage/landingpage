@@ -11,6 +11,7 @@ import AdsCountdown from '@/components/admin/AdsCountdown'
 import LeadClock from '@/components/admin/LeadClock'
 import AdsChartFrame from '@/components/admin/AdsChartFrame'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import AdsTrackingSettingsCard from '@/components/admin/AdsTrackingSettingsCard'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -479,6 +480,8 @@ export default function AdsPage() {
                     </div>
                 </div>
             )}
+
+            <AdsTrackingSettingsCard platform="google" onNotify={showToast} />
 
             <div className="ads-top-cards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                 <AdsCountdown noMargin />
