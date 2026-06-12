@@ -1,4 +1,4 @@
-export const DEFAULT_META_PIXEL_ID = '1909600186425343'
+export const DEFAULT_META_PIXEL_ID = '1660438131829465'
 
 export function normalizeMetaPixelId(value: unknown) {
     const normalized = String(value || '').trim().replace(/\s+/g, '')

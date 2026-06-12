@@ -34,7 +34,7 @@ const TRACKING_CONFIGS: Record<Platform, TrackingCardConfig> = {
         eyebrow: 'Meta Ads',
         description: 'Pixel usado nas campanhas de Facebook e Instagram.',
         fields: [
-            { key: 'meta_pixel_id', label: 'Meta Pixel ID', placeholder: '1909600186425343' },
+            { key: 'meta_pixel_id', label: 'Meta Pixel ID', placeholder: '1660438131829465' },
         ],
         primaryKey: 'meta_pixel_id',
         accent: '#1877f2',
