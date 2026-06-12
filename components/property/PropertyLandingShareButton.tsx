@@ -1,11 +1,15 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Share2 } from 'lucide-react'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Props = {
     propertyId: string
     title: string
+    className?: string
+    children?: ReactNode
+    source?: string
 }
 
 function copyParam(source: URLSearchParams, target: URLSearchParams, key: string) {
@@ -36,32 +40,52 @@ function buildTrackedShareUrl(propertyId: string, title: string) {
     return tracked.toString()
 }
 
-export default function PropertyLandingShareButton({ propertyId, title }: Props) {
-    const handleShare = async () => {
-        const url = buildTrackedShareUrl(propertyId, title)
-        const text = `${title} - Guilherme Pilger`
+type SharePropertyLandingInput = {
+    propertyId: string
+    title: string
+    source?: string
+}
 
+export async function sharePropertyLanding({
+    propertyId,
+    title,
+    source = 'property_details_landing',
+}: SharePropertyLandingInput) {
+    const url = buildTrackedShareUrl(propertyId, title)
+    const text = `${title} - Guilherme Pilger`
+
+    if (navigator.share) {
+        await navigator.share({ title, text, url })
+    } else {
+        await navigator.clipboard?.writeText(url)
+    }
+
+    void trackEvent('property_shared', {
+        property_id: propertyId,
+        title,
+        target_url: url,
+        source,
+    })
+}
+
+export default function PropertyLandingShareButton({
+    propertyId,
+    title,
+    className,
+    children,
+    source,
+}: Props) {
+    const handleShare = async () => {
         try {
-            if (navigator.share) {
-                await navigator.share({ title, text, url })
-            } else {
-                await navigator.clipboard?.writeText(url)
-            }
+            await sharePropertyLanding({ propertyId, title, source })
         } catch {
             return
         }
-
-        void trackEvent('property_shared', {
-            property_id: propertyId,
-            title,
-            target_url: url,
-            source: 'property_details_landing',
-        })
     }
 
     return (
-        <button type="button" onClick={handleShare}>
-            <Share2 size={16} /> Compartilhar
+        <button type="button" className={className} onClick={handleShare}>
+            {children || <><Share2 size={16} /> Compartilhar</>}
         </button>
     )
 }

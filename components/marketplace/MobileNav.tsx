@@ -1,42 +1,124 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Search, MessageSquare } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Heart, Search, Share2 } from 'lucide-react'
+import { sharePropertyLanding } from '@/components/property/PropertyLandingShareButton'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
-export default function MobileNav() {
+type MobileNavProps = {
+    phone?: string
+    message?: string
+    slug?: string
+    template?: string
+    metadata?: Record<string, unknown>
+    sharePropertyId?: string
+    shareTitle?: string
+    whatsappLabel?: string
+    exploreHref?: string
+}
+
+export default function MobileNav({
+    phone: explicitPhone,
+    message: explicitMessage,
+    slug = 'home',
+    template = 'marketplace-home',
+    metadata,
+    sharePropertyId,
+    shareTitle,
+    whatsappLabel = 'Falar com Especialista',
+    exploreHref = '/#mapa',
+}: MobileNavProps = {}) {
+    const router = useRouter()
+    const pathname = usePathname()
     const [broker, setBroker] = useState<{ phone?: string; greeting_message?: string } | null>(null)
 
     useEffect(() => {
-        fetch('/api/broker-for-page?slug=home')
+        if (explicitPhone) {
+            return
+        }
+
+        fetch(`/api/broker-for-page?slug=${encodeURIComponent(slug)}`)
             .then(r => r.json())
             .then(d => { if (d?.broker) setBroker(d.broker) })
             .catch(() => {})
-    }, [])
+    }, [explicitPhone, slug])
 
     const openChat = useCallback(() => {
         const fallbackPhone = '5547992528080'
-        const phone = broker?.phone || fallbackPhone
-        const message = broker?.greeting_message || 'Olá! Quero falar com um especialista.'
+        const phone = explicitPhone || broker?.phone || fallbackPhone
+        const message = explicitMessage || broker?.greeting_message || 'Ola! Quero falar com um especialista.'
 
         openWhatsAppWithLeadCapture({
             phone,
             message,
-            slug: 'home',
-            template: 'marketplace-home',
+            slug,
+            template,
+            metadata,
         })
-    }, [broker])
+    }, [broker, explicitPhone, explicitMessage, slug, template, metadata])
+
+    const shareProperty = useCallback(() => {
+        if (!sharePropertyId || !shareTitle) return
+
+        void sharePropertyLanding({
+            propertyId: sharePropertyId,
+            title: shareTitle,
+            source: 'property_details_mobile_nav',
+        }).catch(() => {})
+    }, [sharePropertyId, shareTitle])
+
+    const explore = useCallback(() => {
+        const supportsCustomEvent = typeof window.CustomEvent === 'function'
+        const openMapSearchEvent = supportsCustomEvent
+            ? new CustomEvent('pilger:open-map-search', {
+                cancelable: true,
+                detail: { source: slug },
+            })
+            : document.createEvent('Event')
+
+        if (!supportsCustomEvent) {
+            openMapSearchEvent.initEvent('pilger:open-map-search', true, true)
+        }
+
+        const shouldFallbackToNavigation = window.dispatchEvent(openMapSearchEvent)
+        if (!shouldFallbackToNavigation || openMapSearchEvent.defaultPrevented) {
+            return
+        }
+
+        const [targetPath = '/', targetHash] = exploreHref.split('#')
+        const normalizedTargetPath = targetPath || '/'
+
+        if (targetHash && pathname === normalizedTargetPath) {
+            const target = document.getElementById(targetHash)
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                window.history.replaceState(null, '', `${normalizedTargetPath}#${targetHash}`)
+                return
+            }
+        }
+
+        router.push(exploreHref)
+    }, [exploreHref, pathname, router, slug])
+
+    const hasShareAction = Boolean(sharePropertyId && shareTitle)
 
     return (
         <div className="mobile-nav" style={{ gap: '0', justifyContent: 'space-evenly', padding: '0 8px' }}>
-            <div className="nav-item active">
+            <button type="button" className="nav-item active" onClick={explore}>
                 <div className="nav-icon"><Search size={22} /></div>
                 <span>Explorar</span>
-            </div>
+            </button>
             <div className="nav-item">
-                <div className="nav-icon"><HeartIcon /></div>
+                <div className="nav-icon"><Heart size={22} /></div>
                 <span>Favoritos</span>
             </div>
+            {hasShareAction && (
+                <button type="button" className="nav-item" onClick={shareProperty}>
+                    <div className="nav-icon"><Share2 size={21} /></div>
+                    <span>Compartilhar</span>
+                </button>
+            )}
             <div onClick={openChat} style={{
                 cursor: 'pointer',
                 backgroundColor: '#25D366',
@@ -53,14 +135,8 @@ export default function MobileNav() {
                 transform: 'translateY(-2px)'
             }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-                Falar com Especialista
+                {whatsappLabel}
             </div>
         </div>
-    )
-}
-
-function HeartIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
     )
 }

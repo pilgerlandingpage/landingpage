@@ -72,7 +72,7 @@ const PROPERTY_TYPE_OPTIONS = [
 ]
 
 const PRICE_OPTIONS = [
-    { value: 'all', label: 'Todos acima de R$4 mi' },
+    { value: 'all', label: 'Acima de R$4 mi' },
     { value: '4000000-6000000', label: 'R$4.000.000 a R$6.000.000' },
     { value: '6000000-8000000', label: 'R$6.000.000 a R$8.000.000' },
     { value: '8000000-10000000', label: 'R$8.000.000 a R$10.000.000' },
@@ -107,7 +107,7 @@ function normalize(value: unknown) {
 }
 
 function priceLabel(value: string) {
-    return PRICE_OPTIONS.find(option => option.value === value)?.label || 'Todos acima de R$4 mi'
+    return PRICE_OPTIONS.find(option => option.value === value)?.label || 'Acima de R$4 mi'
 }
 
 function typeLabel(value: string) {

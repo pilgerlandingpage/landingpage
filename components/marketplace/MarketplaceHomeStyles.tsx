@@ -1568,7 +1568,11 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           flex-direction: column;
           align-items: center;
           gap: 2px;
+          padding: 0;
+          border: 0;
+          background: transparent;
           color: var(--text-muted, #999);
+          font: inherit;
           font-size: 0.65rem;
           cursor: pointer;
           width: 54px;

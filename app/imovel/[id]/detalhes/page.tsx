@@ -22,6 +22,7 @@ import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlT
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
 import PropertyLandingShareButton from '@/components/property/PropertyLandingShareButton'
 import MobileNav from '@/components/marketplace/MobileNav'
+import MobileMapSearchModal from '@/components/marketplace/MobileMapSearchModal'
 import MapSearch from '@/components/marketplace/MapSearch'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import GlobalHeader from '@/components/layout/GlobalHeader'
@@ -36,6 +37,33 @@ import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from 
 export const dynamic = 'force-dynamic'
 
 const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
+const PROPERTY_MAP_MODAL_MIN_PRICE = 4000000
+const PROPERTY_MAP_MODAL_SELECT = [
+    'id',
+    'title',
+    'seo_title',
+    'city',
+    'state',
+    'neighborhood',
+    'price',
+    'rent',
+    'purpose',
+    'bedrooms',
+    'bathrooms',
+    'suites',
+    'parking_spaces',
+    'area_m2',
+    'area_private_m2',
+    'featured_image',
+    'images',
+    'property_type',
+    'exclusive',
+    'source_status',
+    'description',
+    'latitude',
+    'longitude',
+    'updated_at',
+].join(', ')
 const RELATED_PROPERTY_SELECT = [
     'id',
     'title',
@@ -260,6 +288,33 @@ function hasUsableCoordinate(value: unknown) {
 
 function hasMapCoordinates(property: any) {
     return hasUsableCoordinate(property.latitude) && hasUsableCoordinate(property.longitude)
+}
+
+function toMobileExploreMapProperty(property: any, titleOverride?: string, imageOverride?: string) {
+    const area = Number(property.area_private_m2 || property.area_m2 || 0)
+
+    return {
+        id: property.id,
+        title: cleanRepeatedPraiaBravaText(titleOverride || property.seo_title || property.title || 'Imovel'),
+        city: displayLocationName(property.city) || property.city || null,
+        state: property.state || null,
+        neighborhood: replaceItajaiWithPraiaBrava(property.neighborhood) || property.neighborhood || null,
+        price: property.price || null,
+        rent: property.rent || null,
+        purpose: property.purpose || null,
+        latitude: property.latitude,
+        longitude: property.longitude,
+        featured_image: property.featured_image || property.images?.[0] || imageOverride || null,
+        bedrooms: property.bedrooms || null,
+        bathrooms: property.bathrooms || null,
+        suites: property.suites || null,
+        parking_spaces: property.parking_spaces || null,
+        area_m2: area || property.area_m2 || null,
+        property_type: property.property_type || null,
+        description: property.description || null,
+        source_status: property.source_status || null,
+        exclusive: property.exclusive || null,
+    }
 }
 
 function numericValue(value: unknown) {
@@ -521,8 +576,20 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         .eq('event_type', 'property_details_landing_viewed')
         .contains('metadata', { property_id: property.id })
 
+    const { data: propertyMapModalRows, error: propertyMapModalError } = await supabase
+        .from('properties')
+        .select(PROPERTY_MAP_MODAL_SELECT)
+        .eq('status', 'active')
+        .gte('price', PROPERTY_MAP_MODAL_MIN_PRICE)
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .limit(260)
+
     if (propertyViewCountError) {
         console.warn('[Property Detail] view count unavailable:', propertyViewCountError.message)
+    }
+
+    if (propertyMapModalError) {
+        console.warn('[Property Detail] map modal portfolio unavailable:', propertyMapModalError.message)
     }
 
     const propertyViewCount = propertyViewCountRaw || 0
@@ -601,6 +668,16 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
     const relatedCandidates = await getRelatedPropertyCandidates(supabase, property)
     const related = selectRelatedProperties(property, relatedCandidates)
+    const mobileExploreMapPropertiesById = new Map<string, ReturnType<typeof toMobileExploreMapProperty>>()
+    for (const item of propertyMapModalRows || []) {
+        const mapped = toMobileExploreMapProperty(item)
+        if (mapped.id && hasMapCoordinates(mapped)) mobileExploreMapPropertiesById.set(mapped.id, mapped)
+    }
+    const currentExploreMapProperty = toMobileExploreMapProperty(property, displayTitle, primaryImage)
+    if (currentExploreMapProperty.id && hasMapCoordinates(currentExploreMapProperty)) {
+        mobileExploreMapPropertiesById.set(currentExploreMapProperty.id, currentExploreMapProperty)
+    }
+    const mobileExploreMapProperties = Array.from(mobileExploreMapPropertiesById.values())
     const propertyJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -941,7 +1018,21 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 </WhatsAppCaptureLink>
             </div>
 
-            <MobileNav />
+            <MobileNav
+                phone={contactPhone}
+                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
+                slug="imovel"
+                template="property-classic-mobile-nav"
+                metadata={propertyTrackingMetadata}
+                sharePropertyId={property.id}
+                shareTitle={displayTitle}
+                whatsappLabel="Especialista"
+            />
+            <MobileMapSearchModal
+                properties={mobileExploreMapProperties}
+                defaultSource="property_details_mobile_nav"
+                statFallback="Curadoria no mapa"
+            />
         </main>
         </>
     )

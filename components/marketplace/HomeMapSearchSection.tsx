@@ -14,6 +14,7 @@ import {
     Search,
     Sparkles,
     Waves,
+    X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
@@ -407,6 +408,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [isHomeMapInteractionUnlocked, setIsHomeMapInteractionUnlocked] = useState(false)
     const [isOfficeLocationSelected, setIsOfficeLocationSelected] = useState(false)
     const [showMapLockedHint, setShowMapLockedHint] = useState(false)
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const guidedSearchStartedRef = useRef(false)
     const trackedGuideStepRef = useRef<number | null>(null)
@@ -627,6 +629,20 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         }, 2600)
     }, [isMapInteractionLocked])
 
+    const openMapModal = useCallback((source = 'mobile_nav') => {
+        setShowMapLockedHint(false)
+        setIsMapModalOpen(true)
+        void trackEvent('home_map_modal_opened', {
+            source,
+            results_count: filteredProperties.length,
+            mapped_count: filteredMappedTotal,
+        })
+    }, [filteredMappedTotal, filteredProperties.length])
+
+    const closeMapModal = useCallback(() => {
+        setIsMapModalOpen(false)
+    }, [])
+
     const markGuidedSearchSeen = useCallback(() => {
         try {
             window.localStorage.setItem(GUIDED_SEARCH_STORAGE_KEY, 'true')
@@ -841,6 +857,42 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         }
     }, [])
 
+    useEffect(() => {
+        const handleOpenMapSearch = (event: Event) => {
+            event.preventDefault()
+            const source = typeof window.CustomEvent === 'function' && event instanceof window.CustomEvent
+                ? String(event.detail?.source || 'mobile_nav')
+                : 'mobile_nav'
+            openMapModal(source)
+        }
+
+        window.addEventListener('pilger:open-map-search', handleOpenMapSearch)
+        return () => window.removeEventListener('pilger:open-map-search', handleOpenMapSearch)
+    }, [openMapModal])
+
+    useEffect(() => {
+        if (!isMapModalOpen) return
+
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+
+        const focusTimer = window.setTimeout(() => {
+            document.querySelector<HTMLInputElement>('.mobile-map-modal .home-search-location-row input')?.focus({ preventScroll: true })
+        }, 180)
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') closeMapModal()
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+
+        return () => {
+            document.body.style.overflow = previousOverflow
+            window.clearTimeout(focusTimer)
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [closeMapModal, isMapModalOpen])
+
     return (
         <section className="home-map-search" id="mapa">
             <div className="map-search-shell" ref={wrapperRef}>
@@ -851,6 +903,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             refitKey={homeMapRefitKey}
                             interactionEnabled={!isMapInteractionLocked}
                             officeMarker={homeOfficeMarker}
+                            initialMapStyle="luxury"
                         />
                     ) : (
                         <div className="map-preview-placeholder" aria-hidden="true">
@@ -1027,6 +1080,71 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 </form>
             </div>
 
+            {isMapModalOpen && (
+                <div className="mobile-map-modal-backdrop" onClick={closeMapModal} role="presentation">
+                    <div
+                        aria-label="Buscar imóveis no mapa"
+                        aria-modal="true"
+                        className="mobile-map-modal"
+                        onClick={event => event.stopPropagation()}
+                        role="dialog"
+                    >
+                        <div className="mobile-map-modal-head">
+                            <div>
+                                <span>Explorar no mapa</span>
+                                <strong>Busque por cidade, bairro ou perfil</strong>
+                            </div>
+                            <button type="button" onClick={closeMapModal} aria-label="Fechar busca no mapa">
+                                <X size={20} strokeWidth={2.4} />
+                            </button>
+                        </div>
+                        <div className="mobile-map-modal-body">
+                            <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
+                                {shouldRenderMap ? (
+                                    <MapSearch
+                                        properties={homeMapProperties}
+                                        refitKey={`${homeMapRefitKey}-modal`}
+                                        interactionEnabled={!isMapInteractionLocked}
+                                        officeMarker={homeOfficeMarker}
+                                        initialMapStyle="luxury"
+                                    />
+                                ) : (
+                                    <div className="map-preview-placeholder" aria-hidden="true">
+                                        <div className="map-placeholder-grid" />
+                                        <span className="map-placeholder-pin"><MapPin size={18} /></span>
+                                    </div>
+                                )}
+                                <div className="map-preview-stat mobile-map-preview-stat">
+                                    <Building2 size={14} />
+                                    <span>{mapPreviewStatLabel}</span>
+                                </div>
+                                {isMapInteractionLocked && (
+                                    <>
+                                        <div
+                                            className={`map-lock-hint ${showMapLockedHint ? 'is-visible' : ''}`}
+                                            role="status"
+                                            aria-live="polite"
+                                        >
+                                            Pesquise uma cidade ou bairro para mover o mapa.
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="map-interaction-lock"
+                                            aria-label="Pesquise uma cidade ou bairro para mover o mapa"
+                                            onClick={showLockedMapHint}
+                                            onPointerDown={showLockedMapHint}
+                                        />
+                                    </>
+                                )}
+                                <div className="map-search-panel map-search-panel-new mobile-map-search-panel">
+                                    <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
                 .home-map-search {
                     margin: clamp(24px, 4vw, 48px) auto;
@@ -1195,6 +1313,93 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .legacy-map-search-panel[hidden] {
                     display: none !important;
+                }
+                .mobile-map-modal-backdrop {
+                    align-items: center;
+                    background: rgba(15,13,10,0.58);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    display: grid;
+                    inset: 0;
+                    justify-items: center;
+                    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+                    position: fixed;
+                    z-index: 5000;
+                }
+                .mobile-map-modal {
+                    background: #fffdf8;
+                    border: 1px solid rgba(223,193,142,0.3);
+                    border-radius: 18px;
+                    box-shadow: 0 28px 80px rgba(0,0,0,0.34);
+                    display: grid;
+                    grid-template-rows: auto minmax(0, 1fr);
+                    height: min(780px, calc(100svh - 24px));
+                    max-width: 520px;
+                    overflow: hidden;
+                    width: min(100%, 520px);
+                }
+                .mobile-map-modal-head {
+                    align-items: center;
+                    background: rgba(255,253,248,0.96);
+                    border-bottom: 1px solid rgba(184,148,95,0.16);
+                    display: flex;
+                    gap: 12px;
+                    justify-content: space-between;
+                    padding: 12px 12px 11px 16px;
+                    position: relative;
+                    z-index: 3;
+                }
+                .mobile-map-modal-head div {
+                    display: grid;
+                    gap: 3px;
+                    min-width: 0;
+                }
+                .mobile-map-modal-head span {
+                    color: #a78042;
+                    font: 950 0.62rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                }
+                .mobile-map-modal-head strong {
+                    color: #211c16;
+                    font: 850 0.86rem/1.12 'Inter', sans-serif;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .mobile-map-modal-head button {
+                    align-items: center;
+                    background: #171410;
+                    border: 0;
+                    border-radius: 999px;
+                    color: #dfc18e;
+                    cursor: pointer;
+                    display: inline-flex;
+                    flex: 0 0 auto;
+                    height: 38px;
+                    justify-content: center;
+                    width: 38px;
+                }
+                .mobile-map-modal-body {
+                    min-height: 0;
+                    position: relative;
+                }
+                .mobile-map-preview-panel {
+                    border-radius: 0;
+                    height: 100%;
+                    min-height: 0;
+                }
+                .mobile-map-search-panel {
+                    bottom: calc(14px + env(safe-area-inset-bottom));
+                    left: 10px;
+                    max-width: none;
+                    right: 10px;
+                    transform: none;
+                    width: auto;
+                }
+                .mobile-map-preview-stat {
+                    bottom: calc(124px + env(safe-area-inset-bottom));
+                    left: 12px;
                 }
                 .search-heading {
                     color: #5b3d12;
@@ -1793,10 +1998,23 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         border-radius: 14px;
                         height: clamp(390px, 68svh, 460px);
                     }
+                    .mobile-map-modal {
+                        border-radius: 16px;
+                        height: calc(100svh - 24px);
+                    }
+                    .mobile-map-preview-panel {
+                        border-radius: 0;
+                        height: 100%;
+                    }
                     .map-preview-stat {
                         bottom: 104px;
                         left: 10px;
                         padding: 4px 6px;
+                        z-index: 545;
+                    }
+                    .mobile-map-preview-stat {
+                        bottom: calc(122px + env(safe-area-inset-bottom));
+                        left: 10px;
                         z-index: 545;
                     }
                     .map-search-panel {
@@ -1810,6 +2028,11 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         transform: none;
                         width: auto;
                         z-index: 760;
+                    }
+                    .mobile-map-search-panel {
+                        bottom: calc(12px + env(safe-area-inset-bottom));
+                        left: 10px;
+                        right: 10px;
                     }
                     .search-heading {
                         display: none;

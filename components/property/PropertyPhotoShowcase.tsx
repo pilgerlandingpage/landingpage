@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
-import { Heart, Images, X } from 'lucide-react'
+import { Images, X } from 'lucide-react'
 import { trackEvent } from '@/lib/tracking/client'
 
 type PropertyPhotoShowcaseProps = {
@@ -15,7 +15,6 @@ export default function PropertyPhotoShowcase({ images, title, metadata, shareSl
     const gallery = useMemo(() => Array.from(new Set((images || []).filter(Boolean))), [images])
     const [activeIndex, setActiveIndex] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
-    const [isFavorited, setIsFavorited] = useState(false)
 
     const activeImage = gallery[0]
 
@@ -67,14 +66,6 @@ export default function PropertyPhotoShowcase({ images, title, metadata, shareSl
             <div className="plp-gallery-composer single">
                 <button type="button" className="plp-main-photo" onClick={() => openGallery()} aria-label="Ver galeria de fotos">
                     <img src={activeImage} alt={title} />
-                </button>
-                <button
-                    type="button"
-                    className={`plp-favorite-btn${isFavorited ? ' active' : ''}`}
-                    onClick={() => setIsFavorited(prev => !prev)}
-                    aria-label={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                >
-                    <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
                 </button>
             </div>
 

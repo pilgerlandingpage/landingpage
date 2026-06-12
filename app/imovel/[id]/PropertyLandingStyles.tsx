@@ -425,39 +425,6 @@ export default function PropertyLandingStyles() {
                     padding: 1px 5px;
                 }
 
-                .plp-favorite-btn {
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    z-index: 2;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 34px;
-                    height: 34px;
-                    border: none;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.88);
-                    color: #e53e3e;
-                    cursor: pointer;
-                    backdrop-filter: blur(3px);
-                    transition: background 0.18s, transform 0.15s;
-                }
-
-                .plp-favorite-btn:hover {
-                    background: rgba(255, 255, 255, 0.97);
-                    transform: scale(1.08);
-                }
-
-                .plp-favorite-btn.active {
-                    background: rgba(229, 62, 62, 0.12);
-                }
-
-                .plp-favorite-btn svg {
-                    width: 16px;
-                    height: 16px;
-                }
-
                 .plp-thumb-rail {
                     display: grid;
                     grid-template-rows: repeat(5, minmax(0, 1fr));
@@ -1659,17 +1626,64 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-page .mobile-nav {
-                    background: rgba(255, 255, 255, 0.96);
+                    position: fixed;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center !important;
+                    gap: clamp(3px, 1.5vw, 8px) !important;
+                    min-height: 58px;
+                    padding: 0 6px env(safe-area-inset-bottom) !important;
                     border-top: 1px solid rgba(31, 36, 40, 0.1);
+                    background: rgba(255, 255, 255, 0.96);
+                    box-shadow: 0 -10px 28px rgba(18, 24, 31, 0.08);
                     backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
                 }
 
                 .plp-page .nav-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    width: 58px;
+                    height: 48px;
+                    padding: 0;
+                    border: 0;
+                    background: transparent;
+                    gap: 2px;
                     color: #7b858d;
+                    font-family: inherit;
+                    font-size: 0.55rem;
+                    font-weight: 500;
+                    line-height: 1.1;
+                    white-space: nowrap;
+                    cursor: pointer;
+                    transition: color 0.2s ease;
                 }
 
                 .plp-page .nav-item.active {
                     color: var(--plp-gold-dark);
+                }
+
+                .plp-page .nav-icon {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 1px;
+                }
+
+                .plp-page .mobile-nav > div:last-child {
+                    flex: 0 0 auto;
+                    min-width: 0;
+                    width: clamp(156px, 45vw, 184px);
+                    max-width: clamp(156px, 45vw, 184px);
+                    justify-content: center;
+                    padding: 10px !important;
+                    font-size: 0.62rem !important;
                 }
 
                 @media (max-width: 1120px) {
@@ -2621,8 +2635,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-sticky-cta {
-                        right: 14px;
-                        bottom: calc(68px + env(safe-area-inset-bottom));
+                        display: none;
                     }
                 }
             ` }} />
