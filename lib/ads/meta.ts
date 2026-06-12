@@ -14,6 +14,7 @@ import type {
     MetricsSnapshot
 } from './types'
 import { createAdminClient } from '../supabase/server'
+import { resolveMetaPixelId } from '@/lib/tracking/meta-pixel'
 
 const META_API_VERSION = 'v21.0'
 
@@ -70,7 +71,7 @@ async function getMetaConfig() {
     return {
         accessToken: token,
         adAccountId: id.startsWith('act_') ? id : `act_${id}`,
-        pixelId: configMap['meta_pixel_id'] || process.env.META_PIXEL_ID
+        pixelId: resolveMetaPixelId(configMap['meta_pixel_id'], process.env.META_PIXEL_ID)
     };
 }
 

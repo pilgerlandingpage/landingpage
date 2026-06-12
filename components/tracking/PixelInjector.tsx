@@ -21,8 +21,9 @@ export default function PixelInjector({
         <>
             {/* Meta (Facebook) Pixel */}
             {metaPixelId && (
-                <Script id="meta-pixel" strategy="afterInteractive">
-                    {`
+                <>
+                    <Script id="meta-pixel" strategy="afterInteractive">
+                        {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -34,7 +35,17 @@ export default function PixelInjector({
             fbq('init', '${metaPixelId}');
             fbq('track', 'PageView');
           `}
-                </Script>
+                    </Script>
+                    <noscript>
+                        <img
+                            height="1"
+                            width="1"
+                            style={{ display: 'none' }}
+                            src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+                            alt=""
+                        />
+                    </noscript>
+                </>
             )}
 
             {/* Google Analytics (GA4) */}
