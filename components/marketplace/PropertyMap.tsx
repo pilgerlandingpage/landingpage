@@ -49,6 +49,7 @@ interface PropertyMapProps {
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
+    onUserBoundsChange?: (bounds: MapBounds) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -236,30 +237,77 @@ function MapUpdater({ points, refitKey = '' }: { points: [number, number][], ref
     return null
 }
 
-function BoundsEmitter({ onBoundsChange }: { onBoundsChange?: (bounds: MapBounds) => void }) {
+function BoundsEmitter({
+    onBoundsChange,
+    onUserBoundsChange,
+}: {
+    onBoundsChange?: (bounds: MapBounds) => void
+    onUserBoundsChange?: (bounds: MapBounds) => void
+}) {
     const map = useMap()
+    const userIntentRef = useRef(false)
+    const resetTimerRef = useRef<number | null>(null)
 
     useEffect(() => {
-        if (!onBoundsChange) return
+        if (!onBoundsChange && !onUserBoundsChange) return
+
+        const markUserIntent = () => {
+            userIntentRef.current = true
+
+            if (resetTimerRef.current) {
+                window.clearTimeout(resetTimerRef.current)
+            }
+
+            resetTimerRef.current = window.setTimeout(() => {
+                userIntentRef.current = false
+                resetTimerRef.current = null
+            }, 1200)
+        }
+
+        const markZoomIntent = (event: L.LeafletEvent) => {
+            if ('originalEvent' in event) {
+                markUserIntent()
+            }
+        }
 
         const emitBounds = () => {
             const b = map.getBounds()
-            onBoundsChange({
+            const bounds = {
                 north: b.getNorth(),
                 south: b.getSouth(),
                 east: b.getEast(),
                 west: b.getWest(),
-            })
-        }
+            }
 
+            onBoundsChange?.(bounds)
+
+            if (userIntentRef.current) {
+                onUserBoundsChange?.(bounds)
+                userIntentRef.current = false
+            }
+        }
+        const container = map.getContainer()
+
+        map.on('dragstart', markUserIntent)
+        map.on('zoomstart', markZoomIntent)
         map.on('moveend', emitBounds)
         map.on('zoomend', emitBounds)
+        container.addEventListener('wheel', markUserIntent, { passive: true })
+        container.addEventListener('keydown', markUserIntent)
 
         return () => {
+            map.off('dragstart', markUserIntent)
+            map.off('zoomstart', markZoomIntent)
             map.off('moveend', emitBounds)
             map.off('zoomend', emitBounds)
+            container.removeEventListener('wheel', markUserIntent)
+            container.removeEventListener('keydown', markUserIntent)
+
+            if (resetTimerRef.current) {
+                window.clearTimeout(resetTimerRef.current)
+            }
         }
-    }, [map, onBoundsChange])
+    }, [map, onBoundsChange, onUserBoundsChange])
 
     return null
 }
@@ -485,6 +533,7 @@ export default function PropertyMap({
     hoveredPropertyId,
     onMarkerHover,
     onBoundsChange,
+    onUserBoundsChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -1364,7 +1413,7 @@ export default function PropertyMap({
 
                 <MapUpdater points={mapPoints} refitKey={refitKey} />
                 <MapInteractionController enabled={interactionEnabled} />
-                <BoundsEmitter onBoundsChange={onBoundsChange} />
+                <BoundsEmitter onBoundsChange={onBoundsChange} onUserBoundsChange={onUserBoundsChange} />
                 {officeMarker && officeIcon && (
                     <Marker position={officeMarker.latLng} icon={officeIcon} zIndexOffset={1200}>
                         <Popup className="agency-location-popup" minWidth={260} maxWidth={292}>

@@ -65,6 +65,7 @@ interface MapSearchProps {
     hoveredPropertyId?: string | null
     onMarkerHover?: (id: string | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
+    onUserBoundsChange?: (bounds: MapBounds) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -76,6 +77,7 @@ export default function MapSearch({
     hoveredPropertyId,
     onMarkerHover,
     onBoundsChange,
+    onUserBoundsChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -88,6 +90,7 @@ export default function MapSearch({
                 hoveredPropertyId={hoveredPropertyId}
                 onMarkerHover={onMarkerHover}
                 onBoundsChange={onBoundsChange}
+                onUserBoundsChange={onUserBoundsChange}
                 refitKey={refitKey}
                 interactionEnabled={interactionEnabled}
                 officeMarker={officeMarker}

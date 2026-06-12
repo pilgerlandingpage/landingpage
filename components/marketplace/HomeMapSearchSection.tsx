@@ -54,6 +54,13 @@ type AppliedFilters = {
     chips: string[]
 }
 
+type MapBounds = {
+    north: number
+    south: number
+    east: number
+    west: number
+}
+
 type StepOption = {
     value: string
     label: string
@@ -270,6 +277,23 @@ function hasCoordinates(property: Property) {
     return hasHomeMapCoordinate(property)
 }
 
+function filterHomePropertiesByBounds(properties: Property[], bounds: MapBounds | null) {
+    if (!bounds) return properties
+
+    return properties.filter(property => {
+        const latLng = getHomeMapLatLng(property)
+        if (!latLng) return false
+
+        const [lat, lng] = latLng
+        return (
+            lat >= bounds.south &&
+            lat <= bounds.north &&
+            lng >= bounds.west &&
+            lng <= bounds.east
+        )
+    })
+}
+
 function matchesMinimumFirstContactPrice(property: Property) {
     return Number(property.price || property.rent || 0) >= MINIMUM_FIRST_CONTACT_PRICE
 }
@@ -409,6 +433,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [isOfficeLocationSelected, setIsOfficeLocationSelected] = useState(false)
     const [showMapLockedHint, setShowMapLockedHint] = useState(false)
     const [isMapModalOpen, setIsMapModalOpen] = useState(false)
+    const [pendingAreaBounds, setPendingAreaBounds] = useState<MapBounds | null>(null)
+    const [appliedAreaBounds, setAppliedAreaBounds] = useState<MapBounds | null>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const guidedSearchStartedRef = useRef(false)
     const trackedGuideStepRef = useRef<number | null>(null)
@@ -479,6 +505,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setQuery(nextLocation)
         setType(mapOverlayTypeToMapFilter(values.typeValue))
         setPrice(values.priceValue === 'all' ? '' : values.priceValue)
+        setPendingAreaBounds(null)
+        setAppliedAreaBounds(null)
 
         if (values.locationType === 'office') {
             setShowMapLockedHint(false)
@@ -591,12 +619,30 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const activeMobileQuizConfig = mobileFilters[mobileQuizStep] || mobileFilters[0]
     const isMapInteractionLocked = !isHomeMapInteractionUnlocked
     const homeMapProperties = isOfficeLocationSelected || isMapInteractionLocked ? [] : filteredProperties
+    const areaFilteredHomeMapProperties = useMemo(
+        () => filterHomePropertiesByBounds(homeMapProperties, appliedAreaBounds),
+        [appliedAreaBounds, homeMapProperties]
+    )
+    const pendingAreaCount = useMemo(
+        () => pendingAreaBounds ? filterHomePropertiesByBounds(homeMapProperties, pendingAreaBounds).length : 0,
+        [homeMapProperties, pendingAreaBounds]
+    )
+    const areaFilteredMappedTotal = useMemo(
+        () => areaFilteredHomeMapProperties.filter(hasCoordinates).length,
+        [areaFilteredHomeMapProperties]
+    )
     const homeOfficeMarker = isMapInteractionLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
     const homeMapRefitKey = isOfficeLocationSelected ? 'home-office-location-selected' : isMapInteractionLocked ? 'home-office-location' : mapRefitKey
     const mapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
         ? 'Imobiliária Guilherme Pilger'
         : `${filteredMappedTotal} de ${mappedTotal} no mapa`
     const shouldRenderMap = true
+    const activeMapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
+        ? mapPreviewStatLabel
+        : appliedAreaBounds
+            ? `${areaFilteredMappedTotal} de ${filteredMappedTotal} nesta area`
+            : mapPreviewStatLabel
+    const shouldShowSearchThisArea = Boolean(pendingAreaBounds && !isMapInteractionLocked && !isOfficeLocationSelected)
     const shouldPulseNextButton = mobileQuizStep < mobileFilters.length - 1 && answeredQuizSteps.includes(activeMobileQuizConfig.id)
     const mobileQuizProgressStyle = {
         '--quiz-progress': `${((mobileQuizStep + 1) / mobileFilters.length) * 100}%`,
@@ -629,8 +675,33 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         }, 2600)
     }, [isMapInteractionLocked])
 
+    const handleUserBoundsChange = useCallback((bounds: MapBounds) => {
+        if (isMapInteractionLocked || isOfficeLocationSelected) return
+        setPendingAreaBounds(bounds)
+    }, [isMapInteractionLocked, isOfficeLocationSelected])
+
+    const handleSearchThisArea = useCallback(() => {
+        if (!pendingAreaBounds) return
+
+        const resultsCount = filterHomePropertiesByBounds(homeMapProperties, pendingAreaBounds).length
+        setAppliedAreaBounds(pendingAreaBounds)
+        setPendingAreaBounds(null)
+
+        void trackEvent('home_map_search_this_area_clicked', {
+            ...getSearchSnapshot(),
+            results_count: resultsCount,
+            total_count: homeMapProperties.length,
+            bounds: pendingAreaBounds,
+            source: isMapModalOpen ? 'explore_modal' : 'home_map',
+        })
+    }, [getSearchSnapshot, homeMapProperties, isMapModalOpen, pendingAreaBounds])
+
     const openMapModal = useCallback((source = 'mobile_nav') => {
         setShowMapLockedHint(false)
+        setPendingAreaBounds(null)
+        setAppliedAreaBounds(null)
+        setIsHomeMapInteractionUnlocked(true)
+        setIsOfficeLocationSelected(false)
         setIsMapModalOpen(true)
         void trackEvent('home_map_modal_opened', {
             source,
@@ -749,6 +820,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setIsOfficeLocationSelected(false)
         setShowMapLockedHint(false)
         setIsHomeMapInteractionUnlocked(false)
+        setPendingAreaBounds(null)
+        setAppliedAreaBounds(null)
     }
 
     const toggleAdvancedFilters = () => {
@@ -899,7 +972,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 <div className={`map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
                     {shouldRenderMap ? (
                         <MapSearch
-                            properties={homeMapProperties}
+                            properties={areaFilteredHomeMapProperties}
                             refitKey={homeMapRefitKey}
                             interactionEnabled={!isMapInteractionLocked}
                             officeMarker={homeOfficeMarker}
@@ -913,7 +986,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     )}
                     <div className="map-preview-stat">
                         <Building2 size={14} />
-                        <span>{mapPreviewStatLabel}</span>
+                        <span>{activeMapPreviewStatLabel}</span>
                     </div>
                     {isMapInteractionLocked && (
                         <>
@@ -1102,11 +1175,12 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
                                 {shouldRenderMap ? (
                                     <MapSearch
-                                        properties={homeMapProperties}
+                                        properties={areaFilteredHomeMapProperties}
                                         refitKey={`${homeMapRefitKey}-modal`}
                                         interactionEnabled={!isMapInteractionLocked}
                                         officeMarker={homeOfficeMarker}
                                         initialMapStyle="luxury"
+                                        onUserBoundsChange={handleUserBoundsChange}
                                     />
                                 ) : (
                                     <div className="map-preview-placeholder" aria-hidden="true">
@@ -1114,9 +1188,21 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                         <span className="map-placeholder-pin"><MapPin size={18} /></span>
                                     </div>
                                 )}
+                                {shouldShowSearchThisArea && (
+                                    <button
+                                        type="button"
+                                        className="mobile-search-this-area-button"
+                                        onClick={handleSearchThisArea}
+                                        aria-label="Buscar imoveis nesta area do mapa"
+                                    >
+                                        <Search size={15} />
+                                        <span>Buscar nesta area</span>
+                                        {pendingAreaCount > 0 && <strong>{pendingAreaCount}</strong>}
+                                    </button>
+                                )}
                                 <div className="map-preview-stat mobile-map-preview-stat">
                                     <Building2 size={14} />
-                                    <span>{mapPreviewStatLabel}</span>
+                                    <span>{activeMapPreviewStatLabel}</span>
                                 </div>
                                 {isMapInteractionLocked && (
                                     <>
@@ -1400,6 +1486,48 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .mobile-map-preview-stat {
                     bottom: calc(124px + env(safe-area-inset-bottom));
                     left: 12px;
+                }
+                .mobile-search-this-area-button {
+                    align-items: center;
+                    background: rgba(255,253,248,0.96);
+                    border: 1px solid rgba(255,255,255,0.42);
+                    border-radius: 999px;
+                    box-shadow:
+                        0 16px 34px rgba(18,14,8,0.2),
+                        0 0 0 1px rgba(184,148,95,0.1) inset;
+                    color: #211c16;
+                    cursor: pointer;
+                    display: inline-flex;
+                    font: 900 0.68rem/1 'Inter', sans-serif;
+                    gap: 6px;
+                    justify-content: center;
+                    left: 50%;
+                    min-height: 35px;
+                    max-width: min(270px, calc(100% - 24px));
+                    padding: 0 11px;
+                    position: absolute;
+                    top: 52px;
+                    transform: translateX(-50%);
+                    white-space: nowrap;
+                    z-index: 980;
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                }
+                .mobile-search-this-area-button svg {
+                    color: #a78042;
+                    flex: 0 0 auto;
+                }
+                .mobile-search-this-area-button strong {
+                    align-items: center;
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    border-radius: 999px;
+                    color: #111;
+                    display: inline-flex;
+                    font-size: 0.62rem;
+                    height: 21px;
+                    justify-content: center;
+                    min-width: 21px;
+                    padding: 0 6px;
                 }
                 .search-heading {
                     color: #5b3d12;

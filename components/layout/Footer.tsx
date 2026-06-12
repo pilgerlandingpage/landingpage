@@ -81,6 +81,8 @@ export default function Footer() {
 
                 <nav className="footer-section" aria-label="Institucional">
                     <h3>Marca Pilger</h3>
+                    <Link href="/sobre">Sobre Guilherme Pilger</Link>
+                    <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliaria</Link>
                     <Link href="/blog">Blog</Link>
                     <Link href="/noticias">Notícias</Link>
                     <Link href="/eventos">Eventos</Link>

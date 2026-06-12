@@ -266,14 +266,7 @@ export default function GlobalHeader() {
                             <div className="gh-dropdown gh-dropdown-narrow">
                                 <Link href="/sobre">Sobre a Pilger</Link>
                                 <Link href="/busca?city=Balne%C3%A1rio+Cambori%C3%BA">Imobiliária em Balneário Camboriú</Link>
-                                <WhatsAppCaptureLink
-                                    phone="5547992528080"
-                                    message="Olá! Quero uma consultoria imobiliária personalizada."
-                                    slug="menu-desktop"
-                                    template="global-header-consultoria"
-                                >
-                                    Consultoria imobiliária personalizada
-                                </WhatsAppCaptureLink>
+                                <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliária personalizada</Link>
                             </div>
                         </li>
 
@@ -376,15 +369,7 @@ export default function GlobalHeader() {
                             {openAccordion === 'imobiliaria' && (
                                 <div className="gh-mobile-sub">
                                     <Link href="/sobre" onClick={closeMobileMenu}>Sobre a Pilger</Link>
-                                    <WhatsAppCaptureLink
-                                        phone="5547992528080"
-                                        message="Olá! Quero uma consultoria imobiliária personalizada."
-                                        slug="menu-mobile"
-                                        template="global-header-consultoria"
-                                        onClick={() => closeMobileMenu()}
-                                    >
-                                        Consultoria imobiliária
-                                    </WhatsAppCaptureLink>
+                                    <Link href="/consultoria-imobiliaria-personalizada" onClick={closeMobileMenu}>Consultoria imobiliária</Link>
                                 </div>
                             )}
 

@@ -54,6 +54,23 @@ function getLatLng(property: any): [number, number] | null {
     return null
 }
 
+function filterPropertiesByBounds(properties: any[], bounds: MapBounds | null) {
+    if (!bounds) return properties
+
+    return properties.filter(p => {
+        const latLng = getLatLng(p)
+        if (!latLng) return true
+        const [lat, lng] = latLng
+
+        return (
+            lat >= bounds.south &&
+            lat <= bounds.north &&
+            lng >= bounds.west &&
+            lng <= bounds.east
+        )
+    })
+}
+
 function getFilterLabel(key: string, value: string) {
     const cityLabels: Record<string, string> = {
         'Balneário Camboriú': 'B. Camboriú',
@@ -112,14 +129,18 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     const isOfficeSearch = searchParams.get('office') === OFFICE_SEARCH_PARAM_VALUE
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
-    const [mapBoundsState, setMapBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
+    const [latestBoundsState, setLatestBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
+    const [appliedBoundsState, setAppliedBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
+    const [pendingBoundsState, setPendingBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
     const [showRefineSearch, setShowRefineSearch] = useState(false)
     const [refineOfficeSelection, setRefineOfficeSelection] = useState<{ key: string; selected: boolean }>({ key: '', selected: false })
     const refinePanelRef = useRef<HTMLDivElement>(null)
     const isOfficeSelectedInRefine = refineOfficeSelection.key === searchKey && refineOfficeSelection.selected
     const shouldShowOfficeOnMap = isOfficeSearch || isOfficeSelectedInRefine
     const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : 'properties'}`
-    const mapBounds = mapBoundsState.key === mapViewKey ? mapBoundsState.bounds : null
+    const latestMapBounds = latestBoundsState.key === mapViewKey ? latestBoundsState.bounds : null
+    const mapBounds = appliedBoundsState.key === mapViewKey ? appliedBoundsState.bounds : null
+    const pendingMapBounds = pendingBoundsState.key === mapViewKey ? pendingBoundsState.bounds : null
 
     const activeFilters = useMemo(() => {
         const ignored = new Set(['page'])
@@ -149,35 +170,35 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     }, [])
 
     const handleBoundsChange = useCallback((bounds: MapBounds) => {
-        setMapBoundsState({ key: mapViewKey, bounds })
+        setLatestBoundsState({ key: mapViewKey, bounds })
     }, [mapViewKey])
+
+    const handleUserBoundsChange = useCallback((bounds: MapBounds) => {
+        if (shouldShowOfficeOnMap) return
+
+        setLatestBoundsState({ key: mapViewKey, bounds })
+        setPendingBoundsState({ key: mapViewKey, bounds })
+    }, [mapViewKey, shouldShowOfficeOnMap])
 
     const handleRefineSearchValuesChange = useCallback((values: HomeSearchValues) => {
         setRefineOfficeSelection({ key: searchKey, selected: values.locationType === 'office' })
     }, [searchKey])
 
     const visibleProperties = useMemo(() => {
-        if (!mapBounds) return properties
-
-        return properties.filter(p => {
-            const latLng = getLatLng(p)
-            if (!latLng) return true
-            const [lat, lng] = latLng
-
-            return (
-                lat >= mapBounds.south &&
-                lat <= mapBounds.north &&
-                lng >= mapBounds.west &&
-                lng <= mapBounds.east
-            )
-        })
+        return filterPropertiesByBounds(properties, mapBounds)
     }, [properties, mapBounds])
+
+    const pendingVisibleCount = useMemo(
+        () => pendingMapBounds ? filterPropertiesByBounds(properties, pendingMapBounds).length : 0,
+        [pendingMapBounds, properties]
+    )
 
     const visibleCount = visibleProperties.length
     const totalCount = properties.length
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
     const countLabel = mapBounds && visibleCount < totalCount ? 'imoveis nesta area' : 'imoveis encontrados'
+    const hasPendingAreaSearch = Boolean(pendingMapBounds && !shouldShowOfficeOnMap)
 
     const handleSearchButtonClick = useCallback(() => {
         const nextOpen = !showRefineSearch
@@ -197,9 +218,77 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         })
     }, [activeFilters, showRefineSearch, totalCount, visibleCount])
 
+    const handleSearchThisArea = useCallback(() => {
+        const bounds = pendingMapBounds || latestMapBounds
+        if (!bounds) return
+
+        setAppliedBoundsState({ key: mapViewKey, bounds })
+        setPendingBoundsState({ key: '', bounds: null })
+
+        void trackEvent('search_results_search_this_area_clicked', {
+            active_filters: activeFilters,
+            total_count: totalCount,
+            visible_count: filterPropertiesByBounds(properties, bounds).length,
+            bounds,
+        })
+    }, [activeFilters, latestMapBounds, mapViewKey, pendingMapBounds, properties, totalCount])
+
     return (
         <>
             <style>{`
+                .search-map-interactive-layer {
+                    position: absolute;
+                    inset: 0;
+                    overflow: hidden;
+                }
+                .search-this-area-button {
+                    position: absolute;
+                    left: 50%;
+                    top: 58px;
+                    z-index: 980;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 38px;
+                    max-width: min(320px, calc(100% - 28px));
+                    padding: 0 14px;
+                    border: 1px solid rgba(255,255,255,0.42);
+                    border-radius: 999px;
+                    background: rgba(255,253,248,0.96);
+                    color: #211c16;
+                    cursor: pointer;
+                    font: 900 0.76rem/1 'Inter', sans-serif;
+                    box-shadow:
+                        0 16px 34px rgba(18,14,8,0.18),
+                        0 0 0 1px rgba(184,148,95,0.1) inset;
+                    transform: translateX(-50%);
+                    white-space: nowrap;
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                }
+                .search-this-area-button svg {
+                    color: #a78042;
+                    flex: 0 0 auto;
+                }
+                .search-this-area-button strong {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 23px;
+                    height: 23px;
+                    padding: 0 7px;
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #111;
+                    font-size: 0.68rem;
+                }
+                .search-this-area-button:hover {
+                    transform: translate(-50%, -1px);
+                    box-shadow:
+                        0 20px 40px rgba(18,14,8,0.22),
+                        0 0 0 1px rgba(184,148,95,0.14) inset;
+                }
                 .search-card-wrap {
                     position: relative;
                     min-width: 0;
@@ -386,6 +475,20 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     text-transform: uppercase;
                 }
                 @media (max-width: 649px) {
+                    .search-this-area-button {
+                        top: 52px;
+                        min-height: 35px;
+                        max-width: min(270px, calc(100% - 24px));
+                        padding: 0 11px;
+                        font-size: 0.68rem;
+                        gap: 6px;
+                    }
+                    .search-this-area-button strong {
+                        min-width: 21px;
+                        height: 21px;
+                        padding: 0 6px;
+                        font-size: 0.62rem;
+                    }
                     .result-lux-header {
                         margin: 0 -2px 12px;
                         padding: 4px 2px 13px;
@@ -454,15 +557,30 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
 
             <SearchViews
                 map={
-                    <MapSearch
-                        properties={shouldShowOfficeOnMap ? [] : propertiesWithCoords}
-                        hoveredPropertyId={hoveredPropertyId}
-                        onMarkerHover={handleMarkerHover}
-                        onBoundsChange={handleBoundsChange}
-                        refitKey={mapViewKey}
-                        officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
-                        initialMapStyle="luxury"
-                    />
+                    <div className="search-map-interactive-layer">
+                        <MapSearch
+                            properties={shouldShowOfficeOnMap ? [] : propertiesWithCoords}
+                            hoveredPropertyId={hoveredPropertyId}
+                            onMarkerHover={handleMarkerHover}
+                            onBoundsChange={handleBoundsChange}
+                            onUserBoundsChange={handleUserBoundsChange}
+                            refitKey={mapViewKey}
+                            officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
+                            initialMapStyle="luxury"
+                        />
+                        {hasPendingAreaSearch && (
+                            <button
+                                type="button"
+                                className="search-this-area-button"
+                                onClick={handleSearchThisArea}
+                                aria-label="Buscar imoveis nesta area do mapa"
+                            >
+                                <Search size={15} />
+                                <span>Buscar nesta area</span>
+                                {pendingVisibleCount > 0 && <strong>{pendingVisibleCount}</strong>}
+                            </button>
+                        )}
+                    </div>
                 }
             >
                 <header className="result-lux-header">
