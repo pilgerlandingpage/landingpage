@@ -8,6 +8,7 @@ interface PixelInjectorProps {
     googleAnalyticsId?: string
     tiktokPixelId?: string
     linkedinPixelId?: string
+    pageViewEventId?: string
 }
 
 export default function PixelInjector({
@@ -16,6 +17,7 @@ export default function PixelInjector({
     googleAnalyticsId,
     tiktokPixelId,
     linkedinPixelId,
+    pageViewEventId,
 }: PixelInjectorProps) {
     return (
         <>
@@ -33,7 +35,7 @@ export default function PixelInjector({
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('init', '${metaPixelId}');
-            fbq('track', 'PageView');
+            fbq('track', 'PageView', {}, ${pageViewEventId ? `{ eventID: '${pageViewEventId}' }` : '{}'});
           `}
                     </Script>
                     <noscript>

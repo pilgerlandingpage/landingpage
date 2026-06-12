@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
 import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
+import { sendMetaCapiEvent } from '@/lib/tracking/meta-capi'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
 
 const VISITOR_COOKIE_NAME = 'pilger_visitor_id'
@@ -217,6 +218,35 @@ async function insertFunnelEvent(params: {
     }
 
     return data as LeadActivityEventRow
+}
+
+async function sendMetaCapiForFunnelEvent(params: {
+    request: NextRequest
+    eventType: string
+    metadata: Record<string, unknown>
+    trackingData: ReturnType<typeof extractTrackingData>
+    visitorCookieId: string
+    visitorId: string
+    leadId?: string | null
+    searchParams: URLSearchParams
+    createdAt?: string | null
+}) {
+    await sendMetaCapiEvent({
+        siteEventType: params.eventType,
+        metadata: {
+            ...params.metadata,
+            ...(params.createdAt ? { created_at: params.createdAt } : {}),
+        },
+        trackingData: params.trackingData,
+        visitorCookieId: params.visitorCookieId,
+        visitorId: params.visitorId,
+        leadId: params.leadId,
+        searchParams: params.searchParams,
+        requestCookies: {
+            fbp: params.request.cookies.get('_fbp')?.value || null,
+            fbc: params.request.cookies.get('_fbc')?.value || null,
+        },
+    })
 }
 
 function safeHttpUrl(raw: string | null): string | null {
@@ -832,6 +862,19 @@ export async function GET(request: NextRequest) {
             eventType: clickMetadata.event_type || 'whatsapp_link_click',
             metadata: clickMetadata,
         })
+        if (funnelEvent) {
+            await sendMetaCapiForFunnelEvent({
+                request,
+                eventType: funnelEvent.event_type || clickMetadata.event_type || 'whatsapp_link_click',
+                metadata: metadataRecord(funnelEvent.metadata),
+                trackingData,
+                visitorCookieId: cookieId,
+                visitorId,
+                leadId: linkedLeadId,
+                searchParams,
+                createdAt: funnelEvent.created_at,
+            })
+        }
         await appendSiteActivityToLead(linkedLeadId, visitorId, funnelEvent)
         await appendSiteActivityToBrokerCandidate(visitorId, funnelEvent)
 
@@ -948,6 +991,19 @@ export async function POST(request: NextRequest) {
                 eventType: event_type || 'page_view',
                 metadata: eventMetadata,
             })
+            if (funnelEvent) {
+                await sendMetaCapiForFunnelEvent({
+                    request,
+                    eventType: funnelEvent.event_type || event_type || 'page_view',
+                    metadata: metadataRecord(funnelEvent.metadata),
+                    trackingData,
+                    visitorCookieId: cookieId,
+                    visitorId: existing.id,
+                    leadId: resolvedLeadId,
+                    searchParams,
+                    createdAt: funnelEvent.created_at,
+                })
+            }
             await appendSiteActivityToLead(resolvedLeadId, existing.id, funnelEvent)
             await appendSiteActivityToBrokerCandidate(existing.id, funnelEvent)
 
@@ -960,6 +1016,19 @@ export async function POST(request: NextRequest) {
                     eventType: String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
                     metadata: clickMetadata,
                 })
+                if (clickEvent) {
+                    await sendMetaCapiForFunnelEvent({
+                        request,
+                        eventType: clickEvent.event_type || String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
+                        metadata: metadataRecord(clickEvent.metadata),
+                        trackingData,
+                        visitorCookieId: cookieId,
+                        visitorId: existing.id,
+                        leadId: resolvedLeadId,
+                        searchParams,
+                        createdAt: clickEvent.created_at,
+                    })
+                }
                 await appendSiteActivityToLead(resolvedLeadId, existing.id, clickEvent)
                 await appendSiteActivityToBrokerCandidate(existing.id, clickEvent)
             }
@@ -1019,6 +1088,19 @@ export async function POST(request: NextRequest) {
             eventType: event_type || 'page_view',
             metadata: eventMetadata,
         })
+        if (funnelEvent) {
+            await sendMetaCapiForFunnelEvent({
+                request,
+                eventType: funnelEvent.event_type || event_type || 'page_view',
+                metadata: metadataRecord(funnelEvent.metadata),
+                trackingData,
+                visitorCookieId: cookieId,
+                visitorId: visitor.id,
+                leadId: resolvedLeadId,
+                searchParams,
+                createdAt: funnelEvent.created_at,
+            })
+        }
         await appendSiteActivityToLead(resolvedLeadId, visitor.id, funnelEvent)
         await appendSiteActivityToBrokerCandidate(visitor.id, funnelEvent)
 
@@ -1031,6 +1113,19 @@ export async function POST(request: NextRequest) {
                 eventType: String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
                 metadata: clickMetadata,
             })
+            if (clickEvent) {
+                await sendMetaCapiForFunnelEvent({
+                    request,
+                    eventType: clickEvent.event_type || String(clickMetadata.event_type || searchParams.get('event_type') || 'link_click'),
+                    metadata: metadataRecord(clickEvent.metadata),
+                    trackingData,
+                    visitorCookieId: cookieId,
+                    visitorId: visitor.id,
+                    leadId: resolvedLeadId,
+                    searchParams,
+                    createdAt: clickEvent.created_at,
+                })
+            }
             await appendSiteActivityToLead(resolvedLeadId, visitor.id, clickEvent)
             await appendSiteActivityToBrokerCandidate(visitor.id, clickEvent)
         }

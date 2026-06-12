@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
 import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
+import { sendMetaCapiEvent } from '@/lib/tracking/meta-capi'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
 import { inngest } from '@/lib/inngest/client'
 import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
@@ -297,7 +298,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Evento novo no funil: formulário enviado
-        await supabase.from('funnel_events').insert({
+        const { data: leadFunnelEvent, error: leadFunnelError } = await supabase.from('funnel_events').insert({
             visitor_id: visitor.id,
             lead_id: leadId,
             landing_page_id: landingPageId,
@@ -312,6 +313,36 @@ export async function POST(request: NextRequest) {
                 ...enrichedCaptureContext,
             },
         })
+            .select('id, event_type, metadata, created_at')
+            .single()
+
+        if (leadFunnelError) {
+            console.warn('[Lead Capture] funnel event insert failed:', leadFunnelError.message)
+        }
+
+        if (leadFunnelEvent) {
+            await sendMetaCapiEvent({
+                siteEventType: leadFunnelEvent.event_type || 'form_submitted',
+                metadata: {
+                    ...metadataRecord(leadFunnelEvent.metadata),
+                    created_at: leadFunnelEvent.created_at,
+                },
+                trackingData,
+                visitorCookieId,
+                visitorId: visitor.id,
+                leadId,
+                searchParams,
+                requestCookies: {
+                    fbp: request.cookies.get('_fbp')?.value || null,
+                    fbc: request.cookies.get('_fbc')?.value || null,
+                },
+                lead: {
+                    email,
+                    phone,
+                    name,
+                },
+            })
+        }
 
         if (!leadId) {
             throw new Error('Lead ID not resolved after capture')

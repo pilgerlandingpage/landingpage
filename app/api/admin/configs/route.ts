@@ -108,6 +108,8 @@ const ENV_FALLBACKS: Record<string, string> = {
     instagram_app_id: 'INSTAGRAM_APP_ID',
     instagram_app_secret: 'INSTAGRAM_APP_SECRET',
     meta_access_token: 'META_ACCESS_TOKEN',
+    meta_capi_access_token: 'META_CAPI_ACCESS_TOKEN',
+    meta_test_event_code: 'META_TEST_EVENT_CODE',
     meta_business_id: 'META_BUSINESS_ID',
     meta_ad_account_id: 'META_AD_ACCOUNT_ID',
     meta_pixel_id: 'META_PIXEL_ID',

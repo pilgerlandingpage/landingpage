@@ -1,9 +1,16 @@
 import { v4 as uuidv4 } from 'uuid'
+import { buildMetaCustomData, resolveMetaEventName, type MetaEventName } from '@/lib/tracking/meta-events'
 
 const COOKIE_NAME = 'pilger_visitor_id'
 const CONSENT_COOKIE_NAME = 'pilger_consent'
 const TRACKING_DISABLED_COOKIE_NAME = 'pilger_tracking_disabled'
 const COOKIE_DAYS = 365
+
+declare global {
+    interface Window {
+        fbq?: (...args: any[]) => void
+    }
+}
 
 type PushIntentPayload = {
     reason: string
@@ -64,6 +71,45 @@ export function grantConsent() {
     if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event('pilger_consent_granted'))
     }
+}
+
+export function createMetaEventId(prefix = 'meta'): string {
+    return `${prefix}_${Date.now()}_${uuidv4()}`
+}
+
+export function getMetaBrowserData() {
+    return {
+        meta_fbp: getCookie('_fbp') || undefined,
+        meta_fbc: getCookie('_fbc') || undefined,
+    }
+}
+
+export function trackMetaPixelEvent(
+    eventName: MetaEventName,
+    metadata: Record<string, unknown> = {},
+    eventId = createMetaEventId(eventName.toLowerCase())
+) {
+    const browserData = getMetaBrowserData()
+    const metaMetadata = {
+        meta_event_name: eventName,
+        meta_event_id: eventId,
+        ...browserData,
+    }
+
+    try {
+        if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+            window.fbq('track', eventName, buildMetaCustomData(eventName, metadata), { eventID: eventId })
+        }
+    } catch (error) {
+        console.warn('[Meta Pixel] event skipped:', error)
+    }
+
+    return metaMetadata
+}
+
+function trackMappedMetaPixelEvent(eventType: string, metadata: Record<string, unknown>) {
+    const eventName = resolveMetaEventName(eventType)
+    return eventName ? trackMetaPixelEvent(eventName, metadata) : {}
 }
 
 export function revokeConsent() {
@@ -153,6 +199,11 @@ export async function trackEvent(eventType: string, metadata: any = {}) {
         page_url: window.location.href,
         page_title: document.title,
     }
+    const mergedMetadata = {
+        ...pageMetadata,
+        ...metadata,
+    }
+    const metaMetadata = trackMappedMetaPixelEvent(eventType, mergedMetadata)
 
     try {
         await fetch('/api/track', {
@@ -166,8 +217,8 @@ export async function trackEvent(eventType: string, metadata: any = {}) {
                 search_params: window.location.search,
                 event_type: eventType,
                 metadata: {
-                    ...pageMetadata,
-                    ...metadata,
+                    ...mergedMetadata,
+                    ...metaMetadata,
                 }
             }),
         })
@@ -185,6 +236,12 @@ export async function trackChatOpened(landingPageSlug?: string, metadata: any = 
         page_url: window.location.href,
         page_title: document.title,
     }
+    const mergedMetadata = {
+        channel: 'whatsapp',
+        ...pageMetadata,
+        ...metadata,
+    }
+    const metaMetadata = trackMappedMetaPixelEvent('chat_opened', mergedMetadata)
 
     try {
         await fetch('/api/track', {
@@ -198,9 +255,8 @@ export async function trackChatOpened(landingPageSlug?: string, metadata: any = 
                 search_params: window.location.search,
                 event_type: 'chat_opened',
                 metadata: {
-                    channel: 'whatsapp',
-                    ...pageMetadata,
-                    ...metadata,
+                    ...mergedMetadata,
+                    ...metaMetadata,
                 },
             }),
         })

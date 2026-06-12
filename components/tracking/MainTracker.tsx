@@ -5,7 +5,7 @@ import Tracker from '@/components/tracking/Tracker'
 import UnifiedConsentBanner from '@/components/tracking/UnifiedConsentBanner'
 import GeoCapturePrompt from '@/components/tracking/GeoCapturePrompt'
 import PushConsent from '@/components/push/PushConsent'
-import { hasConsent, isTrackingDisabled } from '@/lib/tracking/client'
+import { createMetaEventId, hasConsent, isTrackingDisabled } from '@/lib/tracking/client'
 import PixelInjector from '@/components/tracking/PixelInjector'
 
 interface MainTrackerProps {
@@ -14,6 +14,7 @@ interface MainTrackerProps {
 
 export default function MainTracker({ landingPageSlug }: MainTrackerProps) {
     const [consent, setConsent] = useState(() => !isTrackingDisabled() && hasConsent())
+    const [pageViewEventId] = useState(() => createMetaEventId('pageview'))
     const [visitorId, setVisitorId] = useState<string | undefined>()
     const [vapidPublicKey, setVapidPublicKey] = useState<string | undefined>()
     const [trackingConfig, setTrackingConfig] = useState<{
@@ -58,11 +59,13 @@ export default function MainTracker({ landingPageSlug }: MainTrackerProps) {
                     metaPixelId={trackingConfig.metaPixelId}
                     googleAnalyticsId={trackingConfig.googleAnalyticsId}
                     googleAdsId={trackingConfig.googleAdsId}
+                    pageViewEventId={pageViewEventId}
                 />
             )}
             {consent && (
                 <Tracker
                     landingPageSlug={landingPageSlug}
+                    pageViewEventId={pageViewEventId}
                     onVisitorReady={(id, key) => {
                         setVisitorId(id)
                         if (key) setVapidPublicKey(key)

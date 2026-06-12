@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { getVisitorId, isTrackingDisabled } from '@/lib/tracking/client'
+import { getMetaBrowserData, getVisitorId, isTrackingDisabled } from '@/lib/tracking/client'
 
 interface TrackerProps {
     landingPageSlug?: string
+    pageViewEventId?: string
     onVisitorReady?: (visitorId: string, vapidPublicKey?: string) => void
 }
 
-export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProps) {
+export default function Tracker({ landingPageSlug, pageViewEventId, onVisitorReady }: TrackerProps) {
     const tracked = useRef(false)
     const scrollMilestones = useRef(new Set<number>())
 
@@ -56,7 +57,12 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
                             landing_page_slug: landingPageSlug,
                             referrer: document.referrer,
                             search_params: window.location.search,
-                            metadata: pageMetadata(),
+                            metadata: {
+                                ...pageMetadata(),
+                                meta_event_name: 'PageView',
+                                ...(pageViewEventId ? { meta_event_id: pageViewEventId } : {}),
+                                ...getMetaBrowserData(),
+                            },
                         }),
                     })
 
@@ -96,7 +102,7 @@ export default function Tracker({ landingPageSlug, onVisitorReady }: TrackerProp
             window.removeEventListener('scroll', handleScroll)
             clearTimeout(timeout)
         }
-    }, [landingPageSlug, onVisitorReady])
+    }, [landingPageSlug, onVisitorReady, pageViewEventId])
 
     return null
 }

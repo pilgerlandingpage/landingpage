@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Mail, MessageCircle, Phone, Send, User, X } from 'lucide-react'
-import { getVisitorId, trackChatOpened } from '@/lib/tracking/client'
+import { createMetaEventId, getMetaBrowserData, getVisitorId, trackChatOpened, trackMetaPixelEvent } from '@/lib/tracking/client'
 import type { WhatsAppCaptureRequest } from '@/lib/tracking/whatsapp-capture'
 
 type ModalState = (WhatsAppCaptureRequest & { open: true }) | { open: false }
@@ -115,6 +115,12 @@ export default function WhatsAppLeadCaptureModal() {
         setError('')
         const normalizedPhone = normalizePhone(phone)
         const normalizedEmail = email.trim().toLowerCase()
+        const leadMetaEventId = createMetaEventId('lead')
+        const pageMetadata = {
+            page_path: window.location.pathname,
+            page_url: window.location.href,
+            page_title: document.title,
+        }
 
         try {
             const response = await fetch('/api/leads/capture', {
@@ -131,8 +137,12 @@ export default function WhatsAppLeadCaptureModal() {
                     consent_lgpd: true,
                     whatsapp_phone: state.phone,
                     metadata: {
+                        ...pageMetadata,
                         ...(state.metadata || {}),
                         whatsapp_prefill_message: messagePreview,
+                        meta_event_name: 'Lead',
+                        meta_event_id: leadMetaEventId,
+                        ...getMetaBrowserData(),
                     },
                 }),
             })
@@ -142,6 +152,14 @@ export default function WhatsAppLeadCaptureModal() {
             if (!response.ok) {
                 throw new Error(data?.error || 'Não foi possível salvar seus dados.')
             }
+
+            trackMetaPixelEvent('Lead', {
+                ...pageMetadata,
+                ...(state.metadata || {}),
+                phone: normalizedPhone,
+                email: normalizedEmail,
+                title: propertyTitle,
+            }, leadMetaEventId)
 
             await trackChatOpened(state.slug, {
                 template: state.template || 'unknown',

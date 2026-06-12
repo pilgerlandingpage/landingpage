@@ -44,6 +44,8 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'instagram_app_id', label: 'Instagram App ID', placeholder: 'ID do aplicativo Instagram', isSecret: false },
             { key: 'instagram_app_secret', label: 'Instagram App Secret', placeholder: 'Secret do aplicativo Instagram', isSecret: true },
             { key: 'meta_access_token', label: 'Business/System User Token', placeholder: 'Token geral do Business Manager', isSecret: true },
+            { key: 'meta_capi_access_token', label: 'Conversions API Token', placeholder: 'Token exclusivo da API de Conversoes', isSecret: true },
+            { key: 'meta_test_event_code', label: 'Meta Test Event Code', placeholder: 'TEST12345 para testar eventos', isSecret: false },
             { key: 'meta_business_id', label: 'Business ID', placeholder: 'ID do portfolio de negocios', isSecret: false },
             { key: 'meta_ad_account_id', label: 'Ad Account ID', placeholder: 'act_... ou numero da conta', isSecret: false },
             { key: 'meta_pixel_id', label: 'Pixel ID', placeholder: 'ID do pixel Meta', isSecret: false },
