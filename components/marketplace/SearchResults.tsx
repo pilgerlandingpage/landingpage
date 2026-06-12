@@ -87,6 +87,15 @@ function getFilterLabel(key: string, value: string) {
         '8000000-10000000': 'R$ 8 mi a R$ 10 mi',
         '10000000-': 'Acima de R$ 10 mi',
     }
+    const tagLabels: Record<string, string> = {
+        'frente-mar': 'Frente mar',
+        'vista-mar': 'Vista mar',
+        'quadra-mar': 'Quadra mar',
+        lancamento: 'Lancamento',
+        'em-construcao': 'Em construcao',
+        pronto: 'Pronto',
+        mobiliado: 'Mobiliado',
+    }
 
     const labels: Record<string, string> = {
         q: `Busca: ${replaceItajaiWithPraiaBrava(value)}`,
@@ -104,7 +113,7 @@ function getFilterLabel(key: string, value: string) {
         priceMax: `Max. R$ ${Number(value).toLocaleString('pt-BR')}`,
         office: 'Imobiliária Guilherme Pilger',
         subtype: value.replace(/-/g, ' '),
-        tag: value.replace(/-/g, ' '),
+        tag: tagLabels[value] || value.replace(/-/g, ' '),
     }
 
     return labels[key] || `${key}: ${value}`

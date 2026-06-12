@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Heart, Search, Share2 } from 'lucide-react'
 import { sharePropertyLanding } from '@/components/property/PropertyLandingShareButton'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
+import { trackEvent } from '@/lib/tracking/client'
 
 type MobileNavProps = {
     phone?: string
@@ -68,6 +69,15 @@ export default function MobileNav({
         }).catch(() => {})
     }, [sharePropertyId, shareTitle])
 
+    const openFavorites = useCallback(() => {
+        void trackEvent('mobile_nav_favorites_clicked', {
+            source: slug,
+            pathname,
+        })
+
+        router.push('/favoritos')
+    }, [pathname, router, slug])
+
     const explore = useCallback(() => {
         const supportsCustomEvent = typeof window.CustomEvent === 'function'
         const openMapSearchEvent = supportsCustomEvent
@@ -109,10 +119,10 @@ export default function MobileNav({
                 <div className="nav-icon"><Search size={22} /></div>
                 <span>Explorar</span>
             </button>
-            <div className="nav-item">
+            <button type="button" className="nav-item" onClick={openFavorites}>
                 <div className="nav-icon"><Heart size={22} /></div>
                 <span>Favoritos</span>
-            </div>
+            </button>
             {hasShareAction && (
                 <button type="button" className="nav-item" onClick={shareProperty}>
                     <div className="nav-icon"><Share2 size={21} /></div>

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Suggestion = {
@@ -312,7 +313,7 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                     : canonicalCityValue(cleanLocation)
 
             if (cityValue) params.set('city', cityValue)
-            else if (cleanLocation) params.set('q', cleanLocation)
+            else if (cleanLocation) appendNaturalSearchParams(params, cleanLocation)
         }
 
         if (typeValue !== 'all') {
@@ -445,14 +446,14 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
 
                 <div className="home-search-location-row">
                     <label>
-                        <span>Cidade, bairro ou empreendimento</span>
+                        <span>Descreva o imovel ou local</span>
                         <MapPin className="home-search-pin" size={18} />
                         <input
                             autoComplete="off"
                             onChange={event => updateLocation(event.target.value)}
                             onFocus={focusLocation}
                             onKeyDown={handleKeyDown}
-                            placeholder="digite a cidade ou bairro..."
+                            placeholder="ex: cobertura 4 suites Praia Brava frente mar"
                             type="text"
                             value={locationLabel}
                         />

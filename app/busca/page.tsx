@@ -4,6 +4,7 @@ import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 import { normalizeLocationName } from '@/lib/locations/display'
+import { parseNaturalSearch } from '@/lib/properties/natural-search'
 
 export const metadata: Metadata = {
     title: 'Busca de imóveis de luxo',
@@ -122,7 +123,9 @@ const SEARCH_PROPERTY_FIELDS = [
     'suites',
     'parking_spaces',
     'area_m2',
+    'area_private_m2',
     'featured_image',
+    'images',
     'property_type',
     'exclusive',
     'latitude',
@@ -130,6 +133,10 @@ const SEARCH_PROPERTY_FIELDS = [
     'neighborhood',
     'purpose',
     'source_status',
+    'description',
+    'amenities',
+    'created_at',
+    'updated_at',
 ].join(',')
 
 const MIN_SEARCH_PRICE = 4000000
@@ -162,23 +169,25 @@ export default async function SearchPage({
     const supabase = await createServerSupabase()
     const resolvedParams = await searchParams
 
-    const q = firstParam(resolvedParams.q)
-    const type = firstParam(resolvedParams.type)
-    const subtype = firstParam(resolvedParams.subtype)
-    const city = firstParam(resolvedParams.city)
-    const tag = firstParam(resolvedParams.tag)
+    const rawQ = firstParam(resolvedParams.q)
+    const naturalSearch = parseNaturalSearch(rawQ)
+    const q = naturalSearch.hasStructuredFilters ? naturalSearch.q : rawQ
+    const type = firstParam(resolvedParams.type) || naturalSearch.type
+    const subtype = firstParam(resolvedParams.subtype) || naturalSearch.subtype
+    const city = firstParam(resolvedParams.city) || naturalSearch.city
+    const tag = firstParam(resolvedParams.tag) || naturalSearch.tag
     const offer = firstParam(resolvedParams.offer)
     const price = firstParam(resolvedParams.price)
     const bedrooms = asNumber(resolvedParams.bedrooms)
-    const bedroomsMin = asNumber(resolvedParams.bedroomsMin)
+    const bedroomsMin = asNumber(resolvedParams.bedroomsMin) || Number(naturalSearch.bedroomsMin || 0)
     const suites = asNumber(resolvedParams.suites)
-    const suitesMin = asNumber(resolvedParams.suitesMin)
-    const bathroomsMin = asNumber(resolvedParams.bathroomsMin)
-    const parkingMin = asNumber(resolvedParams.parkingMin)
-    const areaMin = asNumber(resolvedParams.areaMin)
-    const areaMax = asNumber(resolvedParams.areaMax)
-    const priceMin = asNumber(resolvedParams.priceMin)
-    const priceMax = asNumber(resolvedParams.priceMax)
+    const suitesMin = asNumber(resolvedParams.suitesMin) || Number(naturalSearch.suitesMin || 0)
+    const bathroomsMin = asNumber(resolvedParams.bathroomsMin) || Number(naturalSearch.bathroomsMin || 0)
+    const parkingMin = asNumber(resolvedParams.parkingMin) || Number(naturalSearch.parkingMin || 0)
+    const areaMin = asNumber(resolvedParams.areaMin) || Number(naturalSearch.areaMin || 0)
+    const areaMax = asNumber(resolvedParams.areaMax) || Number(naturalSearch.areaMax || 0)
+    const priceMin = asNumber(resolvedParams.priceMin) || Number(naturalSearch.priceMin || 0)
+    const priceMax = asNumber(resolvedParams.priceMax) || Number(naturalSearch.priceMax || 0)
 
     let query = supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
 

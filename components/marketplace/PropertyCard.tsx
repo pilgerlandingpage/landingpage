@@ -2,10 +2,12 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { Bath, BedDouble, Camera, Car, Heart, MapPin, Ruler } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
+import { BedDouble, Camera, Car, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { getPropertyIntelligenceLabels } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
 interface PropertyCardProps {
@@ -25,14 +27,35 @@ interface PropertyCardProps {
         neighborhood?: string | null
         source_status?: string | null
         exclusive?: boolean | null
+        description?: string | null
         parking_spaces?: number | null
         suites?: number | null
         amenities?: string[] | null
         status?: string | null
+        created_at?: string | null
+        updated_at?: string | null
     }
     landingPageSlug?: string
     imagePriority?: boolean
     variant?: 'default' | 'homeCompact'
+}
+
+const FAVORITES_KEY = 'pilger_property_favorites'
+
+function readFavoriteIds() {
+    if (typeof window === 'undefined') return []
+
+    try {
+        const parsed = JSON.parse(window.localStorage.getItem(FAVORITES_KEY) || '[]')
+        return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : []
+    } catch {
+        return []
+    }
+}
+
+function writeFavoriteIds(ids: string[]) {
+    window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids.slice(0, 80)))
+    window.dispatchEvent(new CustomEvent('pilger:favorites-changed', { detail: { ids } }))
 }
 
 function formatPrice(price: number | null) {
@@ -75,6 +98,7 @@ function boldifyTitle(title: string): ReactNode {
 
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
+    const [isFavorite, setIsFavorite] = useState(false)
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
     const detailsHref = propertyDetailsPath(property.id)
     const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
@@ -90,6 +114,10 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageCount = Array.isArray(property.images) ? property.images.filter(Boolean).length : 0
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
+    const intelligenceLabels = getPropertyIntelligenceLabels(property, {
+        includeFrontSea: false,
+        max: isHomeCompact ? 2 : 3,
+    })
     const cardTitle = displayTitle
     const isFrenteMar = /frente.?mar|frente ao mar/i.test(displayTitle) || amenities.some(a => /frente.?mar/i.test(a))
     /*
@@ -122,6 +150,41 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         })
     }
 
+    useEffect(() => {
+        const syncFavoriteState = () => {
+            setIsFavorite(readFavoriteIds().includes(property.id))
+        }
+
+        syncFavoriteState()
+        window.addEventListener('storage', syncFavoriteState)
+        window.addEventListener('pilger:favorites-changed', syncFavoriteState)
+
+        return () => {
+            window.removeEventListener('storage', syncFavoriteState)
+            window.removeEventListener('pilger:favorites-changed', syncFavoriteState)
+        }
+    }, [property.id])
+
+    const handleFavoriteToggle = (event: MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+        event.stopPropagation()
+
+        const current = readFavoriteIds()
+        const next = current.includes(property.id)
+            ? current.filter(id => id !== property.id)
+            : [property.id, ...current.filter(id => id !== property.id)]
+
+        writeFavoriteIds(next)
+        setIsFavorite(next.includes(property.id))
+
+        void trackEvent(current.includes(property.id) ? 'property_unfavorited' : 'property_favorited', {
+            property_id: property.id,
+            title: displayTitle,
+            source: isHomeCompact ? 'search_card' : 'property_card',
+            favorite_count: next.length,
+        })
+    }
+
     return (
         <div className={`property-card ${isHomeCompact ? 'property-card-compact' : ''}`}>
             <div className="card-image-container">
@@ -138,9 +201,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                 loading={imagePriority ? undefined : 'lazy'}
                                 decoding="async"
                             />
-                            <span className="compact-heart" aria-hidden="true">
-                                <Heart size={22} />
-                            </span>
                             {imageCount > 0 && (
                                 <span className="compact-photo-count">
                                     <Camera size={13} />
@@ -165,6 +225,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         </>
                     )}
                 </Link>
+                <button
+                    type="button"
+                    className={`favorite-toggle ${isFavorite ? 'favorite-toggle-active' : ''}`}
+                    aria-label={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                    aria-pressed={isFavorite}
+                    onClick={handleFavoriteToggle}
+                >
+                    <Heart size={isHomeCompact ? 21 : 19} />
+                </button>
 
             </div>
 
@@ -180,6 +249,16 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 </div>
 
                 <div className="property-price">{formattedPrice}</div>
+
+                {intelligenceLabels.length > 0 && (
+                    <div className="property-intelligence-row" aria-label="Sinais de curadoria">
+                        {intelligenceLabels.map(label => (
+                            <span className={`property-intelligence-chip property-intelligence-chip-${label.tone}`} key={label.key}>
+                                {label.label}
+                            </span>
+                        ))}
+                    </div>
+                )}
 
                 <div className="property-meta">
                     {isHomeCompact ? (
@@ -445,7 +524,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     flex: 0 0 auto;
                     stroke-width: 2.25;
                 }
-                .compact-heart {
+                .favorite-toggle {
                     position: absolute;
                     top: 10px;
                     right: 10px;
@@ -455,12 +534,29 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     justify-content: center;
                     width: 32px;
                     height: 32px;
+                    border: 0;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.88);
                     color: #fff;
+                    cursor: pointer;
                     filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.42));
+                    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
                 }
-                .compact-heart svg {
-                    fill: rgba(31, 27, 21, 0.18);
+                .favorite-toggle:hover {
+                    transform: translateY(-1px) scale(1.03);
+                    background: #fff;
+                }
+                .favorite-toggle svg {
+                    fill: rgba(31, 27, 21, 0.08);
+                    color: #f5a5ac;
                     stroke-width: 2.15;
+                }
+                .favorite-toggle-active {
+                    background: #fff;
+                    color: #ef7182;
+                }
+                .favorite-toggle-active svg {
+                    fill: #ef7182;
                 }
                 .compact-photo-count {
                     position: absolute;
@@ -476,6 +572,43 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     color: #fff8ea;
                     font: 560 0.66rem/1 'Inter', sans-serif;
                     backdrop-filter: blur(8px);
+                }
+                .property-intelligence-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 5px;
+                    margin-top: 8px;
+                    min-width: 0;
+                }
+                .property-intelligence-chip {
+                    display: inline-flex;
+                    align-items: center;
+                    max-width: 100%;
+                    min-height: 22px;
+                    padding: 0 7px;
+                    border-radius: 999px;
+                    font: 800 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.02em;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+                .property-intelligence-chip-gold {
+                    background: rgba(184,148,95,0.14);
+                    color: #8f6726;
+                }
+                .property-intelligence-chip-dark {
+                    background: rgba(31,27,21,0.1);
+                    color: #28231c;
+                }
+                .property-intelligence-chip-green {
+                    background: rgba(31,125,83,0.1);
+                    color: #1f7d53;
+                }
+                .property-intelligence-chip-blue {
+                    background: rgba(26,111,168,0.1);
+                    color: #1a6fa8;
                 }
                 @media (max-width: 649px) {
                     .property-card {
@@ -545,13 +678,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         gap: 4px 6px;
                         margin-top: 5px;
                     }
-                    .compact-heart {
+                    .favorite-toggle {
                         top: 7px;
                         right: 7px;
                         width: 29px;
                         height: 29px;
                     }
-                    .compact-heart svg {
+                    .favorite-toggle svg {
                         width: 20px;
                         height: 20px;
                     }
@@ -563,6 +696,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     }
                     .property-card-compact .property-meta span:not(:last-child)::after {
                         margin-left: 3px;
+                    }
+                    .property-intelligence-row {
+                        gap: 4px;
+                        margin-top: 6px;
+                    }
+                    .property-intelligence-chip {
+                        min-height: 19px;
+                        padding: 0 6px;
+                        font-size: 0.49rem;
                     }
                 }
                 .frente-mar-badge {
