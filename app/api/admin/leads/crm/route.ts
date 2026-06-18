@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
+import {
+    leadIntentColumnsFromMetadata,
+    mergeLeadSiteActivity,
+    type LeadActivityEventRow,
+} from '@/lib/tracking/lead-activity'
+import { getOptionalAdminActorContext, type AdminActorContext } from '@/lib/events/admin-auth'
 
 function getSupabase() {
     return createClient(
@@ -35,6 +41,200 @@ function metadataValue(source: any, path: string[]): string | null {
         cursor = cursor[key]
     }
     return cursor == null ? null : String(cursor)
+}
+
+function asRecord(value: any): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+}
+
+function asString(value: any): string {
+    return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizeFollowupStatus(value: any) {
+    const status = String(value || '').toLowerCase()
+    if (status === 'sent') return 'sent'
+    if (status === 'responded') return 'responded'
+    if (status === 'converted') return 'converted'
+    if (status === 'dismissed') return 'dismissed'
+    return 'pending'
+}
+
+function followupStatusLabel(status: string) {
+    if (status === 'sent') return 'Enviada'
+    if (status === 'responded') return 'Respondida'
+    if (status === 'converted') return 'Convertida'
+    if (status === 'dismissed') return 'Descartada'
+    return 'Pendente'
+}
+
+function followupEventType(status: string) {
+    if (status === 'sent') return 'crm_search_alert_followup_sent'
+    if (status === 'responded') return 'crm_search_alert_followup_responded'
+    if (status === 'converted') return 'crm_search_alert_followup_converted'
+    if (status === 'dismissed') return 'crm_search_alert_followup_dismissed'
+    return 'crm_search_alert_followup_pending'
+}
+
+function followupActionKey(value: any) {
+    const record = asRecord(value)
+    const explicit = asString(record.key || record.followup_key)
+    if (explicit) return explicit
+
+    return [
+        asString(record.alert_id),
+        asString(record.property_id),
+        asString(record.message),
+    ].filter(Boolean).join(':')
+}
+
+function recommendationMatchesFollowup(recommendation: Record<string, any>, action: Record<string, any>) {
+    const recommendationKey = asString(recommendation.followup_key)
+    const actionKey = asString(action.key)
+    if (recommendationKey && actionKey && recommendationKey === actionKey) return true
+
+    const recommendationAlertId = asString(recommendation.alert_id)
+    const actionAlertId = asString(action.alert_id)
+    if (recommendationAlertId && actionAlertId && recommendationAlertId === actionAlertId) return true
+
+    const recommendationPropertyId = asString(recommendation.property_id)
+    const actionPropertyId = asString(action.property_id)
+    return Boolean(recommendationPropertyId && actionPropertyId && recommendationPropertyId === actionPropertyId)
+}
+
+function isPremiumRecommendationType(type: string) {
+    return [
+        'premium_intent_no_contact',
+        'private_visit_pending',
+        'availability_pending',
+        'reserved_negotiation_pending',
+        'value_reading_pending',
+    ].includes(type)
+}
+
+function isBehaviorSignalRecommendationType(type: string) {
+    return [
+        'favorite_property_pending',
+        'revisited_property_pending',
+        'street_view_pending',
+        'price_history_pending',
+    ].includes(type)
+}
+
+function shouldResolveConsultativeRecommendation(type: string, status: string) {
+    if ((type === 'alert_opened_no_contact' || type === 'stale_pending') && status !== 'pending') return true
+    if (type === 'stale_sent' && ['responded', 'converted', 'dismissed'].includes(status)) return true
+    if (isPremiumRecommendationType(type) && status !== 'pending') return true
+    if (isBehaviorSignalRecommendationType(type) && status !== 'pending') return true
+    return false
+}
+
+function resolveFollowupRecommendationSnapshot(metadata: Record<string, any>, action: Record<string, any>, now: string) {
+    const snapshot = asRecord(metadata.crm_action_recommendations)
+    const items = Array.isArray(snapshot.items) ? snapshot.items : []
+    if (!items.length) return snapshot.items ? snapshot : null
+
+    const status = normalizeFollowupStatus(action.status)
+    let changed = false
+    const nextItems = items.map((item: any) => {
+        const record = asRecord(item)
+        const type = asString(record.type)
+        if (!['alert_opened_no_contact', 'stale_pending', 'stale_sent'].includes(type) && !isPremiumRecommendationType(type) && !isBehaviorSignalRecommendationType(type)) return item
+        if (!recommendationMatchesFollowup(record, action)) return item
+
+        const nextRecord = {
+            ...record,
+            action_status: status,
+            action_updated_at: now,
+            action_actor_type: action.actor_type || record.action_actor_type || null,
+            action_actor_id: action.actor_id || record.action_actor_id || null,
+            action_actor_name: action.actor_name || record.action_actor_name || null,
+            action_actor_email: action.actor_email || record.action_actor_email || null,
+        }
+
+        if (!shouldResolveConsultativeRecommendation(type, status)) return nextRecord
+
+        changed = true
+        return {
+            ...nextRecord,
+            resolved_status: status,
+            resolved_at: record.resolved_at || now,
+            resolved_reason: 'followup_status_updated',
+        }
+    })
+
+    const unresolvedItems = nextItems
+        .map(asRecord)
+        .filter(item => !item.applied_at && item.applied_status !== 'applied' && !item.resolved_at)
+
+    return {
+        ...snapshot,
+        items: nextItems,
+        ...(changed ? { last_resolved_at: now } : {}),
+        active_summary: {
+            total: unresolvedItems.length,
+            alert_opened_no_contact: unresolvedItems.filter(item => item.type === 'alert_opened_no_contact').length,
+            stale_pending: unresolvedItems.filter(item => item.type === 'stale_pending').length,
+            stale_sent: unresolvedItems.filter(item => item.type === 'stale_sent').length,
+            unassigned: unresolvedItems.filter(item => item.type === 'unassigned').length,
+            redistribution: unresolvedItems.filter(item => item.type === 'redistribution').length,
+            premium_intent_no_contact: unresolvedItems.filter(item => item.type === 'premium_intent_no_contact').length,
+            private_visit_pending: unresolvedItems.filter(item => item.type === 'private_visit_pending').length,
+            availability_pending: unresolvedItems.filter(item => item.type === 'availability_pending').length,
+            reserved_negotiation_pending: unresolvedItems.filter(item => item.type === 'reserved_negotiation_pending').length,
+            value_reading_pending: unresolvedItems.filter(item => item.type === 'value_reading_pending').length,
+            favorite_property_pending: unresolvedItems.filter(item => item.type === 'favorite_property_pending').length,
+            revisited_property_pending: unresolvedItems.filter(item => item.type === 'revisited_property_pending').length,
+            street_view_pending: unresolvedItems.filter(item => item.type === 'street_view_pending').length,
+            price_history_pending: unresolvedItems.filter(item => item.type === 'price_history_pending').length,
+        },
+    }
+}
+
+function actionForFollowup(actions: Record<string, any>, followup: any) {
+    const key = followupActionKey(followup)
+    if (key && actions[key]) return asRecord(actions[key])
+
+    const fallbackKey = [
+        asString(followup?.alert_id),
+        asString(followup?.property_id),
+    ].filter(Boolean).join(':')
+
+    return fallbackKey ? asRecord(actions[fallbackKey]) : {}
+}
+
+function applyFollowupActionsToSummary(summary: any, actionsSource: any) {
+    const summaryRecord = asRecord(summary)
+    if (!summary || Object.keys(summaryRecord).length === 0) return summary || null
+
+    const actions = asRecord(actionsSource)
+    const followups = Array.isArray(summaryRecord.search_alert_followups)
+        ? summaryRecord.search_alert_followups
+        : []
+
+    if (!followups.length) return summaryRecord
+
+    return {
+        ...summaryRecord,
+        search_alert_followups: followups.map((item: any) => {
+            const action = actionForFollowup(actions, item)
+            const status = normalizeFollowupStatus(action.status)
+
+            return {
+                ...item,
+                action_status: status,
+                action_updated_at: action.updated_at || null,
+                action_note: action.note || null,
+                action_actor_type: action.actor_type || null,
+                action_actor_id: action.actor_id || action.updated_by_admin_user_id || null,
+                action_actor_name: action.actor_name || action.updated_by_name || null,
+                action_actor_email: action.actor_email || action.updated_by_email || null,
+                sent_at: action.sent_at || null,
+                responded_at: action.responded_at || null,
+                converted_at: action.converted_at || null,
+            }
+        }),
+    }
 }
 
 function isMissingBrokerProfilesTable(error: any) {
@@ -260,6 +460,8 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
     const landingPage = lead?.landing_page || {}
     const selfReportedSource = metadataValue(tracking, ['self_reported_source'])
     const behaviorSummary = metadata?.behavior_summary || null
+    const followupActions = metadata?.crm_followup_actions || {}
+    const behaviorSummaryWithActions = applyFollowupActionsToSummary(behaviorSummary, followupActions)
     const behaviorScore = Number(behaviorSummary?.engagement_score || 0)
 
     return {
@@ -295,7 +497,13 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
         site_activity: Array.isArray(metadata?.site_activity)
             ? metadata.site_activity.slice(-15).reverse()
             : [],
-        behavior_summary: behaviorSummary,
+        behavior_summary: behaviorSummaryWithActions,
+        crm_action_recommendations: metadata?.crm_action_recommendations || null,
+        crm_action_recommendation_actions: metadata?.crm_action_recommendation_actions || null,
+        crm_executive_brief: metadata?.crm_executive_brief || null,
+        crm_executive_brief_history: Array.isArray(metadata?.crm_executive_brief_history)
+            ? metadata.crm_executive_brief_history.slice(0, 8)
+            : [],
         precise_location: metadata?.precise_location || metadata?.gps_location || null,
         gps_permission: metadata?.gps_permission || null,
         conversation_id: conversation?.id || row.conversation_id || null,
@@ -395,6 +603,200 @@ async function loadCrmRows(params: {
     return { rows: legacyResult.data || [], source: 'legacy' as const }
 }
 
+async function findLeadForFollowup(supabase: ReturnType<typeof getSupabase>, body: any) {
+    const leadId = asString(body.lead_id)
+    if (leadId) {
+        const { data, error } = await supabase
+            .from('leads')
+            .select('id, visitor_id, metadata, lead_score, lead_classification')
+            .eq('id', leadId)
+            .maybeSingle()
+
+        if (error) throw error
+        if (data?.id) return data
+    }
+
+    const phones = phoneCandidates(body.lead_phone)
+    if (phones.length === 0) return null
+
+    const { data, error } = await supabase
+        .from('leads')
+        .select('id, visitor_id, metadata, lead_score, lead_classification')
+        .or(buildPhoneOrFilter(phones))
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (error) throw error
+    return data || null
+}
+
+async function appendFollowupActionEvent(params: {
+    supabase: ReturnType<typeof getSupabase>
+    lead: any
+    action: Record<string, any>
+}) {
+    const status = normalizeFollowupStatus(params.action.status)
+    const metadata = {
+        event_label: 'Atualizou abordagem comercial',
+        followup_key: params.action.key,
+        followup_status: status,
+        followup_status_label: followupStatusLabel(status),
+        alert_id: params.action.alert_id || null,
+        alert_title: params.action.alert_title || null,
+        property_id: params.action.property_id || null,
+        property_title: params.action.property_title || null,
+        property_url: params.action.property_url || null,
+        title: params.action.property_title || params.action.alert_title || 'Abordagem de alerta salvo',
+        match_score: params.action.match_score ?? null,
+        actor_type: params.action.actor_type || null,
+        actor_id: params.action.actor_id || null,
+        actor_name: params.action.actor_name || null,
+        actor_email: params.action.actor_email || null,
+        auth_user_id: params.action.auth_user_id || null,
+        source: 'crm_followup_queue',
+        page_path: params.action.property_id ? `/imovel/${encodeURIComponent(String(params.action.property_id))}/detalhes` : null,
+    }
+
+    const { data, error } = await params.supabase
+        .from('funnel_events')
+        .insert({
+            visitor_id: params.lead.visitor_id || null,
+            lead_id: params.lead.id,
+            event_type: followupEventType(status),
+            metadata,
+        })
+        .select('id, event_type, metadata, created_at')
+        .single()
+
+    if (error) {
+        console.warn('[Lead CRM] followup action event skipped:', error.message)
+        return null
+    }
+
+    return data as LeadActivityEventRow
+}
+
+async function fetchFollowupActivityRows(params: {
+    supabase: ReturnType<typeof getSupabase>
+    lead: any
+    fallback: LeadActivityEventRow | null
+}) {
+    let eventRows: LeadActivityEventRow[] = params.fallback ? [params.fallback] : []
+    let query = params.supabase
+        .from('funnel_events')
+        .select('id, event_type, metadata, created_at')
+        .order('created_at', { ascending: false })
+        .limit(120)
+
+    if (params.lead.visitor_id) {
+        query = query.eq('visitor_id', params.lead.visitor_id)
+    } else {
+        query = query.eq('lead_id', params.lead.id)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+        console.warn('[Lead CRM] followup activity fetch skipped:', error.message)
+    } else if (data?.length) {
+        eventRows = data as LeadActivityEventRow[]
+    }
+
+    return eventRows.reverse()
+}
+
+async function updateLeadFollowupAction(supabase: ReturnType<typeof getSupabase>, body: any, actor: AdminActorContext | null = null) {
+    const payload = asRecord(body.followup_action)
+    const key = followupActionKey(payload)
+
+    if (!key) {
+        return NextResponse.json({ success: false, error: 'followup key required' }, { status: 400 })
+    }
+
+    const lead = await findLeadForFollowup(supabase, body)
+    if (!lead?.id) {
+        return NextResponse.json({ success: false, error: 'lead not found for followup action' }, { status: 404 })
+    }
+
+    const now = new Date().toISOString()
+    const metadata = asRecord(lead.metadata)
+    const currentActions = asRecord(metadata.crm_followup_actions)
+    const previous = asRecord(currentActions[key])
+    const status = normalizeFollowupStatus(payload.status)
+    const action = {
+        ...previous,
+        key,
+        status,
+        alert_id: asString(payload.alert_id) || previous.alert_id || null,
+        alert_title: asString(payload.alert_title) || previous.alert_title || null,
+        property_id: asString(payload.property_id) || previous.property_id || null,
+        property_title: asString(payload.property_title) || previous.property_title || null,
+        property_url: asString(payload.property_url) || previous.property_url || null,
+        message: asString(payload.message) || previous.message || null,
+        match_score: Number.isFinite(Number(payload.match_score)) ? Number(payload.match_score) : previous.match_score ?? null,
+        note: asString(payload.note) || previous.note || null,
+        actor_type: actor?.actor_type || previous.actor_type || null,
+        actor_id: actor?.actor_id || previous.actor_id || previous.updated_by_admin_user_id || null,
+        actor_name: actor?.actor_name || previous.actor_name || previous.updated_by_name || null,
+        actor_email: actor?.actor_email || previous.actor_email || previous.updated_by_email || null,
+        auth_user_id: actor?.auth_user_id || previous.auth_user_id || null,
+        updated_by_admin_user_id: actor?.actor_id || previous.updated_by_admin_user_id || null,
+        updated_by_name: actor?.actor_name || previous.updated_by_name || null,
+        updated_by_email: actor?.actor_email || previous.updated_by_email || null,
+        source: 'crm',
+        updated_at: now,
+        sent_at: status === 'sent' ? previous.sent_at || now : previous.sent_at || null,
+        responded_at: status === 'responded' ? previous.responded_at || now : previous.responded_at || null,
+        converted_at: status === 'converted' ? previous.converted_at || now : previous.converted_at || null,
+        dismissed_at: status === 'dismissed' ? previous.dismissed_at || now : previous.dismissed_at || null,
+    }
+
+    const nextActions = {
+        ...currentActions,
+        [key]: action,
+    }
+    const nextRecommendationSnapshot = resolveFollowupRecommendationSnapshot(metadata, action, now)
+    const baseMetadata = {
+        ...metadata,
+        crm_followup_actions: nextActions,
+        ...(nextRecommendationSnapshot ? { crm_action_recommendations: nextRecommendationSnapshot } : {}),
+    }
+
+    const eventRow = await appendFollowupActionEvent({ supabase, lead, action })
+    const eventRows = await fetchFollowupActivityRows({ supabase, lead, fallback: eventRow })
+    const mergedMetadata = mergeLeadSiteActivity(baseMetadata, eventRows)
+    const nextMetadata = {
+        ...mergedMetadata,
+        crm_followup_actions: nextActions,
+        ...(nextRecommendationSnapshot ? { crm_action_recommendations: nextRecommendationSnapshot } : {}),
+        behavior_summary: applyFollowupActionsToSummary(mergedMetadata.behavior_summary, nextActions),
+    }
+
+    const { error } = await supabase
+        .from('leads')
+        .update({
+            metadata: nextMetadata,
+            ...leadIntentColumnsFromMetadata(
+                nextMetadata,
+                lead.lead_score,
+                lead.lead_classification
+            ),
+            updated_at: now,
+        })
+        .eq('id', lead.id)
+
+    if (error) throw error
+
+    return NextResponse.json({
+        success: true,
+        source: 'lead_metadata',
+        lead_id: lead.id,
+        followup_action: action,
+        crm_action_recommendations: nextRecommendationSnapshot || null,
+    })
+}
+
 export async function GET(request: NextRequest) {
     try {
         const supabase = getSupabase()
@@ -465,6 +867,11 @@ export async function PUT(request: NextRequest) {
 
         if (!id) {
             return NextResponse.json({ success: false, error: 'ID required' }, { status: 400 })
+        }
+
+        if (updates.followup_action) {
+            const actor = await getOptionalAdminActorContext()
+            return updateLeadFollowupAction(supabase, body, actor)
         }
 
         updates.updated_at = new Date().toISOString()

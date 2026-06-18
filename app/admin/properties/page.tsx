@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, useRef, useMemo } from 'react'
-import { AlertCircle, Bot, CheckCircle, Edit, FileText, Filter, ImageIcon, Loader2, Plus, Save, Search, Trash2, Video, X, Upload, Camera, MapPin, Home, Sparkles, GripVertical, User, Wand2 } from 'lucide-react'
+import { AlertCircle, BellRing, Bot, CheckCircle, DollarSign, Edit, FileText, Filter, History, ImageIcon, Loader2, Plus, Save, Search, Trash2, Video, X, Upload, Camera, MapPin, Home, Sparkles, GripVertical, User, Wand2 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import type { PropertyPriceHistoryRow } from '@/lib/properties/price-history'
 
 interface Property {
     id: string
@@ -11,10 +12,16 @@ interface Property {
     city: string | null
     state: string | null
     price: number | null
+    condo_fee?: number | null
+    iptu?: number | null
     property_type: string | null
     bedrooms: number | null
     bathrooms: number | null
+    suites?: number | null
+    parking_spaces?: number | null
     area_m2: number | null
+    area_private_m2?: number | null
+    area_total_m2?: number | null
     status: string
     video_url: string | null
     featured_image: string | null
@@ -24,9 +31,23 @@ interface Property {
     owner_phone: string | null
     owner_email: string | null
     neighborhood?: string | null
+    street?: string | null
+    number?: string | null
+    complement?: string | null
+    latitude?: number | string | null
+    longitude?: number | string | null
     source_reference?: string | null
     source_payload?: Record<string, any> | null
     created_at: string
+}
+
+type SearchAlertProcessingSummary = {
+    processedProperties: number
+    alertsChecked: number
+    matchesCreated: number
+    notificationsSent: number
+    notificationsFailed: number
+    propertyErrors: number
 }
 
 const emptyForm = {
@@ -34,11 +55,23 @@ const emptyForm = {
     description: '',
     city: '',
     state: '',
+    neighborhood: '',
+    street: '',
+    number: '',
+    complement: '',
+    latitude: '',
+    longitude: '',
     price: '',
+    condo_fee: '',
+    iptu: '',
     property_type: '',
     bedrooms: '',
     bathrooms: '',
+    suites: '',
+    parking_spaces: '',
     area_m2: '',
+    area_private_m2: '',
+    area_total_m2: '',
     featured_image: '',
     status: 'under_review',
     images: [] as string[],
@@ -104,6 +137,8 @@ function getPropertyIssues(prop: Property) {
     if (!hasFeatured) issues.push('Sem foto principal')
     if (!prop.price) issues.push('Sem preco')
     if (!prop.city) issues.push('Sem cidade')
+    if (!prop.neighborhood) issues.push('Sem bairro')
+    if (!prop.latitude || !prop.longitude) issues.push('Sem mapa')
     if (!prop.property_type) issues.push('Sem tipo')
     if (!prop.owner_name || !prop.owner_phone) issues.push('Proprietario incompleto')
     if (!prop.images?.length) issues.push('Sem galeria')
@@ -116,8 +151,11 @@ function getPropertyCompletion(prop: Property) {
         Boolean(prop.description),
         Boolean(prop.city),
         Boolean(prop.state),
+        Boolean(prop.neighborhood),
         Boolean(prop.price),
         Boolean(prop.property_type),
+        Boolean(prop.area_private_m2 || prop.area_m2),
+        Boolean(prop.latitude && prop.longitude),
         Boolean(prop.featured_image || prop.images?.[0]),
         Boolean(prop.images?.length),
         Boolean(prop.owner_name),
@@ -130,6 +168,174 @@ function formatFileSize(bytes: number) {
     if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1).replace('.0', '')}MB`
     if (bytes >= 1024) return `${Math.round(bytes / 1024)}KB`
     return `${bytes}B`
+}
+
+function parseNumberField(value: string) {
+    if (!value.trim()) return null
+    const parsed = Number(value.replace(',', '.'))
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function parseIntegerField(value: string) {
+    const parsed = parseNumberField(value)
+    return parsed === null ? null : Math.trunc(parsed)
+}
+
+function formatAdminMoney(value?: number | string | null, fallback = 'Sob consulta') {
+    const amount = typeof value === 'string' ? Number(value.replace(',', '.')) : Number(value)
+    if (!Number.isFinite(amount) || amount <= 0) return fallback
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0,
+    }).format(amount)
+}
+
+function formatAdminDate(value?: string | null) {
+    if (!value) return 'Data em aberto'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return 'Data em aberto'
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(date)
+}
+
+function numberFrom(value: unknown) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function summarizeSearchAlertProcessing(value: any): SearchAlertProcessingSummary | null {
+    if (!value) return null
+
+    const summary = value.summary || value
+    if (summary && typeof summary === 'object' && !Array.isArray(summary) && (
+        'matches_created' in summary
+        || 'processed_properties' in summary
+        || 'alerts_checked' in summary
+    )) {
+        return {
+            processedProperties: numberFrom(summary.processed_properties || summary.processedProperties),
+            alertsChecked: numberFrom(summary.alerts_checked || summary.alertsChecked),
+            matchesCreated: numberFrom(summary.matches_created || summary.matchesCreated),
+            notificationsSent: numberFrom(summary.notifications_sent || summary.notificationsSent),
+            notificationsFailed: numberFrom(summary.notifications_failed || summary.notificationsFailed),
+            propertyErrors: numberFrom(summary.property_errors || summary.propertyErrors),
+        }
+    }
+
+    const results: any[] = Array.isArray(value.results)
+        ? value.results
+        : Array.isArray(value)
+            ? value
+            : [value]
+
+    if (!results.length) return null
+
+    return results.reduce<SearchAlertProcessingSummary>((acc, result) => {
+        acc.processedProperties += result?.processed === false ? 0 : 1
+        acc.alertsChecked += numberFrom(result?.alert_count)
+        acc.matchesCreated += numberFrom(result?.match_count)
+        acc.notificationsSent += numberFrom(result?.notification_sent)
+        acc.notificationsFailed += numberFrom(result?.notification_failed)
+        if (result?.error) acc.propertyErrors += 1
+        return acc
+    }, {
+        processedProperties: 0,
+        alertsChecked: 0,
+        matchesCreated: 0,
+        notificationsSent: 0,
+        notificationsFailed: 0,
+        propertyErrors: 0,
+    })
+}
+
+function searchAlertProcessingMessage(summary: SearchAlertProcessingSummary | null) {
+    if (!summary || summary.alertsChecked <= 0) return ''
+
+    const base = summary.matchesCreated > 0
+        ? `${summary.matchesCreated} match(es) de alerta criados`
+        : `${summary.alertsChecked} alerta(s) avaliados, sem novos matches`
+    const push = summary.notificationsSent > 0
+        ? `; ${summary.notificationsSent} push enviado(s)`
+        : ''
+    const failures = summary.notificationsFailed > 0 || summary.propertyErrors > 0
+        ? `; ${summary.notificationsFailed + summary.propertyErrors} falha(s)`
+        : ''
+
+    return `${base}${push}${failures}.`
+}
+
+function priceHistoryEventLabel(eventType: string) {
+    if (eventType === 'listed') return 'Cadastro criado'
+    if (eventType === 'initial_snapshot') return 'Snapshot atual'
+    if (eventType === 'price_reduced') return 'Preço reduzido'
+    if (eventType === 'price_increased') return 'Preço aumentado'
+    if (eventType === 'price_updated') return 'Preço atualizado'
+    if (eventType === 'costs_updated') return 'Custos atualizados'
+    return 'Revisão financeira'
+}
+
+function priceHistoryMainValue(event: PropertyPriceHistoryRow) {
+    const price = Number(event.new_price || 0)
+    const condoFee = Number(event.new_condo_fee || 0)
+    const iptu = Number(event.new_iptu || 0)
+
+    if (price > 0) return formatAdminMoney(price)
+    if (condoFee > 0) return `Cond. ${formatAdminMoney(condoFee)}`
+    if (iptu > 0) return `IPTU ${formatAdminMoney(iptu)}`
+    return 'Registro salvo'
+}
+
+function priceHistoryNote(event: PropertyPriceHistoryRow) {
+    const previousPrice = Number(event.previous_price || 0)
+    const nextPrice = Number(event.new_price || 0)
+    const priceM2 = Number(event.new_price_per_m2 || 0)
+    const notes = [
+        previousPrice > 0 && nextPrice > 0 && previousPrice !== nextPrice ? `antes ${formatAdminMoney(previousPrice)}` : null,
+        priceM2 > 0 ? `${formatAdminMoney(Math.round(priceM2))}/m²` : null,
+        event.source ? `origem ${event.source}` : null,
+    ].filter(Boolean)
+
+    return notes.join(' | ') || 'Evento financeiro do cadastro'
+}
+
+function buildInitialPriceHistorySnapshot(property: Property | null): PropertyPriceHistoryRow | null {
+    if (!property) return null
+
+    const price = Number(property.price || 0)
+    const condoFee = Number(property.condo_fee || 0)
+    const iptu = Number(property.iptu || 0)
+    const area = Number(property.area_private_m2 || property.area_m2 || 0)
+
+    if (price <= 0 && condoFee <= 0 && iptu <= 0) return null
+
+    return {
+        property_id: property.id,
+        event_type: 'initial_snapshot',
+        previous_price: null,
+        new_price: price > 0 ? price : null,
+        previous_condo_fee: null,
+        new_condo_fee: condoFee > 0 ? condoFee : null,
+        previous_iptu: null,
+        new_iptu: iptu > 0 ? iptu : null,
+        previous_price_per_m2: null,
+        new_price_per_m2: price > 0 && area > 0 ? price / area : null,
+        area_m2: area > 0 ? area : null,
+        source: 'snapshot_atual',
+        metadata: {
+            property_title: property.title,
+            source_reference: property.source_reference || null,
+            virtual: true,
+        },
+        created_at: property.created_at,
+    }
 }
 
 function validateAiUploadFile(file: File, kind: 'image' | 'video' | 'document') {
@@ -490,6 +696,9 @@ export default function PropertiesPage() {
     const [aiGenerating, setAiGenerating] = useState(false)
     const [aiNotes, setAiNotes] = useState<string[]>([])
     const [editingProp, setEditingProp] = useState<Property | null>(null)
+    const [priceHistory, setPriceHistory] = useState<PropertyPriceHistoryRow[]>([])
+    const [priceHistoryLoading, setPriceHistoryLoading] = useState(false)
+    const [processingAlertPropertyId, setProcessingAlertPropertyId] = useState<string | null>(null)
     const [form, setForm] = useState(emptyForm)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
@@ -500,6 +709,12 @@ export default function PropertiesPage() {
     const [errorPopup, setErrorPopup] = useState<string | null>(null)
     const reviewOpenedRef = useRef(false)
     const aiTriage = getAiBriefingTriage(aiContext, aiImages.length)
+    const visiblePriceHistory = useMemo(() => {
+        if (priceHistory.length > 0) return priceHistory
+
+        const snapshot = buildInitialPriceHistorySnapshot(editingProp)
+        return snapshot ? [snapshot] : []
+    }, [editingProp, priceHistory])
 
     const typeOptions = useMemo(() => {
         const values = new Set(properties.map(prop => prop.property_type).filter(Boolean) as string[])
@@ -584,7 +799,25 @@ export default function PropertiesPage() {
     const resetForm = () => {
         setShowForm(false)
         setEditingProp(null)
+        setPriceHistory([])
+        setPriceHistoryLoading(false)
         setForm(emptyForm)
+    }
+
+    const fetchPriceHistory = async (propertyId: string) => {
+        setPriceHistory([])
+        setPriceHistoryLoading(true)
+        try {
+            const res = await fetch(`/api/admin/properties/${propertyId}/price-history`)
+            const json = await res.json().catch(() => null)
+            if (!res.ok) throw new Error(json?.error || 'Falha ao carregar historico financeiro')
+            setPriceHistory(Array.isArray(json?.history) ? json.history : [])
+        } catch (err: any) {
+            setPriceHistory([])
+            showToast(err.message || 'Falha ao carregar historico financeiro', 'error')
+        } finally {
+            setPriceHistoryLoading(false)
+        }
     }
 
     const resetAiForm = () => {
@@ -604,11 +837,23 @@ export default function PropertiesPage() {
             description: prop.description || '',
             city: prop.city || '',
             state: prop.state || '',
+            neighborhood: prop.neighborhood || '',
+            street: prop.street || '',
+            number: prop.number || '',
+            complement: prop.complement || '',
+            latitude: prop.latitude?.toString() || '',
+            longitude: prop.longitude?.toString() || '',
             price: prop.price?.toString() || '',
+            condo_fee: prop.condo_fee?.toString() || '',
+            iptu: prop.iptu?.toString() || '',
             property_type: prop.property_type || '',
             bedrooms: prop.bedrooms?.toString() || '',
             bathrooms: prop.bathrooms?.toString() || '',
+            suites: prop.suites?.toString() || '',
+            parking_spaces: prop.parking_spaces?.toString() || '',
             area_m2: prop.area_m2?.toString() || '',
+            area_private_m2: prop.area_private_m2?.toString() || '',
+            area_total_m2: prop.area_total_m2?.toString() || '',
             featured_image: prop.featured_image || '',
             images: prop.images || [],
             amenities: prop.amenities?.join(', ') || '',
@@ -619,6 +864,7 @@ export default function PropertiesPage() {
             owner_email: prop.owner_email || '',
         })
         setShowForm(true)
+        void fetchPriceHistory(prop.id)
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -689,11 +935,23 @@ export default function PropertiesPage() {
                 description: draft.description || aiContext || null,
                 city: draft.city || null,
                 state: draft.state || null,
+                neighborhood: draft.neighborhood || null,
+                street: draft.street || null,
+                number: draft.number || null,
+                complement: draft.complement || null,
+                latitude: draft.latitude ?? null,
+                longitude: draft.longitude ?? null,
                 price: draft.price ?? null,
+                condo_fee: draft.condo_fee ?? null,
+                iptu: draft.iptu ?? null,
                 property_type: draft.property_type || null,
                 bedrooms: draft.bedrooms ?? null,
                 bathrooms: draft.bathrooms ?? null,
+                suites: draft.suites ?? null,
+                parking_spaces: draft.parking_spaces ?? null,
                 area_m2: draft.area_m2 ?? null,
+                area_private_m2: draft.area_private_m2 ?? null,
+                area_total_m2: draft.area_total_m2 ?? null,
                 featured_image: aiImages[0] || null,
                 images: aiImages,
                 amenities: Array.isArray(draft.amenities) ? draft.amenities : [],
@@ -776,11 +1034,23 @@ export default function PropertiesPage() {
             description: form.description || null,
             city: form.city || null,
             state: form.state || null,
-            price: form.price ? parseFloat(form.price) : null,
+            neighborhood: form.neighborhood || null,
+            street: form.street || null,
+            number: form.number || null,
+            complement: form.complement || null,
+            latitude: parseNumberField(form.latitude),
+            longitude: parseNumberField(form.longitude),
+            price: parseNumberField(form.price),
+            condo_fee: parseNumberField(form.condo_fee),
+            iptu: parseNumberField(form.iptu),
             property_type: form.property_type || null,
-            bedrooms: form.bedrooms ? parseInt(form.bedrooms) : null,
-            bathrooms: form.bathrooms ? parseInt(form.bathrooms) : null,
-            area_m2: form.area_m2 ? parseFloat(form.area_m2) : null,
+            bedrooms: parseIntegerField(form.bedrooms),
+            bathrooms: parseIntegerField(form.bathrooms),
+            suites: parseIntegerField(form.suites),
+            parking_spaces: parseIntegerField(form.parking_spaces),
+            area_m2: parseNumberField(form.area_m2),
+            area_private_m2: parseNumberField(form.area_private_m2),
+            area_total_m2: parseNumberField(form.area_total_m2),
             featured_image: nextFeaturedImage,
             images: form.images,
             amenities: form.amenities ? form.amenities.split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -799,20 +1069,46 @@ export default function PropertiesPage() {
             if (!res.ok) throw new Error(editingProp ? 'Erro ao atualizar' : 'Erro ao criar')
             const json = await res.json().catch(() => null)
             const notification = json?.notification
+            const alertMessage = searchAlertProcessingMessage(summarizeSearchAlertProcessing(json?.search_alerts))
             if (editingProp) {
-                showToast('Imovel atualizado!', 'success')
+                showToast(alertMessage ? `Imovel atualizado. ${alertMessage}` : 'Imovel atualizado!', 'success')
             } else if (notification?.sent) {
-                showToast('Imovel criado em analise e marketing avisado no WhatsApp.', 'success')
+                showToast(alertMessage ? `Imovel criado em analise e marketing avisado no WhatsApp. ${alertMessage}` : 'Imovel criado em analise e marketing avisado no WhatsApp.', 'success')
             } else if (notification?.reason || notification?.error) {
-                showToast(`Imovel criado em analise. Aviso WhatsApp pendente: ${notification.reason || notification.error}`, 'success')
+                showToast(alertMessage ? `Imovel criado em analise. Aviso WhatsApp pendente: ${notification.reason || notification.error}. ${alertMessage}` : `Imovel criado em analise. Aviso WhatsApp pendente: ${notification.reason || notification.error}`, 'success')
             } else {
-                showToast('Imovel criado em analise!', 'success')
+                showToast(alertMessage ? `Imovel criado em analise. ${alertMessage}` : 'Imovel criado em analise!', 'success')
             }
             resetForm()
             setForm(prev => ({ ...prev, status: nextStatus }))
             fetchProps()
         } catch (err: any) { showToast(err.message, 'error') }
         finally { setSaving(false) }
+    }
+
+    const processPropertyAlerts = async (prop: Property) => {
+        if (prop.status !== 'active') {
+            showToast('A varredura de alertas roda apenas para imoveis ativos.', 'error')
+            return
+        }
+
+        setProcessingAlertPropertyId(prop.id)
+        try {
+            const res = await fetch('/api/admin/search-alerts/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ property_id: prop.id }),
+            })
+            const json = await res.json().catch(() => null)
+            if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao processar alertas do imovel')
+
+            const alertMessage = searchAlertProcessingMessage(summarizeSearchAlertProcessing(json?.summary || json?.result))
+            showToast(alertMessage || 'Alertas avaliados para este imovel.', 'success')
+        } catch (err: any) {
+            showToast(err.message || 'Erro ao processar alertas do imovel', 'error')
+        } finally {
+            setProcessingAlertPropertyId(null)
+        }
     }
 
     const handleDelete = async (id: string) => {
@@ -1041,6 +1337,12 @@ export default function PropertiesPage() {
                         <div className="prop-form-grid">
                             <div className="form-group"><label className="form-label">Cidade</label><input className="form-input" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Balneário Camboriú" /></div>
                             <div className="form-group"><label className="form-label">Estado</label><input className="form-input" value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="SC" /></div>
+                            <div className="form-group"><label className="form-label">Bairro</label><input className="form-input" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} placeholder="Praia Brava" /></div>
+                            <div className="form-group"><label className="form-label">Rua</label><input className="form-input" value={form.street} onChange={e => setForm({ ...form, street: e.target.value })} placeholder="Rua 3700" /></div>
+                            <div className="form-group"><label className="form-label">Numero</label><input className="form-input" value={form.number} onChange={e => setForm({ ...form, number: e.target.value })} placeholder="500" /></div>
+                            <div className="form-group"><label className="form-label">Complemento</label><input className="form-input" value={form.complement} onChange={e => setForm({ ...form, complement: e.target.value })} placeholder="Apto 2801" /></div>
+                            <div className="form-group"><label className="form-label">Latitude</label><input className="form-input" type="number" step="any" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} placeholder="-26.9566" /></div>
+                            <div className="form-group"><label className="form-label">Longitude</label><input className="form-input" type="number" step="any" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} placeholder="-48.6297" /></div>
                             <div className="form-group"><label className="form-label">Preço (R$)</label><input className="form-input" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="4500000" /></div>
                             <div className="form-group"><label className="form-label">Dormitórios</label><input className="form-input" type="number" value={form.bedrooms} onChange={e => setForm({ ...form, bedrooms: e.target.value })} placeholder="4" /></div>
                             <div className="form-group"><label className="form-label">Banheiros</label><input className="form-input" type="number" value={form.bathrooms} onChange={e => setForm({ ...form, bathrooms: e.target.value })} placeholder="3" /></div>
@@ -1049,6 +1351,46 @@ export default function PropertiesPage() {
                     </div>
 
                     {/* ── Section 3: Media ── */}
+                    <div className="prop-section prop-section-financial">
+                        <div className="prop-section-title"><DollarSign size={18} /> Custos, areas e atributos comerciais</div>
+                        <div className="prop-form-grid">
+                            <div className="form-group"><label className="form-label">Condominio (R$)</label><input className="form-input" type="number" value={form.condo_fee} onChange={e => setForm({ ...form, condo_fee: e.target.value })} placeholder="2500" /></div>
+                            <div className="form-group"><label className="form-label">IPTU anual (R$)</label><input className="form-input" type="number" value={form.iptu} onChange={e => setForm({ ...form, iptu: e.target.value })} placeholder="9800" /></div>
+                            <div className="form-group"><label className="form-label">Suites</label><input className="form-input" type="number" value={form.suites} onChange={e => setForm({ ...form, suites: e.target.value })} placeholder="4" /></div>
+                            <div className="form-group"><label className="form-label">Vagas</label><input className="form-input" type="number" value={form.parking_spaces} onChange={e => setForm({ ...form, parking_spaces: e.target.value })} placeholder="3" /></div>
+                            <div className="form-group"><label className="form-label">Area privativa (m2)</label><input className="form-input" type="number" step="any" value={form.area_private_m2} onChange={e => setForm({ ...form, area_private_m2: e.target.value })} placeholder="220" /></div>
+                            <div className="form-group"><label className="form-label">Area total (m2)</label><input className="form-input" type="number" step="any" value={form.area_total_m2} onChange={e => setForm({ ...form, area_total_m2: e.target.value })} placeholder="340" /></div>
+                        </div>
+                    </div>
+
+                    {editingProp && (
+                        <div className="prop-section prop-section-history">
+                            <div className="prop-section-title"><History size={18} /> Historico financeiro</div>
+                            {priceHistoryLoading ? (
+                                <div className="property-history-empty">
+                                    <Loader2 size={16} className="spin" /> Carregando historico...
+                                </div>
+                            ) : visiblePriceHistory.length > 0 ? (
+                                <div className="property-history-list">
+                                    {visiblePriceHistory.map(event => (
+                                        <div key={event.id || `${event.event_type}-${event.created_at}`} className="property-history-row">
+                                            <span>{formatAdminDate(event.created_at)}</span>
+                                            <div>
+                                                <strong>{priceHistoryEventLabel(event.event_type)}</strong>
+                                                <small>{priceHistoryNote(event)}</small>
+                                            </div>
+                                            <b>{priceHistoryMainValue(event)}</b>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="property-history-empty">
+                                    Sem eventos gravados ainda. A proxima alteracao de preco, condominio ou IPTU criara a primeira linha.
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="prop-section prop-section-media">
                         <div className="prop-section-title"><Camera size={18} /> Mídia</div>
 
@@ -1141,9 +1483,17 @@ export default function PropertiesPage() {
                                 <div className="admin-property-head">
                                     <div>
                                         <div className="admin-property-title">{prop.title}</div>
-                                        <div className="admin-property-location">{prop.city || 'Cidade pendente'}{prop.state ? `, ${prop.state}` : ''}</div>
+                                        <div className="admin-property-location">{[prop.neighborhood, prop.city || 'Cidade pendente', prop.state].filter(Boolean).join(', ')}</div>
                                     </div>
                                     <div className="admin-property-actions">
+                                        <button
+                                            className="btn btn-outline btn-sm"
+                                            onClick={() => processPropertyAlerts(prop)}
+                                            disabled={processingAlertPropertyId === prop.id || prop.status !== 'active'}
+                                            title={prop.status === 'active' ? 'Varrer alertas salvos para este imovel' : 'Disponivel apenas para imoveis ativos'}
+                                        >
+                                            {processingAlertPropertyId === prop.id ? <Loader2 size={14} className="spin" /> : <BellRing size={14} />}
+                                        </button>
                                         <button className="btn btn-outline btn-sm" onClick={() => handleEdit(prop)}><Edit size={14} /></button>
                                         <button className="btn btn-outline btn-sm" onClick={() => handleDelete(prop.id)} style={{ color: 'var(--danger)' }}><Trash2 size={14} /></button>
                                     </div>
@@ -1154,6 +1504,11 @@ export default function PropertiesPage() {
                                 </div>
                                 {prop.price ? <div className="admin-property-price">R$ {prop.price.toLocaleString('pt-BR')}</div> : <div className="admin-property-price muted">Preco pendente</div>}
                                 <div className="admin-property-meta">
+                                    {prop.suites && <span>{prop.suites} suites</span>}
+                                    {prop.parking_spaces && <span>{prop.parking_spaces} vagas</span>}
+                                    {prop.area_private_m2 && <span>{prop.area_private_m2}m2 priv.</span>}
+                                    {prop.condo_fee && <span>Cond. {formatAdminMoney(prop.condo_fee)}</span>}
+                                    {prop.iptu && <span>IPTU {formatAdminMoney(prop.iptu)}</span>}
                                     {prop.property_type && <span>{prop.property_type}</span>}
                                     {prop.bedrooms && <span>{prop.bedrooms} dormitórios</span>}
                                     {prop.bathrooms && <span>{prop.bathrooms} banheiros</span>}

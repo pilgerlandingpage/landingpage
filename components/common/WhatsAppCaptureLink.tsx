@@ -2,6 +2,7 @@
 
 import type { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
+import { trackEvent } from '@/lib/tracking/client'
 
 type Props = {
     phone: string
@@ -29,6 +30,18 @@ export default function WhatsAppCaptureLink({
     const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault()
         if (externalOnClick) externalOnClick(e)
+        const trackingEventType = typeof metadata?.tracking_event_type === 'string'
+            ? metadata.tracking_event_type
+            : ''
+
+        if (trackingEventType) {
+            void trackEvent(trackingEventType, {
+                ...(metadata || {}),
+                template,
+                channel: 'whatsapp',
+                capture_before_whatsapp: true,
+            })
+        }
         openWhatsAppWithLeadCapture({ phone, message, slug, template, metadata })
     }
 

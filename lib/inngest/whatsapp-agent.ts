@@ -2041,7 +2041,7 @@ function extractLeadDataForCrm(inputText: string, aiText: string, senderName?: s
 
     const objections: string[] = []
     if (/\b(caro|preco|valor alto|baixar|desconto|entrada)\b/i.test(lower)) objections.push('preco')
-    if (/\b(financiamento|credito|documento|documentacao|aprovar)\b/i.test(lower)) objections.push('financiamento/documentacao')
+    if (/\b(credito|documento|documentacao|aprovar|comprovar|comprovacao)\b/i.test(lower)) objections.push('documentacao/analise comercial')
     if (/\b(localizacao|regiao|bairro|distancia|longe)\b/i.test(lower)) objections.push('localizacao')
     if (/\b(seguranca|confio|confiavel|garantia|golpe|realmente existe)\b/i.test(lower)) objections.push('seguranca/confianca')
     if (objections.length) out.objections = objections

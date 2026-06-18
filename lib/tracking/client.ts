@@ -26,6 +26,11 @@ const PUSH_INTENT_EVENTS = new Set([
     'property_details_clicked',
     'property_feed_similar_clicked',
     'property_map_popup_opened',
+    'property_search_alert_saved',
+    'property_private_visit_requested',
+    'property_availability_requested',
+    'property_reserved_negotiation_requested',
+    'property_value_reading_requested',
 ])
 
 export function getCookie(name: string): string | null {
@@ -173,6 +178,45 @@ function maybeDispatchPushIntent(eventType: string, metadata: any) {
                 title: 'Salve sua busca de luxo',
                 body: 'Avisamos quando surgir imovel dentro do perfil que voce acabou de pesquisar.',
                 cta: 'Salvar alerta VIP',
+            }
+        } else if (eventType === 'property_search_alert_saved') {
+            payload = {
+                reason: eventType,
+                title: 'Alerta de busca salvo',
+                body: 'Ative as notificacoes para ser avisado quando entrar um imovel com esse perfil.',
+                cta: 'Ativar alertas VIP',
+            }
+        } else if (eventType === 'property_private_visit_requested') {
+            payload = {
+                reason: eventType,
+                title: 'Visita privada solicitada',
+                body: title
+                    ? `Podemos avisar quando houver agenda e disponibilidade para ${title}.`
+                    : 'Podemos avisar quando houver agenda e disponibilidade para este imovel.',
+                cta: 'Receber atualizacao',
+            }
+        } else if (eventType === 'property_availability_requested') {
+            payload = {
+                reason: eventType,
+                title: 'Disponibilidade em acompanhamento',
+                body: title
+                    ? `Avisamos se a disponibilidade de ${title} mudar.`
+                    : 'Avisamos se a disponibilidade deste perfil mudar.',
+                cta: 'Acompanhar',
+            }
+        } else if (eventType === 'property_reserved_negotiation_requested') {
+            payload = {
+                reason: eventType,
+                title: 'Tratativa reservada',
+                body: 'Ative alertas para receber movimentos relevantes desse perfil de imovel.',
+                cta: 'Ativar alertas',
+            }
+        } else if (eventType === 'property_value_reading_requested') {
+            payload = {
+                reason: eventType,
+                title: 'Leitura de valor',
+                body: 'Podemos avisar quando entrar outra oportunidade comparavel na mesma regiao.',
+                cta: 'Receber comparaveis',
             }
         } else if (eventType === 'property_map_popup_opened') {
             payload = {

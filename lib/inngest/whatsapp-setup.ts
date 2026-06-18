@@ -146,9 +146,9 @@ export const whatsappInstanceSetup = inngest.createFunction(
                 text: 'Para dar andamento, vou precisar dos seguintes documentos:\n\n📄 RG e CPF\n📄 Comprovante de renda\n📄 Comprovante de residência\n📄 Certidão de estado civil\n\nPode enviar por aqui mesmo! 📎',
             },
             {
-                shortCut: '/financiamento',
+                shortCut: '/negociacao',
                 type: 'text' as const,
-                text: 'Trabalhamos com financiamento pela Caixa, Itaú, Bradesco e Santander. A simulação é gratuita e leva apenas alguns minutos! Quer que eu faça uma simulação para você? 🏦',
+                text: 'Para imoveis de alto padrao, tratamos disponibilidade, visita privada e condicoes comerciais de forma reservada com o especialista. Quer que eu chame a equipe para uma leitura do imovel?',
             },
             {
                 shortCut: '/obrigado',

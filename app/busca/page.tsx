@@ -44,6 +44,78 @@ function asNumber(value: string | string[] | undefined) {
     return Number.isFinite(number) ? number : 0
 }
 
+type MapDrawArea = Array<[number, number]>
+
+type MapBounds = {
+    north: number
+    south: number
+    east: number
+    west: number
+}
+
+function parseDrawAreaParam(value: string | string[] | undefined): MapDrawArea | null {
+    const raw = firstParam(value)
+    if (!raw) return null
+
+    const points = raw
+        .split(';')
+        .map(pair => {
+            const [latRaw, lngRaw] = pair.split(',')
+            const lat = Number(latRaw)
+            const lng = Number(lngRaw)
+
+            if (
+                Number.isFinite(lat) &&
+                Number.isFinite(lng) &&
+                lat >= -90 &&
+                lat <= 90 &&
+                lng >= -180 &&
+                lng <= 180
+            ) {
+                return [lat, lng] as [number, number]
+            }
+
+            return null
+        })
+        .filter((point): point is [number, number] => Boolean(point))
+
+    return points.length >= 3 ? points : null
+}
+
+function parseMapBoundsParam(value: string | string[] | undefined): MapBounds | null {
+    const raw = firstParam(value)
+    if (!raw) return null
+
+    const [northRaw, southRaw, eastRaw, westRaw] = raw.split(',')
+    const bounds = {
+        north: Number(northRaw),
+        south: Number(southRaw),
+        east: Number(eastRaw),
+        west: Number(westRaw),
+    }
+
+    if (
+        Number.isFinite(bounds.north) &&
+        Number.isFinite(bounds.south) &&
+        Number.isFinite(bounds.east) &&
+        Number.isFinite(bounds.west) &&
+        bounds.north >= -90 &&
+        bounds.north <= 90 &&
+        bounds.south >= -90 &&
+        bounds.south <= 90 &&
+        bounds.east >= -180 &&
+        bounds.east <= 180 &&
+        bounds.west >= -180 &&
+        bounds.west <= 180 &&
+        bounds.north > bounds.south &&
+        bounds.east > bounds.west
+    ) {
+        return bounds
+    }
+
+    return null
+}
+
 function applyTextFilter(query: any, tag: string | undefined) {
     if (!tag) return query
 
@@ -126,6 +198,7 @@ const SEARCH_PROPERTY_FIELDS = [
     'area_private_m2',
     'featured_image',
     'images',
+    'video_url',
     'property_type',
     'exclusive',
     'latitude',
@@ -188,10 +261,25 @@ export default async function SearchPage({
     const areaMax = asNumber(resolvedParams.areaMax) || Number(naturalSearch.areaMax || 0)
     const priceMin = asNumber(resolvedParams.priceMin) || Number(naturalSearch.priceMin || 0)
     const priceMax = asNumber(resolvedParams.priceMax) || Number(naturalSearch.priceMax || 0)
+    const drawArea = parseDrawAreaParam(resolvedParams.drawArea)
+    const mapBounds = parseMapBoundsParam(resolvedParams.mapBounds)
+    const hasServerSpatialFilter = Boolean(drawArea || mapBounds)
 
-    let query = supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
+    const createPropertyQuery = (useSpatialFilter: boolean) => (
+        useSpatialFilter && hasServerSpatialFilter
+            ? supabase
+                .rpc('search_active_properties_in_area', {
+                    p_draw_area: drawArea,
+                    p_bounds: mapBounds,
+                })
+                .select(SEARCH_PROPERTY_FIELDS)
+            : supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
+    )
 
-    query = applySearchTermFilter(query, q)
+    const applyPropertyFilters = (initialQuery: any) => {
+        let query = initialQuery
+
+        query = applySearchTermFilter(query, q)
 
     query = applyLocationFilter(query, city)
 
@@ -248,9 +336,19 @@ export default async function SearchPage({
     if (offer === 'rent') query = query.not('rent', 'is', null)
     if (offer === 'sale') query = query.not('price', 'is', null)
 
-    query = applyTextFilter(query, tag)
+        query = applyTextFilter(query, tag)
 
-    const { data: properties } = await query.order('created_at', { ascending: false })
+        return query.order('created_at', { ascending: false })
+    }
+
+    const spatialResult = await applyPropertyFilters(createPropertyQuery(hasServerSpatialFilter))
+    let properties = spatialResult.data
+
+    if (spatialResult.error && hasServerSpatialFilter) {
+        console.warn('[Busca] Spatial property search failed; falling back to the regular property query.', spatialResult.error.message)
+        const fallbackResult = await applyPropertyFilters(createPropertyQuery(false))
+        properties = fallbackResult.data
+    }
 
     const { data: landingPages } = await supabase
         .from('landing_pages')

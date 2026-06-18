@@ -738,12 +738,19 @@ export default function PropertyFeedStyles() {
                 z-index: 401;
             }
 
+            .property-feed-map-shell.map-view-street::after {
+                content: none;
+                display: none;
+            }
+
             .property-feed-map-canvas {
                 background: #111;
                 height: 100% !important;
                 width: 100% !important;
             }
 
+            .property-feed-map-shell.map-view-luxury .leaflet-tile-pane,
+            .property-feed-map-shell.map-view-map .leaflet-tile-pane,
             .property-feed-map-shell.map-style-luxury .leaflet-tile-pane {
                 filter: saturate(.86) contrast(1.06) sepia(.08) hue-rotate(352deg);
             }
@@ -752,6 +759,7 @@ export default function PropertyFeedStyles() {
                 filter: saturate(.9) contrast(1.02);
             }
 
+            .property-feed-map-shell.map-view-satellite .leaflet-tile-pane,
             .property-feed-map-shell.map-style-satellite .leaflet-tile-pane {
                 filter: saturate(1.08) contrast(1.04) brightness(.94);
             }
@@ -790,9 +798,10 @@ export default function PropertyFeedStyles() {
             }
 
             .property-feed-map-style-control {
-                display: flex;
-                flex-direction: column;
+                display: grid;
                 gap: 7px;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                left: 10px;
                 position: absolute;
                 right: 10px;
                 top: 10px;
@@ -811,7 +820,7 @@ export default function PropertyFeedStyles() {
                 font: 850 .64rem/1 Inter, sans-serif;
                 gap: 5px;
                 height: 32px;
-                justify-content: flex-start;
+                justify-content: center;
                 min-width: 0;
                 padding: 0 9px;
                 transition: background .18s ease, color .18s ease, transform .18s ease;
@@ -826,6 +835,181 @@ export default function PropertyFeedStyles() {
                 background: linear-gradient(135deg, #dfc18e, #b8945f);
                 border-color: rgba(255,255,255,.28);
                 color: #101010;
+            }
+
+            .property-feed-map-street-view {
+                background: #0f1113;
+                height: 100%;
+                min-height: 0;
+                overscroll-behavior: contain;
+                pointer-events: auto;
+                position: relative;
+                touch-action: auto;
+                width: 100%;
+                z-index: 1;
+            }
+
+            .property-feed-map-street-frame {
+                border: 0;
+                display: block;
+                height: 100%;
+                pointer-events: auto !important;
+                touch-action: auto !important;
+                width: 100%;
+            }
+
+            .property-feed-map-street-view:not(.is-interactive) .property-feed-map-street-frame,
+            .property-feed-map-street-view:not(.is-interactive) .property-feed-map-street-native {
+                pointer-events: none !important;
+            }
+
+            .property-feed-map-street-native {
+                background: #0f1113;
+                height: 100%;
+                min-height: inherit;
+                pointer-events: auto;
+                position: relative;
+                touch-action: pan-x pan-y;
+                width: 100%;
+            }
+
+            .property-feed-map-street-native.is-interactive {
+                touch-action: none;
+            }
+
+            .property-feed-map-street-native-state {
+                align-items: center;
+                background: #0f1113;
+                color: rgba(255,255,255,.86);
+                display: grid;
+                gap: 9px;
+                inset: 0;
+                justify-items: center;
+                place-content: center;
+                position: absolute;
+                text-align: center;
+                z-index: 4;
+            }
+
+            .property-feed-map-street-native-state svg {
+                color: #dfc18e;
+            }
+
+            .property-feed-map-street-native-state strong {
+                font-size: .86rem;
+                font-weight: 900;
+            }
+
+            .property-feed-map-street-activate,
+            .property-feed-map-street-release {
+                align-items: center;
+                border: 1px solid rgba(255,255,255,.22);
+                box-shadow: 0 12px 30px rgba(0,0,0,.24);
+                cursor: pointer;
+                display: inline-flex;
+                justify-content: center;
+                position: absolute;
+                z-index: 720;
+            }
+
+            .property-feed-map-street-activate {
+                bottom: 18px;
+                left: 50%;
+                min-height: 40px;
+                padding: 0 14px;
+                border-radius: 999px;
+                background: linear-gradient(135deg, #dfc18e, #b8945f);
+                color: #111;
+                font-size: .74rem;
+                font-weight: 950;
+                gap: 7px;
+                transform: translateX(-50%);
+                white-space: nowrap;
+            }
+
+            .property-feed-map-street-release {
+                right: 12px;
+                top: 12px;
+                width: 38px;
+                height: 38px;
+                border-radius: 999px;
+                background: rgba(255,255,255,.92);
+                color: #111;
+            }
+
+            .property-feed-map-street-fallback {
+                align-items: flex-start;
+                background: rgba(15, 15, 15, .82);
+                border: 1px solid rgba(232, 220, 199, .18);
+                border-radius: 13px;
+                box-shadow: 0 16px 38px rgba(0,0,0,.28);
+                color: #fff;
+                display: grid;
+                gap: 5px;
+                left: 14px;
+                max-width: min(310px, calc(100% - 28px));
+                padding: 13px 14px;
+                position: absolute;
+                top: 58px;
+                z-index: 610;
+            }
+
+            .property-feed-map-street-fallback svg {
+                color: #f0d08f;
+            }
+
+            .property-feed-map-street-fallback strong {
+                font-size: .84rem;
+                font-weight: 900;
+                line-height: 1.1;
+            }
+
+            .property-feed-map-street-fallback span {
+                color: rgba(255,255,255,.76);
+                font-size: .72rem;
+                font-weight: 720;
+                line-height: 1.28;
+            }
+
+            .property-feed-map-caption {
+                align-items: center;
+                background: rgba(12, 12, 12, .76);
+                border: 1px solid rgba(232, 220, 199, .14);
+                border-radius: 12px;
+                bottom: 12px;
+                color: rgba(255,255,255,.86);
+                display: flex;
+                gap: 10px;
+                justify-content: space-between;
+                left: 12px;
+                max-width: calc(100% - 24px);
+                padding: 9px 10px;
+                position: absolute;
+                right: 12px;
+                z-index: 610;
+            }
+
+            .property-feed-map-caption span {
+                font-size: .72rem;
+                font-weight: 760;
+                line-height: 1.2;
+                min-width: 0;
+            }
+
+            .property-feed-map-caption a {
+                align-items: center;
+                background: #fff;
+                border-radius: 999px;
+                color: #111;
+                display: inline-flex;
+                flex: 0 0 auto;
+                font-size: .66rem;
+                font-weight: 900;
+                gap: 5px;
+                line-height: 1;
+                padding: 8px 10px;
+                text-decoration: none;
+                white-space: nowrap;
             }
 
             .property-feed-map-marker {
@@ -1142,13 +1326,43 @@ export default function PropertyFeedStyles() {
                 }
 
                 .property-feed-map-style-control {
+                    left: 8px;
                     right: 8px;
                     top: 8px;
                 }
 
                 .property-feed-map-style-control button {
                     height: 31px;
-                    padding: 0 8px;
+                    font-size: .6rem;
+                    padding: 0 6px;
+                }
+
+                .property-feed-map-caption {
+                    align-items: flex-end;
+                    background: transparent;
+                    border: 0;
+                    bottom: 10px;
+                    box-shadow: none;
+                    left: 8px;
+                    justify-content: flex-end;
+                    right: 8px;
+                    max-width: calc(100% - 16px);
+                    padding: 0;
+                }
+
+                .property-feed-map-caption span {
+                    display: none;
+                }
+
+                .property-feed-map-caption a {
+                    padding: 7px 9px;
+                }
+
+                .property-feed-map-street-fallback {
+                    left: 8px;
+                    max-width: calc(100% - 16px);
+                    padding: 10px 11px;
+                    top: 48px;
                 }
 
                 .property-feed-header {

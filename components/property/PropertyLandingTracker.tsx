@@ -3,6 +3,9 @@
 import { useEffect } from 'react'
 import { trackEvent } from '@/lib/tracking/client'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { markSearchAlertMatchOpenIfNeeded } from '@/lib/tracking/search-alert-session'
+
+const HISTORY_KEY = 'pilger_property_history'
 
 type PropertyLandingTrackerProps = {
     propertyId: string
@@ -27,9 +30,37 @@ function isWhatsAppCta(anchor: HTMLAnchorElement, href: string) {
         href === '#whatsapp-form' ||
         anchor.classList.contains('plp-whatsapp-button') ||
         anchor.classList.contains('plp-dark-button') ||
+        anchor.classList.contains('plp-context-cta') ||
+        anchor.classList.contains('plp-market-cta') ||
         anchor.classList.contains('plp-mobile-cta-button')
     )
 }
+
+function readStoredIds(key: string): string[] {
+    try {
+        const parsed = JSON.parse(window.localStorage.getItem(key) || '[]')
+        return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : []
+    } catch {
+        return []
+    }
+}
+
+function rememberPropertyView(propertyId: string) {
+    try {
+        const current = readStoredIds(HISTORY_KEY)
+        const next = [propertyId, ...current.filter(id => id !== propertyId)].slice(0, 40)
+        window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+        window.dispatchEvent(new CustomEvent('pilger:history-changed', { detail: { ids: next } }))
+    } catch {
+        // localStorage can be unavailable in private or restricted contexts.
+    }
+}
+
+const TRACKED_SECTIONS = [
+    { id: 'ficha', label: 'Ficha rapida' },
+    { id: 'historico-precos', label: 'Historico e valor' },
+    { id: 'localizacao', label: 'Localizacao' },
+]
 
 export default function PropertyLandingTracker({
     propertyId,
@@ -41,6 +72,9 @@ export default function PropertyLandingTracker({
 }: PropertyLandingTrackerProps) {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
+        const alertId = params.get('alert_id') || null
+        const alertTitle = params.get('alert_title') || null
+        const propertyUrl = window.location.href
         const urlTracking = {
             utm_source: params.get('utm_source') || null,
             utm_medium: params.get('utm_medium') || null,
@@ -51,22 +85,68 @@ export default function PropertyLandingTracker({
             lead_phone: params.get('lead_phone') || params.get('wa_phone') || params.get('wpp_phone') || null,
             event_type: params.get('event_type') || null,
             link_type: params.get('link_type') || null,
+            alert_id: alertId,
+            alert_title: alertTitle,
         }
         const baseMetadata = {
             property_id: propertyId,
+            property_title: title,
             title,
             price: price || null,
             city: city || null,
             neighborhood: neighborhood || null,
             property_type: propertyType || null,
+            alert_id: alertId,
+            alert_title: alertTitle,
+            property_url: propertyUrl,
             source: 'property_details_landing',
             tracking: urlTracking,
         }
 
+        rememberPropertyView(propertyId)
         void trackEvent('property_details_landing_viewed', baseMetadata)
+
+        if (alertId && markSearchAlertMatchOpenIfNeeded(alertId, propertyId)) {
+            void trackEvent('property_search_alert_match_opened', {
+                ...baseMetadata,
+                source: 'property_details_landing_direct',
+            })
+        }
 
         const root = document.querySelector<HTMLElement>('[data-property-landing-root="true"]')
         if (!root) return
+        const viewedSections = new Set<string>()
+        const sectionObserver = typeof IntersectionObserver === 'undefined'
+            ? null
+            : new IntersectionObserver((entries, observer) => {
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) continue
+                    const section = entry.target instanceof HTMLElement
+                        ? TRACKED_SECTIONS.find(item => item.id === entry.target.id)
+                        : null
+                    if (!section || viewedSections.has(section.id)) continue
+
+                    viewedSections.add(section.id)
+                    void trackEvent('property_details_landing_section_viewed', {
+                        ...baseMetadata,
+                        section_id: section.id,
+                        section_label: section.label,
+                        target_section: `#${section.id}`,
+                    })
+                    observer.unobserve(entry.target)
+                }
+            }, {
+                root: null,
+                rootMargin: '-18% 0px -18% 0px',
+                threshold: 0.42,
+            })
+
+        if (sectionObserver) {
+            for (const section of TRACKED_SECTIONS) {
+                const element = root.querySelector<HTMLElement>(`#${section.id}`)
+                if (element) sectionObserver.observe(element)
+            }
+        }
 
         const handleClick = (event: MouseEvent) => {
             const target = event.target instanceof Element ? event.target : null
@@ -126,7 +206,10 @@ export default function PropertyLandingTracker({
         }
 
         root.addEventListener('click', handleClick)
-        return () => root.removeEventListener('click', handleClick)
+        return () => {
+            root.removeEventListener('click', handleClick)
+            sectionObserver?.disconnect()
+        }
     }, [city, neighborhood, price, propertyId, propertyType, title])
 
     return null

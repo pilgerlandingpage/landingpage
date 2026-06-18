@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, type CSSProperties } from 'react'
 
 interface SearchViewsProps {
     children: React.ReactNode
     map: React.ReactNode
+    overlay?: React.ReactNode
 }
 
 const SNAP_FULL_MAP = 85
 const SNAP_HALF = 50
 const SNAP_FULL_LIST = 8
 
-export default function SearchViews({ children, map }: SearchViewsProps) {
+export default function SearchViews({ children, map, overlay }: SearchViewsProps) {
     const [sheetPosition, setSheetPosition] = useState(SNAP_HALF)
     const [isDragging, setIsDragging] = useState(false)
     const sheetRef = useRef<HTMLDivElement>(null)
@@ -76,6 +77,14 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     bottom: 0;
                     z-index: 1;
                     background: #111;
+                }
+
+                .sv-wrap:has(.map-options-open) .sv-map {
+                    z-index: 50;
+                }
+
+                .sv-wrap:has(.map-options-open) .sv-panel {
+                    pointer-events: none;
                 }
 
                 .sv-panel {
@@ -202,9 +211,18 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                     width: 100% !important;
                     height: 100% !important;
                 }
+                .sv-overlay {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 40;
+                    pointer-events: none;
+                }
+                .sv-overlay > * {
+                    pointer-events: auto;
+                }
             `}</style>
 
-            <main className="sv-wrap">
+            <main className="sv-wrap" style={{ '--sv-sheet-top': `${sheetPosition}dvh` } as CSSProperties}>
                 {/* Content panel: bottom sheet (mobile) / left sidebar (desktop) */}
                 <div
                     ref={sheetRef}
@@ -231,6 +249,11 @@ export default function SearchViews({ children, map }: SearchViewsProps) {
                 <div className="sv-map">
                     {map}
                 </div>
+                {overlay && (
+                    <div className="sv-overlay">
+                        {overlay}
+                    </div>
+                )}
             </main>
         </>
     )

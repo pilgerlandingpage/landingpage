@@ -82,3 +82,24 @@ export function compactPropertyText(value?: string | null, fallback = '', max = 
     const text = cleanPropertyText(value || fallback).replace(/\s+/g, ' ').trim()
     return text.length > max ? `${text.slice(0, max - 3).trim()}...` : text
 }
+
+export function cleanPublicPropertyText(value?: string | null) {
+    return cleanPropertyText(value)
+        .replace(/\bpossibilidade\s+de\s+financiamento\b[^\n.]*/gi, ' ')
+        .replace(/\baceita\s+financiamento(?:\s+banc[aá]rio)?\b/gi, ' ')
+        .replace(/\bfinanciamento(?:\s+(?:banc[aá]rio|com\s+a\s+construtora))?\b/gi, ' ')
+        .replace(/\bsimula[cç][aã]o(?:\s+(?:banc[aá]ria|de\s+cr[eé]dito|de\s+pagamento))?\b/gi, ' ')
+        .replace(/[ \t]{2,}/g, ' ')
+        .replace(/\s+([,.!?;:])/g, '$1')
+        .replace(/\n{3,}/g, '\n\n')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .join('\n')
+        .trim()
+}
+
+export function compactPublicPropertyText(value?: string | null, fallback = '', max = 160) {
+    const text = cleanPublicPropertyText(value || fallback).replace(/\s+/g, ' ').trim()
+    return text.length > max ? `${text.slice(0, max - 3).trim()}...` : text
+}

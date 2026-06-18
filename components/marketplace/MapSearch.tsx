@@ -1,7 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { MapStyle } from './PropertyMap'
+import type { MapDrawArea, MapStyle } from './PropertyMap'
+import type { MapRegionArea } from '@/lib/locations/map-regions'
 
 const PropertyMap = dynamic(
     () => import('./PropertyMap'),
@@ -63,9 +64,15 @@ type OfficeMarker = {
 interface MapSearchProps {
     properties: any[]
     hoveredPropertyId?: string | null
+    selectedPropertyId?: string | null
+    drawArea?: MapDrawArea | null
+    regionArea?: MapRegionArea | null
     onMarkerHover?: (id: string | null) => void
+    onPropertySelect?: (property: any) => void
+    onDrawAreaChange?: (area: MapDrawArea | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     onUserBoundsChange?: (bounds: MapBounds) => void
+    onLocateAreaChange?: (bounds: MapBounds, location: { latitude: number; longitude: number; accuracy?: number | null }) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -75,9 +82,15 @@ interface MapSearchProps {
 export default function MapSearch({
     properties,
     hoveredPropertyId,
+    selectedPropertyId,
+    drawArea,
+    regionArea,
     onMarkerHover,
+    onPropertySelect,
+    onDrawAreaChange,
     onBoundsChange,
     onUserBoundsChange,
+    onLocateAreaChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -88,9 +101,15 @@ export default function MapSearch({
             <PropertyMap
                 properties={properties}
                 hoveredPropertyId={hoveredPropertyId}
+                selectedPropertyId={selectedPropertyId}
+                drawArea={drawArea}
+                regionArea={regionArea}
                 onMarkerHover={onMarkerHover}
+                onPropertySelect={onPropertySelect}
+                onDrawAreaChange={onDrawAreaChange}
                 onBoundsChange={onBoundsChange}
                 onUserBoundsChange={onUserBoundsChange}
+                onLocateAreaChange={onLocateAreaChange}
                 refitKey={refitKey}
                 interactionEnabled={interactionEnabled}
                 officeMarker={officeMarker}

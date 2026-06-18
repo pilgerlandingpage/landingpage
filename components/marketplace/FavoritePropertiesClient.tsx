@@ -180,12 +180,20 @@ export default function FavoritePropertiesClient() {
             metadata: {
                 favorite_ids: favoriteIds,
                 favorites_count: favoriteIds.length,
+                tracking_event_type: 'property_value_reading_requested',
+                premium_intent: 'value_reading',
+                requested_action: 'Receber curadoria comparativa dos favoritos',
+                cta_context: 'Pagina de favoritos',
             },
         })
 
-        void trackEvent('favorites_page_curadoria_clicked', {
+        void trackEvent('property_value_reading_requested', {
             favorite_ids: favoriteIds,
             favorites_count: favoriteIds.length,
+            premium_intent: 'value_reading',
+            requested_action: 'Receber curadoria comparativa dos favoritos',
+            cta_context: 'Pagina de favoritos',
+            source: 'favorites_page_curadoria',
         })
     }
 

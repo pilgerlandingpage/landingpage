@@ -2,8 +2,8 @@ export type MetaEventName = 'PageView' | 'ViewContent' | 'Search' | 'Contact' | 
 
 const META_EVENT_BY_SITE_EVENT: Array<[RegExp, MetaEventName]> = [
     [/^page_view$/, 'PageView'],
-    [/^(property_details_landing_viewed|property_map_popup_opened|property_details_clicked|home_property_details_clicked)$/, 'ViewContent'],
-    [/^(home_map_search_submitted|property_search_submitted|home_search_submitted|home_guided_search_completed|search_results_search_this_area_clicked|home_map_modal_search_this_area_clicked|property_map_modal_search_this_area_clicked)$/, 'Search'],
+    [/^(property_details_landing_viewed|property_details_landing_gallery_opened|property_details_landing_section_viewed|property_details_continuation_viewed|property_details_continuation_favorites_clicked|property_details_continuation_property_clicked|property_map_popup_opened|property_map_pin_selected|property_map_preview_opened|property_map_preview_details_clicked|property_location_view_changed|property_location_street_view_opened|property_search_alert_match_opened|property_details_clicked|home_property_details_clicked)$/, 'ViewContent'],
+    [/^(home_map_search_submitted|property_search_submitted|home_search_submitted|home_guided_search_completed|search_results_search_this_area_clicked|property_map_draw_area_applied|property_search_alert_clicked|property_search_alert_saved|property_search_alert_matched|property_private_visit_requested|property_availability_requested|property_reserved_negotiation_requested|property_value_reading_requested|home_map_modal_search_this_area_clicked|property_map_modal_search_this_area_clicked)$/, 'Search'],
     [/(whatsapp|chat_opened|chat_cta_clicked|specialist_clicked|message_clicked)/, 'Contact'],
     [/^(form_submitted|lead_captured|broker_candidate_form_submitted)$/, 'Lead'],
     [/^(property_favorited)$/, 'AddToWishlist'],

@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
             landingPageSlug,
             requestedPhone: String(body?.whatsapp_phone || body?.destination_phone || body?.target_phone || ''),
         })
-        const enrichedCaptureContext = {
+        const enrichedCaptureContext: Record<string, any> = {
             ...captureMetadata,
             ...(whatsappDestination.property_id ? { property_id: whatsappDestination.property_id } : {}),
             whatsapp_destination: {
@@ -174,6 +174,10 @@ export async function POST(request: NextRequest) {
                 is_connected: whatsappDestination.is_connected,
             },
         }
+        const premiumIntent = metadataText(enrichedCaptureContext.premium_intent)
+        const requestedAction = metadataText(enrichedCaptureContext.requested_action)
+        const ctaContext = metadataText(enrichedCaptureContext.cta_context)
+        const trackingEventType = metadataText(enrichedCaptureContext.tracking_event_type)
 
         const trackingData = extractTrackingData(request.headers, searchParams, referrer)
         trackingData.visitor_cookie_id = visitorCookieId
@@ -380,6 +384,10 @@ export async function POST(request: NextRequest) {
                 broker_id: whatsappDestination.broker_id || undefined,
                 admin_user_id: whatsappDestination.admin_user_id || undefined,
                 whatsapp_instance_id: whatsappDestination.whatsapp_instance_id || undefined,
+                premium_intent: premiumIntent || undefined,
+                requested_action: requestedAction || undefined,
+                cta_context: ctaContext || undefined,
+                tracking_event_type: trackingEventType || undefined,
             },
         })
 
@@ -405,6 +413,10 @@ export async function POST(request: NextRequest) {
                             landing_page_slug: landingPageSlug,
                             visitor_cookie_id: visitorCookieId,
                             property_id: whatsappDestination.property_id,
+                            premium_intent: premiumIntent,
+                            requested_action: requestedAction,
+                            cta_context: ctaContext,
+                            tracking_event_type: trackingEventType,
                             whatsapp_destination: enrichedCaptureContext.whatsapp_destination,
                         },
                     },

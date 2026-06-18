@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { Circle, MapContainer, TileLayer, Marker, Polygon, Polyline, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Bath, Bed, Building2, Layers, Maximize, Satellite, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { Bath, Bed, Building2, CloudSun, Eraser, Flame, Globe2, Hand, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, PencilLine, Satellite, SlidersHorizontal, Sparkles, ThermometerSun, Waves, Wind, X } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import type { MapRegionArea } from '@/lib/locations/map-regions'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
-import { trackEvent } from '@/lib/tracking/client'
+import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -24,6 +25,8 @@ interface Property {
     latitude: number | string | null
     longitude: number | string | null
     featured_image: string | null
+    images?: string[] | null
+    video_url?: string | null
     bedrooms: number | null
     bathrooms: number | null
     suites?: number | null
@@ -47,9 +50,15 @@ interface MapBounds {
 interface PropertyMapProps {
     properties: Property[]
     hoveredPropertyId?: string | null
+    selectedPropertyId?: string | null
+    drawArea?: MapDrawArea | null
+    regionArea?: MapRegionArea | null
     onMarkerHover?: (id: string | null) => void
+    onPropertySelect?: (property: Property) => void
+    onDrawAreaChange?: (area: MapDrawArea | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     onUserBoundsChange?: (bounds: MapBounds) => void
+    onLocateAreaChange?: (bounds: MapBounds, location: UserLocationSnapshot) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -60,6 +69,8 @@ type MappedProperty = {
     property: Property
     latLng: [number, number]
 }
+
+export type MapDrawArea = [number, number][]
 
 type OfficeMarker = {
     latLng: [number, number]
@@ -74,6 +85,19 @@ type ClusterItem =
 
 export type MapStyle = 'luxury' | 'satellite' | 'classic'
 type QuickFilter = 'all' | 'exclusive' | 'waterfront' | 'launch' | 'premium'
+type MapContextLayer = 'flood' | 'fire' | 'wind' | 'air' | 'heat'
+type LocateState = 'idle' | 'loading' | 'active' | 'error'
+
+type UserLocationSnapshot = {
+    latitude: number
+    longitude: number
+    accuracy?: number | null
+}
+
+type UserMapLocation = UserLocationSnapshot & {
+    latLng: [number, number]
+    bounds: MapBounds
+}
 
 const QUICK_FILTERS: Array<{ value: QuickFilter; label: string }> = [
     { value: 'all', label: 'Todos' },
@@ -88,8 +112,59 @@ const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'sa
     { value: 'satellite', label: 'Satélite', icon: 'satellite' },
     { value: 'classic', label: 'Claro', icon: 'layers' },
 ]
+const MAP_OPTION_STYLES: Array<{ value: MapStyle; label: string; icon: 'map' | 'satellite' | 'sparkles' }> = [
+    { value: 'classic', label: 'Ruas', icon: 'map' },
+    { value: 'satellite', label: 'Satelite', icon: 'satellite' },
+    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
+]
+const MAP_CONTEXT_LAYERS: Array<{ value: MapContextLayer; label: string; icon: 'flood' | 'fire' | 'wind' | 'air' | 'heat' }> = [
+    { value: 'flood', label: 'Alagamento', icon: 'flood' },
+    { value: 'fire', label: 'Fogo', icon: 'fire' },
+    { value: 'wind', label: 'Vento', icon: 'wind' },
+    { value: 'air', label: 'Ar', icon: 'air' },
+    { value: 'heat', label: 'Calor', icon: 'heat' },
+]
 const AGENCY_MARKER_ICON_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png'
 const AGENCY_CARD_IMAGE_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/unnamed.webp'
+const MIN_DRAW_PIXEL_DISTANCE = 10
+const MAX_DRAW_AREA_POINTS = 96
+const DRAW_AREA_POLYGON_OPTIONS: L.PathOptions = {
+    color: '#2f7bff',
+    weight: 2,
+    opacity: 0.96,
+    fillColor: '#2f7bff',
+    fillOpacity: 0.14,
+    className: 'map-draw-area-polygon',
+}
+const DRAW_AREA_DRAFT_OPTIONS: L.PathOptions = {
+    color: '#2f7bff',
+    weight: 3,
+    opacity: 0.98,
+    dashArray: '7 7',
+    className: 'map-draw-area-draft',
+}
+const REGION_AREA_POLYGON_OPTIONS: L.PathOptions = {
+    color: '#2f7bff',
+    weight: 2,
+    opacity: 0.92,
+    fillColor: '#2f7bff',
+    fillOpacity: 0.08,
+    className: 'map-region-area-polygon',
+}
+const REGION_AREA_MASK_OPTIONS: L.PathOptions = {
+    color: '#05080a',
+    weight: 0,
+    opacity: 0,
+    fillColor: '#05080a',
+    fillOpacity: 0.4,
+    className: 'map-region-area-mask',
+}
+const REGION_MASK_OUTER_RING: MapDrawArea = [
+    [-85, -180],
+    [-85, 180],
+    [85, 180],
+    [85, -180],
+]
 
 const SERVICE_AREA_BOUNDS = {
     north: -25.0,
@@ -143,6 +218,22 @@ function formatFullPrice(price: number | null | undefined) {
     }).format(price)
 }
 
+function formatMapPrice(price: number | null | undefined) {
+    const value = Number(price || 0)
+    if (!value) return 'Consulte'
+
+    if (value >= 1000000) {
+        const millions = value / 1000000
+        const label = millions >= 10
+            ? Math.round(millions).toLocaleString('pt-BR')
+            : millions.toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+        return `R$ ${label} mi`
+    }
+
+    if (value >= 1000) return `R$ ${Math.round(value / 1000).toLocaleString('pt-BR')} mil`
+    return `R$ ${Math.round(value).toLocaleString('pt-BR')}`
+}
+
 function propertyText(property: Property) {
     return [
         property.title,
@@ -174,6 +265,72 @@ function getStyleIcon(icon: 'sparkles' | 'satellite' | 'layers') {
     if (icon === 'satellite') return <Satellite size={14} />
     if (icon === 'layers') return <Layers size={14} />
     return <Sparkles size={14} />
+}
+
+function getMapOptionIcon(icon: 'map' | 'satellite' | 'sparkles') {
+    if (icon === 'satellite') return <Satellite size={30} />
+    if (icon === 'sparkles') return <Sparkles size={30} />
+    return <MapIcon size={30} />
+}
+
+function getContextLayerIcon(icon: 'flood' | 'fire' | 'wind' | 'air' | 'heat') {
+    if (icon === 'flood') return <Waves size={17} />
+    if (icon === 'fire') return <Flame size={17} />
+    if (icon === 'wind') return <Wind size={17} />
+    if (icon === 'air') return <CloudSun size={17} />
+    if (icon === 'heat') return <ThermometerSun size={17} />
+    return <Waves size={17} />
+}
+
+function clampCoordinate(value: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, value))
+}
+
+function buildBoundsAroundLocation(latitude: number, longitude: number, accuracy?: number | null): MapBounds {
+    const radiusMeters = Math.max(1200, Math.min(4500, Number(accuracy || 0) * 1.8 || 1800))
+    const latDelta = radiusMeters / 111320
+    const lngDivisor = Math.max(0.18, Math.cos(latitude * Math.PI / 180))
+    const lngDelta = radiusMeters / (111320 * lngDivisor)
+
+    return {
+        north: clampCoordinate(latitude + latDelta, -90, 90),
+        south: clampCoordinate(latitude - latDelta, -90, 90),
+        east: clampCoordinate(longitude + lngDelta, -180, 180),
+        west: clampCoordinate(longitude - lngDelta, -180, 180),
+    }
+}
+
+async function saveMapLocationSignal(location: UserLocationSnapshot) {
+    if (typeof window === 'undefined') return
+
+    const params = new URLSearchParams(window.location.search)
+    const hasLeadSignal = Boolean(
+        params.get('lead_id')
+        || params.get('lead_phone')
+        || params.get('wa_phone')
+        || params.get('wpp_phone')
+    )
+    if (!hasLeadSignal) return
+
+    try {
+        await fetch('/api/leads/location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                visitor_cookie_id: getVisitorId(),
+                source: 'property_map_locate_button',
+                permission_status: 'granted',
+                latitude: location.latitude,
+                longitude: location.longitude,
+                accuracy: location.accuracy,
+                page_url: window.location.href,
+                page_path: window.location.pathname,
+                search_params: window.location.search,
+            }),
+        })
+    } catch (error) {
+        console.warn('[PropertyMap] location signal save failed:', error)
+    }
 }
 
 function escapeHtml(value: string) {
@@ -312,6 +469,72 @@ function BoundsEmitter({
     return null
 }
 
+function UserLocationController({
+    requestId,
+    onLocated,
+    onStatusChange,
+}: {
+    requestId: number
+    onLocated: (location: UserMapLocation) => void
+    onStatusChange: (state: LocateState) => void
+}) {
+    const map = useMap()
+
+    useEffect(() => {
+        if (!requestId) return
+
+        if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
+            onStatusChange('error')
+            void trackEvent('property_map_user_location_unavailable', {
+                reason: 'geolocation_not_supported',
+            })
+            return
+        }
+
+        onStatusChange('loading')
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude
+                const longitude = position.coords.longitude
+                const accuracy = position.coords.accuracy || null
+
+                if (!isValidLatLng(latitude, longitude)) {
+                    onStatusChange('error')
+                    return
+                }
+
+                const bounds = buildBoundsAroundLocation(latitude, longitude, accuracy)
+                const location: UserMapLocation = {
+                    latitude,
+                    longitude,
+                    accuracy,
+                    latLng: [latitude, longitude],
+                    bounds,
+                }
+
+                map.flyTo([latitude, longitude], 15, { duration: 0.75 })
+                onLocated(location)
+                onStatusChange('active')
+            },
+            (error) => {
+                const permissionStatus = error.code === error.PERMISSION_DENIED ? 'denied' : 'unavailable'
+                onStatusChange('error')
+                void trackEvent('property_map_user_location_failed', {
+                    permission_status: permissionStatus,
+                    message: error.message,
+                })
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 60000,
+                timeout: 9000,
+            }
+        )
+    }, [map, onLocated, onStatusChange, requestId])
+
+    return null
+}
+
 function MapInteractionController({ enabled }: { enabled: boolean }) {
     const map = useMap()
 
@@ -334,10 +557,222 @@ function MapInteractionController({ enabled }: { enabled: boolean }) {
     return null
 }
 
-function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): ClusterItem[] {
-    if (zoom >= 15) return items.map(item => ({ kind: 'single', item }))
+function distanceBetweenPoints(a: L.Point, b: L.Point) {
+    const dx = a.x - b.x
+    const dy = a.y - b.y
+    return Math.sqrt(dx * dx + dy * dy)
+}
 
-    const gridSize = zoom < 11 ? 92 : zoom < 13 ? 78 : 64
+function simplifyDrawArea(points: MapDrawArea): MapDrawArea {
+    if (points.length <= MAX_DRAW_AREA_POINTS) return points
+
+    const step = Math.ceil(points.length / MAX_DRAW_AREA_POINTS)
+    const simplified = points.filter((_, index) => index % step === 0)
+    const lastPoint = points[points.length - 1]
+
+    if (simplified[simplified.length - 1] !== lastPoint) {
+        simplified.push(lastPoint)
+    }
+
+    return simplified.slice(0, MAX_DRAW_AREA_POINTS)
+}
+
+function pointerEventToLatLng(map: L.Map, event: PointerEvent): { latLng: [number, number]; point: L.Point } {
+    const rect = map.getContainer().getBoundingClientRect()
+    const point = L.point(event.clientX - rect.left, event.clientY - rect.top)
+    const latLng = map.containerPointToLatLng(point)
+
+    return {
+        latLng: [latLng.lat, latLng.lng],
+        point,
+    }
+}
+
+function DrawAreaLayer({
+    enabled,
+    area,
+    onCommit,
+}: {
+    enabled: boolean
+    area?: MapDrawArea | null
+    onCommit?: (area: MapDrawArea) => void
+}) {
+    const map = useMap()
+    const [draftArea, setDraftArea] = useState<MapDrawArea>([])
+    const drawingRef = useRef(false)
+    const pointsRef = useRef<MapDrawArea>([])
+    const lastPointRef = useRef<L.Point | null>(null)
+
+    useEffect(() => {
+        if (!enabled || !onCommit) {
+            drawingRef.current = false
+            pointsRef.current = []
+            lastPointRef.current = null
+            return
+        }
+
+        const container = map.getContainer()
+        const previousCursor = container.style.cursor
+        const previousTouchAction = container.style.touchAction
+
+        container.style.cursor = 'crosshair'
+        container.style.touchAction = 'none'
+
+        const addPoint = (event: PointerEvent, force = false) => {
+            const next = pointerEventToLatLng(map, event)
+
+            if (lastPointRef.current) {
+                const distance = distanceBetweenPoints(next.point, lastPointRef.current)
+                if (distance < (force ? 1 : MIN_DRAW_PIXEL_DISTANCE)) {
+                    return
+                }
+            }
+
+            lastPointRef.current = next.point
+            pointsRef.current = [...pointsRef.current, next.latLng]
+            setDraftArea(pointsRef.current)
+        }
+
+        const resetDrawingRefs = () => {
+            drawingRef.current = false
+            pointsRef.current = []
+            lastPointRef.current = null
+        }
+
+        const stopDrawing = () => {
+            resetDrawingRefs()
+            setDraftArea([])
+        }
+
+        const commitDrawing = (event: PointerEvent) => {
+            if (!drawingRef.current) return
+
+            event.preventDefault()
+            event.stopPropagation()
+            addPoint(event, true)
+
+            const nextArea = simplifyDrawArea(pointsRef.current)
+            stopDrawing()
+
+            if (nextArea.length >= 3) {
+                onCommit(nextArea)
+            }
+        }
+
+        const handlePointerDown = (event: PointerEvent) => {
+            if (event.pointerType === 'mouse' && event.button !== 0) return
+
+            event.preventDefault()
+            event.stopPropagation()
+            container.setPointerCapture?.(event.pointerId)
+            drawingRef.current = true
+            pointsRef.current = []
+            lastPointRef.current = null
+            addPoint(event, true)
+        }
+
+        const handlePointerMove = (event: PointerEvent) => {
+            if (!drawingRef.current) return
+
+            event.preventDefault()
+            event.stopPropagation()
+            addPoint(event)
+        }
+
+        const handlePointerUp = (event: PointerEvent) => {
+            if (!drawingRef.current) return
+
+            commitDrawing(event)
+            container.releasePointerCapture?.(event.pointerId)
+        }
+
+        const handlePointerCancel = (event: PointerEvent) => {
+            if (!drawingRef.current) return
+
+            event.preventDefault()
+            event.stopPropagation()
+            stopDrawing()
+        }
+
+        container.addEventListener('pointerdown', handlePointerDown, true)
+        container.addEventListener('pointermove', handlePointerMove, true)
+        container.addEventListener('pointerup', handlePointerUp, true)
+        container.addEventListener('pointercancel', handlePointerCancel, true)
+
+        return () => {
+            container.removeEventListener('pointerdown', handlePointerDown, true)
+            container.removeEventListener('pointermove', handlePointerMove, true)
+            container.removeEventListener('pointerup', handlePointerUp, true)
+            container.removeEventListener('pointercancel', handlePointerCancel, true)
+            container.style.cursor = previousCursor
+            container.style.touchAction = previousTouchAction
+            resetDrawingRefs()
+        }
+    }, [enabled, map, onCommit])
+
+    return (
+        <>
+            {area && area.length >= 3 && (
+                <Polygon
+                    positions={area}
+                    pathOptions={DRAW_AREA_POLYGON_OPTIONS}
+                    interactive={false}
+                />
+            )}
+            {enabled && draftArea.length > 1 && (
+                <Polyline
+                    positions={draftArea}
+                    pathOptions={DRAW_AREA_DRAFT_OPTIONS}
+                    interactive={false}
+                />
+            )}
+        </>
+    )
+}
+
+function FocusAreaLayer({
+    drawArea,
+    regionArea,
+}: {
+    drawArea?: MapDrawArea | null
+    regionArea?: MapRegionArea | null
+}) {
+    const activeArea = drawArea && drawArea.length >= 3
+        ? drawArea
+        : regionArea?.area && regionArea.area.length >= 3
+            ? regionArea.area
+            : null
+    const maskPositions = useMemo(
+        () => activeArea ? [REGION_MASK_OUTER_RING, activeArea] : null,
+        [activeArea]
+    )
+
+    return (
+        <>
+            {maskPositions && (
+                <Polygon
+                    positions={maskPositions}
+                    pathOptions={REGION_AREA_MASK_OPTIONS}
+                    interactive={false}
+                />
+            )}
+            {regionArea?.area && regionArea.area.length >= 3 && (
+                <Polygon
+                    positions={regionArea.area}
+                    pathOptions={REGION_AREA_POLYGON_OPTIONS}
+                    interactive={false}
+                />
+            )}
+        </>
+    )
+}
+
+function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): ClusterItem[] {
+    if (zoom >= 14 || (zoom < 13 && items.length <= 220)) {
+        return items.map(item => ({ kind: 'single', item }))
+    }
+
+    const gridSize = zoom < 11 ? 58 : zoom < 13 ? 68 : 74
     const grouped = new Map<string, MappedProperty[]>()
 
     items.forEach(item => {
@@ -368,30 +803,51 @@ function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): Clust
     })
 }
 
-function createClusterIcon(count: number, minPrice: number | null) {
-    const priceText = formatFullPrice(minPrice)
+function createClusterIcon(count: number, minPrice: number | null, zoom: number) {
+    const priceText = formatMapPrice(minPrice)
+
+    if (zoom < 13) {
+        return L.divIcon({
+            className: 'premium-cluster-marker',
+            html: `<div class="cluster-dot-wrap">
+                <span class="cluster-dot">${count > 1 ? count : ''}</span>
+            </div>`,
+            iconSize: [42, 42],
+            iconAnchor: [21, 21],
+        })
+    }
 
     return L.divIcon({
         className: 'premium-cluster-marker',
-        html: `<div class="cluster-orbit">
+        html: `<div class="cluster-orbit cluster-orbit--price">
             <span class="cluster-count">${count}</span>
             <span class="cluster-label">${priceText}</span>
         </div>`,
-        iconSize: [136, 58],
-        iconAnchor: [68, 29],
+        iconSize: [98, 48],
+        iconAnchor: [49, 42],
     })
+}
+
+type MarkerVisualState = {
+    isHovered: boolean
+    isSelected: boolean
+    zoom: number
 }
 
 function ClusterLayer({
     items,
     hoveredPropertyId,
+    selectedPropertyId,
     createIcon,
     onMarkerHover,
+    onPropertySelect,
 }: {
     items: MappedProperty[]
     hoveredPropertyId?: string | null
-    createIcon: (property: Property, isHovered: boolean) => L.DivIcon
+    selectedPropertyId?: string | null
+    createIcon: (property: Property, markerState: MarkerVisualState) => L.DivIcon
     onMarkerHover?: (id: string | null) => void
+    onPropertySelect?: (property: Property) => void
 }) {
     const map = useMap()
     const [zoom, setZoom] = useState(map.getZoom())
@@ -414,7 +870,7 @@ function ClusterLayer({
                         <Marker
                             key={`cluster-${cluster.id}`}
                             position={cluster.latLng}
-                            icon={createClusterIcon(cluster.items.length, cluster.minPrice)}
+                            icon={createClusterIcon(cluster.items.length, cluster.minPrice, zoom)}
                             zIndexOffset={400}
                             eventHandlers={{
                                 click: () => {
@@ -427,32 +883,40 @@ function ClusterLayer({
                 }
 
                 const { property, latLng } = cluster.item
-                const isHovered = hoveredPropertyId === property.id
+                const isSelected = selectedPropertyId === property.id
+                const isHovered = hoveredPropertyId === property.id || isSelected
 
                 return (
                     <Marker
                         key={property.id}
                         position={latLng}
-                        icon={createIcon(property, isHovered)}
+                        icon={createIcon(property, { isHovered, isSelected, zoom })}
                         zIndexOffset={isHovered ? 1000 : 0}
                         eventHandlers={{
                             mouseover: (e: any) => {
-                                e.target.openPopup()
+                                if (!onPropertySelect) e.target.openPopup()
                                 onMarkerHover?.(property.id)
                             },
                             mouseout: (e: any) => {
-                                e.target.closePopup()
+                                if (!onPropertySelect) e.target.closePopup()
                                 onMarkerHover?.(null)
                             },
                             click: (e: any) => {
-                                e.target.openPopup()
+                                if (onPropertySelect) {
+                                    map.closePopup()
+                                    onPropertySelect(property)
+                                } else {
+                                    e.target.openPopup()
+                                }
                                 map.flyTo(latLng, Math.max(map.getZoom(), 15), { duration: 0.5 })
                             },
                         }}
                     >
-                        <Popup className="property-popup">
-                            <PropertyPopup property={property} />
-                        </Popup>
+                        {!onPropertySelect && (
+                            <Popup className="property-popup">
+                                <PropertyPopup property={property} />
+                            </Popup>
+                        )}
                     </Marker>
                 )
             })}
@@ -531,9 +995,15 @@ function AgencyLocationPopup({ officeMarker }: { officeMarker: OfficeMarker }) {
 export default function PropertyMap({
     properties,
     hoveredPropertyId,
+    selectedPropertyId,
+    drawArea,
+    regionArea,
     onMarkerHover,
+    onPropertySelect,
+    onDrawAreaChange,
     onBoundsChange,
     onUserBoundsChange,
+    onLocateAreaChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -542,6 +1012,12 @@ export default function PropertyMap({
     const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
+    const [drawModeEnabled, setDrawModeEnabled] = useState(false)
+    const [mapOptionsOpen, setMapOptionsOpen] = useState(false)
+    const [activeContextLayers, setActiveContextLayers] = useState<MapContextLayer[]>([])
+    const [locateRequestId, setLocateRequestId] = useState(0)
+    const [locateState, setLocateState] = useState<LocateState>('idle')
+    const [userMapLocation, setUserMapLocation] = useState<UserMapLocation | null>(null)
 
     const validProperties = useMemo<MappedProperty[]>(
         () => properties
@@ -556,14 +1032,17 @@ export default function PropertyMap({
     )
     const mapPoints = useMemo(() => {
         const points = filteredProperties.map(item => item.latLng)
-        return officeMarker ? [officeMarker.latLng, ...points] : points
-    }, [filteredProperties, officeMarker])
+        const focusPoints = !drawArea && regionArea?.area ? regionArea.area : []
+        return officeMarker ? [officeMarker.latLng, ...points] : [...focusPoints, ...points]
+    }, [drawArea, filteredProperties, officeMarker, regionArea])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
     const mapWatermarkLabel = filteredProperties.length > 0
         ? `${filteredProperties.length} no mapa`
         : officeMarker
             ? officeMarker.title
             : '0 no mapa'
+    const hasDrawArea = Boolean(drawArea && drawArea.length >= 3)
+    const hasRegionArea = Boolean(regionArea?.area && regionArea.area.length >= 3)
 
     const handleQuickFilterChange = (filter: QuickFilter) => {
         const option = QUICK_FILTERS.find(item => item.value === filter)
@@ -579,24 +1058,105 @@ export default function PropertyMap({
     const handleMapStyleChange = (style: MapStyle) => {
         const option = MAP_STYLES.find(item => item.value === style)
         setMapStyle(style)
+        setMapOptionsOpen(false)
         void trackEvent('property_map_style_changed', {
             style,
             style_label: option?.label || style,
         })
     }
 
-    const createIcon = useCallback((property: Property, isHovered: boolean) => {
-        const priceText = formatFullPrice(property.price)
+    const handleDrawModeToggle = () => {
+        const nextEnabled = !drawModeEnabled
+        setDrawModeEnabled(nextEnabled)
+        setMobileControlsOpen(false)
+
+        void trackEvent('property_map_draw_mode_toggled', {
+            enabled: nextEnabled,
+            has_draw_area: hasDrawArea,
+        })
+    }
+
+    const handleContextLayerToggle = (layer: MapContextLayer) => {
+        setActiveContextLayers(current => {
+            const isActive = current.includes(layer)
+            const next = isActive
+                ? current.filter(item => item !== layer)
+                : [...current, layer]
+
+            void trackEvent('property_map_context_layer_toggled', {
+                layer,
+                enabled: !isActive,
+                active_layers: next,
+            })
+
+            return next
+        })
+    }
+
+    const handleLocateButtonClick = () => {
+        setMapOptionsOpen(false)
+        setMobileControlsOpen(false)
+        setLocateRequestId(value => value + 1)
+        void trackEvent('property_map_user_location_clicked', {
+            has_draw_area: hasDrawArea,
+            map_style: mapStyle,
+        })
+    }
+
+    const handleUserLocated = useCallback((location: UserMapLocation) => {
+        setUserMapLocation(location)
+        onBoundsChange?.(location.bounds)
+        onUserBoundsChange?.(location.bounds)
+        onLocateAreaChange?.(location.bounds, {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            accuracy: location.accuracy,
+        })
+
+        void saveMapLocationSignal({
+            latitude: location.latitude,
+            longitude: location.longitude,
+            accuracy: location.accuracy,
+        })
+
+        void trackEvent('property_map_user_location_applied', {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            accuracy: location.accuracy || null,
+            bounds: location.bounds,
+        })
+    }, [onBoundsChange, onLocateAreaChange, onUserBoundsChange])
+
+    const handleDrawAreaCommit = useCallback((area: MapDrawArea) => {
+        setDrawModeEnabled(false)
+        onDrawAreaChange?.(area)
+    }, [onDrawAreaChange])
+
+    const handleDrawAreaClear = () => {
+        setDrawModeEnabled(false)
+        onDrawAreaChange?.(null)
+
+        void trackEvent('property_map_draw_area_cleared_from_map', {
+            had_draw_area: hasDrawArea,
+        })
+    }
+
+    const createIcon = useCallback((property: Property, markerState: MarkerVisualState) => {
+        const { isHovered, isSelected, zoom } = markerState
+        const priceText = escapeHtml(formatMapPrice(property.price))
         const badgeClass = property.exclusive ? ' marker-wrap--exclusive' : ''
+        const stateClass = isSelected ? ' marker-wrap--selected' : isHovered ? ' marker-wrap--active' : ''
+        const shouldUseDot = zoom < 13 && !isHovered
 
         return L.divIcon({
             className: 'custom-price-marker',
-            html: `<div class="marker-wrap ${isHovered ? 'marker-wrap--active' : ''}${badgeClass}">
-                <span class="marker-pin"><span class="marker-glyph"></span></span>
-                <span class="marker-price">${priceText}</span>
+            html: `<div class="marker-wrap ${shouldUseDot ? 'marker-wrap--dot' : 'marker-wrap--bubble'}${stateClass}${badgeClass}">
+                ${shouldUseDot
+                    ? '<span class="marker-dot" aria-hidden="true"></span>'
+                    : `<span class="marker-price">${priceText}</span>`}
             </div>`,
-            iconSize: [136, 78],
-            iconAnchor: [68, 74],
+            iconSize: shouldUseDot ? [34, 34] : [88, 48],
+            iconAnchor: shouldUseDot ? [17, 17] : [44, 42],
         })
     }, [])
 
@@ -621,7 +1181,7 @@ export default function PropertyMap({
     }, [officeMarker])
 
     return (
-        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}`}>
+        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}`}>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
             <div className="map-topbar" role="group" aria-label="Filtros rápidos do mapa">
@@ -698,6 +1258,149 @@ export default function PropertyMap({
                 <Building2 size={14} />
                 <span>{mapWatermarkLabel}</span>
             </div>
+
+            {regionArea && !officeMarker && (
+                <div className="map-region-chip">
+                    <MapPin size={13} />
+                    <span>{regionArea.label}</span>
+                </div>
+            )}
+
+            {onDrawAreaChange && !officeMarker && (
+                <div className="map-draw-control" role="group" aria-label="Desenho de area no mapa">
+                    <button
+                        type="button"
+                        className={drawModeEnabled ? 'active' : ''}
+                        aria-label={drawModeEnabled ? 'Cancelar desenho de area' : 'Desenhar area no mapa'}
+                        aria-pressed={drawModeEnabled}
+                        onClick={handleDrawModeToggle}
+                    >
+                        <PencilLine size={14} />
+                        <span>{drawModeEnabled ? 'Cancelar' : 'Desenhar'}</span>
+                    </button>
+                    {hasDrawArea && (
+                        <button
+                            type="button"
+                            aria-label="Limpar area desenhada"
+                            onClick={handleDrawAreaClear}
+                        >
+                            <Eraser size={14} />
+                            <span>Limpar</span>
+                        </button>
+                    )}
+                </div>
+            )}
+
+            <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa">
+                <button
+                    type="button"
+                    className={mapOptionsOpen ? 'active' : ''}
+                    aria-label="Abrir opcoes do mapa"
+                    aria-expanded={mapOptionsOpen}
+                    onClick={() => setMapOptionsOpen(open => !open)}
+                >
+                    <Globe2 size={24} />
+                    <span>Mapa</span>
+                </button>
+                {onDrawAreaChange && !officeMarker && (
+                    <button
+                        type="button"
+                        className={drawModeEnabled ? 'active' : ''}
+                        aria-label={drawModeEnabled ? 'Cancelar desenho no mapa' : 'Desenhar no mapa'}
+                        aria-pressed={drawModeEnabled}
+                        onClick={handleDrawModeToggle}
+                    >
+                        <Hand size={24} />
+                        <span>{drawModeEnabled ? 'Cancelar' : 'Desenhar'}</span>
+                    </button>
+                )}
+                {!officeMarker && (
+                    <button
+                        type="button"
+                        className={locateState === 'active' ? 'active' : locateState === 'loading' ? 'loading' : ''}
+                        aria-label="Buscar imoveis na minha localizacao"
+                        onClick={handleLocateButtonClick}
+                    >
+                        <LocateFixed size={24} />
+                        <span>{locateState === 'loading' ? 'Buscando' : 'Perto de mim'}</span>
+                    </button>
+                )}
+            </div>
+
+            {activeContextLayers.length > 0 && (
+                <div className="map-context-layer-strip" aria-label="Camadas de contexto ativas">
+                    {activeContextLayers.map(layer => {
+                        const option = MAP_CONTEXT_LAYERS.find(item => item.value === layer)
+                        if (!option) return null
+                        return (
+                            <span key={layer}>
+                                {getContextLayerIcon(option.icon)}
+                                {option.label}
+                            </span>
+                        )
+                    })}
+                </div>
+            )}
+
+            {mapOptionsOpen && (
+                <div className="map-options-scrim" role="presentation" onClick={() => setMapOptionsOpen(false)}>
+                    <section className="map-options-sheet" role="dialog" aria-modal="true" aria-label="Opcoes do mapa" onClick={event => event.stopPropagation()}>
+                        <header>
+                            <h2>Opcoes do mapa</h2>
+                            <button type="button" aria-label="Fechar opcoes do mapa" onClick={() => setMapOptionsOpen(false)}>
+                                <X size={25} />
+                            </button>
+                        </header>
+                        <div className="map-options-style-row" role="group" aria-label="Visualizacao do mapa">
+                            {MAP_OPTION_STYLES.map(style => (
+                                <button
+                                    key={style.value}
+                                    type="button"
+                                    className={mapStyle === style.value ? 'active' : ''}
+                                    aria-pressed={mapStyle === style.value}
+                                    onClick={() => handleMapStyleChange(style.value)}
+                                >
+                                    {getMapOptionIcon(style.icon)}
+                                    <span>{style.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="map-options-divider" />
+                        <div className="map-options-section">
+                            <h3>Riscos e entorno</h3>
+                            <div className="map-context-grid" role="group" aria-label="Camadas de risco e entorno">
+                                {MAP_CONTEXT_LAYERS.map(layer => (
+                                    <button
+                                        key={layer.value}
+                                        type="button"
+                                        className={activeContextLayers.includes(layer.value) ? 'active' : ''}
+                                        aria-pressed={activeContextLayers.includes(layer.value)}
+                                        onClick={() => handleContextLayerToggle(layer.value)}
+                                    >
+                                        {getContextLayerIcon(layer.icon)}
+                                        <span>{layer.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="map-options-section">
+                            <h3>Filtros rapidos</h3>
+                            <div className="map-options-filter-grid" role="group" aria-label="Filtros rapidos do mapa">
+                                {QUICK_FILTERS.map(filter => (
+                                    <button
+                                        key={filter.value}
+                                        type="button"
+                                        className={quickFilter === filter.value ? 'active' : ''}
+                                        onClick={() => handleQuickFilterChange(filter.value)}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            )}
 
             <style>{`
                 .map-shell {
@@ -939,6 +1642,217 @@ export default function PropertyMap({
                 .map-watermark svg {
                     height: 10px;
                     width: 10px;
+                }
+                .map-region-chip {
+                    position: absolute;
+                    left: 14px;
+                    top: 102px;
+                    z-index: 920;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    max-width: min(220px, calc(100% - 28px));
+                    min-height: 32px;
+                    padding: 0 11px;
+                    border: 1px solid rgba(255,255,255,0.24);
+                    border-radius: 999px;
+                    background: rgba(8,14,28,0.78);
+                    color: #f4efe7;
+                    font: 900 0.66rem/1 'Inter', sans-serif;
+                    box-shadow:
+                        0 14px 28px rgba(0,0,0,0.26),
+                        0 0 0 1px rgba(47,123,255,0.14) inset;
+                    backdrop-filter: blur(16px);
+                    pointer-events: none;
+                }
+                .map-region-chip svg {
+                    color: #78a7ff;
+                    flex: 0 0 auto;
+                }
+                .map-region-chip span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .map-draw-control {
+                    position: absolute;
+                    left: 14px;
+                    top: 58px;
+                    z-index: 920;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 7px;
+                    align-items: flex-start;
+                }
+                .map-draw-control button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 7px;
+                    height: 36px;
+                    min-width: 106px;
+                    padding: 0 12px;
+                    border: 1px solid rgba(232,220,199,0.16);
+                    border-radius: 10px;
+                    background: rgba(18,18,18,0.78);
+                    color: #e8dcc7;
+                    cursor: pointer;
+                    font: 900 0.68rem/1 'Inter', sans-serif;
+                    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+                    white-space: nowrap;
+                    backdrop-filter: blur(16px);
+                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                }
+                .map-draw-control button:hover {
+                    transform: translateY(-1px);
+                }
+                .map-draw-control button.active,
+                .map-shell--has-draw-area .map-draw-control button:first-child {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    border-color: rgba(255,255,255,0.3);
+                    color: #101010;
+                }
+                .map-shell--drawing .leaflet-container {
+                    cursor: crosshair !important;
+                }
+                .map-shell--drawing .leaflet-marker-pane,
+                .map-shell--drawing .leaflet-popup-pane {
+                    pointer-events: none;
+                }
+                .map-shell--drawing .map-topbar,
+                .map-shell--drawing .map-style-control,
+                .map-shell--drawing .map-mobile-style-stack,
+                .map-shell--drawing .map-mobile-filter-panel {
+                    opacity: 0.24;
+                    pointer-events: none;
+                    transform: translateY(-2px);
+                }
+                .map-mobile-action-dock,
+                .map-options-scrim,
+                .map-context-layer-strip {
+                    display: none;
+                }
+                .map-options-scrim {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1700;
+                    background: rgba(15,18,22,0.42);
+                    backdrop-filter: blur(1px);
+                }
+                .map-options-sheet {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    display: grid;
+                    gap: 18px;
+                    padding: 24px 18px calc(22px + env(safe-area-inset-bottom));
+                    border-radius: 28px 28px 0 0;
+                    background: #fff;
+                    color: #202326;
+                    box-shadow: 0 -22px 54px rgba(15,18,22,0.28);
+                    animation: mapOptionsRise 0.22s ease both;
+                }
+                .map-options-sheet header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                }
+                .map-options-sheet h2,
+                .map-options-sheet h3 {
+                    margin: 0;
+                    color: #202326;
+                    letter-spacing: 0;
+                }
+                .map-options-sheet h2 {
+                    font: 950 1.6rem/1.1 'Inter', sans-serif;
+                }
+                .map-options-sheet h3 {
+                    font: 950 1.18rem/1.1 'Inter', sans-serif;
+                }
+                .map-options-sheet header button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 46px;
+                    height: 46px;
+                    border: 0;
+                    border-radius: 999px;
+                    background: #fff;
+                    color: #202326;
+                    cursor: pointer;
+                }
+                .map-options-style-row {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 12px;
+                }
+                .map-options-style-row button {
+                    display: grid;
+                    place-items: center;
+                    gap: 9px;
+                    min-height: 104px;
+                    border: 1.5px solid #d8dde3;
+                    border-radius: 999px;
+                    background: #fff;
+                    color: #2b3035;
+                    font: 900 0.88rem/1 'Inter', sans-serif;
+                    cursor: pointer;
+                }
+                .map-options-style-row button.active {
+                    border-color: #1478d4;
+                    background: #e8f4ff;
+                    color: #0b73d9;
+                    box-shadow: 0 0 0 1px rgba(20,120,212,0.2) inset;
+                }
+                .map-options-divider {
+                    height: 1px;
+                    background: #e5e7eb;
+                }
+                .map-options-section {
+                    display: grid;
+                    gap: 12px;
+                }
+                .map-context-grid,
+                .map-options-filter-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+                .map-context-grid button,
+                .map-options-filter-grid button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 44px;
+                    padding: 0 14px;
+                    border: 1.5px solid #d8dde3;
+                    border-radius: 999px;
+                    background: #fff;
+                    color: #2b3035;
+                    font: 900 0.85rem/1 'Inter', sans-serif;
+                    cursor: pointer;
+                }
+                .map-context-grid button.active,
+                .map-options-filter-grid button.active {
+                    border-color: #1478d4;
+                    background: #e8f4ff;
+                    color: #0b73d9;
+                }
+                @keyframes mapOptionsRise {
+                    from { transform: translateY(24px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                .map-draw-area-polygon {
+                    filter: drop-shadow(0 0 8px rgba(47,123,255,0.36));
+                }
+                .map-region-area-polygon {
+                    filter: drop-shadow(0 0 10px rgba(47,123,255,0.32));
+                }
+                .map-region-area-mask {
+                    mix-blend-mode: multiply;
                 }
                 .map-shell .leaflet-popup-pane {
                     z-index: 1200;
@@ -1215,6 +2129,154 @@ export default function PropertyMap({
                     font: 850 0.6rem/1 'Inter', sans-serif;
                     white-space: nowrap;
                 }
+                .marker-wrap {
+                    gap: 0;
+                    filter: drop-shadow(0 8px 15px rgba(23,12,15,0.34));
+                }
+                .marker-wrap--dot {
+                    display: grid;
+                    place-items: center;
+                    width: 34px;
+                    height: 34px;
+                    animation: markerRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+                }
+                .marker-dot {
+                    display: block;
+                    width: 14px;
+                    height: 14px;
+                    border: 2px solid #fff;
+                    border-radius: 999px;
+                    background: #b0042f;
+                    box-shadow:
+                        0 8px 18px rgba(0,0,0,0.26),
+                        0 0 0 7px rgba(176,4,47,0.14);
+                    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+                }
+                .marker-wrap--dot.marker-wrap--active .marker-dot {
+                    background: #70001d;
+                    transform: scale(1.22);
+                    box-shadow:
+                        0 10px 22px rgba(0,0,0,0.3),
+                        0 0 0 8px rgba(112,0,29,0.18);
+                }
+                .marker-wrap--dot.marker-wrap--selected .marker-dot {
+                    background: #1463ff;
+                    transform: scale(1.28);
+                    box-shadow:
+                        0 12px 24px rgba(0,0,0,0.32),
+                        0 0 0 8px rgba(20,99,255,0.18);
+                }
+                .marker-wrap--bubble {
+                    align-items: center;
+                    animation: markerRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+                }
+                .marker-wrap--bubble .marker-price {
+                    position: relative;
+                    min-width: auto;
+                    padding: 7px 11px 8px;
+                    border: 2px solid #fff;
+                    border-radius: 18px;
+                    background: #b0042f;
+                    color: #fff;
+                    font: 950 0.76rem/1 'Inter', sans-serif;
+                    letter-spacing: 0;
+                    box-shadow:
+                        0 12px 26px rgba(0,0,0,0.28),
+                        0 0 0 6px rgba(176,4,47,0.12);
+                    backdrop-filter: none;
+                }
+                .marker-wrap--bubble .marker-price::before {
+                    content: '';
+                    position: absolute;
+                    left: 50%;
+                    bottom: -8px;
+                    width: 0;
+                    height: 0;
+                    border-left: 7px solid transparent;
+                    border-right: 7px solid transparent;
+                    border-top: 9px solid #b0042f;
+                    transform: translateX(-50%);
+                }
+                .marker-wrap--bubble.marker-wrap--active {
+                    transform: translateY(-4px) scale(1.14);
+                    filter: drop-shadow(0 14px 30px rgba(112,0,29,0.35));
+                }
+                .marker-wrap--bubble.marker-wrap--active .marker-price {
+                    background: #70001d;
+                    color: #fff;
+                    box-shadow:
+                        0 14px 28px rgba(0,0,0,0.34),
+                        0 0 0 7px rgba(112,0,29,0.16);
+                }
+                .marker-wrap--bubble.marker-wrap--active .marker-price::before {
+                    border-top-color: #70001d;
+                }
+                .marker-wrap--bubble.marker-wrap--selected {
+                    transform: translateY(-4px) scale(1.16);
+                    filter: drop-shadow(0 16px 34px rgba(20,99,255,0.34));
+                }
+                .marker-wrap--bubble.marker-wrap--selected .marker-price {
+                    background: #1463ff;
+                    color: #fff;
+                    box-shadow:
+                        0 16px 32px rgba(0,0,0,0.34),
+                        0 0 0 7px rgba(20,99,255,0.17);
+                }
+                .marker-wrap--bubble.marker-wrap--selected .marker-price::before {
+                    border-top-color: #1463ff;
+                }
+                .cluster-dot-wrap {
+                    display: grid;
+                    place-items: center;
+                    width: 42px;
+                    height: 42px;
+                    cursor: pointer;
+                    filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
+                }
+                .cluster-dot {
+                    display: grid;
+                    place-items: center;
+                    min-width: 20px;
+                    height: 20px;
+                    padding: 0 5px;
+                    border: 2px solid #fff;
+                    border-radius: 999px;
+                    background: #b0042f;
+                    color: #fff;
+                    font: 950 0.56rem/1 'Inter', sans-serif;
+                    box-shadow: 0 0 0 8px rgba(176,4,47,0.15);
+                }
+                .cluster-orbit--price {
+                    min-width: 86px;
+                    height: 42px;
+                    padding: 6px 10px;
+                    border: 2px solid #fff;
+                    border-radius: 19px;
+                    background: #9b0027;
+                    color: #fff;
+                    box-shadow:
+                        0 12px 24px rgba(0,0,0,0.3),
+                        0 0 0 6px rgba(155,0,39,0.13);
+                    animation: none;
+                }
+                .cluster-orbit--price::after {
+                    content: '';
+                    position: absolute;
+                    left: 50%;
+                    bottom: -8px;
+                    border-left: 7px solid transparent;
+                    border-right: 7px solid transparent;
+                    border-top: 9px solid #9b0027;
+                    transform: translateX(-50%);
+                }
+                .cluster-orbit--price .cluster-count {
+                    font-size: 0.78rem;
+                }
+                .cluster-orbit--price .cluster-label {
+                    margin-top: 2px;
+                    color: rgba(255,255,255,0.82);
+                    font-size: 0.52rem;
+                }
 
                 .property-popup .leaflet-popup-content-wrapper {
                     width: 292px;
@@ -1345,7 +2407,7 @@ export default function PropertyMap({
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.045); }
                 }
-                @media (max-width: 720px) {
+                @media (max-width: 1023px) {
                     .map-topbar {
                         display: none;
                     }
@@ -1353,16 +2415,118 @@ export default function PropertyMap({
                         display: none;
                     }
                     .map-mobile-style-stack {
-                        display: flex;
+                        display: none;
                     }
                     .map-mobile-filter-panel.is-open {
-                        display: grid;
+                        display: none;
                     }
                     .map-mobile-filters-open .leaflet-control-zoom {
                         display: none !important;
                     }
                     .map-watermark {
                         display: none;
+                    }
+                    .map-draw-control {
+                        display: none;
+                    }
+                    .map-mobile-action-dock {
+                        position: fixed;
+                        left: max(12px, env(safe-area-inset-left));
+                        top: clamp(124px, calc(var(--sv-sheet-top, 50dvh) - 74px), calc(100dvh - 176px));
+                        bottom: auto;
+                        z-index: 1300;
+                        display: flex !important;
+                        align-items: center;
+                        gap: 12px;
+                        pointer-events: auto;
+                    }
+                    .map-mobile-action-dock button {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 58px;
+                        height: 58px;
+                        border: 1px solid rgba(18,24,30,0.08);
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.94);
+                        color: #171a1d;
+                        cursor: pointer;
+                        box-shadow: 0 12px 26px rgba(18,24,30,0.18);
+                        backdrop-filter: blur(14px);
+                        -webkit-backdrop-filter: blur(14px);
+                    }
+                    .map-mobile-action-dock button span {
+                        position: absolute;
+                        width: 1px;
+                        height: 1px;
+                        overflow: hidden;
+                        clip: rect(0 0 0 0);
+                    }
+                    .map-mobile-action-dock button.active {
+                        background: #e8f4ff;
+                        color: #0b73d9;
+                        box-shadow: 0 12px 26px rgba(20,120,212,0.24);
+                    }
+                    .map-mobile-action-dock button.loading svg {
+                        animation: mapLocateSpin 1s linear infinite;
+                    }
+                    .map-options-scrim {
+                        display: block;
+                        position: fixed;
+                        z-index: 1400;
+                    }
+                    .map-context-layer-strip {
+                        position: fixed;
+                        left: 12px;
+                        right: 12px;
+                        top: max(120px, calc(var(--sv-sheet-top, 50dvh) - 124px));
+                        bottom: auto;
+                        z-index: 1290;
+                        display: flex;
+                        gap: 8px;
+                        overflow-x: auto;
+                        padding: 2px 0;
+                        scrollbar-width: none;
+                    }
+                    .map-context-layer-strip::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .map-context-layer-strip span {
+                        flex: 0 0 auto;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 7px;
+                        min-height: 36px;
+                        padding: 0 11px;
+                        border: 1px solid rgba(20,120,212,0.18);
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.94);
+                        color: #202326;
+                        font: 900 0.76rem/1 'Inter', sans-serif;
+                        box-shadow: 0 10px 22px rgba(18,24,30,0.14);
+                    }
+                    .map-options-sheet {
+                        max-height: min(72vh, 620px);
+                        overflow-y: auto;
+                    }
+                    .map-shell--drawing .map-mobile-action-dock button:not(.active),
+                    .map-shell--drawing .map-context-layer-strip {
+                        opacity: 0.34;
+                        pointer-events: none;
+                    }
+                    .map-user-location-circle {
+                        filter: drop-shadow(0 0 12px rgba(20,120,212,0.24));
+                    }
+                    @keyframes mapLocateSpin {
+                        to { transform: rotate(360deg); }
+                    }
+                    .map-region-chip {
+                        top: 92px;
+                        left: 12px;
+                        max-width: min(176px, calc(100% - 24px));
+                        min-height: 28px;
+                        padding: 0 9px;
+                        font-size: 0.58rem;
                     }
                     .property-popup .leaflet-popup-content-wrapper,
                     .property-popup .leaflet-popup-content,
@@ -1412,8 +2576,34 @@ export default function PropertyMap({
                 )}
 
                 <MapUpdater points={mapPoints} refitKey={refitKey} />
-                <MapInteractionController enabled={interactionEnabled} />
+                <MapInteractionController enabled={interactionEnabled && !drawModeEnabled} />
                 <BoundsEmitter onBoundsChange={onBoundsChange} onUserBoundsChange={onUserBoundsChange} />
+                <UserLocationController
+                    requestId={locateRequestId}
+                    onLocated={handleUserLocated}
+                    onStatusChange={setLocateState}
+                />
+                <FocusAreaLayer drawArea={drawArea} regionArea={regionArea} />
+                <DrawAreaLayer
+                    key={drawModeEnabled ? 'draw-enabled' : 'draw-disabled'}
+                    enabled={drawModeEnabled}
+                    area={drawArea}
+                    onCommit={handleDrawAreaCommit}
+                />
+                {userMapLocation && (
+                    <Circle
+                        center={userMapLocation.latLng}
+                        radius={Math.max(90, Math.min(900, Number(userMapLocation.accuracy || 120)))}
+                        pathOptions={{
+                            color: '#1478d4',
+                            weight: 2,
+                            opacity: 0.78,
+                            fillColor: '#1478d4',
+                            fillOpacity: 0.14,
+                            className: 'map-user-location-circle',
+                        }}
+                    />
+                )}
                 {officeMarker && officeIcon && (
                     <Marker position={officeMarker.latLng} icon={officeIcon} zIndexOffset={1200}>
                         <Popup className="agency-location-popup" minWidth={260} maxWidth={292}>
@@ -1424,8 +2614,10 @@ export default function PropertyMap({
                 <ClusterLayer
                     items={filteredProperties}
                     hoveredPropertyId={hoveredPropertyId}
+                    selectedPropertyId={selectedPropertyId}
                     createIcon={createIcon}
                     onMarkerHover={onMarkerHover}
+                    onPropertySelect={onPropertySelect}
                 />
             </MapContainer>
         </div>

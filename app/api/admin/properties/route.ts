@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { deleteFile } from '@/lib/r2'
 import { notifyPropertyReviewReady } from '@/lib/properties/review-notifications'
+import { recordPropertyPriceHistory } from '@/lib/properties/price-history'
+import { processPropertySearchAlerts } from '@/lib/properties/search-alert-matcher'
 
 const PROPERTY_TEXT_FIELDS = ['title', 'description', 'seo_title', 'seo_description'] as const
 
@@ -31,6 +33,23 @@ function normalizePropertyPayload(payload: Record<string, any>) {
     }
 
     return normalized
+}
+
+async function processSearchAlertsSafely(supabase: any, property: any, source: string) {
+    if (property?.status !== 'active') {
+        return { processed: false, skipped_reason: 'property_not_active' }
+    }
+
+    try {
+        return await processPropertySearchAlerts(supabase, property, { source })
+    } catch (error) {
+        console.warn('[Admin Properties] search alert processing skipped:', error)
+        return {
+            processed: false,
+            skipped_reason: 'search_alert_processing_failed',
+            error: error instanceof Error ? error.message : String(error),
+        }
+    }
 }
 
 export async function GET(request: NextRequest) {
@@ -108,6 +127,15 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (error) throw error
+        await recordPropertyPriceHistory(supabase, {
+            property: data,
+            eventType: 'listed',
+            source: 'admin_create',
+            metadata: {
+                status: data?.status || null,
+                created_via: body?.source_payload?.created_by || 'admin_form',
+            },
+        })
 
         const shouldNotifyReview = data?.status !== 'active'
         const notification = shouldNotifyReview
@@ -117,8 +145,9 @@ export async function POST(request: NextRequest) {
                 origin: request.nextUrl.origin,
             })
             : { sent: false, skipped: true, reason: 'Imovel criado como ativo.' }
+        const searchAlerts = await processSearchAlertsSafely(supabase, data, 'admin_create')
 
-        return NextResponse.json({ property: data, notification }, { status: 201 })
+        return NextResponse.json({ property: data, notification, search_alerts: searchAlerts }, { status: 201 })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
@@ -131,15 +160,35 @@ export async function PUT(request: NextRequest) {
         if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
 
         const supabase = createAdminClient()
+        const { data: previousProperty, error: previousError } = await supabase
+            .from('properties')
+            .select('id,title,city,neighborhood,status,source_reference,price,condo_fee,iptu,area_m2,area_private_m2')
+            .eq('id', id)
+            .single()
+
+        if (previousError) throw previousError
+
+        const normalizedUpdateData = normalizePropertyPayload(updateData)
         const { data, error } = await supabase
             .from('properties')
-            .update(normalizePropertyPayload(updateData))
+            .update(normalizedUpdateData)
             .eq('id', id)
             .select()
             .single()
 
         if (error) throw error
-        return NextResponse.json(data)
+        await recordPropertyPriceHistory(supabase, {
+            property: data,
+            previousProperty,
+            source: 'admin_update',
+            metadata: {
+                status_before: previousProperty?.status || null,
+                status_after: data?.status || null,
+            },
+        })
+        const searchAlerts = await processSearchAlertsSafely(supabase, data, 'admin_update')
+
+        return NextResponse.json({ ...data, search_alerts: searchAlerts })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }

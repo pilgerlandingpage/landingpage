@@ -66,6 +66,7 @@ trabalhe-conosco-*.png
 
 # temp files
 temp_config.json
+/tmp/
 
 # Claude Code local config
 .claude/

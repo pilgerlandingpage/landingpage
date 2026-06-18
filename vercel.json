@@ -28,6 +28,18 @@
         {
             "path": "/api/cron/market-radar",
             "schedule": "0 * * * *"
+        },
+        {
+            "path": "/api/cron/property-search-alerts",
+            "schedule": "30 * * * *"
+        },
+        {
+            "path": "/api/cron/crm-action-recommendations",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/cron/lead-executive-briefs",
+            "schedule": "15 11 * * *"
         }
     ]
 }

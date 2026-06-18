@@ -87,9 +87,10 @@ export default function WhatsAppLeadCaptureModal() {
         ? propertyUrlFromMetadata || (typeof window !== 'undefined' ? window.location.href : '')
         : ''
     const messagePreview = state.open
-        ? isPropertyLead
-            ? `Ola, tenho interesse no imovel ${propertyUrl}`.trim()
-            : state.message || 'Ola! Quero falar com um especialista.'
+        ? state.message?.trim()
+            || (isPropertyLead
+                ? `Ola, tenho interesse no imovel ${propertyUrl}`.trim()
+                : 'Ola! Quero falar com um especialista.')
         : ''
     const requiresEmail = isPropertyLead
 

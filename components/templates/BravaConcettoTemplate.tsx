@@ -252,7 +252,7 @@ export default function BravaConcettoTemplate({ data, slug, landingPageId, agent
 
     const faqs = [
         { q: 'Qual a previsão de entrega?', a: 'Previsão para Março 2030. Consulte nossa equipe de vendas para obter o cronograma atualizado e as condições do empreendimento.' },
-        { q: 'Quais as condições de pagamento?', a: 'Condição: 20% de entrada e saldo em 78x. Consulte um especialista e saiba mais sobre condições diferenciadas.' },
+        { q: 'Como confirmar disponibilidade e negociação?', a: 'A disponibilidade e a leitura comercial das unidades sao tratadas de forma reservada com a equipe especialista.' },
         { q: 'Quais as informações técnicas do projeto?', a: '• Unidades: 22 apartamentos, 1 garden e 2 coberturas duplex (Total 25 unidades)\n• Apartamentos por andar: 2\n• Pavimentos: 16\n• Tamanho do terreno: 1.600m²\n• Área da obra: 7.000m²\n• Altura: 52m' },
         { q: 'Onde fica exatamente?', a: 'Na Avenida Carlos Drummond de Andrade, 111, no coração da Praia Brava, a apenas 200m da orla.' },
         { q: 'É possível personalizar a planta?', a: 'Sim! Oferecemos a possibilidade de personalizar o layout interno.' },

@@ -6303,8 +6303,8 @@ h6 {
                     top: 100%;
                     left: 50%;
                     transform: translateX(-50%) translateY(4px);
-                    width: 100vw;
-                    max-width: 1400px;
+                    width: min(1400px, calc(100vw - 48px));
+                    max-width: calc(100vw - 48px);
                     background: #fff;
                     border-top: 2px solid #b8945f;
                     border-radius: 0 0 10px 10px;
@@ -7050,6 +7050,58 @@ h6 {
 .prop-section-media {
   border-color: rgba(184,148,95,0.25);
   background: linear-gradient(135deg, rgba(184,148,95,0.03), transparent);
+}
+.prop-section-financial {
+  border-color: rgba(18,140,126,0.24);
+  background: linear-gradient(135deg, rgba(18,140,126,0.045), transparent);
+}
+.prop-section-financial .prop-section-title {
+  border-bottom-color: rgba(18,140,126,0.18);
+  color: #20b8a5;
+}
+.prop-section-history {
+  border-color: rgba(201,169,110,0.26);
+  background: linear-gradient(135deg, rgba(201,169,110,0.05), rgba(18,18,18,0.01));
+}
+.property-history-list {
+  display: grid;
+  gap: 10px;
+}
+.property-history-row {
+  align-items: center;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 145px minmax(0, 1fr) auto;
+  padding: 12px 14px;
+}
+.property-history-row span,
+.property-history-row small,
+.property-history-empty {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.property-history-row strong {
+  color: var(--text-primary);
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+}
+.property-history-row b {
+  color: var(--gold);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.property-history-empty {
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(201,169,110,0.22);
+  border-radius: 10px;
+  display: flex;
+  gap: 8px;
+  padding: 14px;
 }
 .prop-form-grid {
   display: grid;
@@ -7864,6 +7916,11 @@ h6 {
   .ai-upload-groups { grid-template-columns: 1fr; }
   .ai-property-upload { min-height: 92px; }
   .prop-form-grid { grid-template-columns: 1fr; }
+  .property-history-row {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+  }
+  .property-history-row b { white-space: normal; }
   .prop-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .prop-editor-actions { flex-direction: column; }
   .prop-dropzone.has-image, .prop-dropzone.has-image.large { height: 180px; }

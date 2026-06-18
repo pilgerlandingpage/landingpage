@@ -8,9 +8,29 @@ export type LeadActivityEntry = {
     property_id?: string
     target_property_id?: string
     property_title?: string
+    alert_id?: string
+    alert_title?: string
+    property_url?: string
+    match_score?: number
+    match_reasons?: string[]
+    suggested_message?: string
+    followup_title?: string
+    followup_priority?: string
+    source?: string
     page_path?: string
     page_title?: string
     detail?: string
+    selected_region?: string
+    selected_region_label?: string
+    coordinate_count?: number
+    visible_count?: number
+    bounds_summary?: string
+    map_view?: string
+    section_id?: string
+    section_label?: string
+    premium_intent?: string
+    requested_action?: string
+    cta_context?: string
 }
 
 export type LeadActivityEventRow = {
@@ -35,6 +55,62 @@ function asNumberString(value: unknown): string | undefined {
     return asString(value)
 }
 
+function asFiniteNumber(value: unknown): number | undefined {
+    const number = Number(value)
+    return Number.isFinite(number) ? number : undefined
+}
+
+function asStringArray(value: unknown): string[] {
+    return Array.isArray(value)
+        ? value.map(asString).filter((item): item is string => Boolean(item))
+        : []
+}
+
+function mapViewLabel(value?: string) {
+    if (value === 'map') return 'Mapa'
+    if (value === 'satellite') return 'Satelite'
+    if (value === 'street') return 'Street View'
+    return value
+}
+
+function formatBoundsSummary(value: unknown) {
+    const bounds = asRecord(value)
+    const north = asFiniteNumber(bounds.north)
+    const south = asFiniteNumber(bounds.south)
+    const east = asFiniteNumber(bounds.east)
+    const west = asFiniteNumber(bounds.west)
+
+    if (
+        typeof north !== 'number'
+        || typeof south !== 'number'
+        || typeof east !== 'number'
+        || typeof west !== 'number'
+    ) {
+        return undefined
+    }
+
+    return `N ${north.toFixed(4)} / S ${south.toFixed(4)} / L ${east.toFixed(4)} / O ${west.toFixed(4)}`
+}
+
+const PREMIUM_INTENT_EVENTS = [
+    'property_private_visit_requested',
+    'property_availability_requested',
+    'property_reserved_negotiation_requested',
+    'property_value_reading_requested',
+]
+
+function isPremiumIntentEvent(eventType: string) {
+    return PREMIUM_INTENT_EVENTS.includes(eventType)
+}
+
+function premiumIntentLabel(value?: string) {
+    if (value === 'private_visit') return 'Visita privada'
+    if (value === 'availability') return 'Disponibilidade'
+    if (value === 'reserved_negotiation') return 'Negociacao reservada'
+    if (value === 'value_reading') return 'Leitura de valor'
+    return value
+}
+
 function eventDetail(eventType: string, metadata: JsonRecord): string | undefined {
     if (eventType === 'scroll_depth') {
         const percentage = asNumberString(metadata.percentage)
@@ -53,6 +129,14 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
     if (eventType === 'property_gallery_opened') {
         const imageIndex = asNumberString(metadata.image_index)
         return imageIndex ? `Foto ${Number(imageIndex) + 1}` : undefined
+    }
+
+    if (isPremiumIntentEvent(eventType)) {
+        const intent = premiumIntentLabel(asString(metadata.premium_intent))
+        const action = asString(metadata.requested_action)
+        const title = asString(metadata.property_title) || asString(metadata.title)
+        const context = asString(metadata.cta_context) || asString(metadata.cta_label)
+        return [intent, action, title, context].filter(Boolean).join(' | ') || undefined
     }
 
     if (eventType === 'property_feed_saved_history_clicked') {
@@ -92,6 +176,62 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
         return label ? `${action} ${label}` : undefined
     }
 
+    if (eventType === 'property_details_landing_section_viewed') {
+        return asString(metadata.section_label)
+            || asString(metadata.target_section)
+            || asString(metadata.title)
+    }
+
+    if (eventType === 'search_results_search_this_area_clicked') {
+        const results = asNumberString(metadata.visible_count)
+        const region = asString(metadata.selected_region_label) || asString(metadata.selected_region)
+        const bounds = formatBoundsSummary(metadata.bounds)
+        return [
+            results ? `${results} imoveis` : undefined,
+            region ? `Regiao ${region}` : undefined,
+            bounds ? `Recorte ${bounds}` : undefined,
+        ].filter(Boolean).join(' | ') || undefined
+    }
+
+    if (eventType.startsWith('crm_search_alert_followup_')) {
+        const status = asString(metadata.followup_status_label)
+        const propertyTitle = asString(metadata.property_title) || asString(metadata.title)
+        const alertTitle = asString(metadata.alert_title)
+        const score = asNumberString(metadata.match_score)
+        return [
+            status,
+            propertyTitle,
+            alertTitle,
+            score ? `${score}% aderente` : undefined,
+        ].filter(Boolean).join(' | ') || undefined
+    }
+
+    if (
+        eventType === 'property_search_alert_clicked'
+        || eventType === 'property_search_alert_saved'
+        || eventType === 'property_search_alert_failed'
+        || eventType === 'property_search_alert_matched'
+        || eventType === 'property_search_alert_match_opened'
+        || eventType === 'property_search_alert_paused'
+        || eventType === 'property_search_alert_resumed'
+        || eventType === 'property_search_alert_deleted'
+        || eventType === 'property_search_alert_push_requested'
+        || eventType === 'property_search_alerts_panel_opened'
+    ) {
+        const title = asString(metadata.alert_title) || asString(metadata.title)
+        const propertyTitle = asString(metadata.property_title)
+        const results = asNumberString(metadata.visible_count)
+        const region = asString(metadata.selected_region_label) || asString(metadata.selected_region)
+        const score = asNumberString(metadata.match_score)
+        return [
+            title,
+            propertyTitle,
+            score ? `${score}% aderente` : undefined,
+            results ? `${results} imoveis` : undefined,
+            region,
+        ].filter(Boolean).join(' | ') || undefined
+    }
+
     if (eventType === 'home_map_advanced_filters_toggled' || eventType === 'home_search_advanced_toggled') {
         return metadata.open === false ? 'Fechou filtros' : 'Abriu filtros'
     }
@@ -121,12 +261,20 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
         || eventType === 'property_details_landing_gallery_opened'
         || eventType === 'property_details_landing_map_clicked'
         || eventType === 'property_details_landing_related_clicked'
+        || eventType === 'property_details_landing_section_viewed'
     ) {
         return asString(metadata.title)
             || asString(metadata.link_title)
             || asString(metadata.link_label)
+            || asString(metadata.section_label)
             || asString(metadata.target_section)
             || asString(metadata.destination)
+    }
+
+    if (eventType === 'whatsapp_property_click' || eventType === 'chat_opened') {
+        const label = asString(metadata.cta_label) || asString(metadata.link_label) || asString(metadata.template)
+        const context = asString(metadata.cta_context) || asString(metadata.section_label)
+        return [label, context].filter(Boolean).join(' | ') || undefined
     }
 
     if (eventType === 'property_map_quick_filter_clicked') {
@@ -135,6 +283,54 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
 
     if (eventType === 'property_map_style_changed') {
         return asString(metadata.style_label)
+    }
+
+    if (eventType === 'property_map_draw_area_applied') {
+        const points = asNumberString(metadata.coordinate_count)
+        const results = asNumberString(metadata.visible_count)
+        const region = asString(metadata.selected_region_label) || asString(metadata.selected_region)
+        return [
+            points ? `${points} pontos` : undefined,
+            results ? `${results} imoveis` : undefined,
+            region ? `Regiao ${region}` : undefined,
+        ].filter(Boolean).join(' | ') || undefined
+    }
+
+    if (eventType === 'property_map_draw_area_cleared' || eventType === 'property_map_draw_area_cleared_from_map') {
+        return metadata.had_draw_area === false ? 'Sem area ativa' : 'Area removida'
+    }
+
+    if (
+        eventType === 'property_map_pin_selected'
+        || eventType === 'property_map_preview_opened'
+        || eventType === 'property_map_preview_closed'
+        || eventType === 'property_map_preview_details_clicked'
+        || eventType === 'property_map_popup_opened'
+    ) {
+        return asString(metadata.title)
+            || asString(metadata.neighborhood)
+            || asString(metadata.destination)
+    }
+
+    if (eventType === 'property_map_preview_photo_changed') {
+        const index = asFiniteNumber(metadata.image_index)
+        const galleryCount = asNumberString(metadata.gallery_count)
+        return [
+            Number.isFinite(index) ? `Foto ${Number(index) + 1}` : undefined,
+            galleryCount ? `${galleryCount} fotos` : undefined,
+        ].filter(Boolean).join(' | ') || undefined
+    }
+
+    if (eventType === 'property_location_view_changed' || eventType === 'property_location_street_view_opened') {
+        const view = mapViewLabel(asString(metadata.view))
+        const label = asString(metadata.link_label)
+        return [view, label].filter(Boolean).join(' | ') || asString(metadata.title)
+    }
+
+    if (eventType === 'property_location_google_maps_opened') {
+        const view = mapViewLabel(asString(metadata.view))
+        const label = asString(metadata.link_label)
+        return [view, label, asString(metadata.title)].filter(Boolean).join(' | ') || 'Google Maps'
     }
 
     if (
@@ -153,6 +349,30 @@ function eventDetail(eventType: string, metadata: JsonRecord): string | undefine
         return asString(metadata.filter_label)
             || asNumberString(metadata.visible_count)
             || undefined
+    }
+
+    if (eventType === 'search_results_memory_property_clicked') {
+        const title = asString(metadata.title) || asString(metadata.property_title)
+        const source = asString(metadata.source)
+        const sourceLabel = source === 'favorite' ? 'Salvo' : source === 'history' ? 'Visto recentemente' : source
+        return [title, sourceLabel].filter(Boolean).join(' | ') || undefined
+    }
+
+    if (
+        eventType === 'property_details_continuation_viewed'
+        || eventType === 'property_details_continuation_favorites_clicked'
+        || eventType === 'property_details_continuation_property_clicked'
+    ) {
+        const shown = Array.isArray(metadata.shown_property_ids) ? metadata.shown_property_ids.length : 0
+        const favorites = asNumberString(metadata.favorite_count)
+        const history = asNumberString(metadata.history_count)
+        const title = asString(metadata.title) || asString(metadata.property_title)
+        return [
+            title,
+            shown ? `${shown} imoveis retomados` : undefined,
+            favorites ? `${favorites} salvos` : undefined,
+            history ? `${history} vistos` : undefined,
+        ].filter(Boolean).join(' | ') || asString(metadata.title)
     }
 
     return asString(metadata.link_label)
@@ -192,6 +412,46 @@ function eventLabel(eventType: string, metadata: JsonRecord): string {
             return 'Limpou busca do mapa'
         case 'home_map_feature_filter_toggled':
             return 'Ajustou filtro rapido do mapa'
+        case 'search_results_search_this_area_clicked':
+            return 'Buscou nesta area do mapa'
+        case 'property_search_alert_clicked':
+            return 'Tentou salvar alerta de busca'
+        case 'property_search_alert_saved':
+            return 'Salvou alerta de busca'
+        case 'property_search_alert_failed':
+            return 'Erro ao salvar alerta de busca'
+        case 'property_search_alert_matched':
+            return 'Recebeu match de alerta'
+        case 'property_search_alert_match_opened':
+            return 'Abriu match de alerta'
+        case 'property_search_alert_paused':
+            return 'Pausou alerta de busca'
+        case 'property_search_alert_resumed':
+            return 'Reativou alerta de busca'
+        case 'property_search_alert_deleted':
+            return 'Removeu alerta de busca'
+        case 'property_search_alert_push_requested':
+            return 'Pediu ativacao de push'
+        case 'property_search_alerts_panel_opened':
+            return 'Abriu painel de alertas'
+        case 'property_private_visit_requested':
+            return 'Pediu visita privada'
+        case 'property_availability_requested':
+            return 'Pediu disponibilidade'
+        case 'property_reserved_negotiation_requested':
+            return 'Pediu negociacao reservada'
+        case 'property_value_reading_requested':
+            return 'Pediu leitura de valor'
+        case 'crm_search_alert_followup_pending':
+            return 'Reabriu abordagem comercial'
+        case 'crm_search_alert_followup_sent':
+            return 'Marcou abordagem enviada'
+        case 'crm_search_alert_followup_responded':
+            return 'Marcou abordagem respondida'
+        case 'crm_search_alert_followup_converted':
+            return 'Marcou abordagem convertida'
+        case 'crm_search_alert_followup_dismissed':
+            return 'Descartou abordagem comercial'
         case 'home_map_advanced_filters_toggled':
             return 'Mexeu nos filtros do mapa'
         case 'home_search_submitted':
@@ -216,6 +476,8 @@ function eventLabel(eventType: string, metadata: JsonRecord): string {
             return 'Abriu mapa da landing'
         case 'property_details_landing_related_clicked':
             return 'Clicou em imovel relacionado'
+        case 'property_details_landing_section_viewed':
+            return 'Viu secao do imovel'
         case 'home_search_cleared':
             return 'Limpou busca'
         case 'home_search_advanced_toggled':
@@ -226,12 +488,43 @@ function eventLabel(eventType: string, metadata: JsonRecord): string {
             return 'Mudou estilo do mapa'
         case 'property_map_popup_opened':
             return 'Abriu imovel no mapa'
+        case 'property_map_pin_selected':
+            return 'Selecionou pin no mapa'
+        case 'property_map_preview_opened':
+            return 'Abriu preview no mapa'
+        case 'property_map_preview_photo_changed':
+            return 'Passou fotos no preview'
+        case 'property_map_preview_details_clicked':
+            return 'Abriu detalhes pelo mapa'
+        case 'property_map_preview_closed':
+            return 'Fechou preview do mapa'
+        case 'property_map_draw_mode_toggled':
+            return metadata.enabled === false ? 'Saiu do desenho no mapa' : 'Ativou desenho no mapa'
+        case 'property_map_draw_area_applied':
+            return 'Desenhou area no mapa'
+        case 'property_map_draw_area_cleared':
+        case 'property_map_draw_area_cleared_from_map':
+            return 'Removeu area desenhada'
+        case 'property_location_view_changed':
+            return 'Alternou mapa do imovel'
+        case 'property_location_street_view_opened':
+            return 'Abriu Street View'
+        case 'property_location_google_maps_opened':
+            return 'Abriu localizacao no Google Maps'
         case 'search_results_filter_removed':
             return 'Removeu filtro da busca'
         case 'search_results_clear_clicked':
             return 'Limpou resultados da busca'
         case 'search_results_adjust_filters_clicked':
             return 'Voltou para ajustar filtros'
+        case 'search_results_memory_property_clicked':
+            return 'Retomou imovel salvo ou visto'
+        case 'property_details_continuation_viewed':
+            return 'Viu salvos e recentes'
+        case 'property_details_continuation_favorites_clicked':
+            return 'Foi comparar favoritos'
+        case 'property_details_continuation_property_clicked':
+            return 'Retomou imovel salvo ou visto'
         case 'search_results_empty_view_all_clicked':
             return 'Pediu todos os imoveis'
         case 'chat_opened':
@@ -300,11 +593,27 @@ function eventLabel(eventType: string, metadata: JsonRecord): string {
 
 export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEntry {
     const metadata = asRecord(row.metadata)
+    const suggestedFollowup = asRecord(metadata.suggested_followup)
     const propertyId = asString(metadata.property_id)
         || asString(metadata.from_property_id)
         || asString(metadata.lead_property_id)
     const targetPropertyId = asString(metadata.target_property_id)
         || asString(metadata.to_property_id)
+    const coordinateCount = asFiniteNumber(metadata.coordinate_count)
+    const visibleCount = asFiniteNumber(metadata.visible_count)
+    const boundsSummary = formatBoundsSummary(metadata.bounds)
+    const matchScore = asFiniteNumber(metadata.match_score) ?? asFiniteNumber(suggestedFollowup.match_score)
+    const matchReasons = asStringArray(metadata.match_reasons).length
+        ? asStringArray(metadata.match_reasons)
+        : asStringArray(suggestedFollowup.match_reasons)
+    const suggestedMessage = asString(metadata.suggested_whatsapp_message)
+        || asString(metadata.suggested_message)
+        || asString(suggestedFollowup.message)
+    const propertyUrl = asString(metadata.property_url) || asString(suggestedFollowup.property_url)
+    const propertyTitle = asString(metadata.property_title)
+        || asString(metadata.title)
+        || asString(metadata.link_title)
+        || asString(suggestedFollowup.property_title)
 
     return {
         ...(row.id ? { id: row.id } : {}),
@@ -313,10 +622,30 @@ export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEn
         occurred_at: row.created_at || new Date().toISOString(),
         ...(propertyId ? { property_id: propertyId } : {}),
         ...(targetPropertyId ? { target_property_id: targetPropertyId } : {}),
-        ...(asString(metadata.title) || asString(metadata.link_title) ? { property_title: asString(metadata.title) || asString(metadata.link_title) } : {}),
+        ...(propertyTitle ? { property_title: propertyTitle } : {}),
+        ...(asString(metadata.alert_id) ? { alert_id: asString(metadata.alert_id) } : {}),
+        ...(asString(metadata.alert_title) ? { alert_title: asString(metadata.alert_title) } : {}),
+        ...(propertyUrl ? { property_url: propertyUrl } : {}),
+        ...(typeof matchScore === 'number' ? { match_score: matchScore } : {}),
+        ...(matchReasons.length ? { match_reasons: matchReasons } : {}),
+        ...(suggestedMessage ? { suggested_message: suggestedMessage } : {}),
+        ...(asString(suggestedFollowup.title) ? { followup_title: asString(suggestedFollowup.title) } : {}),
+        ...(asString(metadata.followup_priority) || asString(suggestedFollowup.priority) ? { followup_priority: asString(metadata.followup_priority) || asString(suggestedFollowup.priority) } : {}),
+        ...(asString(metadata.source) ? { source: asString(metadata.source) } : {}),
         ...(asString(metadata.page_path) ? { page_path: asString(metadata.page_path) } : {}),
         ...(asString(metadata.page_title) ? { page_title: asString(metadata.page_title) } : {}),
         ...(eventDetail(row.event_type, metadata) ? { detail: eventDetail(row.event_type, metadata) } : {}),
+        ...(asString(metadata.selected_region) ? { selected_region: asString(metadata.selected_region) } : {}),
+        ...(asString(metadata.selected_region_label) ? { selected_region_label: asString(metadata.selected_region_label) } : {}),
+        ...(typeof coordinateCount === 'number' ? { coordinate_count: coordinateCount } : {}),
+        ...(typeof visibleCount === 'number' ? { visible_count: visibleCount } : {}),
+        ...(boundsSummary ? { bounds_summary: boundsSummary } : {}),
+        ...(asString(metadata.view) ? { map_view: asString(metadata.view) } : {}),
+        ...(asString(metadata.section_id) ? { section_id: asString(metadata.section_id) } : {}),
+        ...(asString(metadata.section_label) ? { section_label: asString(metadata.section_label) } : {}),
+        ...(asString(metadata.premium_intent) ? { premium_intent: asString(metadata.premium_intent) } : {}),
+        ...(asString(metadata.requested_action) ? { requested_action: asString(metadata.requested_action) } : {}),
+        ...(asString(metadata.cta_context) ? { cta_context: asString(metadata.cta_context) } : {}),
     }
 }
 
@@ -328,6 +657,23 @@ function dedupeKey(entry: LeadActivityEntry): string {
 function addRecent(list: string[], value?: string): string[] {
     if (!value) return list
     return [value, ...list.filter(item => item !== value)].slice(0, 80)
+}
+
+function addRecentFollowup(list: JsonRecord[], followup: JsonRecord): JsonRecord[] {
+    const key = [
+        asString(followup.alert_id),
+        asString(followup.property_id),
+        asString(followup.message),
+    ].filter(Boolean).join(':')
+
+    return [
+        followup,
+        ...list.filter(item => [
+            asString(item.alert_id),
+            asString(item.property_id),
+            asString(item.message),
+        ].filter(Boolean).join(':') !== key),
+    ].slice(0, 10)
 }
 
 function removeValue(list: string[], value?: string): string[] {
@@ -362,10 +708,30 @@ function scoreNextAction(params: {
     whatsappCount: number
     pushCount: number
     contentCount: number
+    mapIntentCount: number
+    priceHistoryCount: number
+    continuationCount: number
+    savedSearchCount: number
+    searchAlertMatchCount: number
+    premiumIntentCount: number
+    privateVisitCount: number
+    availabilityCount: number
+    reservedNegotiationCount: number
+    valueReadingCount: number
 }) {
+    if (params.privateVisitCount > 0) return 'Confirmar disponibilidade de agenda e propor visita privada com contexto do imovel.'
+    if (params.reservedNegotiationCount > 0) return 'Abrir tratativa reservada com leitura comercial e margem real de negociacao.'
+    if (params.availabilityCount > 0) return 'Validar disponibilidade do imovel e responder com opcoes objetivas de proximo passo.'
+    if (params.valueReadingCount > 0) return 'Enviar leitura de valor, comparaveis e pontos de liquidez antes da visita.'
+    if (params.premiumIntentCount > 0) return 'Responder com abordagem consultiva de alto padrao e conduzir para WhatsApp.'
     if (params.whatsappCount > 0) return 'Responder com curadoria direta e pedir criterio de decisao.'
+    if (params.searchAlertMatchCount > 0) return 'Abordar com o imovel que acabou de bater no alerta salvo.'
+    if (params.savedSearchCount > 0) return 'Manter contato com oportunidades novas dentro da busca salva.'
+    if (params.continuationCount > 0) return 'Retomar pelos imoveis salvos ou revisitados e oferecer comparacao objetiva.'
     if (params.likedCount > 0) return 'Retomar pelos imoveis curtidos e oferecer alternativas parecidas.'
     if (params.detailCount > 0) return 'Usar os imoveis abertos como ponto de comparacao.'
+    if (params.priceHistoryCount > 0) return 'Abordar com leitura de valor, custos e comparaveis da regiao.'
+    if (params.mapIntentCount > 0) return 'Retomar pela regiao explorada no mapa e oferecer opcoes proximas.'
     if (params.searchCount > 0) return 'Enviar uma selecao curta baseada nos filtros usados.'
     if (params.contentCount > 0) return 'Puxar conversa pelo conteudo clicado e conectar com uma oportunidade relevante.'
     if (params.pushCount > 0) return 'Nutrir com oportunidade forte e chamada leve para WhatsApp.'
@@ -380,9 +746,23 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
     let shared_property_ids: string[] = []
     let whatsapp_property_ids: string[] = []
     let detail_property_ids: string[] = []
+    let map_property_ids: string[] = []
+    let preview_property_ids: string[] = []
+    let price_history_property_ids: string[] = []
+    let location_property_ids: string[] = []
+    let search_alert_match_property_ids: string[] = []
+    let selected_regions: string[] = []
+    let map_area_summaries: string[] = []
+    let saved_search_titles: string[] = []
+    let search_alert_followups: JsonRecord[] = []
+    let premium_intents: JsonRecord[] = []
+    let premium_intent_property_ids: string[] = []
+    let last_map_intent: JsonRecord | null = null
+    let latest_premium_intent: JsonRecord | null = null
     let last_property_id: string | undefined
     let last_page_path: string | undefined
     let last_activity_at: string | undefined
+    let last_location_view: string | undefined
     const event_counts: Record<string, number> = {}
 
     for (const entry of activity) {
@@ -390,6 +770,78 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         const propertyId = entry.property_id || entry.target_property_id
         if (propertyId) last_property_id = propertyId
         if (entry.page_path) last_page_path = entry.page_path
+        if (entry.map_view) last_location_view = entry.map_view
+        const regionSignal = entry.selected_region_label || entry.selected_region
+        if (regionSignal) selected_regions = addRecent(selected_regions, regionSignal)
+        if (
+            entry.event_type === 'property_map_draw_area_applied'
+            || entry.event_type === 'search_results_search_this_area_clicked'
+        ) {
+            if (entry.bounds_summary) map_area_summaries = addRecent(map_area_summaries, entry.bounds_summary)
+            last_map_intent = {
+                event_type: entry.event_type,
+                label: entry.label,
+                detail: entry.detail || null,
+                selected_region: regionSignal || null,
+                visible_count: entry.visible_count ?? null,
+                coordinate_count: entry.coordinate_count ?? null,
+                bounds_summary: entry.bounds_summary || null,
+                occurred_at: entry.occurred_at,
+            }
+        }
+        if (isPremiumIntentEvent(entry.event_type)) {
+            premium_intent_property_ids = addRecent(premium_intent_property_ids, propertyId)
+            const premiumIntent = {
+                event_type: entry.event_type,
+                label: entry.label,
+                detail: entry.detail || null,
+                premium_intent: entry.premium_intent || null,
+                requested_action: entry.requested_action || null,
+                cta_context: entry.cta_context || null,
+                property_id: propertyId || null,
+                property_title: entry.property_title || null,
+                property_url: entry.property_url || null,
+                occurred_at: entry.occurred_at,
+            }
+            latest_premium_intent = premiumIntent
+            premium_intents = [
+                premiumIntent,
+                ...premium_intents.filter(item => [
+                    asString(item.event_type),
+                    asString(item.property_id),
+                    asString(item.occurred_at),
+                ].join(':') !== [
+                    entry.event_type,
+                    propertyId || '',
+                    entry.occurred_at,
+                ].join(':')),
+            ].slice(0, 12)
+        }
+        if (entry.event_type === 'property_search_alert_saved') {
+            saved_search_titles = addRecent(saved_search_titles, entry.detail || entry.property_title || 'Alerta de busca')
+        }
+        if (entry.event_type === 'property_search_alert_matched' || entry.event_type === 'property_search_alert_match_opened') {
+            search_alert_match_property_ids = addRecent(search_alert_match_property_ids, propertyId)
+            if (entry.detail) saved_search_titles = addRecent(saved_search_titles, entry.detail)
+        }
+        if (
+            (entry.event_type === 'property_search_alert_matched' || entry.event_type === 'property_search_alert_match_opened')
+            && entry.suggested_message
+        ) {
+            search_alert_followups = addRecentFollowup(search_alert_followups, {
+                alert_id: entry.alert_id || null,
+                alert_title: entry.alert_title || null,
+                property_id: propertyId || null,
+                property_title: entry.property_title || null,
+                property_url: entry.property_url || null,
+                match_score: entry.match_score ?? null,
+                match_reasons: entry.match_reasons || [],
+                title: entry.followup_title || 'Retomar alerta salvo',
+                priority: entry.followup_priority || 'normal',
+                message: entry.suggested_message,
+                occurred_at: entry.occurred_at,
+            })
+        }
         last_activity_at = entry.occurred_at
 
         if (
@@ -398,6 +850,16 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
             || entry.event_type === 'home_property_details_clicked'
             || entry.event_type === 'site_property_share_click'
             || entry.event_type === 'property_details_landing_viewed'
+            || entry.event_type === 'property_map_pin_selected'
+            || entry.event_type === 'property_map_preview_opened'
+            || entry.event_type === 'property_map_popup_opened'
+            || entry.event_type === 'property_search_alert_matched'
+            || entry.event_type === 'property_search_alert_match_opened'
+            || entry.event_type === 'search_results_memory_property_clicked'
+            || entry.event_type === 'property_details_continuation_viewed'
+            || entry.event_type === 'property_details_continuation_favorites_clicked'
+            || entry.event_type === 'property_details_continuation_property_clicked'
+            || isPremiumIntentEvent(entry.event_type)
         ) {
             viewed_property_ids = addRecent(viewed_property_ids, propertyId)
         }
@@ -436,20 +898,66 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
             || entry.event_type === 'property_details_landing_anchor_clicked'
             || entry.event_type === 'property_details_landing_gallery_opened'
             || entry.event_type === 'property_details_landing_map_clicked'
+            || entry.event_type === 'property_details_landing_section_viewed'
+            || entry.event_type === 'property_map_preview_details_clicked'
+            || entry.event_type === 'property_location_view_changed'
+            || entry.event_type === 'property_location_street_view_opened'
+            || entry.event_type === 'property_location_google_maps_opened'
+            || entry.event_type === 'property_search_alert_match_opened'
+            || entry.event_type === 'search_results_memory_property_clicked'
+            || entry.event_type === 'property_details_continuation_viewed'
+            || entry.event_type === 'property_details_continuation_favorites_clicked'
+            || entry.event_type === 'property_details_continuation_property_clicked'
+            || isPremiumIntentEvent(entry.event_type)
         ) {
             detail_property_ids = addRecent(detail_property_ids, propertyId)
+        }
+        if (
+            entry.event_type === 'property_map_pin_selected'
+            || entry.event_type === 'property_map_popup_opened'
+            || entry.event_type === 'property_map_preview_opened'
+            || entry.event_type === 'property_map_preview_photo_changed'
+            || entry.event_type === 'property_map_preview_details_clicked'
+        ) {
+            map_property_ids = addRecent(map_property_ids, propertyId)
+        }
+        if (
+            entry.event_type === 'property_map_preview_opened'
+            || entry.event_type === 'property_map_preview_photo_changed'
+            || entry.event_type === 'property_map_preview_details_clicked'
+        ) {
+            preview_property_ids = addRecent(preview_property_ids, propertyId)
+        }
+        if (
+            entry.event_type === 'property_details_landing_section_viewed'
+            && (entry.section_id === 'historico-precos' || entry.section_label === 'Historico e valor')
+        ) {
+            price_history_property_ids = addRecent(price_history_property_ids, propertyId)
+        }
+        if (
+            entry.event_type === 'property_details_landing_map_clicked'
+            || entry.event_type === 'property_location_view_changed'
+            || entry.event_type === 'property_location_street_view_opened'
+            || entry.event_type === 'property_location_google_maps_opened'
+            || (entry.event_type === 'property_details_landing_section_viewed' && entry.section_id === 'localizacao')
+        ) {
+            location_property_ids = addRecent(location_property_ids, propertyId)
         }
     }
 
     const searchCount = countEvents(event_counts, [
         'home_search_submitted',
         'home_map_search_submitted',
+        'search_results_search_this_area_clicked',
+        'property_map_draw_area_applied',
+        'property_search_alert_saved',
     ])
     const filterCount = countEvents(event_counts, [
         'home_map_filter_changed',
         'home_map_feature_filter_toggled',
         'property_map_quick_filter_clicked',
         'search_results_filter_removed',
+        'property_map_style_changed',
     ])
     const whatsappCount = countEvents(event_counts, [
         'chat_opened',
@@ -472,8 +980,47 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
     const mapIntentCount = countEvents(event_counts, [
         'property_feed_tab_clicked',
         'property_map_popup_opened',
+        'property_map_pin_selected',
+        'property_map_preview_opened',
+        'property_map_preview_photo_changed',
+        'property_map_preview_details_clicked',
+        'property_map_draw_mode_toggled',
+        'property_map_draw_area_applied',
+        'search_results_search_this_area_clicked',
         'property_map_style_changed',
         'property_details_landing_map_clicked',
+        'property_location_view_changed',
+        'property_location_street_view_opened',
+        'property_location_google_maps_opened',
+    ])
+    const previewCount = countEvents(event_counts, [
+        'property_map_preview_opened',
+        'property_map_preview_photo_changed',
+        'property_map_preview_details_clicked',
+    ])
+    const drawAreaSearchCount = countEvents(event_counts, ['property_map_draw_area_applied'])
+    const boundsSearchCount = countEvents(event_counts, ['search_results_search_this_area_clicked'])
+    const areaSearchCount = drawAreaSearchCount + boundsSearchCount
+    const savedSearchCount = countEvents(event_counts, ['property_search_alert_saved'])
+    const searchAlertReceivedCount = countEvents(event_counts, ['property_search_alert_matched'])
+    const searchAlertOpenedCount = countEvents(event_counts, ['property_search_alert_match_opened'])
+    const searchAlertMatchCount = searchAlertReceivedCount + searchAlertOpenedCount
+    const priceHistoryCount = price_history_property_ids.length
+    const privateVisitCount = countEvents(event_counts, ['property_private_visit_requested'])
+    const availabilityCount = countEvents(event_counts, ['property_availability_requested'])
+    const reservedNegotiationCount = countEvents(event_counts, ['property_reserved_negotiation_requested'])
+    const valueReadingCount = countEvents(event_counts, ['property_value_reading_requested'])
+    const premiumIntentCount = privateVisitCount + availabilityCount + reservedNegotiationCount + valueReadingCount
+    const continuationCount = countEvents(event_counts, [
+        'property_details_continuation_viewed',
+        'property_details_continuation_favorites_clicked',
+        'property_details_continuation_property_clicked',
+    ])
+    const streetViewCount = countEvents(event_counts, ['property_location_street_view_opened'])
+    const locationViewCount = countEvents(event_counts, [
+        'property_location_view_changed',
+        'property_location_street_view_opened',
+        'property_location_google_maps_opened',
     ])
     const recencyMs = last_activity_at ? Date.now() - new Date(last_activity_at).getTime() : Number.POSITIVE_INFINITY
     const recencyBoost = recencyMs <= 1000 * 60 * 60 * 24
@@ -491,15 +1038,39 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         + searchCount * 10
         + Math.min(18, contentCount * 6)
         + Math.min(15, filterCount * 3)
-        + Math.min(12, mapIntentCount * 4)
+        + Math.min(18, mapIntentCount * 4)
+        + Math.min(12, previewCount * 3)
+        + Math.min(12, areaSearchCount * 5)
+        + Math.min(10, streetViewCount * 6)
+        + Math.min(10, continuationCount * 5)
+        + Math.min(14, savedSearchCount * 14)
+        + Math.min(20, searchAlertMatchCount * 16)
+        + Math.min(28, premiumIntentCount * 18)
+        + Math.min(18, privateVisitCount * 18)
+        + Math.min(16, reservedNegotiationCount * 16)
+        + Math.min(12, availabilityCount * 12)
+        + Math.min(10, valueReadingCount * 10)
         + pushCount * 12
         - disliked_property_ids.length * 2
         + recencyBoost
     )))
     const intentSignals = [
+        privateVisitCount > 0 ? 'Pediu visita privada' : null,
+        availabilityCount > 0 ? 'Pediu disponibilidade' : null,
+        reservedNegotiationCount > 0 ? 'Pediu negociacao reservada' : null,
+        valueReadingCount > 0 ? 'Pediu leitura de valor' : null,
         whatsappCount > 0 ? 'Chamou no WhatsApp' : null,
         liked_property_ids.length > 0 ? `Curtiu ${liked_property_ids.length} imovel(is)` : null,
         detail_property_ids.length > 0 ? `Abriu descricao de ${detail_property_ids.length} imovel(is)` : null,
+        areaSearchCount > 0 ? `Refinou ${areaSearchCount} area(s) no mapa` : null,
+        preview_property_ids.length > 0 ? `Explorou ${preview_property_ids.length} preview(s) no mapa` : null,
+        streetViewCount > 0 ? 'Abriu Street View' : null,
+        price_history_property_ids.length > 0 ? 'Analisou historico de preco' : null,
+        continuationCount > 0 ? 'Retomou salvos ou vistos recentemente' : null,
+        savedSearchCount > 0 ? 'Salvou alerta de busca' : null,
+        searchAlertOpenedCount > 0 ? 'Abriu match de alerta salvo' : null,
+        searchAlertReceivedCount > 0 ? 'Recebeu match de alerta salvo' : null,
+        selected_regions.length > 0 ? `Regiao: ${selected_regions[0]}` : null,
         searchCount > 0 ? `Fez ${searchCount} busca(s)` : null,
         contentCount > 0 ? `Clicou em ${contentCount} conteudo(s)` : null,
         viewed_property_ids.length > 0 ? `Visualizou ${viewed_property_ids.length} imovel(is)` : null,
@@ -513,6 +1084,7 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         last_activity_at: last_activity_at || null,
         last_property_id: last_property_id || null,
         last_page_path: last_page_path || null,
+        last_location_view: last_location_view || null,
         engagement_score: engagementScore,
         lead_classification: scoreClassification(engagementScore),
         intent_temperature: scoreTemperature(engagementScore),
@@ -525,6 +1097,16 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
             whatsappCount,
             pushCount,
             contentCount,
+            mapIntentCount,
+            priceHistoryCount,
+            continuationCount,
+            savedSearchCount,
+            searchAlertMatchCount,
+            premiumIntentCount,
+            privateVisitCount,
+            availabilityCount,
+            reservedNegotiationCount,
+            valueReadingCount,
         }),
         viewed_property_ids,
         liked_property_ids,
@@ -532,6 +1114,34 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         shared_property_ids,
         whatsapp_property_ids,
         detail_property_ids,
+        map_property_ids,
+        preview_property_ids,
+        price_history_property_ids,
+        location_property_ids,
+        search_alert_match_property_ids,
+        search_alert_followups,
+        premium_intents,
+        latest_premium_intent,
+        premium_intent_property_ids,
+        selected_regions,
+        map_area_summaries,
+        last_map_intent,
+        saved_search_titles,
+        saved_search_count: savedSearchCount,
+        search_alert_match_count: searchAlertMatchCount,
+        map_area_search_count: areaSearchCount,
+        map_draw_area_count: drawAreaSearchCount,
+        map_bounds_search_count: boundsSearchCount,
+        map_preview_count: previewCount,
+        continuation_count: continuationCount,
+        map_intent_count: mapIntentCount,
+        location_view_count: locationViewCount,
+        street_view_count: streetViewCount,
+        premium_intent_count: premiumIntentCount,
+        private_visit_request_count: privateVisitCount,
+        availability_request_count: availabilityCount,
+        reserved_negotiation_request_count: reservedNegotiationCount,
+        value_reading_request_count: valueReadingCount,
     }
 }
 
