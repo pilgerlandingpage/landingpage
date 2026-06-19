@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent, type WheelEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -359,6 +359,7 @@ export default function PropertyFeedMap({
     const [selectedMapView, setSelectedMapView] = useState<PropertyFeedMapView>(fallbackView)
     const [isStreetInteractive, setIsStreetInteractive] = useState(false)
     const streetFrameRef = useRef<HTMLIFrameElement>(null)
+    const streetScrollTouchYRef = useRef<number | null>(null)
     const mapView = viewOptions.some(view => view.value === selectedMapView) ? selectedMapView : fallbackView
     const safeLatLng = useMemo(() => normalizeLatLng(latLng), [latLng])
     const coordinateQuery = safeLatLng ? `${safeLatLng[0]},${safeLatLng[1]}` : ''
@@ -370,8 +371,7 @@ export default function PropertyFeedMap({
     const streetViewUrl = googleMapsEmbedKey
         ? `https://www.google.com/maps/embed/v1/streetview?key=${encodeURIComponent(googleMapsEmbedKey)}&location=${encodeURIComponent(coordinateQuery)}&heading=0&pitch=0&fov=80`
         : fallbackStreetViewEmbedUrl
-    const isStreetModeLocked = mapView === 'street' && viewOptions.length === 1 && !showViewControl
-    const streetInteractionEnabled = isStreetModeLocked || isStreetInteractive
+    const streetInteractionEnabled = isStreetInteractive
     const markerIcon = useMemo(() => L.divIcon({
         className: 'property-feed-map-marker',
         html: `<div class="property-feed-map-marker-wrap${property.exclusive ? ' is-exclusive' : ''}">
@@ -429,19 +429,74 @@ export default function PropertyFeedMap({
     const handleDisableStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
         event?.preventDefault?.()
         event?.stopPropagation?.()
-        if (isStreetModeLocked) return
 
         setIsStreetInteractive(false)
-    }, [isStreetModeLocked])
+    }, [])
+    const getStreetScrollParent = useCallback((target: EventTarget | null) => {
+        const element = target instanceof Element ? target : null
+        const sheetScroller = element?.closest<HTMLElement>('.pmds-media')
+        if (sheetScroller) return sheetScroller
+
+        let parent = element?.parentElement || null
+        while (parent && parent !== document.body) {
+            const style = window.getComputedStyle(parent)
+            const canScroll = /(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight
+            if (canScroll) return parent
+            parent = parent.parentElement
+        }
+
+        return document.scrollingElement as HTMLElement | null
+    }, [])
+    const scrollStreetParent = useCallback((target: EventTarget | null, deltaY: number) => {
+        const scrollParent = getStreetScrollParent(target)
+        if (scrollParent) {
+            scrollParent.scrollTop += deltaY
+            return
+        }
+
+        window.scrollBy({ top: deltaY, behavior: 'auto' })
+    }, [getStreetScrollParent])
+    const handleStreetShieldTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
+        if (streetInteractionEnabled) return
+        streetScrollTouchYRef.current = event.touches[0]?.clientY ?? null
+    }, [streetInteractionEnabled])
+    const handleStreetShieldTouchMove = useCallback((event: TouchEvent<HTMLDivElement>) => {
+        if (streetInteractionEnabled) return
+
+        const nextY = event.touches[0]?.clientY
+        const lastY = streetScrollTouchYRef.current
+        if (nextY == null || lastY == null) {
+            streetScrollTouchYRef.current = nextY ?? null
+            return
+        }
+
+        const deltaY = lastY - nextY
+        streetScrollTouchYRef.current = nextY
+        if (Math.abs(deltaY) < 1) return
+
+        event.preventDefault()
+        event.stopPropagation()
+        scrollStreetParent(event.currentTarget, deltaY)
+    }, [scrollStreetParent, streetInteractionEnabled])
+    const handleStreetShieldTouchEnd = useCallback(() => {
+        streetScrollTouchYRef.current = null
+    }, [])
+    const handleStreetShieldWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
+        if (streetInteractionEnabled || Math.abs(event.deltaY) < 1) return
+
+        event.preventDefault()
+        event.stopPropagation()
+        scrollStreetParent(event.currentTarget, event.deltaY)
+    }, [scrollStreetParent, streetInteractionEnabled])
 
     useEffect(() => {
-        if (mapView !== 'street' || !isStreetInteractive || isStreetModeLocked) return
+        if (mapView !== 'street' || !isStreetInteractive) return
 
         document.body.classList.add('property-street-view-active')
         return () => {
             document.body.classList.remove('property-street-view-active')
         }
-    }, [isStreetInteractive, isStreetModeLocked, mapView])
+    }, [isStreetInteractive, mapView])
 
     if (!safeLatLng) {
         return (
@@ -500,6 +555,17 @@ export default function PropertyFeedMap({
                         />
                     )}
                     {!streetInteractionEnabled && (
+                        <div
+                            className="property-feed-map-street-scroll-shield"
+                            aria-hidden="true"
+                            onTouchStart={handleStreetShieldTouchStart}
+                            onTouchMove={handleStreetShieldTouchMove}
+                            onTouchEnd={handleStreetShieldTouchEnd}
+                            onTouchCancel={handleStreetShieldTouchEnd}
+                            onWheel={handleStreetShieldWheel}
+                        />
+                    )}
+                    {!streetInteractionEnabled && (
                         <button
                             type="button"
                             className="property-feed-map-street-activate"
@@ -511,15 +577,16 @@ export default function PropertyFeedMap({
                             <span>Explorar rua</span>
                         </button>
                     )}
-                    {isStreetInteractive && !isStreetModeLocked && (
+                    {isStreetInteractive && (
                         <button
                             type="button"
-                            className="property-feed-map-street-release"
+                            className="property-feed-map-street-release property-feed-map-street-release--floating"
                             onPointerDown={handleDisableStreetInteraction}
                             onClick={handleDisableStreetInteraction}
-                            aria-label="Sair da navegacao do Street View"
+                            aria-label="Voltar a rolar a pagina"
                         >
                             <X size={18} />
+                            <span>Voltar a rolar</span>
                         </button>
                     )}
                     <div className="property-feed-map-caption">

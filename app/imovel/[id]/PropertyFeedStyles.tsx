@@ -863,6 +863,20 @@ export default function PropertyFeedStyles() {
                 pointer-events: none !important;
             }
 
+            .property-feed-map-street-scroll-shield {
+                background: transparent;
+                inset: 0;
+                pointer-events: auto;
+                position: absolute;
+                touch-action: pan-y;
+                user-select: none;
+                z-index: 710;
+            }
+
+            .property-feed-map-street-view.is-interactive .property-feed-map-street-scroll-shield {
+                display: none;
+            }
+
             .property-feed-map-street-native {
                 background: #0f1113;
                 height: 100% !important;
@@ -931,11 +945,22 @@ export default function PropertyFeedStyles() {
             .property-feed-map-street-release {
                 right: 12px;
                 top: 12px;
-                width: 38px;
+                min-width: 38px;
                 height: 38px;
+                padding: 0 13px;
                 border-radius: 999px;
                 background: rgba(255,255,255,.92);
                 color: #111;
+                gap: 7px;
+                font-size: .72rem;
+                font-weight: 950;
+                pointer-events: auto;
+                white-space: nowrap;
+                z-index: 2147483000;
+            }
+
+            .property-feed-map-street-release span {
+                display: inline;
             }
 
             .property-feed-map-street-fallback {

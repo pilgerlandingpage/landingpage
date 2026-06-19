@@ -3760,8 +3760,8 @@ export default function PropertyLandingStyles() {
                     }
 
                     body.property-street-view-active .pmds-media {
-                        overflow: hidden;
-                        -webkit-overflow-scrolling: auto;
+                        overflow-y: auto;
+                        -webkit-overflow-scrolling: touch;
                     }
 
                     .pmds-panel {
@@ -4543,15 +4543,68 @@ export default function PropertyLandingStyles() {
                         pointer-events: none !important;
                     }
 
+                    .plp-mobile-media-item--map .property-feed-map-street-scroll-shield {
+                        background: transparent;
+                        display: block;
+                        inset: 0;
+                        pointer-events: auto;
+                        position: absolute;
+                        touch-action: pan-y;
+                        user-select: none;
+                        z-index: 2147482000;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-view.is-interactive .property-feed-map-street-scroll-shield {
+                        display: none;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-activate,
+                    .plp-mobile-media-item--map .property-feed-map-street-release {
+                        align-items: center;
+                        border: 1px solid rgba(255,255,255,.22);
+                        box-shadow: 0 12px 30px rgba(0,0,0,.24);
+                        cursor: pointer;
+                        display: inline-flex;
+                        font-weight: 950;
+                        justify-content: center;
+                        pointer-events: auto;
+                        position: absolute;
+                        white-space: nowrap;
+                    }
+
                     .plp-mobile-media-item--map .property-feed-map-street-activate {
-                        bottom: 18px;
-                        z-index: 730;
+                        background: linear-gradient(135deg, #dfc18e, #b8945f);
+                        border-color: rgba(255,255,255,.28);
+                        border-radius: 999px;
+                        bottom: auto;
+                        color: #111;
+                        font-size: .68rem;
+                        gap: 6px;
+                        left: auto;
+                        min-height: 36px;
+                        padding: 0 12px;
+                        right: 12px;
+                        top: 16px;
+                        transform: none;
+                        z-index: 2147483000;
                     }
 
                     .plp-mobile-media-item--map .property-feed-map-street-release {
-                        top: 72px;
-                        right: 12px;
-                        z-index: 730;
+                        background: rgba(255,255,255,.94);
+                        border-color: rgba(17,17,17,.08);
+                        border-radius: 999px;
+                        bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+                        color: #111;
+                        font-size: .72rem;
+                        gap: 7px;
+                        height: 38px;
+                        left: 50%;
+                        padding: 0 13px;
+                        position: fixed;
+                        right: auto;
+                        top: auto;
+                        transform: translateX(-50%);
+                        z-index: 2147483000;
                     }
 
                     .plp-mobile-media-item--map .property-feed-map-style-control {
