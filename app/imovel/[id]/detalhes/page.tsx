@@ -29,6 +29,7 @@ import PropertyLandingShareButton from '@/components/property/PropertyLandingSha
 import PropertyContinuationRail from '@/components/property/PropertyContinuationRail'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
+import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MobileMapSearchModal from '@/components/marketplace/MobileMapSearchModal'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
@@ -1046,6 +1047,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             },
         },
     ]
+    const mobileMediaImages = gallery.length ? gallery : [primaryImage]
 
     return (
         <>
@@ -1115,7 +1117,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                     </div>
                                 </div>
 
-                                {(gallery.length ? gallery : [primaryImage]).slice(0, 2).map((image, index) => (
+                                {mobileMediaImages.slice(0, 1).map((image, index) => (
                                     <figure className="plp-mobile-media-item" key={`sheet-photo-${image}-${index}`}>
                                         <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                         {index === 0 && (
@@ -1138,6 +1140,29 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                             latLng={propertyMapLatLng}
                                             initialView="street"
                                             allowedViews={['street']}
+                                            showViewControl={false}
+                                            showActions={false}
+                                        />
+                                    </figure>
+                                )}
+
+                                {mobileMediaImages.slice(1).map((image, index) => (
+                                    <figure className="plp-mobile-media-item" key={`sheet-photo-extra-${image}-${index}`}>
+                                        <img src={image} alt={`${displayTitle} - foto ${index + 2}`} loading="lazy" />
+                                    </figure>
+                                ))}
+
+                                {propertyMapLatLng && (
+                                    <figure className="plp-mobile-media-item plp-mobile-media-item--map plp-mobile-media-item--location-map">
+                                        <figcaption className="plp-mobile-map-label">
+                                            <MapPin size={14} />
+                                            Mapa do entorno
+                                        </figcaption>
+                                        <PropertyLocationMap
+                                            property={propertyMapPreview}
+                                            latLng={propertyMapLatLng}
+                                            initialView="luxury"
+                                            allowedViews={['luxury']}
                                             showViewControl={false}
                                             showActions={false}
                                         />
@@ -1209,6 +1234,13 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                     ))}
                                 </div>
                             )}
+                            <PropertyNearbyBenefits
+                                propertyId={property.id}
+                                title={displayTitle}
+                                latLng={propertyMapLatLng}
+                                locationLabel={locationLabel || mapLocation || displayCity}
+                                variant="mobile"
+                            />
                         </section>
 
                         <section className="plp-mobile-card plp-mobile-broker-card">
@@ -1383,7 +1415,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 </div>
                             </div>
 
-                            {(gallery.length ? gallery : [primaryImage]).slice(0, 2).map((image, index) => (
+                            {mobileMediaImages.slice(0, 1).map((image, index) => (
                                 <figure className="plp-mobile-media-item" key={`mobile-photo-${image}-${index}`}>
                                     <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                     {index === 0 && (
@@ -1412,11 +1444,28 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 </figure>
                             )}
 
-                            {(gallery.length ? gallery : [primaryImage]).slice(2, 4).map((image, index) => (
+                            {mobileMediaImages.slice(1).map((image, index) => (
                                 <figure className="plp-mobile-media-item" key={`mobile-extra-photo-${image}-${index}`}>
-                                    <img src={image} alt={`${displayTitle} - foto ${index + 3}`} loading="lazy" />
+                                    <img src={image} alt={`${displayTitle} - foto ${index + 2}`} loading="lazy" />
                                 </figure>
                             ))}
+
+                            {propertyMapLatLng && (
+                                <figure className="plp-mobile-media-item plp-mobile-media-item--map plp-mobile-media-item--location-map">
+                                    <figcaption className="plp-mobile-map-label">
+                                        <MapPin size={14} />
+                                        Mapa do entorno
+                                    </figcaption>
+                                    <PropertyLocationMap
+                                        property={propertyMapPreview}
+                                        latLng={propertyMapLatLng}
+                                        initialView="luxury"
+                                        allowedViews={['luxury']}
+                                        showViewControl={false}
+                                        showActions={false}
+                                    />
+                                </figure>
+                            )}
                         </div>
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
                             <a href="#galeria" className="plp-main-photo" aria-label="Abrir galeria completa">
@@ -1458,6 +1507,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
                                 <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
                             </div>
+                            <PropertyNearbyBenefits
+                                propertyId={property.id}
+                                title={displayTitle}
+                                latLng={propertyMapLatLng}
+                                locationLabel={locationLabel || mapLocation || displayCity}
+                            />
                         </section>
 
                         <section className="plp-section plp-classic-lists">

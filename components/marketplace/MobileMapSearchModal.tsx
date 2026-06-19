@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import { searchLocationName } from '@/lib/locations/display'
+import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Property = {
@@ -192,6 +193,13 @@ export default function MobileMapSearchModal({
         () => filterPropertiesByBounds(filteredProperties, appliedAreaBounds),
         [appliedAreaBounds, filteredProperties]
     )
+    const selectedRegionArea = useMemo(
+        () => {
+            if (isOfficeLocationSelected || appliedAreaBounds) return null
+            return findMapRegionByText(searchLocationName(query))
+        },
+        [appliedAreaBounds, isOfficeLocationSelected, query]
+    )
     const pendingAreaCount = useMemo(
         () => pendingAreaBounds ? filterPropertiesByBounds(filteredProperties, pendingAreaBounds).length : 0,
         [filteredProperties, pendingAreaBounds]
@@ -203,6 +211,8 @@ export default function MobileMapSearchModal({
         ? 'Imobiliaria Guilherme Pilger'
         : appliedAreaBounds
             ? `${visibleProperties.length} de ${filteredProperties.length} nesta area`
+            : selectedRegionArea
+                ? selectedRegionArea.label
             : filteredProperties.length
                 ? `${filteredProperties.length} imoveis no mapa`
             : statFallback
@@ -210,7 +220,7 @@ export default function MobileMapSearchModal({
         ? 'property-modal-office-location'
         : isMapLocked
             ? 'property-modal-office'
-            : `property-modal-${query}-${type}-${price}-${visibleProperties.length}-${appliedAreaBounds ? 'area' : 'all'}`
+            : `property-modal-${query}-${selectedRegionArea?.id || 'no-region'}-${type}-${price}-${visibleProperties.length}-${appliedAreaBounds ? 'area' : 'all'}`
     const shouldShowSearchThisArea = Boolean(pendingAreaBounds && !isMapLocked && !isOfficeLocationSelected)
 
     const syncSearchWithMap = useCallback((values: HomeSearchValues) => {
@@ -356,6 +366,7 @@ export default function MobileMapSearchModal({
                     <div className={`mobile-map-preview-panel ${isMapLocked ? 'is-map-locked' : ''}`}>
                         <MapSearch
                             properties={visibleProperties}
+                            regionArea={selectedRegionArea}
                             refitKey={refitKey}
                             interactionEnabled={!isMapLocked}
                             officeMarker={officeMarker}

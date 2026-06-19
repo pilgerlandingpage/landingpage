@@ -5,9 +5,10 @@ import { Circle, MapContainer, TileLayer, Marker, Polygon, Polyline, Popup, useM
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Bath, Bed, Building2, CloudSun, Eraser, Flame, Globe2, Hand, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, PencilLine, Satellite, SlidersHorizontal, Sparkles, ThermometerSun, Waves, Wind, X } from 'lucide-react'
+import { Anchor, Bath, Bed, Building2, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, PencilLine, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
+import { NEARBY_BENEFIT_LAYERS as MAP_AMENITY_LAYERS, getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
@@ -86,6 +87,7 @@ type ClusterItem =
 export type MapStyle = 'luxury' | 'satellite' | 'classic'
 type QuickFilter = 'all' | 'exclusive' | 'waterfront' | 'launch' | 'premium'
 type MapContextLayer = 'flood' | 'fire' | 'wind' | 'air' | 'heat'
+type MapAmenityLayer = NearbyBenefitLayer
 type LocateState = 'idle' | 'loading' | 'active' | 'error'
 
 type UserLocationSnapshot = {
@@ -124,8 +126,20 @@ const MAP_CONTEXT_LAYERS: Array<{ value: MapContextLayer; label: string; icon: '
     { value: 'air', label: 'Ar', icon: 'air' },
     { value: 'heat', label: 'Calor', icon: 'heat' },
 ]
+const MAP_AMENITY_ICONS: Record<MapAmenityLayer, typeof MapPin> = {
+    beach: TreePalm,
+    school: GraduationCap,
+    bank: Landmark,
+    dining: Utensils,
+    coffee: Coffee,
+    health: Cross,
+    shopping: ShoppingBag,
+    marina: Anchor,
+    park: TreePalm,
+}
 const AGENCY_MARKER_ICON_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png'
 const AGENCY_CARD_IMAGE_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/unnamed.webp'
+const MAP_CONTROL_HINT_STORAGE_KEY = 'pilger_map_control_hints_seen_v1'
 const MIN_DRAW_PIXEL_DISTANCE = 10
 const MAX_DRAW_AREA_POINTS = 96
 const DRAW_AREA_POLYGON_OPTIONS: L.PathOptions = {
@@ -144,19 +158,27 @@ const DRAW_AREA_DRAFT_OPTIONS: L.PathOptions = {
     className: 'map-draw-area-draft',
 }
 const REGION_AREA_POLYGON_OPTIONS: L.PathOptions = {
-    color: '#2f7bff',
-    weight: 2,
-    opacity: 0.92,
-    fillColor: '#2f7bff',
-    fillOpacity: 0.08,
+    color: '#0b84ff',
+    weight: 2.6,
+    opacity: 0.96,
+    fillColor: '#ffffff',
+    fillOpacity: 0.72,
     className: 'map-region-area-polygon',
 }
+const REGION_AREA_HALO_OPTIONS: L.PathOptions = {
+    color: '#0b84ff',
+    weight: 7,
+    opacity: 0.2,
+    fillColor: '#ffffff',
+    fillOpacity: 0,
+    className: 'map-region-area-halo',
+}
 const REGION_AREA_MASK_OPTIONS: L.PathOptions = {
-    color: '#05080a',
+    color: '#4e6173',
     weight: 0,
     opacity: 0,
-    fillColor: '#05080a',
-    fillOpacity: 0.4,
+    fillColor: '#5f7082',
+    fillOpacity: 0.34,
     className: 'map-region-area-mask',
 }
 const REGION_MASK_OUTER_RING: MapDrawArea = [
@@ -333,6 +355,122 @@ async function saveMapLocationSignal(location: UserLocationSnapshot) {
     }
 }
 
+type GooglePlacesWindow = Window & {
+    google?: any
+    __pilgerGooglePlacesPromise?: Promise<void>
+}
+
+type NearbyAmenityPlace = {
+    id: string
+    layer: MapAmenityLayer
+    name: string
+    vicinity?: string
+    latLng: [number, number]
+    distanceMeters: number
+}
+
+function getGooglePlacesWindow() {
+    if (typeof window === 'undefined') return null
+    return window as GooglePlacesWindow
+}
+
+function loadGooglePlacesLibrary(apiKey: string) {
+    const googleWindow = getGooglePlacesWindow()
+    if (!googleWindow) return Promise.reject(new Error('Google Places indisponivel fora do navegador.'))
+    if (googleWindow.google?.maps?.places?.PlacesService) return Promise.resolve()
+    if (googleWindow.__pilgerGooglePlacesPromise) return googleWindow.__pilgerGooglePlacesPromise
+
+    googleWindow.__pilgerGooglePlacesPromise = new Promise<void>((resolve, reject) => {
+        const finishWithImportLibrary = (startedAt = Date.now()) => {
+            if (googleWindow.google?.maps?.places?.PlacesService) {
+                resolve()
+                return
+            }
+
+            const importLibrary = googleWindow.google?.maps?.importLibrary
+            if (!importLibrary) {
+                if (Date.now() - startedAt < 9000) {
+                    window.setTimeout(() => finishWithImportLibrary(startedAt), 90)
+                    return
+                }
+
+                reject(new Error('Biblioteca Places nao esta disponivel.'))
+                return
+            }
+
+            Promise.resolve(importLibrary('places'))
+                .then(() => resolve())
+                .catch(() => reject(new Error('Falha ao carregar Google Places.')))
+        }
+
+        if (googleWindow.google?.maps) {
+            finishWithImportLibrary()
+            return
+        }
+
+        const existingScript = document.getElementById('pilger-google-maps-js') as HTMLScriptElement | null
+        if (existingScript) {
+            existingScript.addEventListener('load', () => finishWithImportLibrary(), { once: true })
+            existingScript.addEventListener('error', () => reject(new Error('Falha ao carregar Google Maps.')), { once: true })
+            return
+        }
+
+        const script = document.createElement('script')
+        script.id = 'pilger-google-maps-js'
+        script.async = true
+        script.defer = true
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&libraries=places&language=pt-BR&region=BR&loading=async`
+        script.addEventListener('load', () => finishWithImportLibrary(), { once: true })
+        script.addEventListener('error', () => reject(new Error('Falha ao carregar Google Maps.')), { once: true })
+        document.head.appendChild(script)
+    })
+
+    return googleWindow.__pilgerGooglePlacesPromise
+}
+
+function getAmenityOption(layer: MapAmenityLayer) {
+    return getNearbyBenefitConfig(layer)
+}
+
+function formatDistance(meters: number) {
+    if (!Number.isFinite(meters)) return 'Distancia sob consulta'
+    if (meters < 1000) return `${Math.max(40, Math.round(meters / 10) * 10).toLocaleString('pt-BR')} m`
+    return `${(meters / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`
+}
+
+function nearbySearch(service: any, request: Record<string, unknown>): Promise<any[]> {
+    return new Promise(resolve => {
+        service.nearbySearch(request, (results: any[] | null, status: string) => {
+            if (status === 'OK') {
+                resolve(results || [])
+                return
+            }
+
+            if (status !== 'ZERO_RESULTS') {
+                console.warn('[PropertyMap] Google Places nearbySearch falhou:', status)
+            }
+
+            resolve([])
+        })
+    })
+}
+
+function createAmenityIcon(place: NearbyAmenityPlace) {
+    const option = getAmenityOption(place.layer)
+    const color = option?.color || '#1478d4'
+    const label = escapeHtml(option?.shortLabel || option?.label.slice(0, 2).toUpperCase() || 'PO')
+
+    return L.divIcon({
+        className: 'map-amenity-marker',
+        html: `<div class="map-amenity-marker-wrap map-amenity-marker--${place.layer}" style="--amenity-color:${color}">
+            <span>${label}</span>
+        </div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -18],
+    })
+}
+
 function escapeHtml(value: string) {
     return value.replace(/[&<>"']/g, char => ({
         '&': '&amp;',
@@ -343,13 +481,21 @@ function escapeHtml(value: string) {
     }[char] || char))
 }
 
-function MapUpdater({ points, refitKey = '' }: { points: [number, number][], refitKey?: string }) {
+function MapUpdater({
+    points,
+    refitKey = '',
+    hasFocusArea = false,
+}: {
+    points: [number, number][]
+    refitKey?: string
+    hasFocusArea?: boolean
+}) {
     const map = useMap()
     const lastPointsKey = useRef('')
 
     const pointsKey = useMemo(
-        () => `${refitKey}::${points.map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`).join('|')}`,
-        [points, refitKey]
+        () => `${refitKey}::${hasFocusArea ? 'focus' : 'default'}::${points.map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`).join('|')}`,
+        [hasFocusArea, points, refitKey]
     )
 
     useEffect(() => {
@@ -368,9 +514,27 @@ function MapUpdater({ points, refitKey = '' }: { points: [number, number][], ref
             }
 
             const bounds = L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng)))
-            map.flyToBounds(bounds, { padding: [64, 64], maxZoom: 15, duration: 0.75 })
+            const isMobile = window.matchMedia('(max-width: 767px)').matches
+            const focusBottomPadding = Math.min(340, Math.max(210, Math.round(window.innerHeight * 0.34)))
+            const fitOptions: L.FitBoundsOptions = hasFocusArea
+                ? isMobile
+                    ? {
+                        paddingTopLeft: [26, 72],
+                        paddingBottomRight: [26, focusBottomPadding],
+                        maxZoom: 14,
+                    }
+                    : {
+                        padding: [96, 96],
+                        maxZoom: 14,
+                    }
+                : {
+                    padding: [64, 64],
+                    maxZoom: 15,
+                }
+
+            map.flyToBounds(bounds, { ...fitOptions, duration: 0.75 })
         }
-    }, [map, points, pointsKey])
+    }, [hasFocusArea, map, points, pointsKey])
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver(() => {
@@ -742,6 +906,7 @@ function FocusAreaLayer({
         : regionArea?.area && regionArea.area.length >= 3
             ? regionArea.area
             : null
+    const shouldShowRegionBoundary = Boolean(!drawArea && regionArea?.area && regionArea.area.length >= 3)
     const maskPositions = useMemo(
         () => activeArea ? [REGION_MASK_OUTER_RING, activeArea] : null,
         [activeArea]
@@ -756,13 +921,162 @@ function FocusAreaLayer({
                     interactive={false}
                 />
             )}
-            {regionArea?.area && regionArea.area.length >= 3 && (
-                <Polygon
-                    positions={regionArea.area}
-                    pathOptions={REGION_AREA_POLYGON_OPTIONS}
-                    interactive={false}
-                />
+            {shouldShowRegionBoundary && regionArea?.area && (
+                <>
+                    <Polygon
+                        positions={regionArea.area}
+                        pathOptions={REGION_AREA_HALO_OPTIONS}
+                        interactive={false}
+                    />
+                    <Polygon
+                        positions={regionArea.area}
+                        pathOptions={REGION_AREA_POLYGON_OPTIONS}
+                        interactive={false}
+                    />
+                </>
             )}
+        </>
+    )
+}
+
+function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[] }) {
+    const map = useMap()
+    const [places, setPlaces] = useState<NearbyAmenityPlace[]>([])
+    const activeLayerSet = useMemo(() => new Set(activeLayers), [activeLayers])
+    const visiblePlaces = useMemo(
+        () => places.filter(place => activeLayerSet.has(place.layer)),
+        [activeLayerSet, places]
+    )
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+
+    useEffect(() => {
+        if (!activeLayers.length) {
+            return
+        }
+
+        if (!apiKey) {
+            console.warn('[PropertyMap] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ausente para filtros de entorno.')
+            return
+        }
+
+        let cancelled = false
+        let requestTimer: number | null = null
+
+        const loadAmenities = async () => {
+            const googleWindow = getGooglePlacesWindow()
+
+            try {
+                await loadGooglePlacesLibrary(apiKey)
+                if (cancelled) return
+
+                const googleMaps = googleWindow?.google?.maps
+                const PlacesService = googleMaps?.places?.PlacesService
+                const LatLng = googleMaps?.LatLng
+                if (!PlacesService || !LatLng) {
+                    setPlaces([])
+                    return
+                }
+
+                const center = map.getCenter()
+                const bounds = map.getBounds()
+                const radius = Math.round(Math.max(900, Math.min(5200, map.distance(center, bounds.getNorthEast()) * 0.55)))
+                const service = new PlacesService(document.createElement('div'))
+
+                const resultsByLayer = await Promise.all(activeLayers.map(async layer => {
+                    const option = getAmenityOption(layer)
+                    if (!option) return []
+
+                    const request: Record<string, unknown> = {
+                        location: new LatLng(center.lat, center.lng),
+                        radius,
+                    }
+
+                    if (option.type) request.type = option.type
+                    if (option.keyword) request.keyword = option.keyword
+
+                    const results = await nearbySearch(service, request)
+
+                    return results
+                        .map((result): NearbyAmenityPlace | null => {
+                            const location = result?.geometry?.location
+                            const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
+                            const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
+                            if (!isValidLatLng(lat, lng)) return null
+
+                            const distanceMeters = map.distance(center, L.latLng(lat, lng))
+                            const place: NearbyAmenityPlace = {
+                                id: String(result.place_id || `${layer}-${lat.toFixed(6)}-${lng.toFixed(6)}`),
+                                layer,
+                                name: String(result.name || option.searchLabel),
+                                latLng: [lat, lng],
+                                distanceMeters,
+                            }
+
+                            if (result.vicinity) place.vicinity = String(result.vicinity)
+                            return place
+                        })
+                        .filter((item): item is NearbyAmenityPlace => item !== null)
+                        .sort((a, b) => a.distanceMeters - b.distanceMeters)
+                        .slice(0, 8)
+                }))
+
+                if (cancelled) return
+
+                const uniquePlaces = new Map<string, NearbyAmenityPlace>()
+                resultsByLayer.flat().forEach(place => {
+                    const key = `${place.layer}:${place.id}`
+                    if (!uniquePlaces.has(key)) uniquePlaces.set(key, place)
+                })
+
+                setPlaces(Array.from(uniquePlaces.values()))
+            } catch (error) {
+                if (cancelled) return
+                console.warn('[PropertyMap] Nao foi possivel carregar beneficios do entorno:', error)
+                setPlaces([])
+            }
+        }
+
+        const scheduleLoad = () => {
+            if (requestTimer) window.clearTimeout(requestTimer)
+            requestTimer = window.setTimeout(loadAmenities, 650)
+        }
+
+        scheduleLoad()
+        map.on('moveend', scheduleLoad)
+        map.on('zoomend', scheduleLoad)
+
+        return () => {
+            cancelled = true
+            if (requestTimer) window.clearTimeout(requestTimer)
+            map.off('moveend', scheduleLoad)
+            map.off('zoomend', scheduleLoad)
+        }
+    }, [activeLayers, apiKey, map])
+
+    if (!activeLayers.length || visiblePlaces.length === 0) return null
+
+    return (
+        <>
+            {visiblePlaces.map(place => {
+                const option = getAmenityOption(place.layer)
+                return (
+                    <Marker
+                        key={`${place.layer}-${place.id}`}
+                        position={place.latLng}
+                        icon={createAmenityIcon(place)}
+                        zIndexOffset={650}
+                    >
+                        <Popup className="map-amenity-popup" minWidth={210} maxWidth={250}>
+                            <div className="map-amenity-popup-content">
+                                <span>{option?.searchLabel || 'Entorno'}</span>
+                                <strong>{place.name}</strong>
+                                {place.vicinity && <small>{place.vicinity}</small>}
+                                <b>{formatDistance(place.distanceMeters)} do centro da busca</b>
+                            </div>
+                        </Popup>
+                    </Marker>
+                )
+            })}
         </>
     )
 }
@@ -1015,9 +1329,12 @@ export default function PropertyMap({
     const [drawModeEnabled, setDrawModeEnabled] = useState(false)
     const [mapOptionsOpen, setMapOptionsOpen] = useState(false)
     const [activeContextLayers, setActiveContextLayers] = useState<MapContextLayer[]>([])
+    const [activeAmenityLayers, setActiveAmenityLayers] = useState<MapAmenityLayer[]>([])
     const [locateRequestId, setLocateRequestId] = useState(0)
     const [locateState, setLocateState] = useState<LocateState>('idle')
     const [userMapLocation, setUserMapLocation] = useState<UserMapLocation | null>(null)
+    const [showControlHints, setShowControlHints] = useState(false)
+    const controlHintTimerRef = useRef<number | null>(null)
 
     const validProperties = useMemo<MappedProperty[]>(
         () => properties
@@ -1033,7 +1350,8 @@ export default function PropertyMap({
     const mapPoints = useMemo(() => {
         const points = filteredProperties.map(item => item.latLng)
         const focusPoints = !drawArea && regionArea?.area ? regionArea.area : []
-        return officeMarker ? [officeMarker.latLng, ...points] : [...focusPoints, ...points]
+        if (focusPoints.length) return [...focusPoints, ...points]
+        return officeMarker ? [officeMarker.latLng, ...points] : points
     }, [drawArea, filteredProperties, officeMarker, regionArea])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
     const mapWatermarkLabel = filteredProperties.length > 0
@@ -1085,6 +1403,25 @@ export default function PropertyMap({
 
             void trackEvent('property_map_context_layer_toggled', {
                 layer,
+                enabled: !isActive,
+                active_layers: next,
+            })
+
+            return next
+        })
+    }
+
+    const handleAmenityLayerToggle = (layer: MapAmenityLayer) => {
+        setActiveAmenityLayers(current => {
+            const isActive = current.includes(layer)
+            const next = isActive
+                ? current.filter(item => item !== layer)
+                : [...current, layer]
+            const option = getAmenityOption(layer)
+
+            void trackEvent('property_map_amenity_layer_toggled', {
+                layer,
+                layer_label: option?.label || layer,
                 enabled: !isActive,
                 active_layers: next,
             })
@@ -1180,8 +1517,54 @@ export default function PropertyMap({
         })
     }, [officeMarker])
 
+    const showControlHintsTemporarily = useCallback(() => {
+        setShowControlHints(true)
+
+        if (controlHintTimerRef.current) {
+            window.clearTimeout(controlHintTimerRef.current)
+        }
+
+        controlHintTimerRef.current = window.setTimeout(() => {
+            setShowControlHints(false)
+            controlHintTimerRef.current = null
+        }, 5200)
+    }, [])
+
+    useEffect(() => {
+        if (officeMarker) return
+
+        let alreadySeen = false
+        try {
+            alreadySeen = window.localStorage.getItem(MAP_CONTROL_HINT_STORAGE_KEY) === 'true'
+        } catch {
+            alreadySeen = false
+        }
+
+        if (alreadySeen) return
+
+        const hintTimer = window.setTimeout(showControlHintsTemporarily, 260)
+
+        try {
+            window.localStorage.setItem(MAP_CONTROL_HINT_STORAGE_KEY, 'true')
+        } catch {
+            // localStorage may be unavailable in restricted browser contexts.
+        }
+
+        return () => window.clearTimeout(hintTimer)
+    }, [officeMarker, showControlHintsTemporarily])
+
+    useEffect(() => {
+        return () => {
+            if (controlHintTimerRef.current) {
+                window.clearTimeout(controlHintTimerRef.current)
+            }
+        }
+    }, [])
+
+    const shouldShowControlHints = showControlHints && !officeMarker
+
     return (
-        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}`}>
+        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}${activeAmenityLayers.length ? ' map-shell--has-amenities' : ''}${shouldShowControlHints ? ' map-shell--control-hints' : ''}`}>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
             <div className="map-topbar" role="group" aria-label="Filtros rápidos do mapa">
@@ -1291,12 +1674,13 @@ export default function PropertyMap({
                 </div>
             )}
 
-            <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa">
+            <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa" onPointerDown={showControlHintsTemporarily}>
                 <button
                     type="button"
                     className={mapOptionsOpen ? 'active' : ''}
                     aria-label="Abrir opcoes do mapa"
                     aria-expanded={mapOptionsOpen}
+                    title="Opcoes do mapa"
                     onClick={() => setMapOptionsOpen(open => !open)}
                 >
                     <Globe2 size={24} />
@@ -1308,6 +1692,7 @@ export default function PropertyMap({
                         className={drawModeEnabled ? 'active' : ''}
                         aria-label={drawModeEnabled ? 'Cancelar desenho no mapa' : 'Desenhar no mapa'}
                         aria-pressed={drawModeEnabled}
+                        title={drawModeEnabled ? 'Cancelar desenho' : 'Desenhar area'}
                         onClick={handleDrawModeToggle}
                     >
                         <Hand size={24} />
@@ -1319,6 +1704,7 @@ export default function PropertyMap({
                         type="button"
                         className={locateState === 'active' ? 'active' : locateState === 'loading' ? 'loading' : ''}
                         aria-label="Buscar imoveis na minha localizacao"
+                        title="Perto de mim"
                         onClick={handleLocateButtonClick}
                     >
                         <LocateFixed size={24} />
@@ -1335,6 +1721,22 @@ export default function PropertyMap({
                         return (
                             <span key={layer}>
                                 {getContextLayerIcon(option.icon)}
+                                {option.label}
+                            </span>
+                        )
+                    })}
+                </div>
+            )}
+
+            {activeAmenityLayers.length > 0 && (
+                <div className="map-amenity-layer-strip" aria-label="Beneficios proximos ativos">
+                    {activeAmenityLayers.map(layer => {
+                        const option = getAmenityOption(layer)
+                        if (!option) return null
+                        const Icon = MAP_AMENITY_ICONS[option.value] || MapPin
+                        return (
+                            <span key={layer}>
+                                <Icon size={15} />
                                 {option.label}
                             </span>
                         )
@@ -1381,6 +1783,26 @@ export default function PropertyMap({
                                         <span>{layer.label}</span>
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+                        <div className="map-options-section">
+                            <h3>Beneficios proximos</h3>
+                            <div className="map-amenity-grid" role="group" aria-label="Beneficios proximos no mapa">
+                                {MAP_AMENITY_LAYERS.map(layer => {
+                                    const Icon = MAP_AMENITY_ICONS[layer.value] || MapPin
+                                    return (
+                                        <button
+                                            key={layer.value}
+                                            type="button"
+                                            className={activeAmenityLayers.includes(layer.value) ? 'active' : ''}
+                                            aria-pressed={activeAmenityLayers.includes(layer.value)}
+                                            onClick={() => handleAmenityLayerToggle(layer.value)}
+                                        >
+                                            <Icon size={17} />
+                                            <span>{layer.label}</span>
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
                         <div className="map-options-section">
@@ -1729,7 +2151,8 @@ export default function PropertyMap({
                 }
                 .map-mobile-action-dock,
                 .map-options-scrim,
-                .map-context-layer-strip {
+                .map-context-layer-strip,
+                .map-amenity-layer-strip {
                     display: none;
                 }
                 .map-options-scrim {
@@ -1815,12 +2238,14 @@ export default function PropertyMap({
                     gap: 12px;
                 }
                 .map-context-grid,
+                .map-amenity-grid,
                 .map-options-filter-grid {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 10px;
                 }
                 .map-context-grid button,
+                .map-amenity-grid button,
                 .map-options-filter-grid button {
                     display: inline-flex;
                     align-items: center;
@@ -1836,6 +2261,7 @@ export default function PropertyMap({
                     cursor: pointer;
                 }
                 .map-context-grid button.active,
+                .map-amenity-grid button.active,
                 .map-options-filter-grid button.active {
                     border-color: #1478d4;
                     background: #e8f4ff;
@@ -1848,11 +2274,19 @@ export default function PropertyMap({
                 .map-draw-area-polygon {
                     filter: drop-shadow(0 0 8px rgba(47,123,255,0.36));
                 }
+                .map-region-area-halo {
+                    filter: drop-shadow(0 2px 5px rgba(11,132,255,0.18));
+                    pointer-events: none;
+                }
                 .map-region-area-polygon {
-                    filter: drop-shadow(0 0 10px rgba(47,123,255,0.32));
+                    filter:
+                        drop-shadow(0 0 2px rgba(255,255,255,0.94))
+                        drop-shadow(0 2px 8px rgba(11,132,255,0.26));
+                    stroke-linejoin: round;
+                    stroke-linecap: round;
                 }
                 .map-region-area-mask {
-                    mix-blend-mode: multiply;
+                    mix-blend-mode: normal;
                 }
                 .map-shell .leaflet-popup-pane {
                     z-index: 1200;
@@ -1860,9 +2294,93 @@ export default function PropertyMap({
 
                 .custom-price-marker,
                 .premium-cluster-marker,
-                .agency-location-marker {
+                .agency-location-marker,
+                .map-amenity-marker {
                     background: none !important;
                     border: none !important;
+                }
+                .map-amenity-marker-wrap {
+                    position: relative;
+                    display: grid;
+                    place-items: center;
+                    width: 34px;
+                    height: 34px;
+                    border: 2px solid rgba(255,255,255,0.94);
+                    border-radius: 999px;
+                    background: var(--amenity-color, #1478d4);
+                    box-shadow:
+                        0 12px 24px rgba(10,16,24,0.28),
+                        0 0 0 5px color-mix(in srgb, var(--amenity-color, #1478d4) 16%, transparent);
+                    color: #fff;
+                    font: 950 0.56rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.02em;
+                    transform-origin: center;
+                    animation: markerRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+                }
+                .map-amenity-marker-wrap::after {
+                    content: '';
+                    position: absolute;
+                    left: 50%;
+                    bottom: -7px;
+                    border-left: 6px solid transparent;
+                    border-right: 6px solid transparent;
+                    border-top: 8px solid var(--amenity-color, #1478d4);
+                    transform: translateX(-50%);
+                }
+                .map-amenity-popup .leaflet-popup-content-wrapper {
+                    width: 250px;
+                    border: 1px solid rgba(223,193,142,0.2);
+                    border-radius: 16px;
+                    padding: 0;
+                    overflow: hidden;
+                    background: #131313;
+                    color: #f4efe7;
+                    box-shadow: 0 18px 52px rgba(0,0,0,0.46);
+                }
+                .map-amenity-popup .leaflet-popup-content {
+                    width: 250px !important;
+                    margin: 0;
+                }
+                .map-amenity-popup .leaflet-popup-tip {
+                    background: #131313;
+                    border: 1px solid rgba(223,193,142,0.18);
+                }
+                .map-amenity-popup-content {
+                    display: grid;
+                    gap: 7px;
+                    padding: 13px 14px 14px;
+                    font-family: 'Inter', sans-serif;
+                }
+                .map-amenity-popup-content span {
+                    color: #bda36b;
+                    font-size: 0.62rem;
+                    font-weight: 950;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                }
+                .map-amenity-popup-content strong {
+                    color: #f4efe7;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    line-height: 1.18;
+                }
+                .map-amenity-popup-content small {
+                    color: rgba(244,239,231,0.68);
+                    font-size: 0.72rem;
+                    font-weight: 720;
+                    line-height: 1.3;
+                }
+                .map-amenity-popup-content b {
+                    width: max-content;
+                    max-width: 100%;
+                    padding: 6px 9px;
+                    border-radius: 999px;
+                    background: rgba(223,193,142,0.12);
+                    color: #f0d08f;
+                    font-size: 0.7rem;
+                    font-weight: 950;
+                    line-height: 1;
                 }
                 .agency-marker-wrap {
                     display: grid;
@@ -2430,22 +2948,22 @@ export default function PropertyMap({
                         display: none;
                     }
                     .map-mobile-action-dock {
-                        position: fixed;
+                        position: absolute;
                         left: max(12px, env(safe-area-inset-left));
-                        top: clamp(124px, calc(var(--sv-sheet-top, 50dvh) - 74px), calc(100dvh - 176px));
+                        top: clamp(96px, calc(var(--sv-sheet-top, 72%) - 58px), calc(100% - 58px));
                         bottom: auto;
                         z-index: 1300;
                         display: flex !important;
                         align-items: center;
-                        gap: 12px;
+                        gap: 9px;
                         pointer-events: auto;
                     }
                     .map-mobile-action-dock button {
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
-                        width: 58px;
-                        height: 58px;
+                        width: 42px;
+                        height: 42px;
                         border: 1px solid rgba(18,24,30,0.08);
                         border-radius: 999px;
                         background: rgba(255,255,255,0.94);
@@ -2455,12 +2973,41 @@ export default function PropertyMap({
                         backdrop-filter: blur(14px);
                         -webkit-backdrop-filter: blur(14px);
                     }
+                    .map-mobile-action-dock button svg {
+                        width: 17px;
+                        height: 17px;
+                    }
                     .map-mobile-action-dock button span {
                         position: absolute;
-                        width: 1px;
-                        height: 1px;
-                        overflow: hidden;
-                        clip: rect(0 0 0 0);
+                        left: 50%;
+                        bottom: calc(100% + 8px);
+                        width: max-content;
+                        max-width: 104px;
+                        height: auto;
+                        overflow: visible;
+                        clip: auto;
+                        border: 1px solid rgba(255,255,255,0.16);
+                        border-radius: 999px;
+                        background: rgba(23,20,16,0.9);
+                        box-shadow: 0 10px 24px rgba(18,24,30,0.22);
+                        color: #fff8ea;
+                        font: 900 0.56rem/1 'Inter', sans-serif;
+                        letter-spacing: 0.02em;
+                        opacity: 0;
+                        padding: 6px 8px;
+                        pointer-events: none;
+                        text-align: center;
+                        transform: translate(-50%, 6px);
+                        transition: opacity 0.18s ease, transform 0.18s ease;
+                        white-space: nowrap;
+                        z-index: 1;
+                    }
+                    .map-shell--control-hints .map-mobile-action-dock button span,
+                    .map-mobile-action-dock button:hover span,
+                    .map-mobile-action-dock button:focus-visible span,
+                    .map-mobile-action-dock button.active span {
+                        opacity: 1;
+                        transform: translate(-50%, 0);
                     }
                     .map-mobile-action-dock button.active {
                         background: #e8f4ff;
@@ -2472,14 +3019,14 @@ export default function PropertyMap({
                     }
                     .map-options-scrim {
                         display: block;
-                        position: fixed;
+                        position: absolute;
                         z-index: 1400;
                     }
                     .map-context-layer-strip {
-                        position: fixed;
+                        position: absolute;
                         left: 12px;
                         right: 12px;
-                        top: max(120px, calc(var(--sv-sheet-top, 50dvh) - 124px));
+                        top: clamp(54px, calc(var(--sv-sheet-top, 72%) - 124px), calc(100% - 118px));
                         bottom: auto;
                         z-index: 1290;
                         display: flex;
@@ -2488,10 +3035,25 @@ export default function PropertyMap({
                         padding: 2px 0;
                         scrollbar-width: none;
                     }
-                    .map-context-layer-strip::-webkit-scrollbar {
+                    .map-amenity-layer-strip {
+                        position: absolute;
+                        left: 12px;
+                        right: 12px;
+                        top: clamp(96px, calc(var(--sv-sheet-top, 72%) - 82px), calc(100% - 74px));
+                        bottom: auto;
+                        z-index: 1290;
+                        display: flex;
+                        gap: 8px;
+                        overflow-x: auto;
+                        padding: 2px 0;
+                        scrollbar-width: none;
+                    }
+                    .map-context-layer-strip::-webkit-scrollbar,
+                    .map-amenity-layer-strip::-webkit-scrollbar {
                         display: none;
                     }
-                    .map-context-layer-strip span {
+                    .map-context-layer-strip span,
+                    .map-amenity-layer-strip span {
                         flex: 0 0 auto;
                         display: inline-flex;
                         align-items: center;
@@ -2505,12 +3067,17 @@ export default function PropertyMap({
                         font: 900 0.76rem/1 'Inter', sans-serif;
                         box-shadow: 0 10px 22px rgba(18,24,30,0.14);
                     }
+                    .map-amenity-layer-strip span {
+                        border-color: rgba(184,148,95,0.28);
+                        color: #28221a;
+                    }
                     .map-options-sheet {
                         max-height: min(72vh, 620px);
                         overflow-y: auto;
                     }
                     .map-shell--drawing .map-mobile-action-dock button:not(.active),
-                    .map-shell--drawing .map-context-layer-strip {
+                    .map-shell--drawing .map-context-layer-strip,
+                    .map-shell--drawing .map-amenity-layer-strip {
                         opacity: 0.34;
                         pointer-events: none;
                     }
@@ -2575,7 +3142,7 @@ export default function PropertyMap({
                     />
                 )}
 
-                <MapUpdater points={mapPoints} refitKey={refitKey} />
+                <MapUpdater points={mapPoints} refitKey={refitKey} hasFocusArea={hasDrawArea || hasRegionArea} />
                 <MapInteractionController enabled={interactionEnabled && !drawModeEnabled} />
                 <BoundsEmitter onBoundsChange={onBoundsChange} onUserBoundsChange={onUserBoundsChange} />
                 <UserLocationController
@@ -2590,6 +3157,7 @@ export default function PropertyMap({
                     area={drawArea}
                     onCommit={handleDrawAreaCommit}
                 />
+                <NearbyAmenitiesLayer activeLayers={activeAmenityLayers} />
                 {userMapLocation && (
                     <Circle
                         center={userMapLocation.latLng}

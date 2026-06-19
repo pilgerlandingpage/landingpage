@@ -865,10 +865,11 @@ export default function PropertyFeedStyles() {
 
             .property-feed-map-street-native {
                 background: #0f1113;
-                height: 100%;
-                min-height: inherit;
+                height: 100% !important;
+                inset: 0;
+                min-height: 100% !important;
                 pointer-events: auto;
-                position: relative;
+                position: absolute !important;
                 touch-action: pan-x pan-y;
                 width: 100%;
             }

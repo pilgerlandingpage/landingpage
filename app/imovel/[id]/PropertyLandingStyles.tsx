@@ -895,6 +895,207 @@ export default function PropertyLandingStyles() {
                     overflow-wrap: anywhere;
                 }
 
+                .plp-nearby-benefits {
+                    margin-top: 18px;
+                    padding: 18px;
+                    border: 1px solid rgba(184,148,95,0.18);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,247,239,0.94));
+                    box-shadow: 0 18px 42px rgba(31,25,16,0.08);
+                }
+
+                .plp-nearby-benefits-head {
+                    display: grid;
+                    gap: 5px;
+                    margin-bottom: 15px;
+                }
+
+                .plp-nearby-benefits-head h3 {
+                    margin: 0;
+                    color: var(--plp-ink);
+                    font-size: 21px;
+                    line-height: 1.15;
+                    font-weight: 950;
+                    letter-spacing: 0;
+                }
+
+                .plp-nearby-benefits-head p {
+                    max-width: 720px;
+                    margin: 0;
+                    color: var(--plp-muted);
+                    font-size: 13px;
+                    font-weight: 650;
+                    line-height: 1.55;
+                }
+
+                .plp-nearby-benefits-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 10px;
+                }
+
+                .plp-nearby-benefit-card {
+                    display: grid;
+                    grid-template-columns: 38px minmax(0, 1fr);
+                    gap: 10px;
+                    min-width: 0;
+                    min-height: 116px;
+                    padding: 13px;
+                    border: 1px solid rgba(35,31,26,0.08);
+                    border-radius: 16px;
+                    background: rgba(255,255,255,0.94);
+                }
+
+                .plp-nearby-benefit-card > span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 14px;
+                    background: color-mix(in srgb, var(--benefit-color, var(--plp-gold-dark)) 12%, #fff);
+                    color: var(--benefit-color, var(--plp-gold-dark));
+                }
+
+                .plp-nearby-benefit-card div {
+                    min-width: 0;
+                    display: grid;
+                    align-content: start;
+                    gap: 5px;
+                }
+
+                .plp-nearby-benefit-card small {
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 900;
+                    letter-spacing: .04em;
+                    line-height: 1.1;
+                    text-transform: uppercase;
+                }
+
+                .plp-nearby-benefit-card strong {
+                    color: var(--plp-ink);
+                    font-size: 13px;
+                    font-weight: 950;
+                    line-height: 1.2;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-nearby-benefit-card em {
+                    color: #596068;
+                    font-size: 11px;
+                    font-style: normal;
+                    font-weight: 650;
+                    line-height: 1.3;
+                }
+
+                .plp-nearby-benefit-card b {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    width: fit-content;
+                    margin-top: 2px;
+                    padding: 5px 8px;
+                    border-radius: 999px;
+                    background: #eee7d9;
+                    color: #6f4e1f;
+                    font-size: 11px;
+                    font-weight: 950;
+                    line-height: 1;
+                }
+
+                .plp-nearby-benefit-card.is-loading strong,
+                .plp-nearby-benefit-card.is-loading em {
+                    color: transparent;
+                    border-radius: 999px;
+                    background: linear-gradient(90deg, #f4efe5 0%, #ffffff 48%, #f4efe5 100%);
+                    background-size: 220% 100%;
+                    animation: plpNearbyPulse 1.2s ease-in-out infinite;
+                }
+
+                .plp-nearby-benefit-card.is-loading strong {
+                    max-width: 132px;
+                }
+
+                .plp-nearby-benefit-card.is-loading em {
+                    max-width: 96px;
+                }
+
+                .plp-nearby-benefit-card--wide {
+                    grid-column: 1 / -1;
+                    min-height: 0;
+                }
+
+                @keyframes plpNearbyPulse {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: -220% 50%; }
+                }
+
+                @media (max-width: 760px) {
+                    .plp-nearby-benefits {
+                        padding: 14px;
+                    }
+
+                    .plp-nearby-benefits-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                    }
+
+                    .plp-nearby-benefit-card {
+                        grid-template-columns: 32px minmax(0, 1fr);
+                        min-height: 104px;
+                        padding: 10px;
+                        border-radius: 15px;
+                    }
+
+                    .plp-nearby-benefit-card > span {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 12px;
+                    }
+
+                    .plp-nearby-benefits--mobile {
+                        margin-top: 16px;
+                        padding: 13px;
+                        border-radius: 18px;
+                        box-shadow: none;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefits-head h3 {
+                        font-size: 1.08rem;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefits-head p {
+                        font-size: 0.78rem;
+                        line-height: 1.42;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-card {
+                        grid-template-columns: 30px minmax(0, 1fr);
+                        gap: 8px;
+                        min-height: 98px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-card > span {
+                        width: 30px;
+                        height: 30px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-card strong {
+                        font-size: 0.78rem;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-card em {
+                        font-size: 0.68rem;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-card b {
+                        padding: 4px 7px;
+                        font-size: 0.68rem;
+                    }
+                }
+
                 .plp-classic-lists {
                     display: grid;
                     gap: 24px;
@@ -4140,6 +4341,31 @@ export default function PropertyLandingStyles() {
                         touch-action: auto;
                     }
 
+                    .plp-mobile-media-item--location-map {
+                        background: #fff;
+                        height: auto;
+                        min-height: 0;
+                        padding: 18px 14px 22px;
+                    }
+
+                    .plp-mobile-media-item--location-map .plp-location-explorer {
+                        border: 1px solid rgba(35,31,26,0.28);
+                        border-radius: 18px;
+                        box-shadow: 0 16px 32px rgba(31,25,16,0.14);
+                        height: min(62vw, 272px);
+                        min-height: 236px;
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    .plp-mobile-media-item--location-map .plp-mobile-map-label {
+                        background: rgba(255,255,255,0.92);
+                        border: 1px solid rgba(35,31,26,0.1);
+                        color: #172027;
+                        left: 26px;
+                        top: 30px;
+                    }
+
                     .plp-mobile-map-label {
                         left: 12px;
                         top: 12px;
@@ -4150,10 +4376,114 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-media-item--map .plp-location-explorer {
+                        display: block;
                         height: 100%;
-                        min-height: inherit;
+                        inset: 0;
+                        min-height: 0;
                         overscroll-behavior: contain;
+                        position: absolute;
                         touch-action: auto;
+                        width: 100%;
+                    }
+
+                    .plp-mobile-media-item--location-map .plp-location-explorer {
+                        inset: auto;
+                        height: min(62vw, 272px);
+                        min-height: 236px;
+                        position: relative;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-marker {
+                        background: none !important;
+                        border: 0 !important;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-marker-wrap {
+                        align-items: center;
+                        cursor: pointer;
+                        display: flex;
+                        flex-direction: column;
+                        filter: drop-shadow(0 10px 16px rgba(0,0,0,.4));
+                        gap: 3px;
+                        transform-origin: center bottom;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-pin {
+                        align-items: center;
+                        background: linear-gradient(145deg, #fff3c7 0%, #d7ad42 48%, #9c741b 100%);
+                        border: 2px solid rgba(18,18,18,.88);
+                        border-radius: 50% 50% 50% 8px;
+                        box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 10px 24px rgba(217,172,63,.24);
+                        display: inline-flex;
+                        height: 30px;
+                        justify-content: center;
+                        position: relative;
+                        transform: rotate(45deg);
+                        width: 30px;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-pin::before {
+                        background: radial-gradient(circle, rgba(223,193,142,.32), transparent 64%);
+                        border-radius: 50%;
+                        content: '';
+                        inset: -7px;
+                        position: absolute;
+                        z-index: -1;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-pin span {
+                        background: #15130f;
+                        border-radius: 2px;
+                        height: 8px;
+                        position: relative;
+                        transform: rotate(-45deg);
+                        width: 10px;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-pin span::before {
+                        background: #15130f;
+                        border-radius: 2px 1px 0 1px;
+                        content: '';
+                        height: 8px;
+                        left: 1px;
+                        position: absolute;
+                        top: -5px;
+                        transform: rotate(45deg);
+                        width: 8px;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-pin span::after {
+                        background: #d7ad42;
+                        border-radius: 1px 1px 0 0;
+                        bottom: 0;
+                        content: '';
+                        height: 5px;
+                        left: 4px;
+                        position: absolute;
+                        width: 3px;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-marker-wrap strong {
+                        background: rgba(10,10,10,.88);
+                        border: 1px solid rgba(223,193,142,.54);
+                        border-radius: 999px;
+                        box-shadow: 0 8px 16px rgba(0,0,0,.22);
+                        color: #f0d08f;
+                        display: block;
+                        font-size: .62rem;
+                        font-weight: 900;
+                        line-height: 1.3;
+                        min-width: 52px;
+                        padding: 3px 8px;
+                        text-align: center;
+                        white-space: nowrap;
+                    }
+
+                    .plp-mobile-media-item--location-map .property-feed-map-marker-wrap.is-exclusive strong::after {
+                        color: #fff3c7;
+                        content: 'EX';
+                        font-size: .52rem;
+                        margin-left: 4px;
                     }
 
                     .plp-mobile-media-item--map .plp-location-context,
@@ -4168,14 +4498,16 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-media-item--map .leaflet-container {
                         width: 100% !important;
                         height: 100% !important;
-                        min-height: inherit;
+                        min-height: 0 !important;
                     }
 
                     .plp-mobile-media-item--map .property-feed-map-shell,
                     .plp-mobile-media-item--map .property-feed-map-street-view {
+                        inset: 0;
                         overflow: hidden;
                         overscroll-behavior: contain;
                         pointer-events: auto;
+                        position: absolute !important;
                         touch-action: auto;
                     }
 
@@ -4192,9 +4524,13 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-media-item--map .property-feed-map-street-native,
                     .plp-mobile-media-item--map .property-feed-map-street-frame {
                         display: block;
+                        height: 100% !important;
+                        inset: 0;
+                        min-height: 100% !important;
                         pointer-events: auto !important;
                         touch-action: auto !important;
-                        position: relative;
+                        position: absolute !important;
+                        width: 100% !important;
                         z-index: 3;
                     }
 

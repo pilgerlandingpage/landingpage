@@ -71,6 +71,7 @@ type GoogleMapsWindow = Window & {
             }
             event?: {
                 clearInstanceListeners?: (instance: unknown) => void
+                trigger?: (instance: unknown, eventName: string) => void
             }
         }
     }
@@ -95,9 +96,23 @@ function loadGoogleMapsScript(apiKey: string) {
     if (googleWindow.__pilgerGoogleMapsPromise) return googleWindow.__pilgerGoogleMapsPromise
 
     googleWindow.__pilgerGoogleMapsPromise = new Promise<void>((resolve, reject) => {
+        const finishWhenReady = (startedAt = Date.now()) => {
+            if (googleWindow.google?.maps?.StreetViewPanorama && googleWindow.google?.maps?.StreetViewService) {
+                resolve()
+                return
+            }
+
+            if (Date.now() - startedAt < 9000) {
+                window.setTimeout(() => finishWhenReady(startedAt), 90)
+                return
+            }
+
+            reject(new Error('Google Maps nao ficou pronto para Street View.'))
+        }
+
         const existingScript = document.getElementById('pilger-google-maps-js') as HTMLScriptElement | null
         if (existingScript) {
-            existingScript.addEventListener('load', () => resolve(), { once: true })
+            existingScript.addEventListener('load', () => finishWhenReady(), { once: true })
             existingScript.addEventListener('error', () => reject(new Error('Falha ao carregar Google Maps.')), { once: true })
             return
         }
@@ -106,8 +121,8 @@ function loadGoogleMapsScript(apiKey: string) {
         script.id = 'pilger-google-maps-js'
         script.async = true
         script.defer = true
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&language=pt-BR&region=BR`
-        script.addEventListener('load', () => resolve(), { once: true })
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&libraries=places&language=pt-BR&region=BR&loading=async`
+        script.addEventListener('load', () => finishWhenReady(), { once: true })
         script.addEventListener('error', () => reject(new Error('Falha ao carregar Google Maps.')), { once: true })
         document.head.appendChild(script)
     })
@@ -210,6 +225,7 @@ function GoogleStreetViewPanorama({
     useEffect(() => {
         let panorama: GoogleStreetViewPanoramaInstance | null = null
         let cancelled = false
+        const resizeTimers: number[] = []
 
         loadGoogleMapsScript(apiKey)
             .then(() => {
@@ -225,44 +241,73 @@ function GoogleStreetViewPanorama({
                 }
 
                 const service = new StreetViewService()
-                service.getPanorama({
-                    location: { lat: latLng[0], lng: latLng[1] },
-                    preference: googleMaps?.StreetViewPreference?.NEAREST,
-                    radius: 900,
-                    source: googleMaps?.StreetViewSource?.OUTDOOR,
-                }, (data, status) => {
-                    if (cancelled || !containerRef.current) return
+                const location = { lat: latLng[0], lng: latLng[1] }
+                const panoramaRequests = [
+                    {
+                        location,
+                        preference: googleMaps?.StreetViewPreference?.NEAREST,
+                        radius: 1200,
+                        source: googleMaps?.StreetViewSource?.OUTDOOR,
+                    },
+                    {
+                        location,
+                        preference: googleMaps?.StreetViewPreference?.NEAREST,
+                        radius: 3200,
+                    },
+                ]
 
-                    const isOk = status === (googleMaps?.StreetViewStatus?.OK || 'OK')
-                    const pano = data?.location?.pano
-                    const position = data?.location?.latLng || { lat: latLng[0], lng: latLng[1] }
-
-                    if (!isOk || (!pano && !position)) {
+                const loadNearestPanorama = (requestIndex = 0) => {
+                    const request = panoramaRequests[requestIndex]
+                    if (!request) {
                         setStatus('error')
                         return
                     }
 
-                    panorama = new StreetViewPanorama(containerRef.current, {
-                        addressControl: false,
-                        clickToGo: true,
-                        disableDefaultUI: false,
-                        fullscreenControl: true,
-                        gestureHandling: 'greedy',
-                        linksControl: true,
-                        motionTracking: false,
-                        motionTrackingControl: false,
-                        panControl: true,
-                        pano,
-                        position,
-                        pov: { heading: 0, pitch: 0 },
-                        scrollwheel: true,
-                        showRoadLabels: true,
-                        visible: true,
-                        zoomControl: true,
-                    })
+                    service.getPanorama(request, (data, status) => {
+                        if (cancelled || !containerRef.current) return
 
-                    setStatus('ready')
-                })
+                        const isOk = status === (googleMaps?.StreetViewStatus?.OK || 'OK')
+                        const pano = data?.location?.pano
+                        const position = data?.location?.latLng || location
+
+                        if (!isOk || (!pano && !position)) {
+                            loadNearestPanorama(requestIndex + 1)
+                            return
+                        }
+
+                        panorama = new StreetViewPanorama(containerRef.current, {
+                            addressControl: false,
+                            clickToGo: true,
+                            disableDefaultUI: false,
+                            fullscreenControl: true,
+                            gestureHandling: 'greedy',
+                            linksControl: true,
+                            motionTracking: false,
+                            motionTrackingControl: false,
+                            panControl: true,
+                            pano,
+                            position,
+                            pov: { heading: 0, pitch: 0 },
+                            scrollwheel: true,
+                            showRoadLabels: true,
+                            visible: true,
+                            zoomControl: true,
+                        })
+
+                        const refreshPanorama = () => {
+                            if (!panorama) return
+                            panorama.setVisible?.(true)
+                            googleMaps?.event?.trigger?.(panorama, 'resize')
+                        }
+
+                        setStatus('ready')
+                        ;[60, 220, 700, 1400].forEach((delay) => {
+                            resizeTimers.push(window.setTimeout(refreshPanorama, delay))
+                        })
+                    })
+                }
+
+                loadNearestPanorama()
             })
             .catch(() => {
                 if (!cancelled) setStatus('error')
@@ -270,6 +315,7 @@ function GoogleStreetViewPanorama({
 
         return () => {
             cancelled = true
+            resizeTimers.forEach((timer) => window.clearTimeout(timer))
             if (panorama) {
                 const googleWindow = getGoogleMapsWindow()
                 googleWindow?.google?.maps?.event?.clearInstanceListeners?.(panorama)
@@ -324,6 +370,8 @@ export default function PropertyFeedMap({
     const streetViewUrl = googleMapsEmbedKey
         ? `https://www.google.com/maps/embed/v1/streetview?key=${encodeURIComponent(googleMapsEmbedKey)}&location=${encodeURIComponent(coordinateQuery)}&heading=0&pitch=0&fov=80`
         : fallbackStreetViewEmbedUrl
+    const isStreetModeLocked = mapView === 'street' && viewOptions.length === 1 && !showViewControl
+    const streetInteractionEnabled = isStreetModeLocked || isStreetInteractive
     const markerIcon = useMemo(() => L.divIcon({
         className: 'property-feed-map-marker',
         html: `<div class="property-feed-map-marker-wrap${property.exclusive ? ' is-exclusive' : ''}">
@@ -358,7 +406,11 @@ export default function PropertyFeedMap({
             void trackEvent('property_location_street_view_opened', payload)
         }
     }, [copy.title, googleMapsEmbedKey, mapView, property.city, property.id, property.neighborhood, safeLatLng])
-    const handleEnableStreetInteraction = useCallback(() => {
+    const handleEnableStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+        event?.preventDefault?.()
+        event?.stopPropagation?.()
+        if (isStreetInteractive) return
+
         setIsStreetInteractive(true)
         window.requestAnimationFrame(() => {
             streetFrameRef.current?.focus()
@@ -373,19 +425,23 @@ export default function PropertyFeedMap({
             longitude: safeLatLng?.[1] || null,
             google_maps_js_available: Boolean(googleMapsJsKey),
         })
-    }, [copy.title, googleMapsJsKey, property.city, property.id, property.neighborhood, safeLatLng])
-    const handleDisableStreetInteraction = useCallback(() => {
+    }, [copy.title, googleMapsJsKey, isStreetInteractive, property.city, property.id, property.neighborhood, safeLatLng])
+    const handleDisableStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+        event?.preventDefault?.()
+        event?.stopPropagation?.()
+        if (isStreetModeLocked) return
+
         setIsStreetInteractive(false)
-    }, [])
+    }, [isStreetModeLocked])
 
     useEffect(() => {
-        if (mapView !== 'street' || !isStreetInteractive) return
+        if (mapView !== 'street' || !isStreetInteractive || isStreetModeLocked) return
 
         document.body.classList.add('property-street-view-active')
         return () => {
             document.body.classList.remove('property-street-view-active')
         }
-    }, [isStreetInteractive, mapView])
+    }, [isStreetInteractive, isStreetModeLocked, mapView])
 
     if (!safeLatLng) {
         return (
@@ -401,7 +457,7 @@ export default function PropertyFeedMap({
 
     return (
         <div
-            className={`property-feed-map-shell map-view-${mapView}${mapView === 'street' && isStreetInteractive ? ' is-street-interactive' : ''}`}
+            className={`property-feed-map-shell map-view-${mapView}${mapView === 'street' && streetInteractionEnabled ? ' is-street-interactive' : ''}`}
             aria-label={`Mapa de ${copy.title}`}
         >
             {showViewControl && viewOptions.length > 1 && (
@@ -422,13 +478,13 @@ export default function PropertyFeedMap({
             )}
 
             {mapView === 'street' ? (
-                <div className={`property-feed-map-street-view${isStreetInteractive ? ' is-interactive' : ''}`}>
+                <div className={`property-feed-map-street-view${streetInteractionEnabled ? ' is-interactive' : ''}`}>
                     {googleMapsJsKey ? (
                         <GoogleStreetViewPanorama
                             apiKey={googleMapsJsKey}
                             latLng={safeLatLng}
                             title={copy.title}
-                            interactive={isStreetInteractive}
+                            interactive={streetInteractionEnabled}
                         />
                     ) : (
                         <iframe
@@ -443,10 +499,11 @@ export default function PropertyFeedMap({
                             tabIndex={0}
                         />
                     )}
-                    {!isStreetInteractive && (
+                    {!streetInteractionEnabled && (
                         <button
                             type="button"
                             className="property-feed-map-street-activate"
+                            onPointerDown={handleEnableStreetInteraction}
                             onClick={handleEnableStreetInteraction}
                             aria-label="Explorar Street View"
                         >
@@ -454,10 +511,11 @@ export default function PropertyFeedMap({
                             <span>Explorar rua</span>
                         </button>
                     )}
-                    {isStreetInteractive && (
+                    {isStreetInteractive && !isStreetModeLocked && (
                         <button
                             type="button"
                             className="property-feed-map-street-release"
+                            onPointerDown={handleDisableStreetInteraction}
                             onClick={handleDisableStreetInteraction}
                             aria-label="Sair da navegacao do Street View"
                         >
