@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { UIEvent as ReactUIEvent } from 'react'
-import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Maximize2, Ruler, X } from 'lucide-react'
+import type { MouseEvent as ReactMouseEvent, UIEvent as ReactUIEvent } from 'react'
+import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
@@ -146,6 +146,7 @@ export default function MapPropertyPreviewCard({
     const scrollFrame = useRef<number | null>(null)
     const suppressScrollSelection = useRef(false)
     const suppressScrollTimer = useRef<number | null>(null)
+    const suppressDetailsClick = useRef(false)
     const internalSelectionRef = useRef<string | null>(null)
     const lastAnnouncedPropertyId = useRef<string | null>(null)
 
@@ -284,8 +285,31 @@ export default function MapPropertyPreviewCard({
         touchStartX.current = null
 
         if (Math.abs(delta) < SWIPE_THRESHOLD) return
+        suppressDetailsClick.current = true
+        window.setTimeout(() => {
+            suppressDetailsClick.current = false
+        }, 140)
         goToImage(targetProperty, gallery, delta < 0 ? 1 : -1)
     }, [goToImage])
+
+    const handleDetailsNavigation = useCallback((
+        event: ReactMouseEvent<HTMLAnchorElement>,
+        targetProperty: PreviewProperty,
+        meta: ReturnType<typeof previewMetaFor>,
+    ) => {
+        if (suppressDetailsClick.current) {
+            event.preventDefault()
+            suppressDetailsClick.current = false
+            return
+        }
+
+        void trackEvent('property_map_preview_details_clicked', {
+            property_id: targetProperty.id,
+            title: meta.displayTitle,
+            price: targetProperty.price || null,
+            destination: meta.detailsHref,
+        })
+    }, [])
 
     return (
         <article className="map-property-preview" aria-live="polite">
@@ -341,7 +365,7 @@ export default function MapPropertyPreviewCard({
                 .map-preview-card {
                     position: relative;
                     display: grid;
-                    grid-template-columns: 132px minmax(0, 1fr);
+                    grid-template-columns: 150px minmax(0, 1fr);
                     flex: 0 0 min(390px, calc(100vw - 48px));
                     min-height: 158px;
                     overflow: hidden;
@@ -355,6 +379,9 @@ export default function MapPropertyPreviewCard({
                     backdrop-filter: blur(18px);
                     -webkit-backdrop-filter: blur(18px);
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+                }
+                .map-preview-card:hover {
+                    border-color: rgba(223,193,142,0.56);
                 }
                 .map-preview-card.is-active {
                     border-color: rgba(223,193,142,0.78);
@@ -375,10 +402,26 @@ export default function MapPropertyPreviewCard({
                     min-height: 158px;
                     object-fit: cover;
                 }
+                .map-preview-media-hit {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    display: block;
+                    border-radius: inherit;
+                    color: inherit;
+                    text-decoration: none;
+                    touch-action: pan-y;
+                }
+                .map-preview-media-hit:focus-visible,
+                .map-preview-body-link:focus-visible {
+                    outline: 2px solid rgba(223,193,142,0.86);
+                    outline-offset: -4px;
+                }
                 .map-preview-media::after {
                     content: '';
                     position: absolute;
                     inset: 0;
+                    z-index: 2;
                     background: linear-gradient(180deg, rgba(0,0,0,0.18), transparent 42%, rgba(0,0,0,0.48));
                     pointer-events: none;
                 }
@@ -387,7 +430,7 @@ export default function MapPropertyPreviewCard({
                     top: 8px;
                     left: 8px;
                     right: 36px;
-                    z-index: 2;
+                    z-index: 3;
                     display: flex;
                     flex-wrap: wrap;
                     gap: 4px;
@@ -406,7 +449,7 @@ export default function MapPropertyPreviewCard({
                     position: absolute;
                     left: 8px;
                     bottom: 8px;
-                    z-index: 2;
+                    z-index: 3;
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
@@ -448,7 +491,7 @@ export default function MapPropertyPreviewCard({
                 .map-preview-nav {
                     position: absolute;
                     top: 50%;
-                    z-index: 3;
+                    z-index: 4;
                     display: grid;
                     place-items: center;
                     width: 28px;
@@ -466,7 +509,7 @@ export default function MapPropertyPreviewCard({
                     position: absolute;
                     top: 8px;
                     right: 8px;
-                    z-index: 4;
+                    z-index: 5;
                     display: grid;
                     place-items: center;
                     width: 28px;
@@ -480,9 +523,15 @@ export default function MapPropertyPreviewCard({
                 .map-preview-body {
                     display: grid;
                     align-content: stretch;
-                    gap: 7px;
                     min-width: 0;
-                    padding: 12px 12px 11px;
+                    padding: 11px 12px 10px;
+                }
+                .map-preview-body-link {
+                    display: grid;
+                    gap: 6px;
+                    min-width: 0;
+                    color: inherit;
+                    text-decoration: none;
                 }
                 .map-preview-location {
                     display: inline-flex;
@@ -515,6 +564,12 @@ export default function MapPropertyPreviewCard({
                     color: #f0cf88;
                     font: 900 0.88rem/1 'Inter', sans-serif;
                 }
+                .map-preview-meta-row {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    gap: 8px;
+                    align-items: end;
+                }
                 .map-preview-stats {
                     display: flex;
                     flex-wrap: wrap;
@@ -532,28 +587,6 @@ export default function MapPropertyPreviewCard({
                     color: rgba(247,241,231,0.82);
                     font: 750 0.58rem/1 'Inter', sans-serif;
                     white-space: nowrap;
-                }
-                .map-preview-footer {
-                    display: grid;
-                    grid-template-columns: 1fr auto;
-                    gap: 8px;
-                    align-items: center;
-                    margin-top: auto;
-                }
-                .map-preview-details {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 6px;
-                    min-height: 32px;
-                    padding: 0 11px;
-                    border-radius: 10px;
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
-                    color: #111;
-                    font: 900 0.58rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.1em;
-                    text-decoration: none;
-                    text-transform: uppercase;
                 }
                 .map-preview-index {
                     color: rgba(247,241,231,0.55);
@@ -615,41 +648,44 @@ export default function MapPropertyPreviewCard({
                     }
                     .map-preview-media,
                     .map-preview-media img {
-                        height: 94px;
-                        min-height: 94px;
+                        height: 154px;
+                        min-height: 154px;
                     }
                     .map-preview-body {
-                        gap: 4px;
-                        padding: 7px 9px 8px;
+                        padding: 6px 9px 7px;
+                    }
+                    .map-preview-body-link {
+                        gap: 3px;
+                    }
+                    .map-preview-location {
+                        font-size: 0.43rem;
                     }
                     .map-preview-title {
-                        font-size: 0.72rem;
-                        line-height: 1.02;
+                        font-size: 0.68rem;
+                        line-height: 1.05;
+                        -webkit-line-clamp: 1;
                     }
                     .map-preview-price {
                         font-size: 0.74rem;
                     }
+                    .map-preview-meta-row {
+                        gap: 5px;
+                        align-items: center;
+                    }
                     .map-preview-stats {
                         gap: 3px;
+                    }
+                    .map-preview-stats .map-preview-stat:nth-child(n+3) {
+                        display: none;
                     }
                     .map-preview-stat {
                         min-height: 18px;
                         padding: 0 5px;
                         font-size: 0.48rem;
                     }
-                    .map-preview-details {
-                        min-height: 25px;
-                        padding: 0 8px;
-                        font-size: 0.48rem;
-                        letter-spacing: 0.07em;
-                    }
                     .map-preview-index,
-                    .map-preview-location,
                     .map-preview-swipe-hint {
                         font-size: 0.47rem;
-                    }
-                    .map-preview-footer {
-                        gap: 6px;
                     }
                     .map-preview-photo-count {
                         bottom: 6px;
@@ -681,7 +717,7 @@ export default function MapPropertyPreviewCard({
             `}</style>
 
             <div className="map-preview-track" ref={trackRef} onScroll={handleTrackScroll}>
-                {carouselProperties.map((item, index) => {
+                {carouselProperties.map((item) => {
                     const meta = previewMetaFor(item)
                     const gallery = galleryFor(item)
                     const badges = getBadges(item)
@@ -700,21 +736,25 @@ export default function MapPropertyPreviewCard({
                             onClick={() => selectProperty(item, 'carousel_click')}
                             aria-label={meta.displayTitle}
                         >
-                            <div
-                                className="map-preview-media"
-                                onTouchStart={event => {
-                                    event.stopPropagation()
-                                    touchStartX.current = event.touches[0]?.clientX ?? null
-                                }}
-                                onTouchMove={event => {
-                                    event.stopPropagation()
-                                }}
-                                onTouchEnd={event => {
-                                    event.stopPropagation()
-                                    handlePhotoTouchEnd(item, gallery, event.changedTouches[0]?.clientX ?? 0)
-                                }}
-                            >
+                            <div className="map-preview-media">
                                 <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={meta.displayTitle} loading="lazy" />
+                                <Link
+                                    href={meta.detailsHref}
+                                    className="map-preview-media-hit"
+                                    aria-label={`Abrir detalhes de ${meta.displayTitle}`}
+                                    onClick={event => handleDetailsNavigation(event, item, meta)}
+                                    onTouchStart={event => {
+                                        event.stopPropagation()
+                                        touchStartX.current = event.touches[0]?.clientX ?? null
+                                    }}
+                                    onTouchMove={event => {
+                                        event.stopPropagation()
+                                    }}
+                                    onTouchEnd={event => {
+                                        event.stopPropagation()
+                                        handlePhotoTouchEnd(item, gallery, event.changedTouches[0]?.clientX ?? 0)
+                                    }}
+                                />
                                 {badges.length > 0 && (
                                     <div className="map-preview-badges" aria-label="Destaques do imovel">
                                         {badges.map(badge => <span className="map-preview-badge" key={badge}>{badge}</span>)}
@@ -778,47 +818,37 @@ export default function MapPropertyPreviewCard({
                             </button>
 
                             <div className="map-preview-body">
-                                <div className="map-preview-location">
-                                    <MapPin size={12} />
-                                    <span>{meta.location || 'Litoral catarinense'}</span>
-                                </div>
-                                <h2 className="map-preview-title">{meta.displayTitle}</h2>
-                                <div className="map-preview-price">{formatPrice(item.price)}</div>
-                                {meta.stats.length > 0 && (
-                                    <div className="map-preview-stats" aria-label="Dados principais">
-                                        {meta.stats.slice(0, 3).map(stat => {
-                                            const Icon = stat.icon
-                                            return (
-                                                <span className="map-preview-stat" key={stat.key}>
-                                                    <Icon size={12} />
-                                                    {stat.label}
-                                                </span>
-                                            )
-                                        })}
+                                <Link
+                                    href={meta.detailsHref}
+                                    className="map-preview-body-link"
+                                    aria-label={`Abrir detalhes de ${meta.displayTitle}`}
+                                    onClick={event => handleDetailsNavigation(event, item, meta)}
+                                >
+                                    <div className="map-preview-location">
+                                        <MapPin size={12} />
+                                        <span>{meta.location || 'Litoral catarinense'}</span>
                                     </div>
-                                )}
-                                <div className="map-preview-footer">
-                                    <Link
-                                        href={meta.detailsHref}
-                                        className="map-preview-details"
-                                        onClick={() => {
-                                            void trackEvent('property_map_preview_details_clicked', {
-                                                property_id: item.id,
-                                                title: meta.displayTitle,
-                                                price: item.price || null,
-                                                destination: meta.detailsHref,
-                                            })
-                                        }}
-                                    >
-                                        Ver detalhes
-                                        <Maximize2 size={12} />
-                                    </Link>
-                                    <span className="map-preview-index">
-                                        {index + 1}/{carouselProperties.length}
-                                        <br />
-                                        {activeIndex + 1}/{gallery.length} fotos
-                                    </span>
-                                </div>
+                                    <h2 className="map-preview-title">{meta.displayTitle}</h2>
+                                    <div className="map-preview-price">{formatPrice(item.price)}</div>
+                                    <div className="map-preview-meta-row">
+                                        {meta.stats.length > 0 && (
+                                            <div className="map-preview-stats" aria-label="Dados principais">
+                                                {meta.stats.slice(0, 3).map(stat => {
+                                                    const Icon = stat.icon
+                                                    return (
+                                                        <span className="map-preview-stat" key={stat.key}>
+                                                            <Icon size={12} />
+                                                            {stat.label}
+                                                        </span>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                        <span className="map-preview-index">
+                                            {activeIndex + 1}/{gallery.length} fotos
+                                        </span>
+                                    </div>
+                                </Link>
                             </div>
                         </section>
                     )
