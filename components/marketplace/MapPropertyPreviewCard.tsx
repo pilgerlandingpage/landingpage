@@ -615,37 +615,38 @@ export default function MapPropertyPreviewCard({
                     }
                     .map-preview-media,
                     .map-preview-media img {
-                        height: 142px;
-                        min-height: 142px;
+                        height: 114px;
+                        min-height: 114px;
                     }
                     .map-preview-body {
-                        gap: 6px;
-                        padding: 10px 12px 11px;
+                        gap: 5px;
+                        padding: 8px 10px 9px;
                     }
                     .map-preview-title {
-                        font-size: 0.82rem;
+                        font-size: 0.76rem;
+                        line-height: 1.04;
                     }
                     .map-preview-price {
-                        font-size: 0.82rem;
+                        font-size: 0.78rem;
                     }
                     .map-preview-stats {
-                        gap: 4px;
+                        gap: 3px;
                     }
                     .map-preview-stat {
-                        min-height: 21px;
-                        padding: 0 6px;
-                        font-size: 0.54rem;
+                        min-height: 19px;
+                        padding: 0 5px;
+                        font-size: 0.5rem;
                     }
                     .map-preview-details {
-                        min-height: 30px;
-                        padding: 0 9px;
-                        font-size: 0.54rem;
+                        min-height: 27px;
+                        padding: 0 8px;
+                        font-size: 0.5rem;
                         letter-spacing: 0.08em;
                     }
                     .map-preview-index,
                     .map-preview-location,
                     .map-preview-swipe-hint {
-                        font-size: 0.52rem;
+                        font-size: 0.49rem;
                     }
                     .map-preview-badges {
                         right: 34px;
