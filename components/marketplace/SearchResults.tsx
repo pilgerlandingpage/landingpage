@@ -1109,6 +1109,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
             `}</style>
 
             <SearchViews
+                previewOpen={Boolean(selectedMapProperty)}
                 map={
                     <div className="search-map-interactive-layer">
                         <MapSearch

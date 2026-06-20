@@ -6,13 +6,14 @@ interface SearchViewsProps {
     children: React.ReactNode
     map: React.ReactNode
     overlay?: React.ReactNode
+    previewOpen?: boolean
 }
 
 const SNAP_FULL_MAP = 85
 const SNAP_HALF = 50
 const SNAP_FULL_LIST = 8
 
-export default function SearchViews({ children, map, overlay }: SearchViewsProps) {
+export default function SearchViews({ children, map, overlay, previewOpen = false }: SearchViewsProps) {
     const [sheetPosition, setSheetPosition] = useState(SNAP_HALF)
     const [isDragging, setIsDragging] = useState(false)
     const sheetRef = useRef<HTMLDivElement>(null)
@@ -220,9 +221,25 @@ export default function SearchViews({ children, map, overlay }: SearchViewsProps
                 .sv-overlay > * {
                     pointer-events: auto;
                 }
+                @media (max-width: 1023px) {
+                    .sv-wrap.is-preview-open .sv-panel {
+                        background: transparent;
+                        border-color: transparent;
+                        box-shadow: none;
+                        pointer-events: none;
+                        backdrop-filter: none;
+                        -webkit-backdrop-filter: none;
+                    }
+                    .sv-wrap.is-preview-open .sv-handle,
+                    .sv-wrap.is-preview-open .sv-scroll {
+                        opacity: 0;
+                        pointer-events: none;
+                        visibility: hidden;
+                    }
+                }
             `}</style>
 
-            <main className="sv-wrap" style={{ '--sv-sheet-top': `${sheetPosition}dvh` } as CSSProperties}>
+            <main className={`sv-wrap${previewOpen ? ' is-preview-open' : ''}`} style={{ '--sv-sheet-top': `${sheetPosition}dvh` } as CSSProperties}>
                 {/* Content panel: bottom sheet (mobile) / left sidebar (desktop) */}
                 <div
                     ref={sheetRef}

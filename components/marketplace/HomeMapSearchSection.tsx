@@ -17,13 +17,16 @@ import {
     X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
+import MapPropertyPreviewCard from './MapPropertyPreviewCard'
 import type { MapDrawArea } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { trackEvent } from '@/lib/tracking/client'
+
+type MapPreviewProperty = Parameters<NonNullable<ComponentProps<typeof MapPropertyPreviewCard>['onPropertySelect']>>[0]
 
 type Property = {
     id: string
@@ -439,6 +442,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [showMapLockedHint, setShowMapLockedHint] = useState(false)
     const [isMapModalOpen, setIsMapModalOpen] = useState(false)
     const [selectedDrawArea, setSelectedDrawArea] = useState<MapDrawArea | null>(null)
+    const [selectedHomeMapPropertyId, setSelectedHomeMapPropertyId] = useState<string | null>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const guidedSearchStartedRef = useRef(false)
     const trackedGuideStepRef = useRef<number | null>(null)
@@ -510,6 +514,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setType(mapOverlayTypeToMapFilter(values.typeValue))
         setPrice(values.priceValue === 'all' ? '' : values.priceValue)
         setSelectedDrawArea(null)
+        setSelectedHomeMapPropertyId(null)
 
         if (values.locationType === 'office') {
             setShowMapLockedHint(false)
@@ -634,10 +639,16 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         [homeMapProperties, selectedDrawArea]
     )
     const areaFilteredHomeMapProperties = drawFilteredHomeMapProperties
-    const areaFilteredMappedTotal = useMemo(
-        () => areaFilteredHomeMapProperties.filter(hasCoordinates).length,
+    const visibleHomeMapProperties = useMemo(
+        () => areaFilteredHomeMapProperties.filter(hasCoordinates),
         [areaFilteredHomeMapProperties]
     )
+    const selectedHomeMapProperty = useMemo(() => {
+        if (!selectedHomeMapPropertyId || isMapInteractionLocked || isOfficeLocationSelected) return null
+        return visibleHomeMapProperties.find(property => property.id === selectedHomeMapPropertyId) || null
+    }, [isMapInteractionLocked, isOfficeLocationSelected, selectedHomeMapPropertyId, visibleHomeMapProperties])
+    const isHomeMapPreviewOpen = Boolean(selectedHomeMapProperty)
+    const areaFilteredMappedTotal = visibleHomeMapProperties.length
     const homeOfficeMarker = isMapInteractionLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
     const homeMapRefitKey = isOfficeLocationSelected ? 'home-office-location-selected' : isMapInteractionLocked ? 'home-office-location' : mapRefitKey
     const mapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
@@ -685,6 +696,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
     const handleDrawAreaChange = useCallback((area: MapDrawArea | null) => {
         setSelectedDrawArea(area)
+        setSelectedHomeMapPropertyId(null)
 
         if (area) {
             setIsHomeMapInteractionUnlocked(true)
@@ -700,9 +712,57 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         })
     }, [getSearchSnapshot, homeMapProperties, isMapModalOpen])
 
+    const handleHomeMapPropertySelect = useCallback((property: Property) => {
+        if (!property?.id) return
+
+        setSelectedHomeMapPropertyId(property.id)
+        setIsHomeMapInteractionUnlocked(true)
+        setIsOfficeLocationSelected(false)
+        setShowMapLockedHint(false)
+
+        void trackEvent('home_map_property_selected', {
+            property_id: property.id,
+            title: property.title,
+            price: property.price || null,
+            source: isMapModalOpen ? 'explore_modal' : 'home_map',
+            results_count: areaFilteredHomeMapProperties.length,
+            mapped_count: areaFilteredMappedTotal,
+        })
+    }, [areaFilteredHomeMapProperties.length, areaFilteredMappedTotal, isMapModalOpen])
+
+    const handleHomeMapPreviewPropertySelect = useCallback((property: MapPreviewProperty, source: string) => {
+        if (!property?.id) return
+        if (property.id === selectedHomeMapPropertyId) return
+
+        setSelectedHomeMapPropertyId(property.id)
+
+        void trackEvent('home_map_preview_similar_selected', {
+            property_id: property.id,
+            title: property.title || null,
+            price: property.price || null,
+            source,
+            modal_open: isMapModalOpen,
+            mapped_count: visibleHomeMapProperties.length,
+        })
+    }, [isMapModalOpen, selectedHomeMapPropertyId, visibleHomeMapProperties.length])
+
+    const closeHomeMapPropertyPreview = useCallback(() => {
+        const property = selectedHomeMapProperty
+        setSelectedHomeMapPropertyId(null)
+
+        if (property) {
+            void trackEvent('home_map_preview_closed', {
+                property_id: property.id,
+                title: property.title,
+                source: isMapModalOpen ? 'explore_modal' : 'home_map',
+            })
+        }
+    }, [isMapModalOpen, selectedHomeMapProperty])
+
     const openMapModal = useCallback((source = 'mobile_nav') => {
         setShowMapLockedHint(false)
         setSelectedDrawArea(null)
+        setSelectedHomeMapPropertyId(null)
         setIsOfficeLocationSelected(false)
         setIsMapModalOpen(true)
         void trackEvent('home_map_modal_opened', {
@@ -713,6 +773,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }, [filteredMappedTotal, filteredProperties.length])
 
     const closeMapModal = useCallback(() => {
+        setSelectedHomeMapPropertyId(null)
         setIsMapModalOpen(false)
     }, [])
 
@@ -823,6 +884,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setShowMapLockedHint(false)
         setIsHomeMapInteractionUnlocked(false)
         setSelectedDrawArea(null)
+        setSelectedHomeMapPropertyId(null)
     }
 
     const toggleAdvancedFilters = () => {
@@ -932,6 +994,19 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }, [])
 
     useEffect(() => {
+        if (!isHomeMapPreviewOpen || isMapModalOpen) {
+            document.body.classList.remove('home-map-preview-focus')
+            return
+        }
+
+        document.body.classList.add('home-map-preview-focus')
+
+        return () => {
+            document.body.classList.remove('home-map-preview-focus')
+        }
+    }, [isHomeMapPreviewOpen, isMapModalOpen])
+
+    useEffect(() => {
         const handleOpenMapSearch = (event: Event) => {
             event.preventDefault()
             const source = typeof window.CustomEvent === 'function' && event instanceof window.CustomEvent
@@ -968,18 +1043,20 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }, [closeMapModal, isMapModalOpen])
 
     return (
-        <section className="home-map-search" id="mapa">
+        <section className={`home-map-search${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`} id="mapa">
             <div className="map-search-shell" ref={wrapperRef}>
-                <div className={`map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
+                <div className={`map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
                     {shouldRenderMap ? (
                         <MapSearch
-                            properties={areaFilteredHomeMapProperties}
+                            properties={visibleHomeMapProperties}
+                            selectedPropertyId={selectedHomeMapPropertyId}
                             drawArea={selectedDrawArea}
                             regionArea={selectedRegionArea}
                             refitKey={homeMapRefitKey}
                             interactionEnabled={!isMapInteractionLocked}
                             officeMarker={homeOfficeMarker}
                             initialMapStyle="luxury"
+                            onPropertySelect={handleHomeMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
                         />
                     ) : (
@@ -1013,6 +1090,17 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     <div className="map-search-panel map-search-panel-new">
                         <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
                     </div>
+                    {selectedHomeMapProperty && (
+                        <div className="home-map-property-preview">
+                            <MapPropertyPreviewCard
+                                property={selectedHomeMapProperty}
+                                properties={visibleHomeMapProperties}
+                                selectedPropertyId={selectedHomeMapPropertyId}
+                                onClose={closeHomeMapPropertyPreview}
+                                onPropertySelect={visibleHomeMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <form
@@ -1176,16 +1264,18 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             </button>
                         </div>
                         <div className="mobile-map-modal-body">
-                            <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}`}>
+                            <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
                                 {shouldRenderMap ? (
                                     <MapSearch
-                                        properties={areaFilteredHomeMapProperties}
+                                        properties={visibleHomeMapProperties}
+                                        selectedPropertyId={selectedHomeMapPropertyId}
                                         drawArea={selectedDrawArea}
                                         regionArea={selectedRegionArea}
                                         refitKey={`${homeMapRefitKey}-modal`}
                                         interactionEnabled={!isMapInteractionLocked}
                                         officeMarker={homeOfficeMarker}
                                         initialMapStyle="luxury"
+                                        onPropertySelect={handleHomeMapPropertySelect}
                                         onDrawAreaChange={handleDrawAreaChange}
                                     />
                                 ) : (
@@ -1219,6 +1309,17 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                 <div className="map-search-panel map-search-panel-new mobile-map-search-panel">
                                     <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
                                 </div>
+                                {selectedHomeMapProperty && (
+                                    <div className="home-map-property-preview">
+                                        <MapPropertyPreviewCard
+                                            property={selectedHomeMapProperty}
+                                            properties={visibleHomeMapProperties}
+                                            selectedPropertyId={selectedHomeMapPropertyId}
+                                            onClose={closeHomeMapPropertyPreview}
+                                            onPropertySelect={visibleHomeMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1391,6 +1492,36 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .map-search-panel-new :global(.home-search-box-map) {
                     pointer-events: auto;
                     width: 100%;
+                }
+                .map-preview-panel.is-preview-open .map-search-panel-new,
+                .map-preview-panel.is-preview-open .map-preview-stat,
+                .map-preview-panel.is-preview-open .map-lock-hint,
+                .map-preview-panel.is-preview-open :global(.map-mobile-action-dock),
+                .map-preview-panel.is-preview-open :global(.map-context-layer-strip),
+                .map-preview-panel.is-preview-open :global(.map-amenity-layer-strip),
+                .map-preview-panel.is-preview-open :global(.leaflet-control-zoom) {
+                    opacity: 0;
+                    pointer-events: none;
+                    transform: translateY(8px);
+                    visibility: hidden;
+                }
+                .map-preview-panel.is-preview-open .map-search-panel-new {
+                    transform: translate(-50%, 8px);
+                }
+                .map-preview-panel.is-preview-open .mobile-map-search-panel {
+                    transform: translateY(8px);
+                }
+                .home-map-property-preview {
+                    inset: 0;
+                    pointer-events: none;
+                    position: absolute;
+                    z-index: 820;
+                }
+                .home-map-property-preview :global(.map-property-preview) {
+                    z-index: 2;
+                }
+                :global(body.home-map-preview-focus .home-map-search ~ *) {
+                    display: none !important;
                 }
                 .legacy-map-search-panel[hidden] {
                     display: none !important;
