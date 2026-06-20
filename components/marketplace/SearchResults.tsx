@@ -322,9 +322,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     const isOfficeSearch = searchParams.get('office') === OFFICE_SEARCH_PARAM_VALUE
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
-    const [latestBoundsState, setLatestBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
-    const [appliedBoundsState, setAppliedBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
-    const [pendingBoundsState, setPendingBoundsState] = useState<{ key: string; bounds: MapBounds | null }>({ key: '', bounds: null })
     const [showRefineSearch, setShowRefineSearch] = useState(false)
     const [selectedMapPropertyOverride, setSelectedMapPropertyOverride] = useState<{ key: string; id: string | null } | null>(null)
     const [drawAreaOverride, setDrawAreaOverride] = useState<{ key: string; area: MapDrawArea | null } | null>(null)
@@ -339,9 +336,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     const shouldShowOfficeOnMap = isOfficeSearch || isOfficeSelectedInRefine
     const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : 'properties'}`
     const urlMapBounds = useMemo(() => parseMapBoundsParam(searchParams.get(MAP_BOUNDS_PARAM)), [searchKey, searchParams])
-    const latestMapBounds = latestBoundsState.key === mapViewKey ? latestBoundsState.bounds : urlMapBounds
-    const mapBounds = appliedBoundsState.key === mapViewKey ? appliedBoundsState.bounds : urlMapBounds
-    const pendingMapBounds = pendingBoundsState.key === mapViewKey ? pendingBoundsState.bounds : null
+    const mapBounds = urlMapBounds
     const selectedMapPropertyId = selectedMapPropertyOverride?.key === searchKey
         ? selectedMapPropertyOverride.id
         : searchParams.get(MAP_PROPERTY_PARAM)
@@ -472,17 +467,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         setMapHoveredId(id)
     }, [])
 
-    const handleBoundsChange = useCallback((bounds: MapBounds) => {
-        setLatestBoundsState({ key: mapViewKey, bounds })
-    }, [mapViewKey])
-
-    const handleUserBoundsChange = useCallback((bounds: MapBounds) => {
-        if (shouldShowOfficeOnMap) return
-
-        setLatestBoundsState({ key: mapViewKey, bounds })
-        setPendingBoundsState({ key: mapViewKey, bounds })
-    }, [mapViewKey, shouldShowOfficeOnMap])
-
     const handleRefineSearchValuesChange = useCallback((values: HomeSearchValues) => {
         setRefineOfficeSelection({ key: searchKey, selected: values.locationType === 'office' })
     }, [searchKey])
@@ -504,16 +488,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         if (selectedDrawArea && !filterPropertiesByDrawArea([property], selectedDrawArea).length) return null
         return property
     }, [mapBounds, propertiesWithCoords, selectedDrawArea, selectedMapPropertyId, shouldShowOfficeOnMap])
-    const selectedMapPropertyIndex = useMemo(() => {
-        if (!selectedMapProperty) return -1
-        return visibleMapProperties.findIndex(property => String(property.id) === String(selectedMapProperty.id))
-    }, [selectedMapProperty, visibleMapProperties])
-
-    const pendingVisibleCount = useMemo(
-        () => pendingMapBounds ? filterPropertiesByDrawArea(filterPropertiesByBounds(properties, pendingMapBounds), selectedDrawArea).length : 0,
-        [pendingMapBounds, properties, selectedDrawArea]
-    )
-
     const visibleCount = visibleProperties.length
     const totalCount = properties.length
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
@@ -532,8 +506,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         : mapBounds && visibleCount < totalCount
             ? 'imoveis nesta area'
             : 'imoveis encontrados'
-    const hasPendingAreaSearch = Boolean(pendingMapBounds && !shouldShowOfficeOnMap)
-
     const handleSearchButtonClick = useCallback(() => {
         const nextOpen = !showRefineSearch
         setShowRefineSearch(nextOpen)
@@ -624,25 +596,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         }
     }, [activeFilters, buildSearchAlertSnapshot, saveAlertState])
 
-    const handleSearchThisArea = useCallback(() => {
-        const bounds = pendingMapBounds || latestMapBounds
-        if (!bounds) return
-
-        setAppliedBoundsState({ key: mapViewKey, bounds })
-        setPendingBoundsState({ key: '', bounds: null })
-        replaceSpatialSearchParams({ bounds, mapPropertyId: null })
-
-        void trackEvent('search_results_search_this_area_clicked', {
-            active_filters: activeFilters,
-            total_count: totalCount,
-            visible_count: filterPropertiesByDrawArea(filterPropertiesByBounds(properties, bounds), selectedDrawArea).length,
-            bounds,
-            draw_area: selectedDrawArea,
-            selected_region: selectedRegionArea?.id || null,
-            selected_region_label: selectedRegionArea?.label || null,
-        })
-    }, [activeFilters, latestMapBounds, mapViewKey, pendingMapBounds, properties, replaceSpatialSearchParams, selectedDrawArea, selectedRegionArea, totalCount])
-
     const handleDrawAreaChange = useCallback((area: MapDrawArea | null) => {
         setDrawAreaOverride({ key: searchKey, area })
         setSelectedMapPropertyOverride({ key: searchKey, id: null })
@@ -673,27 +626,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         }
     }, [activeFilters, mapBounds, properties, replaceSpatialSearchParams, searchKey, selectedRegionArea, totalCount])
 
-    const handleLocateAreaChange = useCallback((bounds: MapBounds, location: { latitude: number; longitude: number; accuracy?: number | null }) => {
-        setAppliedBoundsState({ key: mapViewKey, bounds })
-        setLatestBoundsState({ key: mapViewKey, bounds })
-        setPendingBoundsState({ key: '', bounds: null })
-        setDrawAreaOverride({ key: searchKey, area: null })
-        setSelectedMapPropertyOverride({ key: searchKey, id: null })
-        replaceSpatialSearchParams({ bounds, drawArea: null, mapPropertyId: null })
-
-        void trackEvent('search_results_user_location_applied', {
-            active_filters: activeFilters,
-            total_count: totalCount,
-            visible_count: filterPropertiesByBounds(properties, bounds).length,
-            bounds,
-            latitude: location.latitude,
-            longitude: location.longitude,
-            accuracy: location.accuracy || null,
-            selected_region: selectedRegionArea?.id || null,
-            selected_region_label: selectedRegionArea?.label || null,
-        })
-    }, [activeFilters, mapViewKey, properties, replaceSpatialSearchParams, searchKey, selectedRegionArea, totalCount])
-
     const handleMapPropertySelect = useCallback((property: any) => {
         setSelectedMapPropertyOverride({ key: searchKey, id: property.id })
         replaceMapPropertyParam(property.id)
@@ -722,39 +654,27 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         }
     }, [searchKey, selectedMapProperty])
 
-    const selectMapPreviewPropertyByIndex = useCallback((index: number, source: string) => {
-        if (!visibleMapProperties.length) return
-
-        const nextIndex = ((index % visibleMapProperties.length) + visibleMapProperties.length) % visibleMapProperties.length
-        const property = visibleMapProperties[nextIndex]
+    const handleMapPreviewPropertySelect = useCallback((property: any, source: string) => {
         if (!property?.id) return
+        if (property.id === selectedMapPropertyId) return
 
         setSelectedMapPropertyOverride({ key: searchKey, id: property.id })
         replaceMapPropertyParam(property.id)
+        const nextIndex = visibleMapProperties.findIndex(item => item.id === property.id)
 
         void trackEvent('property_map_preview_similar_selected', {
             property_id: property.id,
             title: property.title,
             price: property.price || null,
             source,
-            next_position: nextIndex + 1,
+            next_position: nextIndex >= 0 ? nextIndex + 1 : null,
             visible_count: visibleMapProperties.length,
             active_filters: activeFilters,
             total_count: totalCount,
             selected_region: selectedRegionArea?.id || null,
             selected_region_label: selectedRegionArea?.label || null,
         })
-    }, [activeFilters, searchKey, selectedRegionArea, totalCount, visibleMapProperties])
-
-    const handleMapPreviewPreviousProperty = useCallback(() => {
-        const baseIndex = selectedMapPropertyIndex >= 0 ? selectedMapPropertyIndex : 0
-        selectMapPreviewPropertyByIndex(baseIndex - 1, 'previous')
-    }, [selectMapPreviewPropertyByIndex, selectedMapPropertyIndex])
-
-    const handleMapPreviewNextProperty = useCallback(() => {
-        const baseIndex = selectedMapPropertyIndex >= 0 ? selectedMapPropertyIndex : -1
-        selectMapPreviewPropertyByIndex(baseIndex + 1, 'next')
-    }, [selectMapPreviewPropertyByIndex, selectedMapPropertyIndex])
+    }, [activeFilters, searchKey, selectedMapPropertyId, selectedRegionArea, totalCount, visibleMapProperties])
 
     const handleMemoryPropertyClick = useCallback((property: any, source: 'favorite' | 'history') => {
         void trackEvent('search_results_memory_property_clicked', {
@@ -773,54 +693,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     position: absolute;
                     inset: 0;
                     overflow: hidden;
-                }
-                .search-this-area-button {
-                    position: absolute;
-                    left: 50%;
-                    top: 58px;
-                    z-index: 980;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    min-height: 38px;
-                    max-width: min(320px, calc(100% - 28px));
-                    padding: 0 14px;
-                    border: 1px solid rgba(255,255,255,0.42);
-                    border-radius: 999px;
-                    background: rgba(255,253,248,0.96);
-                    color: #211c16;
-                    cursor: pointer;
-                    font: 900 0.76rem/1 'Inter', sans-serif;
-                    box-shadow:
-                        0 16px 34px rgba(18,14,8,0.18),
-                        0 0 0 1px rgba(184,148,95,0.1) inset;
-                    transform: translateX(-50%);
-                    white-space: nowrap;
-                    backdrop-filter: blur(16px);
-                    -webkit-backdrop-filter: blur(16px);
-                }
-                .search-this-area-button svg {
-                    color: #a78042;
-                    flex: 0 0 auto;
-                }
-                .search-this-area-button strong {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 23px;
-                    height: 23px;
-                    padding: 0 7px;
-                    border-radius: 999px;
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
-                    color: #111;
-                    font-size: 0.68rem;
-                }
-                .search-this-area-button:hover {
-                    transform: translate(-50%, -1px);
-                    box-shadow:
-                        0 20px 40px rgba(18,14,8,0.22),
-                        0 0 0 1px rgba(184,148,95,0.14) inset;
                 }
                 .search-card-wrap {
                     position: relative;
@@ -1143,20 +1015,6 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     text-transform: uppercase;
                 }
                 @media (max-width: 649px) {
-                    .search-this-area-button {
-                        top: 52px;
-                        min-height: 35px;
-                        max-width: min(270px, calc(100% - 24px));
-                        padding: 0 11px;
-                        font-size: 0.68rem;
-                        gap: 6px;
-                    }
-                    .search-this-area-button strong {
-                        min-width: 21px;
-                        height: 21px;
-                        padding: 0 6px;
-                        font-size: 0.62rem;
-                    }
                     .result-lux-header {
                         margin: 0 -2px 12px;
                         padding: 4px 2px 13px;
@@ -1262,35 +1120,19 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                             onMarkerHover={handleMarkerHover}
                             onPropertySelect={handleMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
-                            onBoundsChange={handleBoundsChange}
-                            onUserBoundsChange={handleUserBoundsChange}
-                            onLocateAreaChange={handleLocateAreaChange}
                             refitKey={mapViewKey}
                             officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
                             initialMapStyle="luxury"
                         />
-                        {hasPendingAreaSearch && (
-                            <button
-                                type="button"
-                                className="search-this-area-button"
-                                onClick={handleSearchThisArea}
-                                aria-label="Buscar imoveis nesta area do mapa"
-                            >
-                                <Search size={15} />
-                                <span>Buscar nesta area</span>
-                                {pendingVisibleCount > 0 && <strong>{pendingVisibleCount}</strong>}
-                            </button>
-                        )}
                     </div>
                 }
                 overlay={selectedMapProperty && (
                     <MapPropertyPreviewCard
                         property={selectedMapProperty}
+                        properties={visibleMapProperties}
+                        selectedPropertyId={selectedMapPropertyId}
                         onClose={handleMapPropertyPreviewClose}
-                        onPreviousProperty={visibleMapProperties.length > 1 ? handleMapPreviewPreviousProperty : undefined}
-                        onNextProperty={visibleMapProperties.length > 1 ? handleMapPreviewNextProperty : undefined}
-                        currentPosition={selectedMapPropertyIndex >= 0 ? selectedMapPropertyIndex + 1 : undefined}
-                        similarCount={visibleMapProperties.length}
+                        onPropertySelect={visibleMapProperties.length > 1 ? handleMapPreviewPropertySelect : undefined}
                     />
                 )}
             >

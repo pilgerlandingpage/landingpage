@@ -914,9 +914,10 @@ export default function PropertyLandingStyles() {
                 .plp-nearby-benefits-head h3 {
                     margin: 0;
                     color: var(--plp-ink);
-                    font-size: 21px;
-                    line-height: 1.15;
-                    font-weight: 950;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 20px;
+                    line-height: 1.18;
+                    font-weight: 700;
                     letter-spacing: 0;
                 }
 
@@ -925,7 +926,7 @@ export default function PropertyLandingStyles() {
                     margin: 0;
                     color: var(--plp-muted);
                     font-size: 13px;
-                    font-weight: 650;
+                    font-weight: 450;
                     line-height: 1.55;
                 }
 
@@ -968,7 +969,7 @@ export default function PropertyLandingStyles() {
                 .plp-nearby-benefit-card small {
                     color: var(--plp-muted);
                     font-size: 10px;
-                    font-weight: 900;
+                    font-weight: 700;
                     letter-spacing: .04em;
                     line-height: 1.1;
                     text-transform: uppercase;
@@ -977,7 +978,7 @@ export default function PropertyLandingStyles() {
                 .plp-nearby-benefit-card strong {
                     color: var(--plp-ink);
                     font-size: 13px;
-                    font-weight: 950;
+                    font-weight: 740;
                     line-height: 1.2;
                     overflow-wrap: anywhere;
                 }
@@ -986,7 +987,7 @@ export default function PropertyLandingStyles() {
                     color: #596068;
                     font-size: 11px;
                     font-style: normal;
-                    font-weight: 650;
+                    font-weight: 450;
                     line-height: 1.3;
                 }
 
@@ -1001,7 +1002,7 @@ export default function PropertyLandingStyles() {
                     background: #eee7d9;
                     color: #6f4e1f;
                     font-size: 11px;
-                    font-weight: 950;
+                    font-weight: 720;
                     line-height: 1;
                 }
 
@@ -1063,12 +1064,14 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefits-head h3 {
-                        font-size: 1.08rem;
+                        font-size: 1.02rem;
+                        font-weight: 700;
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefits-head p {
-                        font-size: 0.78rem;
-                        line-height: 1.42;
+                        font-size: 0.74rem;
+                        font-weight: 430;
+                        line-height: 1.45;
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefit-card {
@@ -1083,16 +1086,19 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefit-card strong {
-                        font-size: 0.78rem;
+                        font-size: 0.74rem;
+                        font-weight: 720;
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefit-card em {
-                        font-size: 0.68rem;
+                        font-size: 0.66rem;
+                        font-weight: 430;
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefit-card b {
                         padding: 4px 7px;
-                        font-size: 0.68rem;
+                        font-size: 0.64rem;
+                        font-weight: 720;
                     }
                 }
 
@@ -3844,6 +3850,14 @@ export default function PropertyLandingStyles() {
                         font-family: Inter, "Segoe UI", Arial, sans-serif;
                     }
 
+                    .plp-mobile-card .plp-kicker {
+                        margin-bottom: 4px;
+                        color: #9a7337;
+                        font-size: 0.61rem;
+                        font-weight: 760;
+                        letter-spacing: 0.12em;
+                    }
+
                     .plp-mobile-card--summary {
                         margin-top: 2px;
                     }
@@ -3857,18 +3871,19 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-card-head h2 {
                         margin: 0;
                         color: #171a1d;
-                        font-size: 1.45rem;
-                        line-height: 1.08;
-                        font-weight: 950;
+                        font-family: 'Playfair Display', Georgia, serif;
+                        font-size: 1.23rem;
+                        line-height: 1.16;
+                        font-weight: 700;
                         letter-spacing: 0;
                     }
 
                     .plp-mobile-card p {
                         margin: 0;
                         color: #343a40;
-                        font-size: 1rem;
-                        line-height: 1.5;
-                        font-weight: 580;
+                        font-size: 0.92rem;
+                        line-height: 1.52;
+                        font-weight: 440;
                     }
 
                     .plp-mobile-text-link {
@@ -3876,7 +3891,8 @@ export default function PropertyLandingStyles() {
                         width: fit-content;
                         margin-top: 13px;
                         color: var(--plp-gold-dark);
-                        font-weight: 950;
+                        font-size: 0.88rem;
+                        font-weight: 720;
                         text-decoration: underline;
                         text-underline-offset: 4px;
                     }
@@ -3914,16 +3930,16 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-market-grid small,
                     .plp-mobile-timeline-item small {
                         color: #6f756f;
-                        font-size: 0.72rem;
-                        font-weight: 800;
+                        font-size: 0.68rem;
+                        font-weight: 650;
                         line-height: 1.25;
                     }
 
                     .plp-mobile-fact-tile strong {
                         color: #171a1d;
-                        font-size: 0.96rem;
-                        font-weight: 950;
-                        line-height: 1.18;
+                        font-size: 0.9rem;
+                        font-weight: 720;
+                        line-height: 1.2;
                     }
 
                     .plp-mobile-detail-list {
@@ -3938,8 +3954,8 @@ export default function PropertyLandingStyles() {
                         align-items: flex-start;
                         gap: 8px;
                         color: #2f3439;
-                        font-size: 0.92rem;
-                        font-weight: 760;
+                        font-size: 0.86rem;
+                        font-weight: 560;
                         line-height: 1.35;
                     }
 
@@ -3968,15 +3984,16 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-broker-head h2 {
                         margin: 2px 0 3px;
                         color: #171a1d;
-                        font-size: 1.28rem;
+                        font-family: 'Playfair Display', Georgia, serif;
+                        font-size: 1.1rem;
                         line-height: 1.1;
-                        font-weight: 950;
+                        font-weight: 700;
                     }
 
                     .plp-mobile-broker-head p {
                         color: #697069;
-                        font-size: 0.87rem;
-                        font-weight: 700;
+                        font-size: 0.78rem;
+                        font-weight: 500;
                     }
 
                     .plp-mobile-broker-card .plp-mobile-sheet-actions {
@@ -4005,8 +4022,8 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-market-grid strong {
                         color: #171a1d;
-                        font-size: 1.02rem;
-                        font-weight: 950;
+                        font-size: 0.94rem;
+                        font-weight: 720;
                         line-height: 1.15;
                     }
 
@@ -4031,16 +4048,16 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-timeline-item > span {
                         color: #4d544d;
-                        font-size: 0.72rem;
-                        font-weight: 900;
+                        font-size: 0.68rem;
+                        font-weight: 680;
                         line-height: 1.16;
                     }
 
                     .plp-mobile-timeline-item strong {
                         display: block;
                         color: #171a1d;
-                        font-size: 0.84rem;
-                        font-weight: 930;
+                        font-size: 0.8rem;
+                        font-weight: 700;
                         line-height: 1.16;
                     }
 
@@ -4052,7 +4069,7 @@ export default function PropertyLandingStyles() {
                         background: #eee6d6;
                         color: #16130f;
                         font-size: 0.74rem;
-                        font-weight: 950;
+                        font-weight: 720;
                         line-height: 1;
                         overflow-wrap: anywhere;
                     }
@@ -4179,8 +4196,8 @@ export default function PropertyLandingStyles() {
                         border-radius: 999px;
                         background: rgba(18,18,18,0.72);
                         color: #fff;
-                        font-size: 0.72rem;
-                        font-weight: 900;
+                        font-size: 0.66rem;
+                        font-weight: 700;
                     }
 
                     .plp-mobile-related-card div {
@@ -4191,15 +4208,15 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-related-card strong {
                         color: #171a1d;
-                        font-size: 1.25rem;
-                        font-weight: 950;
-                        line-height: 1;
+                        font-size: 1.02rem;
+                        font-weight: 720;
+                        line-height: 1.08;
                     }
 
                     .plp-mobile-related-card small {
                         color: #3c423c;
-                        font-size: 0.84rem;
-                        font-weight: 850;
+                        font-size: 0.78rem;
+                        font-weight: 560;
                     }
 
                     .plp-mobile-related-card p {
@@ -4223,13 +4240,13 @@ export default function PropertyLandingStyles() {
                         position: fixed;
                         left: 0;
                         right: 0;
-                        top: max(14px, env(safe-area-inset-top));
+                        top: max(12px, env(safe-area-inset-top));
                         z-index: 120;
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
-                        gap: 12px;
-                        padding: 0 20px;
+                        gap: 10px;
+                        padding: 0 18px;
                         pointer-events: none;
                     }
 
@@ -4244,42 +4261,52 @@ export default function PropertyLandingStyles() {
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
-                        width: 58px;
-                        height: 58px;
-                        border: 0;
+                        width: 46px;
+                        height: 46px;
+                        border: 1px solid rgba(184,148,95,0.2);
                         border-radius: 999px;
-                        background: rgba(255,255,255,0.84);
-                        color: #111;
+                        background: rgba(255,252,246,0.88);
+                        color: #7d5a25;
                         text-decoration: none;
-                        box-shadow: 0 14px 34px rgba(12,16,18,0.18);
-                        backdrop-filter: blur(14px);
-                        -webkit-backdrop-filter: blur(14px);
+                        box-shadow: 0 10px 24px rgba(12,16,18,0.14);
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                    }
+
+                    .plp-mobile-back-pill svg,
+                    .plp-mobile-action-pill svg {
+                        width: 18px;
+                        height: 18px;
+                        stroke-width: 2;
                     }
 
                     .plp-mobile-action-group {
                         display: inline-flex;
                         align-items: center;
-                        gap: 4px;
-                        min-height: 58px;
-                        padding: 0 10px;
+                        gap: 2px;
+                        min-height: 46px;
+                        padding: 0 6px;
+                        border: 1px solid rgba(184,148,95,0.18);
                         border-radius: 999px;
-                        background: rgba(255,255,255,0.84);
-                        box-shadow: 0 14px 34px rgba(12,16,18,0.18);
-                        backdrop-filter: blur(14px);
-                        -webkit-backdrop-filter: blur(14px);
+                        background: rgba(255,252,246,0.88);
+                        box-shadow: 0 10px 24px rgba(12,16,18,0.14);
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
                     }
 
                     .plp-mobile-action-group .plp-mobile-action-pill {
-                        width: 46px;
-                        height: 46px;
+                        width: 34px;
+                        height: 34px;
+                        border: 0;
                         background: transparent;
+                        color: #7d5a25;
                         box-shadow: none;
                         font-size: 0;
                     }
 
                     .plp-mobile-action-group .plp-mobile-action-pill svg {
-                        width: 23px;
-                        height: 23px;
+                        width: 18px;
+                        height: 18px;
                     }
 
                     .plp-mobile-media-item {
@@ -4315,7 +4342,7 @@ export default function PropertyLandingStyles() {
                         background: rgba(255,255,255,0.92);
                         color: #172027;
                         font-size: 0.8rem;
-                        font-weight: 900;
+                        font-weight: 720;
                         box-shadow: 0 10px 24px rgba(0,0,0,0.16);
                     }
 
@@ -4565,7 +4592,7 @@ export default function PropertyLandingStyles() {
                         box-shadow: 0 12px 30px rgba(0,0,0,.24);
                         cursor: pointer;
                         display: inline-flex;
-                        font-weight: 950;
+                        font-weight: 760;
                         justify-content: center;
                         pointer-events: auto;
                         position: absolute;
@@ -4663,16 +4690,16 @@ export default function PropertyLandingStyles() {
                         background: #fff0f0;
                         color: #c9233d;
                         font-size: 0.75rem;
-                        font-weight: 950;
+                        font-weight: 720;
                     }
 
                     .plp-mobile-sheet-price {
                         display: block;
                         max-width: 100%;
                         color: #171a1d;
-                        font-size: clamp(1.72rem, 7.2vw, 2.16rem);
-                        font-weight: 950;
-                        line-height: 1;
+                        font-size: clamp(1.44rem, 6.2vw, 1.86rem);
+                        font-weight: 820;
+                        line-height: 1.04;
                         letter-spacing: 0;
                         overflow-wrap: anywhere;
                     }
@@ -4682,8 +4709,8 @@ export default function PropertyLandingStyles() {
                         flex-wrap: wrap;
                         gap: 7px 13px;
                         color: #2f3439;
-                        font-size: 0.8rem;
-                        font-weight: 900;
+                        font-size: 0.74rem;
+                        font-weight: 660;
                     }
 
                     .plp-mobile-sheet-facts span {
@@ -4703,8 +4730,8 @@ export default function PropertyLandingStyles() {
                         min-width: 0;
                         margin: 0;
                         color: #343a40;
-                        font-size: 0.84rem;
-                        font-weight: 650;
+                        font-size: 0.8rem;
+                        font-weight: 500;
                         line-height: 1.35;
                         overflow: hidden;
                         display: -webkit-box;
@@ -4737,8 +4764,8 @@ export default function PropertyLandingStyles() {
                         justify-content: center;
                         min-height: 38px;
                         border-radius: 10px;
-                        font-size: 0.76rem;
-                        font-weight: 950;
+                        font-size: 0.72rem;
+                        font-weight: 760;
                         text-decoration: none;
                     }
 

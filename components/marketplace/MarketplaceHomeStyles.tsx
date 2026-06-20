@@ -1102,8 +1102,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(to top, rgba(128,88,24,0.72), rgba(190,142,48,0.34) 52%, rgba(255,235,188,0.12) 78%, rgba(255,248,226,0.04)),
-            linear-gradient(90deg, rgba(105,70,18,0.34), rgba(223,193,142,0.08));
+            linear-gradient(to top, rgba(8,8,8,0.82), rgba(8,8,8,0.42) 52%, rgba(8,8,8,0.16) 78%, rgba(8,8,8,0.04)),
+            linear-gradient(90deg, rgba(8,8,8,0.46), rgba(8,8,8,0.08));
         }
         .premium-category-icon {
           position: absolute;
@@ -1999,8 +1999,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(to top, rgba(128,88,24,0.72), rgba(190,142,48,0.34) 50%, rgba(255,235,188,0.12) 76%, rgba(255,248,226,0.04)),
-            linear-gradient(90deg, rgba(105,70,18,0.34), rgba(223,193,142,0.08));
+            linear-gradient(to top, rgba(8,8,8,0.82), rgba(8,8,8,0.42) 50%, rgba(8,8,8,0.16) 76%, rgba(8,8,8,0.04)),
+            linear-gradient(90deg, rgba(8,8,8,0.46), rgba(8,8,8,0.08));
         }
         .gp-location-copy {
           position: absolute;
@@ -2073,8 +2073,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .premium-category-shade {
             background:
-              linear-gradient(to top, rgba(128,88,24,0.68), rgba(190,142,48,0.3) 54%, rgba(255,235,188,0.1) 78%, rgba(255,248,226,0.03)),
-              linear-gradient(90deg, rgba(105,70,18,0.28), rgba(223,193,142,0.06)) !important;
+              linear-gradient(to top, rgba(8,8,8,0.78), rgba(8,8,8,0.38) 54%, rgba(8,8,8,0.14) 78%, rgba(8,8,8,0.03)),
+              linear-gradient(90deg, rgba(8,8,8,0.38), rgba(8,8,8,0.06)) !important;
           }
           .gp-authority-strip {
             align-items: stretch !important;

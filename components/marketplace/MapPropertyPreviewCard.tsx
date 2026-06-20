@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent } from 'react'
+import type { UIEvent as ReactUIEvent } from 'react'
 import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Maximize2, Ruler, X } from 'lucide-react'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
@@ -32,11 +32,10 @@ type PreviewProperty = {
 
 type MapPropertyPreviewCardProps = {
     property: PreviewProperty
+    properties?: PreviewProperty[]
+    selectedPropertyId?: string | null
+    onPropertySelect?: (property: PreviewProperty, source: string) => void
     onClose: () => void
-    onPreviousProperty?: () => void
-    onNextProperty?: () => void
-    currentPosition?: number
-    similarCount?: number
 }
 
 const FALLBACK_IMAGE = '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
@@ -57,6 +56,11 @@ function normalizeText(value: unknown) {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
+}
+
+function compactNumber(value?: number | null) {
+    if (!value) return ''
+    return value.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
 }
 
 function galleryFor(property: PreviewProperty) {
@@ -82,29 +86,26 @@ function getBadges(property: PreviewProperty) {
     if (/reducao|baixou|oportunidade|preco/.test(text) && /reducao|baixou|oportunidade/.test(text)) badges.push('Reducao')
     if (property.video_url) badges.push('Video')
 
-    return badges.slice(0, 4)
+    return badges.slice(0, 3)
 }
 
-function compactNumber(value?: number | null) {
-    if (!value) return ''
-    return value.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
+function uniqueProperties(properties: PreviewProperty[] | undefined, fallback: PreviewProperty) {
+    const source = properties?.length ? properties : [fallback]
+    const seen = new Set<string>()
+    const unique: PreviewProperty[] = []
+
+    for (const item of source) {
+        if (!item?.id || seen.has(item.id)) continue
+        seen.add(item.id)
+        unique.push(item)
+    }
+
+    if (!seen.has(fallback.id)) unique.unshift(fallback)
+
+    return unique
 }
 
-export default function MapPropertyPreviewCard({
-    property,
-    onClose,
-    onPreviousProperty,
-    onNextProperty,
-    currentPosition,
-    similarCount,
-}: MapPropertyPreviewCardProps) {
-    const [imageState, setImageState] = useState<{ propertyId: string; index: number }>({ propertyId: property.id, index: 0 })
-    const touchStartX = useRef<number | null>(null)
-    const longPressTimer = useRef<number | null>(null)
-    const gallery = useMemo(() => galleryFor(property), [property])
-    const badges = useMemo(() => getBadges(property), [property])
-    const badgesKey = badges.join(', ')
-    const detailsHref = propertyDetailsPath(property.id)
+function previewMetaFor(property: PreviewProperty) {
     const displayTitle = replaceItajaiWithPraiaBrava(property.title || 'Imovel selecionado')
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
@@ -120,130 +121,249 @@ export default function MapPropertyPreviewCard({
         property.parking_spaces ? { key: 'parking', icon: Car, label: `${property.parking_spaces} vagas` } : null,
         area ? { key: 'area', icon: Ruler, label: `${compactNumber(area)} m2` } : null,
     ].filter(Boolean) as Array<{ key: string; icon: typeof BedDouble; label: string }>
-    const hasSimilarNavigation = Boolean(similarCount && similarCount > 1 && (onNextProperty || onPreviousProperty))
-    const propertyPositionLabel = hasSimilarNavigation && currentPosition && similarCount
-        ? `${currentPosition}/${similarCount}`
-        : 'Semelhantes'
 
-    const activeIndex = imageState.propertyId === property.id
-        ? Math.min(imageState.index, Math.max(0, gallery.length - 1))
-        : 0
+    return {
+        detailsHref: propertyDetailsPath(property.id),
+        displayCity,
+        displayNeighborhood,
+        displayTitle,
+        location,
+        stats,
+    }
+}
 
-    const clearLongPressTimer = useCallback(() => {
-        if (longPressTimer.current === null) return
-        window.clearTimeout(longPressTimer.current)
-        longPressTimer.current = null
-    }, [])
+export default function MapPropertyPreviewCard({
+    property,
+    properties,
+    selectedPropertyId,
+    onPropertySelect,
+    onClose,
+}: MapPropertyPreviewCardProps) {
+    const [imageState, setImageState] = useState<{ propertyId: string; index: number }>({ propertyId: property.id, index: 0 })
+    const touchStartX = useRef<number | null>(null)
+    const trackRef = useRef<HTMLDivElement | null>(null)
+    const itemRefs = useRef<Record<string, HTMLElement | null>>({})
+    const scrollFrame = useRef<number | null>(null)
+    const suppressScrollSelection = useRef(false)
+    const suppressScrollTimer = useRef<number | null>(null)
+    const internalSelectionRef = useRef<string | null>(null)
+    const lastAnnouncedPropertyId = useRef<string | null>(null)
 
-    const requestSimilarProperty = useCallback((source: string, direction: 1 | -1 = 1) => {
-        const handler = direction === -1 ? onPreviousProperty : onNextProperty
-        if (!handler) return
-
-        clearLongPressTimer()
-        handler()
-        void trackEvent('property_map_preview_similar_requested', {
-            property_id: property.id,
-            title: displayTitle,
-            source,
-            direction,
-            current_position: currentPosition || null,
-            similar_count: similarCount || null,
-        })
-    }, [clearLongPressTimer, currentPosition, displayTitle, onNextProperty, onPreviousProperty, property.id, similarCount])
-
-    useEffect(() => () => {
-        clearLongPressTimer()
-    }, [clearLongPressTimer])
+    const carouselProperties = useMemo(() => uniqueProperties(properties, property), [properties, property])
+    const selectedId = selectedPropertyId || property.id
+    const carouselMode = carouselProperties.length > 1
+    const selectedProperty = carouselProperties.find(item => item.id === selectedId) || property
+    const selectedGallery = useMemo(() => galleryFor(selectedProperty), [selectedProperty])
+    const selectedBadges = useMemo(() => getBadges(selectedProperty), [selectedProperty])
+    const selectedBadgesKey = selectedBadges.join(', ')
+    const selectedMeta = useMemo(() => previewMetaFor(selectedProperty), [selectedProperty])
 
     useEffect(() => {
         void trackEvent('property_map_preview_opened', {
-            property_id: property.id,
-            title: displayTitle,
-            price: property.price || null,
-            city: displayCity || null,
-            neighborhood: displayNeighborhood || null,
-            property_type: property.property_type || null,
-            gallery_count: gallery.length,
-            badges,
+            property_id: selectedProperty.id,
+            title: selectedMeta.displayTitle,
+            price: selectedProperty.price || null,
+            city: selectedMeta.displayCity || null,
+            neighborhood: selectedMeta.displayNeighborhood || null,
+            property_type: selectedProperty.property_type || null,
+            gallery_count: selectedGallery.length,
+            badges: selectedBadges,
         })
-    }, [badges, badgesKey, displayCity, displayNeighborhood, displayTitle, gallery.length, property.id, property.price, property.property_type])
+    }, [
+        selectedBadges,
+        selectedBadgesKey,
+        selectedGallery.length,
+        selectedMeta.displayCity,
+        selectedMeta.displayNeighborhood,
+        selectedMeta.displayTitle,
+        selectedProperty.id,
+        selectedProperty.price,
+        selectedProperty.property_type,
+    ])
 
-    const goToImage = useCallback((direction: 1 | -1) => {
-        if (direction === 1 && activeIndex >= gallery.length - 1 && onNextProperty) {
-            requestSimilarProperty('gallery_end', 1)
+    useEffect(() => () => {
+        if (scrollFrame.current !== null) {
+            window.cancelAnimationFrame(scrollFrame.current)
+            scrollFrame.current = null
+        }
+        if (suppressScrollTimer.current !== null) {
+            window.clearTimeout(suppressScrollTimer.current)
+            suppressScrollTimer.current = null
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!carouselMode) return
+
+        lastAnnouncedPropertyId.current = selectedId
+
+        if (internalSelectionRef.current === selectedId) {
+            internalSelectionRef.current = null
             return
         }
 
-        if (direction === -1 && activeIndex <= 0 && onPreviousProperty) {
-            requestSimilarProperty('gallery_start', -1)
-            return
-        }
+        const selectedNode = itemRefs.current[selectedId]
+        suppressScrollSelection.current = true
+        selectedNode?.scrollIntoView({
+            block: 'nearest',
+            inline: 'center',
+            behavior: 'auto',
+        })
 
+        if (suppressScrollTimer.current !== null) window.clearTimeout(suppressScrollTimer.current)
+        suppressScrollTimer.current = window.setTimeout(() => {
+            suppressScrollSelection.current = false
+            suppressScrollTimer.current = null
+        }, 120)
+    }, [carouselMode, selectedId])
+
+    const selectProperty = useCallback((nextProperty: PreviewProperty, source: string) => {
+        if (!nextProperty?.id || nextProperty.id === lastAnnouncedPropertyId.current) return
+
+        lastAnnouncedPropertyId.current = nextProperty.id
+        internalSelectionRef.current = nextProperty.id
+        onPropertySelect?.(nextProperty, source)
+    }, [onPropertySelect])
+
+    const handleTrackScroll = useCallback((event: ReactUIEvent<HTMLDivElement>) => {
+        if (!carouselMode || !onPropertySelect) return
+        if (suppressScrollSelection.current) return
+
+        const track = event.currentTarget
+        if (scrollFrame.current !== null) window.cancelAnimationFrame(scrollFrame.current)
+
+        scrollFrame.current = window.requestAnimationFrame(() => {
+            scrollFrame.current = null
+
+            const center = track.scrollLeft + (track.clientWidth / 2)
+            let closestProperty: PreviewProperty | null = null
+            let closestDistance = Number.POSITIVE_INFINITY
+
+            for (const item of carouselProperties) {
+                const node = itemRefs.current[item.id]
+                if (!node) continue
+
+                const itemCenter = node.offsetLeft + (node.offsetWidth / 2)
+                const distance = Math.abs(itemCenter - center)
+                if (distance < closestDistance) {
+                    closestDistance = distance
+                    closestProperty = item
+                }
+            }
+
+            if (closestProperty) selectProperty(closestProperty, 'carousel_scroll')
+        })
+    }, [carouselMode, carouselProperties, onPropertySelect, selectProperty])
+
+    const goToImage = useCallback((targetProperty: PreviewProperty, gallery: string[], direction: 1 | -1) => {
+        if (gallery.length < 2) return
+
+        const activeIndex = imageState.propertyId === targetProperty.id
+            ? Math.min(imageState.index, Math.max(0, gallery.length - 1))
+            : 0
         const nextIndex = (activeIndex + direction + gallery.length) % gallery.length
+        const meta = previewMetaFor(targetProperty)
+
         setImageState({
-            propertyId: property.id,
+            propertyId: targetProperty.id,
             index: nextIndex,
         })
         void trackEvent('property_map_preview_photo_changed', {
-            property_id: property.id,
-            title: displayTitle,
+            property_id: targetProperty.id,
+            title: meta.displayTitle,
             direction,
             image_index: nextIndex,
             gallery_count: gallery.length,
         })
-    }, [activeIndex, displayTitle, gallery.length, onNextProperty, onPreviousProperty, property.id, requestSimilarProperty])
+    }, [imageState.index, imageState.propertyId])
 
-    const handleTouchEnd = useCallback((clientX: number) => {
+    const handlePhotoTouchEnd = useCallback((targetProperty: PreviewProperty, gallery: string[], clientX: number) => {
         if (touchStartX.current === null) return
 
         const delta = clientX - touchStartX.current
         touchStartX.current = null
 
         if (Math.abs(delta) < SWIPE_THRESHOLD) return
-
-        if (gallery.length < 2 && hasSimilarNavigation) {
-            requestSimilarProperty(delta < 0 ? 'single_photo_swipe_next' : 'single_photo_swipe_previous', delta < 0 ? 1 : -1)
-            return
-        }
-
-        goToImage(delta < 0 ? 1 : -1)
-    }, [gallery.length, goToImage, hasSimilarNavigation, requestSimilarProperty])
-
-    const handleBodyPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-        if (!hasSimilarNavigation || !onNextProperty) return
-        if ((event.target as HTMLElement).closest('a,button')) return
-
-        clearLongPressTimer()
-        longPressTimer.current = window.setTimeout(() => {
-            requestSimilarProperty('body_long_press', 1)
-        }, 560)
-    }, [clearLongPressTimer, hasSimilarNavigation, onNextProperty, requestSimilarProperty])
+        goToImage(targetProperty, gallery, delta < 0 ? 1 : -1)
+    }, [goToImage])
 
     return (
         <article className="map-property-preview" aria-live="polite">
             <style>{`
                 .map-property-preview {
                     position: absolute;
-                    left: 50%;
-                    bottom: 18px;
+                    left: 0;
+                    right: 0;
+                    bottom: 112px;
                     z-index: 1;
+                    isolation: isolate;
+                    pointer-events: none;
+                }
+                .map-property-preview::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    top: -22px;
+                    bottom: -180px;
+                    z-index: 0;
+                    background:
+                        linear-gradient(
+                            180deg,
+                            rgba(255,255,255,0.88) 0%,
+                            rgba(255,255,255,0.64) 20%,
+                            rgba(242,236,226,0.22) 38%,
+                            rgba(12,11,9,0.48) 68%,
+                            rgba(12,11,9,0.78) 100%
+                        );
+                    backdrop-filter: blur(5px) saturate(0.72) brightness(0.82);
+                    -webkit-backdrop-filter: blur(5px) saturate(0.72) brightness(0.82);
+                    pointer-events: none;
+                }
+                .map-preview-track {
+                    position: relative;
+                    z-index: 2;
+                    display: flex;
+                    gap: 10px;
+                    overflow-x: auto;
+                    overflow-y: visible;
+                    padding: 0 16px 7px;
+                    scroll-padding-inline: 16px;
+                    scroll-snap-type: x mandatory;
+                    scrollbar-width: none;
+                    touch-action: pan-x;
+                    pointer-events: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                .map-preview-track::-webkit-scrollbar {
+                    display: none;
+                }
+                .map-preview-card {
+                    position: relative;
                     display: grid;
-                    grid-template-columns: 158px minmax(0, 1fr);
-                    width: min(520px, calc(100vw - 24px));
-                    min-height: 172px;
+                    grid-template-columns: 132px minmax(0, 1fr);
+                    flex: 0 0 min(390px, calc(100vw - 48px));
+                    min-height: 158px;
                     overflow: hidden;
-                    border: 1px solid rgba(255,255,255,0.28);
-                    border-radius: 18px;
-                    background: rgba(16,15,13,0.92);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 17px;
+                    background: rgba(17,16,14,0.94);
                     color: #f7f1e7;
-                    box-shadow: 0 24px 64px rgba(0,0,0,0.38);
-                    transform: translateX(-50%);
-                    backdrop-filter: blur(22px);
-                    -webkit-backdrop-filter: blur(22px);
+                    box-shadow: 0 18px 48px rgba(0,0,0,0.34);
+                    scroll-snap-align: center;
+                    transform: translateZ(0);
+                    backdrop-filter: blur(18px);
+                    -webkit-backdrop-filter: blur(18px);
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+                }
+                .map-preview-card.is-active {
+                    border-color: rgba(223,193,142,0.78);
+                    transform: translateZ(0) scale(1);
+                    box-shadow: 0 18px 48px rgba(0,0,0,0.34), 0 0 0 1px rgba(223,193,142,0.18);
                 }
                 .map-preview-media {
                     position: relative;
-                    min-height: 172px;
+                    min-height: 158px;
                     overflow: hidden;
                     background: #1f1b16;
                     touch-action: pan-y;
@@ -252,50 +372,78 @@ export default function MapPropertyPreviewCard({
                     display: block;
                     width: 100%;
                     height: 100%;
-                    min-height: 172px;
+                    min-height: 158px;
                     object-fit: cover;
                 }
                 .map-preview-media::after {
                     content: '';
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(180deg, rgba(0,0,0,0.18), transparent 38%, rgba(0,0,0,0.42));
+                    background: linear-gradient(180deg, rgba(0,0,0,0.18), transparent 42%, rgba(0,0,0,0.48));
                     pointer-events: none;
                 }
                 .map-preview-badges {
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    right: 38px;
+                    top: 8px;
+                    left: 8px;
+                    right: 36px;
                     z-index: 2;
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 5px;
+                    gap: 4px;
                 }
                 .map-preview-badge {
-                    padding: 5px 7px;
-                    border: 1px solid rgba(255,255,255,0.22);
+                    padding: 4px 6px;
+                    border: 1px solid rgba(255,255,255,0.2);
                     border-radius: 999px;
-                    background: rgba(12,12,12,0.72);
-                    color: #f6dfaa;
-                    font: 900 0.56rem/1 'Inter', sans-serif;
+                    background: rgba(12,12,12,0.7);
+                    color: #f4d99c;
+                    font: 850 0.48rem/1 'Inter', sans-serif;
                     letter-spacing: 0.08em;
                     text-transform: uppercase;
                 }
                 .map-preview-photo-count {
                     position: absolute;
-                    left: 10px;
-                    bottom: 10px;
+                    left: 8px;
+                    bottom: 8px;
                     z-index: 2;
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
-                    height: 24px;
-                    padding: 0 8px;
+                    height: 22px;
+                    padding: 0 7px;
                     border-radius: 999px;
                     background: rgba(10,10,10,0.72);
                     color: #fff;
-                    font: 850 0.62rem/1 'Inter', sans-serif;
+                    font: 800 0.58rem/1 'Inter', sans-serif;
+                }
+                .map-preview-photo-dots {
+                    position: absolute;
+                    left: 50%;
+                    bottom: 14px;
+                    z-index: 3;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 8px;
+                    border-radius: 999px;
+                    background: rgba(12,12,12,0.28);
+                    transform: translateX(-50%);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    pointer-events: none;
+                }
+                .map-preview-photo-dot {
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.58);
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+                }
+                .map-preview-photo-dot.is-active {
+                    width: 7px;
+                    height: 7px;
+                    background: #dfc18e;
                 }
                 .map-preview-nav {
                     position: absolute;
@@ -303,26 +451,26 @@ export default function MapPropertyPreviewCard({
                     z-index: 3;
                     display: grid;
                     place-items: center;
-                    width: 30px;
-                    height: 30px;
-                    border: 1px solid rgba(255,255,255,0.22);
+                    width: 28px;
+                    height: 28px;
+                    border: 1px solid rgba(255,255,255,0.2);
                     border-radius: 50%;
-                    background: rgba(12,12,12,0.72);
+                    background: rgba(12,12,12,0.7);
                     color: #fff;
                     cursor: pointer;
                     transform: translateY(-50%);
                 }
-                .map-preview-nav.prev { left: 8px; }
-                .map-preview-nav.next { right: 8px; }
+                .map-preview-nav.prev { left: 7px; }
+                .map-preview-nav.next { right: 7px; }
                 .map-preview-close {
                     position: absolute;
-                    top: 10px;
-                    right: 10px;
+                    top: 8px;
+                    right: 8px;
                     z-index: 4;
                     display: grid;
                     place-items: center;
-                    width: 30px;
-                    height: 30px;
+                    width: 28px;
+                    height: 28px;
                     border: 1px solid rgba(255,255,255,0.22);
                     border-radius: 50%;
                     background: rgba(12,12,12,0.72);
@@ -332,17 +480,17 @@ export default function MapPropertyPreviewCard({
                 .map-preview-body {
                     display: grid;
                     align-content: stretch;
-                    gap: 10px;
-                    padding: 14px 14px 13px;
+                    gap: 7px;
                     min-width: 0;
+                    padding: 12px 12px 11px;
                 }
                 .map-preview-location {
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
                     min-width: 0;
-                    color: rgba(247,241,231,0.7);
-                    font: 800 0.62rem/1.3 'Inter', sans-serif;
+                    color: rgba(247,241,231,0.68);
+                    font: 750 0.55rem/1.25 'Inter', sans-serif;
                     letter-spacing: 0.08em;
                     text-transform: uppercase;
                 }
@@ -357,35 +505,35 @@ export default function MapPropertyPreviewCard({
                     overflow: hidden;
                     color: #fff8ea;
                     font-family: 'Noto Serif', Georgia, serif;
-                    font-size: 1.05rem;
-                    font-weight: 800;
+                    font-size: 0.92rem;
+                    font-weight: 750;
                     line-height: 1.08;
                     -webkit-box-orient: vertical;
                     -webkit-line-clamp: 2;
                 }
                 .map-preview-price {
                     color: #f0cf88;
-                    font: 950 1.03rem/1 'Inter', sans-serif;
+                    font: 900 0.88rem/1 'Inter', sans-serif;
                 }
                 .map-preview-stats {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 6px;
+                    gap: 5px;
                 }
                 .map-preview-stat {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
-                    min-height: 26px;
-                    padding: 0 8px;
+                    gap: 4px;
+                    min-height: 23px;
+                    padding: 0 7px;
                     border: 1px solid rgba(255,255,255,0.09);
                     border-radius: 999px;
                     background: rgba(255,255,255,0.06);
                     color: rgba(247,241,231,0.82);
-                    font: 800 0.66rem/1 'Inter', sans-serif;
+                    font: 750 0.58rem/1 'Inter', sans-serif;
                     white-space: nowrap;
                 }
-                .map-preview-actions {
+                .map-preview-footer {
                     display: grid;
                     grid-template-columns: 1fr auto;
                     gap: 8px;
@@ -396,119 +544,120 @@ export default function MapPropertyPreviewCard({
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 7px;
-                    min-height: 38px;
-                    padding: 0 12px;
-                    border-radius: 11px;
+                    gap: 6px;
+                    min-height: 32px;
+                    padding: 0 11px;
+                    border-radius: 10px;
                     background: linear-gradient(135deg, #dfc18e, #b8945f);
                     color: #111;
-                    font: 950 0.68rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.12em;
+                    font: 900 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.1em;
                     text-decoration: none;
                     text-transform: uppercase;
                 }
                 .map-preview-index {
-                    color: rgba(247,241,231,0.58);
-                    font: 850 0.66rem/1 'Inter', sans-serif;
+                    color: rgba(247,241,231,0.55);
+                    font: 800 0.56rem/1.2 'Inter', sans-serif;
+                    text-align: right;
                     white-space: nowrap;
                 }
-                .map-preview-progress {
-                    display: grid;
-                    justify-items: end;
-                    gap: 5px;
-                    min-width: 78px;
-                }
-                .map-preview-property-nav {
+                .map-preview-swipe-hint {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
-                    min-height: 28px;
-                    padding: 0 5px;
-                    border: 1px solid rgba(255,255,255,0.12);
+                    justify-content: center;
+                    gap: 4px;
+                    max-width: max-content;
+                    margin: -1px auto 0;
+                    padding: 5px 10px;
+                    border: 1px solid rgba(223,193,142,0.32);
                     border-radius: 999px;
-                    background: rgba(255,255,255,0.06);
-                }
-                .map-preview-property-nav button {
-                    display: grid;
-                    place-items: center;
-                    width: 22px;
-                    height: 22px;
-                    border: 0;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.12);
-                    color: #fff8ea;
-                    cursor: pointer;
-                }
-                .map-preview-property-nav span {
+                    background: rgba(17,16,14,0.76);
                     color: rgba(255,248,234,0.78);
-                    font: 900 0.58rem/1 'Inter', sans-serif;
-                    white-space: nowrap;
+                    font: 750 0.56rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.04em;
+                    pointer-events: none;
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
                 }
                 @media (min-width: 1024px) {
                     .map-property-preview {
                         left: auto;
-                        right: 46px;
-                        bottom: 46px;
-                        transform: none;
-                        width: min(520px, calc(57vw - 92px));
+                        right: 36px;
+                        bottom: 42px;
+                        width: min(440px, calc(57vw - 72px));
+                    }
+                    .map-preview-track {
+                        padding-inline: 0;
+                        scroll-padding-inline: 0;
+                    }
+                    .map-preview-card {
+                        flex-basis: min(430px, 100%);
                     }
                 }
                 @media (max-width: 649px) {
                     .map-property-preview {
-                        bottom: 92px;
+                        bottom: 150px;
+                    }
+                    .map-property-preview::before {
+                        top: -10px;
+                        bottom: -260px;
+                    }
+                    .map-preview-track {
+                        gap: 9px;
+                        padding: 0 13px 7px;
+                        scroll-padding-inline: 13px;
+                    }
+                    .map-preview-card {
                         grid-template-columns: 1fr;
-                        width: min(410px, calc(100vw - 18px));
+                        flex-basis: min(335px, calc(100vw - 54px));
                         min-height: 0;
-                        max-height: calc(100vh - 188px);
-                        border-radius: 16px;
+                        border-radius: 15px;
                     }
                     .map-preview-media,
                     .map-preview-media img {
-                        height: 190px;
-                        min-height: 190px;
+                        height: 142px;
+                        min-height: 142px;
                     }
                     .map-preview-body {
-                        gap: 8px;
-                        padding: 13px 14px 14px;
+                        gap: 6px;
+                        padding: 10px 12px 11px;
                     }
                     .map-preview-title {
-                        font-size: 0.86rem;
+                        font-size: 0.82rem;
                     }
                     .map-preview-price {
-                        font-size: 0.88rem;
+                        font-size: 0.82rem;
                     }
                     .map-preview-stats {
                         gap: 4px;
                     }
                     .map-preview-stat {
-                        min-height: 23px;
+                        min-height: 21px;
                         padding: 0 6px;
-                        font-size: 0.58rem;
+                        font-size: 0.54rem;
                     }
                     .map-preview-details {
-                        min-height: 33px;
+                        min-height: 30px;
                         padding: 0 9px;
-                        font-size: 0.58rem;
+                        font-size: 0.54rem;
                         letter-spacing: 0.08em;
                     }
                     .map-preview-index,
-                    .map-preview-location {
-                        font-size: 0.55rem;
-                    }
-                    .map-preview-nav {
-                        display: grid;
+                    .map-preview-location,
+                    .map-preview-swipe-hint {
+                        font-size: 0.52rem;
                     }
                     .map-preview-badges {
                         right: 34px;
                     }
                     .map-preview-badge {
-                        padding: 4px 6px;
-                        font-size: 0.5rem;
+                        padding: 3px 6px;
+                        font-size: 0.46rem;
                     }
                 }
                 @media (max-width: 380px) {
-                    .map-property-preview {
-                        width: min(370px, calc(100vw - 14px));
+                    .map-preview-card {
+                        flex-basis: min(312px, calc(100vw - 46px));
                     }
                     .map-preview-stats .map-preview-stat:nth-child(n+3) {
                         display: none;
@@ -516,101 +665,158 @@ export default function MapPropertyPreviewCard({
                 }
             `}</style>
 
-            <div
-                className="map-preview-media"
-                onTouchStart={event => {
-                    touchStartX.current = event.touches[0]?.clientX ?? null
-                }}
-                onTouchEnd={event => {
-                    handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)
-                }}
-            >
-                <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={displayTitle} loading="lazy" />
-                {badges.length > 0 && (
-                    <div className="map-preview-badges" aria-label="Destaques do imovel">
-                        {badges.map(badge => <span className="map-preview-badge" key={badge}>{badge}</span>)}
-                    </div>
-                )}
-                <span className="map-preview-photo-count">
-                    <Camera size={13} />
-                    {gallery.length}
-                </span>
-                {gallery.length > 1 && (
-                    <>
-                        <button type="button" className="map-preview-nav prev" aria-label="Foto anterior" onClick={() => goToImage(-1)}>
-                            <ChevronLeft size={16} />
-                        </button>
-                        <button type="button" className="map-preview-nav next" aria-label="Proxima foto" onClick={() => goToImage(1)}>
-                            <ChevronRight size={16} />
-                        </button>
-                    </>
-                )}
-            </div>
+            <div className="map-preview-track" ref={trackRef} onScroll={handleTrackScroll}>
+                {carouselProperties.map((item, index) => {
+                    const meta = previewMetaFor(item)
+                    const gallery = galleryFor(item)
+                    const badges = getBadges(item)
+                    const activeIndex = imageState.propertyId === item.id
+                        ? Math.min(imageState.index, Math.max(0, gallery.length - 1))
+                        : 0
+                    const isSelected = item.id === selectedId
 
-            <button type="button" className="map-preview-close" aria-label="Fechar preview do imovel" onClick={onClose}>
-                <X size={16} />
-            </button>
-
-            <div
-                className="map-preview-body"
-                onPointerDown={handleBodyPointerDown}
-                onPointerUp={clearLongPressTimer}
-                onPointerLeave={clearLongPressTimer}
-                onPointerCancel={clearLongPressTimer}
-            >
-                <div className="map-preview-location">
-                    <MapPin size={13} />
-                    <span>{location || 'Litoral catarinense'}</span>
-                </div>
-                <h2 className="map-preview-title">{displayTitle}</h2>
-                <div className="map-preview-price">{formatPrice(property.price)}</div>
-                {stats.length > 0 && (
-                    <div className="map-preview-stats" aria-label="Dados principais">
-                        {stats.slice(0, 4).map(stat => {
-                            const Icon = stat.icon
-                            return (
-                                <span className="map-preview-stat" key={stat.key}>
-                                    <Icon size={13} />
-                                    {stat.label}
+                    return (
+                        <section
+                            className={`map-preview-card${isSelected ? ' is-active' : ''}`}
+                            key={item.id}
+                            ref={node => {
+                                itemRefs.current[item.id] = node
+                            }}
+                            onClick={() => selectProperty(item, 'carousel_click')}
+                            aria-label={meta.displayTitle}
+                        >
+                            <div
+                                className="map-preview-media"
+                                onTouchStart={event => {
+                                    event.stopPropagation()
+                                    touchStartX.current = event.touches[0]?.clientX ?? null
+                                }}
+                                onTouchMove={event => {
+                                    event.stopPropagation()
+                                }}
+                                onTouchEnd={event => {
+                                    event.stopPropagation()
+                                    handlePhotoTouchEnd(item, gallery, event.changedTouches[0]?.clientX ?? 0)
+                                }}
+                            >
+                                <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={meta.displayTitle} loading="lazy" />
+                                {badges.length > 0 && (
+                                    <div className="map-preview-badges" aria-label="Destaques do imovel">
+                                        {badges.map(badge => <span className="map-preview-badge" key={badge}>{badge}</span>)}
+                                    </div>
+                                )}
+                                <span className="map-preview-photo-count">
+                                    <Camera size={12} />
+                                    {gallery.length}
                                 </span>
-                            )
-                        })}
-                    </div>
-                )}
-                <div className="map-preview-actions">
-                    <Link
-                        href={detailsHref}
-                        className="map-preview-details"
-                        onClick={() => {
-                            void trackEvent('property_map_preview_details_clicked', {
-                                property_id: property.id,
-                                title: displayTitle,
-                                price: property.price || null,
-                                destination: detailsHref,
-                            })
-                        }}
-                    >
-                        Ver detalhes
-                        <Maximize2 size={14} />
-                    </Link>
-                    <div className="map-preview-progress">
-                        {hasSimilarNavigation && (
-                            <div className="map-preview-property-nav" aria-label="Navegar por imoveis semelhantes">
-                                <button type="button" aria-label="Imovel anterior" onClick={() => requestSimilarProperty('property_nav_previous', -1)}>
-                                    <ChevronLeft size={13} />
-                                </button>
-                                <span>{propertyPositionLabel}</span>
-                                <button type="button" aria-label="Proximo imovel" onClick={() => requestSimilarProperty('property_nav_next', 1)}>
-                                    <ChevronRight size={13} />
-                                </button>
+                                {gallery.length > 1 && (
+                                    <div className="map-preview-photo-dots" aria-hidden="true">
+                                        {Array.from({ length: Math.min(gallery.length, 6) }).map((_, dotIndex) => {
+                                            const isActive = dotIndex === Math.min(activeIndex, 5)
+                                            return (
+                                                <span
+                                                    className={`map-preview-photo-dot${isActive ? ' is-active' : ''}`}
+                                                    key={`${item.id}-photo-dot-${dotIndex}`}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                                {gallery.length > 1 && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className="map-preview-nav prev"
+                                            aria-label="Foto anterior"
+                                            onClick={event => {
+                                                event.stopPropagation()
+                                                goToImage(item, gallery, -1)
+                                            }}
+                                        >
+                                            <ChevronLeft size={15} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="map-preview-nav next"
+                                            aria-label="Proxima foto"
+                                            onClick={event => {
+                                                event.stopPropagation()
+                                                goToImage(item, gallery, 1)
+                                            }}
+                                        >
+                                            <ChevronRight size={15} />
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                        )}
-                        <span className="map-preview-index">
-                            {activeIndex + 1}/{gallery.length} fotos
-                        </span>
-                    </div>
-                </div>
+
+                            <button
+                                type="button"
+                                className="map-preview-close"
+                                aria-label="Fechar preview do imovel"
+                                onClick={event => {
+                                    event.stopPropagation()
+                                    onClose()
+                                }}
+                            >
+                                <X size={15} />
+                            </button>
+
+                            <div className="map-preview-body">
+                                <div className="map-preview-location">
+                                    <MapPin size={12} />
+                                    <span>{meta.location || 'Litoral catarinense'}</span>
+                                </div>
+                                <h2 className="map-preview-title">{meta.displayTitle}</h2>
+                                <div className="map-preview-price">{formatPrice(item.price)}</div>
+                                {meta.stats.length > 0 && (
+                                    <div className="map-preview-stats" aria-label="Dados principais">
+                                        {meta.stats.slice(0, 3).map(stat => {
+                                            const Icon = stat.icon
+                                            return (
+                                                <span className="map-preview-stat" key={stat.key}>
+                                                    <Icon size={12} />
+                                                    {stat.label}
+                                                </span>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                                <div className="map-preview-footer">
+                                    <Link
+                                        href={meta.detailsHref}
+                                        className="map-preview-details"
+                                        onClick={() => {
+                                            void trackEvent('property_map_preview_details_clicked', {
+                                                property_id: item.id,
+                                                title: meta.displayTitle,
+                                                price: item.price || null,
+                                                destination: meta.detailsHref,
+                                            })
+                                        }}
+                                    >
+                                        Ver detalhes
+                                        <Maximize2 size={12} />
+                                    </Link>
+                                    <span className="map-preview-index">
+                                        {index + 1}/{carouselProperties.length}
+                                        <br />
+                                        {activeIndex + 1}/{gallery.length} fotos
+                                    </span>
+                                </div>
+                            </div>
+                        </section>
+                    )
+                })}
             </div>
+
+            {carouselMode && (
+                <div className="map-preview-swipe-hint" aria-hidden="true">
+                    <ChevronLeft size={12} />
+                    <span>Arraste para ver semelhantes</span>
+                    <ChevronRight size={12} />
+                </div>
+            )}
         </article>
     )
 }

@@ -59,7 +59,6 @@ interface PropertyMapProps {
     onDrawAreaChange?: (area: MapDrawArea | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     onUserBoundsChange?: (bounds: MapBounds) => void
-    onLocateAreaChange?: (bounds: MapBounds, location: UserLocationSnapshot) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -558,6 +557,57 @@ function MapUpdater({
     return null
 }
 
+function SelectedPropertyFocusController({
+    items,
+    selectedPropertyId,
+    enabled = true,
+}: {
+    items: MappedProperty[]
+    selectedPropertyId?: string | null
+    enabled?: boolean
+}) {
+    const map = useMap()
+    const lastFocusKey = useRef('')
+
+    useEffect(() => {
+        if (!enabled || !selectedPropertyId) return
+
+        const item = items.find(candidate => String(candidate.property.id) === String(selectedPropertyId))
+        if (!item) return
+
+        const focusKey = `${selectedPropertyId}:${item.latLng[0].toFixed(6)},${item.latLng[1].toFixed(6)}`
+        if (lastFocusKey.current === focusKey) return
+        lastFocusKey.current = focusKey
+
+        map.invalidateSize({ animate: false })
+
+        const focusZoom = Math.max(map.getZoom(), 15)
+        const container = map.getContainer()
+        const containerRect = container.getBoundingClientRect()
+        const previewCard = document.querySelector<HTMLElement>('.map-property-preview')
+        const previewRect = previewCard?.getBoundingClientRect()
+        const visibleBottom = previewRect && previewRect.top > containerRect.top && previewRect.top < containerRect.bottom
+            ? previewRect.top - containerRect.top - 18
+            : containerRect.height
+        const targetPoint = L.point(
+            containerRect.width / 2,
+            Math.max(110, Math.min(containerRect.height * 0.46, visibleBottom / 2))
+        )
+        const mapCenterPoint = L.point(containerRect.width / 2, containerRect.height / 2)
+        const adjustedCenter = map.unproject(
+            map.project(item.latLng, focusZoom).add(mapCenterPoint.subtract(targetPoint)),
+            focusZoom
+        )
+
+        map.flyTo(adjustedCenter, focusZoom, {
+            duration: 0.48,
+            easeLinearity: 0.22,
+        })
+    }, [enabled, items, map, selectedPropertyId])
+
+    return null
+}
+
 function BoundsEmitter({
     onBoundsChange,
     onUserBoundsChange,
@@ -676,7 +726,11 @@ function UserLocationController({
                     bounds,
                 }
 
-                map.flyTo([latitude, longitude], 15, { duration: 0.75 })
+                map.stop()
+                map.setView([latitude, longitude], Math.max(map.getZoom(), 14), {
+                    animate: true,
+                    duration: 0.45,
+                })
                 onLocated(location)
                 onStatusChange('active')
             },
@@ -1205,7 +1259,7 @@ function ClusterLayer({
                         key={property.id}
                         position={latLng}
                         icon={createIcon(property, { isHovered, isSelected, zoom })}
-                        zIndexOffset={isHovered ? 1000 : 0}
+                        zIndexOffset={isSelected ? 1400 : isHovered ? 1000 : 0}
                         eventHandlers={{
                             mouseover: (e: any) => {
                                 if (!onPropertySelect) e.target.openPopup()
@@ -1317,7 +1371,6 @@ export default function PropertyMap({
     onDrawAreaChange,
     onBoundsChange,
     onUserBoundsChange,
-    onLocateAreaChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -1442,13 +1495,9 @@ export default function PropertyMap({
 
     const handleUserLocated = useCallback((location: UserMapLocation) => {
         setUserMapLocation(location)
-        onBoundsChange?.(location.bounds)
-        onUserBoundsChange?.(location.bounds)
-        onLocateAreaChange?.(location.bounds, {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            accuracy: location.accuracy,
-        })
+        window.setTimeout(() => {
+            setLocateState(current => current === 'active' ? 'idle' : current)
+        }, 2200)
 
         void saveMapLocationSignal({
             latitude: location.latitude,
@@ -1462,7 +1511,7 @@ export default function PropertyMap({
             accuracy: location.accuracy || null,
             bounds: location.bounds,
         })
-    }, [onBoundsChange, onLocateAreaChange, onUserBoundsChange])
+    }, [])
 
     const handleDrawAreaCommit = useCallback((area: MapDrawArea) => {
         setDrawModeEnabled(false)
@@ -2649,7 +2698,7 @@ export default function PropertyMap({
                 }
                 .marker-wrap {
                     gap: 0;
-                    filter: drop-shadow(0 8px 15px rgba(23,12,15,0.34));
+                    filter: drop-shadow(0 8px 15px rgba(8,38,82,0.32));
                 }
                 .marker-wrap--dot {
                     display: grid;
@@ -2664,25 +2713,26 @@ export default function PropertyMap({
                     height: 14px;
                     border: 2px solid #fff;
                     border-radius: 999px;
-                    background: #b0042f;
+                    background: #1463ff;
                     box-shadow:
                         0 8px 18px rgba(0,0,0,0.26),
-                        0 0 0 7px rgba(176,4,47,0.14);
+                        0 0 0 7px rgba(20,99,255,0.14);
                     transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
                 }
                 .marker-wrap--dot.marker-wrap--active .marker-dot {
-                    background: #70001d;
+                    background: #0a3f9f;
                     transform: scale(1.22);
                     box-shadow:
                         0 10px 22px rgba(0,0,0,0.3),
-                        0 0 0 8px rgba(112,0,29,0.18);
+                        0 0 0 8px rgba(10,63,159,0.18);
                 }
                 .marker-wrap--dot.marker-wrap--selected .marker-dot {
-                    background: #1463ff;
+                    background: #0f8f5a;
                     transform: scale(1.28);
                     box-shadow:
                         0 12px 24px rgba(0,0,0,0.32),
-                        0 0 0 8px rgba(20,99,255,0.18);
+                        0 0 0 8px rgba(15,143,90,0.2),
+                        0 0 28px rgba(15,143,90,0.32);
                 }
                 .marker-wrap--bubble {
                     align-items: center;
@@ -2694,13 +2744,13 @@ export default function PropertyMap({
                     padding: 7px 11px 8px;
                     border: 2px solid #fff;
                     border-radius: 18px;
-                    background: #b0042f;
+                    background: #1463ff;
                     color: #fff;
                     font: 950 0.76rem/1 'Inter', sans-serif;
                     letter-spacing: 0;
                     box-shadow:
                         0 12px 26px rgba(0,0,0,0.28),
-                        0 0 0 6px rgba(176,4,47,0.12);
+                        0 0 0 6px rgba(20,99,255,0.12);
                     backdrop-filter: none;
                 }
                 .marker-wrap--bubble .marker-price::before {
@@ -2712,36 +2762,37 @@ export default function PropertyMap({
                     height: 0;
                     border-left: 7px solid transparent;
                     border-right: 7px solid transparent;
-                    border-top: 9px solid #b0042f;
+                    border-top: 9px solid #1463ff;
                     transform: translateX(-50%);
                 }
                 .marker-wrap--bubble.marker-wrap--active {
                     transform: translateY(-4px) scale(1.14);
-                    filter: drop-shadow(0 14px 30px rgba(112,0,29,0.35));
+                    filter: drop-shadow(0 14px 30px rgba(10,63,159,0.35));
                 }
                 .marker-wrap--bubble.marker-wrap--active .marker-price {
-                    background: #70001d;
+                    background: #0a3f9f;
                     color: #fff;
                     box-shadow:
                         0 14px 28px rgba(0,0,0,0.34),
-                        0 0 0 7px rgba(112,0,29,0.16);
+                        0 0 0 7px rgba(10,63,159,0.16);
                 }
                 .marker-wrap--bubble.marker-wrap--active .marker-price::before {
-                    border-top-color: #70001d;
+                    border-top-color: #0a3f9f;
                 }
                 .marker-wrap--bubble.marker-wrap--selected {
                     transform: translateY(-4px) scale(1.16);
-                    filter: drop-shadow(0 16px 34px rgba(20,99,255,0.34));
+                    filter: drop-shadow(0 16px 34px rgba(15,143,90,0.36));
                 }
                 .marker-wrap--bubble.marker-wrap--selected .marker-price {
-                    background: #1463ff;
+                    background: #0f8f5a;
                     color: #fff;
                     box-shadow:
                         0 16px 32px rgba(0,0,0,0.34),
-                        0 0 0 7px rgba(20,99,255,0.17);
+                        0 0 0 7px rgba(15,143,90,0.18),
+                        0 0 34px rgba(15,143,90,0.28);
                 }
                 .marker-wrap--bubble.marker-wrap--selected .marker-price::before {
-                    border-top-color: #1463ff;
+                    border-top-color: #0f8f5a;
                 }
                 .cluster-dot-wrap {
                     display: grid;
@@ -2759,10 +2810,10 @@ export default function PropertyMap({
                     padding: 0 5px;
                     border: 2px solid #fff;
                     border-radius: 999px;
-                    background: #b0042f;
+                    background: #1463ff;
                     color: #fff;
                     font: 950 0.56rem/1 'Inter', sans-serif;
-                    box-shadow: 0 0 0 8px rgba(176,4,47,0.15);
+                    box-shadow: 0 0 0 8px rgba(20,99,255,0.15);
                 }
                 .cluster-orbit--price {
                     min-width: 86px;
@@ -2770,11 +2821,11 @@ export default function PropertyMap({
                     padding: 6px 10px;
                     border: 2px solid #fff;
                     border-radius: 19px;
-                    background: #9b0027;
+                    background: #0b56b7;
                     color: #fff;
                     box-shadow:
                         0 12px 24px rgba(0,0,0,0.3),
-                        0 0 0 6px rgba(155,0,39,0.13);
+                        0 0 0 6px rgba(11,86,183,0.13);
                     animation: none;
                 }
                 .cluster-orbit--price::after {
@@ -2784,7 +2835,7 @@ export default function PropertyMap({
                     bottom: -8px;
                     border-left: 7px solid transparent;
                     border-right: 7px solid transparent;
-                    border-top: 9px solid #9b0027;
+                    border-top: 9px solid #0b56b7;
                     transform: translateX(-50%);
                 }
                 .cluster-orbit--price .cluster-count {
@@ -3143,6 +3194,11 @@ export default function PropertyMap({
                 )}
 
                 <MapUpdater points={mapPoints} refitKey={refitKey} hasFocusArea={hasDrawArea || hasRegionArea} />
+                <SelectedPropertyFocusController
+                    items={validProperties}
+                    selectedPropertyId={selectedPropertyId}
+                    enabled={!drawModeEnabled}
+                />
                 <MapInteractionController enabled={interactionEnabled && !drawModeEnabled} />
                 <BoundsEmitter onBoundsChange={onBoundsChange} onUserBoundsChange={onUserBoundsChange} />
                 <UserLocationController

@@ -1,9 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { BadgeCheck, Camera, Crown, MessageCircle, TrendingUp } from 'lucide-react'
-import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import { BadgeCheck, Camera, Crown, TrendingUp } from 'lucide-react'
 
 const AUTHORITY_BADGES = [
     { icon: Crown, label: 'Especialista em luxo' },
@@ -31,14 +29,14 @@ export default function AboutGuilhermeSection() {
 
                 <div className="about-copy">
                     <span className="about-kicker">Sobre o Guilherme</span>
-                    <h2>O rosto por trás da curadoria mais desejada do litoral.</h2>
+                    <h2>Curadoria de alto padrão com visão de mercado.</h2>
                     <p className="about-lead">
-                        Guilherme Pilger transformou o alto padrão em conteúdo, presença e estratégia.
-                        Ele une audiência, bastidor de mercado e atendimento direto para apresentar oportunidades com mais contexto.
+                        Guilherme Pilger filtra oportunidades, lê o movimento do litoral e mostra
+                        o que realmente faz sentido antes da visita.
                     </p>
 
                     <div className="about-quote">
-                        Antes de vender, Guilherme entrega clareza: o que vale, onde está a oportunidade e qual movimento faz sentido.
+                        Menos volume. Mais contexto para decidir com segurança.
                     </div>
 
                     <div className="about-badges">
@@ -53,21 +51,6 @@ export default function AboutGuilhermeSection() {
                         })}
                     </div>
 
-                    <div className="about-actions">
-                        <Link href="/busca?priceMin=5000000" className="about-button about-button-gold">
-                            Ver curadoria premium
-                        </Link>
-                        <WhatsAppCaptureLink
-                            phone="5547992528080"
-                            message="Olá! Vim pelo site e quero falar com o Guilherme."
-                            slug="home"
-                            template="about-guilherme"
-                            className="about-button about-button-dark"
-                        >
-                            <MessageCircle size={16} />
-                            Falar com Guilherme
-                        </WhatsAppCaptureLink>
-                    </div>
                 </div>
             </div>
 
@@ -185,62 +168,26 @@ export default function AboutGuilhermeSection() {
                 .about-badges {
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, max-content));
-                    gap: 8px;
+                    gap: 6px;
                     align-items: center;
-                    margin-top: 16px;
+                    margin-top: 14px;
                 }
                 .about-badges span {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 6px;
-                    min-height: 30px;
-                    padding: 0 10px;
+                    gap: 5px;
+                    min-height: 24px;
+                    padding: 0 8px;
                     border: 1px solid rgba(223,193,142,0.18);
                     border-radius: 999px;
                     background: rgba(255,255,255,0.055);
                     color: #ead8b5;
-                    font-size: 0.62rem;
+                    font-size: 0.55rem;
                     font-weight: 900;
-                    letter-spacing: 0.06em;
+                    letter-spacing: 0.045em;
                     text-transform: uppercase;
                     white-space: nowrap;
-                }
-                .about-actions {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    margin-top: 18px;
-                }
-                :global(.about-button) {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    min-height: 40px;
-                    padding: 0 16px;
-                    border: 1px solid transparent;
-                    border-radius: 999px;
-                    font-size: 0.68rem;
-                    font-weight: 950;
-                    letter-spacing: 0.1em;
-                    text-transform: uppercase;
-                    text-decoration: none;
-                    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-                    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
-                }
-                :global(.about-button:hover) {
-                    transform: translateY(-2px);
-                    box-shadow: 0 16px 34px rgba(0,0,0,0.24);
-                }
-                :global(.about-button-gold) {
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
-                    color: #111 !important;
-                }
-                :global(.about-button-dark) {
-                    border-color: rgba(223,193,142,0.3);
-                    background: rgba(255,255,255,0.09);
-                    color: #fff8ea !important;
                 }
                 @media (max-width: 860px) {
                     .about-section {
@@ -251,7 +198,7 @@ export default function AboutGuilhermeSection() {
                         gap: 18px;
                         width: 100%;
                         max-width: 100%;
-                        padding: 28px 18px 84px;
+                        padding: 28px 18px 44px;
                         overflow: hidden;
                     }
                     .about-media {
@@ -289,28 +236,22 @@ export default function AboutGuilhermeSection() {
                     }
                     .about-badges {
                         width: 100%;
-                        grid-template-columns: 1fr;
-                        gap: 7px;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 6px;
                     }
                     .about-badges span {
-                        justify-content: flex-start;
-                        gap: 6px;
-                        min-height: 30px;
-                        padding: 0 11px;
-                        font-size: 0.62rem;
-                        letter-spacing: 0.055em;
+                        justify-content: center;
+                        gap: 5px;
+                        min-height: 25px;
+                        padding: 0 7px;
+                        font-size: 0.51rem;
+                        letter-spacing: 0.035em;
                     }
                     .about-badges span :global(svg) {
                         display: block;
-                        width: 13px;
-                        height: 13px;
+                        width: 11px;
+                        height: 11px;
                         flex: 0 0 auto;
-                    }
-                    .about-actions {
-                        flex-direction: column;
-                    }
-                    :global(.about-button) {
-                        width: 100%;
                     }
                 }
                 @media (min-width: 861px) and (max-width: 1180px) {

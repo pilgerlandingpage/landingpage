@@ -98,6 +98,7 @@ function boldifyTitle(title: string): ReactNode {
 
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
+    const showFavoriteToggle = !isHomeCompact
     const [isFavorite, setIsFavorite] = useState(false)
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
     const detailsHref = propertyDetailsPath(property.id)
@@ -114,10 +115,12 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageCount = Array.isArray(property.images) ? property.images.filter(Boolean).length : 0
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
-    const intelligenceLabels = getPropertyIntelligenceLabels(property, {
-        includeFrontSea: false,
-        max: isHomeCompact ? 2 : 3,
-    })
+    const intelligenceLabels = isHomeCompact
+        ? []
+        : getPropertyIntelligenceLabels(property, {
+            includeFrontSea: false,
+            max: 3,
+        })
     const cardTitle = displayTitle
     const isFrenteMar = /frente.?mar|frente ao mar/i.test(displayTitle) || amenities.some(a => /frente.?mar/i.test(a))
     /*
@@ -151,6 +154,8 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     }
 
     useEffect(() => {
+        if (!showFavoriteToggle) return
+
         const syncFavoriteState = () => {
             setIsFavorite(readFavoriteIds().includes(property.id))
         }
@@ -163,7 +168,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             window.removeEventListener('storage', syncFavoriteState)
             window.removeEventListener('pilger:favorites-changed', syncFavoriteState)
         }
-    }, [property.id])
+    }, [property.id, showFavoriteToggle])
 
     const handleFavoriteToggle = (event: MouseEvent<HTMLButtonElement>) => {
         event.preventDefault()
@@ -225,15 +230,17 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         </>
                     )}
                 </Link>
-                <button
-                    type="button"
-                    className={`favorite-toggle ${isFavorite ? 'favorite-toggle-active' : ''}`}
-                    aria-label={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-                    aria-pressed={isFavorite}
-                    onClick={handleFavoriteToggle}
-                >
-                    <Heart size={isHomeCompact ? 21 : 19} />
-                </button>
+                {showFavoriteToggle && (
+                    <button
+                        type="button"
+                        className={`favorite-toggle ${isFavorite ? 'favorite-toggle-active' : ''}`}
+                        aria-label={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                        aria-pressed={isFavorite}
+                        onClick={handleFavoriteToggle}
+                    >
+                        <Heart size={19} />
+                    </button>
+                )}
 
             </div>
 
@@ -482,7 +489,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     font-weight: 560;
                     letter-spacing: 0.025em;
                     line-height: 1.12;
-                    margin-bottom: 6px;
+                    margin-bottom: 1px;
                     text-transform: uppercase;
                 }
                 .property-card-compact .compact-location-row svg {
@@ -498,7 +505,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 .property-card-compact .property-price {
                     font-size: 0.86rem;
                     font-weight: 620;
-                    margin-top: 6px;
+                    margin-top: 2px;
                 }
                 .property-card-compact .property-meta {
                     border-bottom: 0;
@@ -507,7 +514,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     gap: 6px 9px;
                     font-size: 0.73rem;
                     line-height: 1;
-                    margin-top: 8px;
+                    margin-top: 6px;
                     padding-bottom: 8px;
                 }
                 .property-card-compact .property-meta .compact-feature-item {
@@ -668,15 +675,18 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     .property-card-compact .property-location {
                         font-size: 0.6rem;
                     }
+                    .property-card-compact .compact-location-row {
+                        margin-bottom: 1px;
+                    }
                     .property-card-compact .property-price {
                         font-size: 0.7rem;
                         font-weight: 620;
-                        margin-top: 5px;
+                        margin-top: 2px;
                     }
                     .property-card-compact .property-meta {
                         font-size: 0.58rem;
                         gap: 4px 6px;
-                        margin-top: 5px;
+                        margin-top: 4px;
                     }
                     .favorite-toggle {
                         top: 7px;

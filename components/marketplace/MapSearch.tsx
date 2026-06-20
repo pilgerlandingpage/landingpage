@@ -72,7 +72,6 @@ interface MapSearchProps {
     onDrawAreaChange?: (area: MapDrawArea | null) => void
     onBoundsChange?: (bounds: MapBounds) => void
     onUserBoundsChange?: (bounds: MapBounds) => void
-    onLocateAreaChange?: (bounds: MapBounds, location: { latitude: number; longitude: number; accuracy?: number | null }) => void
     refitKey?: string
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
@@ -90,7 +89,6 @@ export default function MapSearch({
     onDrawAreaChange,
     onBoundsChange,
     onUserBoundsChange,
-    onLocateAreaChange,
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
@@ -109,7 +107,6 @@ export default function MapSearch({
                 onDrawAreaChange={onDrawAreaChange}
                 onBoundsChange={onBoundsChange}
                 onUserBoundsChange={onUserBoundsChange}
-                onLocateAreaChange={onLocateAreaChange}
                 refitKey={refitKey}
                 interactionEnabled={interactionEnabled}
                 officeMarker={officeMarker}
