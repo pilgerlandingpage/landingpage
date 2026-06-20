@@ -596,15 +596,15 @@ export default function MapPropertyPreviewCard({
                 }
                 @media (max-width: 649px) {
                     .map-property-preview {
-                        bottom: 150px;
+                        bottom: 96px;
                     }
                     .map-property-preview::before {
-                        top: -10px;
-                        bottom: -260px;
+                        top: -4px;
+                        bottom: -208px;
                     }
                     .map-preview-track {
                         gap: 9px;
-                        padding: 0 13px 7px;
+                        padding: 0 13px 5px;
                         scroll-padding-inline: 13px;
                     }
                     .map-preview-card {
@@ -615,38 +615,52 @@ export default function MapPropertyPreviewCard({
                     }
                     .map-preview-media,
                     .map-preview-media img {
-                        height: 114px;
-                        min-height: 114px;
+                        height: 94px;
+                        min-height: 94px;
                     }
                     .map-preview-body {
-                        gap: 5px;
-                        padding: 8px 10px 9px;
+                        gap: 4px;
+                        padding: 7px 9px 8px;
                     }
                     .map-preview-title {
-                        font-size: 0.76rem;
-                        line-height: 1.04;
+                        font-size: 0.72rem;
+                        line-height: 1.02;
                     }
                     .map-preview-price {
-                        font-size: 0.78rem;
+                        font-size: 0.74rem;
                     }
                     .map-preview-stats {
                         gap: 3px;
                     }
                     .map-preview-stat {
-                        min-height: 19px;
+                        min-height: 18px;
                         padding: 0 5px;
-                        font-size: 0.5rem;
+                        font-size: 0.48rem;
                     }
                     .map-preview-details {
-                        min-height: 27px;
+                        min-height: 25px;
                         padding: 0 8px;
-                        font-size: 0.5rem;
-                        letter-spacing: 0.08em;
+                        font-size: 0.48rem;
+                        letter-spacing: 0.07em;
                     }
                     .map-preview-index,
                     .map-preview-location,
                     .map-preview-swipe-hint {
-                        font-size: 0.49rem;
+                        font-size: 0.47rem;
+                    }
+                    .map-preview-footer {
+                        gap: 6px;
+                    }
+                    .map-preview-photo-count {
+                        bottom: 6px;
+                        height: 19px;
+                        padding: 0 6px;
+                        font-size: 0.5rem;
+                    }
+                    .map-preview-photo-dots {
+                        bottom: 10px;
+                        gap: 4px;
+                        padding: 4px 7px;
                     }
                     .map-preview-badges {
                         right: 34px;
