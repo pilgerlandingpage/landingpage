@@ -899,6 +899,9 @@ export default async function PropertyDetailPage({
     const propertyUrl = absoluteUrl(propertyPath)
     const propertyTrackingMetadata = {
         property_id: property.id,
+        property_slug: canonicalSegment,
+        property_path: propertyPath,
+        canonical_url: propertyUrl,
         property_url: propertyUrl,
         property_title: displayTitle,
         title: displayTitle,
@@ -1127,6 +1130,8 @@ export default async function PropertyDetailPage({
                 city={displayCity}
                 neighborhood={displayNeighborhood}
                 propertyType={property.property_type}
+                propertyPath={propertyPath}
+                propertySlug={canonicalSegment}
             />
             <GlobalHeader />
 

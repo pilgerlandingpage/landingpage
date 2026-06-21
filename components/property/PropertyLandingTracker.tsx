@@ -14,6 +14,8 @@ type PropertyLandingTrackerProps = {
     city?: string | null
     neighborhood?: string | null
     propertyType?: string | null
+    propertyPath?: string | null
+    propertySlug?: string | null
 }
 
 function cleanText(value: string | null | undefined) {
@@ -23,6 +25,28 @@ function cleanText(value: string | null | undefined) {
 function relatedPropertyIdFromHref(href: string) {
     const match = href.match(/\/imovel\/([^/?#]+)\/detalhes/)
     return match?.[1] || extractPropertyIdFromSeoSlug(href)
+}
+
+function isUuid(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+}
+
+function propertySlugFromPath(pathname: string) {
+    const match = pathname.match(/\/imovel\/([^/?#]+)(?:\/detalhes)?/)
+    const segment = match?.[1] ? decodeURIComponent(match[1]) : ''
+    if (!segment || isUuid(segment)) return null
+    return segment
+}
+
+function relatedPropertyFromHref(href: string) {
+    const match = href.match(/\/imovel\/([^/?#]+)\/detalhes/)
+    const segment = match?.[1] ? decodeURIComponent(match[1]) : ''
+    const embeddedId = extractPropertyIdFromSeoSlug(segment || href)
+    const propertyId = embeddedId || (segment && isUuid(segment) ? segment : null)
+    const propertySlug = segment && !isUuid(segment) ? segment : null
+    const propertyPath = segment ? `/imovel/${encodeURIComponent(segment)}/detalhes` : null
+
+    return { propertyId, propertySlug, propertyPath }
 }
 
 function isWhatsAppCta(anchor: HTMLAnchorElement, href: string) {
@@ -69,12 +93,20 @@ export default function PropertyLandingTracker({
     city,
     neighborhood,
     propertyType,
+    propertyPath,
+    propertySlug,
 }: PropertyLandingTrackerProps) {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
         const alertId = params.get('alert_id') || null
         const alertTitle = params.get('alert_title') || null
+        const pagePath = window.location.pathname
         const propertyUrl = window.location.href
+        const resolvedPropertyPath = propertyPath || pagePath
+        const resolvedPropertySlug = propertySlug || propertySlugFromPath(pagePath)
+        const canonicalUrl = resolvedPropertyPath
+            ? `${window.location.origin}${resolvedPropertyPath}`
+            : propertyUrl
         const urlTracking = {
             utm_source: params.get('utm_source') || null,
             utm_medium: params.get('utm_medium') || null,
@@ -87,9 +119,17 @@ export default function PropertyLandingTracker({
             link_type: params.get('link_type') || null,
             alert_id: alertId,
             alert_title: alertTitle,
+            page_path: pagePath,
+            page_url: propertyUrl,
+            property_path: resolvedPropertyPath,
+            property_slug: resolvedPropertySlug,
+            canonical_url: canonicalUrl,
         }
         const baseMetadata = {
             property_id: propertyId,
+            property_slug: resolvedPropertySlug,
+            property_path: resolvedPropertyPath,
+            canonical_url: canonicalUrl,
             property_title: title,
             title,
             price: price || null,
@@ -195,10 +235,13 @@ export default function PropertyLandingTracker({
             }
 
             const targetPropertyId = relatedPropertyIdFromHref(href)
-            if (targetPropertyId) {
+            const relatedProperty = relatedPropertyFromHref(href)
+            if (targetPropertyId || relatedProperty.propertySlug) {
                 void trackEvent('property_details_landing_related_clicked', {
                     ...baseMetadata,
-                    target_property_id: targetPropertyId,
+                    target_property_id: relatedProperty.propertyId || null,
+                    target_property_slug: relatedProperty.propertySlug || null,
+                    target_property_path: relatedProperty.propertyPath || null,
                     link_label: linkLabel,
                     target_url: href,
                 })
@@ -210,7 +253,7 @@ export default function PropertyLandingTracker({
             root.removeEventListener('click', handleClick)
             sectionObserver?.disconnect()
         }
-    }, [city, neighborhood, price, propertyId, propertyType, title])
+    }, [city, neighborhood, price, propertyId, propertyPath, propertySlug, propertyType, title])
 
     return null
 }

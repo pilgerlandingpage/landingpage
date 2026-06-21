@@ -6,7 +6,11 @@ export type LeadActivityEntry = {
     label: string
     occurred_at: string
     property_id?: string
+    property_slug?: string
+    property_path?: string
     target_property_id?: string
+    target_property_slug?: string
+    target_property_path?: string
     property_title?: string
     alert_id?: string
     alert_title?: string
@@ -18,6 +22,7 @@ export type LeadActivityEntry = {
     followup_priority?: string
     source?: string
     page_path?: string
+    page_url?: string
     page_title?: string
     detail?: string
     selected_region?: string
@@ -597,8 +602,18 @@ export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEn
     const propertyId = asString(metadata.property_id)
         || asString(metadata.from_property_id)
         || asString(metadata.lead_property_id)
+    const propertySlug = asString(metadata.property_slug)
+        || asString(metadata.propertySlug)
+        || asString(metadata.slug)
+    const propertyPath = asString(metadata.property_path)
+        || asString(metadata.propertyPath)
+        || asString(metadata.canonical_path)
     const targetPropertyId = asString(metadata.target_property_id)
         || asString(metadata.to_property_id)
+    const targetPropertySlug = asString(metadata.target_property_slug)
+        || asString(metadata.targetPropertySlug)
+    const targetPropertyPath = asString(metadata.target_property_path)
+        || asString(metadata.targetPropertyPath)
     const coordinateCount = asFiniteNumber(metadata.coordinate_count)
     const visibleCount = asFiniteNumber(metadata.visible_count)
     const boundsSummary = formatBoundsSummary(metadata.bounds)
@@ -621,7 +636,11 @@ export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEn
         label: eventLabel(row.event_type, metadata),
         occurred_at: row.created_at || new Date().toISOString(),
         ...(propertyId ? { property_id: propertyId } : {}),
+        ...(propertySlug ? { property_slug: propertySlug } : {}),
+        ...(propertyPath ? { property_path: propertyPath } : {}),
         ...(targetPropertyId ? { target_property_id: targetPropertyId } : {}),
+        ...(targetPropertySlug ? { target_property_slug: targetPropertySlug } : {}),
+        ...(targetPropertyPath ? { target_property_path: targetPropertyPath } : {}),
         ...(propertyTitle ? { property_title: propertyTitle } : {}),
         ...(asString(metadata.alert_id) ? { alert_id: asString(metadata.alert_id) } : {}),
         ...(asString(metadata.alert_title) ? { alert_title: asString(metadata.alert_title) } : {}),
@@ -633,6 +652,7 @@ export function leadActivityFromEvent(row: LeadActivityEventRow): LeadActivityEn
         ...(asString(metadata.followup_priority) || asString(suggestedFollowup.priority) ? { followup_priority: asString(metadata.followup_priority) || asString(suggestedFollowup.priority) } : {}),
         ...(asString(metadata.source) ? { source: asString(metadata.source) } : {}),
         ...(asString(metadata.page_path) ? { page_path: asString(metadata.page_path) } : {}),
+        ...(asString(metadata.page_url) ? { page_url: asString(metadata.page_url) } : {}),
         ...(asString(metadata.page_title) ? { page_title: asString(metadata.page_title) } : {}),
         ...(eventDetail(row.event_type, metadata) ? { detail: eventDetail(row.event_type, metadata) } : {}),
         ...(asString(metadata.selected_region) ? { selected_region: asString(metadata.selected_region) } : {}),
@@ -741,6 +761,7 @@ function scoreNextAction(params: {
 
 function buildBehaviorSummary(activity: LeadActivityEntry[]) {
     let viewed_property_ids: string[] = []
+    let viewed_property_slugs: string[] = []
     let liked_property_ids: string[] = []
     let disliked_property_ids: string[] = []
     let shared_property_ids: string[] = []
@@ -760,6 +781,7 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
     let last_map_intent: JsonRecord | null = null
     let latest_premium_intent: JsonRecord | null = null
     let last_property_id: string | undefined
+    let last_property_slug: string | undefined
     let last_page_path: string | undefined
     let last_activity_at: string | undefined
     let last_location_view: string | undefined
@@ -768,7 +790,9 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
     for (const entry of activity) {
         event_counts[entry.event_type] = (event_counts[entry.event_type] || 0) + 1
         const propertyId = entry.property_id || entry.target_property_id
+        const propertySlug = entry.property_slug || entry.target_property_slug
         if (propertyId) last_property_id = propertyId
+        if (propertySlug) last_property_slug = propertySlug
         if (entry.page_path) last_page_path = entry.page_path
         if (entry.map_view) last_location_view = entry.map_view
         const regionSignal = entry.selected_region_label || entry.selected_region
@@ -862,6 +886,7 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
             || isPremiumIntentEvent(entry.event_type)
         ) {
             viewed_property_ids = addRecent(viewed_property_ids, propertyId)
+            viewed_property_slugs = addRecent(viewed_property_slugs, propertySlug)
         }
         if (entry.event_type === 'property_favorited') {
             liked_property_ids = addRecent(liked_property_ids, propertyId)
@@ -1083,6 +1108,7 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
         event_counts,
         last_activity_at: last_activity_at || null,
         last_property_id: last_property_id || null,
+        last_property_slug: last_property_slug || null,
         last_page_path: last_page_path || null,
         last_location_view: last_location_view || null,
         engagement_score: engagementScore,
@@ -1109,6 +1135,7 @@ function buildBehaviorSummary(activity: LeadActivityEntry[]) {
             valueReadingCount,
         }),
         viewed_property_ids,
+        viewed_property_slugs,
         liked_property_ids,
         disliked_property_ids,
         shared_property_ids,

@@ -896,6 +896,20 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         return params
     }, [activeChips, price, purpose, query, type])
 
+    const navigateToSearchResults = useCallback((source = 'home_map_search') => {
+        const params = buildSearchParams()
+        const queryString = params.toString()
+        const destination = queryString ? `/busca?${queryString}` : '/busca'
+
+        void trackEvent('home_map_search_submitted', {
+            ...getSearchSnapshot(),
+            source,
+            destination,
+        })
+        if (isGuidedSearchActive) finishGuidedSearch()
+        router.push(destination)
+    }, [buildSearchParams, finishGuidedSearch, getSearchSnapshot, isGuidedSearchActive, router])
+
     const applySearch = (event?: React.FormEvent) => {
         event?.preventDefault()
 
@@ -913,14 +927,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             return
         }
 
-        const params = buildSearchParams()
-        const queryString = params.toString()
-        void trackEvent('home_map_search_submitted', {
-            ...getSearchSnapshot(),
-            destination: queryString ? `/busca?${queryString}` : '/busca',
-        })
-        if (isGuidedSearchActive) finishGuidedSearch()
-        router.push(queryString ? `/busca?${queryString}` : '/busca')
+        navigateToSearchResults('home_map_form')
     }
 
     const clearSearch = () => {
@@ -1152,7 +1159,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                     </button>
                                 ))}
                             </div>
-                            <button type="button" className="home-map-open-button" onClick={() => openMapModal('home_map_preview_cta')}>
+                            <button type="button" className="home-map-open-button" onClick={() => navigateToSearchResults('home_map_preview_cta')}>
                                 Pesquisa avançada
                             </button>
                         </div>

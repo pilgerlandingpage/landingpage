@@ -32,6 +32,53 @@ function metadataText(value: unknown): string | null {
     return text || null
 }
 
+function safeDecode(value: string) {
+    try {
+        return decodeURIComponent(value)
+    } catch {
+        return value
+    }
+}
+
+function pathnameFromUrl(value: string | null) {
+    if (!value) return null
+    try {
+        return new URL(value, 'https://guilhermepilger.ai').pathname
+    } catch {
+        return null
+    }
+}
+
+function propertySlugFromPath(pathname: string | null) {
+    const match = String(pathname || '').match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
+    const segment = match?.[1] ? safeDecode(match[1]) : ''
+    if (!segment || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
+        return null
+    }
+    return segment
+}
+
+function buildCapturePageContext(metadata: Record<string, unknown>) {
+    const pageUrl = metadataText(metadata.page_url)
+        || metadataText(metadata.property_url)
+        || metadataText(metadata.canonical_url)
+    const pagePath = metadataText(metadata.page_path)
+        || metadataText(metadata.property_path)
+        || pathnameFromUrl(pageUrl)
+    const propertyPath = metadataText(metadata.property_path)
+        || (String(pagePath || '').startsWith('/imovel/') ? pagePath : null)
+    const propertySlug = metadataText(metadata.property_slug)
+        || metadataText(metadata.propertySlug)
+        || propertySlugFromPath(propertyPath || pagePath)
+
+    return {
+        ...(pagePath ? { page_path: pagePath } : {}),
+        ...(pageUrl ? { page_url: pageUrl } : {}),
+        ...(propertyPath ? { property_path: propertyPath } : {}),
+        ...(propertySlug ? { property_slug: propertySlug } : {}),
+    }
+}
+
 function propertyIdFromLandingSlug(slug?: string | null): string | null {
     const match = String(slug || '').match(/^imovel-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i)
     return match?.[1] || null
@@ -161,8 +208,10 @@ export async function POST(request: NextRequest) {
             landingPageSlug,
             requestedPhone: String(body?.whatsapp_phone || body?.destination_phone || body?.target_phone || ''),
         })
+        const capturePageContext = buildCapturePageContext(captureMetadata)
         const enrichedCaptureContext: Record<string, any> = {
             ...captureMetadata,
+            ...capturePageContext,
             ...(whatsappDestination.property_id ? { property_id: whatsappDestination.property_id } : {}),
             whatsapp_destination: {
                 phone: whatsappDestination.phone,
@@ -241,6 +290,7 @@ export async function POST(request: NextRequest) {
             capture_source: 'site_form',
             landing_page_slug: landingPageSlug,
             visitor_cookie_id: visitorCookieId,
+            ...capturePageContext,
             ...(Object.keys(enrichedCaptureContext).length ? { capture_context: enrichedCaptureContext } : {}),
             tracking: {
                 detected_source: trackingData.detected_source || null,
@@ -256,6 +306,7 @@ export async function POST(request: NextRequest) {
                 country: trackingData.country || null,
                 city: trackingData.city || null,
                 region: trackingData.region || null,
+                ...capturePageContext,
             },
         }
 

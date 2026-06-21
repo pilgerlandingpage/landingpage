@@ -216,7 +216,7 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                 .sv-overlay {
                     position: absolute;
                     inset: 0;
-                    z-index: 40;
+                    z-index: 1600;
                     pointer-events: none;
                 }
                 .sv-overlay > * {

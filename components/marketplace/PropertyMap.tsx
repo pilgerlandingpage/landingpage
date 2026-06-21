@@ -1311,8 +1311,8 @@ function ClusterLayer({
                 }
 
                 const { property, latLng } = cluster.item
-                const isSelected = selectedPropertyId === property.id
-                const isHovered = hoveredPropertyId === property.id || isSelected
+                const isSelected = String(selectedPropertyId || '') === String(property.id)
+                const isHovered = String(hoveredPropertyId || '') === String(property.id) || isSelected
 
                 return (
                     <Marker

@@ -315,6 +315,40 @@ function isUuid(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
 }
 
+function safeDecode(value: string) {
+    try {
+        return decodeURIComponent(value)
+    } catch {
+        return value
+    }
+}
+
+function propertyRouteInfoFromUrl(raw: string | null) {
+    const value = String(raw || '').trim()
+    if (!value) {
+        return { property_path: null as string | null, property_slug: null as string | null }
+    }
+
+    try {
+        const url = new URL(value, 'https://guilhermepilger.ai')
+        const match = url.pathname.match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
+        const segment = match?.[1] ? safeDecode(match[1]) : ''
+        return {
+            property_path: match ? url.pathname : null,
+            property_slug: segment && !isUuid(segment) ? segment : null,
+        }
+    } catch {
+        return { property_path: null as string | null, property_slug: null as string | null }
+    }
+}
+
+function propertySlugFromContentId(contentType: string, contentId: string) {
+    if (contentType !== 'property') return null
+    const decoded = safeDecode(contentId).trim()
+    if (!decoded || isUuid(decoded)) return null
+    return decoded
+}
+
 async function resolveTrackedTargetUrl(searchParams: URLSearchParams, requestUrl: string) {
     const explicitTarget = safeHttpUrl(searchParams.get('redirect') || searchParams.get('to'))
     if (explicitTarget) return explicitTarget
@@ -406,6 +440,10 @@ function buildClickMetadata(params: {
         || ''
     ).trim()
     const propertyId = resolvePropertyIdFromClick(params.searchParams, redirectUrl, contentType, contentId)
+    const routeInfo = propertyRouteInfoFromUrl(redirectUrl)
+    const contentPropertySlug = propertySlugFromContentId(contentType, contentId)
+    const propertySlug = routeInfo.property_slug || contentPropertySlug
+    const propertyPath = routeInfo.property_path || (propertySlug ? `/imovel/${encodeURIComponent(propertySlug)}/detalhes` : null)
 
     return {
         clicked_at: new Date().toISOString(),
@@ -416,6 +454,8 @@ function buildClickMetadata(params: {
         content_type: contentType || null,
         content_id: contentId || null,
         property_id: propertyId || null,
+        property_slug: propertySlug || null,
+        property_path: propertyPath || null,
         target_url: redirectUrl,
         lead_id: normalizeLeadId(params.searchParams.get('lead_id')) || null,
         lead_phone: normalizeLeadPhone(
@@ -543,6 +583,8 @@ async function attachTrackedVisitorToLead(params: {
         || whatsappClick.link_type === 'property'
         || whatsappClick.content_type === 'property'
         || Boolean(whatsappClick.property_id)
+        || Boolean(whatsappClick.property_slug)
+        || Boolean(whatsappClick.property_path)
     const contentClick = isContentClick(whatsappClick)
 
     const { error: updateError } = await supabase
@@ -570,6 +612,8 @@ async function attachTrackedVisitorToLead(params: {
                     country: params.trackingData.country || currentTracking.country || null,
                     city: params.trackingData.city || currentTracking.city || null,
                     region: params.trackingData.region || currentTracking.region || null,
+                    property_slug: whatsappClick.property_slug || currentTracking.property_slug || null,
+                    property_path: whatsappClick.property_path || currentTracking.property_path || null,
                 },
                 last_link_click: whatsappClick,
                 link_clicks: nextLinkClicks,

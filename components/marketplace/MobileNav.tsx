@@ -32,7 +32,7 @@ export default function MobileNav({
     sharePropertyPath,
     whatsappLabel = 'Falar com Especialista',
     whatsappTone = 'whatsapp',
-    exploreHref = '/#mapa',
+    exploreHref = '/busca',
 }: MobileNavProps = {}) {
     const router = useRouter()
     const pathname = usePathname()
@@ -84,22 +84,11 @@ export default function MobileNav({
     }, [pathname, router, slug])
 
     const explore = useCallback(() => {
-        const supportsCustomEvent = typeof window.CustomEvent === 'function'
-        const openMapSearchEvent = supportsCustomEvent
-            ? new CustomEvent('pilger:open-map-search', {
-                cancelable: true,
-                detail: { source: slug },
-            })
-            : document.createEvent('Event')
-
-        if (!supportsCustomEvent) {
-            openMapSearchEvent.initEvent('pilger:open-map-search', true, true)
-        }
-
-        const shouldFallbackToNavigation = window.dispatchEvent(openMapSearchEvent)
-        if (!shouldFallbackToNavigation || openMapSearchEvent.defaultPrevented) {
-            return
-        }
+        void trackEvent('mobile_nav_explore_clicked', {
+            source: slug,
+            pathname,
+            destination: exploreHref,
+        })
 
         const [targetPath = '/', targetHash] = exploreHref.split('#')
         const normalizedTargetPath = targetPath || '/'
