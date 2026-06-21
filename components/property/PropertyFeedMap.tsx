@@ -231,7 +231,7 @@ function loadGoogleMapsScript(apiKey: string) {
         script.id = 'pilger-google-maps-js'
         script.async = true
         script.defer = true
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&libraries=places&language=pt-BR&region=BR&loading=async`
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&language=pt-BR&region=BR&loading=async`
         script.addEventListener('load', () => finishWhenReady(), { once: true })
         script.addEventListener('error', () => reject(new Error('Falha ao carregar Google Maps.')), { once: true })
         document.head.appendChild(script)
@@ -388,12 +388,14 @@ function StreetViewMiniMap({
 
 function GoogleStreetViewPanorama({
     apiKey,
+    fallbackUrl,
     latLng,
     title,
     interactive,
     onMiniMapChange,
 }: {
     apiKey: string
+    fallbackUrl?: string
     latLng: [number, number]
     title: string
     interactive: boolean
@@ -541,11 +543,30 @@ function GoogleStreetViewPanorama({
             className={`property-feed-map-street-native${interactive ? ' is-interactive' : ''}`}
             aria-label={`Street View de ${title}`}
         >
-            <div ref={containerRef} className="property-feed-map-street-native-canvas" />
-            {status !== 'ready' && (
+            {status === 'error' && fallbackUrl ? (
+                <iframe
+                    className="property-feed-map-street-frame property-feed-map-street-frame--fallback"
+                    src={fallbackUrl}
+                    title={`Street View de ${title}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allow="fullscreen; geolocation"
+                    allowFullScreen
+                    tabIndex={0}
+                />
+            ) : (
+                <div ref={containerRef} className="property-feed-map-street-native-canvas" />
+            )}
+            {status === 'loading' && (
                 <div className="property-feed-map-street-native-state">
                     <Navigation size={18} />
-                    <strong>{status === 'error' ? 'Street View indisponivel' : 'Carregando Street View'}</strong>
+                    <strong>Carregando Street View</strong>
+                </div>
+            )}
+            {status === 'error' && !fallbackUrl && (
+                <div className="property-feed-map-street-native-state">
+                    <Navigation size={18} />
+                    <strong>Street View indisponivel</strong>
                 </div>
             )}
         </div>
@@ -708,9 +729,13 @@ export default function PropertyFeedMap({
     }, [isStreetInteractive, mapView])
 
     useEffect(() => {
-        if (mapView !== 'street') {
+        if (mapView === 'street') return
+
+        const clearMiniMap = window.setTimeout(() => {
             setStreetMiniMapState(null)
-        }
+        }, 0)
+
+        return () => window.clearTimeout(clearMiniMap)
     }, [mapView])
 
     if (!safeLatLng) {
@@ -752,6 +777,7 @@ export default function PropertyFeedMap({
                     {googleMapsJsKey ? (
                         <GoogleStreetViewPanorama
                             apiKey={googleMapsJsKey}
+                            fallbackUrl={streetViewUrl}
                             latLng={safeLatLng}
                             title={copy.title}
                             interactive={streetInteractionEnabled}

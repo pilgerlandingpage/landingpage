@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlTracker'
-import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
+import PropertyDesktopMediaShowcase from '@/components/property/PropertyDesktopMediaShowcase'
 import PropertyLandingFavoriteButton from '@/components/property/PropertyLandingFavoriteButton'
 import PropertyLandingShareButton from '@/components/property/PropertyLandingShareButton'
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
@@ -1446,9 +1446,11 @@ export default async function PropertyDetailPage({
                 <section id="visao" className="plp-detail-layout">
                     <div className="plp-gallery-column">
                         <div className="plp-desktop-photo-showcase">
-                            <PropertyPhotoShowcase
+                            <PropertyDesktopMediaShowcase
                                 images={gallery.length ? gallery : [primaryImage]}
                                 title={displayTitle}
+                                property={propertyMapPreview}
+                                latLng={propertyMapLatLng}
                                 metadata={propertyTrackingMetadata}
                                 shareSlot={(
                                     <>

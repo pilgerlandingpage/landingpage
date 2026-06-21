@@ -78,6 +78,7 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                     bottom: 0;
                     z-index: 1;
                     background: #111;
+                    overflow: hidden;
                 }
 
                 .sv-wrap:has(.map-options-open) .sv-map {
@@ -265,12 +266,12 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                 {/* Map: fullscreen (mobile) / right panel (desktop) */}
                 <div className="sv-map">
                     {map}
+                    {overlay && (
+                        <div className="sv-overlay">
+                            {overlay}
+                        </div>
+                    )}
                 </div>
-                {overlay && (
-                    <div className="sv-overlay">
-                        {overlay}
-                    </div>
-                )}
             </main>
         </>
     )

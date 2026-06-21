@@ -1434,7 +1434,6 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     z-index: 0;
                 }
                 .map-search-shell:focus-within {
-                    overflow: visible;
                     z-index: 20;
                 }
                 .map-preview-panel {
@@ -1711,6 +1710,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .home-map-property-preview {
                     inset: 0;
+                    overflow: hidden;
                     pointer-events: none;
                     position: absolute;
                     z-index: 820;
@@ -2333,6 +2333,55 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     .map-preview-panel {
                         height: clamp(520px, 38vw, 660px);
                         min-height: 520px;
+                    }
+                    .home-map-property-preview--compact :global(.map-property-preview) {
+                        bottom: 24px;
+                        right: 24px;
+                        width: min(520px, calc(100% - 48px));
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-track) {
+                        padding: 0;
+                        scroll-padding-inline: 0;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-card) {
+                        flex-basis: min(510px, 100%);
+                        grid-template-columns: 190px minmax(0, 1fr);
+                        min-height: 178px;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-media),
+                    .home-map-property-preview--compact :global(.map-preview-media img) {
+                        min-height: 178px;
+                    }
+                    .mobile-map-modal-backdrop {
+                        padding: clamp(20px, 4vw, 44px);
+                    }
+                    .mobile-map-modal {
+                        border-radius: 22px;
+                        height: min(780px, calc(100vh - 72px));
+                        max-width: 1180px;
+                        width: min(1180px, calc(100vw - 72px));
+                    }
+                    .mobile-map-modal-head {
+                        padding: 14px 18px 13px 20px;
+                    }
+                    .mobile-map-modal-body {
+                        overflow: hidden;
+                    }
+                    .mobile-map-preview-panel {
+                        height: 100%;
+                        min-height: 0;
+                    }
+                    .mobile-map-search-panel {
+                        bottom: 22px;
+                        left: 24px;
+                        max-width: none;
+                        right: 24px;
+                        width: auto;
+                    }
+                    .mobile-map-modal .home-map-property-preview :global(.map-property-preview) {
+                        bottom: 28px;
+                        right: 28px;
+                        width: min(520px, calc(100% - 56px));
                     }
                     .map-search-panel {
                         align-content: center;

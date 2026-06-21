@@ -617,16 +617,39 @@ export default function MapPropertyPreviewCard({
                 @media (min-width: 1024px) {
                     .map-property-preview {
                         left: auto;
-                        right: 36px;
-                        bottom: 42px;
-                        width: min(440px, calc(57vw - 72px));
+                        right: clamp(18px, 2.2vw, 36px);
+                        bottom: clamp(18px, 2.2vw, 36px);
+                        width: min(520px, calc(100% - 48px));
+                        max-width: calc(100% - 48px);
+                    }
+                    .map-property-preview::before {
+                        top: auto;
+                        bottom: -26px;
+                        height: 218px;
+                        border-radius: 28px;
+                        background:
+                            linear-gradient(
+                                180deg,
+                                rgba(255,255,255,0) 0%,
+                                rgba(31,27,21,0.16) 30%,
+                                rgba(14,13,11,0.68) 100%
+                            );
+                        backdrop-filter: blur(4px) saturate(0.84) brightness(0.88);
+                        -webkit-backdrop-filter: blur(4px) saturate(0.84) brightness(0.88);
                     }
                     .map-preview-track {
                         padding-inline: 0;
                         scroll-padding-inline: 0;
+                        width: 100%;
                     }
                     .map-preview-card {
-                        flex-basis: min(430px, 100%);
+                        grid-template-columns: 190px minmax(0, 1fr);
+                        flex-basis: min(510px, 100%);
+                        min-height: 178px;
+                    }
+                    .map-preview-media,
+                    .map-preview-media img {
+                        min-height: 178px;
                     }
                 }
                 @media (max-width: 649px) {
