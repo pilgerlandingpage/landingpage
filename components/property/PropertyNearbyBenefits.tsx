@@ -59,7 +59,7 @@ const BENEFIT_COPY: Partial<Record<NearbyBenefitLayer, string>> = {
     school: 'Referencia para familias e permanencia.',
     dining: 'Restaurantes e conveniencias de alto giro.',
     bank: 'Servicos financeiros por perto.',
-    health: 'Apoio medico e farmacia na regiao.',
+    health: 'Apoio médico e farmácia na região.',
     marina: 'Lifestyle nautico e acesso ao litoral.',
 }
 
@@ -74,7 +74,7 @@ function hasModernPlacesLibrary(googleWindow: GooglePlacesWindow | null) {
 
 function loadGooglePlacesLibrary(apiKey: string) {
     const googleWindow = getGooglePlacesWindow()
-    if (!googleWindow) return Promise.reject(new Error('Google Places indisponivel fora do navegador.'))
+    if (!googleWindow) return Promise.reject(new Error('Google Places indisponível fora do navegador.'))
     if (hasModernPlacesLibrary(googleWindow)) return Promise.resolve()
     if (googleWindow.__pilgerGooglePlacesPromise) return googleWindow.__pilgerGooglePlacesPromise
 
@@ -92,7 +92,7 @@ function loadGooglePlacesLibrary(apiKey: string) {
                     return
                 }
 
-                reject(new Error('Biblioteca Places nao esta disponivel.'))
+                reject(new Error('Biblioteca Places não está disponível.'))
                 return
             }
 
@@ -336,7 +336,7 @@ export default function PropertyNearbyBenefits({
                 }
             } catch (error) {
                 if (cancelled) return
-                console.warn('[PropertyNearbyBenefits] Nao foi possivel carregar beneficios:', error)
+                console.warn('[PropertyNearbyBenefits] Não foi possível carregar benefícios:', error)
                 setStatus('error')
             }
         }
@@ -363,8 +363,8 @@ export default function PropertyNearbyBenefits({
         >
             <div className="plp-nearby-benefits-head">
                 <span className="plp-kicker">Entorno premium</span>
-                <h3>Beneficios ao redor do imovel.</h3>
-                <p>{locationLabel ? `${locationLabel} com pontos de interesse proximos para qualificar rotina, liquidez e desejo.` : 'Pontos de interesse proximos para qualificar rotina, liquidez e desejo.'}</p>
+                <h3>Benefícios ao redor do imóvel.</h3>
+                <p>{locationLabel ? `${locationLabel} com pontos de interesse próximos para qualificar rotina, liquidez e desejo.` : 'Pontos de interesse próximos para qualificar rotina, liquidez e desejo.'}</p>
             </div>
 
             <div className="plp-nearby-benefits-grid">

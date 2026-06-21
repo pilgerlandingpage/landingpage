@@ -196,7 +196,7 @@ export default async function NoticiasPage() {
 
                 <section className="news-crosslink">
                     <div>
-                        <span>Analise Pilger</span>
+                        <span>Análise Pilger</span>
                         <h2>Quer ir alem da noticia?</h2>
                         <p>Leia artigos com contexto de mercado, investimento, bairros e oportunidades para entender melhor cada movimento do litoral catarinense.</p>
                     </div>

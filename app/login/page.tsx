@@ -63,7 +63,7 @@ function LoginPageContent() {
             return 'Link expirado ou ja utilizado. Solicite um novo link ao administrador.'
         }
 
-        return String(description || 'Nao foi possivel validar o link. Solicite um novo link ao administrador.')
+        return String(description || 'Não foi possível validar o link. Solicite um novo link ao administrador.')
             .replace(/\+/g, ' ')
     }
 
@@ -82,7 +82,7 @@ function LoginPageContent() {
             return
         }
 
-        setError('Nao foi possivel validar o link. Solicite um novo link ao administrador.')
+        setError('Não foi possível validar o link. Solicite um novo link ao administrador.')
     }, [authError, isPasswordSetupMode, isImpersonationMode])
 
     useEffect(() => {
@@ -92,7 +92,7 @@ function LoginPageContent() {
 
         const prepareImpersonationLogin = async () => {
             setImpersonationFlowLoading(true)
-            setImpersonationFlowMessage('Validando acesso de manutencao...')
+            setImpersonationFlowMessage('Validando acesso de manutenção...')
             setError(null)
 
             try {
@@ -130,7 +130,7 @@ function LoginPageContent() {
                 }
 
                 if (!consumedAuthLink) {
-                    throw new Error('Link de manutencao incompleto. Gere um novo acesso na gestao de usuarios.')
+                    throw new Error('Link de manutenção incompleto. Gere um novo acesso na gestão de usuários.')
                 }
 
                 const {
@@ -140,7 +140,7 @@ function LoginPageContent() {
                 if (cancelled) return
 
                 if (!session?.user) {
-                    throw new Error('Nao foi possivel validar o acesso de manutencao.')
+                    throw new Error('Não foi possível validar o acesso de manutenção.')
                 }
 
                 await fetch('/api/admin/user-access', {
@@ -158,13 +158,13 @@ function LoginPageContent() {
                     }),
                 }).catch(() => {})
 
-                setImpersonationFlowMessage('Acesso validado. Abrindo painel do usuario...')
+                setImpersonationFlowMessage('Acesso validado. Abrindo painel do usuário...')
                 router.replace('/admin?maintenance_login=1')
                 router.refresh()
             } catch (flowErr: any) {
                 if (cancelled) return
-                setImpersonationFlowMessage('Nao foi possivel validar o acesso de manutencao.')
-                setError(flowErr?.message || 'Link invalido ou expirado. Gere um novo acesso na gestao de usuarios.')
+                setImpersonationFlowMessage('Não foi possível validar o acesso de manutenção.')
+                setError(flowErr?.message || 'Link inválido ou expirado. Gere um novo acesso na gestão de usuários.')
             } finally {
                 if (!cancelled) setImpersonationFlowLoading(false)
             }
@@ -227,7 +227,7 @@ function LoginPageContent() {
                     setPasswordFlowMessage('Sessao validada. Defina sua nova senha.')
                 } else {
                     setPasswordFlowReady(false)
-                    setPasswordFlowMessage('Nao foi possivel validar o link. Solicite um novo link de acesso.')
+                    setPasswordFlowMessage('Não foi possível validar o link. Solicite um novo link de acesso.')
                 }
             } catch (flowErr: any) {
                 if (cancelled) return
@@ -303,7 +303,7 @@ function LoginPageContent() {
         }
 
         if (newPassword !== confirmNewPassword) {
-            setError('As senhas nao coincidem.')
+            setError('As senhas não coincidem.')
             setLoading(false)
             return
         }
@@ -365,7 +365,7 @@ function LoginPageContent() {
                 body: JSON.stringify({ email: normalizedEmail, phone: normalizedPhone }),
             })
             const data = await res.json()
-            if (!res.ok) throw new Error(data?.error || 'Nao foi possivel solicitar redefinicao.')
+            if (!res.ok) throw new Error(data?.error || 'Não foi possível solicitar redefinição.')
 
             const responseMessage = data?.message || 'Solicitacao processada.'
             if (data?.success === false) {
@@ -425,7 +425,7 @@ function LoginPageContent() {
                             <div className="login-form-group" style={{ marginBottom: 16 }}>
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
                                     {impersonationFlowLoading && <Loader2 className="animate-spin" size={16} />}
-                                    <span>{impersonationFlowMessage || 'Preparando acesso de manutencao...'}</span>
+                                    <span>{impersonationFlowMessage || 'Preparando acesso de manutenção...'}</span>
                                 </div>
                             </div>
                         )}

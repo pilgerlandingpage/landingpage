@@ -37,7 +37,7 @@ export default function ContatoPage() {
         webPageJsonLd({
             path: '/contato',
             name: 'Contato Guilherme Pilger',
-            description: 'Atendimento para curadoria de imoveis de alto padrao em Santa Catarina.',
+            description: 'Atendimento para curadoria de imóveis de alto padrão em Santa Catarina.',
             type: 'ContactPage',
         }),
         breadcrumbJsonLd([
@@ -49,7 +49,7 @@ export default function ContatoPage() {
             '@type': 'ContactPage',
             name: 'Contato Guilherme Pilger',
             url: absoluteUrl('/contato'),
-            description: 'Atendimento para curadoria de imoveis de alto padrao em Santa Catarina.',
+            description: 'Atendimento para curadoria de imóveis de alto padrão em Santa Catarina.',
         },
     ]
 
@@ -61,12 +61,12 @@ export default function ContatoPage() {
                 <section className="contact-hero">
                     <div>
                         <span>Pilger Luxury Search</span>
-                        <h1>Fale com quem entende o alto padrao do litoral.</h1>
-                        <p>Conte o que voce procura e receba uma curadoria objetiva: oportunidades, bairros, construtoras, liquidez e proximos passos.</p>
+                        <h1>Fale com quem entende o alto padrão do litoral.</h1>
+                        <p>Conte o que você procura e receba uma curadoria objetiva: oportunidades, bairros, construtoras, liquidez e próximos passos.</p>
                         <div className="contact-actions">
                             <WhatsAppCaptureLink
                                 phone="5547992528080"
-                                message="Ola! Vim pela pagina de contato e quero falar com um especialista."
+                                message="Olá! Vim pela página de contato e quero falar com um especialista."
                                 slug="contato"
                                 template="contact-page-primary"
                                 className="contact-primary"
@@ -74,14 +74,14 @@ export default function ContatoPage() {
                                 <MessageCircle size={18} />
                                 Falar no WhatsApp
                             </WhatsAppCaptureLink>
-                            <Link href="/busca" className="contact-secondary"><Search size={17} /> Buscar imoveis</Link>
+                            <Link href="/busca" className="contact-secondary"><Search size={17} /> Buscar imóveis</Link>
                         </div>
                     </div>
                     <aside className="contact-card">
                         <span>Atendimento premium</span>
                         <strong>Guilherme Pilger</strong>
                         <p>CRECI/SC 6772-J</p>
-                        <div><MapPin size={16} /> Balneario Camboriu / SC</div>
+                        <div><MapPin size={16} /> Balneário Camboriú / SC</div>
                         <div><ShieldCheck size={16} /> Curadoria para compra, venda e posicionamento de mercado.</div>
                     </aside>
                 </section>
@@ -93,7 +93,7 @@ export default function ContatoPage() {
                         <p>Canal principal para compradores, vendedores e parceiros.</p>
                         <WhatsAppCaptureLink
                             phone="5547992528080"
-                            message="Ola! Quero falar com a equipe Pilger."
+                            message="Olá! Quero falar com a equipe Pilger."
                             slug="contato"
                             template="contact-page-card"
                         >

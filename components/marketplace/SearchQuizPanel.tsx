@@ -178,13 +178,13 @@ export default function SearchQuizPanel({ resultsCount, mappedCount, onSearchCom
     const filters = useMemo<FilterConfig[]>(() => [
         {
             id: 'location',
-            label: 'Localizacao',
-            question: 'Onde voce quer morar?',
+            label: 'Localização',
+            question: 'Onde você quer morar?',
             icon: <MapPin size={13} />,
             options: LOCATION_STEPS,
             value: query,
             onChange: (value: string) => {
-                if (value !== query) trackFilterChanged('location', 'Localizacao', value, LOCATION_STEPS)
+                if (value !== query) trackFilterChanged('location', 'Localização', value, LOCATION_STEPS)
                 setQuery(value)
                 markAnswered('location')
             },
@@ -192,7 +192,7 @@ export default function SearchQuizPanel({ resultsCount, mappedCount, onSearchCom
         {
             id: 'type',
             label: 'Tipo',
-            question: 'Que tipo de imovel procura?',
+            question: 'Que tipo de imóvel procura?',
             icon: <Home size={13} />,
             options: TYPE_STEPS,
             value: type,
@@ -331,7 +331,7 @@ export default function SearchQuizPanel({ resultsCount, mappedCount, onSearchCom
 
             <button type="submit" className={`srq-submit ${shouldPulseNextButton ? 'is-ready' : ''}`} aria-label="Buscar">
                 <Search size={17} strokeWidth={2.4} />
-                <span>{quizStep < filters.length - 1 ? 'Proximo' : 'Ver imoveis'}</span>
+                <span>{quizStep < filters.length - 1 ? 'Próximo' : 'Ver imóveis'}</span>
             </button>
 
             <button type="button" className="srq-clear" onClick={clearSearch}>

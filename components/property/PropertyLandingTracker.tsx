@@ -82,8 +82,8 @@ function rememberPropertyView(propertyId: string) {
 
 const TRACKED_SECTIONS = [
     { id: 'ficha', label: 'Ficha rapida' },
-    { id: 'historico-precos', label: 'Historico e valor' },
-    { id: 'localizacao', label: 'Localizacao' },
+    { id: 'historico-precos', label: 'Histórico e valor' },
+    { id: 'localizacao', label: 'Localização' },
 ]
 
 export default function PropertyLandingTracker({

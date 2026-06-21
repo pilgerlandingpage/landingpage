@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Guilherme Pilger - Imoveis de luxo no litoral catarinense'
+export const alt = 'Guilherme Pilger - Imóveis de luxo no litoral catarinense'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -119,7 +119,7 @@ export default function Image() {
                   color: '#fff8ea',
                 }}
               >
-                Imoveis de luxo no litoral catarinense.
+                Imóveis de luxo no litoral catarinense.
               </div>
               <div
                 style={{
@@ -132,7 +132,7 @@ export default function Image() {
                   color: 'rgba(255,248,234,.78)',
                 }}
               >
-                Balneario Camboriu, Praia Brava, Itapema e os enderecos mais desejados do alto padrao.
+                Balneário Camboriú, Praia Brava, Itapema e os endereços mais desejados do alto padrão.
               </div>
             </div>
 
@@ -149,7 +149,7 @@ export default function Image() {
                 boxShadow: '0 30px 80px rgba(0,0,0,.24)',
               }}
             >
-              {['Frente mar', 'Coberturas', 'Casas alto padrao'].map((item) => (
+              {['Frente mar', 'Coberturas', 'Casas alto padrão'].map((item) => (
                 <div
                   key={item}
                   style={{

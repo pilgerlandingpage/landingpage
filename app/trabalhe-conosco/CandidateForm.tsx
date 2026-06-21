@@ -67,7 +67,7 @@ export default function CandidateForm() {
                 body: JSON.stringify(payload),
             })
             const data = await response.json()
-            if (!response.ok) throw new Error(data.error || 'Nao foi possivel enviar seu cadastro.')
+            if (!response.ok) throw new Error(data.error || 'Não foi possível enviar seu cadastro.')
 
             void trackEvent('broker_candidate_form_submitted', {
                 candidate_id: data.candidate?.id,
@@ -79,13 +79,13 @@ export default function CandidateForm() {
                 status: 'success',
                 message: data.already_registered
                     ? 'Seu cadastro foi atualizado. Nossa equipe acompanha seu perfil pelo painel.'
-                    : 'Cadastro recebido. Em instantes voce recebe a confirmacao pelo WhatsApp.',
+                    : 'Cadastro recebido. Em instantes você recebe a confirmação pelo WhatsApp.',
             })
             form.reset()
             setBrokerType('autonomo')
             setStarted(false)
         } catch (err: any) {
-            setState({ status: 'error', message: err?.message || 'Nao foi possivel enviar seu cadastro.' })
+            setState({ status: 'error', message: err?.message || 'Não foi possível enviar seu cadastro.' })
         } finally {
             setLoading(false)
         }
@@ -109,7 +109,7 @@ export default function CandidateForm() {
             <div className={styles.formHead}>
                 <span>Cadastro profissional</span>
                 <h2>Quero trabalhar com a Pilger</h2>
-                <p>Preencha seus dados para nosso agente de recrutamento analisar o perfil e organizar o proximo contato.</p>
+                <p>Preencha seus dados para nosso agente de recrutamento analisar o perfil e organizar o próximo contato.</p>
             </div>
 
             <label>
@@ -128,10 +128,10 @@ export default function CandidateForm() {
                 </label>
             </div>
 
-            <div className={styles.type} aria-label="Como voce atua hoje">
+            <div className={styles.type} aria-label="Como você atua hoje">
                 {[
-                    ['autonomo', 'Autonomo'],
-                    ['imobiliaria', 'Imobiliaria'],
+                    ['autonomo', 'Autônomo'],
+                    ['imobiliaria', 'Imobiliária'],
                     ['equipe', 'Equipe'],
                 ].map(([value, label]) => (
                     <button
@@ -164,7 +164,7 @@ export default function CandidateForm() {
             <div className={styles.formGrid}>
                 <label>
                     Cidade principal
-                    <input name="city" required placeholder="Balneario Camboriu" />
+                    <input name="city" required placeholder="Balneário Camboriú" />
                 </label>
                 <label>
                     Estado
@@ -173,17 +173,17 @@ export default function CandidateForm() {
             </div>
 
             <label>
-                Empresa atual ou operacao
-                <input name="current_company" placeholder="Imobiliaria, equipe ou autonomo" />
+                Empresa atual ou operação
+                <input name="current_company" placeholder="Imobiliária, equipe ou autônomo" />
             </label>
 
             <div className={styles.formGrid}>
                 <label>
                     Foco de mercado
-                    <input name="market_focus" placeholder="Luxo, lancamentos, investidores..." />
+                    <input name="market_focus" placeholder="Luxo, lançamentos, investidores..." />
                 </label>
                 <label>
-                    Regioes onde atua
+                    Regiões onde atua
                     <input name="regions" placeholder="Praia Brava, BC, Itapema..." />
                 </label>
             </div>
@@ -203,7 +203,7 @@ export default function CandidateForm() {
             </div>
 
             <label>
-                Como voce trabalha hoje?
+                Como você trabalha hoje?
                 <textarea name="current_operation" rows={3} placeholder="Conte rapidamente como capta, atende e acompanha clientes." />
             </label>
 
@@ -214,7 +214,7 @@ export default function CandidateForm() {
 
             <label>
                 Disponibilidade para conversar
-                <input name="availability" placeholder="Ex: manhas, fim de tarde, segunda a sexta..." />
+                <input name="availability" placeholder="Ex: manhãs, fim de tarde, segunda a sexta..." />
             </label>
 
             <div className={styles.consents}>
@@ -237,7 +237,7 @@ export default function CandidateForm() {
 
             <div className={styles.security}>
                 <ShieldCheck size={16} />
-                O acompanhamento combina analise automatizada e decisao humana no painel administrativo.
+                O acompanhamento combina análise automatizada e decisão humana no painel administrativo.
             </div>
         </form>
     )

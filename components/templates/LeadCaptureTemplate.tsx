@@ -107,7 +107,7 @@ export default function LeadCaptureTemplate({ data, slug, landingPageId, agentNa
 
             {/* Footer */}
             <footer className="lead-footer">
-                <p>© Imobiliaria Guilherme Pilger</p>
+                <p>© Imobiliária Guilherme Pilger</p>
             </footer>
 
             <style jsx>{`

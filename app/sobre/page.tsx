@@ -25,14 +25,14 @@ const heroImage = '/images/eventos/guilherme-pilger.png'
 const videoUrl = 'https://www.youtube.com/embed/qGHFMngGlg0'
 
 export const metadata: Metadata = {
-    title: 'Sobre Guilherme Pilger | Imobiliaria em Balneario Camboriu',
-    description: 'Conheca a historia de Guilherme Pilger, corretor de imoveis desde 2008, especialista em alto padrao em Balneario Camboriu, Praia Brava e Itapema.',
+    title: 'Sobre Guilherme Pilger | Imobiliária em Balneário Camboriú',
+    description: 'Conheça a história de Guilherme Pilger, corretor de imóveis desde 2008, especialista em alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
     alternates: {
         canonical: '/sobre',
     },
     openGraph: {
-        title: 'Sobre Guilherme Pilger | Imobiliaria em Balneario Camboriu',
-        description: 'Historia, curriculo, video e equipe da Imobiliaria Guilherme Pilger no litoral catarinense.',
+        title: 'Sobre Guilherme Pilger | Imobiliária em Balneário Camboriú',
+        description: 'História, currículo, vídeo e equipe da Imobiliária Guilherme Pilger no litoral catarinense.',
         url: '/sobre',
         type: 'website',
         images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: 'Sobre Guilherme Pilger',
-        description: 'Historia, curriculo, video e equipe da Imobiliaria Guilherme Pilger.',
+        description: 'História, currículo, vídeo e equipe da Imobiliária Guilherme Pilger.',
         images: [DEFAULT_OG_IMAGE],
     },
 }
@@ -49,12 +49,12 @@ const credentials = [
     {
         icon: Award,
         title: 'Desde 2008',
-        text: 'Atuacao continua no mercado imobiliario, com foco em venda, compra e avaliacao de imoveis de alto padrao.',
+        text: 'Atuação contínua no mercado imobiliário, com foco em venda, compra e avaliação de imóveis de alto padrão.',
     },
     {
         icon: ShieldCheck,
         title: 'Reconhecimento CRECI RS',
-        text: 'Premiado por uma das tres melhores estrategias de venda de imoveis, levando metodo e disciplina para a operacao.',
+        text: 'Premiado por uma das três melhores estratégias de venda de imóveis, levando método e disciplina para a operação.',
     },
     {
         icon: Users,
@@ -64,39 +64,39 @@ const credentials = [
     {
         icon: BookOpen,
         title: 'A Chave da Venda',
-        text: 'Coautor do best-seller A Chave da Venda de Imoveis, obra voltada a performance comercial imobiliaria.',
+        text: 'Coautor do best-seller A Chave da Venda de Imóveis, obra voltada à performance comercial imobiliária.',
     },
 ]
 
 const pillars = [
     {
         icon: Handshake,
-        title: 'Compromisso inabalavel',
-        text: 'A equipe atua com clareza, constancia e responsabilidade para criar lares felizes e atender necessidades especificas de cada cliente.',
+        title: 'Compromisso inabalável',
+        text: 'A equipe atua com clareza, constância e responsabilidade para criar lares felizes e atender necessidades específicas de cada cliente.',
     },
     {
         icon: Star,
-        title: 'Especializacao e paixao',
-        text: 'O trabalho combina conhecimento de bairros, construtoras, liquidez e padrao de vida para encontrar o imovel alinhado ao sonho do cliente.',
+        title: 'Especialização e paixão',
+        text: 'O trabalho combina conhecimento de bairros, construtoras, liquidez e padrão de vida para encontrar o imóvel alinhado ao sonho do cliente.',
     },
     {
         icon: Compass,
         title: 'Abordagem centrada no cliente',
-        text: 'Cada jornada imobiliaria e tratada como unica, da primeira conversa ate a entrega das chaves, com solucao sob medida.',
+        text: 'Cada jornada imobiliária é tratada como única, da primeira conversa até a entrega das chaves, com solução sob medida.',
     },
     {
         icon: TrendingUp,
-        title: 'Inovacao que faz diferenca',
-        text: 'Marketing, conteudo, tecnologia e visibilidade digital ajudam a posicionar oportunidades e acelerar boas decisoes.',
+        title: 'Inovação que faz diferença',
+        text: 'Marketing, conteúdo, tecnologia e visibilidade digital ajudam a posicionar oportunidades e acelerar boas decisões.',
     },
 ]
 
 const team = [
-    ['Guilherme Pilger', 'CRECI 39.724-F', 'Direcao comercial'],
-    ['Matheus Goncalves', 'CRECI 68.334-F', 'Corretor especialista'],
+    ['Guilherme Pilger', 'CRECI 39.724-F', 'Direção comercial'],
+    ['Matheus Gonçalves', 'CRECI 68.334-F', 'Corretor especialista'],
     ['Drieli Schlickmann', 'CRECI 38.545', 'Corretora especialista'],
     ['Emily Nicole', 'CRECI 70.037-F', 'Corretora especialista'],
-    ['Monica Noronha Macedo', 'CRECI 55.733', 'Corretora especialista'],
+    ['Mônica Noronha Macedo', 'CRECI 55.733', 'Corretora especialista'],
     ['Reginaldo Sa Barreto', 'CRECI 20.904', 'Corretor especialista'],
     ['Comercial Guilherme Pilger', 'CRECI 6772-J', 'Atendimento comercial'],
     ['Beitiner Bergmann', 'CRECI 75.366', 'Corretor especialista'],
@@ -109,7 +109,7 @@ export default function SobrePage() {
         webPageJsonLd({
             path: '/sobre',
             name: 'Sobre Guilherme Pilger',
-            description: 'Historia, curriculo e equipe da Imobiliaria Guilherme Pilger.',
+            description: 'História, currículo e equipe da Imobiliária Guilherme Pilger.',
             type: 'AboutPage',
             image: absoluteUrl(heroImage),
         }),
@@ -120,8 +120,8 @@ export default function SobrePage() {
         {
             '@context': 'https://schema.org',
             '@type': 'VideoObject',
-            name: 'Guilherme Pilger Corretor de Imoveis',
-            description: 'Video institucional com a historia e posicionamento da Imobiliaria Guilherme Pilger.',
+            name: 'Guilherme Pilger Corretor de Imóveis',
+            description: 'Vídeo institucional com a história e o posicionamento da Imobiliária Guilherme Pilger.',
             thumbnailUrl: 'https://i.ytimg.com/vi/qGHFMngGlg0/hqdefault.jpg',
             embedUrl: videoUrl,
             url: 'https://youtu.be/qGHFMngGlg0',
@@ -135,15 +135,15 @@ export default function SobrePage() {
             <main className="about-page">
                 <section className="about-hero">
                     <div className="about-hero-copy">
-                        <span className="about-kicker">Imobiliaria em Balneario Camboriu</span>
+                        <span className="about-kicker">Imobiliária em Balneário Camboriú</span>
                         <h1>Guilherme Pilger</h1>
                         <p>
-                            Uma operacao imobiliaria construida para compradores, vendedores e investidores que buscam alto padrao com criterio, visao de mercado e atendimento consultivo.
+                            Uma operação imobiliária construída para compradores, vendedores e investidores que buscam alto padrão com critério, visão de mercado e atendimento consultivo.
                         </p>
                         <div className="about-actions">
                             <WhatsAppCaptureLink
                                 phone="5547992528080"
-                                message="Ola! Quero falar com a equipe Guilherme Pilger."
+                                message="Olá! Quero falar com a equipe Guilherme Pilger."
                                 slug="sobre"
                                 template="about-hero-whatsapp"
                                 className="about-primary"
@@ -151,16 +151,16 @@ export default function SobrePage() {
                                 <MessageCircle size={18} />
                                 Falar com especialista
                             </WhatsAppCaptureLink>
-                            <Link href="/busca" className="about-secondary"><Search size={17} /> Ver imoveis</Link>
+                            <Link href="/busca" className="about-secondary"><Search size={17} /> Ver imóveis</Link>
                         </div>
                         <div className="about-stats" aria-label="Indicadores de autoridade">
-                            <strong><span>2008</span>inicio da trajetoria</strong>
-                            <strong><span>1M+</span>visualizacoes nas redes</strong>
-                            <strong><span>3</span>regioes foco</strong>
+                            <strong><span>2008</span>início da trajetória</strong>
+                            <strong><span>1M+</span>visualizações nas redes</strong>
+                            <strong><span>3</span>regiões foco</strong>
                         </div>
                     </div>
                     <div className="about-hero-media">
-                        <Image src={heroImage} alt="Guilherme Pilger em atendimento imobiliario premium" fill priority sizes="(max-width: 900px) 100vw, 45vw" />
+                        <Image src={heroImage} alt="Guilherme Pilger em atendimento imobiliário premium" fill priority sizes="(max-width: 900px) 100vw, 45vw" />
                         <div className="about-hero-badge">
                             <ShieldCheck size={18} />
                             <span>CRECI/SC 6772-J</span>
@@ -170,18 +170,18 @@ export default function SobrePage() {
 
                 <section className="about-story">
                     <div>
-                        <span className="about-kicker">Breve curriculo</span>
-                        <h2>Da venda consultiva a uma marca imobiliaria de alto padrao.</h2>
+                        <span className="about-kicker">Breve currículo</span>
+                        <h2>Da venda consultiva a uma marca imobiliária de alto padrão.</h2>
                     </div>
                     <div className="about-story-text">
                         <p>
-                            Trabalhar em uma regiao prospera, proxima do mar e cercada por imoveis de alto padrao sempre foi o sonho que guiou Guilherme Pilger. A trajetoria comecou no mercado imobiliario em 2008 e amadureceu com uma leitura cada vez mais precisa sobre avaliacao, compra, venda e posicionamento de imoveis.
+                            Trabalhar em uma região próspera, próxima do mar e cercada por imóveis de alto padrão sempre foi o sonho que guiou Guilherme Pilger. A trajetória começou no mercado imobiliário em 2008 e amadureceu com uma leitura cada vez mais precisa sobre avaliação, compra, venda e posicionamento de imóveis.
                         </p>
                         <p>
-                            Ao longo dessa jornada, Guilherme foi reconhecido pelo CRECI RS, apresentou estrategias em eventos como Conecta Imobi, tornou-se coautor do livro <strong>A Chave da Venda de Imoveis</strong> e consolidou uma operacao focada em Balneario Camboriu, Praia Brava e Itapema.
+                            Ao longo dessa jornada, Guilherme foi reconhecido pelo CRECI RS, apresentou estratégias em eventos como Conecta Imobi, tornou-se coautor do livro <strong>A Chave da Venda de Imóveis</strong> e consolidou uma operação focada em Balneário Camboriú, Praia Brava e Itapema.
                         </p>
                         <p>
-                            A missao da imobiliaria e ajudar cada cliente a encontrar o imovel perfeito com transparencia, repertorio local, estrategia de negociacao e suporte personalizado antes, durante e depois da decisao.
+                            A missão da imobiliária é ajudar cada cliente a encontrar o imóvel perfeito com transparência, repertório local, estratégia de negociação e suporte personalizado antes, durante e depois da decisão.
                         </p>
                     </div>
                 </section>
@@ -189,14 +189,14 @@ export default function SobrePage() {
                 <section className="about-video-band">
                     <div className="about-video-copy">
                         <PlayCircle size={36} />
-                        <span className="about-kicker">Video institucional</span>
-                        <h2>Conheca a visao por tras da Imobiliaria Guilherme Pilger.</h2>
-                        <p>O video do site antigo foi trazido para a nova experiencia para manter a historia, a autoridade e o contato humano no centro da pagina.</p>
+                        <span className="about-kicker">Vídeo institucional</span>
+                        <h2>Conheça a visão por trás da Imobiliária Guilherme Pilger.</h2>
+                        <p>O vídeo do site antigo foi trazido para a nova experiência para manter a história, a autoridade e o contato humano no centro da página.</p>
                     </div>
                     <div className="about-video-frame">
                         <iframe
                             src={videoUrl}
-                            title="Video sobre Guilherme Pilger"
+                            title="Vídeo sobre Guilherme Pilger"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                         />
@@ -219,9 +219,9 @@ export default function SobrePage() {
                 <section className="about-pillars">
                     <div className="about-section-head">
                         <span className="about-kicker">Por que escolher</span>
-                        <h2>Uma imobiliaria que vende com estrategia e acompanha a decisao.</h2>
+                        <h2>Uma imobiliária que vende com estratégia e acompanha a decisão.</h2>
                         <p>
-                            A proposta nao e apenas apresentar propriedades. E construir uma parceria duradoura, com leitura de mercado, selecao criteriosa e clareza nos proximos passos.
+                            A proposta não é apenas apresentar propriedades. É construir uma parceria duradoura, com leitura de mercado, seleção criteriosa e clareza nos próximos passos.
                         </p>
                     </div>
                     <div className="about-pillar-grid">
@@ -240,17 +240,17 @@ export default function SobrePage() {
 
                 <section className="about-proof">
                     <div className="about-testimonial">
-                        <div className="about-stars" aria-label="Avaliacao 4.6 de 5">
+                        <div className="about-stars" aria-label="Avaliação 4.6 de 5">
                             {Array.from({ length: 5 }).map((_, index) => <Star key={index} size={16} fill="currentColor" />)}
                             <span>4,6 / 5</span>
                         </div>
                         <blockquote>
-                            A forma de trabalho do Guilherme Pilger e realmente inovadora. Quando eu buscava um imovel para minha familia, ele entendeu minhas necessidades e apresentou uma opcao que eu sequer tinha cogitado. Comprei na primeira visita.
+                            A forma de trabalho do Guilherme Pilger é realmente inovadora. Quando eu buscava um imóvel para minha família, ele entendeu minhas necessidades e apresentou uma opção que eu sequer tinha cogitado. Comprei na primeira visita.
                         </blockquote>
                         <strong>Raul Bergesch</strong>
                     </div>
                     <div className="about-social-proof">
-                        <h2>Presenca digital que amplia a visibilidade dos imoveis.</h2>
+                        <h2>Presença digital que amplia a visibilidade dos imóveis.</h2>
                         <div>
                             <span><Instagram size={20} /> Instagram <strong>187 mil seguidores</strong></span>
                             <span><Youtube size={20} /> YouTube <strong>119 mil inscritos</strong></span>
@@ -262,7 +262,7 @@ export default function SobrePage() {
                 <section className="about-team">
                     <div className="about-section-head">
                         <span className="about-kicker">Corretores</span>
-                        <h2>Equipe conectada ao alto padrao do litoral.</h2>
+                        <h2>Equipe conectada ao alto padrão do litoral.</h2>
                     </div>
                     <div className="about-team-grid">
                         {team.map(([name, creci, role]) => (
@@ -278,12 +278,12 @@ export default function SobrePage() {
 
                 <section className="about-final">
                     <div>
-                        <span className="about-kicker">Proximo passo</span>
-                        <h2>Conte o que voce procura. A curadoria comeca pela conversa certa.</h2>
+                        <span className="about-kicker">Próximo passo</span>
+                        <h2>Conte o que você procura. A curadoria começa pela conversa certa.</h2>
                     </div>
                     <WhatsAppCaptureLink
                         phone="5547992528080"
-                        message="Ola! Vi a pagina sobre o Guilherme Pilger e quero uma curadoria de imoveis."
+                        message="Olá! Vi a página sobre o Guilherme Pilger e quero uma curadoria de imóveis."
                         slug="sobre"
                         template="about-final-whatsapp"
                         className="about-final-button"

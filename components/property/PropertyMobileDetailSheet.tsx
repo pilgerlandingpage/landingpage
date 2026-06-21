@@ -56,7 +56,7 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
     }, [isDragging, snapToNearest])
 
     return (
-        <section className="pmds-wrap" aria-label="Experiencia mobile do imovel">
+        <section className="pmds-wrap" aria-label="Experiência mobile do imóvel">
             <div className="pmds-media">
                 {media}
             </div>
@@ -70,7 +70,7 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
                 <div
                     className="pmds-handle"
                     role="slider"
-                    aria-label="Arrastar ficha do imovel"
+                    aria-label="Arrastar ficha do imóvel"
                     aria-valuemin={SNAP_DETAILS_FOCUS}
                     aria-valuemax={SNAP_MEDIA_FOCUS}
                     aria-valuenow={Math.round(sheetTop)}

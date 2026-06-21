@@ -32,16 +32,16 @@ function ContinueAuthContent() {
     const title = flow === 'first_access'
         ? 'Criar senha de acesso'
         : flow === 'maintenance_login'
-            ? 'Acesso de manutencao'
+            ? 'Acesso de manutenção'
             : 'Redefinir senha'
     const description = flow === 'first_access'
-        ? 'Clique no botao abaixo para validar seu convite e criar sua senha.'
+        ? 'Clique no botão abaixo para validar seu convite e criar sua senha.'
         : flow === 'maintenance_login'
-            ? 'Clique no botao abaixo para entrar no painel do usuario selecionado.'
-            : 'Clique no botao abaixo para validar o pedido e criar uma nova senha.'
+            ? 'Clique no botão abaixo para entrar no painel do usuário selecionado.'
+            : 'Clique no botão abaixo para validar o pedido e criar uma nova senha.'
     const invalidMessage = isExpiredLink
         ? 'Link expirado ou ja utilizado. Solicite um novo link ao administrador.'
-        : 'Este link nao parece valido. Solicite um novo link de acesso ao administrador.'
+        : 'Este link não parece válido. Solicite um novo link de acesso ao administrador.'
 
     const continueToSupabase = () => {
         if (!isValidLink || loading) return

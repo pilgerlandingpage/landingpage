@@ -66,7 +66,7 @@ async function getPost(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params
     const post = await getPost(slug)
-    if (!post) return { title: 'Artigo nao encontrado | Blog' }
+    if (!post) return { title: 'Artigo não encontrado | Blog' }
     const image = post.cover_image_url || DEFAULT_OG_IMAGE
     const contentPath = isNewsLikeContent(post) ? `/noticias/${post.slug}` : `/blog/${post.slug}`
     const description = pickPublicBlogSummary(post) || undefined
@@ -113,8 +113,8 @@ function propertyHref(property: BlogPropertyRecommendation) {
 
 function propertyMeta(property: BlogPropertyRecommendation) {
     return [
-        property.suites ? `${property.suites} suites` : property.bedrooms ? `${property.bedrooms} dorm.` : '',
-        property.area_m2 ? `${Number(property.area_m2).toLocaleString('pt-BR')}m2` : '',
+        property.suites ? `${property.suites} suítes` : property.bedrooms ? `${property.bedrooms} dorm.` : '',
+        property.area_m2 ? `${Number(property.area_m2).toLocaleString('pt-BR')} m²` : '',
         property.parking_spaces ? `${property.parking_spaces} vagas` : '',
     ].filter(Boolean).join(' · ')
 }
@@ -153,7 +153,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         }),
         breadcrumbJsonLd([
             { name: 'Home', url: '/' },
-            { name: isNews ? 'Noticias' : 'Blog', url: isNews ? '/noticias' : '/blog' },
+            { name: isNews ? 'Notícias' : 'Blog', url: isNews ? '/noticias' : '/blog' },
             { name: post.title, url: contentPath },
         ]),
         articleJsonLd({
@@ -193,7 +193,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <img src={BLOG_AUTHOR_IMAGE_URL} alt={authorName} />
                             <span>Autor do blog</span>
                             <h2>{authorName}</h2>
-                            <p>Curadoria imobiliaria, leitura de mercado e oportunidades premium no litoral catarinense.</p>
+                            <p>Curadoria imobiliária, leitura de mercado e oportunidades premium no litoral catarinense.</p>
                         </div>
 
                         <div>
@@ -223,7 +223,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         <span className="blog-property-copy">
                                             <strong>{property.title}</strong>
                                             <em>{[property.neighborhood, property.city].filter(Boolean).join(' · ')}</em>
-                                            <small>{propertyMeta(property) || property.property_type || 'Imovel premium'}</small>
+                                            <small>{propertyMeta(property) || property.property_type || 'Imóvel premium'}</small>
                                             <b>{formatPrice(property.price)}</b>
                                         </span>
                                     </Link>

@@ -58,7 +58,7 @@ export function realEstateListingJsonLd(params: {
   const amenities = Array.isArray(property.amenities) ? property.amenities : []
   const description = compactPropertyText(
     params.description || property.seo_description || property.description,
-    `${property.property_type || 'Imovel'} de alto padrao em ${params.city || property.city || 'Santa Catarina'}.`,
+    `${property.property_type || 'Imóvel'} de alto padrão em ${params.city || property.city || 'Santa Catarina'}.`,
     260
   )
   const address = {

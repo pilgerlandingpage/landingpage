@@ -1496,7 +1496,7 @@ export default function LeadsPage() {
                                         <LeadAvatar name={selectedLead.name} avatarUrl={selectedLead.avatar_url} size={40} />
                                         <div>
                                             <h3 style={{ color: '#111b21', fontSize: '15px', fontWeight: 600, margin: 0 }}>
-                                                {selectedLead.name || 'Lead AnÃ´nimo'}
+                                                {selectedLead.name || 'Lead Anônimo'}
                                             </h3>
                                             <span style={{ color: '#667781', fontSize: '12px' }}>
                                                 {selectedLead.phone || 'sem telefone'}

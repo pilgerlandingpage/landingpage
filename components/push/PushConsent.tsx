@@ -18,7 +18,7 @@ type PushPromptContent = {
 const DEFAULT_PROMPT: PushPromptContent = {
     reason: 'passive',
     title: 'Receba oportunidades antes de todo mundo',
-    body: 'Avisamos quando aparecer um imovel alinhado ao seu perfil em Balneario, Praia Brava, Itapema ou Porto Belo.',
+    body: 'Avisamos quando aparecer um imóvel alinhado ao seu perfil em Balneário, Praia Brava, Itapema ou Porto Belo.',
     cta: 'Ativar alertas VIP',
 }
 
@@ -284,7 +284,7 @@ export default function PushConsent({ visitorId, vapidPublicKey: trackedVapidPub
                             </button>
 
                             <button type="button" className="push-later" onClick={() => handleDismiss()}>
-                                Agora nao
+                                Agora não
                             </button>
                         </div>
                     </div>

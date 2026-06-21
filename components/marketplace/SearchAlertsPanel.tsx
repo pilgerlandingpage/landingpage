@@ -257,8 +257,8 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
         })
 
         try {
-            if (!('Notification' in window)) throw new Error('Este navegador nao suporta notificacoes.')
-            if (!('serviceWorker' in navigator)) throw new Error('Service Worker indisponivel neste navegador.')
+            if (!('Notification' in window)) throw new Error('Este navegador não suporta notificações.')
+            if (!('serviceWorker' in navigator)) throw new Error('Service Worker indisponível neste navegador.')
 
             let permission = Notification.permission
             if (permission === 'default') {
@@ -270,7 +270,7 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                     source: 'search_alerts_panel',
                     permission,
                 })
-                throw new Error('Permissao de notificacao nao concedida.')
+                throw new Error('Permissão de notificação não concedida.')
             }
 
             const visitorCookieId = getVisitorId()
@@ -290,8 +290,8 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
             const vapidPublicKey = trackData?.vapid_public_key || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
             const visitorId = trackData?.visitor_id
 
-            if (!visitorId) throw new Error('Visitante nao encontrado para salvar notificacao.')
-            if (!vapidPublicKey) throw new Error('Chave publica de push nao configurada.')
+            if (!visitorId) throw new Error('Visitante não encontrado para salvar notificação.')
+            if (!vapidPublicKey) throw new Error('Chave pública de push não configurada.')
 
             const swRegistration = await navigator.serviceWorker.register('/sw.js')
             await navigator.serviceWorker.ready
@@ -375,8 +375,8 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                         <div className={`search-alerts-push ${pushActive ? 'is-active' : ''}`}>
                             {pushActive ? <CheckCircle2 size={18} /> : <BellRing size={18} />}
                             <div>
-                                <strong>{pushActive ? 'Notificacoes ativas' : 'Ative avisos em tempo real'}</strong>
-                                <p>{pushActive ? 'Quando um imovel bater com um alerta, o navegador recebe o aviso.' : 'Receba o aviso assim que uma oportunidade bater com seus criterios.'}</p>
+                                <strong>{pushActive ? 'Notificações ativas' : 'Ative avisos em tempo real'}</strong>
+                                <p>{pushActive ? 'Quando um imóvel bater com um alerta, o navegador recebe o aviso.' : 'Receba o aviso assim que uma oportunidade bater com seus critérios.'}</p>
                             </div>
                             {!pushActive && (
                                 <button type="button" onClick={enablePush} disabled={pushState === 'saving'}>
@@ -410,7 +410,7 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                                 <div className="search-alerts-empty">
                                     <BellRing size={24} />
                                     <strong>Salve uma busca para monitorar o mercado</strong>
-                                    <span>Use filtros, mapa ou area desenhada e toque em Salvar alerta.</span>
+                                    <span>Use filtros, mapa ou área desenhada e toque em Salvar alerta.</span>
                                 </div>
                             ) : alerts.map(alert => {
                                 const filters = alertFilterLabels(alert)
@@ -441,7 +441,7 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                                         </div>
 
                                         <div className="search-alert-item-meta">
-                                            <span>{Number(alert.result_count || 0)} imoveis na busca</span>
+                                            <span>{Number(alert.result_count || 0)} imóveis na busca</span>
                                             <span>{Number(alert.match_count || 0)} match(es)</span>
                                             {alert.selected_region && <span>{alert.selected_region}</span>}
                                         </div>
@@ -500,9 +500,9 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                                                                 })
                                                             }}
                                                         >
-                                                            <img src={getPropertyImage(property)} alt={property?.title || 'Imovel'} loading="lazy" />
+                                                            <img src={getPropertyImage(property)} alt={property?.title || 'Imóvel'} loading="lazy" />
                                                             <span>
-                                                                <strong>{property?.title || 'Imovel encontrado'}</strong>
+                                                                <strong>{property?.title || 'Imóvel encontrado'}</strong>
                                                                 <small>{formatCurrency(property?.price || null)} · {propertyLocation(property) || 'Litoral SC'}</small>
                                                                 {matchReasons.length > 0 && (
                                                                     <small className="search-alert-match-reasons">

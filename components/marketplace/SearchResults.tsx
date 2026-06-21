@@ -224,14 +224,14 @@ function getFilterLabel(key: string, value: string) {
         q: `Busca: ${replaceItajaiWithPraiaBrava(value)}`,
         city: cityLabels[value] || replaceItajaiWithPraiaBrava(value),
         type: value,
-        price: `Valor: ${priceLabels[value] || value.replace('-', ' ate ')}`,
+        price: `Valor: ${priceLabels[value] || value.replace('-', ' até ')}`,
         offer: value === 'rent' ? 'Aluguel' : 'Venda',
         bedroomsMin: `${value}+ dormitórios`,
-        suitesMin: `${value}+ suites`,
+        suitesMin: `${value}+ suítes`,
         bathroomsMin: `${value}+ banheiros`,
         parkingMin: `${value}+ vagas`,
-        areaMin: `A partir de ${value}m2`,
-        areaMax: `Ate ${value}m2`,
+        areaMin: `A partir de ${value} m²`,
+        areaMax: `Até ${value} m²`,
         priceMin: `Min. R$ ${Number(value).toLocaleString('pt-BR')}`,
         priceMax: `Max. R$ ${Number(value).toLocaleString('pt-BR')}`,
         office: 'Imobiliária Guilherme Pilger',
@@ -246,7 +246,7 @@ function buildSearchAlertTitle(filters: Array<{ label: string }>, selectedRegion
     const labels = filters.map(filter => filter.label).filter(Boolean).slice(0, 3)
     if (labels.length) return labels.join(' + ')
     if (selectedRegion) return `Alerta em ${selectedRegion}`
-    if (hasDrawArea) return 'Alerta na area desenhada'
+    if (hasDrawArea) return 'Alerta na área desenhada'
     return 'Alerta de busca'
 }
 
@@ -288,7 +288,7 @@ function formatMemoryPrice(price?: number | string | null) {
 }
 
 function memoryPropertyTitle(property: any) {
-    return replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imovel selecionado')
+    return replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imóvel selecionado')
 }
 
 function memoryPropertyLocation(property: any) {
@@ -517,10 +517,10 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         [visibleProperties]
     )
     const countLabel = selectedDrawArea
-        ? 'imoveis na area desenhada'
+        ? 'imóveis na área desenhada'
         : mapBounds && visibleCount < totalCount
-            ? 'imoveis nesta area'
-            : 'imoveis encontrados'
+            ? 'imóveis nesta área'
+            : 'imóveis encontrados'
     const handleSearchButtonClick = useCallback(() => {
         const nextOpen = !showRefineSearch
         setShowRefineSearch(nextOpen)
@@ -594,7 +594,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                 detail: {
                     reason: 'property_search_alert_saved',
                     title: 'Alerta de busca salvo',
-                    body: 'Ative as notificacoes para ser avisado quando entrar um imovel com esse perfil.',
+                    body: 'Ative as notificações para ser avisado quando entrar um imóvel com esse perfil.',
                     cta: 'Ativar alertas VIP',
                 },
             }))
@@ -1159,7 +1159,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     </div>
                     <div className="result-main-row">
                         <div>
-                            <h1 className="result-title">Imoveis selecionados</h1>
+                            <h1 className="result-title">Imóveis selecionados</h1>
                             <p className="result-count">
                                 <strong>{isSpatiallyFiltered ? visibleCount : totalCount}</strong> {countLabel}
                                 {isSpatiallyFiltered && visibleCount < totalCount && (
@@ -1258,7 +1258,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                 </header>
 
                 {(memoryItems.length > 0 || memoryLoading) && (
-                    <section className="search-memory-panel" aria-label="Imoveis salvos e vistos recentemente">
+                    <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
                         <div className="search-memory-head">
                             <div className="search-memory-title">
                                 <Clock3 size={15} />
@@ -1315,7 +1315,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                         <div className="search-empty-icon">
                             <SearchX size={20} />
                         </div>
-                        <h2 className="search-empty-title">Nenhum imovel nesta area</h2>
+                        <h2 className="search-empty-title">Nenhum imóvel nesta área</h2>
                         <p className="search-empty-copy">
                             Amplie o mapa ou remova um filtro para encontrar outras oportunidades.
                         </p>
@@ -1355,14 +1355,14 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                         </div>
                         {hiddenVisibleCount > 0 && (
                             <div className="search-render-limit">
-                                Mostrando os primeiros {renderedProperties.length} imoveis desta area. Aproxime o mapa para refinar os resultados.
+                                Mostrando os primeiros {renderedProperties.length} imóveis desta área. Aproxime o mapa para refinar os resultados.
                             </div>
                         )}
                     </>
                 )}
 
                 <footer className="search-footer">
-                    {new Date().getFullYear()} Guilherme Pilger Corretor de Imoveis
+                    {new Date().getFullYear()} Guilherme Pilger Corretor de Imóveis
                 </footer>
             </SearchViews>
         </>

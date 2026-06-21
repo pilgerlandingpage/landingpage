@@ -70,7 +70,7 @@ function formatNumber(value?: number | string | null, suffix = '') {
 }
 
 function propertyTitle(property: FavoriteProperty) {
-    return replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imovel selecionado')
+    return replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imóvel selecionado')
 }
 
 function propertyLocation(property: FavoriteProperty) {
@@ -174,7 +174,7 @@ export default function FavoritePropertiesClient() {
 
         openWhatsAppWithLeadCapture({
             phone: '5547992528080',
-            message: `Ola! Salvei alguns imoveis no site e quero receber uma curadoria comparativa.\n\n${summary}`,
+            message: `Olá! Salvei alguns imóveis no site e quero receber uma curadoria comparativa.\n\n${summary}`,
             slug: 'favoritos',
             template: 'favorites-comparison',
             metadata: {
@@ -204,13 +204,13 @@ export default function FavoritePropertiesClient() {
                     <span className="favorites-kicker">Curadoria pessoal</span>
                     <h1>Favoritos e comparacao</h1>
                     <p>
-                        Salve os imoveis que chamaram sua atencao e compare perfil, localizacao, area e sinais de curadoria antes de chamar o especialista.
+                        Salve os imóveis que chamaram sua atenção e compare perfil, localização, área e sinais de curadoria antes de chamar o especialista.
                     </p>
                 </div>
                 <div className="favorites-hero-actions">
                     <Link href="/busca" className="favorites-action">
                         <Search size={17} />
-                        Buscar imoveis
+                        Buscar imóveis
                     </Link>
                     {properties.length > 0 && (
                         <button type="button" className="favorites-action favorites-action-primary" onClick={openCuradoria}>
@@ -230,15 +230,15 @@ export default function FavoritePropertiesClient() {
                 <section className="favorites-state">
                     <Heart size={26} />
                     <strong>Nenhum favorito salvo ainda</strong>
-                    <p>Toque no coracao dos imoveis para montar sua selecao e comparar depois.</p>
+                    <p>Toque no coração dos imóveis para montar sua seleção e comparar depois.</p>
                     <Link href="/busca" className="favorites-action favorites-action-primary">
                         <Search size={17} />
-                        Explorar imoveis
+                        Explorar imóveis
                     </Link>
                 </section>
             ) : (
                 <>
-                    <section className="favorites-grid" aria-label="Imoveis favoritos">
+                    <section className="favorites-grid" aria-label="Imóveis favoritos">
                         {properties.map((property, index) => (
                             <article className="favorite-card-shell" key={property.id}>
                                 <PropertyCard property={toPropertyCardInput(property)} imagePriority={index < 2} variant="homeCompact" />
@@ -274,7 +274,7 @@ export default function FavoritePropertiesClient() {
                                         {comparedProperties.map(property => <td key={property.id}>{formatMoney(property.price)}</td>)}
                                     </tr>
                                     <tr>
-                                        <td>Localizacao</td>
+                                        <td>Localização</td>
                                         {comparedProperties.map(property => <td key={property.id}>{propertyLocation(property)}</td>)}
                                     </tr>
                                     <tr>
@@ -282,7 +282,7 @@ export default function FavoritePropertiesClient() {
                                         {comparedProperties.map(property => <td key={property.id}>{property.property_type || '-'}</td>)}
                                     </tr>
                                     <tr>
-                                        <td>Suites</td>
+                                        <td>Suítes</td>
                                         {comparedProperties.map(property => <td key={property.id}>{formatNumber(property.suites)}</td>)}
                                     </tr>
                                     <tr>
@@ -290,11 +290,11 @@ export default function FavoritePropertiesClient() {
                                         {comparedProperties.map(property => <td key={property.id}>{formatNumber(property.parking_spaces)}</td>)}
                                     </tr>
                                     <tr>
-                                        <td>Area</td>
-                                        {comparedProperties.map(property => <td key={property.id}>{formatNumber(property.area_private_m2 || property.area_m2, ' m2')}</td>)}
+                                        <td>Área</td>
+                                        {comparedProperties.map(property => <td key={property.id}>{formatNumber(property.area_private_m2 || property.area_m2, ' m²')}</td>)}
                                     </tr>
                                     <tr>
-                                        <td>R$/m2</td>
+                                        <td>R$/m²</td>
                                         {comparedProperties.map(property => <td key={property.id}>{formatMoney(getPropertyPricePerM2(property))}</td>)}
                                     </tr>
                                     <tr>

@@ -118,7 +118,7 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
 
                         <div className="space-y-4">
                             <div className="flex justify-between py-3 border-b border-slate-100">
-                                <span className="text-slate-500">ÃƒÂrea Privativa</span>
+                                <span className="text-slate-500">Área Privativa</span>
                                 <span className="font-semibold">{data.stats.area}m²</span>
                             </div>
                             <div className="flex justify-between py-3 border-b border-slate-100">

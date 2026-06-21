@@ -23,22 +23,22 @@ import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonL
 const heroImage = '/images/eventos/guilherme-pilger.png'
 
 export const metadata: Metadata = {
-    title: 'Consultoria Imobiliaria Personalizada | Guilherme Pilger',
-    description: 'Consultoria imobiliaria personalizada para compra, venda e investimento em imoveis de alto padrao em Balneario Camboriu, Praia Brava e Itapema.',
+    title: 'Consultoria Imobiliária Personalizada | Guilherme Pilger',
+    description: 'Consultoria imobiliária personalizada para compra, venda e investimento em imóveis de alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
     alternates: {
         canonical: '/consultoria-imobiliaria-personalizada',
     },
     openGraph: {
-        title: 'Consultoria Imobiliaria Personalizada | Guilherme Pilger',
-        description: 'Estrategia, avaliacao, negociacao e acompanhamento para decisoes imobiliarias no litoral catarinense.',
+        title: 'Consultoria Imobiliária Personalizada | Guilherme Pilger',
+        description: 'Estratégia, avaliação, negociação e acompanhamento para decisões imobiliárias no litoral catarinense.',
         url: '/consultoria-imobiliaria-personalizada',
         type: 'website',
         images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Consultoria Imobiliaria Personalizada',
-        description: 'Estrategia, avaliacao, negociacao e acompanhamento para decisoes imobiliarias.',
+        title: 'Consultoria Imobiliária Personalizada',
+        description: 'Estratégia, avaliação, negociação e acompanhamento para decisões imobiliárias.',
         images: [DEFAULT_OG_IMAGE],
     },
 }
@@ -46,54 +46,54 @@ export const metadata: Metadata = {
 const elements = [
     {
         icon: BarChart3,
-        title: 'Avaliacao de propriedades',
-        text: 'Analise de localizacao, tamanho, condicoes do imovel, infraestrutura disponivel, liquidez e tendencias de mercado para entender valor e potencial de valorizacao.',
+        title: 'Avaliação de propriedades',
+        text: 'Análise de localização, tamanho, condições do imóvel, infraestrutura disponível, liquidez e tendências de mercado para entender valor e potencial de valorização.',
     },
     {
         icon: Handshake,
-        title: 'Estrategias de negociacao',
-        text: 'Definicao de metas realistas, leitura das melhores oportunidades e conducao da negociacao para buscar o melhor acordo possivel.',
+        title: 'Estratégias de negociação',
+        text: 'Definição de metas realistas, leitura das melhores oportunidades e condução da negociação para buscar o melhor acordo possível.',
     },
     {
         icon: Compass,
-        title: 'Gerenciamento de portfolio',
-        text: 'Acompanhamento continuo de propriedades, diversificacao de investimentos e reducao de riscos em diferentes momentos do mercado.',
+        title: 'Gerenciamento de portfólio',
+        text: 'Acompanhamento contínuo de propriedades, diversificação de investimentos e redução de riscos em diferentes momentos do mercado.',
     },
 ]
 
 const processSteps = [
     {
         icon: Target,
-        title: 'Identificacao das necessidades',
-        text: 'A consultoria comeca entendendo expectativas, prioridade de localizacao, tamanho, valor, objetivo da compra ou venda e perfil de investimento.',
+        title: 'Identificação das necessidades',
+        text: 'A consultoria começa entendendo expectativas, prioridade de localização, tamanho, valor, objetivo da compra ou venda e perfil de investimento.',
     },
     {
         icon: LineChart,
-        title: 'Desenvolvimento do plano de acao',
-        text: 'Com base nos dados coletados, a equipe estrutura uma busca ou estrategia comercial eficiente, filtrando oportunidades e riscos.',
+        title: 'Desenvolvimento do plano de ação',
+        text: 'Com base nos dados coletados, a equipe estrutura uma busca ou estratégia comercial eficiente, filtrando oportunidades e riscos.',
     },
     {
         icon: CheckCircle2,
-        title: 'Implementacao e acompanhamento',
-        text: 'A decisao e acompanhada ate o fim do processo, com seguranca, clareza, negociacao e suporte para a escolha certa.',
+        title: 'Implementação e acompanhamento',
+        text: 'A decisão é acompanhada até o fim do processo, com segurança, clareza, negociação e suporte para a escolha certa.',
     },
 ]
 
 const benefits = [
     {
         icon: LineChart,
-        title: 'Maximizacao do retorno',
-        text: 'Analises aprofundadas ajudam a identificar oportunidades e estrategias com maior potencial de rentabilidade.',
+        title: 'Maximização do retorno',
+        text: 'Análises aprofundadas ajudam a identificar oportunidades e estratégias com maior potencial de rentabilidade.',
     },
     {
         icon: ShieldCheck,
-        title: 'Minimizacao do risco financeiro',
-        text: 'A experiencia regional reduz exposicao a decisoes mal precificadas, burocracias complexas ou escolhas desalinhadas ao mercado.',
+        title: 'Minimização do risco financeiro',
+        text: 'A experiência regional reduz exposição a decisões mal precificadas, burocracias complexas ou escolhas desalinhadas ao mercado.',
     },
     {
         icon: Clock3,
-        title: 'Otimizacao do tempo',
-        text: 'A curadoria economiza tempo ao separar rapidamente os imoveis mais adequados ao perfil e ao objetivo do cliente.',
+        title: 'Otimização do tempo',
+        text: 'A curadoria economiza tempo ao separar rapidamente os imóveis mais adequados ao perfil e ao objetivo do cliente.',
     },
 ]
 
@@ -102,22 +102,22 @@ export default function ConsultoriaPage() {
         organizationJsonLd(),
         webPageJsonLd({
             path: '/consultoria-imobiliaria-personalizada',
-            name: 'Consultoria Imobiliaria Personalizada',
-            description: 'Consultoria para compra, venda e investimento em imoveis de alto padrao.',
+            name: 'Consultoria Imobiliária Personalizada',
+            description: 'Consultoria para compra, venda e investimento em imóveis de alto padrão.',
             type: 'WebPage',
             image: absoluteUrl(heroImage),
         }),
         breadcrumbJsonLd([
             { name: 'Home', url: '/' },
-            { name: 'Consultoria Imobiliaria Personalizada', url: '/consultoria-imobiliaria-personalizada' },
+            { name: 'Consultoria Imobiliária Personalizada', url: '/consultoria-imobiliaria-personalizada' },
         ]),
         {
             '@context': 'https://schema.org',
             '@type': 'Service',
-            name: 'Consultoria Imobiliaria Personalizada',
+            name: 'Consultoria Imobiliária Personalizada',
             provider: { '@id': `${absoluteUrl('/')}#organization` },
-            areaServed: ['Balneario Camboriu', 'Praia Brava', 'Itapema'],
-            serviceType: 'Consultoria imobiliaria',
+            areaServed: ['Balneário Camboriú', 'Praia Brava', 'Itapema'],
+            serviceType: 'Consultoria imobiliária',
             url: absoluteUrl('/consultoria-imobiliaria-personalizada'),
         },
     ]
@@ -129,15 +129,15 @@ export default function ConsultoriaPage() {
             <main className="consult-page">
                 <section className="consult-hero">
                     <div className="consult-hero-copy">
-                        <span className="consult-kicker">Solucoes eficientes para seu investimento</span>
-                        <h1>Consultoria Imobiliaria Personalizada</h1>
+                        <span className="consult-kicker">Soluções eficientes para seu investimento</span>
+                        <h1>Consultoria Imobiliária Personalizada</h1>
                         <p>
-                            Uma abordagem mais ampla e estrategica para compra, venda e investimento em imoveis de alto padrao. O foco e analisar mercado, tramites, riscos e oportunidades para que a decisao seja tomada com seguranca.
+                            Uma abordagem mais ampla e estratégica para compra, venda e investimento em imóveis de alto padrão. O foco é analisar mercado, trâmites, riscos e oportunidades para que a decisão seja tomada com segurança.
                         </p>
                         <div className="consult-actions">
                             <WhatsAppCaptureLink
                                 phone="5547992528080"
-                                message="Ola! Quero entender a consultoria imobiliaria personalizada."
+                                message="Olá! Quero entender a consultoria imobiliária personalizada."
                                 slug="consultoria"
                                 template="consultoria-hero-whatsapp"
                                 className="consult-primary"
@@ -156,17 +156,17 @@ export default function ConsultoriaPage() {
                 <section className="consult-intro">
                     <div>
                         <span className="consult-kicker">Entendendo a consultoria</span>
-                        <h2>Mais que intermediar: interpretar o mercado antes da decisao.</h2>
+                        <h2>Mais que intermediar: interpretar o mercado antes da decisão.</h2>
                     </div>
                     <div className="consult-intro-text">
                         <p>
-                            A Consultoria Imobiliaria Personalizada se diferencia do trabalho de um corretor comum por analisar minuciosamente o mercado imobiliario e focar nos tramites especificos de cada negocio.
+                            A Consultoria Imobiliária Personalizada se diferencia do trabalho de um corretor comum por analisar minuciosamente o mercado imobiliário e focar nos trâmites específicos de cada negócio.
                         </p>
                         <p>
-                            Durante seus anos de atuacao desde 2008, Guilherme Pilger desenvolveu estrategias reconhecidas pelo CRECI RS e apresentadas em eventos como Conecta Imobi 2019 e 2022. Essa experiencia e aplicada para orientar compradores, vendedores e investidores em Balneario Camboriu, Praia Brava e Itapema.
+                            Durante seus anos de atuação desde 2008, Guilherme Pilger desenvolveu estratégias reconhecidas pelo CRECI RS e apresentadas em eventos como Conecta Imobi 2019 e 2022. Essa experiência é aplicada para orientar compradores, vendedores e investidores em Balneário Camboriú, Praia Brava e Itapema.
                         </p>
                         <p>
-                            O objetivo e atender necessidades especificas, considerando perfil, interesse, demanda, contexto economico, cenario de mercado e condicoes reais de negociacao.
+                            O objetivo é atender necessidades específicas, considerando perfil, interesse, demanda, contexto econômico, cenário de mercado e condições reais de negociação.
                         </p>
                     </div>
                 </section>
@@ -174,16 +174,16 @@ export default function ConsultoriaPage() {
                 <section className="consult-importance">
                     <div className="consult-importance-card">
                         <MapPin size={22} />
-                        <h2>Importancia da consultoria imobiliaria personalizada</h2>
+                        <h2>Importância da consultoria imobiliária personalizada</h2>
                         <p>
-                            Alem de auxiliar na identificacao das melhores oportunidades, a consultoria aborda questoes relacionadas ao mercado e ao perfil de interesse. A atuacao local permite avaliar cenarios, bairros, padroes de construtoras e oportunidades com maior precisao.
+                            Além de auxiliar na identificação das melhores oportunidades, a consultoria aborda questões relacionadas ao mercado e ao perfil de interesse. A atuação local permite avaliar cenários, bairros, padrões de construtoras e oportunidades com maior precisão.
                         </p>
                     </div>
                     <div className="consult-importance-card">
                         <ShieldCheck size={22} />
                         <h2>Uma escolha com menos improviso</h2>
                         <p>
-                            A abordagem personalizada leva em conta expectativas individuais e evita que o cliente perca tempo com imoveis fora de perfil ou negocie sem informacao suficiente.
+                            A abordagem personalizada leva em conta expectativas individuais e evita que o cliente perca tempo com imóveis fora de perfil ou negocie sem informação suficiente.
                         </p>
                     </div>
                 </section>
@@ -191,7 +191,7 @@ export default function ConsultoriaPage() {
                 <section className="consult-section">
                     <div className="consult-section-head">
                         <span className="consult-kicker">Elementos da consultoria</span>
-                        <h2>Os tres pilares que sustentam uma decisao imobiliaria melhor.</h2>
+                        <h2>Os três pilares que sustentam uma decisão imobiliária melhor.</h2>
                     </div>
                     <div className="consult-card-grid">
                         {elements.map(item => {
@@ -232,7 +232,7 @@ export default function ConsultoriaPage() {
 
                 <section className="consult-section consult-benefits">
                     <div className="consult-section-head">
-                        <span className="consult-kicker">Beneficios</span>
+                        <span className="consult-kicker">Benefícios</span>
                         <h2>Mais retorno, menos risco e uma busca mais objetiva.</h2>
                     </div>
                     <div className="consult-card-grid">
@@ -251,19 +251,19 @@ export default function ConsultoriaPage() {
 
                 <section className="consult-final">
                     <div>
-                        <span className="consult-kicker">Consultoria com metodo</span>
-                        <h2>Antes de comprar, vender ou investir, alinhe estrategia, valor e timing.</h2>
+                        <span className="consult-kicker">Consultoria com método</span>
+                        <h2>Antes de comprar, vender ou investir, alinhe estratégia, valor e timing.</h2>
                         <p>A conversa inicial ajuda a entender se a consultoria faz sentido para o seu momento e qual caminho deve ser priorizado.</p>
                     </div>
                     <WhatsAppCaptureLink
                         phone="5547992528080"
-                        message="Ola! Quero iniciar uma consultoria imobiliaria personalizada."
+                        message="Olá! Quero iniciar uma consultoria imobiliária personalizada."
                         slug="consultoria"
                         template="consultoria-final-whatsapp"
                         className="consult-final-button"
                     >
                         <MessageCircle size={18} />
-                        Comecar pelo WhatsApp
+                        Começar pelo WhatsApp
                     </WhatsAppCaptureLink>
                 </section>
             </main>

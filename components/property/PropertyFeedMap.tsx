@@ -201,7 +201,7 @@ const streetMiniMapStyles: Record<
 
 function loadGoogleMapsScript(apiKey: string) {
     const googleWindow = getGoogleMapsWindow()
-    if (!googleWindow) return Promise.reject(new Error('Google Maps indisponivel fora do navegador.'))
+    if (!googleWindow) return Promise.reject(new Error('Google Maps indisponível fora do navegador.'))
     if (googleWindow.google?.maps?.StreetViewPanorama) return Promise.resolve()
     if (googleWindow.__pilgerGoogleMapsPromise) return googleWindow.__pilgerGoogleMapsPromise
 
@@ -217,7 +217,7 @@ function loadGoogleMapsScript(apiKey: string) {
                 return
             }
 
-            reject(new Error('Google Maps nao ficou pronto para Street View.'))
+            reject(new Error('Google Maps não ficou pronto para Street View.'))
         }
 
         const existingScript = document.getElementById('pilger-google-maps-js') as HTMLScriptElement | null
@@ -566,7 +566,7 @@ function GoogleStreetViewPanorama({
             {status === 'error' && !fallbackUrl && (
                 <div className="property-feed-map-street-native-state">
                     <Navigation size={18} />
-                    <strong>Street View indisponivel</strong>
+                    <strong>Street View indisponível</strong>
                 </div>
             )}
         </div>
@@ -740,10 +740,10 @@ export default function PropertyFeedMap({
 
     if (!safeLatLng) {
         return (
-            <div className="property-feed-map-shell property-feed-map-shell--empty" aria-label="Localizacao indisponivel">
+            <div className="property-feed-map-shell property-feed-map-shell--empty" aria-label="Localização indisponível">
                 <div className="property-feed-map-street-fallback">
                     <Navigation size={19} />
-                    <strong>Localizacao sob curadoria</strong>
+                    <strong>Localização sob curadoria</strong>
                     <span>Endereco e entorno sao confirmados pelo especialista antes da visita.</span>
                 </div>
             </div>

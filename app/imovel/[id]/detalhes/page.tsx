@@ -379,7 +379,7 @@ function toMobileExploreMapProperty(property: any, titleOverride?: string, image
     return {
         id: property.id,
         source_slug: property.source_slug || null,
-        title: cleanRepeatedPraiaBravaText(titleOverride || property.seo_title || property.title || 'Imovel'),
+        title: cleanRepeatedPraiaBravaText(titleOverride || property.seo_title || property.title || 'Imóvel'),
         city: displayLocationName(property.city) || property.city || null,
         state: property.state || null,
         neighborhood: replaceItajaiWithPraiaBrava(property.neighborhood) || property.neighborhood || null,
@@ -941,7 +941,7 @@ export default async function PropertyDetailPage({
     const marketTrackingMetadata = {
         ...propertyTrackingMetadata,
         section_id: 'historico-precos',
-        section_label: 'Historico e valor',
+        section_label: 'Histórico e valor',
         location_label: locationLabel || null,
         current_price_m2: marketHistory.currentPriceM2 || null,
         median_m2: marketHistory.medianM2 || null,
@@ -950,63 +950,63 @@ export default async function PropertyDetailPage({
     }
     const contextualLeadCtas = [
         {
-            label: 'Analise de valor',
+            label: 'Análise de valor',
             icon: <BarChart3 size={15} />,
             template: 'property-context-value-analysis',
-            message: `Ola, quero receber a analise de valor deste imovel ${propertyUrl}`,
+            message: `Olá, quero receber a análise de valor deste imóvel ${propertyUrl}`,
             metadata: {
                 ...marketTrackingMetadata,
                 tracking_event_type: 'property_value_reading_requested',
                 premium_intent: 'value_reading',
                 requested_action: 'Receber leitura de valor',
                 cta_context: 'value_analysis',
-                cta_label: 'Analise de valor',
+                cta_label: 'Análise de valor',
             },
         },
         {
-            label: 'Visita na regiao',
+            label: 'Visita na região',
             icon: <MapPin size={15} />,
             template: 'property-context-location-visit',
-            message: `Ola, quero entender a localizacao e agendar uma visita deste imovel ${propertyUrl}`,
+            message: `Olá, quero entender a localização e agendar uma visita deste imóvel ${propertyUrl}`,
             metadata: {
                 ...propertyTrackingMetadata,
                 tracking_event_type: 'property_private_visit_requested',
                 premium_intent: 'private_visit',
                 requested_action: 'Agendar visita privada',
                 section_id: 'localizacao',
-                section_label: 'Localizacao',
+                section_label: 'Localização',
                 location_label: locationLabel || null,
                 has_coordinates: Boolean(propertyMapLatLng),
                 cta_context: 'location_visit',
-                cta_label: 'Visita na regiao',
+                cta_label: 'Visita na região',
             },
         },
         {
-            label: 'Negociacao reservada',
+            label: 'Negociação reservada',
             icon: <CheckCircle2 size={15} />,
             template: 'property-context-reserved-negotiation',
-            message: `Ola, quero tratar disponibilidade e negociacao reservada deste imovel ${propertyUrl}`,
+            message: `Olá, quero tratar disponibilidade e negociação reservada deste imóvel ${propertyUrl}`,
             metadata: {
                 ...propertyTrackingMetadata,
                 tracking_event_type: 'property_reserved_negotiation_requested',
                 premium_intent: 'reserved_negotiation',
-                requested_action: 'Iniciar negociacao reservada',
+                requested_action: 'Iniciar negociação reservada',
                 cta_context: 'reserved_negotiation',
-                cta_label: 'Negociacao reservada',
+                cta_label: 'Negociação reservada',
             },
         },
         {
             label: 'Comparar similares',
             icon: <Home size={15} />,
             template: 'property-context-similar-options',
-            message: `Ola, quero comparar este imovel com opcoes semelhantes ${propertyUrl}`,
+            message: `Olá, quero comparar este imóvel com opções semelhantes ${propertyUrl}`,
             metadata: {
                 ...propertyTrackingMetadata,
                 tracking_event_type: 'property_availability_requested',
                 premium_intent: 'availability',
-                requested_action: 'Comparar opcoes e disponibilidade',
+                requested_action: 'Comparar opções e disponibilidade',
                 section_id: 'imoveis-semelhantes',
-                section_label: 'Imoveis semelhantes',
+                section_label: 'Imóveis semelhantes',
                 comparable_count: relatedCandidates.length,
                 related_visible_count: related.length,
                 cta_context: 'similar_options',
@@ -1026,12 +1026,12 @@ export default async function PropertyDetailPage({
     const mobileExploreMapProperties = Array.from(mobileExploreMapPropertiesById.values())
     const mobileNarrativePreview = narrativeParagraphs[0] || brokerInsight.text
     const mobileFactCards = [
-        area > 0 ? { icon: <Ruler size={22} />, label: 'Area privativa', value: `${area.toLocaleString('pt-BR')} m2` } : null,
-        suiteCount > 0 ? { icon: <BedDouble size={22} />, label: 'Configuracao', value: `${suiteCount} ${statLabel(suiteCount, 'suite', 'suites')}` } : null,
+        area > 0 ? { icon: <Ruler size={22} />, label: 'Área privativa', value: `${area.toLocaleString('pt-BR')} m²` } : null,
+        suiteCount > 0 ? { icon: <BedDouble size={22} />, label: 'Configuração', value: `${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}` } : null,
         bathroomsCount > 0 ? { icon: <Bath size={22} />, label: 'Banheiros', value: String(bathroomsCount) } : null,
         parkingCount > 0 ? { icon: <Car size={22} />, label: 'Garagem', value: `${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}` } : null,
-        { icon: <MapPin size={22} />, label: 'Localizacao', value: locationLabel || displayCity || 'Litoral SC' },
-        marketHistory.currentPriceM2 ? { icon: <BarChart3 size={22} />, label: 'Valor por m2', value: `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m2` } : null,
+        { icon: <MapPin size={22} />, label: 'Localização', value: locationLabel || displayCity || 'Litoral SC' },
+        marketHistory.currentPriceM2 ? { icon: <BarChart3 size={22} />, label: 'Valor por m²', value: `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` } : null,
     ].filter(Boolean) as Array<{ icon: ReactNode; label: string; value: string }>
     const mobileDetailPreviewItems = Array.from(new Set([
         ...detailItems,
@@ -1164,12 +1164,12 @@ export default async function PropertyDetailPage({
                 <section className="plp-mobile-sheet-experience">
                     <PropertyMobileDetailSheet
                         media={(
-                            <div className="plp-mobile-media-feed" aria-label="Fotos e localizacao do imovel">
+                            <div className="plp-mobile-media-feed" aria-label="Fotos e localização do imóvel">
                                 <div className="plp-mobile-media-controls">
                                     <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
                                         <ArrowLeft size={23} />
                                     </Link>
-                                    <div className="plp-mobile-action-group" aria-label="Acoes do imovel">
+                                    <div className="plp-mobile-action-group" aria-label="Ações do imóvel">
                                         <PropertyLandingFavoriteButton
                                             propertyId={property.id}
                                             title={displayTitle}
@@ -1186,7 +1186,7 @@ export default async function PropertyDetailPage({
                                         {index === 0 && (
                                             <figcaption className="plp-mobile-status-pill">
                                                 <span />
-                                                {property.property_type || 'Imovel a venda'}
+                                                {property.property_type || 'Imóvel à venda'}
                                             </figcaption>
                                         )}
                                     </figure>
@@ -1240,14 +1240,14 @@ export default async function PropertyDetailPage({
                             <div className="plp-mobile-sheet-facts">
                                 {bedroomCount > 0 && <span><BedDouble size={19} /> {bedroomCount} {statLabel(bedroomCount, 'dorm.', 'dorms.')}</span>}
                                 {bathroomsCount > 0 && <span><Bath size={19} /> {bathroomsCount} {statLabel(bathroomsCount, 'banho', 'banhos')}</span>}
-                                {area > 0 && <span><Ruler size={19} /> {area.toLocaleString('pt-BR')} m2</span>}
+                                {area > 0 && <span><Ruler size={19} /> {area.toLocaleString('pt-BR')} m²</span>}
                                 {parkingCount > 0 && <span><Car size={19} /> {parkingCount} {statLabel(parkingCount, 'vaga', 'vagas')}</span>}
                             </div>
                             <p>{locationLabel || displayTitle}</p>
                             <div className="plp-mobile-sheet-actions plp-mobile-sheet-actions--single">
                                 <WhatsAppCaptureLink
                                     phone={contactPhone}
-                                    message={`Ola, quero agendar uma visita privada neste imovel ${propertyUrl}`}
+                                    message={`Olá, quero agendar uma visita privada neste imóvel ${propertyUrl}`}
                                     slug="imovel"
                                     template="property-mobile-sheet-visit"
                                     metadata={{
@@ -1268,12 +1268,12 @@ export default async function PropertyDetailPage({
                         <section id="mobile-detalhes" className="plp-mobile-card plp-mobile-card--special">
                             <div className="plp-mobile-card-head">
                                 <span className="plp-kicker">Destaques</span>
-                                <h2>O que torna este imovel especial.</h2>
+                                <h2>O que torna este imóvel especial.</h2>
                             </div>
                             <p>{mobileNarrativePreview}</p>
                             {narrativeParagraphs.length > 1 && (
                                 <details className="plp-mobile-description-details">
-                                    <summary>Ver descricao completa</summary>
+                                    <summary>Ver descrição completa</summary>
                                     <div className="plp-mobile-description-full">
                                         {narrativeParagraphs.slice(1).map((paragraph, index) => (
                                             <p key={`mobile-description-${index}`}>{paragraph}</p>
@@ -1286,7 +1286,7 @@ export default async function PropertyDetailPage({
                         <section className="plp-mobile-card plp-mobile-card--facts">
                             <div className="plp-mobile-card-head">
                                 <span className="plp-kicker">Ficha</span>
-                                <h2>Fatos e caracteristicas.</h2>
+                                <h2>Fatos e características.</h2>
                             </div>
                             <div className="plp-mobile-facts-grid">
                                 {mobileFactCards.map((item) => (
@@ -1324,11 +1324,11 @@ export default async function PropertyDetailPage({
                                     <p>{brokerCredentialLine}</p>
                                 </div>
                             </div>
-                            <p>Converse para confirmar disponibilidade, condicoes de visita e leitura de oportunidade antes de avancar.</p>
+                            <p>Converse para confirmar disponibilidade, condições de visita e leitura de oportunidade antes de avançar.</p>
                             <div className="plp-mobile-sheet-actions">
                                 <WhatsAppCaptureLink
                                     phone={contactPhone}
-                                    message={`Ola, quero falar com o especialista responsavel por este imovel ${propertyUrl}`}
+                                    message={`Olá, quero falar com o especialista responsável por este imóvel ${propertyUrl}`}
                                     slug="imovel"
                                     template="property-mobile-sheet-specialist"
                                     metadata={{
@@ -1350,19 +1350,19 @@ export default async function PropertyDetailPage({
                         <section className="plp-mobile-card plp-mobile-market-section">
                             <div className="plp-mobile-card-head">
                                 <span className="plp-kicker">Mercado</span>
-                                <h2>Valor e historico.</h2>
+                                <h2>Valor e histórico.</h2>
                             </div>
                             <div className="plp-mobile-market-grid">
                                 <div>
-                                    <small>Preco atual</small>
+                                    <small>Preço atual</small>
                                     <strong>{formatMoney(property.price)}</strong>
                                 </div>
                                 <div>
-                                    <small>Valor por m2</small>
-                                    <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m2` : 'Sob consulta'}</strong>
+                                    <small>Valor por m²</small>
+                                    <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'}</strong>
                                 </div>
                                 <div>
-                                    <small>Comparaveis ativos</small>
+                                    <small>Comparáveis ativos</small>
                                     <strong>{marketHistory.comparableCount ? String(marketHistory.comparableCount) : 'Em curadoria'}</strong>
                                 </div>
                                 <div>
@@ -1387,9 +1387,9 @@ export default async function PropertyDetailPage({
                         <section className="plp-mobile-card plp-mobile-location-card">
                             <div className="plp-mobile-card-head">
                                 <span className="plp-kicker">Entorno</span>
-                                <h2>Localizacao e contexto.</h2>
+                                <h2>Localização e contexto.</h2>
                             </div>
-                            <p>{locationLabel || mapLocation || 'Endereco sob curadoria para visitas qualificadas.'}</p>
+                            <p>{locationLabel || mapLocation || 'Endereço sob curadoria para visitas qualificadas.'}</p>
                             {propertyMapLatLng ? (
                                 <div className="plp-map-frame plp-mobile-location-map">
                                     <PropertyLocationMap
@@ -1403,7 +1403,7 @@ export default async function PropertyDetailPage({
                                 </div>
                             ) : (
                                 <div className="plp-mobile-location-grid">
-                                    <span><MapPin size={17} /> Endereco confirmado pelo especialista antes da visita.</span>
+                                    <span><MapPin size={17} /> Endereço confirmado pelo especialista antes da visita.</span>
                                     <span><Eye size={17} /> Contexto visual em curadoria.</span>
                                 </div>
                             )}
@@ -1412,8 +1412,8 @@ export default async function PropertyDetailPage({
                         {related.length > 0 && (
                             <section className="plp-mobile-card plp-mobile-related-section">
                                 <div className="plp-mobile-card-head">
-                                    <span className="plp-kicker">Comparacao</span>
-                                    <h2>Imoveis semelhantes.</h2>
+                                    <span className="plp-kicker">Comparação</span>
+                                    <h2>Imóveis semelhantes.</h2>
                                 </div>
                                 <div className="plp-mobile-related-rail">
                                     {related.map((item: any) => {
@@ -1428,7 +1428,7 @@ export default async function PropertyDetailPage({
                                                 {item.exclusive && <span>Exclusivo</span>}
                                                 <div>
                                                     <strong>{formatMoney(item.price)}</strong>
-                                                    <small>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m2` : 'Area sob consulta'} | {itemSuites ? `${itemSuites} suites` : item.property_type || 'Imovel'}</small>
+                                                    <small>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m²` : 'Área sob consulta'} | {itemSuites ? `${itemSuites} suítes` : item.property_type || 'Imóvel'}</small>
                                                     <p>{relatedLocation || relatedTitle}</p>
                                                 </div>
                                             </Link>
@@ -1440,10 +1440,10 @@ export default async function PropertyDetailPage({
 
                         <section className="plp-mobile-card plp-mobile-transparency-card">
                             <div className="plp-mobile-card-head">
-                                <span className="plp-kicker">Transparencia</span>
-                                <h2>Dados sujeitos a confirmacao.</h2>
+                                <span className="plp-kicker">Transparência</span>
+                                <h2>Dados sujeitos a confirmação.</h2>
                             </div>
-                            <p>Preco, disponibilidade, metragem, custos recorrentes e condicoes comerciais devem ser confirmados pelo especialista antes de qualquer decisao.</p>
+                            <p>Preço, disponibilidade, metragem, custos recorrentes e condições comerciais devem ser confirmados pelo especialista antes de qualquer decisão.</p>
                         </section>
                     </PropertyMobileDetailSheet>
                 </section>
@@ -1465,12 +1465,12 @@ export default async function PropertyDetailPage({
                                 )}
                             />
                         </div>
-                        <div className="plp-mobile-media-feed" aria-label="Fotos e localizacao do imovel">
+                        <div className="plp-mobile-media-feed" aria-label="Fotos e localização do imóvel">
                             <div className="plp-mobile-media-controls">
                                 <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
                                     <ArrowLeft size={23} />
                                 </Link>
-                                <div className="plp-mobile-action-group" aria-label="Acoes do imovel">
+                                <div className="plp-mobile-action-group" aria-label="Ações do imóvel">
                                     <PropertyLandingFavoriteButton
                                         propertyId={property.id}
                                         title={displayTitle}
@@ -1487,7 +1487,7 @@ export default async function PropertyDetailPage({
                                     {index === 0 && (
                                         <figcaption className="plp-mobile-status-pill">
                                             <span />
-                                            {property.property_type || 'Imovel a venda'}
+                                            {property.property_type || 'Imóvel à venda'}
                                         </figcaption>
                                     )}
                                 </figure>
@@ -1633,7 +1633,7 @@ export default async function PropertyDetailPage({
                                     </p>
                                     <WhatsAppCaptureLink
                                         phone={contactPhone}
-                                        message={`Ola, quero receber a leitura de valor deste imovel ${propertyUrl}`}
+                                        message={`Olá, quero receber a leitura de valor deste imóvel ${propertyUrl}`}
                                         slug="imovel"
                                         template="property-market-value-cta"
                                         metadata={{
@@ -1653,7 +1653,7 @@ export default async function PropertyDetailPage({
 
                                 <article className="plp-market-card plp-price-history-card">
                                     <div className="plp-market-card-head">
-                                        <span>Historico de preco</span>
+                                        <span>Histórico de preço</span>
                                         <strong>Mercado local</strong>
                                     </div>
                                     <div className="plp-price-history-list">
@@ -1690,8 +1690,8 @@ export default async function PropertyDetailPage({
                             ) : (
                                 <div className="plp-map-empty">
                                     <MapPin size={22} />
-                                    <strong>{locationLabel || mapLocation || 'Localizacao sob curadoria'}</strong>
-                                    <span>Endereco exato apresentado pelo agente durante o atendimento.</span>
+                                    <strong>{locationLabel || mapLocation || 'Localização sob curadoria'}</strong>
+                                    <span>Endereço exato apresentado pelo agente durante o atendimento.</span>
                                 </div>
                             )}
                         </div>
@@ -1733,21 +1733,21 @@ export default async function PropertyDetailPage({
                             <h3><MessageCircle size={18} /> Mais informações sobre este imóvel</h3>
                             <p>Envie seus dados para receber disponibilidade, condições e atendimento direto pelo WhatsApp.</p>
                             <div className="plp-form-preview" aria-hidden="true">
-                                <span className="plp-form-message">Ola, tenho interesse no imovel {propertyUrl}</span>
+                                <span className="plp-form-message">Olá, tenho interesse no imóvel {propertyUrl}</span>
                                 <span>Nome completo *</span>
                                 <span>Telefone *</span>
                                 <span>Email *</span>
                             </div>
                             <WhatsAppCaptureLink
                                 phone={contactPhone}
-                                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
+                                message={`Olá, tenho interesse no imóvel ${propertyUrl}`}
                                 slug="imovel"
                                 template="property-classic-form"
                                 metadata={{
                                     ...propertyTrackingMetadata,
                                     tracking_event_type: 'property_availability_requested',
                                     premium_intent: 'availability',
-                                    requested_action: 'Receber disponibilidade e condicoes',
+                                    requested_action: 'Receber disponibilidade e condições',
                                     cta_context: 'sidebar_lead_card',
                                     cta_label: 'Enviar interesse',
                                 }}
@@ -1843,7 +1843,7 @@ export default async function PropertyDetailPage({
             <div className="plp-mobile-sticky-cta">
                 <WhatsAppCaptureLink
                     phone={contactPhone}
-                    message={`Ola, tenho interesse no imovel ${propertyUrl}`}
+                    message={`Olá, tenho interesse no imóvel ${propertyUrl}`}
                     slug="imovel"
                     template="property-classic-sticky"
                     metadata={{
@@ -1863,13 +1863,13 @@ export default async function PropertyDetailPage({
                     <span className="plp-mobile-cta-icon">
                         <WhatsAppIcon />
                     </span>
-                    <span className="plp-mobile-cta-label">Receba detalhes, disponibilidade e visita privada deste imóvel em seu WhatsApp apos o cadastro</span>
+                    <span className="plp-mobile-cta-label">Receba detalhes, disponibilidade e visita privada deste imóvel em seu WhatsApp após o cadastro</span>
                 </WhatsAppCaptureLink>
             </div>
 
             <MobileNav
                 phone={contactPhone}
-                message={`Ola, tenho interesse no imovel ${propertyUrl}`}
+                message={`Olá, tenho interesse no imóvel ${propertyUrl}`}
                 slug="imovel"
                 template="property-classic-mobile-nav"
                 metadata={{

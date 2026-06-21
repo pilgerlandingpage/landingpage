@@ -34,7 +34,7 @@ const FALLBACK_FEED: PublicMarketRadarFeed = {
   source: 'fallback',
   ticker: [
     { label: 'Praia Brava Premium', value: '+18.4% anual', tone: 'up' },
-    { label: 'Balneario Camboriu Luxo', value: 'R$ 62.300 m2', tone: 'up' },
+    { label: 'Balneário Camboriú Luxo', value: 'R$ 62.300 m²', tone: 'up' },
     { label: 'Frente Mar SC', value: 'demanda aquecida', tone: 'up' },
     { label: 'VivaPark Porto Belo', value: 'oportunidade alta', tone: 'up' },
     { label: 'INCC Mensal', value: '+0.42%', tone: 'neutral' },
@@ -42,30 +42,30 @@ const FALLBACK_FEED: PublicMarketRadarFeed = {
   ],
   highlights: [
     {
-      keyword: 'Apartamento frente mar Balneario Camboriu',
+      keyword: 'Apartamento frente mar Balneário Camboriú',
       score: 91,
       temperature: 'prioridade comercial',
-      summary: 'Demanda aquecida para ativos premium frente mar, com leitura positiva para conteudo, vitrine e trafego qualificado.',
+      summary: 'Demanda aquecida para ativos premium frente mar, com leitura positiva para conteúdo, vitrine e tráfego qualificado.',
       relatedPropertiesCount: 0,
     },
     {
-      keyword: 'Praia Brava alto padrao',
+      keyword: 'Praia Brava alto padrão',
       score: 86,
       temperature: 'quente',
-      summary: 'A regiao segue como tese forte de valorizacao, combinando escassez, liquidez e interesse de investidores.',
+      summary: 'A região segue como tese forte de valorização, combinando escassez, liquidez e interesse de investidores.',
       relatedPropertiesCount: 0,
     },
     {
       keyword: 'VivaPark Porto Belo',
       score: 82,
       temperature: 'quente',
-      summary: 'Bairros planejados continuam ganhando forca no radar de investimento imobiliario de Santa Catarina.',
+      summary: 'Bairros planejados continuam ganhando força no radar de investimento imobiliário de Santa Catarina.',
       relatedPropertiesCount: 0,
     },
   ],
   regions: [
-    { label: 'Balneario Camboriu', score: 92, description: 'Luxo vertical e frente mar' },
-    { label: 'Praia Brava', score: 88, description: 'Alto padrao e lifestyle' },
+    { label: 'Balneário Camboriú', score: 92, description: 'Luxo vertical e frente mar' },
+    { label: 'Praia Brava', score: 88, description: 'Alto padrão e lifestyle' },
     { label: 'Itapema', score: 79, description: 'Liquidez e segunda moradia' },
   ],
 }
@@ -95,7 +95,7 @@ function getTone(row: any): MarketTickerItem['tone'] {
 function inferRegion(keyword: string) {
   const text = keyword.toLowerCase()
   if (text.includes('praia brava')) return 'Praia Brava'
-  if (text.includes('balneario') || text.includes('camboriu')) return 'Balneario Camboriu'
+  if (text.includes('balneario') || text.includes('camboriu')) return 'Balneário Camboriú'
   if (text.includes('itapema') || text.includes('meia praia')) return 'Itapema'
   if (text.includes('porto belo') || text.includes('vivapark') || text.includes('pereque')) return 'Porto Belo'
   return 'Santa Catarina'
@@ -116,7 +116,7 @@ function buildRegionSignals(rows: any[]) {
     .map(([label, values]) => ({
       label,
       score: Math.round(values.total / Math.max(1, values.count)),
-      description: values.related > 0 ? `${values.related} imoveis conectados ao radar` : 'Sinal de mercado em observacao',
+      description: values.related > 0 ? `${values.related} imóveis conectados ao radar` : 'Sinal de mercado em observação',
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 4)
@@ -155,7 +155,7 @@ export async function getPublicMarketRadarFeed(): Promise<PublicMarketRadarFeed>
       keyword: String(row.keyword || 'Radar de Mercado'),
       score: Number(row.opportunity_score || 0),
       temperature: normalizeTemperature(row.market_temperature),
-      summary: String(row.summary || 'Sinal de mercado monitorado pela inteligencia Pilger.'),
+      summary: String(row.summary || 'Sinal de mercado monitorado pela inteligência Pilger.'),
       relatedPropertiesCount: Number(row.related_properties_count || 0),
     }))
 

@@ -89,8 +89,8 @@ export default function WhatsAppLeadCaptureModal() {
     const messagePreview = state.open
         ? state.message?.trim()
             || (isPropertyLead
-                ? `Ola, tenho interesse no imovel ${propertyUrl}`.trim()
-                : 'Ola! Quero falar com um especialista.')
+                ? `Olá, tenho interesse no imóvel ${propertyUrl}`.trim()
+                : 'Olá! Quero falar com um especialista.')
         : ''
     const requiresEmail = isPropertyLead
 

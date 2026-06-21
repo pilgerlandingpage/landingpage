@@ -10,7 +10,7 @@ export function EventFormAnchorButton() {
 
     return (
         <button type="button" className="event-hero-cta" onClick={scrollToForm}>
-            Confirmar minha presenca
+            Confirmar minha presença
         </button>
     )
 }
@@ -31,38 +31,38 @@ const challengeOptions: ChoiceOption[] = [
     { value: 'captar_leads', label: 'Captar leads qualificados' },
     { value: 'responder_rapido', label: 'Responder leads com velocidade' },
     { value: 'organizar_followup', label: 'Organizar follow-up' },
-    { value: 'gerar_conteudo', label: 'Gerar conteudo' },
+    { value: 'gerar_conteudo', label: 'Gerar conteúdo' },
     { value: 'converter_visitas', label: 'Converter atendimentos em visitas' },
-    { value: 'alto_ticket', label: 'Vender imoveis de maior ticket' },
+    { value: 'alto_ticket', label: 'Vender imóveis de maior ticket' },
 ]
 
 const currentToolOptions: ChoiceOption[] = [
-    { value: 'nao_uso', label: 'Nao uso ferramenta' },
+    { value: 'nao_uso', label: 'Não uso ferramenta' },
     { value: 'planilha_whatsapp', label: 'Planilha ou WhatsApp manual' },
     { value: 'crm_simples', label: 'CRM simples' },
-    { value: 'crm_automacao', label: 'CRM com automacao' },
-    { value: 'sistema_proprio', label: 'Equipe ou sistema proprio' },
+    { value: 'crm_automacao', label: 'CRM com automação' },
+    { value: 'sistema_proprio', label: 'Equipe ou sistema próprio' },
 ]
 
 const timelineOptions: ChoiceOption[] = [
     { value: 'imediato', label: 'Imediatamente' },
-    { value: '30_dias', label: 'Nos proximos 30 dias' },
-    { value: '3_meses', label: 'Nos proximos 3 meses' },
+    { value: '30_dias', label: 'Nos próximos 30 dias' },
+    { value: '3_meses', label: 'Nos próximos 3 meses' },
     { value: 'estudando', label: 'Ainda estou estudando' },
 ]
 
 const investmentOptions: ChoiceOption[] = [
-    { value: 'nao_invisto', label: 'Nao invisto' },
-    { value: 'ate_500', label: 'Ate R$ 500' },
+    { value: 'nao_invisto', label: 'Não invisto' },
+    { value: 'ate_500', label: 'Até R$ 500' },
     { value: '500_1500', label: 'R$ 500 a R$ 1.500' },
     { value: '1500_5000', label: 'R$ 1.500 a R$ 5.000' },
     { value: '5000_plus', label: 'Acima de R$ 5.000' },
 ]
 
 const questionSteps = [
-    { name: 'monthly_leads', label: 'Leads por mes', options: monthlyLeadOptions },
+    { name: 'monthly_leads', label: 'Leads por mês', options: monthlyLeadOptions },
     { name: 'main_challenge', label: 'Qual seu principal desafio hoje?', options: challengeOptions, stacked: true },
-    { name: 'current_tool', label: 'Como voce organiza seus atendimentos hoje?', options: currentToolOptions, stacked: true },
+    { name: 'current_tool', label: 'Como você organiza seus atendimentos hoje?', options: currentToolOptions, stacked: true },
     { name: 'improvement_timeline', label: 'Quando quer melhorar esse processo?', options: timelineOptions },
     { name: 'monthly_investment', label: 'Investimento mensal atual', options: investmentOptions },
 ]
@@ -196,22 +196,22 @@ export default function RegistrationForm({ slug }: { slug: string }) {
                 body: JSON.stringify(payload),
             })
             const data = await response.json()
-            if (!response.ok) throw new Error(data.error || 'Nao foi possivel confirmar sua presenca.')
+            if (!response.ok) throw new Error(data.error || 'Não foi possível confirmar sua presença.')
             setWhatsappCta(data.whatsapp_cta || null)
 
             if (data.already_registered) {
-                setSuccess('Seu cadastro ja estava confirmado. Se quiser tirar duvidas agora, inicie a conversa com nossa equipe pelo WhatsApp.')
+                setSuccess('Seu cadastro já estava confirmado. Se quiser tirar dúvidas agora, inicie a conversa com nossa equipe pelo WhatsApp.')
             } else if (data.waitlisted) {
-                setSuccess('Cadastro recebido. As vagas principais estao completas, entao voce entrou na lista de espera.')
+                setSuccess('Cadastro recebido. As vagas principais estão completas, então você entrou na lista de espera.')
             } else {
-                setSuccess('Presenca confirmada. Para falar com a equipe agora, toque no botao abaixo e inicie a conversa no WhatsApp.')
+                setSuccess('Presença confirmada. Para falar com a equipe agora, toque no botão abaixo e inicie a conversa no WhatsApp.')
             }
             event.currentTarget.reset()
             setBrokerType('autonomo')
             setCity('')
             setChoiceValues({})
         } catch (err: any) {
-            setError(err?.message || 'Nao foi possivel confirmar sua presenca.')
+            setError(err?.message || 'Não foi possível confirmar sua presença.')
         } finally {
             setLoading(false)
         }
@@ -221,21 +221,21 @@ export default function RegistrationForm({ slug }: { slug: string }) {
         return (
             <div className="event-form-success">
                 <CheckCircle2 size={38} />
-                <h3>Confirmacao recebida</h3>
+                <h3>Confirmação recebida</h3>
                 <p>{success}</p>
                 {whatsappCta && (
                     <div className="event-whatsapp-cta">
-                        <span>Tem alguma duvida?</span>
+                        <span>Tem alguma dúvida?</span>
                         <a href={whatsappCta.url} target="_blank" rel="noopener noreferrer">
                             <MessageCircle size={18} />
                             Falar no WhatsApp
                         </a>
-                        <small>A conversa comeca por voce. A mensagem ja vai pronta no seu WhatsApp.</small>
+                        <small>A conversa começa por você. A mensagem já vai pronta no seu WhatsApp.</small>
                     </div>
                 )}
                 {!whatsappCta && (
                     <div className="event-whatsapp-fallback">
-                        A equipe recebeu seu cadastro. Se o WhatsApp estiver em manutencao, acompanhe as informacoes do evento por esta pagina.
+                        A equipe recebeu seu cadastro. Se o WhatsApp estiver em manutenção, acompanhe as informações do evento por esta página.
                     </div>
                 )}
                 <button type="button" onClick={() => {
@@ -250,7 +250,7 @@ export default function RegistrationForm({ slug }: { slug: string }) {
         <form className="event-form" onSubmit={submit}>
             <div className="event-form-head">
                 <span>Cadastro reservado</span>
-                <h2>Confirme sua presenca</h2>
+                <h2>Confirme sua presença</h2>
                 <p>Preencha seus dados profissionais e, ao finalizar, inicie a conversa com nossa equipe pelo WhatsApp.</p>
             </div>
 
@@ -277,7 +277,7 @@ export default function RegistrationForm({ slug }: { slug: string }) {
                     className={brokerType === 'autonomo' ? 'active' : ''}
                     onClick={() => setBrokerType('autonomo')}
                 >
-                    Autonomo
+                    Autônomo
                 </button>
                 <button
                     type="button"
@@ -285,13 +285,13 @@ export default function RegistrationForm({ slug }: { slug: string }) {
                     className={brokerType === 'imobiliaria' ? 'active' : ''}
                     onClick={() => setBrokerType('imobiliaria')}
                 >
-                    Imobiliaria
+                    Imobiliária
                 </button>
             </div>
 
             {brokerType === 'imobiliaria' && (
                 <label>
-                    Nome da imobiliaria
+                    Nome da imobiliária
                     <input name="real_estate_name" placeholder="Nome da empresa" />
                 </label>
             )}
@@ -309,21 +309,21 @@ export default function RegistrationForm({ slug }: { slug: string }) {
 
             <div className="event-form-grid">
                 <label>
-                    Cidade de atuacao
+                    Cidade de atuação
                     <input
                         name="city"
                         required
                         value={city}
                         onChange={event => setCity(event.target.value)}
-                        placeholder="Balneario Camboriu"
+                        placeholder="Balneário Camboriú"
                     />
                 </label>
             </div>
 
             {showDiagnosticIntro && (
                 <div className="event-form-section progressive">
-                    <span>Diagnostico profissional</span>
-                    <p>Responda 5 perguntas rapidas. Cada resposta libera a proxima etapa.</p>
+                    <span>Diagnóstico profissional</span>
+                    <p>Responda 5 perguntas rápidas. Cada resposta libera a próxima etapa.</p>
                 </div>
             )}
 
@@ -352,12 +352,12 @@ export default function RegistrationForm({ slug }: { slug: string }) {
 
                     <label className="event-consent">
                         <input name="consent_whatsapp" type="checkbox" required />
-                        <span>Autorizo comunicacoes sobre este evento pelo WhatsApp e posso iniciar a conversa pelo botao apos o cadastro.</span>
+                        <span>Autorizo comunicações sobre este evento pelo WhatsApp e posso iniciar a conversa pelo botão após o cadastro.</span>
                     </label>
 
                     <button className="event-submit" type="submit" disabled={loading}>
                         {loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}
-                        Confirmar presenca
+                        Confirmar presença
                     </button>
                 </div>
             )}

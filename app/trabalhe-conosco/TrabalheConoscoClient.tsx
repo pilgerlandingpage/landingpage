@@ -11,19 +11,19 @@ export default function TrabalheConoscoClient() {
                 <div className={styles.heroContent}>
                     <div className={styles.copy}>
                         <span>Trabalhe conosco</span>
-                        <h1>Corretores que querem operar com inteligencia, curadoria e alto padrao.</h1>
+                        <h1>Corretores que querem operar com inteligência, curadoria e alto padrão.</h1>
                         <p>
-                            A Pilger esta estruturando uma rede de profissionais alinhados com atendimento consultivo,
-                            leitura de dados e presenca digital. Seu cadastro entra no painel interno e passa pela analise
+                            A Pilger está estruturando uma rede de profissionais alinhados com atendimento consultivo,
+                            leitura de dados e presença digital. Seu cadastro entra no painel interno e passa pela análise
                             do agente de recrutamento.
                         </p>
                         <div className={styles.proof}>
                             <strong>O que analisamos</strong>
                             <ul>
-                                <li>Experiencia, CRECI e regioes de atuacao</li>
-                                <li>Presenca digital e redes profissionais</li>
-                                <li>Fit com alto padrao, lancamentos e atendimento consultivo</li>
-                                <li>Interacoes futuras com o ecossistema Pilger</li>
+                                <li>Experiência, CRECI e regiões de atuação</li>
+                                <li>Presença digital e redes profissionais</li>
+                                <li>Fit com alto padrão, lançamentos e atendimento consultivo</li>
+                                <li>Interações futuras com o ecossistema Pilger</li>
                             </ul>
                         </div>
                     </div>
@@ -35,12 +35,12 @@ export default function TrabalheConoscoClient() {
                 <div>
                     <span>01</span>
                     <strong>Cadastro</strong>
-                    <p>Voce informa dados profissionais, redes sociais e consentimentos.</p>
+                    <p>Você informa dados profissionais, redes sociais e consentimentos.</p>
                 </div>
                 <div>
                     <span>02</span>
                     <strong>Agente</strong>
-                    <p>O agente organiza os dados, calcula potencial e alimenta a inteligencia.</p>
+                    <p>O agente organiza os dados, calcula potencial e alimenta a inteligência.</p>
                 </div>
                 <div>
                     <span>03</span>

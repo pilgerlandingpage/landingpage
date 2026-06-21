@@ -74,7 +74,7 @@ function toCardProperty(property: MemoryProperty) {
     return {
         ...property,
         id: property.id,
-        title: replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imovel selecionado'),
+        title: replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imóvel selecionado'),
         city: property.city || null,
         state: property.state || null,
         price: property.price || null,
@@ -184,7 +184,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
     if (!isLoading && visibleProperties.length === 0) return null
 
     return (
-        <section className="plp-continuation-rail" aria-label="Imoveis salvos e vistos recentemente">
+        <section className="plp-continuation-rail" aria-label="Imóveis salvos e vistos recentemente">
             <div className="plp-continuation-head">
                 <div>
                     <span>

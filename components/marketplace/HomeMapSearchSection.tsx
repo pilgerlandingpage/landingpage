@@ -323,7 +323,7 @@ function matchesType(property: Property, type: string) {
     if (type === 'all') return true
     const text = normalize(`${property.property_type || ''} ${property.title || ''}`)
     if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => text.includes(term))
-    if (type === 'Casa em Condominio') return text.includes('casa') && text.includes('condom')
+    if (type === 'Casa em Condomínio') return text.includes('casa') && text.includes('condom')
     return text.includes(normalize(type))
 }
 
@@ -336,11 +336,11 @@ function mapOverlayTypeToMapFilter(value: string) {
 
     const subtypeLabels: Record<string, string> = {
         cobertura: 'Cobertura',
-        condominio: 'Casa em Condominio',
+        condominio: 'Casa em Condomínio',
         duplex: 'Duplex',
-        galpao: 'Galpao',
+        galpao: 'Galpão',
         garden: 'Garden',
-        'predio-residencial': 'Predio',
+        'predio-residencial': 'Prédio',
         'sala-comercial': 'Sala Comercial',
         'terreno-comercial': 'Terreno Comercial',
         'terreno-condominio': 'Terreno',
@@ -590,7 +590,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             options: LOCATION_STEPS,
             value: query,
             onChange: (value: string) => {
-                if (value !== query) trackFilterChanged('location', 'Localizacao', value, LOCATION_STEPS, 'quiz')
+                if (value !== query) trackFilterChanged('location', 'Localização', value, LOCATION_STEPS, 'quiz')
                 setQuery(value)
                 markQuizStepAnswered('location')
             },
@@ -685,7 +685,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const activeMapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
         ? mapPreviewStatLabel
         : selectedDrawArea
-            ? `${areaFilteredMappedTotal} na area desenhada`
+            ? `${areaFilteredMappedTotal} na área desenhada`
             : selectedRegionArea
             ? selectedRegionArea.label
             : mapPreviewStatLabel
@@ -1235,7 +1235,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             options={LOCATION_STEPS}
                             value={query}
                             onChange={(value) => {
-                                if (value !== query) trackFilterChanged('location', 'Localizacao', value, LOCATION_STEPS, 'desktop')
+                                if (value !== query) trackFilterChanged('location', 'Localização', value, LOCATION_STEPS, 'desktop')
                                 setQuery(value)
                             }}
                         />

@@ -380,7 +380,7 @@ function hasModernPlacesLibrary(googleWindow: GooglePlacesWindow | null) {
 
 function loadGooglePlacesLibrary(apiKey: string) {
     const googleWindow = getGooglePlacesWindow()
-    if (!googleWindow) return Promise.reject(new Error('Google Places indisponivel fora do navegador.'))
+    if (!googleWindow) return Promise.reject(new Error('Google Places indisponível fora do navegador.'))
     if (hasModernPlacesLibrary(googleWindow)) return Promise.resolve()
     if (googleWindow.__pilgerGooglePlacesPromise) return googleWindow.__pilgerGooglePlacesPromise
 
@@ -398,7 +398,7 @@ function loadGooglePlacesLibrary(apiKey: string) {
                     return
                 }
 
-                reject(new Error('Biblioteca Places nao esta disponivel.'))
+                reject(new Error('Biblioteca Places não está disponível.'))
                 return
             }
 
@@ -1145,7 +1145,7 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
                 setPlaces(Array.from(uniquePlaces.values()))
             } catch (error) {
                 if (cancelled) return
-                console.warn('[PropertyMap] Nao foi possivel carregar beneficios do entorno:', error)
+                console.warn('[PropertyMap] Não foi possível carregar benefícios do entorno:', error)
                 setPlaces([])
             }
         }
@@ -1613,7 +1613,7 @@ export default function PropertyMap({
     const officeIcon = useMemo(() => {
         if (!officeMarker) return null
 
-        const subtitle = officeMarker.subtitle || 'Imobiliaria'
+        const subtitle = officeMarker.subtitle || 'Imobiliária'
 
         return L.divIcon({
             className: 'agency-location-marker',
@@ -1763,11 +1763,11 @@ export default function PropertyMap({
             )}
 
             {onDrawAreaChange && !officeMarker && (
-                <div className="map-draw-control" role="group" aria-label="Desenho de area no mapa">
+                <div className="map-draw-control" role="group" aria-label="Desenho de área no mapa">
                     <button
                         type="button"
                         className={drawModeEnabled ? 'active' : ''}
-                        aria-label={drawModeEnabled ? 'Cancelar desenho de area' : 'Desenhar area no mapa'}
+                        aria-label={drawModeEnabled ? 'Cancelar desenho de área' : 'Desenhar área no mapa'}
                         aria-pressed={drawModeEnabled}
                         onClick={handleDrawModeToggle}
                     >
@@ -1777,7 +1777,7 @@ export default function PropertyMap({
                     {hasDrawArea && (
                         <button
                             type="button"
-                            aria-label="Limpar area desenhada"
+                            aria-label="Limpar área desenhada"
                             onClick={handleDrawAreaClear}
                         >
                             <Eraser size={14} />
@@ -1791,9 +1791,9 @@ export default function PropertyMap({
                 <button
                     type="button"
                     className={mapOptionsOpen ? 'active' : ''}
-                    aria-label="Abrir opcoes do mapa"
+                    aria-label="Abrir opções do mapa"
                     aria-expanded={mapOptionsOpen}
-                    title="Opcoes do mapa"
+                    title="Opções do mapa"
                     onClick={() => setMapOptionsOpen(open => !open)}
                 >
                     <Globe2 size={24} />
@@ -1805,7 +1805,7 @@ export default function PropertyMap({
                         className={drawModeEnabled ? 'active' : ''}
                         aria-label={drawModeEnabled ? 'Cancelar desenho no mapa' : 'Desenhar no mapa'}
                         aria-pressed={drawModeEnabled}
-                        title={drawModeEnabled ? 'Cancelar desenho' : 'Desenhar area'}
+                        title={drawModeEnabled ? 'Cancelar desenho' : 'Desenhar área'}
                         onClick={handleDrawModeToggle}
                     >
                         <Hand size={24} />
@@ -1816,7 +1816,7 @@ export default function PropertyMap({
                     <button
                         type="button"
                         className={locateState === 'active' ? 'active' : locateState === 'loading' ? 'loading' : ''}
-                        aria-label="Buscar imoveis na minha localizacao"
+                        aria-label="Buscar imóveis na minha localização"
                         title="Perto de mim"
                         onClick={handleLocateButtonClick}
                     >
@@ -1842,7 +1842,7 @@ export default function PropertyMap({
             )}
 
             {activeAmenityLayers.length > 0 && (
-                <div className="map-amenity-layer-strip" aria-label="Beneficios proximos ativos">
+                <div className="map-amenity-layer-strip" aria-label="Benefícios próximos ativos">
                     {activeAmenityLayers.map(layer => {
                         const option = getAmenityOption(layer)
                         if (!option) return null
@@ -1859,14 +1859,14 @@ export default function PropertyMap({
 
             {mapOptionsOpen && (
                 <div className="map-options-scrim" role="presentation" onClick={() => setMapOptionsOpen(false)}>
-                    <section className="map-options-sheet" role="dialog" aria-modal="true" aria-label="Opcoes do mapa" onClick={event => event.stopPropagation()}>
+                    <section className="map-options-sheet" role="dialog" aria-modal="true" aria-label="Opções do mapa" onClick={event => event.stopPropagation()}>
                         <header>
-                            <h2>Opcoes do mapa</h2>
-                            <button type="button" aria-label="Fechar opcoes do mapa" onClick={() => setMapOptionsOpen(false)}>
+                            <h2>Opções do mapa</h2>
+                            <button type="button" aria-label="Fechar opções do mapa" onClick={() => setMapOptionsOpen(false)}>
                                 <X size={25} />
                             </button>
                         </header>
-                        <div className="map-options-style-row" role="group" aria-label="Visualizacao do mapa">
+                        <div className="map-options-style-row" role="group" aria-label="Visualização do mapa">
                             {MAP_OPTION_STYLES.map(style => (
                                 <button
                                     key={style.value}
@@ -1899,8 +1899,8 @@ export default function PropertyMap({
                             </div>
                         </div>
                         <div className="map-options-section">
-                            <h3>Beneficios proximos</h3>
-                            <div className="map-amenity-grid" role="group" aria-label="Beneficios proximos no mapa">
+                            <h3>Benefícios próximos</h3>
+                            <div className="map-amenity-grid" role="group" aria-label="Benefícios próximos no mapa">
                                 {MAP_AMENITY_LAYERS.map(layer => {
                                     const Icon = MAP_AMENITY_ICONS[layer.value] || MapPin
                                     return (

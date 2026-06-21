@@ -6,7 +6,7 @@ import { JsonLd, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
     title: 'Trabalhe conosco | Corretores Pilger',
-    description: 'Cadastro para corretores que querem trabalhar com a Pilger e atuar em um ecossistema imobiliario orientado por dados, atendimento e alto padrao.',
+    description: 'Cadastro para corretores que querem trabalhar com a Pilger e atuar em um ecossistema imobiliário orientado por dados, atendimento e alto padrão.',
     alternates: {
         canonical: '/trabalhe-conosco',
     },
@@ -24,7 +24,7 @@ export default function TrabalheConoscoPage() {
         '@context': 'https://schema.org',
         '@type': 'JobPosting',
         title: 'Corretor parceiro Pilger',
-        description: 'Cadastro para corretores interessados em trabalhar com a Pilger no mercado imobiliario de alto padrao.',
+        description: 'Cadastro para corretores interessados em trabalhar com a Pilger no mercado imobiliário de alto padrão.',
         hiringOrganization: {
             '@type': 'Organization',
             name: 'Guilherme Pilger',

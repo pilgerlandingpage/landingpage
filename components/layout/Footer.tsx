@@ -82,7 +82,7 @@ export default function Footer() {
                 <nav className="footer-section" aria-label="Institucional">
                     <h3>Marca Pilger</h3>
                     <Link href="/sobre">Sobre Guilherme Pilger</Link>
-                    <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliaria</Link>
+                    <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliária</Link>
                     <Link href="/blog">Blog</Link>
                     <Link href="/noticias">Notícias</Link>
                     <Link href="/eventos">Eventos</Link>
@@ -95,8 +95,8 @@ export default function Footer() {
                         Contato
                     </WhatsAppCaptureLink>
                     <Link href="/busca">Busca premium</Link>
-                    <Link href="/politica-de-privacidade">Politica de privacidade</Link>
-                    <Link href="/termos-de-servico">Termos de servico</Link>
+                    <Link href="/politica-de-privacidade">Política de privacidade</Link>
+                    <Link href="/termos-de-servico">Termos de serviço</Link>
                 </nav>
             </div>
 

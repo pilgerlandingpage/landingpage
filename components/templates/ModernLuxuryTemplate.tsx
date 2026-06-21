@@ -124,7 +124,7 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
 
             {/* Footer */}
             <footer className="modern-footer">
-                <p>Imobiliaria Guilherme Pilger • {new Date().getFullYear()}</p>
+                <p>Imobiliária Guilherme Pilger • {new Date().getFullYear()}</p>
             </footer>
 
             <style jsx>{`

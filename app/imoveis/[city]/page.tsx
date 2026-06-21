@@ -46,7 +46,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { city } = await params
   const page = getGeoPage(city)
-  if (!page) return { title: 'Pagina nao encontrada' }
+  if (!page) return { title: 'Página não encontrada' }
 
   return {
     title: page.title,
@@ -180,7 +180,7 @@ function buildJsonLd(page: NonNullable<ReturnType<typeof getGeoPage>>, propertie
     }),
     breadcrumbJsonLd([
       { name: 'Home', url: '/' },
-      { name: 'Imoveis', url: '/imoveis' },
+      { name: 'Imóveis', url: '/imoveis' },
       { name: page.h1, url: `/imoveis/${page.slug}` },
     ]),
     {
@@ -233,7 +233,7 @@ export default async function GeoIntentPage({ params }: PageParams) {
             <h1>{page.h1}</h1>
             <p>{page.description}</p>
             <div className="geo-actions">
-              <Link href={page.searchHref}>Ver todos os imoveis <ArrowRight size={16} /></Link>
+              <Link href={page.searchHref}>Ver todos os imóveis <ArrowRight size={16} /></Link>
               <WhatsAppCaptureLink
                 phone="5547992528080"
                 message={`Olá! Quero uma curadoria para ${page.h1}.`}
@@ -247,7 +247,7 @@ export default async function GeoIntentPage({ params }: PageParams) {
           <aside>
             <MapPin size={20} />
             <strong>{properties.length || 'Curadoria'}</strong>
-            <small>{properties.length === 1 ? 'imovel selecionado' : 'imoveis selecionados'}</small>
+            <small>{properties.length === 1 ? 'imóvel selecionado' : 'imóveis selecionados'}</small>
           </aside>
         </section>
 
@@ -265,8 +265,8 @@ export default async function GeoIntentPage({ params }: PageParams) {
             <span>Leitura de mercado</span>
             <h2>Curadoria com contexto antes da visita.</h2>
             <p>
-              A selecao abaixo combina dados do estoque ativo, leitura de localizacao e sinais de desejo do mercado.
-              Para quem compra alto padrao, a decisao certa depende de comparar produto, construtora, vista, liquidez e momento.
+              A seleção abaixo combina dados do estoque ativo, leitura de localização e sinais de desejo do mercado.
+              Para quem compra alto padrão, a decisão certa depende de comparar produto, construtora, vista, liquidez e momento.
             </p>
           </div>
           <div className="geo-faq">
@@ -282,7 +282,7 @@ export default async function GeoIntentPage({ params }: PageParams) {
 
         <section className="geo-properties">
           <div className="geo-section-head">
-            <span>Imoveis em destaque</span>
+            <span>Imóveis em destaque</span>
             <h2>{page.h1}</h2>
           </div>
           {properties.length > 0 ? (
@@ -302,7 +302,7 @@ export default async function GeoIntentPage({ params }: PageParams) {
           ) : (
             <div className="geo-empty">
               <strong>Curadoria sob consulta</strong>
-              <p>Essa pagina ja esta pronta para ranquear. Assim que houver imoveis compatíveis no estoque ativo, eles aparecem aqui automaticamente.</p>
+              <p>Essa página já está pronta para ranquear. Assim que houver imóveis compatíveis no estoque ativo, eles aparecem aqui automaticamente.</p>
               <WhatsAppCaptureLink
                 phone="5547992528080"
                 message={`Olá! Quero falar com um especialista sobre ${page.h1}.`}

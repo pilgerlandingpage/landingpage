@@ -42,14 +42,14 @@ const PROPERTY_TYPE_GROUPS = [
             { value: 'subtype:duplex', label: 'Duplex / Triplex' },
             { value: 'subtype:garden', label: 'Apartamento Garden' },
             { value: 'subtype:cobertura', label: 'Cobertura' },
-            { value: 'subtype:predio-residencial', label: 'Predio Residencial' },
+            { value: 'subtype:predio-residencial', label: 'Prédio Residencial' },
         ],
     },
     {
         label: 'CASAS',
         options: [
             { value: 'type:Casa', label: 'Casa' },
-            { value: 'subtype:condominio', label: 'Casa em Condominio' },
+            { value: 'subtype:condominio', label: 'Casa em Condomínio' },
         ],
     },
     {
@@ -57,20 +57,20 @@ const PROPERTY_TYPE_GROUPS = [
         options: [
             { value: 'type:Terreno', label: 'Terreno' },
             { value: 'subtype:terreno-comercial', label: 'Terreno Comercial' },
-            { value: 'subtype:terreno-condominio', label: 'Terreno em Condominio' },
+            { value: 'subtype:terreno-condominio', label: 'Terreno em Condomínio' },
         ],
     },
     {
-        label: 'IMOVEIS COMERCIAIS',
+        label: 'IMÓVEIS COMERCIAIS',
         options: [
-            { value: 'subtype:galpao', label: 'Galpao / Deposito' },
+            { value: 'subtype:galpao', label: 'Galpão / Depósito' },
             { value: 'subtype:sala-comercial', label: 'Sala Comercial' },
         ],
     },
 ]
 
 const PROPERTY_TYPE_OPTIONS = [
-    { value: 'all', label: 'Todos os Imoveis' },
+    { value: 'all', label: 'Todos os Imóveis' },
     ...PROPERTY_TYPE_GROUPS.flatMap(group => group.options),
 ]
 
@@ -83,11 +83,11 @@ const PRICE_OPTIONS = [
 ]
 
 const FALLBACK_CITIES = [
-    { label: 'Balneario Camboriu / SC', value: 'Balneario Camboriu' },
+    { label: 'Balneário Camboriú / SC', value: 'Balneario Camboriu' },
     { label: 'Praia Brava / SC', value: 'Praia Brava' },
     { label: 'Itapema / SC', value: 'Itapema' },
     { label: 'Porto Belo / SC', value: 'Porto Belo' },
-    { label: 'Camboriu / SC', value: 'Camboriu' },
+    { label: 'Camboriú / SC', value: 'Camboriu' },
     { label: 'Bombinhas / SC', value: 'Bombinhas' },
     { label: 'Navegantes / SC', value: 'Navegantes' },
     { label: 'Penha / SC', value: 'Penha' },
@@ -114,7 +114,7 @@ function priceLabel(value: string) {
 }
 
 function typeLabel(value: string) {
-    return PROPERTY_TYPE_OPTIONS.find(option => option.value === value)?.label || 'Todos os Imoveis'
+    return PROPERTY_TYPE_OPTIONS.find(option => option.value === value)?.label || 'Todos os Imóveis'
 }
 
 function stripStateSuffix(value: string) {
@@ -278,9 +278,9 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
 
         return [
             { key: 'office', label: 'Imobiliária', meta: 'Localização', items: offices },
-            { key: 'cities', label: 'Cidades', meta: 'Regiao da Busca', items: cities },
-            { key: 'neighborhoods', label: 'Bairros', meta: 'Regiao da Busca', items: neighborhoods },
-            { key: 'properties', label: 'Imoveis', meta: 'Match direto', items: properties },
+            { key: 'cities', label: 'Cidades', meta: 'Região da busca', items: cities },
+            { key: 'neighborhoods', label: 'Bairros', meta: 'Região da busca', items: neighborhoods },
+            { key: 'properties', label: 'Imóveis', meta: 'Match direto', items: properties },
         ].filter(group => group.items.length > 0)
     }, [displayedSuggestions])
 
@@ -436,15 +436,15 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                 {variant === 'home' && (
                     <div className="home-search-title">
                         <span>Busca inteligente</span>
-                        <h2>Encontre seu Imovel!</h2>
+                        <h2>Encontre seu Imóvel!</h2>
                     </div>
                 )}
 
                 <div className="home-search-select-row">
                     <label>
-                        <span>Tipo de imovel</span>
+                        <span>Tipo de imóvel</span>
                         <select value={typeValue} onChange={event => setTypeValue(event.target.value)}>
-                            <option value="all">Todos os Imoveis</option>
+                            <option value="all">Todos os Imóveis</option>
                             {PROPERTY_TYPE_GROUPS.map(group => (
                                 <optgroup label={group.label} key={group.label}>
                                     {group.options.map(option => (
@@ -469,26 +469,26 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
 
                 <div className="home-search-location-row">
                     <label>
-                        <span>Descreva o imovel ou local</span>
+                        <span>Descreva o imóvel ou local</span>
                         <MapPin className="home-search-pin" size={18} />
                         <input
                             autoComplete="off"
                             onChange={event => updateLocation(event.target.value)}
                             onFocus={focusLocation}
                             onKeyDown={handleKeyDown}
-                            placeholder="ex: cobertura 4 suites Praia Brava frente mar"
+                            placeholder="ex: cobertura 4 suítes Praia Brava frente mar"
                             type="text"
                             value={locationLabel}
                         />
                     </label>
-                    <button type="submit" aria-label="Buscar imoveis">
+                    <button type="submit" aria-label="Buscar imóveis">
                         <Search size={20} />
                     </button>
 
                     {showSuggestions && (groupedSuggestions.length > 0 || isLoading) && (
                         <div className="home-search-suggestions">
                             {isLoading && groupedSuggestions.length === 0 ? (
-                                <div className="home-search-loading">Buscando regioes...</div>
+                                <div className="home-search-loading">Buscando regiões...</div>
                             ) : (
                                 groupedSuggestions.map(group => (
                                     <div className="suggestion-group" key={group.key}>
@@ -515,7 +515,7 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                                                         ) : suggestion.type === 'property' && suggestion.price ? (
                                                             <small>{formatPrice(suggestion.price)} {suggestion.city ? `| ${replaceItajaiWithPraiaBrava(suggestion.city)}` : ''}</small>
                                                         ) : suggestion.count ? (
-                                                            <small>{suggestion.count} imoveis</small>
+                                                            <small>{suggestion.count} imóveis</small>
                                                         ) : null}
                                                     </span>
                                                 </button>

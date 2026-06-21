@@ -81,9 +81,9 @@ export default async function EventosPage() {
                     <div className="events-index-hero-media" />
                     <div className="events-index-hero-content">
                         <span>Eventos Guilherme Pilger</span>
-                        <h1>Encontros para corretores que querem operar com mais inteligencia.</h1>
+                        <h1>Encontros para corretores que querem operar com mais inteligência.</h1>
                         <p>
-                            Convites editoriais, apresentacoes reservadas e experiencias de mercado para profissionais que atuam com imoveis.
+                            Convites editoriais, apresentações reservadas e experiências de mercado para profissionais que atuam com imóveis.
                         </p>
                     </div>
                 </section>
@@ -91,7 +91,7 @@ export default async function EventosPage() {
                 <section className="events-index-list">
                     <div className="events-index-heading">
                         <span>Agenda</span>
-                        <h2>Proximos encontros</h2>
+                        <h2>Próximos encontros</h2>
                     </div>
 
                     {events.length === 0 ? (
@@ -111,7 +111,7 @@ export default async function EventosPage() {
                                     <div className="event-card-body">
                                         <span>{event.eyebrow || 'Encontro exclusivo'}</span>
                                         <h3>{event.title}</h3>
-                                        <p>{event.subtitle || event.description || 'Uma experiencia reservada para profissionais do mercado imobiliario.'}</p>
+                                        <p>{event.subtitle || event.description || 'Uma experiência reservada para profissionais do mercado imobiliário.'}</p>
                                         <div className="event-card-meta">
                                             <small><CalendarDays size={14} />{formatEventDate(event.event_date)}</small>
                                             <small><MapPin size={14} />{event.location_name || event.location_address || 'Local a confirmar'}</small>

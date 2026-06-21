@@ -3,7 +3,7 @@ import { pickPublicBlogSummary } from '@/lib/blog/types'
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://guilhermepilger.ai'
 export const BRAND_NAME = 'Guilherme Pilger'
-export const BRAND_LEGAL_NAME = 'Imobiliaria Guilherme Pilger'
+export const BRAND_LEGAL_NAME = 'Imobiliária Guilherme Pilger'
 export const BUSINESS_DESCRIPTION = 'Curadoria de imóveis de luxo e alto padrão no litoral catarinense, com foco em Balneário Camboriú, Praia Brava, Itapema, Porto Belo e regiões premium de Santa Catarina.'
 export const BUSINESS_PHONE = '+55 47 99252-8080'
 export const BUSINESS_EMAIL = 'contato@guilhermepilger.ai'
@@ -328,7 +328,7 @@ export function articleJsonLd(params: {
     publisher: {
       '@id': `${SITE_URL}/#organization`,
     },
-    articleSection: post.category || (isNews ? 'Noticias' : 'Blog'),
+    articleSection: post.category || (isNews ? 'Notícias' : 'Blog'),
     keywords,
     about: (post.local_entities || []).map(entity => ({
       '@type': 'Thing',

@@ -27,11 +27,11 @@ async function getEvent(slug: string) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params
     const event = await getEvent(slug)
-    if (!event) return { title: 'Evento nao encontrado' }
+    if (!event) return { title: 'Evento não encontrado' }
 
     return {
         title: event.title,
-        description: event.description || event.subtitle || 'Encontro exclusivo da Guilherme Pilger para corretores de imoveis.',
+        description: event.description || event.subtitle || 'Encontro exclusivo da Guilherme Pilger para corretores de imóveis.',
         alternates: { canonical: `/eventos/${event.slug}` },
         openGraph: {
             title: event.title,
@@ -49,13 +49,13 @@ export default async function EventoPublicPage({ params }: PageProps) {
     if (!event) notFound()
 
     const heroImage = event.hero_image_url || DEFAULT_EVENT_HERO
-    const subtitle = event.subtitle || event.description || 'Uma apresentacao reservada para profissionais que querem operar com mais inteligencia no mercado imobiliario.'
+    const subtitle = event.subtitle || event.description || 'Uma apresentação reservada para profissionais que querem operar com mais inteligência no mercado imobiliário.'
     const eventMetadata = event.metadata && typeof event.metadata === 'object' && !Array.isArray(event.metadata)
         ? event.metadata as Record<string, unknown>
         : {}
     const mapsUrl = typeof eventMetadata.maps_url === 'string' ? eventMetadata.maps_url : ''
     const location = event.location_name || 'Local do encontro'
-    const locationAddress = event.location_address || 'Endereco a confirmar'
+    const locationAddress = event.location_address || 'Endereço a confirmar'
     const jsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -84,23 +84,23 @@ export default async function EventoPublicPage({ params }: PageProps) {
                         <span>GUILHERME</span>
                         <span>PILGER</span>
                     </div>
-                    <p className="event-report-kicker">INTELIGENCIA DE MERCADO | LITORAL NORTE SC</p>
-                    <h1>ENCONTRO ESTRATEGICO<br />PARA CORRETORES</h1>
+                    <p className="event-report-kicker">INTELIGÊNCIA DE MERCADO | LITORAL NORTE SC</p>
+                    <h1>ENCONTRO ESTRATÉGICO<br />PARA CORRETORES</h1>
                     <p className="event-report-subtitle">{subtitle}</p>
                     <EventFormAnchorButton />
                     <div className="event-report-rule" />
                 </header>
 
-                <section className="event-report-grid" aria-label="Informacoes principais do evento">
+                <section className="event-report-grid" aria-label="Informações principais do evento">
                     <div className="event-left-column">
                         <article className="event-card event-host-card">
                             <Image src={DEFAULT_EVENT_PROFILE} alt="Guilherme Pilger" width={132} height={132} priority />
                             <div>
-                                <span>Seu consultor estrategico</span>
+                                <span>Seu consultor estratégico</span>
                                 <p>
-                                    Especialista em investimentos imobiliarios de alto padrao no Litoral&nbsp;Norte&nbsp;Catarinense.
+                                    Especialista em investimentos imobiliários de alto padrão no Litoral&nbsp;Norte&nbsp;Catarinense.
                                     <br />
-                                    <strong className="event-inline-name">Guilherme Pilger</strong> conduz uma apresentacao reservada sobre tecnologia, posicionamento e inteligencia comercial para corretores.
+                                    <strong className="event-inline-name">Guilherme Pilger</strong> conduz uma apresentação reservada sobre tecnologia, posicionamento e inteligência comercial para corretores.
                                 </p>
                             </div>
                         </article>
@@ -108,7 +108,7 @@ export default async function EventoPublicPage({ params }: PageProps) {
                         <article className="event-card event-main-card">
                             <h2>Antes do mercado perceber.</h2>
                             <p>
-                                Tecnologia, posicionamento e inteligencia comercial para corretores que querem sair na frente.
+                                Tecnologia, posicionamento e inteligência comercial para corretores que querem sair na frente.
                             </p>
                             <div className="event-meta-grid">
                                 <div>
@@ -133,15 +133,15 @@ export default async function EventoPublicPage({ params }: PageProps) {
 
                         <div className="event-small-row">
                             <article className="event-card event-small-card">
-                                <span>A estrategia</span>
-                                <h3>Operar com mais inteligencia</h3>
-                                <p>Uma leitura objetiva sobre atendimento, captacao e automacao aplicada ao dia a dia de corretores.</p>
+                                <span>A estratégia</span>
+                                <h3>Operar com mais inteligência</h3>
+                                <p>Uma leitura objetiva sobre atendimento, captação e automação aplicada ao dia a dia de corretores.</p>
                             </article>
 
                             <article className="event-card event-small-card">
                                 <span>WhatsApp seguro</span>
                                 <h3>Conversa iniciada pelo corretor</h3>
-                                <p>Depois do cadastro, o corretor escolhe chamar a equipe para confirmar presenca e tirar duvidas.</p>
+                                <p>Depois do cadastro, o corretor escolhe chamar a equipe para confirmar presença e tirar dúvidas.</p>
                             </article>
                         </div>
 
@@ -149,7 +149,7 @@ export default async function EventoPublicPage({ params }: PageProps) {
                             <ShieldCheck size={31} />
                             <div>
                                 <h3>Cadastro profissional com CRECI</h3>
-                                <p>O formulario registra CRECI, cidade de atuacao e perfil comercial para que a equipe organize a lista de presenca com mais controle e contexto.</p>
+                                <p>O formulário registra CRECI, cidade de atuação e perfil comercial para que a equipe organize a lista de presença com mais controle e contexto.</p>
                             </div>
                         </article>
                     </div>

@@ -117,7 +117,7 @@ export default function ClassicTemplate({ data, slug, landingPageId, agentName, 
 
             {/* Footer */}
             <footer className="lp-footer">
-                <p>© {new Date().getFullYear()} Imobiliaria Guilherme Pilger. Todos os direitos reservados.</p>
+                <p>© {new Date().getFullYear()} Imobiliária Guilherme Pilger. Todos os direitos reservados.</p>
             </footer>
 
             <style jsx>{`

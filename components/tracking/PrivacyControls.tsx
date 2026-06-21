@@ -38,7 +38,7 @@ export default function PrivacyControls() {
         <section className="privacy-controls">
             <h2>Controle de rastreamento</h2>
             <p>
-                Voce pode pausar a coleta de eventos deste navegador. Isso nao apaga historicos legais ou conversas ja registradas,
+                Você pode pausar a coleta de eventos deste navegador. Isso não apaga históricos legais ou conversas já registradas,
                 mas impede novos eventos anonimos deste dispositivo enquanto estiver desativado.
             </p>
             <button type="button" onClick={disabled ? handleEnable : handleDisable}>

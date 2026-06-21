@@ -75,7 +75,7 @@ export default function PropertyPhotoShowcase({ images, title, metadata, shareSl
                         className="plp-gallery-modal"
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Galeria de fotos do imovel"
+                        aria-label="Galeria de fotos do imóvel"
                         onClick={(event) => event.stopPropagation()}
                     >
                         <header className="plp-gallery-modal-header">

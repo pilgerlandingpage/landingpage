@@ -4,8 +4,8 @@ import FavoritePropertiesClient from '@/components/marketplace/FavoritePropertie
 import { JsonLd, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
-    title: 'Favoritos e comparacao de imoveis',
-    description: 'Compare os imoveis favoritos da curadoria Guilherme Pilger e solicite uma leitura especializada.',
+    title: 'Favoritos e comparação de imóveis',
+    description: 'Compare os imóveis favoritos da curadoria Guilherme Pilger e solicite uma leitura especializada.',
     alternates: {
         canonical: '/favoritos',
     },
@@ -16,8 +16,8 @@ export default function FavoritosPage() {
         organizationJsonLd(),
         webPageJsonLd({
             path: '/favoritos',
-            name: 'Favoritos e comparacao de imoveis',
-            description: 'Area para comparar imoveis favoritos e solicitar curadoria especializada.',
+            name: 'Favoritos e comparação de imóveis',
+            description: 'Área para comparar imóveis favoritos e solicitar curadoria especializada.',
             type: 'CollectionPage',
         }),
         breadcrumbJsonLd([

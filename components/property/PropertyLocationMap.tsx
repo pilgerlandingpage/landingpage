@@ -75,10 +75,10 @@ export default function PropertyLocationMap(props: Props) {
 
     return (
         <div className="plp-location-explorer">
-            <div className="plp-location-context" aria-label="Contexto da localizacao">
+            <div className="plp-location-context" aria-label="Contexto da localização">
                 <div>
                     <MapPin size={15} />
-                    <span>Regiao</span>
+                    <span>Região</span>
                     <strong>{locationLabel(property)}</strong>
                 </div>
                 <div>
@@ -88,8 +88,8 @@ export default function PropertyLocationMap(props: Props) {
                 </div>
                 <div>
                     <Home size={15} />
-                    <span>Imovel</span>
-                    <strong>{property.property_type || 'Alto padrao'}</strong>
+                    <span>Imóvel</span>
+                    <strong>{property.property_type || 'Alto padrão'}</strong>
                 </div>
             </div>
 
@@ -102,7 +102,7 @@ export default function PropertyLocationMap(props: Props) {
             />
 
             {showActions && (
-                <div className="plp-location-actions" aria-label="Acoes de localizacao">
+                <div className="plp-location-actions" aria-label="Ações de localização">
                 <a
                     href={googleMapsUrl}
                     target="_blank"

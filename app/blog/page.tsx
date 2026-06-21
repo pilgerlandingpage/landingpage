@@ -8,13 +8,13 @@ import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
-    title: 'Blog | Imobiliaria Guilherme Pilger',
+    title: 'Blog | Imobiliária Guilherme Pilger',
     description: 'Conteúdos sobre mercado imobiliário premium, investimento, bairros e oportunidades no litoral catarinense.',
     alternates: {
         canonical: '/blog',
     },
     openGraph: {
-        title: 'Blog | Imobiliaria Guilherme Pilger',
+        title: 'Blog | Imobiliária Guilherme Pilger',
         description: 'Conteúdos sobre mercado imobiliário premium, investimento, bairros e oportunidades no litoral catarinense.',
         url: '/blog',
         type: 'website',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Blog | Imobiliaria Guilherme Pilger',
+        title: 'Blog | Imobiliária Guilherme Pilger',
         description: 'Conteúdos sobre mercado imobiliário premium, investimento, bairros e oportunidades no litoral catarinense.',
         images: [DEFAULT_OG_IMAGE],
     },
@@ -161,10 +161,10 @@ export default async function BlogPage() {
                 <section className="blog-crosslink">
                     <div>
                         <span>Radar de mercado</span>
-                        <h2>Noticias para acompanhar o que esta mudando no litoral.</h2>
+                        <h2>Notícias para acompanhar o que está mudando no litoral.</h2>
                         <p>Veja atualizacoes sobre lancamentos, infraestrutura, construtoras e sinais que ajudam a ler o momento antes de decidir.</p>
                     </div>
-                    <Link href="/noticias"><Newspaper size={17} /> Ver noticias</Link>
+                    <Link href="/noticias"><Newspaper size={17} /> Ver notícias</Link>
                 </section>
             </main>
             <Footer />

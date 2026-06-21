@@ -616,7 +616,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                     <button
                                         className={`property-icon-button property-dislike-button ${isDisliked ? 'is-disliked' : ''}`}
                                         type="button"
-                                        aria-label={isDisliked ? 'Remover nÃ£o gostei' : 'NÃ£o gostei deste imÃ³vel'}
+                                        aria-label={isDisliked ? 'Remover não gostei' : 'Não gostei deste imóvel'}
                                         onClick={() => toggleDislike(item)}
                                     >
                                         <ThumbsDown size={19} fill={isDisliked ? 'currentColor' : 'none'} />
@@ -800,7 +800,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                                                         <button
                                                             key={`${item.id}-story-${story.id}`}
                                                             type="button"
-                                                            aria-label={`Ver imovel semelhante ${absoluteIndex + 1}`}
+                                                            aria-label={`Ver imóvel semelhante ${absoluteIndex + 1}`}
                                                             onClick={() => scrollToProperty(story.id)}
                                                         >
                                                             <span>

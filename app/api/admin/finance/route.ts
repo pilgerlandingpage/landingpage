@@ -507,7 +507,7 @@ export async function DELETE(request: NextRequest) {
         if (!schema) {
             return NextResponse.json({
                 success: false,
-                error: 'Tabela financeira incompatÃ­vel. Execute o SQL de correÃ§Ã£o.',
+                error: 'Tabela financeira incompatível. Execute o SQL de correção.',
             }, { status: 400 })
         }
 

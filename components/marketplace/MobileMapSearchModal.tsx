@@ -47,7 +47,7 @@ type MapBounds = {
 
 const OFFICE_LOCATION_MARKER = {
     latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
-    title: 'Imobiliaria Guilherme Pilger',
+    title: 'Imobiliária Guilherme Pilger',
     subtitle: 'Praia Brava',
     address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajai - SC, 88306-800',
 }
@@ -114,11 +114,11 @@ function mapOverlayTypeToMapFilter(value: string) {
 
     const subtypeLabels: Record<string, string> = {
         cobertura: 'Cobertura',
-        condominio: 'Casa em Condominio',
+        condominio: 'Casa em Condomínio',
         duplex: 'Duplex',
-        galpao: 'Galpao',
+        galpao: 'Galpão',
         garden: 'Garden',
-        'predio-residencial': 'Predio',
+        'predio-residencial': 'Prédio',
         'sala-comercial': 'Sala Comercial',
         'terreno-comercial': 'Terreno Comercial',
         'terreno-condominio': 'Terreno',
@@ -131,7 +131,7 @@ function matchesType(property: Property, type: string) {
     if (!type || type === 'all') return true
     const text = normalize(`${property.property_type || ''} ${property.title || ''}`)
     if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => text.includes(term))
-    if (type === 'Casa em Condominio') return text.includes('casa') && text.includes('condom')
+    if (type === 'Casa em Condomínio') return text.includes('casa') && text.includes('condom')
     return text.includes(normalize(type))
 }
 
@@ -209,13 +209,13 @@ export default function MobileMapSearchModal({
     const visibleProperties = isMapLocked || isOfficeLocationSelected ? [] : boundedProperties
     const officeMarker = isMapLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
     const statLabel = isMapLocked || isOfficeLocationSelected
-        ? 'Imobiliaria Guilherme Pilger'
+        ? 'Imobiliária Guilherme Pilger'
         : appliedAreaBounds
-            ? `${visibleProperties.length} de ${filteredProperties.length} nesta area`
+            ? `${visibleProperties.length} de ${filteredProperties.length} nesta área`
             : selectedRegionArea
                 ? selectedRegionArea.label
             : filteredProperties.length
-                ? `${filteredProperties.length} imoveis no mapa`
+                ? `${filteredProperties.length} imóveis no mapa`
             : statFallback
     const refitKey = isOfficeLocationSelected
         ? 'property-modal-office-location'
@@ -347,7 +347,7 @@ export default function MobileMapSearchModal({
     return (
         <div className="mobile-map-modal-backdrop" onClick={closeModal} role="presentation">
             <div
-                aria-label="Buscar imoveis no mapa"
+                aria-label="Buscar imóveis no mapa"
                 aria-modal="true"
                 className="mobile-map-modal"
                 onClick={event => event.stopPropagation()}
@@ -380,10 +380,10 @@ export default function MobileMapSearchModal({
                                 type="button"
                                 className="mobile-search-this-area-button"
                                 onClick={handleSearchThisArea}
-                                aria-label="Buscar imoveis nesta area do mapa"
+                                aria-label="Buscar imóveis nesta área do mapa"
                             >
                                 <Search size={15} />
-                                <span>Buscar nesta area</span>
+                                <span>Buscar nesta área</span>
                                 {pendingAreaCount > 0 && <strong>{pendingAreaCount}</strong>}
                             </button>
                         )}

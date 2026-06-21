@@ -253,7 +253,7 @@ export default function GeoCapturePrompt({ visitorId }: GeoCapturePromptProps) {
             <button
                 type="button"
                 onClick={dismiss}
-                aria-label="Fechar pedido de localizacao"
+                aria-label="Fechar pedido de localização"
                 style={{
                     position: 'absolute',
                     top: 10,
@@ -284,11 +284,11 @@ export default function GeoCapturePrompt({ visitorId }: GeoCapturePromptProps) {
                 </div>
                 <div>
                     <strong style={{ display: 'block', fontSize: 14, marginBottom: 4 }}>
-                        Encontrar oportunidades perto de voce
+                        Encontrar oportunidades perto de você
                     </strong>
                     <p style={{ margin: 0, color: '#6b7280', fontSize: 12.5, lineHeight: 1.45 }}>
-                        Autorize sua localizacao para registrarmos sua regiao exata no atendimento e
-                        sugerirmos imoveis mais alinhados.
+                        Autorize sua localização para registrarmos sua região exata no atendimento e
+                        sugerirmos imóveis mais alinhados.
                     </p>
                 </div>
             </div>
@@ -311,7 +311,7 @@ export default function GeoCapturePrompt({ visitorId }: GeoCapturePromptProps) {
                     cursor: state === 'capturing' ? 'wait' : 'pointer',
                 }}
             >
-                {state === 'capturing' ? 'Salvando localizacao...' : state === 'done' ? 'Localizacao salva' : 'Usar minha localizacao'}
+                {state === 'capturing' ? 'Salvando localização...' : state === 'done' ? 'Localização salva' : 'Usar minha localização'}
             </button>
         </div>
     )

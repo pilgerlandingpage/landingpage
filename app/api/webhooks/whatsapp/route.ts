@@ -3174,7 +3174,7 @@ export async function POST(request: NextRequest) {
 
         // â”€â”€ Extract phone number â”€â”€
         // ConnectyHub pode enviar LIDs internos no campo sender/sender_pn
-        // O nÃºmero REAL vem em chatid, owner, ou chat.id
+        // O número REAL vem em chatid, owner, ou chat.id
         // Prioridade: chatid > owner > chat.id > sender_pn > from > remoteJid
         const remotePhone = messageData.chatid           // "5511964830003@s.whatsapp.net" (BEST)
             || messageData.owner                         // sometimes has the real phone
@@ -3550,7 +3550,7 @@ export async function POST(request: NextRequest) {
         if (!instance) {
             console.error(`[Webhook] âŒ No instance found. instanceName: ${instanceName}`)
             await saveAudit({ action: 'instance_not_found', statusCode: 404 })
-            return NextResponse.json({ success: false, message: 'InstÃ¢ncia não encontrada' }, { status: 404 })
+            return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
         }
 
         console.log(`[Webhook] âœ… Instance: ${instance.instance_name} (broker: ${instance.broker_id || 'none'})`)

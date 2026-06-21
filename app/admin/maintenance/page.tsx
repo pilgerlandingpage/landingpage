@@ -2035,7 +2035,7 @@ export default function MaintenancePage() {
                         <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>
                             Status de Créditos / Quota (LLMs)
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                Provider ativo: <strong>{llmCreditCheck?.active_provider || '�'}</strong>
+                                Provider ativo: <strong>{llmCreditCheck?.active_provider || 'não informado'}</strong>
                             </div>
                         </div>
                         <button

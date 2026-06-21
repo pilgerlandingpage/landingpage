@@ -7,13 +7,13 @@ import { getGeoPages } from '@/lib/seo/geo-pages'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
-  title: 'Imoveis de luxo no litoral catarinense',
-  description: 'Guias de busca para imoveis de luxo, frente mar, casas de alto padrao, coberturas e cidades premium de Santa Catarina.',
+  title: 'Imóveis de luxo no litoral catarinense',
+  description: 'Guias de busca para imóveis de luxo, frente mar, casas de alto padrão, coberturas e cidades premium de Santa Catarina.',
   alternates: {
     canonical: '/imoveis',
   },
   openGraph: {
-    title: 'Imoveis de luxo no litoral catarinense',
+    title: 'Imóveis de luxo no litoral catarinense',
     description: 'Encontre a busca certa para comprar melhor com a curadoria de Guilherme Pilger.',
     url: '/imoveis',
     type: 'website',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Imoveis de luxo no litoral catarinense',
+    title: 'Imóveis de luxo no litoral catarinense',
     description: 'Encontre a busca certa para comprar melhor com a curadoria de Guilherme Pilger.',
     images: [DEFAULT_OG_IMAGE],
   },
@@ -34,18 +34,18 @@ function buildJsonLd() {
     organizationJsonLd(),
     webPageJsonLd({
       path: '/imoveis',
-      name: 'Imoveis de luxo no litoral catarinense',
-      description: 'Guias de busca para imoveis de luxo, frente mar, casas de alto padrao, coberturas e cidades premium de Santa Catarina.',
+      name: 'Imóveis de luxo no litoral catarinense',
+      description: 'Guias de busca para imóveis de luxo, frente mar, casas de alto padrão, coberturas e cidades premium de Santa Catarina.',
       type: 'CollectionPage',
     }),
     breadcrumbJsonLd([
       { name: 'Home', url: '/' },
-      { name: 'Imoveis', url: '/imoveis' },
+      { name: 'Imóveis', url: '/imoveis' },
     ]),
     {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: 'Imoveis de luxo no litoral catarinense',
+      name: 'Imóveis de luxo no litoral catarinense',
       url: absoluteUrl('/imoveis'),
       description: metadata.description,
       mainEntity: {
@@ -74,7 +74,7 @@ export default function ImoveisHubPage() {
           <span>Pilger Luxury Search</span>
           <h1>Escolha a busca certa para comprar melhor.</h1>
           <p>
-            Paginas criadas para organizar as buscas mais importantes do alto padrao no litoral catarinense,
+            Páginas criadas para organizar as buscas mais importantes do alto padrão no litoral catarinense,
             com contexto, filtros e oportunidades do estoque ativo.
           </p>
           <Link href="/busca">
@@ -108,10 +108,10 @@ export default function ImoveisHubPage() {
         <section className="geo-hub-note">
           <Building2 size={22} />
           <div>
-            <h2>Conteudo feito para busca humana e busca por IA.</h2>
+            <h2>Conteúdo feito para busca humana e busca por IA.</h2>
             <p>
               Cada pagina ajuda Google, assistentes de IA e leads a entenderem exatamente onde procurar:
-              cidade, frente mar, cobertura, casa de alto padrao e outras intencoes de compra.
+              cidade, frente mar, cobertura, casa de alto padrão e outras intenções de compra.
             </p>
           </div>
         </section>

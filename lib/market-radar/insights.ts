@@ -51,11 +51,11 @@ export type RadarInsightResult = {
   ai_used: boolean
 }
 
-const DEFAULT_RADAR_ANALYST_PROMPT = `Voce e o Analista de Radar de Mercado da Imobiliaria Guilherme Pilger, uma imobiliaria de luxo em Santa Catarina.
-Sua funcao e interpretar sinais de busca, estoque imobiliario e oportunidade comercial.
-Responda sempre em portugues do Brasil, com linguagem executiva, objetiva e orientada a acao.
-Nunca invente numeros alem dos dados fornecidos.
-Retorne somente JSON valido, sem markdown.`
+const DEFAULT_RADAR_ANALYST_PROMPT = `Você é o Analista de Radar de Mercado da Imobiliária Guilherme Pilger, uma imobiliária de luxo em Santa Catarina.
+Sua função é interpretar sinais de busca, estoque imobiliário e oportunidade comercial.
+Responda sempre em português do Brasil, com linguagem executiva, objetiva e orientada à ação.
+Nunca invente números além dos dados fornecidos.
+Retorne somente JSON válido, sem markdown.`
 
 const STOPWORDS = new Set([
   'a', 'o', 'os', 'as', 'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas',
@@ -64,11 +64,11 @@ const STOPWORDS = new Set([
 ])
 
 const CITY_ALIASES: Record<string, string[]> = {
-  'Balneario Camboriu': ['balneario camboriu', 'bc'],
-  'Itajai': ['itajai', 'praia brava'],
+  'Balneário Camboriú': ['balneario camboriu', 'bc'],
+  'Itajaí': ['itajai', 'praia brava'],
   'Itapema': ['itapema', 'meia praia'],
   'Porto Belo': ['porto belo', 'pereque', 'vivapark', 'viva park'],
-  'Camboriu': ['camboriu'],
+  'Camboriú': ['camboriu'],
 }
 
 function clamp(value: number, min = 0, max = 100) {
@@ -244,13 +244,13 @@ function buildFallbackInsight(args: {
   const temperature = classifyTemperature(opportunityScore)
   const signals = extractKeywordSignals(radar.keyword)
   const recommendedActions = [
-    opportunityScore >= 70 ? 'Criar ou atualizar conteudo editorial com leitura de mercado.' : 'Continuar monitorando antes de acionar campanhas.',
-    relatedProperties.length > 0 ? 'Selecionar imoveis relacionados para vitrine, blog e campanhas.' : 'Mapear captacao ou estoque para atender essa demanda.',
-    signals.wantsCampaign && opportunityScore >= 70 ? 'Avaliar campanha de trafego pago para capturar demanda ativa.' : '',
+    opportunityScore >= 70 ? 'Criar ou atualizar conteúdo editorial com leitura de mercado.' : 'Continuar monitorando antes de acionar campanhas.',
+    relatedProperties.length > 0 ? 'Selecionar imóveis relacionados para vitrine, blog e campanhas.' : 'Mapear captação ou estoque para atender essa demanda.',
+    signals.wantsCampaign && opportunityScore >= 70 ? 'Avaliar campanha de tráfego pago para capturar demanda ativa.' : '',
   ].filter(Boolean)
 
   const contentOpportunities = signals.wantsContent || opportunityScore >= 70
-    ? [`Analise de mercado sobre ${radar.keyword}`, `Guia de investimento: ${radar.keyword}`]
+    ? [`Análise de mercado sobre ${radar.keyword}`, `Guia de investimento: ${radar.keyword}`]
     : []
 
   return {
@@ -258,15 +258,15 @@ function buildFallbackInsight(args: {
     priceStats,
     opportunityScore,
     temperature,
-    summary: `${radar.keyword} esta com score ${trend.currentScore}/100 e ${relatedProperties.length} imoveis relacionados no estoque. O score Pilger indica ${temperature.replace(/_/g, ' ')}.`,
+    summary: `${radar.keyword} está com score ${trend.currentScore}/100 e ${relatedProperties.length} imóveis relacionados no estoque. O score Pilger indica ${temperature.replace(/_/g, ' ')}.`,
     recommendedActions,
     contentOpportunities,
     campaignRecommendation: signals.wantsCampaign && opportunityScore >= 70
       ? 'Revisar palavras-chave, criativos e landing pages relacionados ao termo.'
-      : 'Sem acao de midia imediata; manter observacao.',
+      : 'Sem ação de mídia imediata; manter observação.',
     riskNotes: relatedProperties.length === 0
-      ? 'Tendencia sem estoque relacionado pode gerar demanda que a Pilger nao consegue atender agora.'
-      : 'Validar qualidade dos cadastros antes de ampliar exposicao.',
+      ? 'Tendência sem estoque relacionado pode gerar demanda que a Pilger não consegue atender agora.'
+      : 'Validar qualidade dos cadastros antes de ampliar exposição.',
   }
 }
 
@@ -301,7 +301,7 @@ async function runAiAnalysis(args: {
     suites: property.suites,
   }))
 
-  const message = `Analise esta oportunidade do radar e retorne JSON valido.
+  const message = `Analise esta oportunidade do radar e retorne JSON válido.
 
 Dados:
 ${JSON.stringify({
@@ -322,11 +322,11 @@ ${JSON.stringify({
 Formato obrigatorio:
 {
   "summary": "resumo executivo em 1 ou 2 frases",
-  "recommended_actions": ["acao 1", "acao 2", "acao 3"],
+  "recommended_actions": ["ação 1", "ação 2", "ação 3"],
   "content_opportunities": ["pauta 1", "pauta 2"],
-  "campaign_recommendation": "recomendacao de trafego pago",
+  "campaign_recommendation": "recomendação de tráfego pago",
   "risk_notes": "risco ou cuidado principal",
-  "ai_analysis": "analise estrategica curta"
+  "ai_analysis": "análise estratégica curta"
 }`
 
   const response = await generateChatResponse([], message, args.config.systemPrompt)

@@ -31,7 +31,7 @@ function getCurrentTimeSP() {
     qui: 'thu',
     sex: 'fri',
     sab: 'sat',
-    'sÃ¡b': 'sat',
+    'sáb': 'sat',
   }
 
   return {

@@ -99,7 +99,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 py-4 ${isScrolled ? 'bg-black/95 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex flex-col">
-                        <span className="text-2xl font-serif tracking-[0.2em] font-bold text-white">Lâ€™HÉRITAGE</span>
+                        <span className="text-2xl font-serif tracking-[0.2em] font-bold text-white">L’HÉRITAGE</span>
                         <span className="text-[10px] tracking-[0.4em] text-white/50 uppercase">The Pinnacle of Living</span>
                     </div>
 
@@ -189,7 +189,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             <div className="pt-6">
                                 <div className="flex items-center space-x-4 border-l-2 border-yellow-500/50 pl-6 py-2">
                                     <span className="text-4xl font-serif">{stats.area}</span>
-                                    <span className="text-xs uppercase tracking-widest text-white/50">m² de <br /> ÃƒÂrea Privativa</span>
+                                    <span className="text-xs uppercase tracking-widest text-white/50">m² de <br /> Área Privativa</span>
                                 </div>
                             </div>
                         </div>
@@ -290,7 +290,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             <span className="italic text-yellow-500/90">Silêncio Absoluto.</span>
                         </h2>
                         <p className="text-xl md:text-2xl text-white/70 font-light leading-relaxed mb-16 italic">
-                            &quot;Viver aqui Ã© uma experiÃªncia transcendente. Cada detalhe foi pensado para elevar sua qualidade de vida a um novo patamar.&quot;
+                            &quot;Viver aqui é uma experiência transcendente. Cada detalhe foi pensado para elevar sua qualidade de vida a um novo patamar.&quot;
                         </p>
                         <div className="w-16 h-px bg-white/30 mx-auto mb-16" />
                         <button
@@ -326,7 +326,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                             </h2>
 
                             <p className="text-lg text-black/70 font-light leading-relaxed">
-                                {greetingMessage || "Estou ÃƒÂ  disposição para apresentar todos os detalhes desta obra-prima."}
+                                {greetingMessage || "Estou à disposição para apresentar todos os detalhes desta obra-prima."}
                             </p>
 
                             <div className="grid grid-cols-2 gap-8 pt-4">
@@ -368,7 +368,7 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     </div>
 
                     <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.5em] text-white/20 uppercase">
-                        <span>&copy; {new Date().getFullYear()} Imobiliaria Guilherme Pilger.</span>
+                        <span>&copy; {new Date().getFullYear()} Imobiliária Guilherme Pilger.</span>
                         <span className="mt-4 md:mt-0">Todos os direitos reservados.</span>
                     </div>
                 </div>

@@ -142,7 +142,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const compactFeatureItems = [
         property.bedrooms ? { key: 'bedrooms', icon: <BedDouble size={14} aria-hidden="true" />, label: `${property.bedrooms}` } : null,
         property.parking_spaces ? { key: 'parking', icon: <Car size={14} aria-hidden="true" />, label: `${property.parking_spaces}` } : null,
-        compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m2` } : null,
+        compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m²` } : null,
     ].filter(Boolean) as { key: string; icon: ReactNode; label: string }[]
     const handlePropertyClick = () => {
         if (!isHomeCompact) return

@@ -85,7 +85,7 @@ function getBadges(property: PreviewProperty) {
     if (property.exclusive) badges.push('Exclusivo')
     if (/frente.?mar|vista.?mar|beira.?mar|quadra.?mar/.test(text)) badges.push('Frente mar')
     if (/lancamento|construcao|na planta|pre lancamento/.test(text)) badges.push('Lancamento')
-    if (/reducao|baixou|oportunidade|preco/.test(text) && /reducao|baixou|oportunidade/.test(text)) badges.push('Reducao')
+    if (/reducao|baixou|oportunidade|preco/.test(text) && /reducao|baixou|oportunidade/.test(text)) badges.push('Redução')
     if (property.video_url) badges.push('Video')
 
     return badges.slice(0, 3)
@@ -108,20 +108,20 @@ function uniqueProperties(properties: PreviewProperty[] | undefined, fallback: P
 }
 
 function previewMetaFor(property: PreviewProperty) {
-    const displayTitle = replaceItajaiWithPraiaBrava(property.title || 'Imovel selecionado')
+    const displayTitle = replaceItajaiWithPraiaBrava(property.title || 'Imóvel selecionado')
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
     const location = [displayNeighborhood, displayCity, property.state].filter(Boolean).join(' - ')
     const area = property.area_private_m2 || property.area_m2 || null
     const roomStat = property.suites
-        ? { key: 'suites', icon: BedDouble, label: `${property.suites} suites` }
+        ? { key: 'suites', icon: BedDouble, label: `${property.suites} suítes` }
         : property.bedrooms
             ? { key: 'beds', icon: BedDouble, label: `${property.bedrooms} dorm.` }
             : null
     const stats = [
         roomStat,
         property.parking_spaces ? { key: 'parking', icon: Car, label: `${property.parking_spaces} vagas` } : null,
-        area ? { key: 'area', icon: Ruler, label: `${compactNumber(area)} m2` } : null,
+        area ? { key: 'area', icon: Ruler, label: `${compactNumber(area)} m²` } : null,
     ].filter(Boolean) as Array<{ key: string; icon: typeof BedDouble; label: string }>
 
     return {
@@ -781,7 +781,7 @@ export default function MapPropertyPreviewCard({
                                     }}
                                 />
                                 {badges.length > 0 && (
-                                    <div className="map-preview-badges" aria-label="Destaques do imovel">
+                                    <div className="map-preview-badges" aria-label="Destaques do imóvel">
                                         {badges.map(badge => <span className="map-preview-badge" key={badge}>{badge}</span>)}
                                     </div>
                                 )}
@@ -833,7 +833,7 @@ export default function MapPropertyPreviewCard({
                             <button
                                 type="button"
                                 className="map-preview-close"
-                                aria-label="Fechar preview do imovel"
+                                aria-label="Fechar preview do imóvel"
                                 onClick={event => {
                                     event.stopPropagation()
                                     onClose()
