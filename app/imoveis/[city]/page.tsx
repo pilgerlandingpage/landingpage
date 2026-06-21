@@ -10,7 +10,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { geoPages, getGeoPage } from '@/lib/seo/geo-pages'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
-import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +18,9 @@ type PageParams = { params: Promise<{ city: string }> }
 
 const PROPERTY_FIELDS = [
   'id',
+  'source_slug',
   'title',
+  'seo_title',
   'description',
   'city',
   'state',
@@ -192,7 +194,7 @@ function buildJsonLd(page: NonNullable<ReturnType<typeof getGeoPage>>, propertie
         itemListElement: properties.slice(0, 12).map((property, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          url: absoluteUrl(buildPropertySeoPath(property)),
+          url: absoluteUrl(propertyDetailsPath(property)),
           name: property.title,
         })),
       },

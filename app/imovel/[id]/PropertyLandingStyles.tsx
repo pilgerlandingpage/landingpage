@@ -130,16 +130,17 @@ export default function PropertyLandingStyles() {
                 .plp-mobile-menu-layer {
                     position: fixed;
                     inset: 0;
-                    z-index: 1000;
+                    z-index: 2147483646;
                     display: flex;
                     justify-content: flex-end;
                     background: rgba(21, 26, 29, 0.44);
                     backdrop-filter: blur(3px);
+                    -webkit-backdrop-filter: blur(3px);
                 }
 
                 .plp-mobile-menu-panel {
                     width: min(88vw, 360px);
-                    height: 100%;
+                    height: 100dvh;
                     padding: 18px;
                     overflow-y: auto;
                     background: #fff;
@@ -3897,6 +3898,50 @@ export default function PropertyLandingStyles() {
                         text-underline-offset: 4px;
                     }
 
+                    .plp-mobile-description-details {
+                        display: grid;
+                        gap: 12px;
+                        margin-top: 13px;
+                    }
+
+                    .plp-mobile-description-details summary {
+                        display: inline-flex;
+                        width: fit-content;
+                        cursor: pointer;
+                        list-style: none;
+                        color: var(--plp-gold-dark);
+                        font-size: 0.88rem;
+                        font-weight: 720;
+                        text-decoration: underline;
+                        text-underline-offset: 4px;
+                    }
+
+                    .plp-mobile-description-details summary::-webkit-details-marker {
+                        display: none;
+                    }
+
+                    .plp-mobile-description-details summary::after {
+                        content: '+';
+                        margin-left: 7px;
+                        text-decoration: none;
+                    }
+
+                    .plp-mobile-description-details[open] summary::after {
+                        content: '-';
+                    }
+
+                    .plp-mobile-description-full {
+                        display: grid;
+                        gap: 10px;
+                    }
+
+                    .plp-mobile-description-full p {
+                        color: #343a40;
+                        font-size: 0.92rem;
+                        line-height: 1.54;
+                        font-weight: 420;
+                    }
+
                     .plp-mobile-facts-grid {
                         display: grid;
                         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4304,9 +4349,35 @@ export default function PropertyLandingStyles() {
                         font-size: 0;
                     }
 
+                    .plp-mobile-action-group .plp-mobile-menu {
+                        display: inline-flex;
+                        pointer-events: auto;
+                    }
+
+                    .plp-mobile-action-group .plp-mobile-menu-button {
+                        width: 34px;
+                        height: 34px;
+                        border: 0;
+                        border-radius: 999px;
+                        background: transparent;
+                        color: #7d5a25;
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-action-group .plp-mobile-menu-button:hover {
+                        background: rgba(184,148,95,0.12);
+                        color: #7d5a25;
+                    }
+
                     .plp-mobile-action-group .plp-mobile-action-pill svg {
                         width: 18px;
                         height: 18px;
+                    }
+
+                    .plp-mobile-action-group .plp-mobile-menu-button svg {
+                        width: 18px;
+                        height: 18px;
+                        stroke-width: 2;
                     }
 
                     .plp-mobile-media-item {
@@ -4400,6 +4471,107 @@ export default function PropertyLandingStyles() {
                         background: rgba(12,12,12,0.7);
                         color: #fff;
                         pointer-events: none;
+                    }
+
+                    .plp-mobile-street-minimap {
+                        background:
+                            radial-gradient(circle at 48% 52%, rgba(255,255,255,.95), rgba(255,255,255,.28) 36%, transparent 37%),
+                            linear-gradient(28deg, transparent 43%, rgba(178,139,78,.52) 44%, rgba(178,139,78,.52) 49%, transparent 50%),
+                            linear-gradient(-18deg, transparent 40%, rgba(55,76,93,.34) 41%, rgba(55,76,93,.34) 46%, transparent 47%),
+                            linear-gradient(135deg, #dfe9e5, #fbf6ea);
+                        border: 1px solid rgba(255,255,255,.72);
+                        border-radius: 15px;
+                        box-shadow: 0 16px 34px rgba(0,0,0,.32);
+                        height: 76px;
+                        left: auto;
+                        overflow: hidden;
+                        pointer-events: none;
+                        position: absolute;
+                        right: 12px;
+                        top: 66px;
+                        width: 104px;
+                        z-index: 2147483647;
+                    }
+
+                    .plp-mobile-street-minimap::after {
+                        border: 1px solid rgba(17,17,17,.12);
+                        border-radius: inherit;
+                        content: '';
+                        inset: 0;
+                        position: absolute;
+                    }
+
+                    .plp-mobile-street-minimap-road {
+                        background: rgba(255,255,255,.74);
+                        border: 1px solid rgba(184,148,95,.28);
+                        border-radius: 999px;
+                        display: block;
+                        height: 10px;
+                        left: -12px;
+                        position: absolute;
+                        top: 40px;
+                        transform: rotate(-19deg);
+                        width: 132px;
+                    }
+
+                    .plp-mobile-street-minimap-road--side {
+                        background: rgba(255,255,255,.58);
+                        left: 28px;
+                        top: 18px;
+                        transform: rotate(61deg);
+                        width: 88px;
+                    }
+
+                    .plp-mobile-street-minimap-marker {
+                        align-items: center;
+                        background: linear-gradient(135deg, #dfc18e, #a87938);
+                        border: 2px solid #fff;
+                        border-radius: 999px;
+                        box-shadow: 0 8px 18px rgba(0,0,0,.28);
+                        display: grid;
+                        height: 28px;
+                        justify-items: center;
+                        left: 50%;
+                        position: absolute;
+                        top: 48%;
+                        transform: translate(-50%, -50%);
+                        width: 28px;
+                        z-index: 3;
+                    }
+
+                    .plp-mobile-street-minimap-marker::before {
+                        border-bottom: 8px solid #fff;
+                        border-left: 5px solid transparent;
+                        border-right: 5px solid transparent;
+                        content: '';
+                        left: 50%;
+                        position: absolute;
+                        top: 4px;
+                        transform: translateX(-50%);
+                    }
+
+                    .plp-mobile-street-minimap-marker i {
+                        background: #111;
+                        border-radius: 999px;
+                        display: block;
+                        height: 5px;
+                        width: 5px;
+                    }
+
+                    .plp-mobile-street-minimap small {
+                        background: rgba(17,17,17,.78);
+                        border-radius: 999px;
+                        bottom: 5px;
+                        color: #fff;
+                        font-size: .52rem;
+                        font-weight: 780;
+                        left: 6px;
+                        letter-spacing: .02em;
+                        line-height: 1;
+                        padding: 4px 6px;
+                        position: absolute;
+                        text-transform: uppercase;
+                        z-index: 4;
                     }
 
                     .plp-mobile-media-item--map .plp-location-explorer {
@@ -4549,6 +4721,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-media-item--map .property-feed-map-street-native,
+                    .plp-mobile-media-item--map .property-feed-map-street-native-canvas,
                     .plp-mobile-media-item--map .property-feed-map-street-frame {
                         display: block;
                         height: 100% !important;
@@ -4585,53 +4758,174 @@ export default function PropertyLandingStyles() {
                         display: none;
                     }
 
-                    .plp-mobile-media-item--map .property-feed-map-street-activate,
-                    .plp-mobile-media-item--map .property-feed-map-street-release {
+                    .plp-mobile-media-item--map .property-feed-map-street-toggle {
                         align-items: center;
-                        border: 1px solid rgba(255,255,255,.22);
-                        box-shadow: 0 12px 30px rgba(0,0,0,.24);
+                        background: linear-gradient(135deg, #dfc18e, #b8945f);
+                        border: 1px solid rgba(255,255,255,.28);
+                        border-radius: 999px;
+                        box-shadow: 0 14px 32px rgba(0,0,0,.28);
+                        color: #111;
                         cursor: pointer;
                         display: inline-flex;
-                        font-weight: 760;
+                        font-size: .68rem;
+                        font-weight: 780;
+                        gap: 6px;
                         justify-content: center;
+                        left: 50%;
+                        min-height: 36px;
+                        padding: 0 13px;
                         pointer-events: auto;
                         position: absolute;
-                        white-space: nowrap;
-                    }
-
-                    .plp-mobile-media-item--map .property-feed-map-street-activate {
-                        background: linear-gradient(135deg, #dfc18e, #b8945f);
-                        border-color: rgba(255,255,255,.28);
-                        border-radius: 999px;
-                        bottom: auto;
-                        color: #111;
-                        font-size: .68rem;
-                        gap: 6px;
-                        left: auto;
-                        min-height: 36px;
-                        padding: 0 12px;
-                        right: 12px;
-                        top: 16px;
-                        transform: none;
-                        z-index: 2147483000;
-                    }
-
-                    .plp-mobile-media-item--map .property-feed-map-street-release {
-                        background: rgba(255,255,255,.94);
-                        border-color: rgba(17,17,17,.08);
-                        border-radius: 999px;
-                        bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
-                        color: #111;
-                        font-size: .72rem;
-                        gap: 7px;
-                        height: 38px;
-                        left: 50%;
-                        padding: 0 13px;
-                        position: fixed;
                         right: auto;
-                        top: auto;
-                        transform: translateX(-50%);
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        white-space: nowrap;
                         z-index: 2147483000;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-toggle.is-active {
+                        background: rgba(17, 17, 17, .84);
+                        border-color: rgba(223, 193, 142, .42);
+                        color: #f5ead7;
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-guide {
+                        max-width: min(270px, calc(100% - 34px));
+                        padding: 7px 10px;
+                        top: calc(50% + 43px);
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-guide span:last-child {
+                        font-size: .61rem;
+                        font-weight: 720;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-guide-motion {
+                        height: 16px;
+                        width: 24px;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap {
+                        background: rgba(255, 252, 246, .92);
+                        border: 1px solid rgba(255,255,255,.72);
+                        border-radius: 14px;
+                        bottom: auto;
+                        box-shadow: 0 16px 38px rgba(0,0,0,.28);
+                        display: block;
+                        height: 76px;
+                        left: auto;
+                        overflow: hidden;
+                        pointer-events: none;
+                        position: absolute;
+                        right: 12px;
+                        top: 66px;
+                        width: 104px;
+                        z-index: 2147483600;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap::after {
+                        border: 1px solid rgba(17,17,17,.1);
+                        border-radius: inherit;
+                        content: '';
+                        inset: 0;
+                        pointer-events: none;
+                        position: absolute;
+                        z-index: 4;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-fallback {
+                        background:
+                            radial-gradient(circle at 50% 50%, rgba(255,255,255,.95), rgba(255,255,255,.25) 35%, transparent 36%),
+                            linear-gradient(135deg, transparent 45%, rgba(47, 108, 156, .12) 46%, rgba(47, 108, 156, .12) 53%, transparent 54%),
+                            linear-gradient(135deg, #e7eee9, #f8f4ea);
+                        inset: 0;
+                        position: absolute;
+                        z-index: 1;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-road {
+                        background: rgba(255,255,255,.78);
+                        border: 1px solid rgba(184,148,95,.3);
+                        border-radius: 999px;
+                        box-shadow: 0 1px 0 rgba(255,255,255,.82);
+                        display: block;
+                        height: 8px;
+                        left: -16px;
+                        position: absolute;
+                        top: 40px;
+                        transform: rotate(-22deg);
+                        width: 136px;
+                        z-index: 2;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-road--side {
+                        background: rgba(255,255,255,.62);
+                        left: 28px;
+                        top: 18px;
+                        transform: rotate(58deg);
+                        width: 84px;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-marker {
+                        align-items: center;
+                        background: linear-gradient(135deg, #dfc18e, #a87938);
+                        border: 2px solid #fff;
+                        border-radius: 999px;
+                        box-shadow: 0 8px 18px rgba(0,0,0,.28);
+                        display: grid;
+                        height: 24px;
+                        justify-items: center;
+                        left: 50%;
+                        position: absolute;
+                        top: 50%;
+                        transform-origin: 50% 50%;
+                        transition: transform .14s ease-out;
+                        will-change: transform;
+                        width: 24px;
+                        z-index: 5;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-marker::before {
+                        border-bottom-width: 7px;
+                        border-left-width: 4px;
+                        border-right-width: 4px;
+                        border-left-style: solid;
+                        border-right-style: solid;
+                        border-bottom-style: solid;
+                        border-left-color: transparent;
+                        border-right-color: transparent;
+                        border-bottom-color: #fff;
+                        content: '';
+                        left: 50%;
+                        position: absolute;
+                        top: 4px;
+                        transform: translateX(-50%);
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap-marker i {
+                        background: #111;
+                        border-radius: 999px;
+                        display: block;
+                        height: 5px;
+                        width: 5px;
+                    }
+
+                    .plp-mobile-media-item--map .property-feed-map-street-minimap small {
+                        background: rgba(17,17,17,.76);
+                        border-radius: 999px;
+                        bottom: 5px;
+                        color: #fff;
+                        font-size: .5rem;
+                        font-weight: 820;
+                        left: 6px;
+                        letter-spacing: .04em;
+                        line-height: 1;
+                        padding: 4px 6px;
+                        position: absolute;
+                        text-transform: uppercase;
+                        z-index: 6;
                     }
 
                     .plp-mobile-media-item--map .property-feed-map-style-control {

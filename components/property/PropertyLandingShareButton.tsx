@@ -7,6 +7,7 @@ import { trackEvent } from '@/lib/tracking/client'
 type Props = {
     propertyId: string
     title: string
+    propertyPath?: string
     className?: string
     children?: ReactNode
     source?: string
@@ -17,7 +18,7 @@ function copyParam(source: URLSearchParams, target: URLSearchParams, key: string
     if (value && !target.get(key)) target.set(key, value)
 }
 
-function buildTrackedShareUrl(propertyId: string, title: string) {
+function buildTrackedShareUrl(propertyId: string, title: string, propertyPath?: string) {
     const current = new URL(window.location.href)
     const tracked = new URL('/api/track', window.location.origin)
 
@@ -32,6 +33,10 @@ function buildTrackedShareUrl(propertyId: string, title: string) {
     tracked.searchParams.set('lb', 'Compartilhar')
     tracked.searchParams.set('lt', title.slice(0, 64))
 
+    if (propertyPath) {
+        tracked.searchParams.set('redirect', new URL(propertyPath, window.location.origin).toString())
+    }
+
     copyParam(current.searchParams, tracked.searchParams, 'lead_id')
     copyParam(current.searchParams, tracked.searchParams, 'lead_phone')
     copyParam(current.searchParams, tracked.searchParams, 'wa_phone')
@@ -43,15 +48,17 @@ function buildTrackedShareUrl(propertyId: string, title: string) {
 type SharePropertyLandingInput = {
     propertyId: string
     title: string
+    propertyPath?: string
     source?: string
 }
 
 export async function sharePropertyLanding({
     propertyId,
     title,
+    propertyPath,
     source = 'property_details_landing',
 }: SharePropertyLandingInput) {
-    const url = buildTrackedShareUrl(propertyId, title)
+    const url = buildTrackedShareUrl(propertyId, title, propertyPath)
     const text = `${title} - Guilherme Pilger`
 
     if (navigator.share) {
@@ -71,13 +78,14 @@ export async function sharePropertyLanding({
 export default function PropertyLandingShareButton({
     propertyId,
     title,
+    propertyPath,
     className,
     children,
     source,
 }: Props) {
     const handleShare = async () => {
         try {
-            await sharePropertyLanding({ propertyId, title, source })
+            await sharePropertyLanding({ propertyId, title, propertyPath, source })
         } catch {
             return
         }

@@ -7,6 +7,7 @@ import {
     type LeadActivityEventRow,
 } from '@/lib/tracking/lead-activity'
 import { getOptionalAdminActorContext, type AdminActorContext } from '@/lib/events/admin-auth'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 function getSupabase() {
     return createClient(
@@ -655,7 +656,14 @@ async function appendFollowupActionEvent(params: {
         actor_email: params.action.actor_email || null,
         auth_user_id: params.action.auth_user_id || null,
         source: 'crm_followup_queue',
-        page_path: params.action.property_id ? `/imovel/${encodeURIComponent(String(params.action.property_id))}/detalhes` : null,
+        page_path: params.action.property_id ? propertyDetailsPath({
+            id: String(params.action.property_id),
+            source_slug: asString(params.action.source_slug || params.action.property_slug) || null,
+            slug: asString(params.action.slug) || null,
+            title: asString(params.action.property_title || params.action.title) || null,
+            seo_title: asString(params.action.seo_title) || null,
+            property_type: asString(params.action.property_type) || null,
+        }) : null,
     }
 
     const { data, error } = await params.supabase

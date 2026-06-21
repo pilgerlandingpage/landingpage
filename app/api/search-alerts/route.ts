@@ -386,7 +386,9 @@ export async function GET(request: NextRequest) {
                     notified_at,
                     property:properties (
                         id,
+                        source_slug,
                         title,
+                        seo_title,
                         city,
                         state,
                         neighborhood,

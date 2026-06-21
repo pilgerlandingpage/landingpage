@@ -20,6 +20,9 @@ function extractPropertyId(pathname: string) {
     const legacyMatch = pathname.match(/^\/imovel\/([0-9a-f-]{36})(?:\/detalhes)?\/?$/i)
     if (legacyMatch?.[1] && UUID_PATTERN.test(legacyMatch[1])) return legacyMatch[1]
 
+    const propertyMatch = pathname.match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
+    if (propertyMatch?.[1]) return decodeURIComponent(propertyMatch[1])
+
     if (pathname.startsWith('/imoveis/')) {
         return pathname.match(UUID_PATTERN)?.[0] || null
     }

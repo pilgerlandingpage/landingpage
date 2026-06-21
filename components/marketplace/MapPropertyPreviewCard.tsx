@@ -10,6 +10,8 @@ import { trackEvent } from '@/lib/tracking/client'
 
 type PreviewProperty = {
     id: string
+    source_slug?: string | null
+    slug?: string | null
     title: string
     city?: string | null
     state?: string | null
@@ -123,7 +125,7 @@ function previewMetaFor(property: PreviewProperty) {
     ].filter(Boolean) as Array<{ key: string; icon: typeof BedDouble; label: string }>
 
     return {
-        detailsHref: propertyDetailsPath(property.id),
+        detailsHref: propertyDetailsPath(property),
         displayCity,
         displayNeighborhood,
         displayTitle,

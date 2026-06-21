@@ -11,6 +11,7 @@ import { normalizeWhatsAppPhone, recordLeadOutboundContext } from '@/lib/whatsap
 import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
 import { isTechnicalBlogSummary, pickPublicBlogSummary } from '@/lib/blog/types'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 type SupabaseAdminLike = {
     from: (table: string) => any
@@ -1010,8 +1011,7 @@ function formatPropertyPrice(property: Record<string, any>) {
 }
 
 function propertyRecommendationUrl(property: Record<string, any>, origin?: string | null) {
-    const id = normalizeText(property.id)
-    return `${getPublicAppUrl(origin)}/imovel/${encodeURIComponent(id)}/detalhes`
+    return `${getPublicAppUrl(origin)}${propertyDetailsPath(property)}`
 }
 
 function propertyText(property: Record<string, any>) {
@@ -1600,7 +1600,13 @@ function baseContentUrlFromContext(context: Record<string, any>) {
 
     if (contentType === 'property') {
         const propertyId = normalizeText(context.property_id || context.post_id)
-        if (propertyId) return `${getPublicAppUrl()}/imovel/${encodeURIComponent(propertyId)}/detalhes`
+        if (propertyId) {
+            return `${getPublicAppUrl()}${propertyDetailsPath({
+                id: propertyId,
+                source_slug: normalizeText(context.source_slug || context.property_slug || context.slug),
+                title: normalizeText(context.property_title || context.title || context.link_title),
+            })}`
+        }
     }
 
     return normalizeText(context.content_url || context.link_cta)

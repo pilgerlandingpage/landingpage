@@ -196,6 +196,16 @@ export default function GlobalHeader() {
     }
 
     useEffect(() => {
+        const handleExternalMenuOpen = () => {
+            setSearchOpen(false)
+            setMobileMenuOpen(true)
+        }
+
+        window.addEventListener('pilger:open-global-menu', handleExternalMenuOpen)
+        return () => window.removeEventListener('pilger:open-global-menu', handleExternalMenuOpen)
+    }, [])
+
+    useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
                 setSearchOpen(false)

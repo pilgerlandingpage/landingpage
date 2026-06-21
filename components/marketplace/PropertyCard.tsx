@@ -13,6 +13,8 @@ import { trackEvent } from '@/lib/tracking/client'
 interface PropertyCardProps {
     property: {
         id: string
+        source_slug?: string | null
+        slug?: string | null
         title: string
         city: string | null
         state: string | null
@@ -101,7 +103,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const showFavoriteToggle = !isHomeCompact
     const [isFavorite, setIsFavorite] = useState(false)
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
-    const detailsHref = propertyDetailsPath(property.id)
+    const detailsHref = propertyDetailsPath(property)
     const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
     const imageSrc = property.featured_image || '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
@@ -193,7 +195,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     return (
         <div className={`property-card ${isHomeCompact ? 'property-card-compact' : ''}`}>
             <div className="card-image-container">
-                <Link href={href} className="image-link" tabIndex={-1} onClick={handlePropertyClick}>
+                <Link
+                    href={href}
+                    className="image-link"
+                    tabIndex={-1}
+                    onClick={handlePropertyClick}
+                    style={{ display: 'block', height: '100%', overflow: 'hidden', position: 'relative', width: '100%' }}
+                >
                     {isHomeCompact ? (
                         <>
                             <Image

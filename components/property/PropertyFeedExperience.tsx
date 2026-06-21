@@ -31,6 +31,8 @@ import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
 
 export type PropertyFeedItem = {
     id: string
+    source_slug?: string | null
+    slug?: string | null
     title: string
     description?: string | null
     seo_title?: string | null
@@ -291,7 +293,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
     useEffect(() => {
         if (!shouldOpenPropertyDetailsOnDesktop()) return
 
-        const destination = propertyDetailsPath(property.id)
+        const destination = propertyDetailsPath(property)
         void trackEvent('property_feed_desktop_redirected_to_details', {
             property_id: property.id,
             title: buildPropertyFeedCopy(property).title,
@@ -415,11 +417,11 @@ export default function PropertyFeedExperience({ property, related }: Props) {
             return
         }
 
-        window.location.assign(`/imovel/${targetId}`)
+        window.location.assign(propertyDetailsPath(targetId))
     }, [feedItems])
 
     const shareProperty = useCallback(async (item: PropertyFeedItem) => {
-        const url = new URL(`/imovel/${item.id}`, window.location.origin).toString()
+        const url = new URL(propertyDetailsPath(item), window.location.origin).toString()
         const copy = buildPropertyFeedCopy(item)
         const title = copy.title
         const text = copy.summary || title
@@ -566,7 +568,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                 const rooms = statRooms(item)
                 const area = statArea(item)
                 const bullets = featureBullets(item)
-                const detailsHref = `/imovel/${item.id}/detalhes`
+                const detailsHref = propertyDetailsPath(item)
                 const copy = buildPropertyFeedCopy(item)
                 const contactPhone = contactPhoneFor(item)
                 const connectedBroker = connectedBrokerFor(item)

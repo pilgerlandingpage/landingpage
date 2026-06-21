@@ -21,6 +21,7 @@ L.Icon.Default.mergeOptions({
 
 interface Property {
     id: string
+    source_slug?: string | null
     title: string
     price: number | null
     latitude: number | string | null
@@ -373,15 +374,19 @@ function getGooglePlacesWindow() {
     return window as GooglePlacesWindow
 }
 
+function hasModernPlacesLibrary(googleWindow: GooglePlacesWindow | null) {
+    return Boolean(googleWindow?.google?.maps?.places?.Place)
+}
+
 function loadGooglePlacesLibrary(apiKey: string) {
     const googleWindow = getGooglePlacesWindow()
     if (!googleWindow) return Promise.reject(new Error('Google Places indisponivel fora do navegador.'))
-    if (googleWindow.google?.maps?.places?.PlacesService) return Promise.resolve()
+    if (hasModernPlacesLibrary(googleWindow)) return Promise.resolve()
     if (googleWindow.__pilgerGooglePlacesPromise) return googleWindow.__pilgerGooglePlacesPromise
 
     googleWindow.__pilgerGooglePlacesPromise = new Promise<void>((resolve, reject) => {
         const finishWithImportLibrary = (startedAt = Date.now()) => {
-            if (googleWindow.google?.maps?.places?.PlacesService) {
+            if (hasModernPlacesLibrary(googleWindow)) {
                 resolve()
                 return
             }
@@ -437,21 +442,81 @@ function formatDistance(meters: number) {
     return `${(meters / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`
 }
 
-function nearbySearch(service: any, request: Record<string, unknown>): Promise<any[]> {
-    return new Promise(resolve => {
-        service.nearbySearch(request, (results: any[] | null, status: string) => {
-            if (status === 'OK') {
-                resolve(results || [])
-                return
-            }
+function getPlaceDisplayName(result: any, fallback: string) {
+    const displayName = result?.displayName
+    if (typeof displayName === 'string') return displayName
+    if (displayName?.text) return String(displayName.text)
+    if (result?.name) return String(result.name)
+    if (result?.formattedAddress) return String(result.formattedAddress)
+    return fallback
+}
 
-            if (status !== 'ZERO_RESULTS') {
-                console.warn('[PropertyMap] Google Places nearbySearch falhou:', status)
-            }
+function getPlaceVicinity(result: any) {
+    if (result?.vicinity) return String(result.vicinity)
+    if (result?.shortFormattedAddress) return String(result.shortFormattedAddress)
+    if (result?.formattedAddress) return String(result.formattedAddress)
+    return undefined
+}
 
-            resolve([])
-        })
-    })
+function getPlaceLatLng(result: any): [number, number] | null {
+    const location = result?.location || result?.geometry?.location
+    const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
+    const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
+    return isValidLatLng(lat, lng) ? [lat, lng] : null
+}
+
+async function searchAmenityPlaces(googleMaps: any, layer: MapAmenityLayer, center: L.LatLng, radius: number): Promise<any[]> {
+    const option = getAmenityOption(layer)
+    const placesApi = googleMaps?.places
+    const Place = placesApi?.Place
+    if (!option || !Place) return []
+
+    const centerLiteral = { lat: center.lat, lng: center.lng }
+    const fields = ['id', 'displayName', 'formattedAddress', 'location', 'types', 'primaryType']
+    const safeRadius = Math.max(500, Math.min(radius, 50000))
+
+    if (option.type && typeof Place.searchNearby === 'function') {
+        try {
+            const request: Record<string, unknown> = {
+                fields,
+                locationRestriction: { center: centerLiteral, radius: safeRadius },
+                includedPrimaryTypes: [option.type],
+                maxResultCount: 12,
+            }
+            const rankPreference = placesApi.SearchNearbyRankPreference?.DISTANCE
+            if (rankPreference) request.rankPreference = rankPreference
+
+            const response = await Place.searchNearby(request)
+            const places = Array.isArray(response?.places) ? response.places : []
+            if (places.length > 0) return places
+        } catch (error) {
+            console.warn(`[PropertyMap] searchNearby falhou para ${layer}:`, error)
+        }
+    }
+
+    if (typeof Place.searchByText !== 'function') return []
+
+    try {
+        const request: Record<string, unknown> = {
+            textQuery: option.keyword || option.searchLabel,
+            fields,
+            locationBias: centerLiteral,
+            language: 'pt-BR',
+            region: 'br',
+            maxResultCount: 12,
+        }
+
+        if (option.type) {
+            request.includedType = option.type
+            request.useStrictTypeFiltering = true
+        }
+
+        const response = await Place.searchByText(request)
+        return Array.isArray(response?.places) ? response.places : []
+    } catch (error) {
+        console.warn(`[PropertyMap] searchByText falhou para ${layer}:`, error)
+        return []
+    }
 }
 
 function createAmenityIcon(place: NearbyAmenityPlace) {
@@ -514,7 +579,11 @@ function MapUpdater({
 
             const bounds = L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng)))
             const isMobile = window.matchMedia('(max-width: 767px)').matches
-            const focusBottomPadding = Math.min(340, Math.max(210, Math.round(window.innerHeight * 0.34)))
+            const mapHeight = map.getContainer().clientHeight || window.innerHeight
+            const focusBottomPadding = Math.min(
+                340,
+                Math.max(isMobile ? 126 : 210, Math.round(mapHeight * (isMobile ? 0.3 : 0.34)))
+            )
             const fitOptions: L.FitBoundsOptions = hasFocusArea
                 ? isMobile
                     ? {
@@ -1024,9 +1093,7 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
                 if (cancelled) return
 
                 const googleMaps = googleWindow?.google?.maps
-                const PlacesService = googleMaps?.places?.PlacesService
-                const LatLng = googleMaps?.LatLng
-                if (!PlacesService || !LatLng) {
+                if (!googleMaps?.places?.Place) {
                     setPlaces([])
                     return
                 }
@@ -1034,39 +1101,32 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
                 const center = map.getCenter()
                 const bounds = map.getBounds()
                 const radius = Math.round(Math.max(900, Math.min(5200, map.distance(center, bounds.getNorthEast()) * 0.55)))
-                const service = new PlacesService(document.createElement('div'))
 
                 const resultsByLayer = await Promise.all(activeLayers.map(async layer => {
                     const option = getAmenityOption(layer)
                     if (!option) return []
 
-                    const request: Record<string, unknown> = {
-                        location: new LatLng(center.lat, center.lng),
-                        radius,
-                    }
-
-                    if (option.type) request.type = option.type
-                    if (option.keyword) request.keyword = option.keyword
-
-                    const results = await nearbySearch(service, request)
+                    const results = await searchAmenityPlaces(googleMaps, layer, center, radius)
 
                     return results
                         .map((result): NearbyAmenityPlace | null => {
-                            const location = result?.geometry?.location
-                            const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
-                            const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
-                            if (!isValidLatLng(lat, lng)) return null
+                            const latLng = getPlaceLatLng(result)
+                            if (!latLng) return null
 
+                            const [lat, lng] = latLng
                             const distanceMeters = map.distance(center, L.latLng(lat, lng))
+                            if (distanceMeters > radius * 1.75) return null
+
                             const place: NearbyAmenityPlace = {
-                                id: String(result.place_id || `${layer}-${lat.toFixed(6)}-${lng.toFixed(6)}`),
+                                id: String(result.id || result.place_id || `${layer}-${lat.toFixed(6)}-${lng.toFixed(6)}`),
                                 layer,
-                                name: String(result.name || option.searchLabel),
+                                name: getPlaceDisplayName(result, option.searchLabel),
                                 latLng: [lat, lng],
                                 distanceMeters,
                             }
 
-                            if (result.vicinity) place.vicinity = String(result.vicinity)
+                            const vicinity = getPlaceVicinity(result)
+                            if (vicinity) place.vicinity = vicinity
                             return place
                         })
                         .filter((item): item is NearbyAmenityPlace => item !== null)
@@ -1294,7 +1354,7 @@ function ClusterLayer({
 
 function PropertyPopup({ property }: { property: Property }) {
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
-    const detailsHref = propertyDetailsPath(property.id)
+    const detailsHref = propertyDetailsPath(property)
     const displayKicker = replaceItajaiWithPraiaBrava(property.neighborhood || property.property_type || 'Seleção premium')
 
     return (
@@ -1400,12 +1460,16 @@ export default function PropertyMap({
         () => validProperties.filter(item => matchesQuickFilter(item, quickFilter)),
         [validProperties, quickFilter]
     )
+    const focusAreaPoints = useMemo(() => {
+        if (drawArea && drawArea.length >= 3) return drawArea
+        if (regionArea?.area && regionArea.area.length >= 3) return regionArea.area
+        return []
+    }, [drawArea, regionArea])
     const mapPoints = useMemo(() => {
         const points = filteredProperties.map(item => item.latLng)
-        const focusPoints = !drawArea && regionArea?.area ? regionArea.area : []
-        if (focusPoints.length) return [...focusPoints, ...points]
+        if (focusAreaPoints.length) return focusAreaPoints
         return officeMarker ? [officeMarker.latLng, ...points] : points
-    }, [drawArea, filteredProperties, officeMarker, regionArea])
+    }, [filteredProperties, focusAreaPoints, officeMarker])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
     const mapWatermarkLabel = filteredProperties.length > 0
         ? `${filteredProperties.length} no mapa`

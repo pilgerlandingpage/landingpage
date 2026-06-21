@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
 
     const { data: properties } = await supabase
         .from('properties')
-        .select('id, title, city, neighborhood, property_type, price')
+        .select('id, source_slug, title, seo_title, city, neighborhood, property_type, price')
         .eq('status', 'active')
         .gte('price', MINIMUM_FIRST_CONTACT_PRICE)
         .or(searchFilter)
@@ -135,6 +135,7 @@ export async function GET(req: NextRequest) {
             type: 'property',
             label: replaceItajaiWithPraiaBrava(p.title),
             id: p.id,
+            source_slug: p.source_slug || null,
             price: p.price,
             city: displayLocationName(p.city),
         })

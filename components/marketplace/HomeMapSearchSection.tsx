@@ -30,6 +30,7 @@ type MapPreviewProperty = Parameters<NonNullable<ComponentProps<typeof MapProper
 
 type Property = {
     id: string
+    source_slug?: string | null
     title: string
     city: string | null
     state: string | null
@@ -87,6 +88,7 @@ type FeatureFilter = {
 }
 
 const MINIMUM_FIRST_CONTACT_PRICE = 4000000
+const HOME_MAP_PREVIEW_LIMIT = 8
 const GUIDED_SEARCH_STORAGE_KEY = 'pilger_guided_search_seen_v1'
 
 const GUIDED_SEARCH_MESSAGES: Record<MobileFilterKey, { title: string; choose: string; next: string }> = {
@@ -119,6 +121,7 @@ const LOCATION_STEPS: StepOption[] = [
     { value: 'Porto Belo', label: 'Porto Belo', shortLabel: 'Porto Belo' },
 ]
 const DEFAULT_LOCATION = LOCATION_STEPS[0]?.value || ''
+const HOME_MAP_REGION_CHIPS = LOCATION_STEPS.slice(0, 4)
 const OFFICE_LOCATION_MARKER = {
     latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
     title: 'Imobiliária Guilherme Pilger',
@@ -140,6 +143,7 @@ const PRICE_PRESETS = [
     { value: '8000000-10000000', label: 'R$ 8 mi a R$ 10 mi', shortLabel: '8-10 mi' },
     { value: '10000000-', label: 'Acima de R$ 10 mi', shortLabel: '10 mi+' },
 ]
+const HOME_MAP_PRICE_CHIPS = PRICE_PRESETS
 
 const PURPOSE_STEPS: StepOption[] = [
     { value: 'sale', label: 'Venda', shortLabel: 'Venda' },
@@ -299,6 +303,15 @@ function filterHomePropertiesByDrawArea(properties: Property[], drawArea: MapDra
     return properties.filter(property => {
         const latLng = getHomeMapLatLng(property)
         return latLng ? isPointInsideDrawArea(latLng, drawArea) : false
+    })
+}
+
+function filterHomePropertiesByRegionArea(properties: Property[], regionArea: ReturnType<typeof findMapRegionByText>) {
+    if (!regionArea?.area || regionArea.area.length < 3) return properties
+
+    return properties.filter(property => {
+        const latLng = getHomeMapLatLng(property)
+        return latLng ? isPointInsideDrawArea(latLng, regionArea.area) : false
     })
 }
 
@@ -629,11 +642,16 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const selectedRegionArea = useMemo(
         () => {
             if (isMapInteractionLocked || isOfficeLocationSelected || selectedDrawArea) return null
-            return findMapRegionByText(applied.query)
+            return findMapRegionByText(query || applied.query)
         },
-        [applied.query, isMapInteractionLocked, isOfficeLocationSelected, selectedDrawArea]
+        [applied.query, isMapInteractionLocked, isOfficeLocationSelected, query, selectedDrawArea]
     )
-    const homeMapProperties = isOfficeLocationSelected || isMapInteractionLocked ? [] : filteredProperties
+    const homeMapProperties = useMemo(
+        () => isOfficeLocationSelected || isMapInteractionLocked
+            ? []
+            : filterHomePropertiesByRegionArea(filteredProperties, selectedRegionArea),
+        [filteredProperties, isMapInteractionLocked, isOfficeLocationSelected, selectedRegionArea]
+    )
     const drawFilteredHomeMapProperties = useMemo(
         () => filterHomePropertiesByDrawArea(homeMapProperties, selectedDrawArea),
         [homeMapProperties, selectedDrawArea]
@@ -643,14 +661,23 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         () => areaFilteredHomeMapProperties.filter(hasCoordinates),
         [areaFilteredHomeMapProperties]
     )
+    const homePreviewMapProperties = useMemo(
+        () => selectedRegionArea ? visibleHomeMapProperties : visibleHomeMapProperties.slice(0, HOME_MAP_PREVIEW_LIMIT),
+        [selectedRegionArea, visibleHomeMapProperties]
+    )
     const selectedHomeMapProperty = useMemo(() => {
         if (!selectedHomeMapPropertyId || isMapInteractionLocked || isOfficeLocationSelected) return null
         return visibleHomeMapProperties.find(property => property.id === selectedHomeMapPropertyId) || null
     }, [isMapInteractionLocked, isOfficeLocationSelected, selectedHomeMapPropertyId, visibleHomeMapProperties])
-    const isHomeMapPreviewOpen = Boolean(selectedHomeMapProperty)
+    const isHomeMapPreviewOpen = !isMapModalOpen && Boolean(selectedHomeMapProperty)
+    const isMapModalPreviewOpen = isMapModalOpen && Boolean(selectedHomeMapProperty)
     const areaFilteredMappedTotal = visibleHomeMapProperties.length
     const homeOfficeMarker = isMapInteractionLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
-    const homeMapRefitKey = isOfficeLocationSelected ? 'home-office-location-selected' : isMapInteractionLocked ? 'home-office-location' : mapRefitKey
+    const homeMapRefitKey = isOfficeLocationSelected
+        ? 'home-office-location-selected'
+        : isMapInteractionLocked
+            ? 'home-office-location'
+            : `${mapRefitKey}::home-region-${selectedRegionArea?.id || 'none'}::${selectedRegionArea?.area?.length || 0}`
     const mapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
         ? 'Imobiliária Guilherme Pilger'
         : `${filteredMappedTotal} de ${mappedTotal} no mapa`
@@ -730,6 +757,30 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         })
     }, [areaFilteredHomeMapProperties.length, areaFilteredMappedTotal, isMapModalOpen])
 
+    const selectHomeMapRegion = useCallback((value: string) => {
+        setQuery(value)
+        setSelectedDrawArea(null)
+        setSelectedHomeMapPropertyId(null)
+        setIsOfficeLocationSelected(false)
+        setIsHomeMapInteractionUnlocked(true)
+        setShowMapLockedHint(false)
+
+        void trackEvent('home_map_region_chip_selected', {
+            ...getSearchSnapshot(),
+            region: value,
+        })
+    }, [getSearchSnapshot])
+
+    const selectHomeMapPrice = useCallback((value: string) => {
+        if (value !== price) trackFilterChanged('price', 'Valor', value, PRICE_PRESETS, 'desktop')
+        setPrice(value)
+        setSelectedDrawArea(null)
+        setSelectedHomeMapPropertyId(null)
+        setIsOfficeLocationSelected(false)
+        setIsHomeMapInteractionUnlocked(true)
+        setShowMapLockedHint(false)
+    }, [price, trackFilterChanged])
+
     const handleHomeMapPreviewPropertySelect = useCallback((property: MapPreviewProperty, source: string) => {
         if (!property?.id) return
         if (property.id === selectedHomeMapPropertyId) return
@@ -764,6 +815,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setSelectedDrawArea(null)
         setSelectedHomeMapPropertyId(null)
         setIsOfficeLocationSelected(false)
+        setIsHomeMapInteractionUnlocked(true)
         setIsMapModalOpen(true)
         void trackEvent('home_map_modal_opened', {
             source,
@@ -994,19 +1046,6 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }, [])
 
     useEffect(() => {
-        if (!isHomeMapPreviewOpen || isMapModalOpen) {
-            document.body.classList.remove('home-map-preview-focus')
-            return
-        }
-
-        document.body.classList.add('home-map-preview-focus')
-
-        return () => {
-            document.body.classList.remove('home-map-preview-focus')
-        }
-    }, [isHomeMapPreviewOpen, isMapModalOpen])
-
-    useEffect(() => {
         const handleOpenMapSearch = (event: Event) => {
             event.preventDefault()
             const source = typeof window.CustomEvent === 'function' && event instanceof window.CustomEvent
@@ -1043,12 +1082,12 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     }, [closeMapModal, isMapModalOpen])
 
     return (
-        <section className={`home-map-search${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`} id="mapa">
+        <section className="home-map-search" id="mapa">
             <div className="map-search-shell" ref={wrapperRef}>
-                <div className={`map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
+                <div className={`map-preview-panel home-preview-map-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
                     {shouldRenderMap ? (
                         <MapSearch
-                            properties={visibleHomeMapProperties}
+                            properties={homePreviewMapProperties}
                             selectedPropertyId={selectedHomeMapPropertyId}
                             drawArea={selectedDrawArea}
                             regionArea={selectedRegionArea}
@@ -1065,10 +1104,6 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             <span className="map-placeholder-pin"><MapPin size={18} /></span>
                         </div>
                     )}
-                    <div className="map-preview-stat">
-                        <Building2 size={14} />
-                        <span>{activeMapPreviewStatLabel}</span>
-                    </div>
                     {isMapInteractionLocked && (
                         <>
                             <div
@@ -1087,17 +1122,49 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             />
                         </>
                     )}
-                    <div className="map-search-panel map-search-panel-new">
-                        <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
+                    <div className="home-map-invite">
+                        <div className="home-map-invite-copy">
+                            <span>Explore por localização</span>
+                            <strong>{isMapInteractionLocked || isOfficeLocationSelected ? 'Praia Brava e litoral premium' : activeMapPreviewStatLabel}</strong>
+                        </div>
+                        <div className="home-map-region-chips" aria-label="Regiões em destaque">
+                            {HOME_MAP_REGION_CHIPS.map(option => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    className={searchLocationName(query) === searchLocationName(option.value) && !isMapInteractionLocked ? 'active' : ''}
+                                    onClick={() => selectHomeMapRegion(option.value)}
+                                >
+                                    {option.shortLabel || option.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="home-map-price-row">
+                            <div className="home-map-price-chips" aria-label="Faixas de valor">
+                                {HOME_MAP_PRICE_CHIPS.map(option => (
+                                    <button
+                                        key={option.label}
+                                        type="button"
+                                        className={price === option.value ? 'active' : ''}
+                                        onClick={() => selectHomeMapPrice(option.value)}
+                                    >
+                                        {option.shortLabel || option.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <button type="button" className="home-map-open-button" onClick={() => openMapModal('home_map_preview_cta')}>
+                                Pesquisa avançada
+                            </button>
+                        </div>
                     </div>
-                    {selectedHomeMapProperty && (
-                        <div className="home-map-property-preview">
+                    {selectedHomeMapProperty && !isMapModalOpen && (
+                        <div className="home-map-property-preview home-map-property-preview--compact">
                             <MapPropertyPreviewCard
                                 property={selectedHomeMapProperty}
-                                properties={visibleHomeMapProperties}
+                                properties={homePreviewMapProperties}
                                 selectedPropertyId={selectedHomeMapPropertyId}
                                 onClose={closeHomeMapPropertyPreview}
-                                onPropertySelect={visibleHomeMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
+                                onPropertySelect={homePreviewMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
                             />
                         </div>
                     )}
@@ -1264,7 +1331,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             </button>
                         </div>
                         <div className="mobile-map-modal-body">
-                            <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
+                            <div className={`map-preview-panel mobile-map-preview-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isMapModalPreviewOpen ? ' is-preview-open' : ''}`}>
                                 {shouldRenderMap ? (
                                     <MapSearch
                                         properties={visibleHomeMapProperties}
@@ -1470,6 +1537,136 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     touch-action: pan-y;
                     z-index: 700;
                 }
+                .home-preview-map-panel {
+                    height: clamp(320px, 54svh, 500px);
+                }
+                .home-preview-map-panel :global(.map-mobile-action-dock),
+                .home-preview-map-panel :global(.map-context-layer-strip),
+                .home-preview-map-panel :global(.map-amenity-layer-strip),
+                .home-preview-map-panel :global(.leaflet-control-zoom) {
+                    display: none !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                }
+                .home-map-invite {
+                    align-items: center;
+                    background: rgba(255,253,248,0.94);
+                    border: 1px solid rgba(184,148,95,0.22);
+                    border-radius: 16px;
+                    bottom: 12px;
+                    box-shadow: 0 18px 44px rgba(20,16,10,0.18);
+                    display: grid;
+                    gap: 8px 12px;
+                    grid-template-columns: minmax(170px, 0.7fr) minmax(0, 1.3fr);
+                    left: 50%;
+                    max-width: 820px;
+                    padding: 10px;
+                    position: absolute;
+                    right: auto;
+                    transform: translateX(-50%);
+                    width: min(820px, calc(100% - 32px));
+                    z-index: 760;
+                }
+                .home-map-invite-copy {
+                    align-self: stretch;
+                    display: grid;
+                    gap: 2px;
+                    grid-row: 1 / 3;
+                    justify-content: start;
+                    justify-items: start;
+                    min-width: 0;
+                }
+                .home-map-invite-copy span {
+                    color: #a78042;
+                    font: 900 0.56rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                }
+                .home-map-invite-copy strong {
+                    color: #211c16;
+                    font: 850 0.9rem/1.12 'Inter', sans-serif;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .home-map-region-chips {
+                    display: flex;
+                    grid-column: 2;
+                    overflow-x: auto;
+                    padding-bottom: 1px;
+                    scrollbar-width: none;
+                }
+                .home-map-region-chips {
+                    gap: 6px;
+                }
+                .home-map-price-row {
+                    align-items: center;
+                    display: grid;
+                    gap: 7px;
+                    grid-column: 2;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    min-width: 0;
+                }
+                .home-map-price-chips {
+                    display: flex;
+                    gap: 5px;
+                    min-width: 0;
+                    overflow-x: auto;
+                    padding-bottom: 1px;
+                    scrollbar-width: none;
+                }
+                .home-map-region-chips::-webkit-scrollbar,
+                .home-map-price-chips::-webkit-scrollbar {
+                    display: none;
+                }
+                .home-map-region-chips button,
+                .home-map-price-chips button,
+                .home-map-open-button {
+                    align-items: center;
+                    border-radius: 999px;
+                    cursor: pointer;
+                    display: inline-flex;
+                    flex: 0 0 auto;
+                    font: 850 0.68rem/1 'Inter', sans-serif;
+                    justify-content: center;
+                    min-height: 32px;
+                    padding: 0 12px;
+                    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                    white-space: nowrap;
+                }
+                .home-map-region-chips button {
+                    background: rgba(255,255,255,0.74);
+                    border: 1px solid rgba(184,148,95,0.24);
+                    color: #3b3329;
+                }
+                .home-map-price-chips button {
+                    background: rgba(245,241,234,0.74);
+                    border: 1px solid rgba(184,148,95,0.2);
+                    color: rgba(55,47,37,0.74);
+                    font-size: 0.6rem;
+                    min-height: 26px;
+                    padding: 0 10px;
+                }
+                .home-map-region-chips button.active,
+                .home-map-region-chips button:hover,
+                .home-map-price-chips button.active,
+                .home-map-price-chips button:hover {
+                    background: #171410;
+                    border-color: #171410;
+                    color: #dfc18e;
+                }
+                .home-map-open-button {
+                    background: linear-gradient(135deg, #d8b372, #b9904c);
+                    border: 1px solid rgba(120,82,30,0.28);
+                    box-shadow: 0 12px 26px rgba(120,82,30,0.22);
+                    color: #171410;
+                    font-size: 0.58rem;
+                    min-height: 28px;
+                    padding: 0 10px;
+                }
+                .home-map-open-button:hover {
+                    transform: translateY(-1px);
+                }
                 .map-search-panel {
                     background: #fbfaf7;
                     display: grid;
@@ -1494,6 +1691,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     width: 100%;
                 }
                 .map-preview-panel.is-preview-open .map-search-panel-new,
+                .map-preview-panel.is-preview-open .home-map-invite,
                 .map-preview-panel.is-preview-open .map-preview-stat,
                 .map-preview-panel.is-preview-open .map-lock-hint,
                 .map-preview-panel.is-preview-open :global(.map-mobile-action-dock),
@@ -1520,8 +1718,16 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .home-map-property-preview :global(.map-property-preview) {
                     z-index: 2;
                 }
-                :global(body.home-map-preview-focus .home-map-search ~ *) {
-                    display: none !important;
+                .home-map-property-preview--compact :global(.map-property-preview) {
+                    bottom: 16px;
+                }
+                .home-map-property-preview--compact :global(.map-preview-track) {
+                    padding-inline: 12px;
+                    scroll-padding-inline: 12px;
+                }
+                .home-map-property-preview--compact :global(.map-preview-card) {
+                    cursor: pointer;
+                    flex-basis: min(360px, calc(100vw - 68px));
                 }
                 .legacy-map-search-panel[hidden] {
                     display: none !important;
@@ -2210,6 +2416,59 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     .map-preview-panel {
                         border-radius: 14px;
                         height: clamp(390px, 68svh, 460px);
+                    }
+                    .home-preview-map-panel {
+                        height: clamp(340px, 58svh, 430px);
+                    }
+                    .home-map-invite {
+                        border-radius: 14px;
+                        bottom: 8px;
+                        gap: 7px;
+                        grid-template-columns: minmax(0, 1fr) auto;
+                        left: 8px;
+                        max-width: none;
+                        padding: 8px;
+                        right: 8px;
+                        transform: none;
+                        width: auto;
+                    }
+                    .home-map-invite-copy {
+                        grid-row: auto;
+                    }
+                    .home-map-region-chips,
+                    .home-map-price-row {
+                        grid-column: 1 / -1;
+                    }
+                    .home-map-invite-copy span {
+                        font-size: 0.5rem;
+                    }
+                    .home-map-invite-copy strong {
+                        font-size: 0.76rem;
+                    }
+                    .home-map-region-chips {
+                        gap: 5px;
+                    }
+                    .home-map-price-chips {
+                        gap: 4px;
+                    }
+                    .home-map-price-row {
+                        gap: 5px;
+                    }
+                    .home-map-region-chips button,
+                    .home-map-price-chips button,
+                    .home-map-open-button {
+                        font-size: 0.58rem;
+                        min-height: 28px;
+                        padding: 0 9px;
+                    }
+                    .home-map-price-chips button {
+                        font-size: 0.52rem;
+                        min-height: 24px;
+                        padding: 0 8px;
+                    }
+                    .home-map-open-button {
+                        max-width: 128px;
+                        min-width: 112px;
                     }
                     .mobile-map-modal {
                         border-radius: 16px;

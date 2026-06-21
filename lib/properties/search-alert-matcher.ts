@@ -6,12 +6,14 @@ import {
     mergeLeadSiteActivity,
     type LeadActivityEventRow,
 } from '@/lib/tracking/lead-activity'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 type JsonRecord = Record<string, unknown>
 type SearchParamRecord = Record<string, string | string[]>
 
 export type SearchAlertProperty = {
     id?: string | null
+    source_slug?: string | null
     title?: string | null
     description?: string | null
     seo_title?: string | null
@@ -42,6 +44,7 @@ export type SearchAlertProperty = {
 
 export const SEARCH_ALERT_PROPERTY_MATCH_FIELDS = [
     'id',
+    'source_slug',
     'title',
     'description',
     'seo_title',
@@ -399,9 +402,9 @@ function propertyLocationText(property: SearchAlertProperty) {
     return [property.neighborhood, property.city].map(asString).filter(Boolean).join(' - ')
 }
 
-function propertyDetailsUrl(propertyId: string, alertId: string, medium = 'whatsapp') {
-    if (!propertyId) return getPublicAppUrl()
-    return `${getPublicAppUrl()}/imovel/${encodeURIComponent(propertyId)}/detalhes?utm_source=crm&utm_medium=${encodeURIComponent(medium)}&utm_campaign=property_search_alert&alert_id=${encodeURIComponent(alertId)}`
+function propertyDetailsUrl(property: SearchAlertProperty, alertId: string, medium = 'whatsapp') {
+    if (!property.id) return getPublicAppUrl()
+    return `${getPublicAppUrl()}${propertyDetailsPath(property)}?utm_source=crm&utm_medium=${encodeURIComponent(medium)}&utm_campaign=property_search_alert&alert_id=${encodeURIComponent(alertId)}`
 }
 
 function sentenceList(items: string[], max = 3) {
@@ -423,7 +426,7 @@ function buildMatchFollowup(property: SearchAlertProperty, alert: SavedSearchAle
     const price = propertyPriceText(property)
     const location = propertyLocationText(property)
     const reasonText = sentenceList(reasons)
-    const propertyUrl = propertyDetailsUrl(propertyId || '', alert.id)
+    const propertyUrl = propertyDetailsUrl(property, alert.id)
     const context = [price ? `Valor: ${price}` : null, location ? `Localizacao: ${location}` : null].filter(Boolean).join(' | ')
     const message = [
         `Oi! Separei uma oportunidade de curadoria que encaixa na sua busca salva${alertTitle ? ` (${alertTitle})` : ''}: ${title}.`,
@@ -470,7 +473,7 @@ function buildMatchMetadata(property: SearchAlertProperty, alert: SavedSearchAle
         suggested_whatsapp_message: suggestedFollowup.message,
         followup_priority: suggestedFollowup.priority,
         source,
-        page_path: propertyId ? `/imovel/${propertyId}/detalhes` : null,
+        page_path: propertyId ? propertyDetailsPath(property) : null,
     }
 }
 
@@ -690,7 +693,7 @@ async function notifyMatch(params: {
     channels: string[]
 }) {
     const propertyId = asString(params.property.id)
-    const url = `${getPublicAppUrl()}/imovel/${encodeURIComponent(propertyId)}/detalhes?utm_source=push&utm_medium=push&utm_campaign=property_search_alert&alert_id=${encodeURIComponent(params.alert.id)}`
+    const url = `${getPublicAppUrl()}${propertyDetailsPath(params.property)}?utm_source=push&utm_medium=push&utm_campaign=property_search_alert&alert_id=${encodeURIComponent(params.alert.id)}`
     let pushSent = 0
     let pushFailed = 0
     let notificationStatus = 'queued'

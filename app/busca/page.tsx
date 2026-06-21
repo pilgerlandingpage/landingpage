@@ -186,6 +186,7 @@ function applySearchTermFilter(query: any, value: string | undefined) {
 
 const SEARCH_PROPERTY_FIELDS = [
     'id',
+    'source_slug',
     'title',
     'city',
     'state',

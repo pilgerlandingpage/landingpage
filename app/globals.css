@@ -6558,7 +6558,7 @@ h6 {
                     inset: 0;
                     background: rgba(15, 18, 20, 0.38);
                     backdrop-filter: blur(4px);
-                    z-index: 6100;
+                    z-index: 2147483646;
                     display: flex;
                     justify-content: flex-end;
                 }

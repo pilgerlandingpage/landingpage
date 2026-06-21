@@ -68,15 +68,19 @@ function getGooglePlacesWindow() {
     return window as GooglePlacesWindow
 }
 
+function hasModernPlacesLibrary(googleWindow: GooglePlacesWindow | null) {
+    return Boolean(googleWindow?.google?.maps?.places?.Place)
+}
+
 function loadGooglePlacesLibrary(apiKey: string) {
     const googleWindow = getGooglePlacesWindow()
     if (!googleWindow) return Promise.reject(new Error('Google Places indisponivel fora do navegador.'))
-    if (googleWindow.google?.maps?.places?.PlacesService) return Promise.resolve()
+    if (hasModernPlacesLibrary(googleWindow)) return Promise.resolve()
     if (googleWindow.__pilgerGooglePlacesPromise) return googleWindow.__pilgerGooglePlacesPromise
 
     googleWindow.__pilgerGooglePlacesPromise = new Promise<void>((resolve, reject) => {
         const finishWithImportLibrary = (startedAt = Date.now()) => {
-            if (googleWindow.google?.maps?.places?.PlacesService) {
+            if (hasModernPlacesLibrary(googleWindow)) {
                 resolve()
                 return
             }
@@ -145,38 +149,95 @@ function formatDistance(meters: number) {
     return `${(meters / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`
 }
 
-function nearbySearch(service: any, request: Record<string, unknown>): Promise<any[]> {
-    return new Promise(resolve => {
-        service.nearbySearch(request, (results: any[] | null, status: string) => {
-            if (status === 'OK') {
-                resolve(results || [])
-                return
-            }
+function getPlaceDisplayName(result: any, fallback: string) {
+    const displayName = result?.displayName
+    if (typeof displayName === 'string') return displayName
+    if (displayName?.text) return String(displayName.text)
+    if (result?.name) return String(result.name)
+    if (result?.formattedAddress) return String(result.formattedAddress)
+    return fallback
+}
 
-            if (status !== 'ZERO_RESULTS') {
-                console.warn('[PropertyNearbyBenefits] nearbySearch falhou:', status)
-            }
+function getPlaceVicinity(result: any) {
+    if (result?.vicinity) return String(result.vicinity)
+    if (result?.shortFormattedAddress) return String(result.shortFormattedAddress)
+    if (result?.formattedAddress) return String(result.formattedAddress)
+    return undefined
+}
 
-            resolve([])
-        })
-    })
+function getPlaceLatLng(result: any): LatLngTuple | null {
+    const location = result?.location || result?.geometry?.location
+    const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
+    const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
+    return Number.isFinite(lat) && Number.isFinite(lng) ? [lat, lng] : null
+}
+
+async function searchPlacesForLayer(googleMaps: any, layer: NearbyBenefitLayer, origin: LatLngTuple): Promise<any[]> {
+    const option = getNearbyBenefitConfig(layer)
+    const placesApi = googleMaps?.places
+    const Place = placesApi?.Place
+    if (!option || !Place) return []
+
+    const center = { lat: origin[0], lng: origin[1] }
+    const radius = Math.min(getSearchRadius(layer), 50000)
+    const fields = ['id', 'displayName', 'formattedAddress', 'location', 'types', 'primaryType']
+
+    if (option.type && typeof Place.searchNearby === 'function') {
+        try {
+            const request: Record<string, unknown> = {
+                fields,
+                locationRestriction: { center, radius },
+                includedPrimaryTypes: [option.type],
+                maxResultCount: 5,
+            }
+            const rankPreference = placesApi.SearchNearbyRankPreference?.DISTANCE
+            if (rankPreference) request.rankPreference = rankPreference
+
+            const response = await Place.searchNearby(request)
+            const places = Array.isArray(response?.places) ? response.places : []
+            if (places.length > 0) return places
+        } catch (error) {
+            console.warn(`[PropertyNearbyBenefits] searchNearby falhou para ${layer}:`, error)
+        }
+    }
+
+    if (typeof Place.searchByText !== 'function') return []
+
+    try {
+        const request: Record<string, unknown> = {
+            textQuery: option.keyword || option.searchLabel,
+            fields,
+            locationBias: center,
+            language: 'pt-BR',
+            region: 'br',
+            maxResultCount: 5,
+        }
+
+        if (option.type) {
+            request.includedType = option.type
+            request.useStrictTypeFiltering = true
+        }
+
+        const response = await Place.searchByText(request)
+        return Array.isArray(response?.places) ? response.places : []
+    } catch (error) {
+        console.warn(`[PropertyNearbyBenefits] searchByText falhou para ${layer}:`, error)
+        return []
+    }
 }
 
 function buildResultFromPlace(layer: NearbyBenefitLayer, result: any, origin: LatLngTuple): NearbyBenefitResult | null {
     const option = getNearbyBenefitConfig(layer)
-    const location = result?.geometry?.location
-    const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
-    const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
+    const target = getPlaceLatLng(result)
 
-    if (!option || !Number.isFinite(lat) || !Number.isFinite(lng)) return null
+    if (!option || !target) return null
 
-    const target: LatLngTuple = [lat, lng]
     return {
         layer,
         label: option.label,
         searchLabel: option.searchLabel,
-        name: String(result.name || option.searchLabel),
-        vicinity: result.vicinity ? String(result.vicinity) : undefined,
+        name: getPlaceDisplayName(result, option.searchLabel),
+        vicinity: getPlaceVicinity(result),
         distanceMeters: distanceMetersBetween(origin, target),
         color: option.color,
     }
@@ -240,31 +301,20 @@ export default function PropertyNearbyBenefits({
 
                 const googleWindow = getGooglePlacesWindow()
                 const googleMaps = googleWindow?.google?.maps
-                const PlacesService = googleMaps?.places?.PlacesService
-                const LatLng = googleMaps?.LatLng
-                if (!PlacesService || !LatLng) {
+                if (!googleMaps?.places?.Place) {
                     setStatus('error')
                     return
                 }
 
-                const service = new PlacesService(document.createElement('div'))
-                const origin = new LatLng(originLatLng[0], originLatLng[1])
                 const loadedResults = await Promise.all(PROPERTY_BENEFIT_LAYERS.map(async layer => {
                     const option = getNearbyBenefitConfig(layer)
                     if (!option) return null
 
-                    const request: Record<string, unknown> = {
-                        location: origin,
-                        radius: getSearchRadius(layer),
-                    }
-
-                    if (option.type) request.type = option.type
-                    if (option.keyword) request.keyword = option.keyword
-
-                    const places = await nearbySearch(service, request)
+                    const places = await searchPlacesForLayer(googleMaps, layer, originLatLng)
                     return places
                         .map(result => buildResultFromPlace(layer, result, originLatLng))
                         .filter((item): item is NearbyBenefitResult => Boolean(item))
+                        .filter(item => item.distanceMeters <= getSearchRadius(layer) * 1.75)
                         .sort((a, b) => a.distanceMeters - b.distanceMeters)[0] || null
                 }))
 

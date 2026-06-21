@@ -22,7 +22,10 @@ import { markSearchAlertMatchOpenIfNeeded } from '@/lib/tracking/search-alert-se
 
 type SearchAlertMatchProperty = {
     id: string
+    source_slug?: string | null
+    slug?: string | null
     title?: string | null
+    seo_title?: string | null
     city?: string | null
     state?: string | null
     neighborhood?: string | null
@@ -461,7 +464,7 @@ export default function SearchAlertsPanel({ buttonClassName = '' }: SearchAlerts
                                                         utm_campaign: 'property_search_alert',
                                                     })
                                                     if (alert.title) hrefParams.set('alert_title', alert.title.slice(0, 80))
-                                                    const href = `${propertyDetailsPath(propertyId)}?${hrefParams.toString()}`
+                                                    const href = `${propertyDetailsPath(property || propertyId)}?${hrefParams.toString()}`
                                                     const matchMetadata = asPlainRecord(match.metadata)
                                                     const suggestedFollowup = asPlainRecord(matchMetadata.suggested_followup)
                                                     const suggestedMessage = String(matchMetadata.suggested_whatsapp_message || suggestedFollowup.message || '').trim()

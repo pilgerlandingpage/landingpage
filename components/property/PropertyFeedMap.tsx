@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent, type WheelEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type TouchEvent, type WheelEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { Map as MapIcon, Navigation, Satellite, Sparkles, X } from 'lucide-react'
+import { Map as MapIcon, Navigation, Satellite, Sparkles } from 'lucide-react'
 import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -44,6 +44,9 @@ const PROPERTY_FEED_MAP_VIEWS: Array<{ value: PropertyFeedMapView; label: string
 ]
 
 type GoogleStreetViewPanoramaInstance = {
+    addListener?: (eventName: string, handler: () => void) => { remove?: () => void }
+    getPosition?: () => unknown
+    getPov?: () => { heading?: number; pitch?: number; zoom?: number } | undefined
     setPosition?: (position: { lat: number; lng: number }) => void
     setPov?: (pov: { heading: number; pitch: number }) => void
     setPano?: (pano: string) => void
@@ -87,6 +90,113 @@ declare global {
 function getGoogleMapsWindow() {
     if (typeof window === 'undefined') return null
     return window as GoogleMapsWindow
+}
+
+const streetMiniMapStyles: Record<
+    | 'container'
+    | 'fallback'
+    | 'road'
+    | 'sideRoad'
+    | 'marker'
+    | 'markerArrow'
+    | 'markerDot'
+    | 'label',
+    CSSProperties
+> = {
+    container: {
+        background: 'rgba(255, 252, 246, .92)',
+        border: '1px solid rgba(255,255,255,.72)',
+        borderRadius: 14,
+        boxShadow: '0 16px 38px rgba(0,0,0,.28)',
+        display: 'block',
+        height: 74,
+        isolation: 'isolate',
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        position: 'absolute',
+        right: 12,
+        top: 70,
+        width: 102,
+        zIndex: 2147483600,
+    },
+    fallback: {
+        background:
+            'radial-gradient(circle at 50% 50%, rgba(255,255,255,.95), rgba(255,255,255,.25) 35%, transparent 36%), linear-gradient(135deg, transparent 45%, rgba(47, 108, 156, .12) 46%, rgba(47, 108, 156, .12) 53%, transparent 54%), linear-gradient(135deg, #e7eee9, #f8f4ea)',
+        inset: 0,
+        position: 'absolute',
+        zIndex: 1,
+    },
+    road: {
+        background: 'rgba(255,255,255,.78)',
+        border: '1px solid rgba(184,148,95,.3)',
+        borderRadius: 999,
+        boxShadow: '0 1px 0 rgba(255,255,255,.82)',
+        display: 'block',
+        height: 8,
+        left: -16,
+        position: 'absolute',
+        top: 40,
+        transform: 'rotate(-22deg)',
+        width: 136,
+        zIndex: 2,
+    },
+    sideRoad: {
+        background: 'rgba(255,255,255,.62)',
+        left: 28,
+        top: 18,
+        transform: 'rotate(58deg)',
+        width: 84,
+    },
+    marker: {
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #dfc18e, #a87938)',
+        border: '2px solid #fff',
+        borderRadius: 999,
+        boxShadow: '0 8px 18px rgba(0,0,0,.28)',
+        display: 'grid',
+        height: 24,
+        justifyItems: 'center',
+        left: '50%',
+        position: 'absolute',
+        top: '50%',
+        transformOrigin: '50% 50%',
+        transition: 'transform .14s ease-out',
+        width: 24,
+        willChange: 'transform',
+        zIndex: 5,
+    },
+    markerArrow: {
+        borderBottom: '7px solid #fff',
+        borderLeft: '4px solid transparent',
+        borderRight: '4px solid transparent',
+        display: 'block',
+        left: '50%',
+        position: 'absolute',
+        top: 4,
+        transform: 'translateX(-50%)',
+    },
+    markerDot: {
+        background: '#111',
+        borderRadius: 999,
+        display: 'block',
+        height: 5,
+        width: 5,
+    },
+    label: {
+        background: 'rgba(17,17,17,.76)',
+        borderRadius: 999,
+        bottom: 5,
+        color: '#fff',
+        fontSize: '.5rem',
+        fontWeight: 820,
+        left: 6,
+        letterSpacing: '.04em',
+        lineHeight: 1,
+        padding: '4px 6px',
+        position: 'absolute',
+        textTransform: 'uppercase',
+        zIndex: 6,
+    },
 }
 
 function loadGoogleMapsScript(apiKey: string) {
@@ -168,6 +278,24 @@ function normalizeLatLng(value: [number, number] | null | undefined): [number, n
     return [lat, lng]
 }
 
+function extractLatLng(value: unknown, fallback: [number, number]): [number, number] {
+    const maybeLatLng = value as { lat?: unknown; lng?: unknown } | null | undefined
+    const rawLat = typeof maybeLatLng?.lat === 'function'
+        ? (maybeLatLng.lat as () => unknown)()
+        : maybeLatLng?.lat
+    const rawLng = typeof maybeLatLng?.lng === 'function'
+        ? (maybeLatLng.lng as () => unknown)()
+        : maybeLatLng?.lng
+    const normalized = normalizeLatLng([Number(rawLat), Number(rawLng)])
+    return normalized || fallback
+}
+
+function normalizeHeading(value: unknown) {
+    const heading = Number(value)
+    if (!Number.isFinite(heading)) return 0
+    return ((heading % 360) + 360) % 360
+}
+
 function MapStyleIcon({ icon }: { icon: 'sparkles' | 'map' | 'satellite' | 'street' }) {
     if (icon === 'sparkles') return <Sparkles size={14} />
     if (icon === 'satellite') return <Satellite size={14} />
@@ -208,16 +336,68 @@ function PropertyFeedMapUpdater({ center }: { center: [number, number] }) {
     return null
 }
 
+function StreetViewMiniMap({
+    heading,
+    origin,
+    position,
+}: {
+    heading: number
+    origin: [number, number]
+    position: [number, number]
+}) {
+    const markerOffset = useMemo(() => {
+        const metersPerDegreeLat = 111_320
+        const metersPerDegreeLng = metersPerDegreeLat * Math.cos((origin[0] * Math.PI) / 180)
+        const deltaX = (position[1] - origin[1]) * metersPerDegreeLng
+        const deltaY = (position[0] - origin[0]) * metersPerDegreeLat
+        const pixelsPerMeter = 0.22
+        const left = Math.max(18, Math.min(84, 51 + deltaX * pixelsPerMeter))
+        const top = Math.max(16, Math.min(58, 37 - deltaY * pixelsPerMeter))
+
+        return { left, top }
+    }, [origin, position])
+
+    return (
+        <div
+            className="property-feed-map-street-minimap"
+            style={streetMiniMapStyles.container}
+            aria-hidden="true"
+        >
+            <div className="property-feed-map-street-minimap-fallback" style={streetMiniMapStyles.fallback} />
+            <span className="property-feed-map-street-minimap-road" style={streetMiniMapStyles.road} />
+            <span
+                className="property-feed-map-street-minimap-road property-feed-map-street-minimap-road--side"
+                style={{ ...streetMiniMapStyles.road, ...streetMiniMapStyles.sideRoad }}
+            />
+            <span
+                className="property-feed-map-street-minimap-marker"
+                style={{
+                    ...streetMiniMapStyles.marker,
+                    left: markerOffset.left,
+                    top: markerOffset.top,
+                    transform: `translate(-50%, -50%) rotate(${heading}deg)`,
+                }}
+            >
+                <span style={streetMiniMapStyles.markerArrow} />
+                <i style={streetMiniMapStyles.markerDot} />
+            </span>
+            <small style={streetMiniMapStyles.label}>Mapa</small>
+        </div>
+    )
+}
+
 function GoogleStreetViewPanorama({
     apiKey,
     latLng,
     title,
     interactive,
+    onMiniMapChange,
 }: {
     apiKey: string
     latLng: [number, number]
     title: string
     interactive: boolean
+    onMiniMapChange?: (state: { position: [number, number]; heading: number }) => void
 }) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -225,7 +405,10 @@ function GoogleStreetViewPanorama({
     useEffect(() => {
         let panorama: GoogleStreetViewPanoramaInstance | null = null
         let cancelled = false
+        let miniMapSyncInterval: number | null = null
+        let lastMiniMapState: { position: [number, number]; heading: number } | null = null
         const resizeTimers: number[] = []
+        const listenerRemovers: Array<() => void> = []
 
         loadGoogleMapsScript(apiKey)
             .then(() => {
@@ -269,6 +452,7 @@ function GoogleStreetViewPanorama({
                         const isOk = status === (googleMaps?.StreetViewStatus?.OK || 'OK')
                         const pano = data?.location?.pano
                         const position = data?.location?.latLng || location
+                        const miniMapPosition = extractLatLng(position, latLng)
 
                         if (!isOk || (!pano && !position)) {
                             loadNearestPanorama(requestIndex + 1)
@@ -278,28 +462,55 @@ function GoogleStreetViewPanorama({
                         panorama = new StreetViewPanorama(containerRef.current, {
                             addressControl: false,
                             clickToGo: true,
-                            disableDefaultUI: false,
-                            fullscreenControl: true,
+                            disableDefaultUI: true,
+                            fullscreenControl: false,
                             gestureHandling: 'greedy',
                             linksControl: true,
                             motionTracking: false,
                             motionTrackingControl: false,
-                            panControl: true,
+                            panControl: false,
                             pano,
                             position,
                             pov: { heading: 0, pitch: 0 },
                             scrollwheel: true,
                             showRoadLabels: true,
                             visible: true,
-                            zoomControl: true,
+                            zoomControl: false,
+                        })
+
+                        const syncMiniMap = () => {
+                            if (!panorama || cancelled) return
+
+                            const nextState = {
+                                position: extractLatLng(panorama.getPosition?.(), miniMapPosition),
+                                heading: normalizeHeading(panorama.getPov?.()?.heading),
+                            }
+                            const last = lastMiniMapState
+                            const positionChanged = !last
+                                || Math.abs(last.position[0] - nextState.position[0]) > 0.000001
+                                || Math.abs(last.position[1] - nextState.position[1]) > 0.000001
+                            const headingChanged = !last || Math.abs(last.heading - nextState.heading) > 0.2
+
+                            if (!positionChanged && !headingChanged) return
+
+                            lastMiniMapState = nextState
+                            onMiniMapChange?.(nextState)
+                        }
+                        ;['position_changed', 'pov_changed', 'pano_changed'].forEach((eventName) => {
+                            const listener = panorama?.addListener?.(eventName, syncMiniMap)
+                            if (listener?.remove) listenerRemovers.push(() => listener.remove?.())
                         })
 
                         const refreshPanorama = () => {
                             if (!panorama) return
                             panorama.setVisible?.(true)
                             googleMaps?.event?.trigger?.(panorama, 'resize')
+                            syncMiniMap()
                         }
 
+                        lastMiniMapState = { position: miniMapPosition, heading: 0 }
+                        onMiniMapChange?.(lastMiniMapState)
+                        miniMapSyncInterval = window.setInterval(syncMiniMap, 180)
                         setStatus('ready')
                         ;[60, 220, 700, 1400].forEach((delay) => {
                             resizeTimers.push(window.setTimeout(refreshPanorama, delay))
@@ -316,19 +527,21 @@ function GoogleStreetViewPanorama({
         return () => {
             cancelled = true
             resizeTimers.forEach((timer) => window.clearTimeout(timer))
+            if (miniMapSyncInterval !== null) window.clearInterval(miniMapSyncInterval)
+            listenerRemovers.forEach((remove) => remove())
             if (panorama) {
                 const googleWindow = getGoogleMapsWindow()
                 googleWindow?.google?.maps?.event?.clearInstanceListeners?.(panorama)
             }
         }
-    }, [apiKey, latLng])
+    }, [apiKey, latLng, onMiniMapChange])
 
     return (
         <div
-            ref={containerRef}
             className={`property-feed-map-street-native${interactive ? ' is-interactive' : ''}`}
             aria-label={`Street View de ${title}`}
         >
+            <div ref={containerRef} className="property-feed-map-street-native-canvas" />
             {status !== 'ready' && (
                 <div className="property-feed-map-street-native-state">
                     <Navigation size={18} />
@@ -358,6 +571,7 @@ export default function PropertyFeedMap({
     }, [initialView, viewOptions])
     const [selectedMapView, setSelectedMapView] = useState<PropertyFeedMapView>(fallbackView)
     const [isStreetInteractive, setIsStreetInteractive] = useState(false)
+    const [streetMiniMapState, setStreetMiniMapState] = useState<{ position: [number, number]; heading: number } | null>(null)
     const streetFrameRef = useRef<HTMLIFrameElement>(null)
     const streetScrollTouchYRef = useRef<number | null>(null)
     const mapView = viewOptions.some(view => view.value === selectedMapView) ? selectedMapView : fallbackView
@@ -406,10 +620,13 @@ export default function PropertyFeedMap({
             void trackEvent('property_location_street_view_opened', payload)
         }
     }, [copy.title, googleMapsEmbedKey, mapView, property.city, property.id, property.neighborhood, safeLatLng])
-    const handleEnableStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+    const handleToggleStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
         event?.preventDefault?.()
         event?.stopPropagation?.()
-        if (isStreetInteractive) return
+        if (isStreetInteractive) {
+            setIsStreetInteractive(false)
+            return
+        }
 
         setIsStreetInteractive(true)
         window.requestAnimationFrame(() => {
@@ -426,12 +643,6 @@ export default function PropertyFeedMap({
             google_maps_js_available: Boolean(googleMapsJsKey),
         })
     }, [copy.title, googleMapsJsKey, isStreetInteractive, property.city, property.id, property.neighborhood, safeLatLng])
-    const handleDisableStreetInteraction = useCallback((event?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
-        event?.preventDefault?.()
-        event?.stopPropagation?.()
-
-        setIsStreetInteractive(false)
-    }, [])
     const getStreetScrollParent = useCallback((target: EventTarget | null) => {
         const element = target instanceof Element ? target : null
         const sheetScroller = element?.closest<HTMLElement>('.pmds-media')
@@ -474,7 +685,6 @@ export default function PropertyFeedMap({
         streetScrollTouchYRef.current = nextY
         if (Math.abs(deltaY) < 1) return
 
-        event.preventDefault()
         event.stopPropagation()
         scrollStreetParent(event.currentTarget, deltaY)
     }, [scrollStreetParent, streetInteractionEnabled])
@@ -484,7 +694,6 @@ export default function PropertyFeedMap({
     const handleStreetShieldWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
         if (streetInteractionEnabled || Math.abs(event.deltaY) < 1) return
 
-        event.preventDefault()
         event.stopPropagation()
         scrollStreetParent(event.currentTarget, event.deltaY)
     }, [scrollStreetParent, streetInteractionEnabled])
@@ -497,6 +706,12 @@ export default function PropertyFeedMap({
             document.body.classList.remove('property-street-view-active')
         }
     }, [isStreetInteractive, mapView])
+
+    useEffect(() => {
+        if (mapView !== 'street') {
+            setStreetMiniMapState(null)
+        }
+    }, [mapView])
 
     if (!safeLatLng) {
         return (
@@ -540,6 +755,7 @@ export default function PropertyFeedMap({
                             latLng={safeLatLng}
                             title={copy.title}
                             interactive={streetInteractionEnabled}
+                            onMiniMapChange={setStreetMiniMapState}
                         />
                     ) : (
                         <iframe
@@ -565,30 +781,33 @@ export default function PropertyFeedMap({
                             onWheel={handleStreetShieldWheel}
                         />
                     )}
-                    {!streetInteractionEnabled && (
-                        <button
-                            type="button"
-                            className="property-feed-map-street-activate"
-                            onPointerDown={handleEnableStreetInteraction}
-                            onClick={handleEnableStreetInteraction}
-                            aria-label="Explorar Street View"
-                        >
-                            <Navigation size={16} />
-                            <span>Explorar rua</span>
-                        </button>
-                    )}
-                    {isStreetInteractive && (
-                        <button
-                            type="button"
-                            className="property-feed-map-street-release property-feed-map-street-release--floating"
-                            onPointerDown={handleDisableStreetInteraction}
-                            onClick={handleDisableStreetInteraction}
-                            aria-label="Voltar a rolar a pagina"
-                        >
-                            <X size={18} />
-                            <span>Voltar a rolar</span>
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className={`property-feed-map-street-toggle${streetInteractionEnabled ? ' is-active' : ''}`}
+                        onPointerDown={(event) => event.stopPropagation()}
+                        onClick={handleToggleStreetInteraction}
+                        aria-label={streetInteractionEnabled ? 'Parar de explorar Street View' : 'Explorar Street View'}
+                        aria-pressed={streetInteractionEnabled}
+                    >
+                        <Navigation size={16} />
+                        <span>{streetInteractionEnabled ? 'Parar de explorar' : 'Explorar rua'}</span>
+                    </button>
+                    <div
+                        className={`property-feed-map-street-guide${streetInteractionEnabled ? ' is-active' : ''}`}
+                        aria-live="polite"
+                    >
+                        <span className="property-feed-map-street-guide-motion" aria-hidden="true" />
+                        <span>
+                            {streetInteractionEnabled
+                                ? 'Arraste a rua. Use as setas para avancar. Depois toque em Parar.'
+                                : 'Toque em Explorar rua para mover a visao do entorno.'}
+                        </span>
+                    </div>
+                    <StreetViewMiniMap
+                        heading={(streetMiniMapState || { position: safeLatLng, heading: 0 }).heading}
+                        origin={safeLatLng}
+                        position={(streetMiniMapState || { position: safeLatLng, heading: 0 }).position}
+                    />
                     <div className="property-feed-map-caption">
                         <span>Explore a rua e a vizinhança sem sair da pagina.</span>
                     </div>

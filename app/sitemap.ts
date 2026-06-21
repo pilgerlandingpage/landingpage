@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase/server'
 import { absoluteUrl, SITE_URL } from '@/lib/seo/json-ld'
 import { getGeoPages } from '@/lib/seo/geo-pages'
-import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
 
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [{ data: properties }, { data: posts }, { data: landingPages }] = await Promise.all([
       supabase
         .from('properties')
-        .select('id, title, seo_title, city, neighborhood, property_type, updated_at, created_at')
+        .select('id, source_slug, title, seo_title, city, neighborhood, property_type, updated_at, created_at')
         .eq('status', 'active')
         .order('updated_at', { ascending: false })
         .limit(900),
@@ -76,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ])
 
     for (const property of properties || []) {
-      items.push(entry(buildPropertySeoPath(property), {
+      items.push(entry(propertyDetailsPath(property), {
         lastModified: property.updated_at || property.created_at || new Date(),
         changeFrequency: 'weekly',
         priority: 0.92,

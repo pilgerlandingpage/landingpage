@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Phone, Mail, MapPin, DollarSign, Home, Clock, User, Filter, RefreshCw, ChevronDown, ChevronUp, Star, MessageSquare, FileText, Copy, Send, ExternalLink, CircleDashed, CheckCircle2, Reply, Trophy, XCircle, BarChart3, TrendingUp, Target, AlertTriangle, Zap, ArrowRightLeft, BellRing } from 'lucide-react'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 interface LeadData {
     id: string
@@ -1219,7 +1220,16 @@ export default function LeadCRMPage() {
         if (explicitUrl) return explicitUrl
 
         const propertyId = String(source.property_id || source.target_property_id || '').trim()
-        return propertyId ? `/imovel/${encodeURIComponent(propertyId)}/detalhes` : ''
+        if (!propertyId) return ''
+
+        return propertyDetailsPath({
+            id: propertyId,
+            source_slug: String(source.source_slug || source.property_slug || '').trim() || null,
+            slug: String(source.slug || '').trim() || null,
+            title: String(source.property_title || source.title || '').trim() || null,
+            seo_title: String(source.seo_title || '').trim() || null,
+            property_type: String(source.property_type || '').trim() || null,
+        })
     }
 
     async function copyTextToClipboard(text: string) {

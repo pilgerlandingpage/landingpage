@@ -29,6 +29,7 @@ import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '../whatsapp/agent-global-
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
+import { propertyDetailsPath } from '../properties/responsive-destination'
 
 function getSupabase() {
     return createClient(
@@ -2079,7 +2080,9 @@ function computeLeadScore(lead: Record<string, unknown>): number {
 
 const PROPERTY_CATALOG_FIELDS = [
     'id',
+    'source_slug',
     'title',
+    'seo_title',
     'city',
     'state',
     'neighborhood',
@@ -2348,7 +2351,7 @@ function formatPropertyCatalogItem(property: any, index: number, appUrl: string)
     if (specs.length) parts.push(`Ficha: ${specs.join(' | ')}`)
     if (Array.isArray(property.amenities) && property.amenities.length) parts.push(`Destaques: ${property.amenities.slice(0, 4).join(', ')}`)
     if (property.description) parts.push(`Resumo: ${String(property.description).replace(/\s+/g, ' ').substring(0, 120)}${String(property.description).length > 120 ? '...' : ''}`)
-    const path = `/imovel/${property.id}`
+    const path = propertyDetailsPath(property)
     const buttonLabel = `Ver ${String(property.title || 'imovel').replace(/\s+/g, ' ').trim()}`.substring(0, 20)
     parts.push(`BOTAO: [BOTOES_URL:${buttonLabel}|${buttonLabel}=>${appUrl}${path}]`)
     return parts.join(' | ')
@@ -4304,7 +4307,7 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
                 if (specs.length) parts.push(`📐 ${specs.join(' | ')}`)
                 if (p.amenities?.length) parts.push(`✨ ${p.amenities.slice(0, 4).join(', ')}`)
                 if (p.description) parts.push(`ℹ️ ${p.description.substring(0, 100)}${p.description.length > 100 ? '...' : ''}`)
-                const path = `/imovel/${p.id}`
+                const path = propertyDetailsPath(p)
                 const buttonLabel = `Ver ${String(p.title || 'imovel').replace(/\s+/g, ' ').trim()}`.substring(0, 20)
                 parts.push(`BOTAO: [BOTOES_URL:${buttonLabel}|${buttonLabel}=>${appUrl}${path}]`)
                 return parts.join(' | ')

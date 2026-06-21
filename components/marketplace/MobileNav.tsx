@@ -15,6 +15,7 @@ type MobileNavProps = {
     metadata?: Record<string, unknown>
     sharePropertyId?: string
     shareTitle?: string
+    sharePropertyPath?: string
     whatsappLabel?: string
     whatsappTone?: 'whatsapp' | 'brand'
     exploreHref?: string
@@ -28,6 +29,7 @@ export default function MobileNav({
     metadata,
     sharePropertyId,
     shareTitle,
+    sharePropertyPath,
     whatsappLabel = 'Falar com Especialista',
     whatsappTone = 'whatsapp',
     exploreHref = '/#mapa',
@@ -67,9 +69,10 @@ export default function MobileNav({
         void sharePropertyLanding({
             propertyId: sharePropertyId,
             title: shareTitle,
+            propertyPath: sharePropertyPath,
             source: 'property_details_mobile_nav',
         }).catch(() => {})
-    }, [sharePropertyId, shareTitle])
+    }, [sharePropertyId, sharePropertyPath, shareTitle])
 
     const openFavorites = useCallback(() => {
         void trackEvent('mobile_nav_favorites_clicked', {

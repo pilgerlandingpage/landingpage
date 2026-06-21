@@ -11,7 +11,7 @@ import { markdownToHtml } from '@/lib/blog/markdown'
 import { getMostVisitedBlogProperties, type BlogPropertyRecommendation } from '@/lib/blog/properties'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
 import { JsonLd, articleJsonLd, breadcrumbJsonLd, faqPageJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
-import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -108,7 +108,7 @@ function formatPrice(value?: number | null) {
 }
 
 function propertyHref(property: BlogPropertyRecommendation) {
-    return property.landing_page_slug ? `/${property.landing_page_slug}` : buildPropertySeoPath(property)
+    return property.landing_page_slug ? `/${property.landing_page_slug}` : propertyDetailsPath(property)
 }
 
 function propertyMeta(property: BlogPropertyRecommendation) {

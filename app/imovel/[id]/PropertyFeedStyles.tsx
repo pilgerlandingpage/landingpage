@@ -888,7 +888,19 @@ export default function PropertyFeedStyles() {
                 width: 100%;
             }
 
+            .property-feed-map-street-native-canvas {
+                height: 100% !important;
+                inset: 0;
+                position: absolute !important;
+                width: 100% !important;
+                z-index: 1;
+            }
+
             .property-feed-map-street-native.is-interactive {
+                touch-action: none;
+            }
+
+            .property-feed-map-street-native.is-interactive .property-feed-map-street-native-canvas {
                 touch-action: none;
             }
 
@@ -906,6 +918,130 @@ export default function PropertyFeedStyles() {
                 z-index: 4;
             }
 
+            .property-feed-map-street-minimap {
+                background: rgba(255, 252, 246, .92);
+                border: 1px solid rgba(255,255,255,.72);
+                border-radius: 14px;
+                bottom: auto;
+                box-shadow: 0 16px 38px rgba(0,0,0,.28);
+                height: 82px;
+                left: auto;
+                overflow: hidden;
+                pointer-events: none;
+                position: absolute;
+                top: 72px;
+                right: 12px;
+                width: 108px;
+                z-index: 2147483200;
+            }
+
+            .property-feed-map-street-minimap::after {
+                border: 1px solid rgba(17,17,17,.1);
+                border-radius: inherit;
+                content: '';
+                inset: 0;
+                pointer-events: none;
+                position: absolute;
+                z-index: 4;
+            }
+
+            .property-feed-map-street-minimap img {
+                display: block;
+                height: 100% !important;
+                object-fit: cover;
+                width: 100% !important;
+            }
+
+            .property-feed-map-street-minimap-fallback {
+                background:
+                    radial-gradient(circle at 50% 50%, rgba(255,255,255,.95), rgba(255,255,255,.25) 35%, transparent 36%),
+                    linear-gradient(135deg, transparent 45%, rgba(47, 108, 156, .12) 46%, rgba(47, 108, 156, .12) 53%, transparent 54%),
+                    linear-gradient(135deg, #e7eee9, #f8f4ea);
+                inset: 0;
+                height: 100%;
+                position: absolute;
+                width: 100% !important;
+                z-index: 1;
+            }
+
+            .property-feed-map-street-minimap-road {
+                background: rgba(255,255,255,.78);
+                border: 1px solid rgba(184,148,95,.3);
+                border-radius: 999px;
+                box-shadow: 0 1px 0 rgba(255,255,255,.82);
+                display: block;
+                height: 9px;
+                left: -16px;
+                position: absolute;
+                top: 43px;
+                transform: rotate(-22deg);
+                width: 142px;
+                z-index: 2;
+            }
+
+            .property-feed-map-street-minimap-road--side {
+                background: rgba(255,255,255,.62);
+                left: 28px;
+                top: 19px;
+                transform: rotate(58deg);
+                width: 88px;
+            }
+
+            .property-feed-map-street-minimap-marker {
+                align-items: center;
+                background: linear-gradient(135deg, #dfc18e, #a87938);
+                border: 2px solid #fff;
+                border-radius: 999px;
+                box-shadow: 0 8px 18px rgba(0,0,0,.28);
+                display: grid;
+                height: 28px;
+                justify-items: center;
+                left: 50%;
+                position: relative;
+                position: absolute;
+                top: 50%;
+                transform-origin: 50% 50%;
+                transition: transform .14s ease-out;
+                will-change: transform;
+                width: 28px;
+                z-index: 5;
+            }
+
+            .property-feed-map-street-minimap-marker::before {
+                border-bottom: 8px solid #fff;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                content: '';
+                left: 50%;
+                position: absolute;
+                top: 4px;
+                transform: translateX(-50%);
+            }
+
+            .property-feed-map-street-minimap-marker i {
+                background: #111;
+                border-radius: 999px;
+                display: block;
+                height: 5px;
+                width: 5px;
+            }
+
+            .property-feed-map-street-minimap small {
+                background: rgba(17,17,17,.76);
+                border-radius: 999px;
+                bottom: 5px;
+                color: #fff;
+                font-size: .52rem;
+                font-weight: 820;
+                left: 6px;
+                letter-spacing: .04em;
+                line-height: 1;
+                padding: 4px 6px;
+                position: absolute;
+                text-transform: uppercase;
+                z-index: 6;
+            }
+
             .property-feed-map-street-native-state svg {
                 color: #dfc18e;
             }
@@ -915,52 +1051,112 @@ export default function PropertyFeedStyles() {
                 font-weight: 900;
             }
 
-            .property-feed-map-street-activate,
-            .property-feed-map-street-release {
+            .property-feed-map-street-toggle {
                 align-items: center;
                 border: 1px solid rgba(255,255,255,.22);
                 box-shadow: 0 12px 30px rgba(0,0,0,.24);
                 cursor: pointer;
                 display: inline-flex;
+                gap: 7px;
                 justify-content: center;
-                position: absolute;
-                z-index: 720;
-            }
-
-            .property-feed-map-street-activate {
-                bottom: 18px;
                 left: 50%;
                 min-height: 40px;
-                padding: 0 14px;
+                padding: 0 15px;
+                position: absolute;
                 border-radius: 999px;
                 background: linear-gradient(135deg, #dfc18e, #b8945f);
                 color: #111;
                 font-size: .74rem;
                 font-weight: 950;
-                gap: 7px;
-                transform: translateX(-50%);
-                white-space: nowrap;
-            }
-
-            .property-feed-map-street-release {
-                right: 12px;
-                top: 12px;
-                min-width: 38px;
-                height: 38px;
-                padding: 0 13px;
-                border-radius: 999px;
-                background: rgba(255,255,255,.92);
-                color: #111;
-                gap: 7px;
-                font-size: .72rem;
-                font-weight: 950;
-                pointer-events: auto;
+                top: 50%;
+                transform: translate(-50%, -50%);
                 white-space: nowrap;
                 z-index: 2147483000;
             }
 
-            .property-feed-map-street-release span {
-                display: inline;
+            .property-feed-map-street-toggle.is-active {
+                background: rgba(17, 17, 17, .84);
+                border-color: rgba(223, 193, 142, .42);
+                box-shadow: 0 14px 34px rgba(0,0,0,.32);
+                color: #f5ead7;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
+            .property-feed-map-street-guide {
+                align-items: center;
+                background: rgba(17, 17, 17, .72);
+                border: 1px solid rgba(255,255,255,.14);
+                border-radius: 999px;
+                box-shadow: 0 12px 28px rgba(0,0,0,.24);
+                color: rgba(255,255,255,.92);
+                display: inline-flex;
+                gap: 8px;
+                left: 50%;
+                line-height: 1.2;
+                max-width: min(330px, calc(100% - 34px));
+                padding: 8px 11px;
+                pointer-events: none;
+                position: absolute;
+                text-align: left;
+                top: calc(50% + 48px);
+                transform: translateX(-50%);
+                z-index: 2147482990;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
+            .property-feed-map-street-guide span:last-child {
+                font-size: .67rem;
+                font-weight: 760;
+                letter-spacing: 0;
+            }
+
+            .property-feed-map-street-guide-motion {
+                animation: propertyStreetGuideDrag 1.35s ease-in-out infinite;
+                flex: 0 0 auto;
+                height: 18px;
+                position: relative;
+                width: 28px;
+            }
+
+            .property-feed-map-street-guide-motion::before {
+                background: linear-gradient(90deg, rgba(223,193,142,.18), #dfc18e);
+                border-radius: 999px;
+                content: '';
+                height: 3px;
+                left: 4px;
+                position: absolute;
+                top: 8px;
+                width: 20px;
+            }
+
+            .property-feed-map-street-guide-motion::after {
+                border-bottom: 2px solid #dfc18e;
+                border-right: 2px solid #dfc18e;
+                content: '';
+                height: 7px;
+                position: absolute;
+                right: 3px;
+                top: 5px;
+                transform: rotate(-45deg);
+                width: 7px;
+            }
+
+            .property-feed-map-street-guide.is-active {
+                background: rgba(17, 17, 17, .82);
+                border-color: rgba(223, 193, 142, .28);
+            }
+
+            @keyframes propertyStreetGuideDrag {
+                0%, 100% {
+                    opacity: .58;
+                    transform: translateX(-3px);
+                }
+                50% {
+                    opacity: 1;
+                    transform: translateX(4px);
+                }
             }
 
             .property-feed-map-street-fallback {

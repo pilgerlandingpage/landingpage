@@ -1269,7 +1269,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                             <div className="search-memory-row">
                                 {memoryItems.map(({ property, source }) => (
                                     <Link
-                                        href={propertyDetailsPath(property.id)}
+                                        href={propertyDetailsPath(property)}
                                         className="search-memory-card"
                                         key={`${source}-${property.id}`}
                                         onClick={() => handleMemoryPropertyClick(property, source)}

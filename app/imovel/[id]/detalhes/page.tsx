@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
     ArrowLeft,
@@ -16,7 +16,6 @@ import {
     Home,
     MapPin,
     MessageCircle,
-    MoreVertical,
     Ruler,
     Star,
     TrendingUp,
@@ -26,6 +25,7 @@ import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlT
 import PropertyPhotoShowcase from '@/components/property/PropertyPhotoShowcase'
 import PropertyLandingFavoriteButton from '@/components/property/PropertyLandingFavoriteButton'
 import PropertyLandingShareButton from '@/components/property/PropertyLandingShareButton'
+import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import PropertyContinuationRail from '@/components/property/PropertyContinuationRail'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
@@ -39,16 +39,19 @@ import PropertyLandingStyles from '../PropertyLandingStyles'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_IMAGE, webPageJsonLd } from '@/lib/seo/json-ld'
 import { cleanPublicPropertyText, compactPublicPropertyText } from '@/lib/properties/text'
-import { buildPropertySeoPath } from '@/lib/properties/seo-url'
+import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
 import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 import { fetchPropertyPriceHistory, type PropertyPriceHistoryRow } from '@/lib/properties/price-history'
 
 export const dynamic = 'force-dynamic'
 
 const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const PROPERTY_MAP_MODAL_MIN_PRICE = 4000000
 const PROPERTY_MAP_MODAL_SELECT = [
     'id',
+    'source_slug',
     'title',
     'seo_title',
     'city',
@@ -75,6 +78,7 @@ const PROPERTY_MAP_MODAL_SELECT = [
 ].join(', ')
 const RELATED_PROPERTY_SELECT = [
     'id',
+    'source_slug',
     'title',
     'seo_title',
     'city',
@@ -101,6 +105,7 @@ const RELATED_PROPERTY_SELECT = [
 
 type RelatedPropertyCandidate = {
     id: string
+    source_slug?: string | null
     title?: string | null
     seo_title?: string | null
     city?: string | null
@@ -135,15 +140,61 @@ type RelatedPropertyScore = {
     premiumAlternative: boolean
 }
 
-async function getPropertyForSeo(id: string) {
+type PageSearchParams = Record<string, string | string[] | undefined>
+
+function isUuid(value: string) {
+    return UUID_PATTERN.test(value)
+}
+
+function serializeSearchParams(searchParams: PageSearchParams | undefined) {
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(searchParams || {})) {
+        if (Array.isArray(value)) {
+            value.forEach(item => {
+                if (item !== undefined) params.append(key, item)
+            })
+            continue
+        }
+
+        if (value !== undefined) params.set(key, value)
+    }
+
+    const query = params.toString()
+    return query ? `?${query}` : ''
+}
+
+async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
     const supabase = await createServerSupabase()
+    const decodedIdentifier = decodeURIComponent(identifier || '').trim()
+    const idFromSeoSlug = extractPropertyIdFromSeoSlug(decodedIdentifier)
+
+    if (idFromSeoSlug || isUuid(decodedIdentifier)) {
+        const propertyId = idFromSeoSlug || decodedIdentifier
+        const { data } = await supabase
+            .from('properties')
+            .select(select)
+            .eq('id', propertyId)
+            .maybeSingle()
+
+        return (data || null) as T | null
+    }
+
     const { data } = await supabase
         .from('properties')
-        .select('id, title, description, seo_title, seo_description, city, state, neighborhood, price, featured_image, images, property_type, bedrooms, bathrooms, suites, parking_spaces, area_m2, area_private_m2, latitude, longitude, amenities, status, created_at, updated_at')
-        .eq('id', id)
+        .select(select)
+        .eq('source_slug', decodedIdentifier)
+        .limit(1)
         .maybeSingle()
 
-    return data
+    return (data || null) as T | null
+}
+
+async function getPropertyForSeo(identifier: string) {
+    return getPropertyByIdentifier<any>(
+        identifier,
+        'id, source_slug, title, description, seo_title, seo_description, city, state, neighborhood, price, featured_image, images, property_type, bedrooms, bathrooms, suites, parking_spaces, area_m2, area_private_m2, latitude, longitude, amenities, status, created_at, updated_at'
+    )
 }
 
 function shortText(value?: string | null, fallback = '') {
@@ -193,7 +244,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         `${property.property_type || 'Imóvel'} de alto padrão em ${city}. Fale com Guilherme Pilger para receber uma curadoria completa.`
     )
     const image = property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE
-    const canonicalPath = buildPropertySeoPath(property)
+    const canonicalPath = propertyDetailsPath(property)
 
     return {
         title,
@@ -327,6 +378,7 @@ function toMobileExploreMapProperty(property: any, titleOverride?: string, image
 
     return {
         id: property.id,
+        source_slug: property.source_slug || null,
         title: cleanRepeatedPraiaBravaText(titleOverride || property.seo_title || property.title || 'Imovel'),
         city: displayLocationName(property.city) || property.city || null,
         state: property.state || null,
@@ -757,17 +809,30 @@ function buildDetailItems(property: any, locationLabel: string, area: number) {
     ].filter(Boolean) as string[]
 }
 
-export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+type PropertyDetailPageProps = {
+    params: Promise<{ id: string }>
+    searchParams?: Promise<PageSearchParams>
+    canonicalize?: boolean
+}
+
+export default async function PropertyDetailPage({
+    params,
+    searchParams,
+    canonicalize = true,
+}: PropertyDetailPageProps) {
     const supabase = await createServerSupabase()
     const { id } = await params
 
-    const { data: property } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
-        .single()
+    const property = await getPropertyByIdentifier(id)
 
     if (!property) return notFound()
+
+    const canonicalSegment = propertyDetailsSegment(property)
+    const currentSegment = decodeURIComponent(id || '').trim()
+    if (canonicalize && canonicalSegment && currentSegment !== canonicalSegment) {
+        const query = serializeSearchParams(searchParams ? await searchParams : undefined)
+        redirect(`${propertyDetailsPath(property)}${query}`)
+    }
 
     const adminSupabase = createAdminClient()
     const responsibleBroker = await getResponsibleBrokerForProperty(adminSupabase, property.id)
@@ -830,7 +895,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
     const projectItems = amenities.slice(24, 48)
-    const propertyPath = buildPropertySeoPath(property)
+    const propertyPath = propertyDetailsPath(property)
     const propertyUrl = absoluteUrl(propertyPath)
     const propertyTrackingMetadata = {
         property_id: property.id,
@@ -848,6 +913,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     const propertyMapLatLng = getMapLatLng(property)
     const propertyMapPreview = {
         id: property.id,
+        source_slug: property.source_slug || null,
         title: displayTitle,
         seo_title: property.seo_title || null,
         seo_description: shortText(property.seo_description || property.description, ''),
@@ -1105,15 +1171,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                             className="plp-mobile-action-pill"
                                             source="property_details_mobile_sheet"
                                         />
-                                        <PropertyLandingShareButton
-                                            propertyId={property.id}
-                                            title={displayTitle}
-                                            className="plp-mobile-action-pill"
-                                            source="property_details_mobile_sheet"
-                                        />
-                                        <a href="#mobile-detalhes" className="plp-mobile-action-pill plp-mobile-action-link" aria-label="Ver detalhes">
-                                            <MoreVertical size={23} />
-                                        </a>
+                                        <PropertyLandingMobileMenu title={displayTitle} metadata={propertyTrackingMetadata} />
                                     </div>
                                 </div>
 
@@ -1208,7 +1266,16 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 <h2>O que torna este imovel especial.</h2>
                             </div>
                             <p>{mobileNarrativePreview}</p>
-                            {narrativeParagraphs.length > 1 && <a href="#descricao-completa" className="plp-mobile-text-link">Ver descricao completa</a>}
+                            {narrativeParagraphs.length > 1 && (
+                                <details className="plp-mobile-description-details">
+                                    <summary>Ver descricao completa</summary>
+                                    <div className="plp-mobile-description-full">
+                                        {narrativeParagraphs.slice(1).map((paragraph, index) => (
+                                            <p key={`mobile-description-${index}`}>{paragraph}</p>
+                                        ))}
+                                    </div>
+                                </details>
+                            )}
                         </section>
 
                         <section className="plp-mobile-card plp-mobile-card--facts">
@@ -1351,7 +1418,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                         const relatedLocation = buildDisplayLocationParts(item.neighborhood, item.city).join(' - ')
                                         const relatedTitle = cleanRepeatedPraiaBravaText(item.title)
                                         return (
-                                            <Link key={item.id} href={buildPropertySeoPath(item)} className="plp-mobile-related-card">
+                                            <Link key={item.id} href={propertyDetailsPath(item)} className="plp-mobile-related-card">
                                                 <img src={image} alt={relatedTitle} loading="lazy" />
                                                 {item.exclusive && <span>Exclusivo</span>}
                                                 <div>
@@ -1386,7 +1453,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 shareSlot={(
                                     <>
                                         <PropertyLandingFavoriteButton propertyId={property.id} title={displayTitle} />
-                                        <PropertyLandingShareButton propertyId={property.id} title={displayTitle} />
+                                        <PropertyLandingShareButton propertyId={property.id} title={displayTitle} propertyPath={propertyPath} />
                                     </>
                                 )}
                             />
@@ -1403,15 +1470,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                         className="plp-mobile-action-pill"
                                         source="property_details_mobile_media"
                                     />
-                                    <PropertyLandingShareButton
-                                        propertyId={property.id}
-                                        title={displayTitle}
-                                        className="plp-mobile-action-pill"
-                                        source="property_details_mobile_media"
-                                    />
-                                    <a href="#ficha" className="plp-mobile-action-pill plp-mobile-action-link" aria-label="Ver mais detalhes">
-                                        <MoreVertical size={23} />
-                                    </a>
+                                    <PropertyLandingMobileMenu title={displayTitle} metadata={propertyTrackingMetadata} />
                                 </div>
                             </div>
 
@@ -1749,7 +1808,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                 const relatedLocation = buildDisplayLocationParts(item.neighborhood, item.city).join(' - ')
                                 const relatedTitle = cleanRepeatedPraiaBravaText(item.title)
                                 return (
-                                    <Link key={item.id} href={buildPropertySeoPath(item)} className="plp-related-card">
+                                    <Link key={item.id} href={propertyDetailsPath(item)} className="plp-related-card">
                                         <img src={image} alt={relatedTitle} loading="lazy" />
                                         {item.exclusive && <span className="plp-card-ribbon">Exclusivo</span>}
                                         <div>
@@ -1816,6 +1875,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 }}
                 sharePropertyId={property.id}
                 shareTitle={displayTitle}
+                sharePropertyPath={propertyPath}
                 whatsappLabel="Especialista"
                 whatsappTone="brand"
             />

@@ -1,6 +1,7 @@
 import { getMostVisitedBlogProperties, type BlogPropertyRecommendation } from '@/lib/blog/properties'
 import { searchEditorialImages, persistEditorialImageToR2, type EditorialImageResult } from '@/lib/media/editorial-image-providers'
 import { slugifyBlog } from '@/lib/blog/types'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 type SupabaseLike = {
   from: (table: string) => any
@@ -51,7 +52,7 @@ function unique(values: Array<string | null | undefined>) {
 }
 
 function propertyHref(property: BlogPropertyRecommendation) {
-  return property.landing_page_slug ? `/${property.landing_page_slug}` : `/imovel/${property.id}`
+  return property.landing_page_slug ? `/${property.landing_page_slug}` : propertyDetailsPath(property)
 }
 
 function getPropertyImages(property: BlogPropertyRecommendation) {

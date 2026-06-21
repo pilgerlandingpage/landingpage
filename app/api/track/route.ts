@@ -4,6 +4,8 @@ import { extractTrackingData, generateVisitorId } from '@/lib/tracking'
 import { leadIntentColumnsFromMetadata, mergeLeadSiteActivity, type LeadActivityEventRow } from '@/lib/tracking/lead-activity'
 import { sendMetaCapiEvent } from '@/lib/tracking/meta-capi'
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
+import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 const VISITOR_COOKIE_NAME = 'pilger_visitor_id'
 
@@ -333,6 +335,28 @@ async function resolveTrackedTargetUrl(searchParams: URLSearchParams, requestUrl
     const origin = new URL(requestUrl).origin
 
     if (contentType === 'property') {
+        try {
+            const decodedContentId = decodeURIComponent(contentId)
+            const propertyId = extractPropertyIdFromSeoSlug(decodedContentId) || decodedContentId
+            let query = supabase
+                .from('properties')
+                .select('id, source_slug, title, seo_title, property_type')
+                .limit(1)
+
+            query = isUuid(propertyId)
+                ? query.eq('id', propertyId)
+                : query.eq('source_slug', decodedContentId)
+
+            const { data, error } = await query.maybeSingle()
+            if (error) {
+                console.warn('[Track] property redirect lookup failed:', error.message)
+            } else if (data?.id) {
+                return new URL(propertyDetailsPath(data), origin).toString()
+            }
+        } catch (error) {
+            console.warn('[Track] property redirect resolve failed:', error)
+        }
+
         return new URL(`/imovel/${encodeURIComponent(contentId)}/detalhes`, origin).toString()
     }
 

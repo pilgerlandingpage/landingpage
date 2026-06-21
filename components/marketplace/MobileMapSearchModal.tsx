@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/tracking/client'
 
 type Property = {
     id: string
+    source_slug?: string | null
     title?: string | null
     city?: string | null
     state?: string | null
@@ -524,11 +525,19 @@ export default function MobileMapSearchModal({
                     pointer-events: none;
                     position: absolute;
                     right: 10px;
-                    z-index: 760;
+                    z-index: 1800;
                 }
                 .mobile-map-search-panel :global(.home-search-box-map) {
                     pointer-events: auto;
+                    position: relative;
                     width: 100%;
+                    z-index: 1;
+                }
+                .mobile-map-search-panel :global(.home-search-suggestions) {
+                    z-index: 2;
+                }
+                .mobile-map-preview-panel :global(.map-mobile-action-dock) {
+                    z-index: 720;
                 }
                 .mobile-search-this-area-button {
                     align-items: center;

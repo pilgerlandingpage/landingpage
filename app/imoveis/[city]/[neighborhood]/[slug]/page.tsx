@@ -30,5 +30,6 @@ export default async function SeoPropertyPage({ params }: PageParams) {
 
   return PropertyDetailPage({
     params: Promise.resolve({ id }),
+    canonicalize: false,
   })
 }

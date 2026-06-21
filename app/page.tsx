@@ -47,6 +47,7 @@ const HOME_PROPERTY_DESCRIPTION_LIMIT = 320
 const HOME_MAP_MIN_PRICE = 4000000
 const HOME_PROPERTY_FIELDS = [
   'id',
+  'source_slug',
   'title',
   'description',
   'city',
@@ -85,6 +86,7 @@ function compactHomeProperty(property: any) {
 
   return {
     id: property.id,
+    source_slug: property.source_slug,
     title: property.title,
     description: description.length > HOME_PROPERTY_DESCRIPTION_LIMIT
       ? `${description.slice(0, HOME_PROPERTY_DESCRIPTION_LIMIT)}...`

@@ -10,6 +10,7 @@ type ScoredProperty = {
 
 export type BlogPropertyRecommendation = {
   id: string
+  source_slug: string | null
   title: string
   city: string | null
   state: string | null
@@ -127,7 +128,7 @@ export async function getMostVisitedBlogProperties(
   const [propertiesResult, landingPagesResult] = await Promise.all([
     supabase
       .from('properties')
-      .select('id,title,city,state,neighborhood,price,property_type,bedrooms,bathrooms,suites,parking_spaces,area_m2,featured_image,exclusive,status,source_status,created_at')
+      .select('id,source_slug,title,seo_title,city,state,neighborhood,price,property_type,bedrooms,bathrooms,suites,parking_spaces,area_m2,featured_image,exclusive,status,source_status,created_at')
       .eq('status', 'active')
       .limit(400)
       .abortSignal(createQuerySignal()),
@@ -196,6 +197,7 @@ export async function getMostVisitedBlogProperties(
     .slice(0, limit)
     .map(({ property, viewScore }: any) => ({
       id: property.id,
+      source_slug: property.source_slug || null,
       title: property.title,
       city: property.city,
       state: property.state,

@@ -1,5 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
+import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 export { generateMetadata } from './detalhes/page'
 
@@ -28,17 +30,23 @@ function serializeSearchParams(searchParams: Record<string, string | string[] | 
     return query ? `?${query}` : ''
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default async function PropertyPage({ params, searchParams }: PageProps) {
     const { id } = await params
+    const identifier = decodeURIComponent(id || '').trim()
+    const idFromSeoSlug = extractPropertyIdFromSeoSlug(identifier)
     const supabase = await createServerSupabase()
-    const { data: property } = await supabase
+    const query = supabase
         .from('properties')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle()
+        .select('id, source_slug, title, seo_title, property_type')
+
+    const { data: property } = idFromSeoSlug || UUID_PATTERN.test(identifier)
+        ? await query.eq('id', idFromSeoSlug || identifier).maybeSingle()
+        : await query.eq('source_slug', identifier).limit(1).maybeSingle()
 
     if (!property) return notFound()
 
-    const query = serializeSearchParams(searchParams ? await searchParams : undefined)
-    redirect(`/imovel/${encodeURIComponent(id)}/detalhes${query}`)
+    const search = serializeSearchParams(searchParams ? await searchParams : undefined)
+    redirect(`${propertyDetailsPath(property)}${search}`)
 }
