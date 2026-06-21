@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, type CSSProperties } from 'react'
+import { useState, useRef, useCallback, useEffect, type CSSProperties } from 'react'
 
 interface SearchViewsProps {
     children: React.ReactNode
@@ -20,11 +20,35 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
     const startY = useRef(0)
     const startPosition = useRef(SNAP_HALF)
     const currentTranslate = useRef(SNAP_HALF)
+    const pendingPosition = useRef(SNAP_HALF)
+    const dragFrame = useRef<number | null>(null)
+
+    const updateSheetPosition = useCallback((nextPosition: number) => {
+        currentTranslate.current = nextPosition
+        pendingPosition.current = nextPosition
+
+        if (dragFrame.current !== null) return
+
+        dragFrame.current = window.requestAnimationFrame(() => {
+            dragFrame.current = null
+            setSheetPosition(pendingPosition.current)
+        })
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            if (dragFrame.current !== null) {
+                window.cancelAnimationFrame(dragFrame.current)
+            }
+        }
+    }, [])
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         const touch = e.touches[0]
         startY.current = touch.clientY
         startPosition.current = sheetPosition
+        currentTranslate.current = sheetPosition
+        pendingPosition.current = sheetPosition
         setIsDragging(true)
     }, [sheetPosition])
 
@@ -35,9 +59,8 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
         const windowHeight = window.innerHeight
         const deltaPercent = (deltaY / windowHeight) * 100
         const newPosition = Math.max(SNAP_FULL_LIST, Math.min(SNAP_FULL_MAP, startPosition.current + deltaPercent))
-        currentTranslate.current = newPosition
-        setSheetPosition(newPosition)
-    }, [isDragging])
+        updateSheetPosition(newPosition)
+    }, [isDragging, updateSheetPosition])
 
     const handleTouchEnd = useCallback(() => {
         setIsDragging(false)
@@ -52,7 +75,12 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                 closest = sp
             }
         }
+        if (dragFrame.current !== null) {
+            window.cancelAnimationFrame(dragFrame.current)
+            dragFrame.current = null
+        }
         setSheetPosition(closest)
+        pendingPosition.current = closest
         currentTranslate.current = closest
     }, [])
 
@@ -108,6 +136,8 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                     flex-direction: column;
                     overflow: hidden;
                     backdrop-filter: blur(18px);
+                    will-change: top;
+                    transform: translateZ(0);
                 }
                 .sv-handle {
                     display: flex;

@@ -570,6 +570,11 @@ function MapUpdater({
         lastPointsKey.current = pointsKey
 
         if (points.length > 0) {
+            const container = map.getContainer()
+            const mapHeight = points.length > 1
+                ? container.clientHeight || window.innerHeight
+                : 0
+
             map.invalidateSize({ animate: false })
 
             if (points.length === 1) {
@@ -579,7 +584,6 @@ function MapUpdater({
 
             const bounds = L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng)))
             const isMobile = window.matchMedia('(max-width: 767px)').matches
-            const mapHeight = map.getContainer().clientHeight || window.innerHeight
             const focusBottomPadding = Math.min(
                 340,
                 Math.max(isMobile ? 126 : 210, Math.round(mapHeight * (isMobile ? 0.3 : 0.34)))
@@ -605,21 +609,35 @@ function MapUpdater({
     }, [hasFocusArea, map, points, pointsKey])
 
     useEffect(() => {
+        let frame: number | null = null
+
+        const invalidateMapSize = () => {
+            if (frame !== null) return
+
+            frame = window.requestAnimationFrame(() => {
+                frame = null
+                map.invalidateSize({ animate: false })
+            })
+        }
+
         const resizeObserver = new ResizeObserver(() => {
-            map.invalidateSize({ animate: false })
+            invalidateMapSize()
         })
         const container = map.getContainer()
         resizeObserver.observe(container)
 
         const timers = [100, 300, 600, 1200].map(delay =>
             setTimeout(() => {
-                map.invalidateSize({ animate: false })
+                invalidateMapSize()
             }, delay)
         )
 
         return () => {
             resizeObserver.disconnect()
             timers.forEach(clearTimeout)
+            if (frame !== null) {
+                window.cancelAnimationFrame(frame)
+            }
         }
     }, [map, points])
 
@@ -648,30 +666,33 @@ function SelectedPropertyFocusController({
         if (lastFocusKey.current === focusKey) return
         lastFocusKey.current = focusKey
 
-        map.invalidateSize({ animate: false })
+        const frame = window.requestAnimationFrame(() => {
+            const focusZoom = Math.max(map.getZoom(), 15)
+            const container = map.getContainer()
+            const containerRect = container.getBoundingClientRect()
+            const previewCard = document.querySelector<HTMLElement>('.map-property-preview')
+            const previewRect = previewCard?.getBoundingClientRect()
+            const visibleBottom = previewRect && previewRect.top > containerRect.top && previewRect.top < containerRect.bottom
+                ? previewRect.top - containerRect.top - 18
+                : containerRect.height
+            const targetPoint = L.point(
+                containerRect.width / 2,
+                Math.max(110, Math.min(containerRect.height * 0.46, visibleBottom / 2))
+            )
+            const mapCenterPoint = L.point(containerRect.width / 2, containerRect.height / 2)
+            const adjustedCenter = map.unproject(
+                map.project(item.latLng, focusZoom).add(mapCenterPoint.subtract(targetPoint)),
+                focusZoom
+            )
 
-        const focusZoom = Math.max(map.getZoom(), 15)
-        const container = map.getContainer()
-        const containerRect = container.getBoundingClientRect()
-        const previewCard = document.querySelector<HTMLElement>('.map-property-preview')
-        const previewRect = previewCard?.getBoundingClientRect()
-        const visibleBottom = previewRect && previewRect.top > containerRect.top && previewRect.top < containerRect.bottom
-            ? previewRect.top - containerRect.top - 18
-            : containerRect.height
-        const targetPoint = L.point(
-            containerRect.width / 2,
-            Math.max(110, Math.min(containerRect.height * 0.46, visibleBottom / 2))
-        )
-        const mapCenterPoint = L.point(containerRect.width / 2, containerRect.height / 2)
-        const adjustedCenter = map.unproject(
-            map.project(item.latLng, focusZoom).add(mapCenterPoint.subtract(targetPoint)),
-            focusZoom
-        )
-
-        map.flyTo(adjustedCenter, focusZoom, {
-            duration: 0.48,
-            easeLinearity: 0.22,
+            map.invalidateSize({ animate: false })
+            map.flyTo(adjustedCenter, focusZoom, {
+                duration: 0.48,
+                easeLinearity: 0.22,
+            })
         })
+
+        return () => window.cancelAnimationFrame(frame)
     }, [enabled, items, map, selectedPropertyId])
 
     return null

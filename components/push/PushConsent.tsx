@@ -44,10 +44,26 @@ export default function PushConsent({ visitorId, vapidPublicKey: trackedVapidPub
         if (Notification.permission !== 'default') return
         if (sessionStorage.getItem('push_prompt_dismissed')) return
 
+        let scrollFrame: number | null = null
+        let isScrollListenerActive = false
+
+        const stopScrollTracking = () => {
+            if (isScrollListenerActive) {
+                window.removeEventListener('scroll', handleScroll)
+                isScrollListenerActive = false
+            }
+
+            if (scrollFrame !== null) {
+                window.cancelAnimationFrame(scrollFrame)
+                scrollFrame = null
+            }
+        }
+
         const trigger = (content: PushPromptContent) => {
             if (hasTriggered.current) return
             if (sessionStorage.getItem('push_prompt_dismissed')) return
             hasTriggered.current = true
+            stopScrollTracking()
             setPromptContent(content)
             setShow(true)
             void trackEvent('push_soft_prompt_shown', {
@@ -56,11 +72,18 @@ export default function PushConsent({ visitorId, vapidPublicKey: trackedVapidPub
             })
         }
 
-        const handleScroll = () => {
+        const evaluateScrollPosition = () => {
+            scrollFrame = null
             const scrollable = document.documentElement.scrollHeight - window.innerHeight
             if (scrollable <= 0) return
             const scrollPercent = window.scrollY / scrollable
             if (scrollPercent > 0.35) trigger({ ...DEFAULT_PROMPT, reason: 'scroll_35' })
+        }
+
+        function handleScroll() {
+            if (scrollFrame !== null) return
+
+            scrollFrame = window.requestAnimationFrame(evaluateScrollPosition)
         }
 
         const handleIntent = (event: Event) => {
@@ -78,11 +101,12 @@ export default function PushConsent({ visitorId, vapidPublicKey: trackedVapidPub
         }, 15000)
 
         window.addEventListener('scroll', handleScroll, { passive: true })
+        isScrollListenerActive = true
         window.addEventListener('pilger_push_intent', handleIntent)
 
         return () => {
             window.clearTimeout(timer)
-            window.removeEventListener('scroll', handleScroll)
+            stopScrollTracking()
             window.removeEventListener('pilger_push_intent', handleIntent)
         }
     }, [vapidPublicKey])

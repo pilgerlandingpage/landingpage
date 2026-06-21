@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import PropertyCard from '@/components/marketplace/PropertyCard'
 
@@ -23,15 +23,23 @@ export default function HomepageSection({
     viewAllLabel = 'Ver todos',
 }: HomepageSectionProps) {
     const scrollRef = useRef<HTMLDivElement>(null)
+    const scrollFrame = useRef<number | null>(null)
     const [canScrollLeft, setCanScrollLeft] = useState(false)
     const [canScrollRight, setCanScrollRight] = useState(false)
 
-    const checkScroll = () => {
-        const el = scrollRef.current
-        if (!el) return
-        setCanScrollLeft(el.scrollLeft > 10)
-        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10)
-    }
+    const checkScroll = useCallback(() => {
+        if (scrollFrame.current !== null) return
+
+        scrollFrame.current = window.requestAnimationFrame(() => {
+            scrollFrame.current = null
+
+            const el = scrollRef.current
+            if (!el) return
+
+            setCanScrollLeft(el.scrollLeft > 10)
+            setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10)
+        })
+    }, [])
 
     useEffect(() => {
         checkScroll()
@@ -43,8 +51,11 @@ export default function HomepageSection({
         return () => {
             el?.removeEventListener('scroll', checkScroll)
             window.removeEventListener('resize', checkScroll)
+            if (scrollFrame.current !== null) {
+                window.cancelAnimationFrame(scrollFrame.current)
+            }
         }
-    }, [])
+    }, [checkScroll])
 
     const scroll = (direction: 'left' | 'right') => {
         const el = scrollRef.current

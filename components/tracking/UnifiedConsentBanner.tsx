@@ -27,6 +27,19 @@ export default function UnifiedConsentBanner() {
         if (hasRun.current) return
         hasRun.current = true
 
+        const waitForIdle = () => new Promise<void>(resolve => {
+            const idleWindow = window as typeof window & {
+                requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number
+            }
+
+            if (idleWindow.requestIdleCallback) {
+                idleWindow.requestIdleCallback(() => resolve(), { timeout: 2500 })
+                return
+            }
+
+            window.setTimeout(resolve, 1200)
+        })
+
         const runAutoConsent = async () => {
             try {
                 if (isTrackingDisabled()) {
@@ -72,6 +85,7 @@ export default function UnifiedConsentBanner() {
 
                     if (currentPermission === 'granted') {
                         try {
+                            await waitForIdle()
                             console.log('[AutoConsent] Registering service worker...')
                             const swRegistration = await navigator.serviceWorker.register('/sw.js')
                             await navigator.serviceWorker.ready
