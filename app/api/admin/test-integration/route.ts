@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { appendMetaConnectionLog } from '@/lib/social/meta-oauth'
 import { testEditorialImageProvider } from '@/lib/media/editorial-image-providers'
 import { testGoogleAnalyticsConnection } from '@/lib/analytics/google'
+import { GOOGLE_ADS_API_VERSION } from '@/lib/ads/google'
 
 function parseJsonText(text: string) {
     if (!text) return {}
@@ -9,6 +10,35 @@ function parseJsonText(text: string) {
         return JSON.parse(text)
     } catch {
         return { message: text }
+    }
+}
+
+const META_GRAPH_API_VERSION = 'v21.0'
+
+async function getMetaTokenDiagnostics(config: Record<string, string>, accessToken: string) {
+    const appId = config.meta_app_id
+    const appSecret = config.meta_app_secret
+    if (!appId || !appSecret) return null
+
+    try {
+        const url = new URL(`https://graph.facebook.com/${META_GRAPH_API_VERSION}/debug_token`)
+        url.searchParams.set('input_token', accessToken)
+        url.searchParams.set('access_token', `${appId}|${appSecret}`)
+
+        const response = await fetch(url)
+        const payload = await response.json()
+        if (!response.ok || payload.error) return null
+
+        const scopes = Array.isArray(payload.data?.scopes) ? payload.data.scopes as string[] : []
+        const hasAdsPermission = scopes.includes('ads_read') || scopes.includes('ads_management')
+
+        return {
+            isValid: Boolean(payload.data?.is_valid),
+            hasAdsPermission,
+            missingAdsPermission: !hasAdsPermission,
+        }
+    } catch {
+        return null
     }
 }
 
@@ -178,7 +208,10 @@ export async function POST(request: NextRequest) {
 
             case 'meta_ads': {
                 const accessToken = config.meta_access_token
-                const adAccountId = config.meta_ad_account_id
+                const rawAdAccountId = String(config.meta_ad_account_id || '').trim()
+                const adAccountId = rawAdAccountId && rawAdAccountId.startsWith('act_')
+                    ? rawAdAccountId
+                    : rawAdAccountId ? `act_${rawAdAccountId}` : ''
 
                 if (!accessToken) {
                     await appendMetaConnectionLog({
@@ -193,31 +226,49 @@ export async function POST(request: NextRequest) {
                     })
                 }
 
-                // If Ad Account ID is missing, we just test the token
-                const targetUrl = adAccountId && adAccountId.trim() !== ''
-                    ? `https://graph.facebook.com/v19.0/${adAccountId}?fields=name,account_status&access_token=${accessToken}`
-                    : `https://graph.facebook.com/v19.0/me?access_token=${accessToken}`
+                const tokenDiagnostics = await getMetaTokenDiagnostics(config, accessToken)
+                if (tokenDiagnostics?.isValid && tokenDiagnostics.missingAdsPermission) {
+                    const message = 'Token Meta valido, mas sem permissao de anuncios. Gere um novo token do usuario de sistema com ads_read e/ou ads_management e atribua a conta de anuncios ao usuario.'
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_connection',
+                        status: 'error',
+                        message: `Teste Meta falhou: ${message}`,
+                    })
+                    return NextResponse.json({ success: false, message })
+                }
+
+                // If Ad Account ID is missing, we just test the token identity.
+                const targetUrl = new URL(adAccountId
+                    ? `https://graph.facebook.com/${META_GRAPH_API_VERSION}/${adAccountId}`
+                    : `https://graph.facebook.com/${META_GRAPH_API_VERSION}/me`)
+                targetUrl.searchParams.set('access_token', accessToken)
+                targetUrl.searchParams.set('fields', adAccountId ? 'name,account_status' : 'id,name')
 
                 try {
                     const res = await fetch(targetUrl)
 
                     if (!res.ok) {
                         const error = await res.json()
+                        const baseMessage = error.error?.message || res.statusText
+                        const permissionMessage = String(baseMessage).includes('ads_management or ads_read permission')
+                            ? 'A Meta recusou a conta de anuncios porque o token nao tem ads_read/ads_management para essa conta. Revise as permissoes do usuario de sistema e a atribuicao da conta de anuncios.'
+                            : baseMessage
                         await appendMetaConnectionLog({
                             provider: 'meta',
                             action: 'test_connection',
                             status: 'error',
-                            message: `Teste Meta falhou: ${error.error?.message || res.statusText}`,
+                            message: `Teste Meta falhou: ${permissionMessage}`,
                         })
                         return NextResponse.json({
                             success: false,
-                            message: `Erro Meta Ads: ${error.error?.message || res.statusText}`,
+                            message: `Erro Meta Ads: ${permissionMessage}`,
                         })
                     }
 
                     const data = await res.json()
 
-                    if (adAccountId && adAccountId.trim() !== '') {
+                    if (adAccountId) {
                         const statusName = data.account_status === 1 ? 'Ativa' :
                             data.account_status === 2 ? 'Desativada' :
                                 data.account_status === 3 ? 'Unsettled' :
@@ -316,8 +367,8 @@ export async function POST(request: NextRequest) {
 
                     const accessToken = tokenData.access_token
 
-                    // 2. Testar chamada à API (listAccessibleCustomers v20)
-                    const apiUrl = `https://googleads.googleapis.com/v20/customers:listAccessibleCustomers`
+                    // 2. Testar chamada à API
+                    const apiUrl = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers:listAccessibleCustomers`
                     console.log('Testando conexão Google Ads URL:', apiUrl)
 
                     const apiRes = await fetch(

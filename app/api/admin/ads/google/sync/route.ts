@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server'
+import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
+import { GOOGLE_ADS_API_VERSION } from '@/lib/ads/google'
 import { createAdminClient } from '@/lib/supabase/server'
 import { syncPaidAdsSpendToFinance } from '@/lib/finance/ads-spend-sync'
 
-// We will fetch Google Ads directly here or using google.ts
 export async function POST() {
+    const supabase = createAdminClient()
+
     try {
-        const supabase = createAdminClient()
+        await markAgentStarted(supabase, 'ads_sync')
 
         // 1. Get credentials from app_config
         const { data: configRows } = await supabase.from('app_config').select('key, value').in('key', [
@@ -24,7 +27,7 @@ export async function POST() {
         const customerId = (cm['google_ads_customer_id'] || '').replace(/-/g, '').trim()
 
         if (!clientId || !clientSecret || !refreshToken || !developerToken || !customerId) {
-            return NextResponse.json({ success: false, error: 'Credenciais do Google Ads incompletas' }, { status: 400 })
+            throw new Error('Credenciais do Google Ads incompletas')
         }
 
         // 2. Get Access Token
@@ -34,10 +37,10 @@ export async function POST() {
             body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token' })
         })
         const tokenData = await tokenRes.json()
-        if (tokenData.error) throw new Error('Falha no OAuth Google Ads: ' + tokenData.error)
+        if (!tokenRes.ok || tokenData.error) throw new Error('Falha no OAuth Google Ads: ' + (tokenData.error_description || tokenData.error || tokenRes.status))
         const accessToken = tokenData.access_token
 
-        // 3. Fetch Campaigns from Google Ads API (v20)
+        // 3. Fetch Campaigns from Google Ads API
         // We fetch campaigns without restricting by date to ensure we get ALL campaigns
         // (even those with 0 impressions recently). We still get lifetime metrics or zeros.
         const query = `
@@ -53,7 +56,7 @@ export async function POST() {
             WHERE campaign.status != 'REMOVED'
         `
 
-        const res = await fetch(`https://googleads.googleapis.com/v20/customers/${customerId}/googleAds:searchStream`, {
+        const res = await fetch(`https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:searchStream`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -67,7 +70,7 @@ export async function POST() {
         if (!res.ok) {
             const errText = await res.text()
             console.error('Google Ads API falhou:', errText)
-            throw new Error('Falha ao buscar campanhas na API do Google Ads')
+            throw new Error(`Falha ao buscar campanhas na API do Google Ads: ${errText.slice(0, 500)}`)
         }
 
         const text = await res.text()
@@ -161,7 +164,7 @@ export async function POST() {
             const ctr = impressions > 0 ? (clicks / impressions) : 0
             const cpa = conversions > 0 ? (costUsd / conversions) : null
 
-            await supabase
+            const { error: snapshotError } = await supabase
                 .from('ad_metrics_snapshots')
                 .insert({
                     campaign_id: dbCampId,
@@ -176,10 +179,20 @@ export async function POST() {
                     conversions: Math.round(conversions),
                 })
 
+            if (snapshotError) {
+                throw new Error(`Erro ao salvar snapshot Google Ads da campanha ${gc.name}: ${snapshotError.message}`)
+            }
+
             syncedCount++
         }
 
         const financeSync = await syncPaidAdsSpendToFinance(supabase)
+
+        await markAgentCompleted(supabase, 'ads_sync', {
+            source: 'manual_google_sync',
+            synced: syncedCount,
+            campaigns_found: campaignsFromNetwork.length,
+        })
 
         return NextResponse.json({ 
             success: true, 
@@ -189,6 +202,7 @@ export async function POST() {
         })
 
     } catch (error: any) {
+        await markAgentFailed(supabase, 'ads_sync', error).catch(() => {})
         console.error('API Error (Sync Google Ads):', error)
         return NextResponse.json(
             { success: false, error: error.message || 'Erro interno ao sincronizar Google Ads' },

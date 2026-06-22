@@ -10,6 +10,8 @@
 import type { GoogleCampaignConfig, MetricsSnapshot } from './types'
 import { createAdminClient } from '../supabase/server'
 
+export const GOOGLE_ADS_API_VERSION = 'v24'
+
 // --- Configuração ---
 
 async function getGoogleConfig() {
@@ -73,8 +75,10 @@ async function getAccessToken(config: Awaited<ReturnType<typeof getGoogleConfig>
         })
     })
 
-    const data = await res.json()
-    if (data.error) throw new Error(`Erro OAuth Google: ${data.error_description || data.error}`)
+    const data = await res.json().catch(() => null)
+    if (!res.ok || data?.error || !data?.access_token) {
+        throw new Error(`Erro OAuth Google: ${data?.error_description || data?.error || res.status}`)
+    }
     return data.access_token
 }
 
@@ -93,7 +97,40 @@ async function getHeaders(config: Awaited<ReturnType<typeof getGoogleConfig>>): 
 }
 
 function getApiUrl(customerId: string): string {
-    return `https://googleads.googleapis.com/v20/customers/${customerId}`
+    return `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}`
+}
+
+function getGoogleAdsErrorMessage(payload: any, fallback: string) {
+    const apiError = payload?.error || payload?.[0]?.error
+    const googleFailure = apiError?.details?.find((detail: any) =>
+        String(detail?.['@type'] || '').includes('GoogleAdsFailure')
+    )
+    const firstError = googleFailure?.errors?.[0]
+    const errorCode = firstError?.errorCode
+        ? Object.entries(firstError.errorCode)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ')
+        : ''
+    const detailMessage = firstError?.message || apiError?.message
+    return [errorCode, detailMessage].filter(Boolean).join(' - ') || fallback
+}
+
+function getCampaignFilter(campaignReference: string, customerId: string) {
+    const value = String(campaignReference || '').trim()
+    const resourceMatch = value.match(/campaigns\/(\d+)$/)
+    const campaignId = resourceMatch?.[1] || (/^\d+$/.test(value) ? value : '')
+
+    if (campaignId) return `campaign.id = ${campaignId}`
+    if (value) return `campaign.resource_name = '${value.replace(/'/g, "\\'")}'`
+
+    return `campaign.resource_name = 'customers/${customerId}/campaigns/0'`
+}
+
+function toCampaignResourceName(campaignReference: string, customerId: string) {
+    const value = String(campaignReference || '').trim()
+    if (value.startsWith('customers/')) return value
+    if (/^\d+$/.test(value)) return `customers/${customerId}/campaigns/${value}`
+    return value
 }
 
 async function googleAdsSearchStream(
@@ -387,6 +424,7 @@ export async function updateCampaignStatus(
 ): Promise<void> {
     const config = await getGoogleConfig()
     const headers = await getHeaders(config)
+    const resourceName = toCampaignResourceName(campaignResourceName, config.customerId)
 
     const res = await fetch(
         `${getApiUrl(config.customerId)}/campaigns:mutate`,
@@ -396,7 +434,7 @@ export async function updateCampaignStatus(
             body: JSON.stringify({
                 operations: [{
                     update: {
-                        resourceName: campaignResourceName,
+                        resourceName,
                         status
                     },
                     updateMask: 'status'
@@ -427,11 +465,9 @@ export async function getMetrics(
             metrics.average_cpc,
             metrics.cost_micros,
             metrics.conversions,
-            metrics.cost_per_conversion,
-            metrics.video_views,
-            metrics.video_quartile_p25_rate
+            metrics.cost_per_conversion
         FROM campaign
-        WHERE campaign.resource_name = '${campaignResourceName}'
+        WHERE ${getCampaignFilter(campaignResourceName, config.customerId)}
             AND segments.date DURING ${dateRange}
     `
 
@@ -444,13 +480,12 @@ export async function getMetrics(
         }
     )
 
-    const data = await res.json()
-    if (data.error) {
-        console.error(`Erro ao buscar métricas Google: ${data.error.message}`)
-        return null
+    const data = await res.json().catch(() => null)
+    if (!res.ok || data?.error || data?.[0]?.error) {
+        throw new Error(getGoogleAdsErrorMessage(data, `Erro Google Ads (${res.status}) ao buscar metricas`))
     }
 
-    const row = data[0]?.results?.[0]?.metrics
+    const row = data?.[0]?.results?.[0]?.metrics
     if (!row) return null
 
     const impressions = parseInt(row.impressions || '0')
@@ -468,8 +503,8 @@ export async function getMetrics(
         leads_count: Math.round(conversions),
         cost_per_lead: conversions > 0 ? spend / conversions : undefined,
         roas: undefined,
-        thumbstop_ratio: row.videoQuartileP25Rate ? parseFloat(row.videoQuartileP25Rate) : undefined,
-        video_views_3s: row.videoViews ? parseInt(row.videoViews) : undefined,
+        thumbstop_ratio: undefined,
+        video_views_3s: undefined,
         frequency: undefined
     }
 }
@@ -555,9 +590,7 @@ export async function getAllCampaignsWithMetrics(
             metrics.average_cpc,
             metrics.cost_micros,
             metrics.conversions,
-            metrics.cost_per_conversion,
-            metrics.video_views,
-            metrics.video_quartile_p25_rate
+            metrics.cost_per_conversion
         FROM campaign
         ${whereClause}
     `
@@ -611,8 +644,8 @@ export async function getAllCampaignsWithMetrics(
                                 leads_count: Math.round(conversions),
                                 cost_per_lead: conversions > 0 ? spend / conversions : null,
                                 reach: impressions, // Google Ads não tem 'reach' separado; usamos impressions
-                                thumbstop_ratio: m.videoQuartileP25Rate ? parseFloat(m.videoQuartileP25Rate) : undefined,
-                                video_views_3s: m.videoViews ? parseInt(m.videoViews) : undefined,
+                                thumbstop_ratio: undefined,
+                                video_views_3s: undefined,
                             }
                         }
                     }
@@ -658,7 +691,7 @@ export async function getAccountMonthlySpend(): Promise<Record<string, number>> 
         throw new Error(`Google Ads monthly spend API error: ${errText}`)
     }
 
-    const data = await res.json()
+    const data = await res.json().catch(() => null)
     const monthly: Record<string, number> = {}
 
     if (data && data.length > 0) {

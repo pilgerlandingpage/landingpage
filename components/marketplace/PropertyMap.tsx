@@ -5,7 +5,7 @@ import { Circle, MapContainer, TileLayer, Marker, Polygon, Polyline, Popup, useM
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Anchor, Bath, Bed, Building2, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, PencilLine, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
+import { Anchor, Bath, Bed, Building2, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
 import { NEARBY_BENEFIT_LAYERS as MAP_AMENITY_LAYERS, getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
@@ -1714,21 +1714,6 @@ export default function PropertyMap({
                 ))}
             </div>
 
-            <div className="map-style-control" role="group" aria-label="Estilo do mapa">
-                {MAP_STYLES.map(style => (
-                    <button
-                        key={style.value}
-                        type="button"
-                        className={mapStyle === style.value ? 'active' : ''}
-                        aria-label={`Mapa ${style.label}`}
-                        onClick={() => handleMapStyleChange(style.value)}
-                    >
-                        {getStyleIcon(style.icon)}
-                        <span>{style.label}</span>
-                    </button>
-                ))}
-            </div>
-
             <div className="map-mobile-style-stack" role="group" aria-label="Estilo do mapa">
                 <div className="map-mobile-style-grid">
                     {MAP_STYLES.map(style => (
@@ -1783,28 +1768,16 @@ export default function PropertyMap({
                 </div>
             )}
 
-            {onDrawAreaChange && !officeMarker && (
+            {hasDrawArea && onDrawAreaChange && !officeMarker && (
                 <div className="map-draw-control" role="group" aria-label="Desenho de área no mapa">
                     <button
                         type="button"
-                        className={drawModeEnabled ? 'active' : ''}
-                        aria-label={drawModeEnabled ? 'Cancelar desenho de área' : 'Desenhar área no mapa'}
-                        aria-pressed={drawModeEnabled}
-                        onClick={handleDrawModeToggle}
+                        aria-label="Limpar área desenhada"
+                        onClick={handleDrawAreaClear}
                     >
-                        <PencilLine size={14} />
-                        <span>{drawModeEnabled ? 'Cancelar' : 'Desenhar'}</span>
+                        <Eraser size={14} />
+                        <span>Limpar área</span>
                     </button>
-                    {hasDrawArea && (
-                        <button
-                            type="button"
-                            aria-label="Limpar área desenhada"
-                            onClick={handleDrawAreaClear}
-                        >
-                            <Eraser size={14} />
-                            <span>Limpar</span>
-                        </button>
-                    )}
                 </div>
             )}
 
@@ -2024,8 +1997,7 @@ export default function PropertyMap({
                     scrollbar-width: none;
                 }
                 .map-topbar::-webkit-scrollbar { display: none; }
-                .map-topbar button,
-                .map-style-control button {
+                .map-topbar button {
                     border: 1px solid rgba(232,220,199,0.14);
                     background: rgba(18, 18, 18, 0.76);
                     color: #e8dcc7;
@@ -2041,34 +2013,13 @@ export default function PropertyMap({
                     height: 34px;
                     padding: 0 13px;
                 }
-                .map-topbar button:hover,
-                .map-style-control button:hover {
+                .map-topbar button:hover {
                     transform: translateY(-1px);
                 }
-                .map-topbar button.active,
-                .map-style-control button.active {
+                .map-topbar button.active {
                     background: linear-gradient(135deg, #dfc18e, #b8945f);
                     color: #101010;
                     border-color: rgba(255,255,255,0.28);
-                }
-                .map-style-control {
-                    position: absolute;
-                    right: 14px;
-                    top: 58px;
-                    z-index: 610;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 7px;
-                }
-                .map-style-control button {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    gap: 7px;
-                    height: 36px;
-                    min-width: 102px;
-                    padding: 0 12px;
-                    border-radius: 10px;
                 }
                 .map-mobile-style-stack,
                 .map-mobile-filter-panel {
@@ -2276,38 +2227,112 @@ export default function PropertyMap({
                     pointer-events: none;
                 }
                 .map-shell--drawing .map-topbar,
-                .map-shell--drawing .map-style-control,
                 .map-shell--drawing .map-mobile-style-stack,
                 .map-shell--drawing .map-mobile-filter-panel {
                     opacity: 0.24;
                     pointer-events: none;
                     transform: translateY(-2px);
                 }
-                .map-mobile-action-dock,
-                .map-options-scrim,
+                .map-mobile-action-dock {
+                    position: absolute;
+                    right: 14px;
+                    top: 58px;
+                    z-index: 1300;
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    pointer-events: auto;
+                }
+                .map-mobile-action-dock button {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 42px;
+                    height: 42px;
+                    border: 1px solid rgba(18,24,30,0.08);
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.94);
+                    color: #171a1d;
+                    cursor: pointer;
+                    box-shadow: 0 12px 26px rgba(18,24,30,0.18);
+                    backdrop-filter: blur(14px);
+                    -webkit-backdrop-filter: blur(14px);
+                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+                }
+                .map-mobile-action-dock button:hover {
+                    transform: translateY(-1px);
+                }
+                .map-mobile-action-dock button svg {
+                    width: 17px;
+                    height: 17px;
+                }
+                .map-mobile-action-dock button span {
+                    position: absolute;
+                    left: 50%;
+                    bottom: calc(100% + 8px);
+                    width: max-content;
+                    max-width: 112px;
+                    height: auto;
+                    overflow: visible;
+                    clip: auto;
+                    border: 1px solid rgba(255,255,255,0.16);
+                    border-radius: 999px;
+                    background: rgba(23,20,16,0.9);
+                    box-shadow: 0 10px 24px rgba(18,24,30,0.22);
+                    color: #fff8ea;
+                    font: 900 0.56rem/1 'Inter', sans-serif;
+                    opacity: 0;
+                    padding: 6px 8px;
+                    pointer-events: none;
+                    text-align: center;
+                    transform: translate(-50%, 6px);
+                    transition: opacity 0.18s ease, transform 0.18s ease;
+                    white-space: nowrap;
+                    z-index: 1;
+                }
+                .map-shell--control-hints .map-mobile-action-dock button span,
+                .map-mobile-action-dock button:hover span,
+                .map-mobile-action-dock button:focus-visible span,
+                .map-mobile-action-dock button.active span {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+                .map-mobile-action-dock button.active {
+                    background: #e8f4ff;
+                    color: #0b73d9;
+                    box-shadow: 0 12px 26px rgba(20,120,212,0.24);
+                }
+                .map-mobile-action-dock button.loading svg {
+                    animation: mapLocateSpin 1s linear infinite;
+                }
                 .map-context-layer-strip,
                 .map-amenity-layer-strip {
                     display: none;
                 }
                 .map-options-scrim {
+                    display: block;
                     position: absolute;
                     inset: 0;
-                    z-index: 1700;
-                    background: rgba(15,18,22,0.42);
+                    z-index: 1400;
+                    background: transparent;
                     backdrop-filter: blur(1px);
                 }
                 .map-options-sheet {
                     position: absolute;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
+                    top: 108px;
+                    right: 14px;
+                    width: min(360px, calc(100% - 28px));
+                    max-height: calc(100% - 124px);
+                    overflow-y: auto;
                     display: grid;
-                    gap: 18px;
-                    padding: 24px 18px calc(22px + env(safe-area-inset-bottom));
-                    border-radius: 28px 28px 0 0;
+                    gap: 14px;
+                    padding: 18px;
+                    border: 1px solid rgba(18,24,30,0.08);
+                    border-radius: 18px;
                     background: #fff;
                     color: #202326;
-                    box-shadow: 0 -22px 54px rgba(15,18,22,0.28);
+                    box-shadow: 0 22px 54px rgba(15,18,22,0.24);
                     animation: mapOptionsRise 0.22s ease both;
                 }
                 .map-options-sheet header {
@@ -2404,6 +2429,9 @@ export default function PropertyMap({
                 @keyframes mapOptionsRise {
                     from { transform: translateY(24px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes mapLocateSpin {
+                    to { transform: rotate(360deg); }
                 }
                 .map-draw-area-polygon {
                     filter: drop-shadow(0 0 8px rgba(47,123,255,0.36));
@@ -3065,9 +3093,6 @@ export default function PropertyMap({
                     .map-topbar {
                         display: none;
                     }
-                    .map-style-control {
-                        display: none;
-                    }
                     .map-mobile-style-stack {
                         display: none;
                     }
@@ -3086,6 +3111,7 @@ export default function PropertyMap({
                     .map-mobile-action-dock {
                         position: absolute;
                         left: max(12px, env(safe-area-inset-left));
+                        right: auto;
                         top: clamp(96px, calc(var(--sv-sheet-top, 72%) - 58px), calc(100% - 58px));
                         bottom: auto;
                         z-index: 1300;
@@ -3157,6 +3183,19 @@ export default function PropertyMap({
                         display: block;
                         position: absolute;
                         z-index: 1400;
+                        background: rgba(15,18,22,0.42);
+                    }
+                    .map-options-sheet {
+                        left: 0;
+                        right: 0;
+                        top: auto;
+                        bottom: 0;
+                        width: auto;
+                        gap: 18px;
+                        padding: 24px 18px calc(22px + env(safe-area-inset-bottom));
+                        border-radius: 28px 28px 0 0;
+                        border: 0;
+                        box-shadow: 0 -22px 54px rgba(15,18,22,0.28);
                     }
                     .map-context-layer-strip {
                         position: absolute;
@@ -3219,9 +3258,6 @@ export default function PropertyMap({
                     }
                     .map-user-location-circle {
                         filter: drop-shadow(0 0 12px rgba(20,120,212,0.24));
-                    }
-                    @keyframes mapLocateSpin {
-                        to { transform: rotate(360deg); }
                     }
                     .map-region-chip {
                         top: 92px;

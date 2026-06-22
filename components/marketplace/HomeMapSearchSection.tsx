@@ -2344,14 +2344,16 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     .home-map-property-preview--compact :global(.map-property-preview) {
                         bottom: 24px;
                         right: 24px;
-                        width: min(520px, calc(100% - 48px));
+                        width: min(760px, calc(100% - 48px));
                     }
                     .home-map-property-preview--compact :global(.map-preview-track) {
-                        padding: 0;
-                        scroll-padding-inline: 0;
+                        gap: 12px;
+                        padding-inline: clamp(32px, 4vw, 64px);
+                        scroll-padding-inline: clamp(32px, 4vw, 64px);
                     }
                     .home-map-property-preview--compact :global(.map-preview-card) {
-                        flex-basis: min(510px, 100%);
+                        flex-basis: clamp(420px, 30vw, 520px);
+                        max-width: calc(100% - clamp(92px, 10vw, 136px));
                         grid-template-columns: 190px minmax(0, 1fr);
                         min-height: 178px;
                     }

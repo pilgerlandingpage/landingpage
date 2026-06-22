@@ -555,6 +555,7 @@ export default function MaintenancePage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+    const [saveError, setSaveError] = useState('')
     const [configsDirty, setConfigsDirty] = useState(false)
     const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({})
     const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
@@ -962,90 +963,112 @@ export default function MaintenancePage() {
         return labels[feature] || feature.replace(/_/g, ' ')
     }
 
-    const handleSave = async () => {
-        setSaving(true)
-        try {
-            const allKeys = [
-                ...INTEGRATIONS.flatMap(i => i.fields.map(f => f.key)),
-                'ai_provider',
-                'gemini_model',
-                'openai_model',
-                'gemini_api_key',
-                'openai_api_key',
-                'vapid_subject',
-                'vapid_public_key',
-                'vapid_private_key',
-                'r2_account_id',
-                'r2_access_key_id',
-                'r2_secret_access_key',
-                'r2_bucket_name',
-                'r2_public_url',
-                'meta_app_id',
-                'meta_app_secret',
-                'meta_access_token',
-                'meta_ad_account_id',
-                'meta_pixel_id',
-                'google_ads_developer_token',
-                'google_ads_client_id',
-                'google_ads_client_secret',
-                'google_ads_refresh_token',
-                'google_ads_manager_id',
-                'google_ads_customer_id',
-                'google_analytics_measurement_id',
-                'google_analytics_property_id',
-                'google_analytics_oauth_client_id',
-                'google_analytics_oauth_client_secret',
-                'google_analytics_refresh_token',
-                'google_search_console_site_url',
-                'gemini_billing_bigquery_project_id',
-                'gemini_billing_bigquery_dataset',
-                'gemini_billing_bigquery_table',
-                'gemini_billing_google_project_id',
-                'gemini_billing_service_account_json',
-                'gemini_billing_client_email',
-                'gemini_billing_private_key',
-                'serpapi_api_key',
-                'dataforseo_login',
-                'dataforseo_password',
-                'inngest_event_key',
-                'inngest_signing_key',
-                'meta_social_inbox_enabled',
-                'meta_social_agent_enabled',
-                'meta_social_agent_autopilot',
-                'organic_report_agent_enabled',
-                'organic_report_agent_interval_hours',
-                'paid_report_agent_enabled',
-                'paid_report_agent_interval_hours',
-                'marketing_publisher_agent_enabled',
-                'marketing_publisher_autopilot',
-                'marketing_publisher_interval_minutes',
-
-                'elevenlabs_api_key',
-            ]
-            const configsToSave: Record<string, string> = {}
-            for (const key of allKeys) {
-                if (configs[key] !== undefined && configs[key] !== '') {
-                    configsToSave[key] = configs[key]
-                }
+    const buildConfigsToSave = useCallback(() => {
+        const allKeys = [
+            ...INTEGRATIONS.flatMap(i => i.fields.map(f => f.key)),
+            'ai_provider',
+            'gemini_model',
+            'openai_model',
+            'gemini_api_key',
+            'openai_api_key',
+            'vapid_subject',
+            'vapid_public_key',
+            'vapid_private_key',
+            'r2_account_id',
+            'r2_access_key_id',
+            'r2_secret_access_key',
+            'r2_bucket_name',
+            'r2_public_url',
+            'meta_app_id',
+            'meta_app_secret',
+            'meta_access_token',
+            'meta_ad_account_id',
+            'meta_pixel_id',
+            'google_ads_developer_token',
+            'google_ads_client_id',
+            'google_ads_client_secret',
+            'google_ads_refresh_token',
+            'google_ads_manager_id',
+            'google_ads_customer_id',
+            'google_analytics_measurement_id',
+            'google_analytics_property_id',
+            'google_analytics_oauth_client_id',
+            'google_analytics_oauth_client_secret',
+            'google_analytics_refresh_token',
+            'google_search_console_site_url',
+            'gemini_billing_bigquery_project_id',
+            'gemini_billing_bigquery_dataset',
+            'gemini_billing_bigquery_table',
+            'gemini_billing_google_project_id',
+            'gemini_billing_service_account_json',
+            'gemini_billing_client_email',
+            'gemini_billing_private_key',
+            'serpapi_api_key',
+            'dataforseo_login',
+            'dataforseo_password',
+            'inngest_event_key',
+            'inngest_signing_key',
+            'meta_social_inbox_enabled',
+            'meta_social_agent_enabled',
+            'meta_social_agent_autopilot',
+            'organic_report_agent_enabled',
+            'organic_report_agent_interval_hours',
+            'paid_report_agent_enabled',
+            'paid_report_agent_interval_hours',
+            'marketing_publisher_agent_enabled',
+            'marketing_publisher_autopilot',
+            'marketing_publisher_interval_minutes',
+            'elevenlabs_api_key',
+        ]
+        const configsToSave: Record<string, string> = {}
+        for (const key of allKeys) {
+            if (configs[key] !== undefined) {
+                configsToSave[key] = configs[key]
             }
+        }
+        return configsToSave
+    }, [configs])
+
+    const saveConfigs = useCallback(async ({ showSuccess = true }: { showSuccess?: boolean } = {}) => {
+        setSaving(true)
+        setSaveError('')
+        setSaved(false)
+        try {
+            const configsToSave = buildConfigsToSave()
             const res = await fetch('/api/admin/configs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ configs: configsToSave }),
             })
-            const json = await res.json()
-            if (!json.success) {
+            const json = await res.json().catch(() => ({ success: false, message: 'Resposta invalida ao salvar configuracoes' }))
+            if (!res.ok || !json.success) {
+                const failedKeys = Array.isArray(json.results)
+                    ? json.results.filter((item: { success?: boolean }) => !item.success).map((item: { key?: string }) => item.key).filter(Boolean)
+                    : []
+                const failedSuffix = failedKeys.length ? ` (${failedKeys.slice(0, 4).join(', ')})` : ''
+                setSaveError(`${json.message || 'Erro ao salvar configuracoes'}${failedSuffix}`)
                 console.error('Save error:', json.message)
+                return false
             } else {
                 setConfigsDirty(false)
                 await fetchConfigs(true)
+                if (showSuccess) {
+                    setSaved(true)
+                    setTimeout(() => setSaved(false), 3000)
+                }
+                return true
             }
         } catch (err) {
             console.error('Error saving configs:', err)
+            setSaveError('Erro ao salvar configuracoes. Verifique a conexao e tente novamente.')
+            return false
+        } finally {
+            setSaving(false)
         }
-        setSaving(false)
-        setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
+    }, [buildConfigsToSave, fetchConfigs])
+
+    const handleSave = async () => {
+        await saveConfigs({ showSuccess: true })
     }
 
     const toggleVisibility = (key: string) => {
@@ -1059,6 +1082,17 @@ export default function MaintenancePage() {
         }))
 
         try {
+            if (configsDirty) {
+                const savedBeforeTest = await saveConfigs({ showSuccess: false })
+                if (!savedBeforeTest) {
+                    setTestResults(prev => ({
+                        ...prev,
+                        [integrationId]: { status: 'error', message: 'Nao foi possivel salvar antes de testar.' },
+                    }))
+                    return
+                }
+            }
+
             const res = await fetch('/api/admin/test-integration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1178,6 +1212,7 @@ export default function MaintenancePage() {
                 </div>
                 <div className="admin-header-actions">
                     {saved && <span style={{ color: 'var(--success)', fontSize: '0.9rem' }}>Salvo com sucesso!</span>}
+                    {saveError && <span style={{ color: '#ef4444', fontSize: '0.9rem', maxWidth: '420px', textAlign: 'right' }}>{saveError}</span>}
                     <button className="btn btn-gold" onClick={handleSave} disabled={saving}>
                         <Save size={18} /> {saving ? 'Salvando...' : 'Salvar Tudo'}
                     </button>
@@ -1581,7 +1616,7 @@ export default function MaintenancePage() {
                                         </span>
                                     </div>
 
-                                    <a
+                                    <Link
                                         href="/api/auth/google-analytics/start"
                                         className="btn btn-gold"
                                         style={{
@@ -1595,7 +1630,7 @@ export default function MaintenancePage() {
                                     >
                                         <Wifi size={15} />
                                         {configs.google_analytics_refresh_token ? 'Reconectar Google' : 'Conectar Google Analytics'}
-                                    </a>
+                                    </Link>
 
                                     <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.5 }}>
                                         No Google Cloud, cadastre este callback no OAuth Client ID:

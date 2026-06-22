@@ -768,7 +768,7 @@ export const pollMetricsCron = inngest.createFunction(
                         .from('ad_metrics_snapshots')
                         .insert(snapshotData)
 
-                    if (error) console.error(`Erro ao salvar snapshot: ${error.message}`)
+                    if (error) throw new Error(`Erro ao salvar snapshot: ${error.message}`)
                 }
 
                 return snapshotData || null
@@ -785,6 +785,19 @@ export const pollMetricsCron = inngest.createFunction(
             if (metricsResult) {
                 results.push({ campaign_id: campaign.id, metrics: metricsResult })
             }
+        }
+
+        if (campaigns.length > 0 && results.length === 0) {
+            const firstError = pollErrors[0]
+            const message = firstError
+                ? `Nenhuma campanha de trafego pago gerou snapshot. Primeiro erro: ${firstError.campaign_name} - ${firstError.error}`
+                : 'Nenhuma campanha de trafego pago gerou snapshot.'
+
+            await step.run('mark-ads-sync-failed-empty-results', async () => {
+                await markAdsSyncFailed(supabase, new Error(message))
+            })
+
+            throw new Error(message)
         }
 
         // Disparar análise da IA apenas às 23 horas (Horário de Brasília)

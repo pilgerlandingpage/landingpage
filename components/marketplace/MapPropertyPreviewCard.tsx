@@ -2,7 +2,11 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { MouseEvent as ReactMouseEvent, UIEvent as ReactUIEvent } from 'react'
+import type {
+    MouseEvent as ReactMouseEvent,
+    PointerEvent as ReactPointerEvent,
+    UIEvent as ReactUIEvent,
+} from 'react'
 import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
@@ -42,6 +46,7 @@ type MapPropertyPreviewCardProps = {
 
 const FALLBACK_IMAGE = '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
 const SWIPE_THRESHOLD = 36
+const DESKTOP_DRAG_THRESHOLD = 5
 
 function formatPrice(price?: number | null) {
     if (!price) return 'Sob consulta'
@@ -149,6 +154,13 @@ export default function MapPropertyPreviewCard({
     const suppressScrollSelection = useRef(false)
     const suppressScrollTimer = useRef<number | null>(null)
     const suppressDetailsClick = useRef(false)
+    const suppressCardClick = useRef(false)
+    const desktopDragRef = useRef<{
+        pointerId: number
+        startX: number
+        startScrollLeft: number
+        moved: boolean
+    } | null>(null)
     const internalSelectionRef = useRef<string | null>(null)
     const lastAnnouncedPropertyId = useRef<string | null>(null)
 
@@ -193,7 +205,32 @@ export default function MapPropertyPreviewCard({
             window.clearTimeout(suppressScrollTimer.current)
             suppressScrollTimer.current = null
         }
+        desktopDragRef.current = null
     }, [])
+
+    useEffect(() => {
+        const track = trackRef.current
+        if (!track || !carouselMode) return
+
+        const handleWheel = (event: WheelEvent) => {
+            if (track.scrollWidth <= track.clientWidth) return
+
+            const horizontalDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+                ? event.deltaX
+                : event.deltaY
+
+            if (!horizontalDelta) return
+
+            event.preventDefault()
+            track.scrollLeft += horizontalDelta
+        }
+
+        track.addEventListener('wheel', handleWheel, { passive: false })
+
+        return () => {
+            track.removeEventListener('wheel', handleWheel)
+        }
+    }, [carouselMode])
 
     useEffect(() => {
         if (!carouselMode) return
@@ -262,6 +299,67 @@ export default function MapPropertyPreviewCard({
             if (closestProperty) selectProperty(closestProperty, 'carousel_scroll')
         })
     }, [carouselMode, carouselProperties, onPropertySelect, selectProperty])
+
+    const handleTrackPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+        if (!carouselMode) return
+        if (event.pointerType === 'touch') return
+        if ((event.target as HTMLElement).closest('button')) return
+
+        desktopDragRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startScrollLeft: event.currentTarget.scrollLeft,
+            moved: false,
+        }
+        event.currentTarget.setPointerCapture(event.pointerId)
+        event.currentTarget.classList.add('is-dragging')
+    }, [carouselMode])
+
+    const handleTrackPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+        const dragState = desktopDragRef.current
+        if (!dragState || dragState.pointerId !== event.pointerId) return
+
+        const delta = event.clientX - dragState.startX
+        if (Math.abs(delta) > DESKTOP_DRAG_THRESHOLD) {
+            dragState.moved = true
+            suppressCardClick.current = true
+            suppressDetailsClick.current = true
+        }
+
+        if (dragState.moved) {
+            event.preventDefault()
+            event.currentTarget.scrollLeft = dragState.startScrollLeft - delta
+        }
+    }, [])
+
+    const handleTrackPointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+        const dragState = desktopDragRef.current
+        if (!dragState || dragState.pointerId !== event.pointerId) return
+
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+        event.currentTarget.classList.remove('is-dragging')
+        desktopDragRef.current = null
+
+        if (dragState.moved) {
+            window.setTimeout(() => {
+                suppressCardClick.current = false
+                suppressDetailsClick.current = false
+            }, 120)
+        }
+    }, [])
+
+    const handlePreviewCardClick = useCallback((event: ReactMouseEvent<HTMLElement>, nextProperty: PreviewProperty) => {
+        if (suppressCardClick.current) {
+            event.preventDefault()
+            event.stopPropagation()
+            suppressCardClick.current = false
+            return
+        }
+
+        selectProperty(nextProperty, 'carousel_click')
+    }, [selectProperty])
 
     const goToImage = useCallback((targetProperty: PreviewProperty, gallery: string[], direction: 1 | -1) => {
         if (gallery.length < 2) return
@@ -359,6 +457,12 @@ export default function MapPropertyPreviewCard({
                     overscroll-behavior-x: contain;
                     pointer-events: auto;
                     -webkit-overflow-scrolling: touch;
+                    cursor: grab;
+                    user-select: none;
+                }
+                .map-preview-track.is-dragging {
+                    cursor: grabbing;
+                    user-select: none;
                 }
                 .map-preview-track::-webkit-scrollbar {
                     display: none;
@@ -621,7 +725,7 @@ export default function MapPropertyPreviewCard({
                         left: auto;
                         right: clamp(18px, 2.2vw, 36px);
                         bottom: clamp(18px, 2.2vw, 36px);
-                        width: min(520px, calc(100% - 48px));
+                        width: min(760px, calc(100% - 48px));
                         max-width: calc(100% - 48px);
                     }
                     .map-property-preview::before {
@@ -631,13 +735,15 @@ export default function MapPropertyPreviewCard({
                         border-radius: 28px;
                     }
                     .map-preview-track {
-                        padding-inline: 0;
-                        scroll-padding-inline: 0;
+                        gap: 12px;
+                        padding-inline: clamp(32px, 4vw, 64px);
+                        scroll-padding-inline: clamp(32px, 4vw, 64px);
                         width: 100%;
                     }
                     .map-preview-card {
                         grid-template-columns: 190px minmax(0, 1fr);
-                        flex-basis: min(510px, 100%);
+                        flex-basis: clamp(420px, 30vw, 520px);
+                        max-width: calc(100% - clamp(92px, 10vw, 136px));
                         min-height: 178px;
                     }
                     .map-preview-media,
@@ -734,7 +840,15 @@ export default function MapPropertyPreviewCard({
                 }
             `}</style>
 
-            <div className="map-preview-track" ref={trackRef} onScroll={handleTrackScroll}>
+            <div
+                className="map-preview-track"
+                ref={trackRef}
+                onScroll={handleTrackScroll}
+                onPointerDown={handleTrackPointerDown}
+                onPointerMove={handleTrackPointerMove}
+                onPointerUp={handleTrackPointerEnd}
+                onPointerCancel={handleTrackPointerEnd}
+            >
                 {carouselProperties.map((item) => {
                     const meta = previewMetaFor(item)
                     const gallery = galleryFor(item)
@@ -751,15 +865,16 @@ export default function MapPropertyPreviewCard({
                             ref={node => {
                                 itemRefs.current[item.id] = node
                             }}
-                            onClick={() => selectProperty(item, 'carousel_click')}
+                            onClick={event => handlePreviewCardClick(event, item)}
                             aria-label={meta.displayTitle}
                         >
                             <div className="map-preview-media">
-                                <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={meta.displayTitle} loading="lazy" />
+                                <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={meta.displayTitle} loading="lazy" draggable={false} />
                                 <Link
                                     href={meta.detailsHref}
                                     className="map-preview-media-hit"
                                     aria-label={`Abrir detalhes de ${meta.displayTitle}`}
+                                    draggable={false}
                                     onClick={event => handleDetailsNavigation(event, item, meta)}
                                     onTouchStart={event => {
                                         event.stopPropagation()
@@ -840,6 +955,7 @@ export default function MapPropertyPreviewCard({
                                     href={meta.detailsHref}
                                     className="map-preview-body-link"
                                     aria-label={`Abrir detalhes de ${meta.displayTitle}`}
+                                    draggable={false}
                                     onClick={event => handleDetailsNavigation(event, item, meta)}
                                 >
                                     <div className="map-preview-location">
