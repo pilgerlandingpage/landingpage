@@ -6,7 +6,7 @@ import {
     Wifi, WifiOff, Phone, User, Clock, Globe, Battery, BatteryCharging,
     Bot, Shield, Link2, Monitor, MessageSquare, Mic, Settings,
     ChevronDown, ChevronUp, Save, Power, Eye, Plus,
-    SplitSquareVertical, Users, Timer
+    SplitSquareVertical, Users, Timer, BarChart3, Database, PlayCircle
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import { DEFAULT_WHATSAPP_INSTANCE_CONFIG, normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
@@ -75,6 +75,11 @@ interface InstanceConfig {
     timing_video_document_seconds: number
     timing_button_delay_seconds: number
     human_intervention_minutes: number
+    attendance_monitor_enabled: boolean
+    attendance_history_import_enabled: boolean
+    attendance_daily_report_enabled: boolean
+    attendance_report_hour: number
+    attendance_report_timezone: string
 }
 
 type BooleanConfigKey = {
@@ -107,6 +112,14 @@ const AGENT_DEPENDENT_BOOLEAN_KEYS: BooleanConfigKey[] = [
     'smart_timing_enabled',
 ]
 
+const AGENT_INDEPENDENT_CONFIG_KEYS = new Set<keyof InstanceConfig>([
+    'attendance_monitor_enabled',
+    'attendance_history_import_enabled',
+    'attendance_daily_report_enabled',
+    'attendance_report_hour',
+    'attendance_report_timezone',
+])
+
 const DEFAULT_CONFIG: InstanceConfig = { ...DEFAULT_WHATSAPP_INSTANCE_CONFIG }
 
 export default function WhatsAppInstancesPage() {
@@ -118,6 +131,8 @@ export default function WhatsAppInstancesPage() {
     const [expandedSettings, setExpandedSettings] = useState<string | null>(null)
     const [configs, setConfigs] = useState<Record<string, InstanceConfig>>({})
     const [savingSettings, setSavingSettings] = useState<string | null>(null)
+    const [runningAttendance, setRunningAttendance] = useState<string | null>(null)
+    const [attendanceMessage, setAttendanceMessage] = useState<Record<string, { type: 'success' | 'error'; text: string }>>({})
     const [createBrokerName, setCreateBrokerName] = useState('')
     const [createInstanceName, setCreateInstanceName] = useState('')
     const [creatingInstance, setCreatingInstance] = useState(false)
@@ -255,6 +270,41 @@ export default function WhatsAppInstancesPage() {
         finally { setSavingSettings(null) }
     }
 
+    const runAttendanceReport = async (instanceId: string) => {
+        setRunningAttendance(instanceId)
+        setAttendanceMessage(prev => ({ ...prev, [instanceId]: { type: 'success', text: 'Sincronizando contatos, conversas e mensagens...' } }))
+        try {
+            const res = await fetch('/api/admin/leads/attendance-reports', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'sync_and_report',
+                    instance_id: instanceId,
+                    force: true,
+                    include_history_sync: true,
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao gerar relatório.')
+            const totals = data?.sync?.totals || {}
+            const reports = data?.reports?.reports?.length || 0
+            setAttendanceMessage(prev => ({
+                ...prev,
+                [instanceId]: {
+                    type: 'success',
+                    text: `Relatório pronto: ${Number(totals.contacts || 0)} contatos, ${Number(totals.chats || 0)} chats, ${Number(totals.messages || 0)} mensagens e ${reports} relatório(s).`,
+                },
+            }))
+        } catch (err) {
+            setAttendanceMessage(prev => ({
+                ...prev,
+                [instanceId]: { type: 'error', text: err instanceof Error ? err.message : 'Erro ao executar monitor.' },
+            }))
+        } finally {
+            setRunningAttendance(null)
+        }
+    }
+
     const updateConfig = (instanceId: string, key: string, value: any) => {
         setConfigs(prev => {
             const current = prev[instanceId] || DEFAULT_CONFIG
@@ -268,7 +318,7 @@ export default function WhatsAppInstancesPage() {
                 return { ...prev, [instanceId]: next }
             }
 
-            if (!current.agent_enabled) return prev
+            if (!current.agent_enabled && !AGENT_INDEPENDENT_CONFIG_KEYS.has(key as keyof InstanceConfig)) return prev
             return { ...prev, [instanceId]: next }
         })
     }
@@ -423,6 +473,9 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
+                                onRunAttendance={() => runAttendanceReport(inst.id)}
+                                runningAttendance={runningAttendance === inst.id}
+                                attendanceMessage={attendanceMessage[inst.id] || null}
                                 onRefresh={() => loadInstances(true)}
                             />
                         ))}
@@ -447,6 +500,9 @@ export default function WhatsAppInstancesPage() {
                                 onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
                                 onSaveSettings={() => saveSettings(inst.id)}
                                 savingSettings={savingSettings === inst.id}
+                                onRunAttendance={() => runAttendanceReport(inst.id)}
+                                runningAttendance={runningAttendance === inst.id}
+                                attendanceMessage={attendanceMessage[inst.id] || null}
                                 onRefresh={() => loadInstances(true)}
                             />
                         ))}
@@ -474,13 +530,15 @@ export default function WhatsAppInstancesPage() {
 
 // Instance Card Component
 
-function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings, onRefresh }: {
+function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings, onRunAttendance, runningAttendance, attendanceMessage, onRefresh }: {
     inst: Instance; type: 'agent' | 'user'
     expanded: boolean; onToggleExpand: () => void
     settingsExpanded: boolean; onToggleSettings: () => void
     config: InstanceConfig
     onUpdateConfig: (key: string, value: any) => void
     onSaveSettings: () => void; savingSettings: boolean
+    onRunAttendance: () => void; runningAttendance: boolean
+    attendanceMessage: { type: 'success' | 'error'; text: string } | null
     onRefresh: () => Promise<void> | void
 }) {
     const [webhookLoading, setWebhookLoading] = useState(false)
@@ -1122,7 +1180,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     fontSize: '0.8rem',
                                     fontWeight: 600,
                                 }}>
-                                    Agente desativado: todos os recursos automáticos estão desligados.
+                                    Agente de resposta desativado: o WhatsApp não responde sozinho, mas o Monitor de atendimento pode continuar ativo.
                                 </div>
                             )}
                             <div style={{ display: 'grid', gap: '12px' }}>
@@ -1150,6 +1208,63 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                                 checked={config.allow_internal_instance_messages} onChange={() => onUpdateConfig('allow_internal_instance_messages', !config.allow_internal_instance_messages)} disabled={agentDisabled} />
                                             <ToggleSwitch label="Janela da IA ativa" icon={<Clock size={15} />}
                                                 checked={config.ai_schedule_enabled} onChange={() => onUpdateConfig('ai_schedule_enabled', !config.ai_schedule_enabled)} disabled={agentDisabled} />
+                                        </div>
+                                    </SettingsSection>
+
+                                    <SettingsSection title="Monitor de atendimento" description="Importa contatos, chats e mensagens para gerar relatório diário do corretor.">
+                                        <div style={{ display: 'grid', gap: '10px' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '8px' }}>
+                                                <ToggleSwitch label="Monitorar atendimentos" icon={<BarChart3 size={15} />}
+                                                    checked={config.attendance_monitor_enabled} onChange={() => onUpdateConfig('attendance_monitor_enabled', !config.attendance_monitor_enabled)} />
+                                                <ToggleSwitch label="Importar histórico" icon={<Database size={15} />}
+                                                    checked={config.attendance_history_import_enabled} onChange={() => onUpdateConfig('attendance_history_import_enabled', !config.attendance_history_import_enabled)} />
+                                                <ToggleSwitch label="Relatório diário" icon={<Clock size={15} />}
+                                                    checked={config.attendance_daily_report_enabled} onChange={() => onUpdateConfig('attendance_daily_report_enabled', !config.attendance_daily_report_enabled)} />
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(110px, 160px) minmax(0, 1fr)', gap: '8px', alignItems: 'end' }}>
+                                                <NumericInput label="Hora relatório" value={String(config.attendance_report_hour)}
+                                                    onChange={(v) => {
+                                                        const hour = parseInt(v)
+                                                        onUpdateConfig('attendance_report_hour', Number.isFinite(hour) ? hour : 8)
+                                                    }} min={0} max={23} />
+                                                <button
+                                                    type="button"
+                                                    onClick={onRunAttendance}
+                                                    disabled={runningAttendance || inst.status !== 'connected'}
+                                                    style={{
+                                                        minHeight: '40px',
+                                                        borderRadius: '10px',
+                                                        border: '1px solid rgba(21,128,61,0.35)',
+                                                        background: runningAttendance || inst.status !== 'connected'
+                                                            ? 'rgba(148,163,184,0.18)'
+                                                            : 'linear-gradient(135deg, #16a34a, #0ea5e9)',
+                                                        color: '#ffffff',
+                                                        fontSize: '0.82rem',
+                                                        fontWeight: 800,
+                                                        cursor: runningAttendance || inst.status !== 'connected' ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '8px',
+                                                        opacity: runningAttendance || inst.status !== 'connected' ? 0.62 : 1,
+                                                    }}
+                                                >
+                                                    {runningAttendance ? <Loader2 size={15} className="spin" /> : <PlayCircle size={15} />}
+                                                    {runningAttendance ? 'Gerando...' : 'Sincronizar e gerar agora'}
+                                                </button>
+                                            </div>
+                                            {attendanceMessage && (
+                                                <div style={{
+                                                    padding: '8px 10px',
+                                                    borderRadius: '9px',
+                                                    fontSize: '0.76rem',
+                                                    border: `1px solid ${attendanceMessage.type === 'success' ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
+                                                    background: attendanceMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                                    color: attendanceMessage.type === 'success' ? '#86efac' : '#fca5a5',
+                                                }}>
+                                                    {attendanceMessage.text}
+                                                </div>
+                                            )}
                                         </div>
                                     </SettingsSection>
                                 </div>

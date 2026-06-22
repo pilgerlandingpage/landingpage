@@ -102,6 +102,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/leads', label: 'Todos os Leads' },
             { href: '/admin/leads/crm', label: 'CRM do Agente' },
+            { href: '/admin/leads/relatorios-atendimento', label: 'Relatorios de Atendimento' },
         ],
     },
     broker_candidates: { href: '/admin/trabalhe-conosco', icon: BriefcaseBusiness, label: 'Trabalhe Conosco', section: 'COMERCIAL' },

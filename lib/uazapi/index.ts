@@ -655,10 +655,27 @@ export async function checkNumberExists(phone: string, instanceToken: string) {
     })
 }
 
-/** Listar contatos */
+interface ListContactsOptions {
+    limit?: number
+    offset?: number
+}
+
+/** Listar contatos sem paginacao */
 export async function listContacts(instanceToken: string) {
-    return uazapiFetch('/contact/all', {
+    return uazapiFetch('/contacts', {
         token: instanceToken,
+    })
+}
+
+/** Listar contatos com paginacao */
+export async function listContactsPage(opts: ListContactsOptions, instanceToken: string) {
+    return uazapiFetch('/contacts/list', {
+        method: 'POST',
+        token: instanceToken,
+        body: {
+            limit: opts.limit ?? 1000,
+            offset: opts.offset ?? 0,
+        },
     })
 }
 
@@ -1077,6 +1094,43 @@ export async function findChats(opts: FindChatsOptions, instanceToken: string) {
 }
 
 /** Salvar notas internas — /chat/notes/edit */
+interface FindMessagesOptions {
+    id?: string
+    chatid?: string
+    track_source?: string
+    track_id?: string
+    limit?: number
+    offset?: number
+}
+
+/** Buscar mensagens com filtros */
+export async function findMessages(opts: FindMessagesOptions, instanceToken: string) {
+    return uazapiFetch('/message/find', {
+        method: 'POST',
+        token: instanceToken,
+        body: opts,
+    })
+}
+
+interface RequestHistorySyncOptions {
+    number: string
+    count?: number
+    messageid?: string
+}
+
+/** Solicitar historico sob demanda de um chat */
+export async function requestHistorySync(opts: RequestHistorySyncOptions, instanceToken: string) {
+    return uazapiFetch('/message/history-sync', {
+        method: 'POST',
+        token: instanceToken,
+        body: {
+            number: opts.number,
+            count: opts.count ?? 100,
+            ...(opts.messageid ? { messageid: opts.messageid } : {}),
+        },
+    })
+}
+
 export async function updateNotes(phone: string, notes: string, instanceToken: string) {
     const jid = phone.includes('@') ? phone : `${cleanPhone(phone)}@s.whatsapp.net`
     return uazapiFetch('/chat/notes/edit', {

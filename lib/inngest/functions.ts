@@ -34,6 +34,7 @@ import {
     whatsappKeepOnline
 } from './whatsapp-agent'
 import { whatsappInstanceSetup } from './whatsapp-setup'
+import { whatsappAttendanceDailyReport, whatsappAttendanceManualRun } from './attendance-monitor'
 import { chatWithGemini } from '../gemini'
 import {
     buildCentralContextPrompt,
@@ -1914,6 +1915,8 @@ export const functions = [
     whatsappKeepOnline,
     // WhatsApp Instance Setup
     whatsappInstanceSetup,
+    whatsappAttendanceDailyReport,
+    whatsappAttendanceManualRun,
     // Eventos
     ...eventFunctions,
     // Trabalhe Conosco / Corretores

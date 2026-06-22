@@ -8,7 +8,11 @@ import {
     getContactAvatar,
     listAllInstances,
 } from '@/lib/uazapi'
-import { DEFAULT_WHATSAPP_INSTANCE_CONFIG, normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
+import {
+    DEFAULT_NEW_WHATSAPP_INSTANCE_CONFIG,
+    DEFAULT_WHATSAPP_INSTANCE_CONFIG,
+    normalizeWhatsAppInstanceConfig,
+} from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {
     return createClient(
@@ -358,7 +362,7 @@ export async function POST(request: NextRequest) {
             instance_name: instanceName,
             instance_token: instanceToken,
             status: 'disconnected',
-            config: DEFAULT_WHATSAPP_INSTANCE_CONFIG,
+            config: DEFAULT_NEW_WHATSAPP_INSTANCE_CONFIG,
         }
         if (adminUserId) insertData.admin_user_id = adminUserId
         if (brokerId) insertData.broker_id = brokerId
@@ -495,7 +499,7 @@ export async function PATCH(request: NextRequest) {
             updated_at: new Date().toISOString(),
         }
         if (!currentConfig || Object.keys(currentConfig).length === 0) {
-            updates.config = DEFAULT_WHATSAPP_INSTANCE_CONFIG
+            updates.config = DEFAULT_NEW_WHATSAPP_INSTANCE_CONFIG
         }
 
         const { error: assignError } = await supabase

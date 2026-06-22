@@ -180,5 +180,11 @@ export const inngest = new Inngest({
                 webhookBaseUrl: string
             }
         }
+        'whatsapp/attendance-run': {
+            data: {
+                instanceId?: string | null
+                date?: string | null
+            }
+        }
     }>()
 })

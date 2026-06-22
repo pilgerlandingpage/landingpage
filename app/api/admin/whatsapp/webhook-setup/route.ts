@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
             enabled: true,
             url: webhookUrl,
             events: [
+                'history',
                 'messages',             // Mensagens recebidas/enviadas
                 'messages_update',      // Atualizações (lido, entregue)
                 'connection',           // Conexão/desconexão
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
             filters: {
                 antiLoop: '✅ wasSentByApi excluído (prevenção de loop)',
                 groups: '✅ Grupos excluídos (foco em leads 1:1)',
-                events: 'messages, messages_update, connection, chats, labels',
+                events: 'messages, messages_update, history, connection, chats, labels',
             }
         })
     } catch (error) {

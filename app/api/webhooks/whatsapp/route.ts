@@ -9,6 +9,7 @@ import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
 import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import {
     buildAppointmentConfirmationText,
     detectConfirmedAppointment,
@@ -3086,6 +3087,12 @@ export async function POST(request: NextRequest) {
             const synced = await syncConnectionWebhookStatus({ supabase, instanceName, body })
             await saveAudit({ action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored' })
             return NextResponse.json({ success: true, action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored', synced })
+        }
+
+        if (String(event).toLowerCase() === 'history') {
+            const history = await saveHistoryWebhookMessages({ supabase, instanceName, payload: body })
+            await saveAudit({ action: 'history_messages_saved' })
+            return NextResponse.json({ success: true, action: 'history_messages_saved', history })
         }
 
         const updateKind = String(messageData?.Type || messageData?.type || '').toLowerCase()

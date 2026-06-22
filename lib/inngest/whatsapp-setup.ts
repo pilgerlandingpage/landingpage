@@ -45,7 +45,7 @@ export const whatsappInstanceSetup = inngest.createFunction(
                 await configureWebhook({
                     enabled: true,
                     url: webhookUrl,
-                    events: ['messages', 'messages_update', 'connection', 'chats', 'labels'],
+                    events: ['messages', 'messages_update', 'history', 'connection', 'chats', 'labels'],
                     excludeMessages: ['wasSentByApi', 'isGroupYes'],
                     addUrlEvents: false,
                     addUrlTypesMessages: false,

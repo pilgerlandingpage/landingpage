@@ -47,6 +47,11 @@ export type WhatsAppInstanceConfig = {
     ai_schedule_start: string
     ai_schedule_end: string
     ai_schedule_timezone: string
+    attendance_monitor_enabled: boolean
+    attendance_history_import_enabled: boolean
+    attendance_daily_report_enabled: boolean
+    attendance_report_hour: number
+    attendance_report_timezone: string
 }
 
 const AGENT_DEPENDENT_CONFIG_KEYS: Array<keyof WhatsAppInstanceConfig> = [
@@ -124,6 +129,18 @@ export const DEFAULT_WHATSAPP_INSTANCE_CONFIG: WhatsAppInstanceConfig = {
     ai_schedule_start: '18:00',
     ai_schedule_end: '08:00',
     ai_schedule_timezone: 'America/Sao_Paulo',
+    attendance_monitor_enabled: false,
+    attendance_history_import_enabled: false,
+    attendance_daily_report_enabled: false,
+    attendance_report_hour: 8,
+    attendance_report_timezone: 'America/Sao_Paulo',
+}
+
+export const DEFAULT_NEW_WHATSAPP_INSTANCE_CONFIG: WhatsAppInstanceConfig = {
+    ...DEFAULT_WHATSAPP_INSTANCE_CONFIG,
+    attendance_monitor_enabled: true,
+    attendance_history_import_enabled: true,
+    attendance_daily_report_enabled: true,
 }
 
 export function normalizeWhatsAppInstanceConfig(config?: Record<string, unknown> | null): WhatsAppInstanceConfig {
@@ -162,6 +179,14 @@ export function normalizeWhatsAppInstanceConfig(config?: Record<string, unknown>
         merged.adaptive_rapport_mode = merged.adaptive_rapport_enabled ? 'soft' : 'off'
     }
     merged.adaptive_rapport_enabled = merged.adaptive_rapport_mode !== 'off'
+
+    const reportHour = Number(merged.attendance_report_hour)
+    merged.attendance_report_hour = Number.isFinite(reportHour)
+        ? Math.min(23, Math.max(0, Math.round(reportHour)))
+        : DEFAULT_WHATSAPP_INSTANCE_CONFIG.attendance_report_hour
+    if (!String(merged.attendance_report_timezone || '').trim()) {
+        merged.attendance_report_timezone = DEFAULT_WHATSAPP_INSTANCE_CONFIG.attendance_report_timezone
+    }
 
     return merged
 }
