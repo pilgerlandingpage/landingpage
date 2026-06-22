@@ -54,6 +54,7 @@ const filters = [
     { key: 'quentes', label: 'Leads quentes' },
     { key: 'ruins', label: 'Ruins' },
     { key: 'mornos', label: 'Mornos' },
+    { key: 'frios', label: 'Frios' },
     { key: 'bons', label: 'Boas' },
 ] as const
 

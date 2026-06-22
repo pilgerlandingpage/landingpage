@@ -204,6 +204,9 @@ function professionalVerdict(score: number, breakdown: ReportBreakdown) {
 
 function buildExecutiveOpinion(ownerName: string, report: AttendanceReport, breakdown: ReportBreakdown) {
     const score = Number(report.score || 0)
+    const savedOpinion = String(report.metrics?.coaching_report || report.summary || '').trim()
+    if (savedOpinion) return savedOpinion
+
     if (breakdown.total === 0) {
         return `Ainda nao existe base suficiente para avaliar ${ownerName}. Sincronize mais historico para o agente comparar tempo de resposta, perda de leads e qualidade da abordagem.`
     }
@@ -223,6 +226,16 @@ function buildExecutiveOpinion(ownerName: string, report: AttendanceReport, brea
     }
 
     return `Parecer IA: ${ownerName} precisa de acompanhamento antes de ser tratado como atendimento qualificado. O score ficou em ${score}/100.${unansweredPressure}${hotPressure}${qualityPressure}`
+}
+
+function metricTextList(report: AttendanceReport, key: string): string[] {
+    const value = report.metrics?.[key]
+    if (!Array.isArray(value)) return []
+    return value.map((item) => String(item || '').trim()).filter(Boolean)
+}
+
+function metricText(report: AttendanceReport, key: string): string {
+    return String(report.metrics?.[key] || '').trim()
 }
 
 function improvementItems(breakdown: ReportBreakdown) {
@@ -520,9 +533,12 @@ export default function AttendanceReportsPage() {
                     const coverage = report.coverage || {}
                     const ownerName = getOwnerName(inst, report.instance_id)
                     const breakdown = getReportBreakdown(report, reportScoresAll)
-                    const verdict = professionalVerdict(Number(report.score || 0), breakdown)
+                    const verdict = String(report.metrics?.professional_status_label || professionalVerdict(Number(report.score || 0), breakdown))
                     const executiveOpinion = buildExecutiveOpinion(ownerName, report, breakdown)
                     const coachingItems = improvementItems(breakdown)
+                    const strengths = metricTextList(report, 'strengths')
+                    const improvementPoints = metricTextList(report, 'improvement_points')
+                    const leadQualityReport = metricText(report, 'lead_quality_report')
                     const messageActivity = inst?.message_activity || {}
                     const totalImportedMessages = Number(messageActivity.total_messages || 0)
                     const last7ImportedMessages = Number(messageActivity.last_7_days_messages || 0)
@@ -582,6 +598,12 @@ export default function AttendanceReportsPage() {
                                     </Link>
                                 </div>
                                 <p style={executiveTextStyle}>{executiveOpinion}</p>
+                                {leadQualityReport && (
+                                    <div style={leadQualityBoxStyle}>
+                                        <strong>Qualidade dos leads</strong>
+                                        <span>{leadQualityReport}</span>
+                                    </div>
+                                )}
                                 <div style={insightGridStyle}>
                                     <InsightLinkCard
                                         href={reportDetailHref(report.id, 'sem-resposta')}
@@ -619,6 +641,13 @@ export default function AttendanceReportsPage() {
                                         tone="neutral"
                                     />
                                     <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'frios')}
+                                        label="Leads frios"
+                                        value={breakdown.cold}
+                                        detail="Conversas com pouco sinal comercial"
+                                        tone="neutral"
+                                    />
+                                    <InsightLinkCard
                                         href={reportDetailHref(report.id, 'bons')}
                                         label="Boas conversas"
                                         value={breakdown.strong}
@@ -626,10 +655,26 @@ export default function AttendanceReportsPage() {
                                         tone="success"
                                     />
                                 </div>
+                                {(strengths.length > 0 || improvementPoints.length > 0) && (
+                                    <div style={narrativeGridStyle}>
+                                        <div style={narrativeColumnStyle}>
+                                            <strong>Pontos fortes</strong>
+                                            {(strengths.length ? strengths : ['Ainda nao ha ponto forte consolidado para este periodo.']).slice(0, 4).map((item, index) => (
+                                                <span key={`${report.id}-strength-${index}`}>{item}</span>
+                                            ))}
+                                        </div>
+                                        <div style={narrativeColumnStyle}>
+                                            <strong>Pontos de melhoria</strong>
+                                            {(improvementPoints.length ? improvementPoints : coachingItems).slice(0, 4).map((item, index) => (
+                                                <span key={`${report.id}-improvement-${index}`}>{item}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 <div style={coachingBoxStyle}>
                                     <strong>Plano de melhoria</strong>
                                     <div style={coachingListStyle}>
-                                        {coachingItems.slice(0, 4).map((item, index) => (
+                                        {(improvementPoints.length ? improvementPoints : coachingItems).slice(0, 4).map((item, index) => (
                                             <span key={`${report.id}-coach-${index}`}>{item}</span>
                                         ))}
                                     </div>
@@ -1003,6 +1048,18 @@ const executiveTextStyle: CSSProperties = {
     lineHeight: 1.55,
 }
 
+const leadQualityBoxStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.2)',
+    background: 'rgba(224,242,254,0.5)',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'grid',
+    gap: 4,
+    fontSize: '0.82rem',
+    lineHeight: 1.45,
+}
+
 const subtleLinkStyle: CSSProperties = {
     border: '1px solid rgba(201,169,110,0.28)',
     background: '#fff',
@@ -1057,6 +1114,24 @@ const coachingBoxStyle: CSSProperties = {
     gap: 7,
     color: 'var(--text-primary)',
     fontSize: '0.8rem',
+}
+
+const narrativeGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+    gap: 8,
+}
+
+const narrativeColumnStyle: CSSProperties = {
+    border: '1px solid rgba(100,116,139,0.18)',
+    background: 'rgba(255,255,255,0.74)',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'grid',
+    gap: 6,
+    color: 'var(--text-secondary)',
+    fontSize: '0.8rem',
+    lineHeight: 1.45,
 }
 
 const coachingListStyle: CSSProperties = {

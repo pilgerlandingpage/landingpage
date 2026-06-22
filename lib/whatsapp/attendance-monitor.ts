@@ -763,6 +763,135 @@ function scoreConversation(chatId: string, messages: NormalizedMessage[], leadNa
     }
 }
 
+function formatDurationBrief(seconds: number | null) {
+    if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return 'sem tempo medio calculado'
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.round(seconds / 60)
+    if (minutes < 60) return `${minutes}min`
+    const hours = Math.round(minutes / 60)
+    return `${hours}h`
+}
+
+function percentage(part: number, total: number) {
+    if (!total) return 0
+    return Math.round((part / total) * 100)
+}
+
+function professionalStatusLabel(status: string) {
+    if (status === 'profissional_qualificado') return 'profissional qualificado'
+    if (status === 'qualificado_com_melhorias') return 'qualificado com pontos de melhoria'
+    if (status === 'precisa_acompanhamento') return 'precisa de acompanhamento'
+    return 'sem base suficiente'
+}
+
+function buildLeadQualityReport(params: {
+    total: number
+    hotLeads: number
+    warmLeads: number
+    coldLeads: number
+    unknownLeads: number
+}) {
+    const { total, hotLeads, warmLeads, coldLeads, unknownLeads } = params
+    if (!total) return 'Ainda nao ha conversas suficientes para medir a qualidade dos leads desta instancia.'
+
+    const opportunity = hotLeads + warmLeads
+    const opportunityPct = percentage(opportunity, total)
+    const coldPct = percentage(coldLeads, total)
+    const base = `A base analisada trouxe ${hotLeads} lead(s) quente(s), ${warmLeads} morno(s), ${coldLeads} frio(s) e ${unknownLeads} sem sinal claro.`
+
+    if (hotLeads > 0 && opportunityPct >= 45) {
+        return `${base} Qualidade boa: ha volume relevante de oportunidades com intencao comercial, entao a prioridade deve ser resposta rapida e proximo passo objetivo.`
+    }
+    if (opportunityPct >= 30) {
+        return `${base} Qualidade mista: existem oportunidades, mas parte relevante ainda precisa de qualificacao antes de receber ofertas.`
+    }
+    if (coldPct >= 55) {
+        return `${base} Qualidade baixa no periodo: a maioria das conversas teve pouco sinal de compra, prazo ou visita. O corretor precisa qualificar melhor antes de investir tempo comercial.`
+    }
+    return `${base} Qualidade ainda indefinida: o atendimento precisa fazer perguntas de descoberta para separar curiosos de compradores reais.`
+}
+
+function buildAttendanceNarrative(params: {
+    score: number
+    total: number
+    messages: number
+    crmMessages: number
+    unansweredCount: number
+    hotLeads: number
+    warmLeads: number
+    coldLeads: number
+    unknownLeads: number
+    poorConversations: number
+    strongConversations: number
+    hotUnanswered: number
+    professionalStatus: string
+    avgResponse: number | null
+    inboundMessages: number
+    outboundMessages: number
+    rapportHits: number
+    salesHits: number
+}) {
+    const statusLabel = professionalStatusLabel(params.professionalStatus)
+    const poorPct = percentage(params.poorConversations, params.total)
+    const unansweredPct = percentage(params.unansweredCount, params.total)
+    const opportunity = params.hotLeads + params.warmLeads
+    const opportunityPct = percentage(opportunity, params.total)
+    const leadQualityReport = buildLeadQualityReport({
+        total: params.total,
+        hotLeads: params.hotLeads,
+        warmLeads: params.warmLeads,
+        coldLeads: params.coldLeads,
+        unknownLeads: params.unknownLeads,
+    })
+
+    const strengths = [
+        params.strongConversations > 0 ? `${params.strongConversations} conversa(s) ficaram com 80 pontos ou mais.` : null,
+        params.avgResponse !== null && params.avgResponse <= 900 ? `Tempo medio de resposta dentro de uma faixa competitiva (${formatDurationBrief(params.avgResponse)}).` : null,
+        opportunity > 0 ? `A instancia recebeu ${opportunity} lead(s) com algum sinal de oportunidade (${opportunityPct}% da base analisada).` : null,
+        params.rapportHits > 0 ? `Foram encontrados sinais de rapport e acolhimento em mensagens do corretor.` : null,
+        params.salesHits > 0 ? `A conversa teve sinais de conducoes comerciais como visita, valor, financiamento, bairro ou proposta.` : null,
+    ].filter(Boolean) as string[]
+
+    if (strengths.length === 0 && params.total > 0) {
+        strengths.push('O principal ponto positivo e que ja existe base registrada para auditar o atendimento e acompanhar evolucao diaria.')
+    }
+
+    const improvementPoints = [
+        params.unansweredCount > 0 ? `Retomar ${params.unansweredCount} conversa(s) que ficaram sem ultima resposta (${unansweredPct}% da base).` : null,
+        params.hotUnanswered > 0 ? `Priorizar ${params.hotUnanswered} lead(s) quente(s) que ficaram sem retorno.` : null,
+        params.poorConversations > 0 ? `Revisar ${params.poorConversations} conversa(s) abaixo de 60 pontos (${poorPct}% da base) para corrigir abordagem, rapport e fechamento.` : null,
+        params.avgResponse !== null && params.avgResponse > 900 ? `Reduzir o tempo medio de resposta, hoje em ${formatDurationBrief(params.avgResponse)}.` : null,
+        params.salesHits === 0 && params.outboundMessages > 0 ? 'Incluir perguntas objetivas sobre bairro, faixa de valor, prazo, forma de pagamento e agendamento.' : null,
+        params.rapportHits === 0 && params.outboundMessages > 0 ? 'Melhorar acolhimento: demonstrar entendimento, confirmar necessidade e criar conexao antes de ofertar imoveis.' : null,
+    ].filter(Boolean) as string[]
+
+    if (improvementPoints.length === 0 && params.total > 0) {
+        improvementPoints.push('Manter consistencia e acompanhar se o padrao se sustenta nos proximos dias.')
+    }
+
+    const coachingReport = params.total
+        ? [
+            `O atendimento foi classificado como ${statusLabel}.`,
+            `Foram analisadas ${params.total} conversa(s), ${params.messages} mensagem(ns), ${params.inboundMessages} do lead e ${params.outboundMessages} do corretor/agente, incluindo ${params.crmMessages} mensagem(ns) consolidadas do CRM.`,
+            `O principal risco operacional e ${params.unansweredCount} conversa(s) sem resposta e ${params.poorConversations} conversa(s) ruins.`,
+            leadQualityReport,
+        ].join(' ')
+        : 'Ainda nao ha base suficiente para avaliar postura profissional, qualidade dos leads ou pontos de melhoria desta instancia.'
+
+    const summary = params.total
+        ? `Parecer IA: atendimento ${statusLabel}, score ${params.score}/100. ${coachingReport}`
+        : 'Nao havia mensagens importadas para o periodo selecionado. Rode a sincronizacao para ampliar a cobertura.'
+
+    return {
+        summary,
+        strengths,
+        improvement_points: improvementPoints,
+        lead_quality_report: leadQualityReport,
+        coaching_report: coachingReport,
+        professional_status_label: statusLabel,
+    }
+}
+
 export async function generateAttendanceReports(options: ReportOptions = {}) {
     const supabase = options.supabase || createAdminClient()
     const range = dayRange(options.date)
@@ -827,6 +956,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
         const hotLeads = conversationScores.filter((item) => item.lead_potential === 'hot').length
         const warmLeads = conversationScores.filter((item) => item.lead_potential === 'warm').length
         const coldLeads = conversationScores.filter((item) => item.lead_potential === 'cold').length
+        const unknownLeads = conversationScores.filter((item) => item.lead_potential === 'unknown').length
         const poorConversations = conversationScores.filter((item) => item.score < 60).length
         const strongConversations = conversationScores.filter((item) => item.score >= 80).length
         const needsAttention = conversationScores.filter((item) => item.unanswered || item.score < 60).length
@@ -844,6 +974,30 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
         const avgResponse = avgResponseValues.length
             ? Math.round(avgResponseValues.reduce((sum, value) => sum + value, 0) / avgResponseValues.length)
             : null
+        const inboundMessages = mergedMessages.filter((m) => !m.fromMe).length
+        const outboundMessages = mergedMessages.filter((m) => m.fromMe).length
+        const rapportHits = conversationScores.reduce((sum, item) => sum + Number(item.metrics?.rapport_hits || 0), 0)
+        const salesHits = conversationScores.reduce((sum, item) => sum + Number(item.metrics?.sales_hits || 0), 0)
+        const narrative = buildAttendanceNarrative({
+            score,
+            total: conversationScores.length,
+            messages: mergedMessages.length,
+            crmMessages: mergedCrmMessages.length,
+            unansweredCount,
+            hotLeads,
+            warmLeads,
+            coldLeads,
+            unknownLeads,
+            poorConversations,
+            strongConversations,
+            hotUnanswered,
+            professionalStatus,
+            avgResponse,
+            inboundMessages,
+            outboundMessages,
+            rapportHits,
+            salesHits,
+        })
 
         const recommendations = [
             unansweredCount > 0 ? `Retomar ${unansweredCount} conversa(s) que ficaram sem ultima resposta.` : null,
@@ -851,6 +1005,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             avgResponse !== null && avgResponse > 900 ? 'Criar meta de primeira resposta abaixo de 15 minutos.' : null,
             'Usar perguntas de descoberta: bairro, faixa de valor, prazo, forma de pagamento e objetivo.',
             'Encerrar cada conversa ativa com proximo passo claro: visita, envio de opcoes ou retorno combinado.',
+            ...narrative.improvement_points,
         ].filter(Boolean)
 
         const coverage = {
@@ -869,19 +1024,25 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             hot_leads: hotLeads,
             warm_leads: warmLeads,
             cold_leads: coldLeads,
+            unknown_leads: unknownLeads,
             poor_conversations: poorConversations,
             strong_conversations: strongConversations,
             needs_attention: needsAttention,
             hot_unanswered_leads: hotUnanswered,
             professional_status: professionalStatus,
+            professional_status_label: narrative.professional_status_label,
             avg_response_seconds: avgResponse,
-            inbound_messages: mergedMessages.filter((m) => !m.fromMe).length,
-            outbound_messages: mergedMessages.filter((m) => m.fromMe).length,
+            inbound_messages: inboundMessages,
+            outbound_messages: outboundMessages,
+            rapport_hits: rapportHits,
+            sales_hits: salesHits,
+            strengths: narrative.strengths,
+            improvement_points: narrative.improvement_points,
+            lead_quality_report: narrative.lead_quality_report,
+            coaching_report: narrative.coaching_report,
         }
 
-        const summary = conversationScores.length
-            ? `Parecer IA: status ${professionalStatus.replace(/_/g, ' ')}. Foram analisadas ${conversationScores.length} conversa(s) e ${mergedMessages.length} mensagem(ns), incluindo ${mergedCrmMessages.length} mensagem(ns) do CRM. Score geral ${score}/100, com ${unansweredCount} conversa(s) sem ultima resposta, ${hotLeads} lead(s) quentes e ${poorConversations} conversa(s) ruins.`
-            : 'Nao havia mensagens importadas para o periodo selecionado. Rode a sincronizacao para ampliar a cobertura.'
+        const summary = narrative.summary
 
         const { data: report, error: reportError } = await supabase
             .from('broker_attendance_reports')
