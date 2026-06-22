@@ -56,6 +56,12 @@ function listDatesInRange(startDate: string | null, endDate: string | null) {
     return dates
 }
 
+function boundedNumber(value: unknown, fallback: number, min: number, max: number) {
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed)) return fallback
+    return Math.min(max, Math.max(min, Math.round(parsed)))
+}
+
 export async function GET(request: NextRequest) {
     try {
         const supabase = createAdminClient()
@@ -212,9 +218,17 @@ export async function POST(request: NextRequest) {
         const singleDate = reportDates[0] || date
         const force = body?.force !== false
         const includeHistorySync = body?.include_history_sync !== false
+        const syncOptions = {
+            instanceId,
+            force,
+            includeHistorySync,
+            maxChats: boundedNumber(body?.max_chats, 300, 50, 500),
+            messagesPerChat: boundedNumber(body?.messages_per_chat, 120, 20, 300),
+            maxContacts: boundedNumber(body?.max_contacts, 5000, 200, 10000),
+        }
 
         if (action === 'sync') {
-            const result = await syncAttendanceForConnectedInstances({ instanceId, force, includeHistorySync })
+            const result = await syncAttendanceForConnectedInstances(syncOptions)
             return NextResponse.json(result)
         }
 
@@ -238,15 +252,13 @@ export async function POST(request: NextRequest) {
 
         if (reportDates.length <= 1) {
             const result = await syncAndGenerateAttendanceReports({
-                instanceId,
+                ...syncOptions,
                 date: singleDate,
-                force,
-                includeHistorySync,
             })
             return NextResponse.json(result)
         }
 
-        const sync = await syncAttendanceForConnectedInstances({ instanceId, force, includeHistorySync })
+        const sync = await syncAttendanceForConnectedInstances(syncOptions)
         const reportRuns = []
         for (const reportDate of reportDates) {
             reportRuns.push(await generateAttendanceReports({ instanceId, date: reportDate, force }))

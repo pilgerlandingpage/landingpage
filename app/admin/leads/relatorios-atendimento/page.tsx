@@ -46,6 +46,7 @@ type ConversationScore = {
     summary?: string | null
     risks?: string[]
     recommendations?: string[]
+    metrics?: Record<string, any>
 }
 
 type ImportJob = {
@@ -63,6 +64,15 @@ type RecentReport = {
     score: number
     coverage?: Record<string, any>
     generated_at?: string
+}
+
+type RunSummary = {
+    contacts: number
+    chats: number
+    messages: number
+    historySyncRequested: number
+    reports: number
+    dates: number
 }
 
 function todayDate() {
@@ -113,6 +123,20 @@ function scoreColor(score: number) {
     return '#ef4444'
 }
 
+function potentialLabel(value?: ConversationScore['lead_potential']) {
+    if (value === 'hot') return 'Quente'
+    if (value === 'warm') return 'Morno'
+    if (value === 'cold') return 'Frio'
+    return 'Indefinido'
+}
+
+function potentialStyle(value?: ConversationScore['lead_potential']): CSSProperties {
+    if (value === 'hot') return { ...conversationBadgeStyle, color: '#991b1b', background: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.24)' }
+    if (value === 'warm') return { ...conversationBadgeStyle, color: '#92400e', background: 'rgba(245,158,11,0.14)', borderColor: 'rgba(245,158,11,0.28)' }
+    if (value === 'cold') return { ...conversationBadgeStyle, color: '#334155', background: 'rgba(100,116,139,0.12)', borderColor: 'rgba(100,116,139,0.24)' }
+    return conversationBadgeStyle
+}
+
 function cleanLabel(value?: string | null) {
     const text = String(value || '').trim()
     return text || null
@@ -157,6 +181,7 @@ export default function AttendanceReportsPage() {
     const [instances, setInstances] = useState<InstanceRow[]>([])
     const [jobs, setJobs] = useState<ImportJob[]>([])
     const [recentReports, setRecentReports] = useState<RecentReport[]>([])
+    const [lastRunSummary, setLastRunSummary] = useState<RunSummary | null>(null)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     const instanceById = useMemo(() => new Map(instances.map((item) => [item.id, item])), [instances])
@@ -194,9 +219,9 @@ export default function AttendanceReportsPage() {
         }
     }, { conversations: 0, messages: 0, hot: 0, unanswered: 0 }), [reports])
 
-    async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string } = {}) {
+    async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string; preserveMessage?: boolean } = {}) {
         setLoading(true)
-        setMessage(null)
+        if (!overrides.preserveMessage) setMessage(null)
         try {
             const range = orderedDateRange(overrides.startDate ?? startDate, overrides.endDate ?? endDate)
             const selectedInstanceId = overrides.instanceId ?? instanceId
@@ -221,6 +246,7 @@ export default function AttendanceReportsPage() {
 
     async function runNow() {
         setRunning(true)
+        setLastRunSummary(null)
         setMessage({ type: 'success', text: 'Sincronizando contatos, chats e mensagens. Isso pode levar alguns instantes.' })
         try {
             const range = orderedDateRange(startDate, endDate)
@@ -234,16 +260,31 @@ export default function AttendanceReportsPage() {
                     end_date: range.endDate,
                     force: true,
                     include_history_sync: true,
+                    max_chats: 300,
+                    messages_per_chat: 120,
                 }),
             })
             const data = await res.json()
             if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao gerar relatório')
             const totals = data?.sync?.totals || {}
+            const reportRuns = Array.isArray(data?.report_runs) ? data.report_runs : []
+            const directReports = Array.isArray(data?.reports) ? data.reports : []
+            const reportsCount = directReports.length || reportRuns.reduce((total: number, run: any) => {
+                return total + (Array.isArray(run?.reports) ? run.reports.length : 0)
+            }, 0)
+            setLastRunSummary({
+                contacts: Number(totals.contacts || 0),
+                chats: Number(totals.chats || 0),
+                messages: Number(totals.messages || 0),
+                historySyncRequested: Number(totals.history_sync_requested || 0),
+                reports: reportsCount,
+                dates: Array.isArray(data?.dates) ? data.dates.length : 1,
+            })
             setMessage({
                 type: 'success',
                 text: `Sincronização concluída: ${Number(totals.contacts || 0)} contatos, ${Number(totals.chats || 0)} chats e ${Number(totals.messages || 0)} mensagens importadas.`,
             })
-            await load()
+            await load({ preserveMessage: true })
         } catch (error) {
             setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao executar monitor.' })
         } finally {
@@ -315,6 +356,27 @@ export default function AttendanceReportsPage() {
                 </div>
             )}
 
+            {lastRunSummary && (
+                <div style={runSummaryStyle}>
+                    <div style={runSummaryHeaderStyle}>
+                        <strong>Ultima geracao</strong>
+                        <span>{lastRunSummary.dates} dia(s) processado(s)</span>
+                    </div>
+                    <div style={runSummaryGridStyle}>
+                        <MiniStat label="Contatos importados" value={lastRunSummary.contacts} />
+                        <MiniStat label="Chats lidos" value={lastRunSummary.chats} />
+                        <MiniStat label="Mensagens novas" value={lastRunSummary.messages} />
+                        <MiniStat label="Relatorios atualizados" value={lastRunSummary.reports} />
+                        <MiniStat label="Historicos solicitados" value={lastRunSummary.historySyncRequested} />
+                    </div>
+                    {lastRunSummary.historySyncRequested > 0 && (
+                        <div style={runSummaryNoteStyle}>
+                            A Uazapi pode entregar parte do historico alguns instantes depois da solicitacao. Se as mensagens crescerem depois, clique em Atualizar ou rode Gerar agora novamente para recalcular o relatorio com o que acabou de chegar.
+                        </div>
+                    )}
+                </div>
+            )}
+
             <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 12 }}>
                 <Metric icon={<Users size={18} />} label="Instâncias monitoradas" value={`${monitoredInstances}/${instances.length}`} />
                 <Metric icon={<MessageSquare size={18} />} label="Conversas analisadas" value={String(totals.conversations)} />
@@ -350,7 +412,8 @@ export default function AttendanceReportsPage() {
                     </div>
                 ) : reports.map((report) => {
                     const inst = instanceById.get(report.instance_id)
-                    const reportScores = (scoresByReport.get(report.id) || []).slice(0, 6)
+                    const reportScoresAll = scoresByReport.get(report.id) || []
+                    const reportScores = reportScoresAll.slice(0, 12)
                     const coverage = report.coverage || {}
                     const metrics = report.metrics || {}
                     const recommendations = Array.isArray(report.recommendations) ? report.recommendations : []
@@ -422,6 +485,15 @@ export default function AttendanceReportsPage() {
                                 <MiniStat label="Resp. média" value={formatDuration(metrics.avg_response_seconds)} />
                             </div>
 
+                            <div style={analysisGridStyle}>
+                                <MiniStat label="Mensagens analisadas" value={coverage.messages_analyzed || 0} />
+                                <MiniStat label="Msgs do lead" value={metrics.inbound_messages || 0} />
+                                <MiniStat label="Resp. corretor" value={metrics.outbound_messages || 0} />
+                                <MiniStat label="Leads quentes" value={metrics.hot_leads || 0} />
+                                <MiniStat label="Leads mornos" value={metrics.warm_leads || 0} />
+                                <MiniStat label="Sem resposta" value={metrics.unanswered_conversations || 0} />
+                            </div>
+
                             {recommendations.length > 0 && (
                                 <div style={{ marginTop: 12, display: 'grid', gap: 6 }}>
                                     {recommendations.slice(0, 4).map((item, index) => (
@@ -434,25 +506,56 @@ export default function AttendanceReportsPage() {
 
                             {reportScores.length > 0 && (
                                 <div style={{ marginTop: 14, display: 'grid', gap: 8 }}>
-                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 900 }}>Conversas que pedem atenção</div>
-                                    {reportScores.map((score) => (
-                                        <div key={score.id || score.chat_id} style={conversationStyle}>
-                                            <div>
-                                                <strong style={{ color: scoreColor(score.score) }}>{score.score}/100</strong>
-                                                <span style={{ color: 'var(--text-muted)', marginLeft: 8 }}>{formatPhone(score.phone)}</span>
-                                            </div>
-                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                                                {score.summary || 'Conversa analisada.'}
-                                            </div>
-                                            {!!score.risks?.length && (
-                                                <div style={{ color: '#fca5a5', fontSize: '0.78rem' }}>
-                                                    {score.risks.slice(0, 2).join(' | ')}
+                                    <div style={conversationSectionHeaderStyle}>
+                                        <span>Conversas analisadas em detalhe</span>
+                                        <span>{reportScores.length} de {reportScoresAll.length}</span>
+                                    </div>
+                                    {reportScores.map((score) => {
+                                        const scoreMetrics = score.metrics || {}
+                                        const risks = Array.isArray(score.risks) ? score.risks : []
+                                        const scoreRecommendations = Array.isArray(score.recommendations) ? score.recommendations : []
+                                        return (
+                                            <div key={score.id || score.chat_id} style={conversationStyle}>
+                                                <div style={conversationTopStyle}>
+                                                    <div>
+                                                        <strong style={{ color: scoreColor(score.score), fontSize: '1rem' }}>{score.score}/100</strong>
+                                                        <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontWeight: 800 }}>{formatPhone(score.phone)}</span>
+                                                    </div>
+                                                    <div style={chipRowStyle}>
+                                                        <span style={potentialStyle(score.lead_potential)}>{potentialLabel(score.lead_potential)}</span>
+                                                        {score.unanswered && <span style={dangerBadgeStyle}>Sem resposta</span>}
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                                <div style={conversationMetricsGridStyle}>
+                                                    <MiniStat label="Msgs lead" value={scoreMetrics.inbound_messages || 0} />
+                                                    <MiniStat label="Resp. corretor" value={scoreMetrics.outbound_messages || 0} />
+                                                    <MiniStat label="Tempo medio" value={formatDuration(score.response_time_seconds)} />
+                                                    <MiniStat label="Rapport" value={scoreMetrics.rapport_hits || 0} />
+                                                    <MiniStat label="Vendas" value={scoreMetrics.sales_hits || 0} />
+                                                </div>
+                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                                                    {score.summary || 'Conversa analisada.'}
+                                                </div>
+                                                {risks.length > 0 && (
+                                                    <div style={chipRowStyle}>
+                                                        {risks.slice(0, 3).map((risk, index) => (
+                                                            <span key={`${score.id || score.chat_id}-risk-${index}`} style={riskChipStyle}>{risk}</span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {scoreRecommendations.length > 0 && (
+                                                    <div style={chipRowStyle}>
+                                                        {scoreRecommendations.slice(0, 3).map((item, index) => (
+                                                            <span key={`${score.id || score.chat_id}-next-${index}`} style={recommendationChipStyle}>{item}</span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             )}
+
                         </article>
                     )
                 })}
@@ -701,13 +804,123 @@ const reportDateStyle: CSSProperties = {
     fontWeight: 850,
 }
 
-const conversationStyle: CSSProperties = {
-    border: '1px solid var(--border)',
+const runSummaryStyle: CSSProperties = {
     borderRadius: 8,
-    padding: '9px 10px',
+    border: '1px solid rgba(34,197,94,0.24)',
+    background: 'rgba(34,197,94,0.07)',
+    padding: 12,
     display: 'grid',
-    gap: 4,
-    background: 'rgba(0,0,0,0.12)',
+    gap: 10,
+}
+
+const runSummaryHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 10,
+    flexWrap: 'wrap',
+    color: 'var(--text-primary)',
+    fontSize: '0.84rem',
+}
+
+const runSummaryGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
+    gap: 8,
+}
+
+const runSummaryNoteStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.22)',
+    background: 'rgba(14,165,233,0.07)',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '8px 10px',
+    fontSize: '0.8rem',
+    fontWeight: 800,
+    lineHeight: 1.45,
+}
+
+const analysisGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
+    gap: 8,
+    marginTop: 8,
+}
+
+const conversationSectionHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 10,
+    flexWrap: 'wrap',
+    color: 'var(--text-muted)',
+    fontSize: '0.78rem',
+    fontWeight: 900,
+}
+
+const conversationTopStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 10,
+    flexWrap: 'wrap',
+}
+
+const conversationMetricsGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))',
+    gap: 7,
+}
+
+const conversationBadgeStyle: CSSProperties = {
+    border: '1px solid rgba(148,163,184,0.24)',
+    background: 'rgba(148,163,184,0.12)',
+    color: '#334155',
+    borderRadius: 999,
+    padding: '3px 8px',
+    fontSize: '0.7rem',
+    fontWeight: 900,
+}
+
+const dangerBadgeStyle: CSSProperties = {
+    ...conversationBadgeStyle,
+    color: '#991b1b',
+    background: 'rgba(239,68,68,0.12)',
+    borderColor: 'rgba(239,68,68,0.24)',
+}
+
+const chipRowStyle: CSSProperties = {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    alignItems: 'center',
+}
+
+const riskChipStyle: CSSProperties = {
+    border: '1px solid rgba(239,68,68,0.2)',
+    background: 'rgba(254,226,226,0.75)',
+    color: '#991b1b',
+    borderRadius: 8,
+    padding: '5px 8px',
+    fontSize: '0.76rem',
+    fontWeight: 800,
+}
+
+const recommendationChipStyle: CSSProperties = {
+    border: '1px solid rgba(245,158,11,0.24)',
+    background: 'rgba(254,243,199,0.82)',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: '5px 8px',
+    fontSize: '0.76rem',
+    fontWeight: 800,
+}
+
+const conversationStyle: CSSProperties = {
+    border: '1px solid rgba(148,163,184,0.26)',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'grid',
+    gap: 9,
+    background: '#fff',
+    boxShadow: '0 8px 18px rgba(15,23,42,0.05)',
 }
 
 const jobStyle: CSSProperties = {
