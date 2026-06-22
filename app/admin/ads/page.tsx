@@ -43,6 +43,8 @@ interface Campaign {
         quality_ranking?: string
         engagement_rate_ranking?: string
         conversion_rate_ranking?: string
+        snapshot_at?: string
+        source?: 'live' | 'stored' | 'stored_historical'
     } | null
 }
 
@@ -105,6 +107,13 @@ interface MetaAccountHealth {
     severity: 'ok' | 'warning' | 'error'
     message: string
 }
+
+interface MetricsFallback {
+    active: boolean
+    campaignCount: number
+    latestSnapshotAt: string | null
+    mode: 'selected_period' | 'latest_historical'
+}
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
     draft: { label: 'Rascunho', color: '#94a3b8' },
     pending: { label: 'Publicando...', color: '#f59e0b' },
@@ -134,6 +143,17 @@ function formatDateOnly(value: string | null | undefined) {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
+    })
+}
+
+function formatDateTime(value: string | null | undefined) {
+    if (!value) return '-'
+    return new Date(value).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
     })
 }
 
@@ -229,6 +249,8 @@ export default function AdsPage() {
     const [internalStats, setInternalStats] = useState<{ totalLeads: number; recentLeads: any[] }>({ totalLeads: 0, recentLeads: [] })
     const [liveAccountStats, setLiveAccountStats] = useState<LiveAccountStats | null>(null)
     const [metaAccountHealth, setMetaAccountHealth] = useState<MetaAccountHealth | null>(null)
+    const [metaConnectionIssue, setMetaConnectionIssue] = useState('')
+    const [metricsFallback, setMetricsFallback] = useState<MetricsFallback | null>(null)
     const [paidReports, setPaidReports] = useState<PaidAiReport[]>([])
     const [paidReportLoading, setPaidReportLoading] = useState(false)
     const [paidReportError, setPaidReportError] = useState('')
@@ -260,6 +282,8 @@ export default function AdsPage() {
                 setInternalStats(data.internalStats || { totalLeads: 0, recentLeads: [] })
                 setLiveAccountStats(data.liveAccountStats || null)
                 setMetaAccountHealth(data.accountHealth || null)
+                setMetaConnectionIssue(data.metaConnectionIssue || '')
+                setMetricsFallback(data.metricsFallback || null)
             }
             if (alertRes.ok) {
                 const data = await alertRes.json()
@@ -612,6 +636,37 @@ export default function AdsPage() {
                         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.86rem', lineHeight: 1.45 }}>
                             {metaAccountHealth.message} Status: {metaAccountHealth.status_label} ({metaAccountHealth.status}).
                             {' '}Enquanto isso, a Meta pode pausar entregas, zerar campanhas do dia ou atrasar insights.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {metaConnectionIssue && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    marginBottom: 18,
+                    background: 'rgba(245,158,11,.08)',
+                    border: '1px solid rgba(245,158,11,.26)',
+                    color: 'var(--text-primary)',
+                }}>
+                    <AlertTriangle size={21} color="#f59e0b" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                        <strong style={{ display: 'block', marginBottom: 4 }}>
+                            Meta Ads sem leitura ao vivo
+                        </strong>
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.86rem', lineHeight: 1.45 }}>
+                            {metaConnectionIssue}
+                            {metricsFallback?.active && (
+                                <>
+                                    {' '}Enquanto isso, o painel esta exibindo {metricsFallback.campaignCount} campanha(s) com o ultimo historico salvo
+                                    {metricsFallback.latestSnapshotAt ? ` em ${formatDateTime(metricsFallback.latestSnapshotAt)}` : ''}.
+                                    {metricsFallback.mode === 'latest_historical' ? ' Esses numeros podem nao representar o periodo selecionado.' : ''}
+                                </>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -976,10 +1031,25 @@ export default function AdsPage() {
                                                                 {m.quality_ranking.includes('ABOVE') ? '★ Alto' : m.quality_ranking.includes('BELOW') ? '▼ Baixo' : '■ Médio'}
                                                             </span>
                                                         )}
+                                                        {m?.source && m.source !== 'live' && (
+                                                            <span className="ads-badge" style={{ background: 'rgba(245,158,11,0.12)', color: '#b45309' }}>
+                                                                Historico salvo
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div style={{ fontWeight: 600, fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {camp.name}
                                                     </div>
+                                                    {m?.snapshot_at && (
+                                                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                                                            Snapshot: {formatDateTime(m.snapshot_at)}
+                                                        </div>
+                                                    )}
+                                                    {!m && (
+                                                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                                                            Sem metricas salvas para esta campanha.
+                                                        </div>
+                                                    )}
                                                     {camp.properties?.title && (
                                                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>🏷️ {camp.properties.title}</div>
                                                     )}

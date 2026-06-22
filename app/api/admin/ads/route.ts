@@ -31,6 +31,76 @@ function isMetaLead(row: any) {
         || sourceText.includes('fbclid')
 }
 
+function getSnapshotRange(datePreset: string, startDate?: string | null, endDate?: string | null) {
+    const spNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+
+    if (datePreset === 'today') {
+        return { since: startOfDay(spNow).toISOString(), until: endOfDay(spNow).toISOString() }
+    }
+    if (datePreset === 'yesterday') {
+        const yesterday = subDays(spNow, 1)
+        return { since: startOfDay(yesterday).toISOString(), until: endOfDay(yesterday).toISOString() }
+    }
+    if (datePreset === 'last_7d') {
+        return { since: startOfDay(subDays(spNow, 7)).toISOString(), until: endOfDay(spNow).toISOString() }
+    }
+    if (datePreset === 'last_30d') {
+        return { since: startOfDay(subDays(spNow, 30)).toISOString(), until: endOfDay(spNow).toISOString() }
+    }
+    if (datePreset === 'this_month') {
+        const firstDay = new Date(spNow.getFullYear(), spNow.getMonth(), 1)
+        return { since: startOfDay(firstDay).toISOString(), until: endOfDay(spNow).toISOString() }
+    }
+    if (datePreset === 'last_month') {
+        const firstDay = new Date(spNow.getFullYear(), spNow.getMonth() - 1, 1)
+        const lastDay = new Date(spNow.getFullYear(), spNow.getMonth(), 0)
+        return { since: startOfDay(firstDay).toISOString(), until: endOfDay(lastDay).toISOString() }
+    }
+    if (datePreset === 'custom' && startDate && endDate) {
+        return { since: new Date(startDate).toISOString(), until: endOfDay(new Date(endDate)).toISOString() }
+    }
+
+    return null
+}
+
+async function loadStoredSnapshotMap(
+    supabase: ReturnType<typeof createAdminClient>,
+    campaignIds: string[],
+    options: { range?: { since: string; until: string } | null } = {}
+) {
+    const snapshotMap: Record<string, any> = {}
+    if (campaignIds.length === 0) return snapshotMap
+
+    const chunkSize = 80
+    for (let start = 0; start < campaignIds.length; start += chunkSize) {
+        const batchIds = campaignIds.slice(start, start + chunkSize)
+        let query = supabase
+            .from('ad_metrics_snapshots')
+            .select('campaign_id, snapshot_at, impressions, clicks, ctr, cpm, cpc, spend, leads_count, cost_per_lead, reach, conversions, landing_page_views, link_clicks, cost_per_result, messaging_conversations, post_engagements, quality_ranking, engagement_rate_ranking, conversion_rate_ranking, frequency, thumbstop_ratio, video_p50, video_p75, video_p100')
+            .in('campaign_id', batchIds)
+            .order('snapshot_at', { ascending: false })
+            .limit(2000)
+
+        if (options.range) {
+            query = query.gte('snapshot_at', options.range.since).lte('snapshot_at', options.range.until)
+        }
+
+        const { data, error } = await query
+        if (error) {
+            console.error('Erro ao carregar snapshots Meta armazenados:', error)
+            continue
+        }
+
+        for (const row of data || []) {
+            if (!snapshotMap[row.campaign_id]) {
+                snapshotMap[row.campaign_id] = row
+            }
+        }
+    }
+
+    return snapshotMap
+}
+
 // GET — list all campaigns (with optional ?alerts=true to fetch alerts instead)
 export async function GET(request: NextRequest) {
     try {
@@ -74,6 +144,7 @@ export async function GET(request: NextRequest) {
         let metaInsightsMap: Record<string, any> = {}
         let googleInsightsMap: Record<string, any> = {}
         let accountHealth: Awaited<ReturnType<typeof metaAds.getAdAccountHealth>> | null = null
+        let metaConnectionIssue = ''
         
         try {
             const metaParams: any[] = [datePreset];
@@ -90,10 +161,13 @@ export async function GET(request: NextRequest) {
                 metaAds.getAdAccountHealth(),
             ])
             if (metaRes.status === 'fulfilled') metaInsightsMap = metaRes.value
+            else metaConnectionIssue = metaRes.reason?.message || 'Nao foi possivel ler insights ao vivo da Meta.'
             if (googleRes.status === 'fulfilled') googleInsightsMap = googleRes.value
             if (accountHealthRes.status === 'fulfilled') accountHealth = accountHealthRes.value
+            else if (!metaConnectionIssue) metaConnectionIssue = accountHealthRes.reason?.message || 'Nao foi possivel ler a conta Meta ao vivo.'
         } catch (err) {
             console.error('Erro ao buscar insights ao vivo:', err)
+            metaConnectionIssue = err instanceof Error ? err.message : 'Erro ao buscar insights ao vivo da Meta.'
         }
 
         const existingExternalIds = new Set(campaignRows.map((camp: any) => String(camp.external_campaign_id || '')).filter(Boolean))
@@ -125,13 +199,44 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        const metaCampaignIds = campaignRows
+            .filter((camp: any) => camp.platform === 'meta')
+            .map((camp: any) => camp.id)
+            .filter(Boolean)
+        const snapshotRange = getSnapshotRange(String(datePreset), startDate, endDate)
+        let storedSnapshotMap = await loadStoredSnapshotMap(supabase, metaCampaignIds, { range: snapshotRange })
+        let storedFallbackMode: 'selected_period' | 'latest_historical' = 'selected_period'
+
+        if (Object.keys(storedSnapshotMap).length === 0 && metaConnectionIssue) {
+            storedSnapshotMap = await loadStoredSnapshotMap(supabase, metaCampaignIds)
+            storedFallbackMode = 'latest_historical'
+        }
+
+        let storedFallbackCount = 0
+        let latestStoredSnapshotAt = ''
+
         // Enrich campaigns with metrics
         const enriched = campaignRows.map((camp: any) => {
             if (camp.platform === 'meta') {
                 const liveInsights = camp.external_campaign_id ? metaInsightsMap[camp.external_campaign_id] : null
                 if (liveInsights) {
                     const parsed = metaAds.parseInsightsToSnapshot(camp.id, liveInsights)
-                    return { ...camp, latest_metrics: parsed }
+                    return { ...camp, latest_metrics: { ...parsed, source: 'live' } }
+                }
+
+                const storedSnapshot = storedSnapshotMap[camp.id]
+                if (storedSnapshot) {
+                    storedFallbackCount++
+                    if (!latestStoredSnapshotAt || String(storedSnapshot.snapshot_at) > latestStoredSnapshotAt) {
+                        latestStoredSnapshotAt = String(storedSnapshot.snapshot_at)
+                    }
+                    return {
+                        ...camp,
+                        latest_metrics: {
+                            ...storedSnapshot,
+                            source: storedFallbackMode === 'latest_historical' ? 'stored_historical' : 'stored',
+                        },
+                    }
                 }
             } else if (camp.platform === 'google') {
                 const liveInsights = camp.external_campaign_id ? googleInsightsMap[camp.external_campaign_id] : null
@@ -205,6 +310,13 @@ export async function GET(request: NextRequest) {
             campaigns: enriched,
             liveAccountStats,
             accountHealth,
+            metaConnectionIssue,
+            metricsFallback: {
+                active: storedFallbackCount > 0,
+                campaignCount: storedFallbackCount,
+                latestSnapshotAt: latestStoredSnapshotAt || null,
+                mode: storedFallbackMode,
+            },
             internalStats: {
                 totalLeads: metaLeads.length,
                 recentLeads: metaLeads.slice(0, 10)
