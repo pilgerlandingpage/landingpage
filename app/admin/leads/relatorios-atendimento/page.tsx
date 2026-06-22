@@ -26,6 +26,9 @@ type InstanceRow = {
         latest_message_at?: string | null
         latest_message_direction?: string | null
         latest_message_source?: string | null
+        crm_total_messages?: number
+        crm_last_7_days_messages?: number
+        latest_crm_message_at?: string | null
     } | null
 }
 
@@ -523,6 +526,10 @@ export default function AttendanceReportsPage() {
                     const messageActivity = inst?.message_activity || {}
                     const totalImportedMessages = Number(messageActivity.total_messages || 0)
                     const last7ImportedMessages = Number(messageActivity.last_7_days_messages || 0)
+                    const crmImportedMessages = Number(messageActivity.crm_total_messages || 0)
+                    const crmLast7Messages = Number(messageActivity.crm_last_7_days_messages || 0)
+                    const crmMessagesAnalyzed = Number(coverage.crm_messages_analyzed || 0)
+                    const uazapiMessagesAnalyzed = Number(coverage.uazapi_messages_analyzed || 0)
                     const ownerDetails = [
                         cleanLabel(inst?.owner_subtitle),
                         cleanLabel(inst?.owner_phone || inst?.phone_number) ? formatPhone(inst?.owner_phone || inst?.phone_number) : null,
@@ -646,13 +653,15 @@ export default function AttendanceReportsPage() {
 
                             {Number(coverage.messages_analyzed || 0) === 0 && (
                                 <div style={periodDiagnosticStyle}>
-                                    {totalImportedMessages > 0 ? (
+                                    {(totalImportedMessages + crmImportedMessages) > 0 ? (
                                         <>
                                             <strong>Ha mensagens importadas fora deste periodo.</strong>
                                             <span>
                                                 Esta instancia tem {totalImportedMessages} mensagem(ns) no banco
                                                 {last7ImportedMessages > 0 ? `, ${last7ImportedMessages} nos ultimos 7 dias` : ''}
-                                                {messageActivity.latest_message_at ? `, ultima em ${formatDateTimeLabel(messageActivity.latest_message_at)}` : ''}.
+                                                {crmImportedMessages > 0 ? `, alem de ${crmImportedMessages} mensagem(ns) no CRM` : ''}
+                                                {messageActivity.latest_message_at ? `, ultima Uazapi em ${formatDateTimeLabel(messageActivity.latest_message_at)}` : ''}
+                                                {messageActivity.latest_crm_message_at ? `, ultima CRM em ${formatDateTimeLabel(messageActivity.latest_crm_message_at)}` : ''}.
                                                 O periodo selecionado nao encontrou mensagens para analisar.
                                             </span>
                                             <button
@@ -684,9 +693,14 @@ export default function AttendanceReportsPage() {
                                 <MiniStat label="Contatos da agenda" value={coverage.contacts_synced || 0} />
                                 <MiniStat label="Chats" value={coverage.chats_synced || 0} />
                                 <MiniStat label="Msgs no banco" value={totalImportedMessages || 0} />
+                                <MiniStat label="Msgs CRM" value={crmImportedMessages || 0} />
+                                <MiniStat label="CRM 7 dias" value={crmLast7Messages || 0} />
                                 <MiniStat label="Ultima msg importada" value={messageActivity.latest_message_at ? formatDateTimeLabel(messageActivity.latest_message_at) : 'sem registro'} />
+                                <MiniStat label="Ultima msg CRM" value={messageActivity.latest_crm_message_at ? formatDateTimeLabel(messageActivity.latest_crm_message_at) : 'sem registro'} />
                                 <MiniStat label="Conversas analisadas" value={breakdown.total} />
                                 <MiniStat label="Mensagens" value={breakdown.messages} />
+                                <MiniStat label="Analisadas Uazapi" value={uazapiMessagesAnalyzed || 0} />
+                                <MiniStat label="Analisadas CRM" value={crmMessagesAnalyzed || 0} />
                                 <MiniStat label="Msgs lead" value={breakdown.inbound} />
                                 <MiniStat label="Resp. corretor" value={breakdown.outbound} />
                                 <MiniStat label="Resp. media" value={formatDuration(breakdown.avgResponse)} />

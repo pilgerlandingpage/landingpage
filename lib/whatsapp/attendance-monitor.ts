@@ -206,6 +206,142 @@ function normalizeMessage(raw: any, fallbackChatId?: string | null): NormalizedM
     }
 }
 
+function getCrmMessageBody(raw: any): string | null {
+    const candidates = [raw?.content, raw?.text, raw?.body, raw?.message]
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) return candidate.trim()
+    }
+    return null
+}
+
+function getCrmMessageTimestamp(raw: any, fallback?: string | null): string | null {
+    return parseDateLike(raw?.timestamp || raw?.created_at || raw?.createdAt || raw?.sent_at || raw?.date || fallback)
+}
+
+function normalizeCrmConversationMessage(conversation: any, raw: any, index: number): NormalizedMessage | null {
+    const phone = cleanPhone(conversation?.lead_phone)
+    const chatId = jidFromPhoneOrJid(phone)
+    if (!phone || !chatId) return null
+
+    const body = getCrmMessageBody(raw)
+    if (!body) return null
+
+    const role = String(raw?.role || '').toLowerCase()
+    const source = String(raw?.source || '').toLowerCase()
+    const fromMe = source === 'human' ||
+        source === 'agent' ||
+        source === 'whatsapp_agent' ||
+        source === 'ai' ||
+        source === 'assistant' ||
+        role === 'assistant'
+    const timestamp = getCrmMessageTimestamp(raw, conversation?.updated_at || conversation?.created_at)
+    const messageId = String(raw?.message_id || raw?.id || '').trim() ||
+        `crm:${conversation?.id || phone}:${timestamp || conversation?.updated_at || index}:${index}`
+    const extracted = conversation?.lead_data_extracted && typeof conversation.lead_data_extracted === 'object'
+        ? conversation.lead_data_extracted
+        : {}
+
+    return {
+        chatId,
+        messageId,
+        phone,
+        direction: fromMe ? 'outbound' : 'inbound',
+        fromMe,
+        authorType: fromMe ? (source === 'human' ? 'broker' : 'agent') : 'lead',
+        senderName: raw?.senderName || raw?.sender_name || raw?.name || extracted?.name || extracted?.lead_name || null,
+        messageType: String(raw?.type || '').trim() || 'text',
+        body,
+        messageTimestamp: timestamp,
+        raw: {
+            attendance_source: 'crm_conversation',
+            crm_conversation_id: conversation?.id || null,
+            lead_id: conversation?.lead_id || null,
+            broker_id: conversation?.broker_id || null,
+            instance_id: conversation?.instance_id || null,
+            lead_name: extracted?.name || extracted?.lead_name || null,
+            original: raw,
+        },
+    }
+}
+
+function messageNaturalKey(message: NormalizedMessage) {
+    const body = String(message.body || '').trim().toLowerCase().replace(/\s+/g, ' ')
+    const timestamp = message.messageTimestamp
+        ? new Date(message.messageTimestamp).toISOString().slice(0, 19)
+        : ''
+    return [
+        message.chatId,
+        message.fromMe ? 'out' : 'in',
+        timestamp,
+        body,
+    ].join('|')
+}
+
+function mergeUniqueMessages(messages: NormalizedMessage[]) {
+    const seen = new Set<string>()
+    const merged: NormalizedMessage[] = []
+    for (const message of messages) {
+        const key = message.messageId
+            ? `${message.chatId}:id:${message.messageId}`
+            : messageNaturalKey(message)
+        const natural = messageNaturalKey(message)
+        if (seen.has(key) || seen.has(natural)) continue
+        seen.add(key)
+        seen.add(natural)
+        merged.push(message)
+    }
+    return merged.sort((a, b) => {
+        const ta = a.messageTimestamp ? new Date(a.messageTimestamp).getTime() : 0
+        const tb = b.messageTimestamp ? new Date(b.messageTimestamp).getTime() : 0
+        return ta - tb
+    })
+}
+
+async function fetchCrmConversationMessages(
+    supabase: any,
+    instance: AttendanceInstance,
+    range: { start: string; end: string }
+) {
+    if (!instance.id && !instance.broker_id) return []
+
+    let query = supabase
+        .from('whatsapp_ai_conversations')
+        .select('id, lead_id, broker_id, instance_id, lead_phone, messages, lead_data_extracted, created_at, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1000)
+
+    if (instance.id && instance.broker_id) {
+        query = query.or(`instance_id.eq.${instance.id},broker_id.eq.${instance.broker_id}`)
+    } else if (instance.id) {
+        query = query.eq('instance_id', instance.id)
+    } else if (instance.broker_id) {
+        query = query.eq('broker_id', instance.broker_id)
+    }
+
+    const { data, error } = await query
+    if (error) {
+        console.warn('[attendance-monitor] CRM conversations unavailable:', error.message)
+        return []
+    }
+
+    const startMs = new Date(range.start).getTime()
+    const endMs = new Date(range.end).getTime()
+    const rows: NormalizedMessage[] = []
+
+    for (const conversation of data || []) {
+        const messages = Array.isArray(conversation?.messages) ? conversation.messages : []
+        messages.forEach((raw: any, index: number) => {
+            const normalized = normalizeCrmConversationMessage(conversation, raw, index)
+            if (!normalized?.messageTimestamp) return
+            const timestamp = new Date(normalized.messageTimestamp).getTime()
+            if (!Number.isFinite(timestamp) || timestamp < startMs || timestamp >= endMs) return
+            rows.push(normalized)
+        })
+    }
+
+    return rows
+}
+
 function rememberOldestMessageAnchor(
     anchors: Map<string, { messageId: string; timestamp: number }>,
     message: NormalizedMessage
@@ -654,8 +790,15 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             messageType: row.message_type,
             body: row.body,
             messageTimestamp: row.message_timestamp,
-            raw: row.raw,
+            raw: {
+                ...(row.raw && typeof row.raw === 'object' ? row.raw : {}),
+                attendance_source: row.source || 'whatsapp_message_history',
+            },
         })) as NormalizedMessage[]
+        const crmMessages = await fetchCrmConversationMessages(supabase, instance, range)
+        const mergedMessages = mergeUniqueMessages([...messages, ...crmMessages])
+        const mergedCrmMessages = mergedMessages.filter((message) => message.raw?.attendance_source === 'crm_conversation')
+        const mergedUazapiMessages = mergedMessages.filter((message) => message.raw?.attendance_source !== 'crm_conversation')
 
         const { count: contactsCount } = await supabase
             .from('whatsapp_instance_contacts')
@@ -667,13 +810,16 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             .eq('instance_id', instance.id)
 
         const grouped = new Map<string, NormalizedMessage[]>()
-        for (const msg of messages) {
+        const leadNameByChat = new Map<string, string>()
+        for (const msg of mergedMessages) {
             const list = grouped.get(msg.chatId) || []
             list.push(msg)
             grouped.set(msg.chatId, list)
+            const leadName = typeof msg.raw?.lead_name === 'string' ? msg.raw.lead_name.trim() : ''
+            if (leadName && !leadNameByChat.has(msg.chatId)) leadNameByChat.set(msg.chatId, leadName)
         }
 
-        const conversationScores = Array.from(grouped.entries()).map(([chatId, list]) => scoreConversation(chatId, list))
+        const conversationScores = Array.from(grouped.entries()).map(([chatId, list]) => scoreConversation(chatId, list, leadNameByChat.get(chatId)))
         const score = conversationScores.length
             ? Math.round(conversationScores.reduce((sum, item) => sum + item.score, 0) / conversationScores.length)
             : 0
@@ -711,7 +857,9 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             contacts_synced: contactsCount || 0,
             chats_synced: chatsCount || 0,
             conversations_analyzed: conversationScores.length,
-            messages_analyzed: messages.length,
+            messages_analyzed: mergedMessages.length,
+            uazapi_messages_analyzed: mergedUazapiMessages.length,
+            crm_messages_analyzed: mergedCrmMessages.length,
             period_start: range.start,
             period_end: range.end,
         }
@@ -727,12 +875,12 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             hot_unanswered_leads: hotUnanswered,
             professional_status: professionalStatus,
             avg_response_seconds: avgResponse,
-            inbound_messages: messages.filter((m) => !m.fromMe).length,
-            outbound_messages: messages.filter((m) => m.fromMe).length,
+            inbound_messages: mergedMessages.filter((m) => !m.fromMe).length,
+            outbound_messages: mergedMessages.filter((m) => m.fromMe).length,
         }
 
         const summary = conversationScores.length
-            ? `Parecer IA: status ${professionalStatus.replace(/_/g, ' ')}. Foram analisadas ${conversationScores.length} conversa(s) e ${messages.length} mensagem(ns). Score geral ${score}/100, com ${unansweredCount} conversa(s) sem ultima resposta, ${hotLeads} lead(s) quentes e ${poorConversations} conversa(s) ruins.`
+            ? `Parecer IA: status ${professionalStatus.replace(/_/g, ' ')}. Foram analisadas ${conversationScores.length} conversa(s) e ${mergedMessages.length} mensagem(ns), incluindo ${mergedCrmMessages.length} mensagem(ns) do CRM. Score geral ${score}/100, com ${unansweredCount} conversa(s) sem ultima resposta, ${hotLeads} lead(s) quentes e ${poorConversations} conversa(s) ruins.`
             : 'Nao havia mensagens importadas para o periodo selecionado. Rode a sincronizacao para ampliar a cobertura.'
 
         const { data: report, error: reportError } = await supabase
@@ -755,6 +903,12 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             .select('*')
             .single()
         if (reportError) throw reportError
+
+        const { error: deleteScoresError } = await supabase
+            .from('broker_attendance_conversation_scores')
+            .delete()
+            .eq('report_id', report.id)
+        if (deleteScoresError) throw deleteScoresError
 
         await upsertInChunks(
             supabase,

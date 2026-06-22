@@ -62,6 +62,61 @@ function boundedNumber(value: unknown, fallback: number, min: number, max: numbe
     return Math.min(max, Math.max(min, Math.round(parsed)))
 }
 
+function crmMessageTimestamp(message: any, fallback?: string | null) {
+    const value = message?.timestamp || message?.created_at || message?.createdAt || message?.sent_at || message?.date || fallback
+    const date = new Date(String(value || ''))
+    return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+function summarizeCrmMessages(conversations: any[], sinceIso: string) {
+    const sinceMs = new Date(sinceIso).getTime()
+    let total = 0
+    let recent = 0
+    let latestAt: string | null = null
+
+    for (const conversation of conversations || []) {
+        const messages = Array.isArray(conversation?.messages) ? conversation.messages : []
+        for (const message of messages) {
+            const body = String(message?.content || message?.text || message?.body || '').trim()
+            if (!body) continue
+            const timestamp = crmMessageTimestamp(message, conversation?.updated_at || conversation?.created_at)
+            total += 1
+            if (timestamp) {
+                const time = new Date(timestamp).getTime()
+                if (Number.isFinite(time) && time >= sinceMs) recent += 1
+                if (!latestAt || time > new Date(latestAt).getTime()) latestAt = timestamp
+            }
+        }
+    }
+
+    return { total, recent, latestAt }
+}
+
+async function loadCrmConversationsForInstance(supabase: any, instance: any) {
+    if (!instance?.id && !instance?.broker_id) return []
+
+    let query = supabase
+        .from('whatsapp_ai_conversations')
+        .select('id, instance_id, broker_id, messages, created_at, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1000)
+
+    if (instance.id && instance.broker_id) {
+        query = query.or(`instance_id.eq.${instance.id},broker_id.eq.${instance.broker_id}`)
+    } else if (instance.id) {
+        query = query.eq('instance_id', instance.id)
+    } else if (instance.broker_id) {
+        query = query.eq('broker_id', instance.broker_id)
+    }
+
+    const { data, error } = await query
+    if (error) {
+        console.warn('[attendance-reports GET] Falha ao carregar conversas CRM', error.message)
+        return []
+    }
+    return data || []
+}
+
 export async function GET(request: NextRequest) {
     try {
         const supabase = createAdminClient()
@@ -187,7 +242,7 @@ export async function GET(request: NextRequest) {
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         const messageActivityByInstance = new Map<string, any>()
         await Promise.all(enrichedInstances.map(async (instance: any) => {
-            const [totalMessages, recentMessages, latestMessages] = await Promise.all([
+            const [totalMessages, recentMessages, latestMessages, crmConversations] = await Promise.all([
                 supabase
                     .from('whatsapp_message_history')
                     .select('id', { count: 'exact', head: true })
@@ -203,7 +258,9 @@ export async function GET(request: NextRequest) {
                     .eq('instance_id', instance.id)
                     .order('message_timestamp', { ascending: false })
                     .limit(1),
+                loadCrmConversationsForInstance(supabase, instance),
             ])
+            const crmSummary = summarizeCrmMessages(crmConversations, sevenDaysAgo)
 
             messageActivityByInstance.set(instance.id, {
                 total_messages: totalMessages.count || 0,
@@ -211,6 +268,9 @@ export async function GET(request: NextRequest) {
                 latest_message_at: latestMessages.data?.[0]?.message_timestamp || null,
                 latest_message_direction: latestMessages.data?.[0]?.direction || null,
                 latest_message_source: latestMessages.data?.[0]?.source || null,
+                crm_total_messages: crmSummary.total,
+                crm_last_7_days_messages: crmSummary.recent,
+                latest_crm_message_at: crmSummary.latestAt,
             })
         }))
 
@@ -222,6 +282,9 @@ export async function GET(request: NextRequest) {
                 latest_message_at: null,
                 latest_message_direction: null,
                 latest_message_source: null,
+                crm_total_messages: 0,
+                crm_last_7_days_messages: 0,
+                latest_crm_message_at: null,
             },
         }))
 
