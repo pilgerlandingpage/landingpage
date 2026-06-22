@@ -72,13 +72,16 @@ export async function GET(request: NextRequest) {
             date
         )
         const instanceId = request.nextUrl.searchParams.get('instance_id')
+        const reportId = request.nextUrl.searchParams.get('report_id')
+        const scoreFilter = String(request.nextUrl.searchParams.get('filtro') || request.nextUrl.searchParams.get('filter') || 'todos')
 
         let reportsQuery = supabase
             .from('broker_attendance_reports')
             .select('*')
             .order('generated_at', { ascending: false })
             .limit(50)
-        if (startDate && endDate) reportsQuery = reportsQuery.gte('report_date', startDate).lte('report_date', endDate)
+        if (reportId) reportsQuery = reportsQuery.eq('id', reportId).limit(1)
+        else if (startDate && endDate) reportsQuery = reportsQuery.gte('report_date', startDate).lte('report_date', endDate)
         else if (startDate) reportsQuery = reportsQuery.eq('report_date', startDate)
         if (instanceId) reportsQuery = reportsQuery.eq('instance_id', instanceId)
 
@@ -181,14 +184,65 @@ export async function GET(request: NextRequest) {
             }
         }))
 
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        const messageActivityByInstance = new Map<string, any>()
+        await Promise.all(enrichedInstances.map(async (instance: any) => {
+            const [totalMessages, recentMessages, latestMessages] = await Promise.all([
+                supabase
+                    .from('whatsapp_message_history')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('instance_id', instance.id),
+                supabase
+                    .from('whatsapp_message_history')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('instance_id', instance.id)
+                    .gte('message_timestamp', sevenDaysAgo),
+                supabase
+                    .from('whatsapp_message_history')
+                    .select('message_timestamp, direction, from_me, source')
+                    .eq('instance_id', instance.id)
+                    .order('message_timestamp', { ascending: false })
+                    .limit(1),
+            ])
+
+            messageActivityByInstance.set(instance.id, {
+                total_messages: totalMessages.count || 0,
+                last_7_days_messages: recentMessages.count || 0,
+                latest_message_at: latestMessages.data?.[0]?.message_timestamp || null,
+                latest_message_direction: latestMessages.data?.[0]?.direction || null,
+                latest_message_source: latestMessages.data?.[0]?.source || null,
+            })
+        }))
+
+        const instancesWithActivity = enrichedInstances.map((instance: any) => ({
+            ...instance,
+            message_activity: messageActivityByInstance.get(instance.id) || {
+                total_messages: 0,
+                last_7_days_messages: 0,
+                latest_message_at: null,
+                latest_message_direction: null,
+                latest_message_source: null,
+            },
+        }))
+
         const reportIds = (reportsRes.data || []).map((report: any) => report.id)
         let scores: any[] = []
         if (reportIds.length > 0) {
-            const scoresRes = await supabase
+            let scoresQuery = supabase
                 .from('broker_attendance_conversation_scores')
                 .select('*')
                 .in('report_id', reportIds)
                 .order('score', { ascending: true })
+
+            if (scoreFilter === 'critica') scoresQuery = scoresQuery.or('unanswered.eq.true,score.lt.60')
+            else if (scoreFilter === 'sem-resposta') scoresQuery = scoresQuery.eq('unanswered', true)
+            else if (scoreFilter === 'quentes') scoresQuery = scoresQuery.eq('lead_potential', 'hot')
+            else if (scoreFilter === 'mornos') scoresQuery = scoresQuery.eq('lead_potential', 'warm')
+            else if (scoreFilter === 'frios') scoresQuery = scoresQuery.eq('lead_potential', 'cold')
+            else if (scoreFilter === 'ruins') scoresQuery = scoresQuery.lt('score', 60)
+            else if (scoreFilter === 'bons') scoresQuery = scoresQuery.gte('score', 80)
+
+            const scoresRes = await scoresQuery
             if (scoresRes.error) throw scoresRes.error
             scores = scoresRes.data || []
         }
@@ -198,7 +252,7 @@ export async function GET(request: NextRequest) {
             reports: reportsRes.data || [],
             recent_reports_with_messages: recentReportsWithMessages,
             conversation_scores: scores,
-            instances: enrichedInstances,
+            instances: instancesWithActivity,
             jobs: jobsRes.data || [],
         })
     } catch (error: any) {

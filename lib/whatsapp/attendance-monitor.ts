@@ -206,6 +206,18 @@ function normalizeMessage(raw: any, fallbackChatId?: string | null): NormalizedM
     }
 }
 
+function rememberOldestMessageAnchor(
+    anchors: Map<string, { messageId: string; timestamp: number }>,
+    message: NormalizedMessage
+) {
+    const timestamp = message.messageTimestamp ? new Date(message.messageTimestamp).getTime() : 0
+    if (!message.chatId || !message.messageId || !timestamp) return
+    const current = anchors.get(message.chatId)
+    if (!current || timestamp < current.timestamp) {
+        anchors.set(message.chatId, { messageId: message.messageId, timestamp })
+    }
+}
+
 async function upsertInChunks(supabase: any, table: string, rows: any[], onConflict: string, size = 500) {
     if (rows.length === 0) return 0
     let saved = 0
@@ -355,6 +367,7 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             chats: 0,
             messages: 0,
             history_sync_requested: 0,
+            history_sync_skipped_no_anchor: 0,
             errors: [] as string[],
         }
 
@@ -383,6 +396,7 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             summary.chats = await upsertInChunks(supabase, 'whatsapp_instance_chats', chatRows, 'instance_id,chat_id')
 
             const messageRows: any[] = []
+            const oldestMessageAnchors = new Map<string, { messageId: string; timestamp: number }>()
             for (const chat of normalizedChats) {
                 if (chat.isGroup) continue
                 try {
@@ -390,6 +404,7 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
                     for (const raw of rawMessages) {
                         const msg = normalizeMessage(raw, chat.chatId)
                         if (!msg) continue
+                        rememberOldestMessageAnchor(oldestMessageAnchors, msg)
                         messageRows.push({
                             instance_id: instance.id,
                             chat_id: msg.chatId,
@@ -415,8 +430,13 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
 
             if (options.includeHistorySync !== false) {
                 for (const chat of normalizedChats.filter((item) => !item.isGroup).slice(0, 30)) {
+                    const anchor = oldestMessageAnchors.get(chat.chatId)
+                    if (!anchor?.messageId) {
+                        summary.history_sync_skipped_no_anchor += 1
+                        continue
+                    }
                     try {
-                        await requestHistorySync({ number: chat.chatId, count: 100 }, instance.instance_token)
+                        await requestHistorySync({ number: chat.chatId, count: 100, messageid: anchor.messageId }, instance.instance_token)
                         summary.history_sync_requested += 1
                     } catch (error: any) {
                         summary.errors.push(`history ${chat.chatId}: ${error?.message || String(error)}`)
@@ -440,7 +460,8 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             chats: acc.chats + Number(item.chats || 0),
             messages: acc.messages + Number(item.messages || 0),
             history_sync_requested: acc.history_sync_requested + Number(item.history_sync_requested || 0),
-        }), { contacts: 0, chats: 0, messages: 0, history_sync_requested: 0 }),
+            history_sync_skipped_no_anchor: acc.history_sync_skipped_no_anchor + Number(item.history_sync_skipped_no_anchor || 0),
+        }), { contacts: 0, chats: 0, messages: 0, history_sync_requested: 0, history_sync_skipped_no_anchor: 0 }),
     }
 }
 
@@ -658,6 +679,19 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             : 0
         const unansweredCount = conversationScores.filter((item) => item.unanswered).length
         const hotLeads = conversationScores.filter((item) => item.lead_potential === 'hot').length
+        const warmLeads = conversationScores.filter((item) => item.lead_potential === 'warm').length
+        const coldLeads = conversationScores.filter((item) => item.lead_potential === 'cold').length
+        const poorConversations = conversationScores.filter((item) => item.score < 60).length
+        const strongConversations = conversationScores.filter((item) => item.score >= 80).length
+        const needsAttention = conversationScores.filter((item) => item.unanswered || item.score < 60).length
+        const hotUnanswered = conversationScores.filter((item) => item.lead_potential === 'hot' && item.unanswered).length
+        const professionalStatus = conversationScores.length === 0
+            ? 'sem_base'
+            : score >= 78 && unansweredCount === 0 && poorConversations <= Math.max(1, Math.floor(conversationScores.length * 0.15))
+                ? 'profissional_qualificado'
+                : score >= 62 && unansweredCount <= Math.max(2, Math.floor(conversationScores.length * 0.25))
+                    ? 'qualificado_com_melhorias'
+                    : 'precisa_acompanhamento'
         const avgResponseValues = conversationScores
             .map((item) => item.response_time_seconds)
             .filter((value): value is number => typeof value === 'number')
@@ -685,14 +719,20 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             score,
             unanswered_conversations: unansweredCount,
             hot_leads: hotLeads,
-            warm_leads: conversationScores.filter((item) => item.lead_potential === 'warm').length,
+            warm_leads: warmLeads,
+            cold_leads: coldLeads,
+            poor_conversations: poorConversations,
+            strong_conversations: strongConversations,
+            needs_attention: needsAttention,
+            hot_unanswered_leads: hotUnanswered,
+            professional_status: professionalStatus,
             avg_response_seconds: avgResponse,
             inbound_messages: messages.filter((m) => !m.fromMe).length,
             outbound_messages: messages.filter((m) => m.fromMe).length,
         }
 
         const summary = conversationScores.length
-            ? `Foram analisadas ${conversationScores.length} conversa(s) e ${messages.length} mensagem(ns). Score geral ${score}/100, com ${unansweredCount} conversa(s) sem ultima resposta e ${hotLeads} lead(s) quentes.`
+            ? `Parecer IA: status ${professionalStatus.replace(/_/g, ' ')}. Foram analisadas ${conversationScores.length} conversa(s) e ${messages.length} mensagem(ns). Score geral ${score}/100, com ${unansweredCount} conversa(s) sem ultima resposta, ${hotLeads} lead(s) quentes e ${poorConversations} conversa(s) ruins.`
             : 'Nao havia mensagens importadas para o periodo selecionado. Rode a sincronizacao para ampliar a cobertura.'
 
         const { data: report, error: reportError } = await supabase

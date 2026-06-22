@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import Link from 'next/link'
 import { AlertTriangle, BarChart3, Clock, Database, Flame, MessageSquare, PlayCircle, RefreshCw, Users } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import { normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
@@ -19,6 +20,13 @@ type InstanceRow = {
     owner_photo_url?: string | null
     status?: string | null
     config?: Record<string, any> | null
+    message_activity?: {
+        total_messages?: number
+        last_7_days_messages?: number
+        latest_message_at?: string | null
+        latest_message_direction?: string | null
+        latest_message_source?: string | null
+    } | null
 }
 
 type AttendanceReport = {
@@ -71,12 +79,34 @@ type RunSummary = {
     chats: number
     messages: number
     historySyncRequested: number
+    historySyncSkippedNoAnchor: number
     reports: number
     dates: number
 }
 
+type ReportBreakdown = {
+    total: number
+    hot: number
+    warm: number
+    cold: number
+    poor: number
+    strong: number
+    unanswered: number
+    needsAttention: number
+    messages: number
+    inbound: number
+    outbound: number
+    avgResponse: number | null
+}
+
 function todayDate() {
     return new Date().toISOString().slice(0, 10)
+}
+
+function sevenDaysAgoDate() {
+    const date = new Date()
+    date.setDate(date.getDate() - 7)
+    return date.toISOString().slice(0, 10)
 }
 
 function formatDuration(seconds?: number | null) {
@@ -102,6 +132,20 @@ function formatDateLabel(value?: string | null) {
     return `${day}/${month}/${year}`
 }
 
+function formatDateTimeLabel(value?: string | null) {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(date)
+}
+
 function orderedDateRange(startDate: string, endDate: string) {
     if (!startDate && endDate) {
         return { startDate: endDate, endDate }
@@ -123,18 +167,73 @@ function scoreColor(score: number) {
     return '#ef4444'
 }
 
-function potentialLabel(value?: ConversationScore['lead_potential']) {
-    if (value === 'hot') return 'Quente'
-    if (value === 'warm') return 'Morno'
-    if (value === 'cold') return 'Frio'
-    return 'Indefinido'
+function getReportBreakdown(report: AttendanceReport, scores: ConversationScore[]): ReportBreakdown {
+    const coverage = report.coverage || {}
+    const metrics = report.metrics || {}
+    const avgResponse = Number(metrics.avg_response_seconds)
+    const total = scores.length || Number(coverage.conversations_analyzed || 0)
+    return {
+        total,
+        hot: scores.filter((score) => score.lead_potential === 'hot').length || Number(metrics.hot_leads || 0),
+        warm: scores.filter((score) => score.lead_potential === 'warm').length || Number(metrics.warm_leads || 0),
+        cold: scores.filter((score) => score.lead_potential === 'cold').length || Number(metrics.cold_leads || 0),
+        poor: scores.filter((score) => Number(score.score || 0) < 60).length || Number(metrics.poor_conversations || 0),
+        strong: scores.filter((score) => Number(score.score || 0) >= 80).length || Number(metrics.strong_conversations || 0),
+        unanswered: scores.filter((score) => score.unanswered).length || Number(metrics.unanswered_conversations || 0),
+        needsAttention: scores.filter((score) => score.unanswered || Number(score.score || 0) < 60).length || Number(metrics.needs_attention || 0),
+        messages: Number(coverage.messages_analyzed || 0),
+        inbound: Number(metrics.inbound_messages || 0),
+        outbound: Number(metrics.outbound_messages || 0),
+        avgResponse: Number.isFinite(avgResponse) ? avgResponse : null,
+    }
 }
 
-function potentialStyle(value?: ConversationScore['lead_potential']): CSSProperties {
-    if (value === 'hot') return { ...conversationBadgeStyle, color: '#991b1b', background: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.24)' }
-    if (value === 'warm') return { ...conversationBadgeStyle, color: '#92400e', background: 'rgba(245,158,11,0.14)', borderColor: 'rgba(245,158,11,0.28)' }
-    if (value === 'cold') return { ...conversationBadgeStyle, color: '#334155', background: 'rgba(100,116,139,0.12)', borderColor: 'rgba(100,116,139,0.24)' }
-    return conversationBadgeStyle
+function professionalVerdict(score: number, breakdown: ReportBreakdown) {
+    if (breakdown.total === 0) return 'sem base suficiente'
+    if (score >= 78 && breakdown.unanswered === 0 && breakdown.poor <= Math.max(1, Math.floor(breakdown.total * 0.15))) {
+        return 'profissional qualificado'
+    }
+    if (score >= 62 && breakdown.unanswered <= Math.max(2, Math.floor(breakdown.total * 0.25))) {
+        return 'qualificado com pontos de melhoria'
+    }
+    return 'precisa de acompanhamento'
+}
+
+function buildExecutiveOpinion(ownerName: string, report: AttendanceReport, breakdown: ReportBreakdown) {
+    const score = Number(report.score || 0)
+    if (breakdown.total === 0) {
+        return `Ainda nao existe base suficiente para avaliar ${ownerName}. Sincronize mais historico para o agente comparar tempo de resposta, perda de leads e qualidade da abordagem.`
+    }
+
+    const verdict = professionalVerdict(score, breakdown)
+    const ratio = breakdown.total > 0 ? Math.round((breakdown.poor / breakdown.total) * 100) : 0
+    const hotPressure = breakdown.hot > 0 ? ` Existem ${breakdown.hot} lead(s) quente(s) que precisam de prioridade comercial.` : ''
+    const unansweredPressure = breakdown.unanswered > 0 ? ` O principal risco e ${breakdown.unanswered} conversa(s) sem ultima resposta.` : ''
+    const qualityPressure = breakdown.poor > 0 ? ` ${breakdown.poor} conversa(s) ficaram abaixo do padrao minimo, equivalente a ${ratio}% do volume analisado.` : ''
+
+    if (verdict === 'profissional qualificado') {
+        return `Parecer IA: ${ownerName} demonstra atendimento profissional no periodo. O score ficou em ${score}/100, com boa capacidade de resposta e baixa perda de conversas.${hotPressure}${qualityPressure}`
+    }
+
+    if (verdict === 'qualificado com pontos de melhoria') {
+        return `Parecer IA: ${ownerName} tem condicao de atender, mas precisa melhorar consistencia. O score ficou em ${score}/100.${unansweredPressure}${hotPressure}${qualityPressure}`
+    }
+
+    return `Parecer IA: ${ownerName} precisa de acompanhamento antes de ser tratado como atendimento qualificado. O score ficou em ${score}/100.${unansweredPressure}${hotPressure}${qualityPressure}`
+}
+
+function improvementItems(breakdown: ReportBreakdown) {
+    const items: string[] = []
+    if (breakdown.unanswered > 0) items.push(`Retomar ${breakdown.unanswered} conversa(s) sem ultima resposta.`)
+    if (breakdown.hot > 0) items.push(`Priorizar ${breakdown.hot} lead(s) quente(s) com proximo passo claro.`)
+    if (breakdown.poor > 0) items.push(`Revisar ${breakdown.poor} conversa(s) ruins para corrigir abordagem, rapport e fechamento.`)
+    if (breakdown.avgResponse !== null && breakdown.avgResponse > 900) items.push('Reduzir tempo medio de resposta para abaixo de 15 minutos.')
+    if (items.length === 0) items.push('Manter padrao atual e acompanhar novas conversas importadas.')
+    return items
+}
+
+function reportDetailHref(reportId: string, filter: string) {
+    return `/admin/leads/relatorios-atendimento/detalhes?report_id=${encodeURIComponent(reportId)}&filtro=${encodeURIComponent(filter)}`
 }
 
 function cleanLabel(value?: string | null) {
@@ -277,6 +376,7 @@ export default function AttendanceReportsPage() {
                 chats: Number(totals.chats || 0),
                 messages: Number(totals.messages || 0),
                 historySyncRequested: Number(totals.history_sync_requested || 0),
+                historySyncSkippedNoAnchor: Number(totals.history_sync_skipped_no_anchor || 0),
                 reports: reportsCount,
                 dates: Array.isArray(data?.dates) ? data.dates.length : 1,
             })
@@ -368,6 +468,7 @@ export default function AttendanceReportsPage() {
                         <MiniStat label="Mensagens novas" value={lastRunSummary.messages} />
                         <MiniStat label="Relatorios atualizados" value={lastRunSummary.reports} />
                         <MiniStat label="Historicos solicitados" value={lastRunSummary.historySyncRequested} />
+                        <MiniStat label="Sem ancora historica" value={lastRunSummary.historySyncSkippedNoAnchor} />
                     </div>
                     {lastRunSummary.historySyncRequested > 0 && (
                         <div style={runSummaryNoteStyle}>
@@ -413,11 +514,15 @@ export default function AttendanceReportsPage() {
                 ) : reports.map((report) => {
                     const inst = instanceById.get(report.instance_id)
                     const reportScoresAll = scoresByReport.get(report.id) || []
-                    const reportScores = reportScoresAll.slice(0, 12)
                     const coverage = report.coverage || {}
-                    const metrics = report.metrics || {}
-                    const recommendations = Array.isArray(report.recommendations) ? report.recommendations : []
                     const ownerName = getOwnerName(inst, report.instance_id)
+                    const breakdown = getReportBreakdown(report, reportScoresAll)
+                    const verdict = professionalVerdict(Number(report.score || 0), breakdown)
+                    const executiveOpinion = buildExecutiveOpinion(ownerName, report, breakdown)
+                    const coachingItems = improvementItems(breakdown)
+                    const messageActivity = inst?.message_activity || {}
+                    const totalImportedMessages = Number(messageActivity.total_messages || 0)
+                    const last7ImportedMessages = Number(messageActivity.last_7_days_messages || 0)
                     const ownerDetails = [
                         cleanLabel(inst?.owner_subtitle),
                         cleanLabel(inst?.owner_phone || inst?.phone_number) ? formatPhone(inst?.owner_phone || inst?.phone_number) : null,
@@ -459,9 +564,70 @@ export default function AttendanceReportsPage() {
                                 </div>
                             </div>
 
-                            <p style={{ margin: '12px 0 0', color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem' }}>
-                                {report.summary}
-                            </p>
+                            <section style={executivePanelStyle}>
+                                <div style={executiveHeaderStyle}>
+                                    <div>
+                                        <div style={sectionEyebrowStyle}>Parecer do agente</div>
+                                        <h3 style={executiveTitleStyle}>{verdict}</h3>
+                                    </div>
+                                    <Link href={reportDetailHref(report.id, 'todos')} style={subtleLinkStyle}>
+                                        Ver relatorio completo
+                                    </Link>
+                                </div>
+                                <p style={executiveTextStyle}>{executiveOpinion}</p>
+                                <div style={insightGridStyle}>
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'sem-resposta')}
+                                        label="Nao respondidos"
+                                        value={breakdown.unanswered}
+                                        detail="Leads que ficaram aguardando retorno"
+                                        tone="danger"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'quentes')}
+                                        label="Leads quentes"
+                                        value={breakdown.hot}
+                                        detail="Conversas com sinal de visita, compra ou proposta"
+                                        tone="hot"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'ruins')}
+                                        label="Conversas ruins"
+                                        value={breakdown.poor}
+                                        detail="Atendimentos abaixo de 60 pontos"
+                                        tone="danger"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'critica')}
+                                        label="Amostra critica"
+                                        value={breakdown.needsAttention}
+                                        detail="Conversas sem resposta ou abaixo do padrao"
+                                        tone="danger"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'mornos')}
+                                        label="Leads mornos"
+                                        value={breakdown.warm}
+                                        detail="Leads com interesse, mas sem urgencia clara"
+                                        tone="neutral"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'bons')}
+                                        label="Boas conversas"
+                                        value={breakdown.strong}
+                                        detail="Atendimentos com 80 pontos ou mais"
+                                        tone="success"
+                                    />
+                                </div>
+                                <div style={coachingBoxStyle}>
+                                    <strong>Plano de melhoria</strong>
+                                    <div style={coachingListStyle}>
+                                        {coachingItems.slice(0, 4).map((item, index) => (
+                                            <span key={`${report.id}-coach-${index}`}>{item}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
 
                             {showLatestInstanceHint && (
                                 <button
@@ -478,83 +644,53 @@ export default function AttendanceReportsPage() {
                                 </button>
                             )}
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: 8, marginTop: 12 }}>
-                                <MiniStat label="Contatos" value={coverage.contacts_synced || 0} />
+                            {Number(coverage.messages_analyzed || 0) === 0 && (
+                                <div style={periodDiagnosticStyle}>
+                                    {totalImportedMessages > 0 ? (
+                                        <>
+                                            <strong>Ha mensagens importadas fora deste periodo.</strong>
+                                            <span>
+                                                Esta instancia tem {totalImportedMessages} mensagem(ns) no banco
+                                                {last7ImportedMessages > 0 ? `, ${last7ImportedMessages} nos ultimos 7 dias` : ''}
+                                                {messageActivity.latest_message_at ? `, ultima em ${formatDateTimeLabel(messageActivity.latest_message_at)}` : ''}.
+                                                O periodo selecionado nao encontrou mensagens para analisar.
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const start = sevenDaysAgoDate()
+                                                    const end = todayDate()
+                                                    setStartDate(start)
+                                                    setEndDate(end)
+                                                    void load({ startDate: start, endDate: end })
+                                                }}
+                                                style={periodDiagnosticButtonStyle}
+                                            >
+                                                Ver ultimos 7 dias
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <strong>Contatos nao significam conversas importadas.</strong>
+                                            <span>
+                                                A agenda da instancia foi lida, mas ainda nao encontramos mensagens salvas para analisar. O historico da Uazapi depende de mensagens recentes, webhook de history e, em alguns casos, do WhatsApp aberto/ativo no celular.
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            <div style={syncDataGridStyle}>
+                                <MiniStat label="Contatos da agenda" value={coverage.contacts_synced || 0} />
                                 <MiniStat label="Chats" value={coverage.chats_synced || 0} />
-                                <MiniStat label="Conversas" value={coverage.conversations_analyzed || 0} />
-                                <MiniStat label="Resp. média" value={formatDuration(metrics.avg_response_seconds)} />
+                                <MiniStat label="Msgs no banco" value={totalImportedMessages || 0} />
+                                <MiniStat label="Ultima msg importada" value={messageActivity.latest_message_at ? formatDateTimeLabel(messageActivity.latest_message_at) : 'sem registro'} />
+                                <MiniStat label="Conversas analisadas" value={breakdown.total} />
+                                <MiniStat label="Mensagens" value={breakdown.messages} />
+                                <MiniStat label="Msgs lead" value={breakdown.inbound} />
+                                <MiniStat label="Resp. corretor" value={breakdown.outbound} />
+                                <MiniStat label="Resp. media" value={formatDuration(breakdown.avgResponse)} />
                             </div>
-
-                            <div style={analysisGridStyle}>
-                                <MiniStat label="Mensagens analisadas" value={coverage.messages_analyzed || 0} />
-                                <MiniStat label="Msgs do lead" value={metrics.inbound_messages || 0} />
-                                <MiniStat label="Resp. corretor" value={metrics.outbound_messages || 0} />
-                                <MiniStat label="Leads quentes" value={metrics.hot_leads || 0} />
-                                <MiniStat label="Leads mornos" value={metrics.warm_leads || 0} />
-                                <MiniStat label="Sem resposta" value={metrics.unanswered_conversations || 0} />
-                            </div>
-
-                            {recommendations.length > 0 && (
-                                <div style={{ marginTop: 12, display: 'grid', gap: 6 }}>
-                                    {recommendations.slice(0, 4).map((item, index) => (
-                                        <div key={`${report.id}-rec-${index}`} style={recommendationStyle}>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {reportScores.length > 0 && (
-                                <div style={{ marginTop: 14, display: 'grid', gap: 8 }}>
-                                    <div style={conversationSectionHeaderStyle}>
-                                        <span>Conversas analisadas em detalhe</span>
-                                        <span>{reportScores.length} de {reportScoresAll.length}</span>
-                                    </div>
-                                    {reportScores.map((score) => {
-                                        const scoreMetrics = score.metrics || {}
-                                        const risks = Array.isArray(score.risks) ? score.risks : []
-                                        const scoreRecommendations = Array.isArray(score.recommendations) ? score.recommendations : []
-                                        return (
-                                            <div key={score.id || score.chat_id} style={conversationStyle}>
-                                                <div style={conversationTopStyle}>
-                                                    <div>
-                                                        <strong style={{ color: scoreColor(score.score), fontSize: '1rem' }}>{score.score}/100</strong>
-                                                        <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontWeight: 800 }}>{formatPhone(score.phone)}</span>
-                                                    </div>
-                                                    <div style={chipRowStyle}>
-                                                        <span style={potentialStyle(score.lead_potential)}>{potentialLabel(score.lead_potential)}</span>
-                                                        {score.unanswered && <span style={dangerBadgeStyle}>Sem resposta</span>}
-                                                    </div>
-                                                </div>
-                                                <div style={conversationMetricsGridStyle}>
-                                                    <MiniStat label="Msgs lead" value={scoreMetrics.inbound_messages || 0} />
-                                                    <MiniStat label="Resp. corretor" value={scoreMetrics.outbound_messages || 0} />
-                                                    <MiniStat label="Tempo medio" value={formatDuration(score.response_time_seconds)} />
-                                                    <MiniStat label="Rapport" value={scoreMetrics.rapport_hits || 0} />
-                                                    <MiniStat label="Vendas" value={scoreMetrics.sales_hits || 0} />
-                                                </div>
-                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
-                                                    {score.summary || 'Conversa analisada.'}
-                                                </div>
-                                                {risks.length > 0 && (
-                                                    <div style={chipRowStyle}>
-                                                        {risks.slice(0, 3).map((risk, index) => (
-                                                            <span key={`${score.id || score.chat_id}-risk-${index}`} style={riskChipStyle}>{risk}</span>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {scoreRecommendations.length > 0 && (
-                                                    <div style={chipRowStyle}>
-                                                        {scoreRecommendations.slice(0, 3).map((item, index) => (
-                                                            <span key={`${score.id || score.chat_id}-next-${index}`} style={recommendationChipStyle}>{item}</span>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
 
                         </article>
                     )
@@ -605,6 +741,24 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
             <div style={{ fontWeight: 950, fontSize: '0.95rem' }}>{value}</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 800 }}>{label}</div>
         </div>
+    )
+}
+
+function InsightLinkCard({ href, label, value, detail, tone }: {
+    href: string
+    label: string
+    value: number
+    detail: string
+    tone: 'danger' | 'hot' | 'neutral' | 'success'
+}) {
+    return (
+        <Link href={href} style={{ ...insightCardStyle, ...insightToneStyles[tone] }}>
+            <div style={insightCardTopStyle}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+            </div>
+            <small>{detail}</small>
+        </Link>
     )
 }
 
@@ -746,16 +900,6 @@ const instanceDateHintStyle: CSSProperties = {
     fontWeight: 850,
 }
 
-const recommendationStyle: CSSProperties = {
-    border: '1px solid rgba(180,83,9,0.24)',
-    background: 'rgba(251,191,36,0.14)',
-    color: '#92400e',
-    borderRadius: 8,
-    padding: '8px 10px',
-    fontSize: '0.8rem',
-    fontWeight: 800,
-}
-
 const ownerBadgeStyle: CSSProperties = {
     border: '1px solid rgba(201,169,110,0.28)',
     background: 'rgba(201,169,110,0.12)',
@@ -804,6 +948,144 @@ const reportDateStyle: CSSProperties = {
     fontWeight: 850,
 }
 
+const executivePanelStyle: CSSProperties = {
+    marginTop: 12,
+    border: '1px solid rgba(148,163,184,0.24)',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.88), rgba(248,250,252,0.92))',
+    borderRadius: 8,
+    padding: 14,
+    display: 'grid',
+    gap: 12,
+    boxShadow: '0 10px 24px rgba(15,23,42,0.05)',
+}
+
+const executiveHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+    flexWrap: 'wrap',
+}
+
+const sectionEyebrowStyle: CSSProperties = {
+    color: 'var(--text-muted)',
+    fontSize: '0.72rem',
+    fontWeight: 900,
+    textTransform: 'uppercase',
+}
+
+const executiveTitleStyle: CSSProperties = {
+    margin: '3px 0 0',
+    color: 'var(--text-primary)',
+    fontSize: '1rem',
+    lineHeight: 1.25,
+    textTransform: 'capitalize',
+}
+
+const executiveTextStyle: CSSProperties = {
+    margin: 0,
+    color: 'var(--text-secondary)',
+    fontSize: '0.9rem',
+    lineHeight: 1.55,
+}
+
+const subtleLinkStyle: CSSProperties = {
+    border: '1px solid rgba(201,169,110,0.28)',
+    background: '#fff',
+    color: '#7c520f',
+    borderRadius: 8,
+    padding: '7px 10px',
+    textDecoration: 'none',
+    fontSize: '0.78rem',
+    fontWeight: 900,
+}
+
+const insightGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 170px), 1fr))',
+    gap: 8,
+}
+
+const insightCardStyle: CSSProperties = {
+    border: '1px solid rgba(148,163,184,0.24)',
+    borderRadius: 8,
+    padding: '10px 11px',
+    background: '#fff',
+    textDecoration: 'none',
+    color: 'var(--text-primary)',
+    display: 'grid',
+    gap: 6,
+    minHeight: 82,
+}
+
+const insightCardTopStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    fontSize: '0.78rem',
+    fontWeight: 900,
+}
+
+const insightToneStyles: Record<'danger' | 'hot' | 'neutral' | 'success', CSSProperties> = {
+    danger: { borderColor: 'rgba(239,68,68,0.24)', background: 'rgba(254,242,242,0.82)' },
+    hot: { borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(255,251,235,0.9)' },
+    neutral: { borderColor: 'rgba(100,116,139,0.22)', background: 'rgba(248,250,252,0.94)' },
+    success: { borderColor: 'rgba(34,197,94,0.24)', background: 'rgba(240,253,244,0.86)' },
+}
+
+const coachingBoxStyle: CSSProperties = {
+    border: '1px solid rgba(100,116,139,0.18)',
+    background: 'rgba(248,250,252,0.82)',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'grid',
+    gap: 7,
+    color: 'var(--text-primary)',
+    fontSize: '0.8rem',
+}
+
+const coachingListStyle: CSSProperties = {
+    display: 'grid',
+    gap: 5,
+    color: 'var(--text-secondary)',
+    lineHeight: 1.45,
+}
+
+const syncDataGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
+    gap: 8,
+    marginTop: 12,
+}
+
+const periodDiagnosticStyle: CSSProperties = {
+    marginTop: 10,
+    border: '1px solid rgba(14,165,233,0.22)',
+    background: 'rgba(224,242,254,0.58)',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    flexWrap: 'wrap',
+    fontSize: '0.8rem',
+    lineHeight: 1.45,
+}
+
+const periodDiagnosticButtonStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.28)',
+    background: '#fff',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '7px 10px',
+    cursor: 'pointer',
+    fontSize: '0.76rem',
+    fontWeight: 900,
+}
+
 const runSummaryStyle: CSSProperties = {
     borderRadius: 8,
     border: '1px solid rgba(34,197,94,0.24)',
@@ -837,90 +1119,6 @@ const runSummaryNoteStyle: CSSProperties = {
     fontSize: '0.8rem',
     fontWeight: 800,
     lineHeight: 1.45,
-}
-
-const analysisGridStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
-    gap: 8,
-    marginTop: 8,
-}
-
-const conversationSectionHeaderStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: 10,
-    flexWrap: 'wrap',
-    color: 'var(--text-muted)',
-    fontSize: '0.78rem',
-    fontWeight: 900,
-}
-
-const conversationTopStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: 10,
-    flexWrap: 'wrap',
-}
-
-const conversationMetricsGridStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))',
-    gap: 7,
-}
-
-const conversationBadgeStyle: CSSProperties = {
-    border: '1px solid rgba(148,163,184,0.24)',
-    background: 'rgba(148,163,184,0.12)',
-    color: '#334155',
-    borderRadius: 999,
-    padding: '3px 8px',
-    fontSize: '0.7rem',
-    fontWeight: 900,
-}
-
-const dangerBadgeStyle: CSSProperties = {
-    ...conversationBadgeStyle,
-    color: '#991b1b',
-    background: 'rgba(239,68,68,0.12)',
-    borderColor: 'rgba(239,68,68,0.24)',
-}
-
-const chipRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: 6,
-    flexWrap: 'wrap',
-    alignItems: 'center',
-}
-
-const riskChipStyle: CSSProperties = {
-    border: '1px solid rgba(239,68,68,0.2)',
-    background: 'rgba(254,226,226,0.75)',
-    color: '#991b1b',
-    borderRadius: 8,
-    padding: '5px 8px',
-    fontSize: '0.76rem',
-    fontWeight: 800,
-}
-
-const recommendationChipStyle: CSSProperties = {
-    border: '1px solid rgba(245,158,11,0.24)',
-    background: 'rgba(254,243,199,0.82)',
-    color: '#92400e',
-    borderRadius: 8,
-    padding: '5px 8px',
-    fontSize: '0.76rem',
-    fontWeight: 800,
-}
-
-const conversationStyle: CSSProperties = {
-    border: '1px solid rgba(148,163,184,0.26)',
-    borderRadius: 8,
-    padding: '10px 11px',
-    display: 'grid',
-    gap: 9,
-    background: '#fff',
-    boxShadow: '0 8px 18px rgba(15,23,42,0.05)',
 }
 
 const jobStyle: CSSProperties = {
