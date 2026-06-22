@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
 import { markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/uazapi'
 import { uploadImageToR2 } from '@/lib/storage/r2'
-import { appendLeadConversationLog, ensureWhatsAppLead, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
+import { appendLeadConversationLog, ensureWhatsAppLead, isGenericWhatsAppLeadName, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
 import { generateChatResponse } from '@/lib/ai/generation'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
@@ -3495,7 +3495,7 @@ export async function POST(request: NextRequest) {
                 .limit(1)
                 .maybeSingle()
             if (leadByPhone?.id) auditLeadId = String(leadByPhone.id)
-            if (!senderName && leadByPhone?.name) senderName = String(leadByPhone.name)
+            if (!senderName && leadByPhone?.name && !isGenericWhatsAppLeadName(leadByPhone.name)) senderName = String(leadByPhone.name)
         } catch (e) {
             console.warn('[Webhook] Could not resolve senderName from leads:', e)
         }

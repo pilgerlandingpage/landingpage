@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
+import { isGenericWhatsAppLeadName, phoneCandidates } from '@/lib/whatsapp/lead-sync'
 import {
     leadIntentColumnsFromMetadata,
     mergeLeadSiteActivity,
@@ -50,6 +50,107 @@ function asRecord(value: any): Record<string, any> {
 
 function asString(value: any): string {
     return typeof value === 'string' ? value.trim() : ''
+}
+
+function reliableCrmName(value: any): string {
+    const text = asString(value)
+    return text && !isGenericWhatsAppLeadName(text) ? text : ''
+}
+
+function resolveCrmLeadName(row: any, lead: any): string | null {
+    return reliableCrmName(lead?.name)
+        || reliableCrmName(row?.lead_name)
+        || reliableCrmName(lead?.metadata?.whatsapp?.resolved_name)
+        || reliableCrmName(lead?.metadata?.whatsapp?.imported_contact_name)
+        || row?.lead_name
+        || lead?.name
+        || null
+}
+
+function crmMessageContent(message: any): string {
+    return asString(message?.content || message?.text || message?.body || message?.message)
+}
+
+function crmMessageTimestamp(message: any): string {
+    return asString(message?.timestamp || message?.created_at || message?.sent_at || message?.date)
+}
+
+function mergeCrmConversationMessages(lead: any, conversation: any, historyMessages: any[] = []): any[] {
+    const allMessages = [
+        ...(Array.isArray(lead?.conversation_log) ? lead.conversation_log : []),
+        ...(Array.isArray(conversation?.messages) ? conversation.messages : []),
+        ...historyMessages,
+    ]
+    const seen = new Set<string>()
+    const merged: any[] = []
+
+    for (const message of allMessages) {
+        const content = crmMessageContent(message)
+        if (!content) continue
+        const timestamp = crmMessageTimestamp(message)
+        const messageId = asString(message?.message_id || message?.id)
+        const key = messageId
+            ? `id:${messageId}`
+            : [
+                asString(message?.role),
+                asString(message?.source),
+                asString(message?.broker_id),
+                content,
+                timestamp.slice(0, 19),
+            ].join('|')
+        if (seen.has(key)) continue
+        seen.add(key)
+        merged.push({
+            ...message,
+            content,
+            timestamp: timestamp || message?.timestamp || null,
+        })
+    }
+
+    return merged.sort((a, b) => {
+        const left = Date.parse(crmMessageTimestamp(a))
+        const right = Date.parse(crmMessageTimestamp(b))
+        return (Number.isFinite(left) ? left : 0) - (Number.isFinite(right) ? right : 0)
+    })
+}
+
+function latestCrmConversationAt(conversation: any, messages: any[]): string | null {
+    const timestamps = [
+        asString(conversation?.updated_at),
+        ...messages.map(crmMessageTimestamp),
+    ].filter(Boolean)
+    return timestamps.sort((a, b) => Date.parse(b) - Date.parse(a))[0] || null
+}
+
+function normalizeHistoryMessage(row: any): any | null {
+    const content = crmMessageContent({ content: row?.body })
+    if (!content) return null
+    const fromMe = row?.from_me === true || row?.direction === 'outbound'
+    const authorType = asString(row?.author_type).toLowerCase()
+    const source = authorType === 'agent'
+        ? 'agent'
+        : fromMe || authorType === 'broker'
+            ? 'human'
+            : 'lead'
+    return {
+        role: source === 'lead' ? 'user' : 'assistant',
+        content,
+        type: row?.message_type || 'text',
+        source,
+        message_id: row?.message_id || null,
+        instance_id: row?.instance_id || null,
+        timestamp: row?.message_timestamp || row?.created_at || null,
+        metadata: {
+            attendance_source: row?.source || 'whatsapp_message_history',
+            sender_name: row?.sender_name || null,
+        },
+    }
+}
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+    const chunks: T[][] = []
+    for (let index = 0; index < items.length; index += size) chunks.push(items.slice(index, index + size))
+    return chunks
 }
 
 function normalizeFollowupStatus(value: any) {
@@ -316,6 +417,7 @@ const LEAD_ENRICH_SELECT = `
     avatar_source,
     avatar_updated_at,
     metadata,
+    conversation_log,
     acquired_via,
     funnel_stage,
     lead_score,
@@ -454,7 +556,66 @@ async function fetchConversationsForRows(supabase: ReturnType<typeof getSupabase
     return { byId, byBrokerPhone }
 }
 
-function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', lead: any, broker: any, conversation: any) {
+async function fetchMessageHistoryForRows(supabase: ReturnType<typeof getSupabase>, rows: any[]) {
+    const byPhone = new Map<string, any[]>()
+    const byInstancePhone = new Map<string, any[]>()
+    const phones = Array.from(new Set(rows.flatMap((row: any) => phoneCandidates(row.lead_phone))))
+    if (phones.length === 0) return { byPhone, byInstancePhone }
+
+    const addMessage = (row: any) => {
+        const message = normalizeHistoryMessage(row)
+        if (!message) return
+        for (const candidate of phoneCandidates(row.phone)) {
+            const list = byPhone.get(candidate) || []
+            list.push(message)
+            byPhone.set(candidate, list)
+            if (row.instance_id) {
+                const key = `${row.instance_id}:${candidate}`
+                const scoped = byInstancePhone.get(key) || []
+                scoped.push(message)
+                byInstancePhone.set(key, scoped)
+            }
+        }
+    }
+
+    for (const chunk of chunkArray(phones, 80)) {
+        const { data, error } = await supabase
+            .from('whatsapp_message_history')
+            .select('id, instance_id, phone, message_id, direction, from_me, author_type, sender_name, message_type, body, message_timestamp, source, created_at')
+            .in('phone', chunk)
+            .order('message_timestamp', { ascending: true })
+            .limit(Math.max(250, rows.length * 80))
+
+        if (error) {
+            console.warn('[Lead CRM] whatsapp history enrichment failed:', error.message)
+            continue
+        }
+        for (const row of data || []) addMessage(row)
+    }
+
+    return { byPhone, byInstancePhone }
+}
+
+function resolveHistoryMessagesForRow(row: any, historyMap: Awaited<ReturnType<typeof fetchMessageHistoryForRows>>) {
+    const candidates = phoneCandidates(row.lead_phone)
+    const messages: any[] = []
+    const seen = new Set<string>()
+    for (const candidate of candidates) {
+        const scopedKey = row.instance_id ? `${row.instance_id}:${candidate}` : ''
+        const list = scopedKey && historyMap.byInstancePhone.has(scopedKey)
+            ? historyMap.byInstancePhone.get(scopedKey)
+            : historyMap.byPhone.get(candidate)
+        for (const message of list || []) {
+            const key = asString(message?.message_id) || `${crmMessageContent(message)}:${crmMessageTimestamp(message)}`
+            if (!key || seen.has(key)) continue
+            seen.add(key)
+            messages.push(message)
+        }
+    }
+    return messages
+}
+
+function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', lead: any, broker: any, conversation: any, historyMessages: any[] = []) {
     const metadata = lead?.metadata || {}
     const tracking = typeof metadata?.tracking === 'object' && metadata.tracking ? metadata.tracking : {}
     const visitor = lead?.visitor || {}
@@ -464,6 +625,9 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
     const followupActions = metadata?.crm_followup_actions || {}
     const behaviorSummaryWithActions = applyFollowupActionsToSummary(behaviorSummary, followupActions)
     const behaviorScore = Number(behaviorSummary?.engagement_score || 0)
+    const conversationMessages = mergeCrmConversationMessages(lead, conversation, historyMessages)
+    const conversationUpdatedAt = latestCrmConversationAt(conversation, conversationMessages)
+    const leadName = resolveCrmLeadName(row, lead)
 
     return {
         ...row,
@@ -471,7 +635,7 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
         broker_name: broker?.name || null,
         broker_is_active: broker?.is_active ?? null,
         lead_id: lead?.id || row.lead_id || null,
-        lead_name: row.lead_name || lead?.name || null,
+        lead_name: leadName,
         lead_email: lead?.email || null,
         avatar_url: lead?.avatar_url || null,
         avatar_source: lead?.avatar_source || null,
@@ -509,9 +673,9 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
         gps_permission: metadata?.gps_permission || null,
         conversation_id: conversation?.id || row.conversation_id || null,
         conversation_status: conversation?.status || null,
-        conversation_updated_at: conversation?.updated_at || null,
+        conversation_updated_at: conversationUpdatedAt,
         conversation_summary: conversation?.summary || null,
-        conversation_messages: Array.isArray(conversation?.messages) ? conversation.messages : [],
+        conversation_messages: conversationMessages,
     }
 }
 
@@ -841,10 +1005,11 @@ export async function GET(request: NextRequest) {
             limit,
         })
 
-        const [{ byId, byPhone }, brokerMap, conversationMap] = await Promise.all([
+        const [{ byId, byPhone }, brokerMap, conversationMap, historyMap] = await Promise.all([
             fetchLeadsForRows(supabase, rows),
             fetchBrokerMap(supabase, rows),
             fetchConversationsForRows(supabase, rows),
+            fetchMessageHistoryForRows(supabase, rows),
         ])
 
         const enriched = rows.map((row: any) => {
@@ -857,7 +1022,8 @@ export async function GET(request: NextRequest) {
             const conversation = row.conversation_id
                 ? conversationMap.byId.get(row.conversation_id)
                 : conversationMap.byBrokerPhone.get(conversationKey(row.broker_id, row.lead_phone))
-            return enrichCrmRow(row, source, lead, broker, conversation)
+            const historyMessages = resolveHistoryMessagesForRow(row, historyMap)
+            return enrichCrmRow(row, source, lead, broker, conversation, historyMessages)
         })
 
         return NextResponse.json({ success: true, leads: enriched, source })

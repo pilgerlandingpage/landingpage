@@ -65,6 +65,118 @@ export function phoneCandidates(value: unknown): string[] {
     return [...set]
 }
 
+export function isGenericWhatsAppLeadName(value: unknown): boolean {
+    const name = String(value || '').trim()
+    if (!name) return true
+    const normalized = name.toLowerCase().replace(/\s+/g, ' ')
+    if (/^whatsapp(?:\s+\d{2,})?$/i.test(name)) return true
+    if (/^(lead sem nome|sem nome|desconhecido|unknown)$/i.test(normalized)) return true
+    const digits = name.replace(/\D/g, '')
+    const letters = name.replace(/[^a-zA-ZÀ-ÿ]/g, '')
+    return digits.length >= 8 && letters.length === 0
+}
+
+function cleanLeadNameCandidate(value: unknown): string | null {
+    const name = String(value || '').replace(/\s+/g, ' ').trim()
+    if (!name || isGenericWhatsAppLeadName(name)) return null
+    const letters = name.replace(/[^a-zA-ZÀ-ÿ]/g, '')
+    if (letters.length < 2) return null
+    return name.slice(0, 90)
+}
+
+function formatPhoneFallbackName(phone: string): string {
+    const digits = normalizeWhatsAppPhone(phone)
+    if (!digits) return ''
+    if (digits.startsWith('55') && digits.length >= 12) {
+        const local = digits.slice(2)
+        const ddd = local.slice(0, 2)
+        const number = local.slice(2)
+        if (number.length === 9) return `+55 ${ddd} ${number.slice(0, 5)}-${number.slice(5)}`
+        if (number.length === 8) return `+55 ${ddd} ${number.slice(0, 4)}-${number.slice(4)}`
+    }
+    return `+${digits}`
+}
+
+function buildContactOrFilter(candidates: string[]): string {
+    const safe = Array.from(new Set(
+        candidates
+            .map(candidate => candidate.replace(/[^0-9]/g, ''))
+            .filter(Boolean)
+    ))
+    const filters: string[] = []
+    for (const candidate of safe) {
+        filters.push(`phone.eq.${candidate}`)
+        filters.push(`jid.eq.${candidate}`)
+        filters.push(`jid.eq.${candidate}@s.whatsapp.net`)
+    }
+    return filters.join(',')
+}
+
+function nameFromImportedContact(row: any): string | null {
+    return cleanLeadNameCandidate(row?.contact_name)
+        || cleanLeadNameCandidate(row?.first_name)
+        || cleanLeadNameCandidate(row?.raw?.name)
+        || cleanLeadNameCandidate(row?.raw?.pushName)
+        || cleanLeadNameCandidate(row?.raw?.contactName)
+        || cleanLeadNameCandidate(row?.raw?.wa_name)
+        || cleanLeadNameCandidate(row?.raw?.wa_contactName)
+}
+
+async function findImportedContactName(
+    supabase: SupabaseClientLike,
+    phone: string,
+    instanceId?: string | null
+): Promise<{ name: string; source: string; contact?: any } | null> {
+    const filter = buildContactOrFilter(phoneCandidates(phone))
+    if (!filter) return null
+
+    const queryContacts = async (scoped: boolean) => {
+        let query = supabase
+            .from('whatsapp_instance_contacts')
+            .select('id, instance_id, phone, jid, contact_name, first_name, raw, updated_at')
+            .or(filter)
+            .order('updated_at', { ascending: false })
+            .limit(10)
+        if (scoped && instanceId) query = query.eq('instance_id', instanceId)
+        const { data, error } = await query
+        if (error) {
+            console.warn('[WhatsApp Lead Sync] imported contact lookup failed:', error.message)
+            return null
+        }
+        return (data || []).find((row: any) => nameFromImportedContact(row)) || null
+    }
+
+    const contact = (instanceId ? await queryContacts(true) : null) || await queryContacts(false)
+    const name = nameFromImportedContact(contact)
+    return name ? { name, source: 'whatsapp_instance_contacts', contact } : null
+}
+
+function inferLeadNameFromMessages(messages: any[]): string | null {
+    const patterns = [
+        /\bmeu nome (?:e|eh|é)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{1,50})/i,
+        /\bme chamo\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{1,50})/i,
+        /\baqui (?:e|eh|é)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{1,50})/i,
+        /\bquem fala (?:e|eh|é)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{1,50})/i,
+    ]
+
+    for (const message of messages || []) {
+        const role = String(message?.role || '').toLowerCase()
+        if (role && role !== 'user') continue
+        const text = String(message?.content || message?.text || '').trim()
+        if (!text) continue
+        for (const pattern of patterns) {
+            const match = text.match(pattern)
+            const candidate = match?.[1]
+                ?.split(/[,.!?;:\n\r]/)[0]
+                ?.replace(/\b(?:tudo bem|boa tarde|bom dia|boa noite|obrigado|obrigada)\b.*$/i, '')
+                ?.trim()
+            const clean = cleanLeadNameCandidate(candidate)
+            if (clean) return clean
+        }
+    }
+    return null
+}
+
 function buildPhoneOrFilter(candidates: string[]): string {
     const safe = candidates
         .map(candidate => candidate.replace(/[^0-9]/g, ''))
@@ -555,7 +667,14 @@ export async function ensureWhatsAppLead(
 
     const now = new Date().toISOString()
     const existing = await findLeadByPhone(supabase, phone)
-    const senderName = String(context.senderName || '').trim()
+    const senderName = cleanLeadNameCandidate(context.senderName)
+    const hasReliableExistingName = Boolean(existing?.name && !isGenericWhatsAppLeadName(existing.name))
+    const importedContactName = hasReliableExistingName
+        ? null
+        : await findImportedContactName(supabase, phone, context.instanceId)
+    const resolvedName = importedContactName?.name || senderName || null
+    const fallbackName = resolvedName || formatPhoneFallbackName(phone) || phone
+    const nameSource = importedContactName?.source || (senderName ? 'whatsapp_sender_name' : 'phone_fallback')
     const avatarCheckedAt = (existing?.metadata as any)?.whatsapp?.avatar_checked_at
     const avatarCheckedMs = avatarCheckedAt ? new Date(String(avatarCheckedAt)).getTime() : 0
     const shouldRefreshAvatar = Boolean(context.instanceToken)
@@ -573,6 +692,11 @@ export async function ensureWhatsAppLead(
         avatar_checked_at: shouldRefreshAvatar ? now : avatarCheckedAt || null,
         avatar_status: avatar.url ? 'available' : (shouldRefreshAvatar ? avatar.source : 'cached'),
         avatar_source: avatar.source,
+        resolved_name: fallbackName,
+        lead_name_source: nameSource,
+        lead_name_resolved_at: now,
+        imported_contact_id: importedContactName?.contact?.id || null,
+        imported_contact_name: importedContactName?.name || null,
     })
 
     if (existing?.id) {
@@ -589,8 +713,8 @@ export async function ensureWhatsAppLead(
             updateData.avatar_updated_at = now
         }
 
-        if (senderName && (!existing.name || /^whatsapp\s/i.test(String(existing.name)))) {
-            updateData.name = senderName
+        if (!existing.name || isGenericWhatsAppLeadName(existing.name)) {
+            updateData.name = fallbackName
         }
         if (!existing.acquired_via) updateData.acquired_via = context.acquiredVia || 'whatsapp'
         if (!['qualified', 'converted', 'closed'].includes(String(existing.funnel_stage || '').toLowerCase())) {
@@ -612,7 +736,7 @@ export async function ensureWhatsAppLead(
             await upsertBrokerLeadProfile(supabase, {
                 ...context,
                 leadId: data.id,
-                leadName: data.name || senderName || null,
+                leadName: data.name || fallbackName || null,
                 status: 'new',
                 lastMessageAt: now,
             }).catch(() => null)
@@ -620,7 +744,6 @@ export async function ensureWhatsAppLead(
         return data
     }
 
-    const fallbackName = senderName || `WhatsApp ${phone.slice(-4)}`
     const { data, error } = await supabase
         .from('leads')
         .insert({
@@ -848,9 +971,14 @@ export async function syncWhatsAppLeadSnapshot(
             timestamp: message?.timestamp || null,
         }))
         .filter((message: any) => message.content)
+    const inferredMessageName = inferLeadNameFromMessages(normalizedMessages)
+    const snapshotLeadName = cleanLeadNameCandidate(extracted.name)
+        || cleanLeadNameCandidate(params.senderName)
+        || inferredMessageName
+        || (!isGenericWhatsAppLeadName(lead.name) ? String(lead.name || '').trim() : null)
 
     const scoreSeed: Record<string, unknown> = {
-        lead_name: extracted.name || params.senderName || lead.name,
+        lead_name: snapshotLeadName || lead.name,
         interest: extracted.interest || extracted.purpose || extracted.finalidade || null,
         region: extracted.region || null,
         budget_max: parseBudgetToNumber(extracted.budget || extracted.orcamento),
@@ -876,7 +1004,7 @@ export async function syncWhatsAppLeadSnapshot(
     if (score >= 70 || params.shouldTransfer) leadUpdate.funnel_stage = 'qualified'
     else if (!['qualified', 'converted', 'closed'].includes(String(lead.funnel_stage || '').toLowerCase())) leadUpdate.funnel_stage = 'lead'
 
-    if (extracted.name && (!lead.name || /^whatsapp\s/i.test(String(lead.name)))) leadUpdate.name = extracted.name
+    if (snapshotLeadName && (!lead.name || isGenericWhatsAppLeadName(lead.name))) leadUpdate.name = snapshotLeadName
     const extractedEmail = normalizeEmail(extracted.email)
     if (extractedEmail) leadUpdate.email = extractedEmail
     if (extracted.summary) leadUpdate.ai_summary = extracted.summary
@@ -895,6 +1023,7 @@ export async function syncWhatsAppLeadSnapshot(
             updated_at: now,
             source: 'whatsapp_agent',
             lead_name: scoreSeed.lead_name || null,
+            lead_name_inferred_from_messages: inferredMessageName || null,
             interest: scoreSeed.interest || null,
             region: scoreSeed.region || null,
             budget: extracted.budget || extracted.orcamento || null,
