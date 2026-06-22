@@ -206,12 +206,17 @@ export default function MapPropertyPreviewCard({
         }
 
         const selectedNode = itemRefs.current[selectedId]
+        const trackNode = trackRef.current
         suppressScrollSelection.current = true
-        selectedNode?.scrollIntoView({
-            block: 'nearest',
-            inline: 'center',
-            behavior: 'auto',
-        })
+
+        if (selectedNode && trackNode) {
+            const nextScrollLeft = selectedNode.offsetLeft - ((trackNode.clientWidth - selectedNode.offsetWidth) / 2)
+            const maxScrollLeft = Math.max(0, trackNode.scrollWidth - trackNode.clientWidth)
+            trackNode.scrollTo({
+                left: Math.min(maxScrollLeft, Math.max(0, nextScrollLeft)),
+                behavior: 'auto',
+            })
+        }
 
         if (suppressScrollTimer.current !== null) window.clearTimeout(suppressScrollTimer.current)
         suppressScrollTimer.current = window.setTimeout(() => {
@@ -323,6 +328,8 @@ export default function MapPropertyPreviewCard({
                     bottom: 112px;
                     z-index: 1;
                     isolation: isolate;
+                    max-width: 100%;
+                    contain: layout paint;
                     pointer-events: none;
                 }
                 .map-property-preview::before {
@@ -333,17 +340,7 @@ export default function MapPropertyPreviewCard({
                     top: -22px;
                     bottom: -180px;
                     z-index: 0;
-                    background:
-                        linear-gradient(
-                            180deg,
-                            rgba(255,255,255,0.88) 0%,
-                            rgba(255,255,255,0.64) 20%,
-                            rgba(242,236,226,0.22) 38%,
-                            rgba(12,11,9,0.48) 68%,
-                            rgba(12,11,9,0.78) 100%
-                        );
-                    backdrop-filter: blur(5px) saturate(0.72) brightness(0.82);
-                    -webkit-backdrop-filter: blur(5px) saturate(0.72) brightness(0.82);
+                    display: none;
                     pointer-events: none;
                 }
                 .map-preview-track {
@@ -354,10 +351,12 @@ export default function MapPropertyPreviewCard({
                     overflow-x: auto;
                     overflow-y: visible;
                     padding: 0 16px 7px;
+                    max-width: 100%;
                     scroll-padding-inline: 16px;
                     scroll-snap-type: x mandatory;
                     scrollbar-width: none;
                     touch-action: pan-x;
+                    overscroll-behavior-x: contain;
                     pointer-events: auto;
                     -webkit-overflow-scrolling: touch;
                 }
@@ -368,33 +367,34 @@ export default function MapPropertyPreviewCard({
                     position: relative;
                     display: grid;
                     grid-template-columns: 150px minmax(0, 1fr);
-                    flex: 0 0 min(390px, calc(100vw - 48px));
+                    flex: 0 0 min(390px, 100%);
+                    max-width: 100%;
                     min-height: 158px;
                     overflow: hidden;
-                    border: 1px solid rgba(255,255,255,0.2);
+                    border: 1px solid rgba(184,148,95,0.28);
                     border-radius: 17px;
-                    background: rgba(17,16,14,0.94);
-                    color: #f7f1e7;
-                    box-shadow: 0 18px 48px rgba(0,0,0,0.34);
+                    background: rgba(255,253,248,0.98);
+                    color: #211d18;
+                    box-shadow: 0 18px 42px rgba(50,42,30,0.22);
                     scroll-snap-align: center;
                     transform: translateZ(0);
-                    backdrop-filter: blur(18px);
-                    -webkit-backdrop-filter: blur(18px);
+                    backdrop-filter: blur(14px);
+                    -webkit-backdrop-filter: blur(14px);
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
                 }
                 .map-preview-card:hover {
-                    border-color: rgba(223,193,142,0.56);
+                    border-color: rgba(184,148,95,0.48);
                 }
                 .map-preview-card.is-active {
-                    border-color: rgba(223,193,142,0.78);
+                    border-color: rgba(184,148,95,0.64);
                     transform: translateZ(0) scale(1);
-                    box-shadow: 0 18px 48px rgba(0,0,0,0.34), 0 0 0 1px rgba(223,193,142,0.18);
+                    box-shadow: 0 18px 42px rgba(50,42,30,0.24), 0 0 0 1px rgba(223,193,142,0.22);
                 }
                 .map-preview-media {
                     position: relative;
                     min-height: 158px;
                     overflow: hidden;
-                    background: #1f1b16;
+                    background: #e9dfcf;
                     touch-action: pan-y;
                 }
                 .map-preview-media img {
@@ -439,12 +439,13 @@ export default function MapPropertyPreviewCard({
                 }
                 .map-preview-badge {
                     padding: 4px 6px;
-                    border: 1px solid rgba(255,255,255,0.2);
+                    border: 1px solid rgba(184,148,95,0.34);
                     border-radius: 999px;
-                    background: rgba(12,12,12,0.7);
-                    color: #f4d99c;
+                    background: rgba(255,253,248,0.92);
+                    color: #8b642d;
                     font: 850 0.48rem/1 'Inter', sans-serif;
                     letter-spacing: 0.08em;
+                    box-shadow: 0 6px 16px rgba(38,31,22,0.16);
                     text-transform: uppercase;
                 }
                 .map-preview-photo-count {
@@ -472,7 +473,7 @@ export default function MapPropertyPreviewCard({
                     gap: 5px;
                     padding: 5px 8px;
                     border-radius: 999px;
-                    background: rgba(12,12,12,0.28);
+                    background: rgba(255,253,248,0.78);
                     transform: translateX(-50%);
                     backdrop-filter: blur(10px);
                     -webkit-backdrop-filter: blur(10px);
@@ -482,13 +483,13 @@ export default function MapPropertyPreviewCard({
                     width: 5px;
                     height: 5px;
                     border-radius: 50%;
-                    background: rgba(255,255,255,0.58);
+                    background: rgba(43,36,27,0.34);
                     box-shadow: 0 1px 3px rgba(0,0,0,0.28);
                 }
                 .map-preview-photo-dot.is-active {
                     width: 7px;
                     height: 7px;
-                    background: #dfc18e;
+                    background: #b8945f;
                 }
                 .map-preview-nav {
                     position: absolute;
@@ -527,6 +528,7 @@ export default function MapPropertyPreviewCard({
                     align-content: stretch;
                     min-width: 0;
                     padding: 11px 12px 10px;
+                    background: linear-gradient(180deg, rgba(255,253,248,0.99), rgba(248,242,231,0.99));
                 }
                 .map-preview-body-link {
                     display: grid;
@@ -540,7 +542,7 @@ export default function MapPropertyPreviewCard({
                     align-items: center;
                     gap: 5px;
                     min-width: 0;
-                    color: rgba(247,241,231,0.68);
+                    color: #81766a;
                     font: 750 0.55rem/1.25 'Inter', sans-serif;
                     letter-spacing: 0.08em;
                     text-transform: uppercase;
@@ -554,7 +556,7 @@ export default function MapPropertyPreviewCard({
                     display: -webkit-box;
                     margin: 0;
                     overflow: hidden;
-                    color: #fff8ea;
+                    color: #211d18;
                     font-family: 'Noto Serif', Georgia, serif;
                     font-size: 0.92rem;
                     font-weight: 750;
@@ -563,7 +565,7 @@ export default function MapPropertyPreviewCard({
                     -webkit-line-clamp: 2;
                 }
                 .map-preview-price {
-                    color: #f0cf88;
+                    color: #a9792f;
                     font: 900 0.88rem/1 'Inter', sans-serif;
                 }
                 .map-preview-meta-row {
@@ -583,15 +585,15 @@ export default function MapPropertyPreviewCard({
                     gap: 4px;
                     min-height: 23px;
                     padding: 0 7px;
-                    border: 1px solid rgba(255,255,255,0.09);
+                    border: 1px solid rgba(184,148,95,0.22);
                     border-radius: 999px;
-                    background: rgba(255,255,255,0.06);
-                    color: rgba(247,241,231,0.82);
+                    background: rgba(247,239,224,0.92);
+                    color: #5d5348;
                     font: 750 0.58rem/1 'Inter', sans-serif;
                     white-space: nowrap;
                 }
                 .map-preview-index {
-                    color: rgba(247,241,231,0.55);
+                    color: #8b8175;
                     font: 800 0.56rem/1.2 'Inter', sans-serif;
                     text-align: right;
                     white-space: nowrap;
@@ -604,10 +606,10 @@ export default function MapPropertyPreviewCard({
                     max-width: max-content;
                     margin: -1px auto 0;
                     padding: 5px 10px;
-                    border: 1px solid rgba(223,193,142,0.32);
+                    border: 1px solid rgba(184,148,95,0.3);
                     border-radius: 999px;
-                    background: rgba(17,16,14,0.76);
-                    color: rgba(255,248,234,0.78);
+                    background: rgba(255,253,248,0.94);
+                    color: #62584d;
                     font: 750 0.56rem/1 'Inter', sans-serif;
                     letter-spacing: 0.04em;
                     pointer-events: none;
@@ -627,15 +629,6 @@ export default function MapPropertyPreviewCard({
                         bottom: -26px;
                         height: 218px;
                         border-radius: 28px;
-                        background:
-                            linear-gradient(
-                                180deg,
-                                rgba(255,255,255,0) 0%,
-                                rgba(31,27,21,0.16) 30%,
-                                rgba(14,13,11,0.68) 100%
-                            );
-                        backdrop-filter: blur(4px) saturate(0.84) brightness(0.88);
-                        -webkit-backdrop-filter: blur(4px) saturate(0.84) brightness(0.88);
                     }
                     .map-preview-track {
                         padding-inline: 0;
@@ -667,7 +660,7 @@ export default function MapPropertyPreviewCard({
                     }
                     .map-preview-card {
                         grid-template-columns: 1fr;
-                        flex-basis: min(335px, calc(100vw - 54px));
+                        flex-basis: min(335px, 100%);
                         min-height: 0;
                         border-radius: 15px;
                     }
@@ -733,7 +726,7 @@ export default function MapPropertyPreviewCard({
                 }
                 @media (max-width: 380px) {
                     .map-preview-card {
-                        flex-basis: min(312px, calc(100vw - 46px));
+                        flex-basis: min(312px, 100%);
                     }
                     .map-preview-stats .map-preview-stat:nth-child(n+3) {
                         display: none;

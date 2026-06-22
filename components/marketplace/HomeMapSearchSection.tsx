@@ -1734,7 +1734,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .home-map-property-preview--compact :global(.map-preview-card) {
                     cursor: pointer;
-                    flex-basis: min(360px, calc(100vw - 68px));
+                    flex-basis: min(360px, 100%);
                 }
                 .legacy-map-search-panel[hidden] {
                     display: none !important;
