@@ -19,10 +19,52 @@ function extractAvatarUrl(payload: any): string | null {
         null
 }
 
+function normalizeDateValue(value: unknown) {
+    const text = String(value || '').trim()
+    return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null
+}
+
+function normalizeDateRange(startValue: unknown, endValue: unknown, fallbackValue?: unknown) {
+    let startDate = normalizeDateValue(startValue) || normalizeDateValue(fallbackValue)
+    let endDate = normalizeDateValue(endValue) || normalizeDateValue(fallbackValue) || startDate
+
+    if (!startDate && endDate) {
+        startDate = endDate
+    }
+
+    if (startDate && endDate && startDate > endDate) {
+        const previousStart = startDate
+        startDate = endDate
+        endDate = previousStart
+    }
+
+    return { startDate, endDate }
+}
+
+function listDatesInRange(startDate: string | null, endDate: string | null) {
+    if (!startDate) return []
+    const dates: string[] = []
+    const end = endDate || startDate
+    const cursor = new Date(`${startDate}T12:00:00.000Z`)
+    const endTime = new Date(`${end}T12:00:00.000Z`).getTime()
+
+    for (let guard = 0; guard < 45 && cursor.getTime() <= endTime; guard += 1) {
+        dates.push(cursor.toISOString().slice(0, 10))
+        cursor.setUTCDate(cursor.getUTCDate() + 1)
+    }
+
+    return dates
+}
+
 export async function GET(request: NextRequest) {
     try {
         const supabase = createAdminClient()
         const date = request.nextUrl.searchParams.get('date')
+        const { startDate, endDate } = normalizeDateRange(
+            request.nextUrl.searchParams.get('start_date'),
+            request.nextUrl.searchParams.get('end_date'),
+            date
+        )
         const instanceId = request.nextUrl.searchParams.get('instance_id')
 
         let reportsQuery = supabase
@@ -30,7 +72,8 @@ export async function GET(request: NextRequest) {
             .select('*')
             .order('generated_at', { ascending: false })
             .limit(50)
-        if (date) reportsQuery = reportsQuery.eq('report_date', date)
+        if (startDate && endDate) reportsQuery = reportsQuery.gte('report_date', startDate).lte('report_date', endDate)
+        else if (startDate) reportsQuery = reportsQuery.eq('report_date', startDate)
         if (instanceId) reportsQuery = reportsQuery.eq('instance_id', instanceId)
 
         const [reportsRes, instancesRes, jobsRes] = await Promise.all([
@@ -49,6 +92,21 @@ export async function GET(request: NextRequest) {
         if (reportsRes.error) throw reportsRes.error
         if (instancesRes.error) throw instancesRes.error
         if (jobsRes.error) throw jobsRes.error
+
+        let recentReportsQuery = supabase
+            .from('broker_attendance_reports')
+            .select('id, instance_id, report_date, score, coverage, generated_at')
+            .order('report_date', { ascending: false })
+            .order('generated_at', { ascending: false })
+            .limit(120)
+        if (instanceId) recentReportsQuery = recentReportsQuery.eq('instance_id', instanceId)
+
+        const recentReportsRes = await recentReportsQuery
+        if (recentReportsRes.error) throw recentReportsRes.error
+
+        const recentReportsWithMessages = (recentReportsRes.data || []).filter((report: any) =>
+            Number(report?.coverage?.messages_analyzed || 0) > 0
+        )
 
         const instances = instancesRes.data || []
         const brokerIds = Array.from(new Set(instances.map((instance: any) => instance.broker_id).filter(Boolean)))
@@ -132,6 +190,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             success: true,
             reports: reportsRes.data || [],
+            recent_reports_with_messages: recentReportsWithMessages,
             conversation_scores: scores,
             instances: enrichedInstances,
             jobs: jobsRes.data || [],
@@ -148,6 +207,9 @@ export async function POST(request: NextRequest) {
         const action = String(body?.action || 'sync_and_report')
         const instanceId = body?.instance_id || null
         const date = body?.date || null
+        const { startDate, endDate } = normalizeDateRange(body?.start_date, body?.end_date, date)
+        const reportDates = listDatesInRange(startDate, endDate)
+        const singleDate = reportDates[0] || date
         const force = body?.force !== false
         const includeHistorySync = body?.include_history_sync !== false
 
@@ -157,17 +219,45 @@ export async function POST(request: NextRequest) {
         }
 
         if (action === 'report') {
-            const result = await generateAttendanceReports({ instanceId, date, force })
+            if (reportDates.length <= 1) {
+                const result = await generateAttendanceReports({ instanceId, date: singleDate, force })
+                return NextResponse.json(result)
+            }
+
+            const reportRuns = []
+            for (const reportDate of reportDates) {
+                reportRuns.push(await generateAttendanceReports({ instanceId, date: reportDate, force }))
+            }
+            return NextResponse.json({
+                success: true,
+                dates: reportDates,
+                report_runs: reportRuns,
+                reports: reportRuns.flatMap((run) => run.reports || []),
+            })
+        }
+
+        if (reportDates.length <= 1) {
+            const result = await syncAndGenerateAttendanceReports({
+                instanceId,
+                date: singleDate,
+                force,
+                includeHistorySync,
+            })
             return NextResponse.json(result)
         }
 
-        const result = await syncAndGenerateAttendanceReports({
-            instanceId,
-            date,
-            force,
-            includeHistorySync,
+        const sync = await syncAttendanceForConnectedInstances({ instanceId, force, includeHistorySync })
+        const reportRuns = []
+        for (const reportDate of reportDates) {
+            reportRuns.push(await generateAttendanceReports({ instanceId, date: reportDate, force }))
+        }
+        return NextResponse.json({
+            success: true,
+            dates: reportDates,
+            sync,
+            report_runs: reportRuns,
+            reports: reportRuns.flatMap((run) => run.reports || []),
         })
-        return NextResponse.json(result)
     } catch (error: any) {
         console.error('[attendance-reports POST]', error)
         return NextResponse.json({ success: false, error: error?.message || 'Erro ao executar monitor de atendimento' }, { status: 500 })

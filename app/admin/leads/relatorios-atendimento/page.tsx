@@ -56,6 +56,15 @@ type ImportJob = {
     created_at?: string
 }
 
+type RecentReport = {
+    id: string
+    instance_id: string
+    report_date: string
+    score: number
+    coverage?: Record<string, any>
+    generated_at?: string
+}
+
 function todayDate() {
     return new Date().toISOString().slice(0, 10)
 }
@@ -74,6 +83,28 @@ function formatPhone(phone?: string | null) {
     if (!digits) return 'sem telefone'
     if (digits.length >= 12 && digits.startsWith('55')) return `+55 ${digits.slice(2, 4)} ${digits.slice(4)}`
     return `+${digits}`
+}
+
+function formatDateLabel(value?: string | null) {
+    if (!value) return ''
+    const [year, month, day] = value.split('-')
+    if (!year || !month || !day) return value
+    return `${day}/${month}/${year}`
+}
+
+function orderedDateRange(startDate: string, endDate: string) {
+    if (!startDate && endDate) {
+        return { startDate: endDate, endDate }
+    }
+    if (startDate && endDate && startDate > endDate) {
+        return { startDate: endDate, endDate: startDate }
+    }
+    return { startDate, endDate: endDate || startDate }
+}
+
+function isDateInRange(value: string, startDate: string, endDate: string) {
+    const range = orderedDateRange(startDate, endDate)
+    return value >= range.startDate && value <= range.endDate
 }
 
 function scoreColor(score: number) {
@@ -118,15 +149,25 @@ function getInitials(value?: string | null) {
 export default function AttendanceReportsPage() {
     const [loading, setLoading] = useState(true)
     const [running, setRunning] = useState(false)
-    const [date, setDate] = useState(todayDate())
+    const [startDate, setStartDate] = useState(todayDate())
+    const [endDate, setEndDate] = useState(todayDate())
     const [instanceId, setInstanceId] = useState('')
     const [reports, setReports] = useState<AttendanceReport[]>([])
     const [scores, setScores] = useState<ConversationScore[]>([])
     const [instances, setInstances] = useState<InstanceRow[]>([])
     const [jobs, setJobs] = useState<ImportJob[]>([])
+    const [recentReports, setRecentReports] = useState<RecentReport[]>([])
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     const instanceById = useMemo(() => new Map(instances.map((item) => [item.id, item])), [instances])
+    const latestReportWithMessages = recentReports[0] || null
+    const latestReportByInstance = useMemo(() => {
+        const map = new Map<string, RecentReport>()
+        recentReports.forEach((report) => {
+            if (!map.has(report.instance_id)) map.set(report.instance_id, report)
+        })
+        return map
+    }, [recentReports])
     const scoresByReport = useMemo(() => {
         const map = new Map<string, ConversationScore[]>()
         scores.forEach((score) => {
@@ -153,13 +194,16 @@ export default function AttendanceReportsPage() {
         }
     }, { conversations: 0, messages: 0, hot: 0, unanswered: 0 }), [reports])
 
-    async function load() {
+    async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string } = {}) {
         setLoading(true)
         setMessage(null)
         try {
+            const range = orderedDateRange(overrides.startDate ?? startDate, overrides.endDate ?? endDate)
+            const selectedInstanceId = overrides.instanceId ?? instanceId
             const params = new URLSearchParams()
-            if (date) params.set('date', date)
-            if (instanceId) params.set('instance_id', instanceId)
+            if (range.startDate) params.set('start_date', range.startDate)
+            if (range.endDate) params.set('end_date', range.endDate)
+            if (selectedInstanceId) params.set('instance_id', selectedInstanceId)
             const res = await fetch(`/api/admin/leads/attendance-reports?${params.toString()}`)
             const data = await res.json()
             if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao carregar relatórios')
@@ -167,6 +211,7 @@ export default function AttendanceReportsPage() {
             setScores(data.conversation_scores || [])
             setInstances(data.instances || [])
             setJobs(data.jobs || [])
+            setRecentReports(data.recent_reports_with_messages || [])
         } catch (error) {
             setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao carregar relatórios.' })
         } finally {
@@ -178,13 +223,15 @@ export default function AttendanceReportsPage() {
         setRunning(true)
         setMessage({ type: 'success', text: 'Sincronizando contatos, chats e mensagens. Isso pode levar alguns instantes.' })
         try {
+            const range = orderedDateRange(startDate, endDate)
             const res = await fetch('/api/admin/leads/attendance-reports', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'sync_and_report',
                     instance_id: instanceId || null,
-                    date,
+                    start_date: range.startDate,
+                    end_date: range.endDate,
                     force: true,
                     include_history_sync: true,
                 }),
@@ -220,19 +267,31 @@ export default function AttendanceReportsPage() {
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        style={controlStyle}
-                    />
+                    <label style={dateControlGroupStyle}>
+                        <span>De</span>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            style={controlStyle}
+                        />
+                    </label>
+                    <label style={dateControlGroupStyle}>
+                        <span>Ate</span>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            style={controlStyle}
+                        />
+                    </label>
                     <select value={instanceId} onChange={(e) => setInstanceId(e.target.value)} style={controlStyle}>
                         <option value="">Todas as instâncias</option>
                         {instances.map((inst) => (
                             <option key={inst.id} value={inst.id}>{getInstanceOptionLabel(inst)}</option>
                         ))}
                     </select>
-                    <button type="button" onClick={load} style={ghostButtonStyle}>
+                    <button type="button" onClick={() => { void load() }} style={ghostButtonStyle}>
                         <RefreshCw size={15} /> Atualizar
                     </button>
                     <button type="button" onClick={runNow} disabled={running} style={primaryButtonStyle(running)}>
@@ -264,6 +323,26 @@ export default function AttendanceReportsPage() {
                 <Metric icon={<AlertTriangle size={18} />} label="Sem última resposta" value={String(totals.unanswered)} />
             </section>
 
+            {reports.length > 0 && totals.messages === 0 && latestReportWithMessages && !isDateInRange(latestReportWithMessages.report_date, startDate, endDate) && (
+                <div style={dateHintStyle}>
+                    <div>
+                        Este periodo nao tem mensagens analisadas. O ultimo dia com historico foi {formatDateLabel(latestReportWithMessages.report_date)}
+                        {' '}com {Number(latestReportWithMessages.coverage?.messages_analyzed || 0)} mensagens.
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStartDate(latestReportWithMessages.report_date)
+                            setEndDate(latestReportWithMessages.report_date)
+                            void load({ startDate: latestReportWithMessages.report_date, endDate: latestReportWithMessages.report_date })
+                        }}
+                        style={dateHintButtonStyle}
+                    >
+                        Ver {formatDateLabel(latestReportWithMessages.report_date)}
+                    </button>
+                </div>
+            )}
+
             <section style={{ display: 'grid', gap: 12 }}>
                 {reports.length === 0 ? (
                     <div style={emptyStyle}>
@@ -281,6 +360,10 @@ export default function AttendanceReportsPage() {
                         cleanLabel(inst?.owner_phone || inst?.phone_number) ? formatPhone(inst?.owner_phone || inst?.phone_number) : null,
                     ].filter(Boolean)
                     const ownerPhotoUrl = cleanLabel(inst?.owner_photo_url)
+                    const latestInstanceReport = latestReportByInstance.get(report.instance_id)
+                    const showLatestInstanceHint = Number(coverage.messages_analyzed || 0) === 0
+                        && latestInstanceReport
+                        && !isDateInRange(latestInstanceReport.report_date, startDate, endDate)
                     return (
                         <article key={report.id} style={reportCardStyle}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -300,6 +383,9 @@ export default function AttendanceReportsPage() {
                                         <div style={technicalInstanceStyle}>
                                             Instancia: {inst?.instance_name || report.instance_id}
                                         </div>
+                                        <div style={reportDateStyle}>
+                                            Relatorio: {formatDateLabel(report.report_date)}
+                                        </div>
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
@@ -313,6 +399,21 @@ export default function AttendanceReportsPage() {
                             <p style={{ margin: '12px 0 0', color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem' }}>
                                 {report.summary}
                             </p>
+
+                            {showLatestInstanceHint && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setStartDate(latestInstanceReport.report_date)
+                                        setEndDate(latestInstanceReport.report_date)
+                                        void load({ startDate: latestInstanceReport.report_date, endDate: latestInstanceReport.report_date })
+                                    }}
+                                    style={instanceDateHintStyle}
+                                >
+                                    Ultimo dia com mensagens: {formatDateLabel(latestInstanceReport.report_date)}
+                                    {' '}({Number(latestInstanceReport.coverage?.messages_analyzed || 0)} mensagens)
+                                </button>
+                            )}
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: 8, marginTop: 12 }}>
                                 <MiniStat label="Contatos" value={coverage.contacts_synced || 0} />
@@ -433,6 +534,15 @@ const controlStyle: CSSProperties = {
     fontWeight: 700,
 }
 
+const dateControlGroupStyle: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    color: 'var(--text-muted)',
+    fontSize: '0.74rem',
+    fontWeight: 900,
+}
+
 const ghostButtonStyle: CSSProperties = {
     minHeight: 38,
     borderRadius: 8,
@@ -494,6 +604,45 @@ const emptyStyle: CSSProperties = {
     fontWeight: 700,
 }
 
+const dateHintStyle: CSSProperties = {
+    borderRadius: 8,
+    border: '1px solid rgba(14,165,233,0.22)',
+    background: 'rgba(14,165,233,0.08)',
+    color: '#075985',
+    padding: '11px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    flexWrap: 'wrap',
+    fontSize: '0.84rem',
+    fontWeight: 800,
+}
+
+const dateHintButtonStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.26)',
+    background: '#fff',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '7px 10px',
+    cursor: 'pointer',
+    fontSize: '0.78rem',
+    fontWeight: 900,
+}
+
+const instanceDateHintStyle: CSSProperties = {
+    marginTop: 10,
+    border: '1px solid rgba(14,165,233,0.2)',
+    background: 'rgba(14,165,233,0.07)',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '8px 10px',
+    cursor: 'pointer',
+    textAlign: 'left',
+    fontSize: '0.8rem',
+    fontWeight: 850,
+}
+
 const recommendationStyle: CSSProperties = {
     border: '1px solid rgba(180,83,9,0.24)',
     background: 'rgba(251,191,36,0.14)',
@@ -543,6 +692,13 @@ const technicalInstanceStyle: CSSProperties = {
     fontSize: '0.74rem',
     fontWeight: 700,
     overflowWrap: 'anywhere',
+}
+
+const reportDateStyle: CSSProperties = {
+    marginTop: 3,
+    color: 'var(--text-secondary)',
+    fontSize: '0.75rem',
+    fontWeight: 850,
 }
 
 const conversationStyle: CSSProperties = {
