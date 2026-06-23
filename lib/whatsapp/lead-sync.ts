@@ -411,6 +411,10 @@ export type LeadOutboundContext = {
     content_url: string | null
     cta_label: string | null
     message_preview: string | null
+    recommendation_score?: number | null
+    recommendation_reason?: string | null
+    recommendation_reasons?: string[]
+    recommendation_source_property_ids?: string[]
     sent_at: string
 }
 
@@ -429,6 +433,10 @@ function sanitizeOutboundContext(params: {
     contentUrl?: unknown
     ctaLabel?: unknown
     message?: unknown
+    recommendationScore?: unknown
+    recommendationReason?: unknown
+    recommendationReasons?: unknown
+    recommendationSourcePropertyIds?: unknown
     sentAt?: unknown
 }): LeadOutboundContext {
     const sentAt = String(params.sentAt || '').trim() || new Date().toISOString()
@@ -456,6 +464,16 @@ function sanitizeOutboundContext(params: {
         content_url: contentUrl || null,
         cta_label: compactString(params.ctaLabel, 80) || null,
         message_preview: compactString(messagePreview, 700) || null,
+        recommendation_score: Number.isFinite(Number(params.recommendationScore))
+            ? Math.max(0, Math.min(100, Math.round(Number(params.recommendationScore))))
+            : null,
+        recommendation_reason: compactString(params.recommendationReason, 300) || null,
+        recommendation_reasons: Array.isArray(params.recommendationReasons)
+            ? params.recommendationReasons.map(item => compactString(item, 120)).filter(Boolean).slice(0, 8)
+            : [],
+        recommendation_source_property_ids: Array.isArray(params.recommendationSourcePropertyIds)
+            ? params.recommendationSourcePropertyIds.map(item => compactString(item, 80)).filter(Boolean).slice(0, 12)
+            : [],
         sent_at: sentAt,
     }
 }
@@ -487,6 +505,10 @@ export function getRecentLeadOutboundContexts(lead: any): LeadOutboundContext[] 
             contentUrl: item.content_url,
             ctaLabel: item.cta_label,
             message: item.message_preview,
+            recommendationScore: item.recommendation_score,
+            recommendationReason: item.recommendation_reason,
+            recommendationReasons: item.recommendation_reasons,
+            recommendationSourcePropertyIds: item.recommendation_source_property_ids,
             sentAt: item.sent_at,
         }))
         .filter((item) => {
@@ -527,6 +549,8 @@ export function buildRecentLeadOutboundContextPrompt(lead: any, latestUserMessag
         latest.content_summary ? `- Resumo do conteudo: ${latest.content_summary}` : '',
         latest.content_url ? `- Link enviado ao lead: ${latest.content_url}` : '',
         latest.cta_label ? `- Texto do botao enviado: ${latest.cta_label}` : '',
+        latest.recommendation_score != null ? `- Score contextual da recomendacao: ${latest.recommendation_score}%.` : '',
+        latest.recommendation_reason ? `- Motivo contextual do envio: ${latest.recommendation_reason}.` : '',
         `- Canal de envio: ${latest.channel}; agente distribuidor: ${latest.source_agent || 'gabriel_distribuicao'}; origem: ${latest.origin_agent || 'ecossistema'}.`,
         latest.sent_at ? `- Enviado em: ${latest.sent_at}` : '',
         '',
@@ -559,6 +583,10 @@ export async function recordLeadOutboundContext(
         contentUrl?: unknown
         ctaLabel?: unknown
         message?: unknown
+        recommendationScore?: unknown
+        recommendationReason?: unknown
+        recommendationReasons?: unknown
+        recommendationSourcePropertyIds?: unknown
         sentAt?: unknown
     }
 ) {

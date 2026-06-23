@@ -686,6 +686,7 @@ const BEHAVIOR_GROUPS = [
             'editorial_distribution_email_enabled',
             'editorial_distribution_whatsapp_enabled',
             'editorial_distribution_push_enabled',
+            'editorial_distribution_message_review_required',
             'editorial_distribution_recommendations_enabled',
         ],
     },

@@ -29,6 +29,7 @@ const configKeys = [
   'editorial_distribution_email_enabled',
   'editorial_distribution_whatsapp_enabled',
   'editorial_distribution_push_enabled',
+  'editorial_distribution_message_review_required',
   'editorial_distribution_whatsapp_interval_minutes',
   'editorial_distribution_whatsapp_daily_limit',
   'editorial_distribution_push_interval_minutes',

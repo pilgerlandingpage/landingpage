@@ -27,6 +27,7 @@ type EditorialConfig = {
     agentEnabled: boolean
     autopilot: boolean
     approvalRequired: boolean
+    messageReviewRequired: boolean
     recommendationsEnabled: boolean
     emailEnabled: boolean
     whatsappEnabled: boolean
@@ -73,6 +74,7 @@ const EDITORIAL_TRIGGER_TYPES: EditorialTrigger[] = ['blog_published', 'news_pub
 const DISTRIBUTION_TRIGGER_TYPES: DistributionTrigger[] = ['blog_published', 'news_published', 'property_recommendation']
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TIME_ZONE = 'America/Sao_Paulo'
+const MIN_CONTEXTUAL_RECOMMENDATION_SCORE = 50
 const PROPERTY_RECOMMENDATION_FIELDS = [
     'id',
     'title',
@@ -332,6 +334,7 @@ async function loadConfigMap(supabase: SupabaseAdminLike) {
         'email_agent_allowed_end_time',
         'email_agent_default_audience',
         'email_agent_templates',
+        'editorial_distribution_message_review_required',
         'editorial_distribution_recommendations_enabled',
         'editorial_distribution_recommendation_min_score',
         'editorial_distribution_recommendation_batch_limit',
@@ -361,6 +364,7 @@ async function loadEditorialConfig(supabase: SupabaseAdminLike): Promise<Editori
         agentEnabled: config.email_agent_enabled !== 'false',
         autopilot: config.email_agent_autopilot === 'true',
         approvalRequired: config.email_agent_require_approval !== 'false',
+        messageReviewRequired: config.editorial_distribution_message_review_required !== 'false',
         recommendationsEnabled: config.editorial_distribution_recommendations_enabled !== 'false',
         emailEnabled: config.editorial_distribution_email_enabled !== 'false',
         whatsappEnabled: config.editorial_distribution_whatsapp_enabled !== 'false',
@@ -372,7 +376,10 @@ async function loadEditorialConfig(supabase: SupabaseAdminLike): Promise<Editori
         emailDailyLimit: normalizePositiveInt(config.email_agent_daily_limit, 150, 1, 5000),
         whatsappDailyLimit: normalizePositiveInt(config.editorial_distribution_whatsapp_daily_limit, 120, 1, 5000),
         pushDailyLimit: normalizePositiveInt(config.editorial_distribution_push_daily_limit, 300, 1, 10000),
-        recommendationMinScore: normalizePositiveInt(config.editorial_distribution_recommendation_min_score, 45, 1, 100),
+        recommendationMinScore: Math.max(
+            MIN_CONTEXTUAL_RECOMMENDATION_SCORE,
+            normalizePositiveInt(config.editorial_distribution_recommendation_min_score, MIN_CONTEXTUAL_RECOMMENDATION_SCORE, 1, 100)
+        ),
         recommendationBatchLimit: normalizePositiveInt(config.editorial_distribution_recommendation_batch_limit, 25, 1, 500),
         minHoursBetweenLeadMessages: normalizePositiveInt(config.email_agent_min_hours_between_lead_messages, 24, 1, 720),
         allowedStartTime: config.email_agent_allowed_start_time || '09:00',
@@ -381,6 +388,18 @@ async function loadEditorialConfig(supabase: SupabaseAdminLike): Promise<Editori
         whatsappTemplates: parseWhatsAppEditorialTemplatesJson(config.editorial_distribution_whatsapp_templates || getDefaultWhatsAppEditorialTemplatesJson()),
         pushTemplates: parsePushEditorialTemplatesJson(config.editorial_distribution_push_templates || getDefaultPushEditorialTemplatesJson()),
     }
+}
+
+function requiresMessageReview(config: EditorialConfig) {
+    return config.messageReviewRequired || config.approvalRequired || !config.autopilot
+}
+
+function initialQueueStatus(config: EditorialConfig) {
+    return requiresMessageReview(config) ? 'waiting' : 'queued'
+}
+
+function initialApprovalStatus(config: EditorialConfig) {
+    return requiresMessageReview(config) ? 'awaiting_approval' : 'approved'
 }
 
 function templateForTrigger(config: EditorialConfig, trigger: EditorialTrigger, audience: string) {
@@ -437,6 +456,246 @@ async function loadAudienceLeads(supabase: SupabaseAdminLike, audience: string) 
     if (error) throw error
 
     return (data || []).filter((lead: any) => leadMatchesAudience(lead, audience))
+}
+
+type LeadChannelAvailability = Record<EditorialChannel, boolean>
+
+type LeadRecommendationMatch = {
+    score: number
+    contactScore: number
+    intentScore: number
+    contentScore: number
+    reasons: string[]
+    channels: LeadChannelAvailability
+    sourcePropertyIds: string[]
+}
+
+function leadChannelAvailability(lead: Record<string, any>): LeadChannelAvailability {
+    const metadata = metadataRecord(lead.metadata)
+    const visitorId = normalizeText(lead.visitor_id || metadata.visitor_id)
+    return {
+        email: Boolean(normalizeEmail(lead.email)),
+        whatsapp: Boolean(normalizeWhatsAppPhone(lead.phone_e164 || lead.phone)),
+        push: Boolean(
+            visitorId &&
+            (lead.push_subscribed === true || lead.push_subscribed_lead === true || metadata.push_subscribed_at)
+        ),
+    }
+}
+
+function countSummaryEvents(summary: Record<string, any>, eventTypes: string[]) {
+    const counts = metadataRecord(summary.event_counts)
+    return eventTypes.reduce((total, eventType) => total + Math.max(0, Number(counts[eventType] || 0)), 0)
+}
+
+function recentActivityBoost(value: unknown) {
+    const ms = new Date(String(value || '')).getTime()
+    if (!Number.isFinite(ms)) return 0
+    const ageDays = (Date.now() - ms) / (1000 * 60 * 60 * 24)
+    if (ageDays <= 7) return 8
+    if (ageDays <= 30) return 5
+    if (ageDays <= 90) return 2
+    return 0
+}
+
+function scoreLeadContactReadiness(lead: Record<string, any>, signals: ReturnType<typeof collectLeadPropertySignalIds>) {
+    const channels = leadChannelAvailability(lead)
+    const summary = leadBehaviorSummary(lead)
+    const reasons: string[] = []
+    let score = 0
+
+    if (channels.email) {
+        score += 18
+        reasons.push('deixou e-mail')
+    }
+    if (channels.whatsapp) {
+        score += 22
+        reasons.push('deixou WhatsApp')
+    }
+    if (channels.push) {
+        score += 18
+        reasons.push('aceitou push')
+    }
+
+    const whatsappEvents = countSummaryEvents(summary, [
+        'chat_opened',
+        'whatsapp_link_click',
+        'whatsapp_property_click',
+        'property_feed_message_clicked',
+        'property_feed_whatsapp_clicked',
+        'property_feed_menu_specialist_clicked',
+    ])
+    if (signals.whatsapp.length || whatsappEvents) {
+        score += 15
+        reasons.push('chamou ou clicou no WhatsApp')
+    }
+
+    return {
+        score: Math.min(40, score),
+        reasons,
+        channels,
+    }
+}
+
+function scoreLeadIntentReadiness(
+    lead: Record<string, any>,
+    signals: ReturnType<typeof collectLeadPropertySignalIds>,
+    referenceProperties: Record<string, any>[]
+) {
+    const summary = leadBehaviorSummary(lead)
+    const reasons: string[] = []
+    let score = Math.min(24, Math.round(Number(summary.engagement_score || lead.lead_score || 0) * 0.45))
+    const sourceIds = uniqueStrings([
+        ...signals.liked,
+        ...signals.whatsapp,
+        ...signals.details,
+        ...signals.viewed,
+    ], 24)
+
+    if (sourceIds.length) {
+        score += Math.min(10, sourceIds.length * 3)
+        reasons.push(`${sourceIds.length} imovel(is) com interacao`)
+    }
+    if (signals.details.length) {
+        score += 6
+        reasons.push('abriu detalhes de imovel')
+    }
+    if (signals.liked.length) {
+        score += 8
+        reasons.push('favoritou imovel')
+    }
+    if (signals.whatsapp.length) {
+        score += 10
+        reasons.push('acionou WhatsApp em imovel')
+    }
+
+    const maxPrice = Math.max(0, ...referenceProperties.map(property => Number(property.price || 0)).filter(Number.isFinite))
+    if (maxPrice >= 10000000) {
+        score += 14
+        reasons.push('interesse em imovel de R$ 10 mi+')
+    } else if (maxPrice >= 5000000) {
+        score += 10
+        reasons.push('interesse em imovel premium')
+    }
+
+    const lastActivityBoost = recentActivityBoost(summary.last_activity_at)
+    if (lastActivityBoost) {
+        score += lastActivityBoost
+        reasons.push('interacao recente')
+    }
+
+    return {
+        score: Math.min(40, score),
+        reasons,
+        sourcePropertyIds: sourceIds,
+    }
+}
+
+function textIncludesAny(text: string, values: Iterable<string>) {
+    for (const value of values) {
+        const normalized = normalizeComparable(value)
+        if (normalized && text.includes(normalized)) return normalized
+    }
+    return ''
+}
+
+function editorialContentMatchText(post: Record<string, any>) {
+    return normalizeComparable([
+        post.title,
+        post.subtitle,
+        post.summary,
+        post.excerpt,
+        post.content_markdown,
+        post.content_html,
+        post.category,
+        post.primary_keyword,
+        post.seo_title,
+        safeArray(post.tags).join(' '),
+    ].filter(Boolean).join(' '))
+}
+
+function scoreEditorialContentForLead(
+    post: Record<string, any>,
+    contentType: EditorialContentType,
+    lead: Record<string, any>,
+    referenceProperties: Record<string, any>[]
+): LeadRecommendationMatch {
+    const signals = collectLeadPropertySignalIds(lead)
+    const contact = scoreLeadContactReadiness(lead, signals)
+    const intent = scoreLeadIntentReadiness(lead, signals, referenceProperties)
+    const profile = buildLeadPropertyProfile(lead, referenceProperties)
+    const text = editorialContentMatchText(post)
+    const reasons: string[] = [...contact.reasons, ...intent.reasons]
+    let contentScore = 0
+
+    const cityMatch = textIncludesAny(text, profile.cities)
+    if (cityMatch) {
+        contentScore += 24
+        reasons.push(`tema ligado a ${cityMatch}`)
+    }
+    const neighborhoodMatch = textIncludesAny(text, profile.neighborhoods)
+    if (neighborhoodMatch) {
+        contentScore += 26
+        reasons.push(`bairro citado: ${neighborhoodMatch}`)
+    }
+    const propertyTypeMatch = textIncludesAny(text, profile.propertyTypes)
+    if (propertyTypeMatch) {
+        contentScore += 12
+        reasons.push(`tipo de imovel compatível: ${propertyTypeMatch}`)
+    }
+
+    if (profile.targetPrice && profile.targetPrice >= 5000000 && /luxo|alto padrao|premium|exclusiv|invest|valoriz|balneario|praia brava/.test(text)) {
+        contentScore += profile.targetPrice >= 10000000 ? 22 : 18
+        reasons.push('conteudo alinhado a interesse premium')
+    }
+    if (profile.tags.has('investimento') && /invest|renda|rentabilidade|valoriz|liquidez/.test(text)) {
+        contentScore += 18
+        reasons.push('tema de investimento compatível')
+    }
+    if (profile.tags.has('alto-padrao') && /luxo|alto padrao|premium|exclusiv/.test(text)) {
+        contentScore += 14
+        reasons.push('tema de alto padrao compatível')
+    }
+    if (profile.tags.has('lancamento') && /lancamento|na planta|obra|entrega/.test(text)) {
+        contentScore += 10
+        reasons.push('tema de lancamento compatível')
+    }
+    if (contentType === 'news' && /mercado|noticia|valoriz|invest|balneario|itapema|praia brava/.test(text)) {
+        contentScore += 8
+    }
+
+    return {
+        score: Math.min(100, contact.score + intent.score + Math.min(55, contentScore)),
+        contactScore: contact.score,
+        intentScore: intent.score,
+        contentScore: Math.min(55, contentScore),
+        reasons: uniqueStrings(reasons, 8),
+        channels: contact.channels,
+        sourcePropertyIds: intent.sourcePropertyIds,
+    }
+}
+
+function baseLeadRecommendationMatch(
+    lead: Record<string, any>,
+    referenceProperties: Record<string, any>[]
+): LeadRecommendationMatch {
+    const signals = collectLeadPropertySignalIds(lead)
+    const contact = scoreLeadContactReadiness(lead, signals)
+    const intent = scoreLeadIntentReadiness(lead, signals, referenceProperties)
+    const score = Math.min(100, contact.score + intent.score)
+    return {
+        score,
+        contactScore: contact.score,
+        intentScore: intent.score,
+        contentScore: 0,
+        reasons: uniqueStrings([...contact.reasons, ...intent.reasons], 8),
+        channels: contact.channels,
+        sourcePropertyIds: intent.sourcePropertyIds,
+    }
+}
+
+function contextualReason(match: LeadRecommendationMatch, fallback: string) {
+    return match.reasons.length ? match.reasons.slice(0, 4).join(', ') : fallback
 }
 
 function buildWhatsAppCtaUrl(post: Record<string, any>, contentType: EditorialContentType, lead: Record<string, any>, ctaPhone: string) {
@@ -505,8 +764,9 @@ async function buildQueueContext(params: {
     campaignId: string
     whatsappCtaPhone: string
     ecosystemSummary?: string
+    match: LeadRecommendationMatch
 }) {
-    const { post, lead, config, template, whatsappTemplate, pushTemplate, contentType, trigger, channel, contentUrl, campaignId, whatsappCtaPhone, ecosystemSummary } = params
+    const { post, lead, config, template, whatsappTemplate, pushTemplate, contentType, trigger, channel, contentUrl, campaignId, whatsappCtaPhone, ecosystemSummary, match } = params
     const defaultCtaLabel = contentType === 'news' ? 'Ler noticia' : 'Ler artigo'
     const ctaLabel = channel === 'whatsapp'
         ? (whatsappTemplate?.ctaLabel || defaultCtaLabel)
@@ -614,10 +874,18 @@ async function buildQueueContext(params: {
         link_cta: trackedContentUrl,
         link_whatsapp: whatsappUrl,
         cta_label: ctaLabel,
-        approval_required: config.approvalRequired || !config.autopilot,
-        approval_status: config.approvalRequired || !config.autopilot ? 'awaiting_approval' : 'approved',
+        recommendation_score: match.score,
+        recommendation_contact_score: match.contactScore,
+        recommendation_intent_score: match.intentScore,
+        recommendation_content_score: match.contentScore,
+        recommendation_reason: contextualReason(match, 'interacao do lead com imoveis relacionados'),
+        recommendation_source_property_ids: match.sourcePropertyIds,
+        recommendation_reasons: match.reasons,
+        editable_message_status: requiresMessageReview(config) ? 'draft' : 'auto_approved',
+        approval_required: requiresMessageReview(config),
+        approval_status: initialApprovalStatus(config),
         ecosystem_summary: ecosystemSummary || null,
-        created_by_agent: 'gabriel_correio',
+        created_by_agent: 'gabriel_distribuicao',
         created_at: new Date().toISOString(),
     }
 }
@@ -735,12 +1003,13 @@ export async function enqueueEditorialCampaignForPost(
             console.warn('[editorial-distribution] ecosystem context unavailable:', error?.message || error)
             return ''
         })
-    const queueStatus = config.approvalRequired || !config.autopilot ? 'waiting' : 'queued'
+    const queueStatus = initialQueueStatus(config)
     const baseSchedule = nextWindowStart(config)
     let emailIndex = 0
     let whatsappIndex = 0
     let pushIndex = 0
     const rows: any[] = []
+    const skipped: Record<string, number> = {}
 
     for (const lead of leads) {
         const leadName = normalizeText(lead.name) || 'Lead'
@@ -748,16 +1017,44 @@ export async function enqueueEditorialCampaignForPost(
         const leadEmail = normalizeEmail(lead.email)
         const leadMetadata = metadataRecord(lead.metadata)
         const leadVisitorId = normalizeText(lead.visitor_id || leadMetadata.visitor_id)
-        const leadHasPush = Boolean(
-            leadVisitorId &&
-            (lead.push_subscribed === true || lead.push_subscribed_lead === true || leadMetadata.push_subscribed_at)
-        )
+        const signals = collectLeadPropertySignalIds(lead)
+        const sourceIds = uniqueStrings([
+            ...signals.liked,
+            ...signals.whatsapp,
+            ...signals.details,
+            ...signals.viewed,
+        ], 24)
+
+        if (!sourceIds.length) {
+            skipped.no_property_signal = (skipped.no_property_signal || 0) + 1
+            continue
+        }
+
+        const referenceProperties = await loadReferenceProperties(supabase, sourceIds)
+        if (!referenceProperties.length) {
+            skipped.no_reference_property = (skipped.no_reference_property || 0) + 1
+            continue
+        }
+
+        const match = scoreEditorialContentForLead(post, contentType, lead, referenceProperties)
+        if (!match.channels.email && !match.channels.whatsapp && !match.channels.push) {
+            skipped.no_contact_channel = (skipped.no_contact_channel || 0) + 1
+            continue
+        }
+        if (!params.force && match.score < config.recommendationMinScore) {
+            skipped.low_context_score = (skipped.low_context_score || 0) + 1
+            continue
+        }
+        if (!params.force && match.contentScore < 10) {
+            skipped.weak_content_match = (skipped.weak_content_match || 0) + 1
+            continue
+        }
 
         const emailTargetKey = leadChannelTargetKey('email', lead)
         const whatsappTargetKey = leadChannelTargetKey('whatsapp', lead)
         const pushTargetKey = leadChannelTargetKey('push', lead)
 
-        if (config.emailEnabled && leadEmail && !existingCampaign.keys.has(emailTargetKey)) {
+        if (config.emailEnabled && match.channels.email && leadEmail && !existingCampaign.keys.has(emailTargetKey)) {
             const context = await buildQueueContext({
                 post,
                 lead,
@@ -772,6 +1069,7 @@ export async function enqueueEditorialCampaignForPost(
                 campaignId,
                 whatsappCtaPhone,
                 ecosystemSummary,
+                match,
             })
             rows.push({
                 lead_id: lead.id,
@@ -787,7 +1085,7 @@ export async function enqueueEditorialCampaignForPost(
             if (emailTargetKey) existingCampaign.keys.add(emailTargetKey)
         }
 
-        if (config.whatsappEnabled && leadPhone && !existingCampaign.keys.has(whatsappTargetKey)) {
+        if (config.whatsappEnabled && match.channels.whatsapp && leadPhone && !existingCampaign.keys.has(whatsappTargetKey)) {
             const context = await buildQueueContext({
                 post,
                 lead,
@@ -802,6 +1100,7 @@ export async function enqueueEditorialCampaignForPost(
                 campaignId,
                 whatsappCtaPhone,
                 ecosystemSummary,
+                match,
             })
             rows.push({
                 lead_id: lead.id,
@@ -817,7 +1116,7 @@ export async function enqueueEditorialCampaignForPost(
             if (whatsappTargetKey) existingCampaign.keys.add(whatsappTargetKey)
         }
 
-        if (config.pushEnabled && leadHasPush && !existingCampaign.keys.has(pushTargetKey)) {
+        if (config.pushEnabled && match.channels.push && leadVisitorId && !existingCampaign.keys.has(pushTargetKey)) {
             const context = await buildQueueContext({
                 post,
                 lead,
@@ -832,6 +1131,7 @@ export async function enqueueEditorialCampaignForPost(
                 campaignId,
                 whatsappCtaPhone,
                 ecosystemSummary,
+                match,
             })
             rows.push({
                 lead_id: lead.id,
@@ -854,6 +1154,7 @@ export async function enqueueEditorialCampaignForPost(
             skipped: true,
             reason: existingCampaign.count > 0 ? 'campaign_already_exists' : 'no_recipients',
             campaign_id: campaignId,
+            skipped_details: skipped,
         }
     }
 
@@ -875,7 +1176,10 @@ export async function enqueueEditorialCampaignForPost(
             content_type: contentType,
             source: params.source || 'publish',
             existing_campaign_rows: existingCampaign.count,
-            approval_required: config.approvalRequired || !config.autopilot,
+            approval_required: requiresMessageReview(config),
+            recommendation_mode: 'contextual_lead_match',
+            min_score: config.recommendationMinScore,
+            skipped,
             email: emailIndex,
             whatsapp: whatsappIndex,
             push: pushIndex,
@@ -890,7 +1194,8 @@ export async function enqueueEditorialCampaignForPost(
         email: emailIndex,
         whatsapp: whatsappIndex,
         push: pushIndex,
-        approval_required: config.approvalRequired || !config.autopilot,
+        approval_required: requiresMessageReview(config),
+        skipped,
     }
 }
 
@@ -1179,8 +1484,9 @@ function buildPropertyRecommendationContext(params: {
     score: number
     reason: string
     ecosystemSummary?: string
+    match: LeadRecommendationMatch
 }) {
-    const { property, lead, config, channel, campaignId, contentUrl, score, reason, ecosystemSummary } = params
+    const { property, lead, config, channel, campaignId, contentUrl, score, reason, ecosystemSummary, match } = params
     const leadName = normalizeText(lead.name) || 'tudo bem'
     const title = normalizePostText(property.title || 'Imovel selecionado', 180)
     const price = formatPropertyPrice(property)
@@ -1260,7 +1566,12 @@ function buildPropertyRecommendationContext(params: {
         property_id: property.id,
         property_title: title,
         recommendation_score: score,
+        recommendation_contact_score: match.contactScore,
+        recommendation_intent_score: match.intentScore,
+        recommendation_content_score: match.contentScore,
         recommendation_reason: reason,
+        recommendation_source_property_ids: match.sourcePropertyIds,
+        recommendation_reasons: match.reasons,
         audience: config.audience,
         channel,
         target_email: normalizeEmail(lead.email),
@@ -1281,8 +1592,9 @@ function buildPropertyRecommendationContext(params: {
         link_cta: trackedContentUrl,
         link_whatsapp: '',
         cta_label: ctaLabel,
-        approval_required: config.approvalRequired || !config.autopilot,
-        approval_status: config.approvalRequired || !config.autopilot ? 'awaiting_approval' : 'approved',
+        editable_message_status: requiresMessageReview(config) ? 'draft' : 'auto_approved',
+        approval_required: requiresMessageReview(config),
+        approval_status: initialApprovalStatus(config),
         ecosystem_summary: ecosystemSummary || null,
         created_by_agent: 'gabriel_distribuicao',
         created_at: new Date().toISOString(),
@@ -1317,7 +1629,7 @@ export async function enqueueBehavioralPropertyRecommendations(
     const candidates = await loadRecommendationCandidates(supabase)
     if (!candidates.length) return { queued: false, skipped: true, reason: 'no_active_properties' }
 
-    const queueStatus = config.approvalRequired || !config.autopilot ? 'waiting' : 'queued'
+    const queueStatus = initialQueueStatus(config)
     const baseSchedule = nextWindowStart(config)
     const ecosystemSummary = await getAgentEcosystemContext({ supabase: supabase as any, agent: 'distribution', days: 30, limit: 100 })
         .then(context => buildAgentContextBrief(context))
@@ -1335,13 +1647,6 @@ export async function enqueueBehavioralPropertyRecommendations(
 
     for (const lead of leads) {
         if (matchedLeads >= batchLimit) break
-        const summary = leadBehaviorSummary(lead)
-        const behaviorScore = Number(summary.engagement_score || lead.lead_score || 0)
-        if (!options.force && behaviorScore < config.recommendationMinScore) {
-            skipped.low_score = (skipped.low_score || 0) + 1
-            continue
-        }
-
         const signals = collectLeadPropertySignalIds(lead)
         const sourceIds = uniqueStrings([
             ...signals.liked,
@@ -1360,10 +1665,27 @@ export async function enqueueBehavioralPropertyRecommendations(
             continue
         }
 
+        const match = baseLeadRecommendationMatch(lead, referenceProperties)
+        if (!match.channels.email && !match.channels.whatsapp && !match.channels.push) {
+            skipped.no_contact_channel = (skipped.no_contact_channel || 0) + 1
+            continue
+        }
+        if (!options.force && match.score < config.recommendationMinScore) {
+            skipped.low_context_score = (skipped.low_context_score || 0) + 1
+            continue
+        }
+
         const profile = buildLeadPropertyProfile(lead, referenceProperties)
         const scored = candidates
-            .map((property: any): { property: Record<string, any>; score: number } => ({ property, score: scoreRecommendedProperty(property, profile) }))
-            .filter((item: { property: Record<string, any>; score: number }) => item.score >= config.recommendationMinScore)
+            .map((property: any): { property: Record<string, any>; propertyScore: number; score: number } => {
+                const propertyScore = scoreRecommendedProperty(property, profile)
+                return {
+                    property,
+                    propertyScore,
+                    score: Math.min(100, Math.round((match.score * 0.45) + (Math.min(100, propertyScore) * 0.55))),
+                }
+            })
+            .filter((item: { property: Record<string, any>; propertyScore: number; score: number }) => item.propertyScore > 0 && item.score >= config.recommendationMinScore)
             .sort((a: { property: Record<string, any>; score: number }, b: { property: Record<string, any>; score: number }) => (
                 b.score - a.score ||
                 new Date(b.property?.created_at || 0).getTime() - new Date(a.property?.created_at || 0).getTime()
@@ -1392,12 +1714,13 @@ export async function enqueueBehavioralPropertyRecommendations(
         )
         const contentUrl = propertyRecommendationUrl(selected.property, origin)
         const reason = [
+            contextualReason(match, ''),
             profile.neighborhoods.size ? `bairro semelhante aos imoveis visitados` : '',
             profile.propertyTypes.size ? `tipo de imovel semelhante` : '',
             profile.targetPrice ? `faixa de valor parecida` : '',
         ].filter(Boolean).join(', ') || 'comportamento recente do lead'
 
-        if (config.emailEnabled && leadEmail) {
+        if (config.emailEnabled && match.channels.email && leadEmail) {
             const context = buildPropertyRecommendationContext({
                 property: selected.property,
                 lead,
@@ -1408,6 +1731,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 score: selected.score,
                 reason,
                 ecosystemSummary,
+                match: { ...match, score: selected.score, contentScore: Math.min(55, selected.propertyScore), reasons: uniqueStrings([...match.reasons, reason], 8) },
             })
             rows.push({
                 lead_id: lead.id,
@@ -1422,7 +1746,7 @@ export async function enqueueBehavioralPropertyRecommendations(
             emailIndex += 1
         }
 
-        if (config.whatsappEnabled && leadPhone) {
+        if (config.whatsappEnabled && match.channels.whatsapp && leadPhone) {
             const context = buildPropertyRecommendationContext({
                 property: selected.property,
                 lead,
@@ -1433,6 +1757,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 score: selected.score,
                 reason,
                 ecosystemSummary,
+                match: { ...match, score: selected.score, contentScore: Math.min(55, selected.propertyScore), reasons: uniqueStrings([...match.reasons, reason], 8) },
             })
             rows.push({
                 lead_id: lead.id,
@@ -1447,7 +1772,7 @@ export async function enqueueBehavioralPropertyRecommendations(
             whatsappIndex += 1
         }
 
-        if (config.pushEnabled && leadHasPush) {
+        if (config.pushEnabled && match.channels.push && leadHasPush) {
             const context = buildPropertyRecommendationContext({
                 property: selected.property,
                 lead,
@@ -1458,6 +1783,7 @@ export async function enqueueBehavioralPropertyRecommendations(
                 score: selected.score,
                 reason,
                 ecosystemSummary,
+                match: { ...match, score: selected.score, contentScore: Math.min(55, selected.propertyScore), reasons: uniqueStrings([...match.reasons, reason], 8) },
             })
             rows.push({
                 lead_id: lead.id,
@@ -1545,13 +1871,14 @@ async function logEditorialEvent(supabase: SupabaseAdminLike, payload: {
 
     const campaignId = normalizeText(metadata.campaign_id)
     const postId = normalizeText(metadata.post_id)
+    const contentType = normalizeText(metadata.content_type)
     await recordEcosystemEvent({
         supabase: supabase as any,
         eventType: payload.eventType,
         actorType: 'agent',
         leadId: payload.leadId || null,
         entityType: postId
-            ? 'blog_post'
+            ? (contentType === 'property' ? 'property' : 'blog_post')
             : campaignId
                 ? 'editorial_campaign'
                 : payload.runId
@@ -1752,6 +2079,10 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
                 contentSummary: stripTechnicalOutboundText(context.post_excerpt || context.text_content || context.whatsapp_message),
                 contentUrl: context.content_url || context.link_cta,
                 ctaLabel: context.cta_label,
+                recommendationScore: context.recommendation_score,
+                recommendationReason: context.recommendation_reason,
+                recommendationReasons: context.recommendation_reasons,
+                recommendationSourcePropertyIds: context.recommendation_source_property_ids,
                 message: channel === 'whatsapp'
                     ? context.whatsapp_message
                     : channel === 'push'
@@ -1774,6 +2105,12 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
                 campaign_id: context.campaign_id,
                 post_id: context.post_id,
                 channel,
+                content_type: context.content_type,
+                trigger: context.trigger,
+                recommendation_score: context.recommendation_score || null,
+                recommendation_reason: context.recommendation_reason || null,
+                recommendation_reasons: context.recommendation_reasons || [],
+                recommendation_source_property_ids: context.recommendation_source_property_ids || [],
             },
         })
 
@@ -1974,6 +2311,23 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
         const channel = context.channel as EditorialChannel
         const trigger = normalizeDistributionTrigger(row.trigger_type || context.trigger)
         if (!trigger) continue
+        if (trigger !== 'property_recommendation') {
+            const contextualScore = Number(context.recommendation_score || 0)
+            if (!Number.isFinite(contextualScore) || contextualScore < config.recommendationMinScore) {
+                await updateRun(supabase, row.id, {
+                    status: 'stopped',
+                    completed_at: new Date().toISOString(),
+                    context: {
+                        ...context,
+                        approval_status: 'cancelled',
+                        stopped_reason: 'missing_contextual_recommendation_score',
+                        stopped_at: new Date().toISOString(),
+                    },
+                })
+                results.push({ sent: false, stopped: true, id: row.id, channel, reason: 'missing_contextual_recommendation_score' })
+                continue
+            }
+        }
 
         if (channel === 'email' && dailyCounts.email >= config.emailDailyLimit) {
             const scheduledFor = nextWindowStartAfterDailyLimit(config, checkedDate)

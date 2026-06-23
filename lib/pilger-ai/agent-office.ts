@@ -1082,6 +1082,17 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 help: 'Mantem admin no controle antes de disparos amplos.',
             },
             {
+                key: 'editorial_distribution_message_review_required',
+                label: 'Revisao das mensagens',
+                type: 'select',
+                fallback: 'true',
+                options: [
+                    { label: 'Rascunho editavel', value: 'true' },
+                    { label: 'Enviar direto', value: 'false' },
+                ],
+                help: 'Quando ativo, Gabriel prepara e explica a recomendacao antes do envio por e-mail, push ou WhatsApp.',
+            },
+            {
                 key: 'email_agent_send_interval_minutes',
                 label: 'Intervalo por lead',
                 type: 'number',
@@ -1163,7 +1174,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 key: 'editorial_distribution_push_enabled',
                 label: 'Enviar por push',
                 type: 'select',
-                fallback: 'false',
+                fallback: 'true',
                 options: [
                     { label: 'Ativo', value: 'true' },
                     { label: 'Pausado', value: 'false' },
@@ -1265,7 +1276,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 label: 'Recomendacoes',
                 value: configs.editorial_distribution_recommendations_enabled === 'false'
                     ? 'Pausadas'
-                    : `Ativas a partir de ${configs.editorial_distribution_recommendation_min_score || '45'} pontos`,
+                    : `Ativas a partir de ${configs.editorial_distribution_recommendation_min_score || '50'} pontos`,
                 tone: configs.editorial_distribution_recommendations_enabled === 'false' ? 'warning' : 'success',
             },
             {

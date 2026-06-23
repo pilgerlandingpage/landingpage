@@ -299,9 +299,10 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     email_agent_templates: getDefaultEmailAgentTemplatesJson(),
     editorial_distribution_email_enabled: 'true',
     editorial_distribution_whatsapp_enabled: 'true',
-    editorial_distribution_push_enabled: 'false',
+    editorial_distribution_push_enabled: 'true',
+    editorial_distribution_message_review_required: 'true',
     editorial_distribution_recommendations_enabled: 'true',
-    editorial_distribution_recommendation_min_score: '45',
+    editorial_distribution_recommendation_min_score: '50',
     editorial_distribution_recommendation_batch_limit: '25',
     editorial_distribution_whatsapp_interval_minutes: '5',
     editorial_distribution_whatsapp_daily_limit: '120',
@@ -422,6 +423,7 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'editorial_distribution_email_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_distribution_whatsapp_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_distribution_push_enabled') return value === 'true' ? 'true' : 'false'
+    if (key === 'editorial_distribution_message_review_required') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_distribution_recommendations_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'pexels_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'pixabay_enabled') return value === 'false' ? 'false' : 'true'
