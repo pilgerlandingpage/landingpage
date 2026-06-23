@@ -110,6 +110,18 @@ function extractPhoneLoose(raw: any): string | null {
     return digits || null
 }
 
+function inferInstanceType(inst: any): 'global' | 'broker' | 'sector' | 'admin' {
+    const explicit = String(inst?.instance_type || '').toLowerCase()
+    if (explicit === 'global' || explicit === 'broker' || explicit === 'sector' || explicit === 'admin') {
+        return explicit
+    }
+    const name = String(inst?.instance_name || '').toLowerCase()
+    if (name === 'agente global' || name === 'whatsapp global') return 'global'
+    if (inst?.broker_id) return 'broker'
+    if (inst?.admin_user_id && inst.admin_user_id !== '00000000-0000-0000-0000-000000000000') return 'admin'
+    return 'broker'
+}
+
 // GET — Lista instâncias (filtra por broker_id ou admin_user_id se fornecido)
 export async function GET(request: NextRequest) {
     try {
@@ -235,10 +247,12 @@ export async function GET(request: NextRequest) {
         // Enrich each connected instance with live data from ConnectyHub
         const enrichedInstances = await Promise.all(
             reconciledInstances.map(async (inst: any) => {
+                const instanceType = inferInstanceType(inst)
                 const enriched: any = {
                     ...inst,
+                    instance_type: instanceType,
                     config: normalizeWhatsAppInstanceConfig(inst.config || {}),
-                    virtual_brokers: inst.broker_id ? brokersMap[inst.broker_id] || null : null,
+                    virtual_brokers: inst.broker_id && instanceType !== 'global' ? brokersMap[inst.broker_id] || null : null,
                     admin_users: inst.admin_user_id ? adminsMap[inst.admin_user_id] || null : null,
                 }
 
@@ -294,7 +308,7 @@ export async function GET(request: NextRequest) {
                         } catch { /* webhook check not critical */ }
 
                         // Sync broker profile with live WhatsApp data
-                        if (inst.broker_id) {
+                        if (inst.broker_id && instanceType !== 'global') {
                             try {
                                 const brokerUpdates: Record<string, any> = {
                                     updated_at: new Date().toISOString(),

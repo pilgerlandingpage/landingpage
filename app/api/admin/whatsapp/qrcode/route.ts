@@ -15,6 +15,59 @@ function normalizePhone(value: unknown): string | null {
     return digits || null
 }
 
+function normalizeInstanceType(value: unknown): 'global' | 'broker' | 'sector' | 'admin' {
+    const type = String(value || '').toLowerCase()
+    if (type === 'global' || type === 'sector' || type === 'admin') return type
+    return 'broker'
+}
+
+function isMissingColumnError(error: any, column: string) {
+    const message = String(error?.message || error || '')
+    return message.includes(column) || message.includes(`'${column}'`) || message.includes(`"${column}"`)
+}
+
+async function updateInstanceWithCompatibility(supabase: any, id: string, updates: Record<string, any>) {
+    const result = await supabase
+        .from('whatsapp_instances')
+        .update(updates)
+        .eq('id', id)
+
+    if (!result.error || !Object.prototype.hasOwnProperty.call(updates, 'instance_type')) return result
+    if (!isMissingColumnError(result.error, 'instance_type')) return result
+
+    const { instance_type: _instanceType, ...fallbackUpdates } = updates
+    return supabase
+        .from('whatsapp_instances')
+        .update(fallbackUpdates)
+        .eq('id', id)
+}
+
+async function insertInstanceWithCompatibility(supabase: any, insertData: Record<string, any>) {
+    const result = await supabase
+        .from('whatsapp_instances')
+        .insert(insertData)
+        .select()
+        .single()
+
+    if (!result.error || !Object.prototype.hasOwnProperty.call(insertData, 'instance_type')) return result
+    if (!isMissingColumnError(result.error, 'instance_type')) return result
+
+    const { instance_type: _instanceType, ...fallbackInsert } = insertData
+    return supabase
+        .from('whatsapp_instances')
+        .insert(fallbackInsert)
+        .select()
+        .single()
+}
+
+async function saveGlobalInstanceConfig(supabase: any, instanceId: string) {
+    await supabase
+        .from('app_config')
+        .upsert([
+            { key: 'agent_default_instance_id', value: instanceId },
+        ], { onConflict: 'key' })
+}
+
 async function ensureAiBrokerForAdminUser(params: {
     supabase: any
     adminUserId: string
@@ -136,6 +189,8 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase()
         const body = await request.json()
         const { instanceId, instance_name, broker_id, admin_user_id } = body
+        const requestedInstanceType = normalizeInstanceType(body?.instance_type)
+        const isGlobalInstance = requestedInstanceType === 'global'
 
         let instance: any = null
         let autoBrokerId: string | null = null
@@ -154,21 +209,67 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: false, message: 'Instancia nao encontrada' }, { status: 404 })
             }
             instance = data
+            if (isGlobalInstance) {
+                await updateInstanceWithCompatibility(supabase, instance.id, {
+                    instance_type: 'global',
+                    updated_at: new Date().toISOString(),
+                })
+                await saveGlobalInstanceConfig(supabase, instance.id)
+                instance = { ...instance, instance_type: 'global' }
+            }
         } else if (instance_name) {
             // Scenario 2: create new instance
 
             // Check if there is already an instance for this broker/user
-            let existingQuery = supabase.from('whatsapp_instances').select('*')
-            if (broker_id) {
-                existingQuery = existingQuery.eq('broker_id', broker_id)
-            } else if (admin_user_id) {
-                existingQuery = existingQuery.eq('admin_user_id', admin_user_id)
+            let existing: any = null
+            if (isGlobalInstance) {
+                const { data: configRow } = await supabase
+                    .from('app_config')
+                    .select('value')
+                    .eq('key', 'agent_default_instance_id')
+                    .maybeSingle()
+                const defaultInstanceId = String(configRow?.value || '').trim()
+                if (defaultInstanceId) {
+                    const { data } = await supabase
+                        .from('whatsapp_instances')
+                        .select('*')
+                        .eq('id', defaultInstanceId)
+                        .maybeSingle()
+                    existing = data || null
+                }
+                if (!existing) {
+                    const { data } = await supabase
+                        .from('whatsapp_instances')
+                        .select('*')
+                        .eq('instance_name', instance_name)
+                        .maybeSingle()
+                    existing = data || null
+                }
+            } else {
+                if (!broker_id && !admin_user_id) {
+                    return NextResponse.json({ success: false, message: 'Informe broker_id, admin_user_id ou instance_type=global.' }, { status: 400 })
+                }
+                let existingQuery = supabase.from('whatsapp_instances').select('*')
+                if (broker_id) {
+                    existingQuery = existingQuery.eq('broker_id', broker_id)
+                } else if (admin_user_id) {
+                    existingQuery = existingQuery.eq('admin_user_id', admin_user_id)
+                }
+                const { data } = await existingQuery.limit(1).maybeSingle()
+                existing = data || null
             }
-            const { data: existing } = await existingQuery.limit(1).maybeSingle()
 
             if (existing?.instance_token) {
                 // Already has instance -> reconnect
                 instance = existing
+                if (isGlobalInstance) {
+                    await updateInstanceWithCompatibility(supabase, existing.id, {
+                        instance_type: 'global',
+                        updated_at: new Date().toISOString(),
+                    })
+                    await saveGlobalInstanceConfig(supabase, existing.id)
+                    instance = { ...instance, instance_type: 'global' }
+                }
             } else {
                 // Create at uazapi
                 console.log(`[QR Code] Criando instancia: ${instance_name}`)
@@ -188,38 +289,42 @@ export async function POST(request: NextRequest) {
                 // If there was a row without token, update. Otherwise insert.
                 if (existing) {
                     const existingConfig = existing?.config && typeof existing.config === 'object' ? existing.config : null
-                    const updates: Record<string, any> = { instance_token: token, instance_name, updated_at: new Date().toISOString() }
+                    const updates: Record<string, any> = {
+                        instance_token: token,
+                        instance_name,
+                        instance_type: requestedInstanceType,
+                        updated_at: new Date().toISOString(),
+                    }
                     if (!existingConfig || Object.keys(existingConfig).length === 0) {
                         updates.config = DEFAULT_WHATSAPP_INSTANCE_CONFIG
                     }
-                    await supabase
-                        .from('whatsapp_instances')
-                        .update(updates)
-                        .eq('id', existing.id)
+                    await updateInstanceWithCompatibility(supabase, existing.id, updates)
                     instance = { ...existing, ...updates }
                 } else {
                     const insertData: any = {
                         instance_name,
                         instance_token: token,
                         status: 'disconnected',
+                        instance_type: requestedInstanceType,
                         config: DEFAULT_WHATSAPP_INSTANCE_CONFIG,
                     }
                     if (broker_id) insertData.broker_id = broker_id
                     if (admin_user_id) insertData.admin_user_id = admin_user_id
                     // admin_user_id is NOT NULL, if broker without user use null UUID
                     if (!admin_user_id && broker_id) insertData.admin_user_id = '00000000-0000-0000-0000-000000000000'
+                    if (isGlobalInstance && !admin_user_id && !broker_id) insertData.admin_user_id = '00000000-0000-0000-0000-000000000000'
 
-                    const { data: newInst, error: insertErr } = await supabase
-                        .from('whatsapp_instances')
-                        .insert(insertData)
-                        .select()
-                        .single()
+                    const { data: newInst, error: insertErr } = await insertInstanceWithCompatibility(supabase, insertData)
 
                     if (insertErr) {
                         console.error('[QR Code] Erro ao salvar instancia:', insertErr)
                         return NextResponse.json({ success: false, message: `Erro ao salvar: ${insertErr.message}` }, { status: 500 })
                     }
                     instance = newInst
+                }
+
+                if (isGlobalInstance && instance?.id) {
+                    await saveGlobalInstanceConfig(supabase, instance.id)
                 }
 
                 if (broker_id && instance?.id) {
@@ -243,7 +348,7 @@ export async function POST(request: NextRequest) {
         }
 
         // If this is a user-owned instance, ensure AI broker is auto-created and linked.
-        if (!broker_id && instance?.admin_user_id) {
+        if (!isGlobalInstance && !broker_id && instance?.admin_user_id) {
             try {
                 const brokerResult = await ensureAiBrokerForAdminUser({
                     supabase,

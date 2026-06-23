@@ -1,5 +1,6 @@
 ﻿'use client'
 
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import {
     Smartphone, RefreshCw, Loader2, AlertCircle, CheckCircle2,
@@ -20,6 +21,7 @@ interface BrokerData { id: string; name: string; creci: string; photo_url: strin
 interface AdminUserData { id: string; name: string; email: string }
 interface Instance {
     id: string; admin_user_id: string; broker_id?: string
+    instance_type?: 'global' | 'broker' | 'sector' | 'admin'
     instance_name: string; instance_token?: string
     phone_number: string | null; status: 'disconnected' | 'connecting' | 'connected'
     connected_at: string | null; created_at: string; config?: Record<string, any>
@@ -323,9 +325,11 @@ export default function WhatsAppInstancesPage() {
         })
     }
 
-    const connectedCount = instances.filter(i => i.status === 'connected').length
-    const agentInstances = instances.filter(i => i.broker_id)
-    const userInstances = instances.filter(i => !i.broker_id)
+    const globalInstances = instances.filter(i => i.instance_type === 'global')
+    const operationalInstances = instances.filter(i => i.instance_type !== 'global')
+    const connectedCount = operationalInstances.filter(i => i.status === 'connected').length
+    const agentInstances = operationalInstances.filter(i => i.broker_id)
+    const userInstances = operationalInstances.filter(i => !i.broker_id)
 
     if (loading) return <AdminLoadingState message="Carregando instâncias..." minHeight="400px" />
 
@@ -349,7 +353,7 @@ export default function WhatsAppInstancesPage() {
                         <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp - Conectados
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        {instances.length} instância{instances.length !== 1 ? 's' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
+                        {operationalInstances.length} instância{operationalInstances.length !== 1 ? 's' : ''} operacional{operationalInstances.length !== 1 ? 'is' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
                     </p>
                 </div>
                 <button onClick={refreshAll} disabled={refreshing}
@@ -357,6 +361,26 @@ export default function WhatsAppInstancesPage() {
                     <RefreshCw size={16} className={refreshing ? 'spin' : ''} />
                     {refreshing ? 'Atualizando...' : 'Atualizar'}
                 </button>
+            </div>
+
+            <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                    <div style={{ fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Globe size={16} style={{ color: '#0284c7' }} />
+                        WhatsApp Global separado dos Corretores IA
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: 4 }}>
+                        {globalInstances.length
+                            ? `${globalInstances.length} instância global encontrada. Ela agora é gerenciada na sessão própria.`
+                            : 'Nenhuma instância global marcada ainda. Use a sessão própria para conectar ou definir o número principal.'}
+                    </div>
+                </div>
+                <Link
+                    href="/admin/whatsapp/global"
+                    style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid rgba(14,165,233,0.25)', color: '#0369a1', background: '#fff', fontWeight: 800, textDecoration: 'none', fontSize: '0.84rem' }}
+                >
+                    Abrir WhatsApp Global
+                </Link>
             </div>
 
             <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.2)' }}>
@@ -510,7 +534,7 @@ export default function WhatsAppInstancesPage() {
                 </div>
             )}
 
-            {instances.length === 0 && (
+            {operationalInstances.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <Smartphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum conectado WhatsApp</p>

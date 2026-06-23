@@ -11,6 +11,12 @@ import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/s
 import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import {
+    buildWhatsAppGlobalAcknowledgement,
+    isWhatsAppGlobalInstance,
+    recordWhatsAppGlobalCommand,
+    resolveWhatsAppGlobalIdentity,
+} from '@/lib/whatsapp/global-identity'
+import {
     buildAppointmentConfirmationText,
     detectConfirmedAppointment,
     extractAppointmentTimeFromText,
@@ -3604,6 +3610,68 @@ export async function POST(request: NextRequest) {
                 })
             } catch (e) {
                 console.warn('[Webhook] Event interaction tracking failed:', e)
+            }
+        }
+
+        if (!isFromMe && isWhatsAppGlobalInstance(instance)) {
+            try {
+                const hasGlobalMedia = Boolean(
+                    isAudio ||
+                    isDocument ||
+                    isLocation ||
+                    mediaUrl ||
+                    audioUrl ||
+                    auditMedia.length > 0
+                )
+                const globalIdentity = await resolveWhatsAppGlobalIdentity({
+                    supabase,
+                    phone: finalPhone,
+                    senderName,
+                })
+
+                if (globalIdentity.type !== 'lead') {
+                    const commandResult = await recordWhatsAppGlobalCommand({
+                        supabase,
+                        instance,
+                        phone: finalPhone,
+                        identity: globalIdentity,
+                        text: storedMessageContent || messageText || '',
+                        hasMedia: hasGlobalMedia,
+                        payload: {
+                            message_type: messageType || null,
+                            message_id: messageId || null,
+                            sender_name: senderName || null,
+                            media: auditMedia,
+                        },
+                    })
+
+                    if (instance.instance_token) {
+                        await sendWhatsAppMessage({
+                            phone: finalPhone,
+                            message: buildWhatsAppGlobalAcknowledgement({
+                                identity: globalIdentity,
+                                intent: commandResult.intent,
+                                allowed: commandResult.allowed,
+                            }),
+                            instanceToken: instance.instance_token,
+                        })
+                    }
+
+                    await saveAudit({
+                        action: commandResult.allowed
+                            ? 'whatsapp_global_command_recorded'
+                            : 'whatsapp_global_command_blocked',
+                    })
+                    return NextResponse.json({
+                        success: true,
+                        action: 'whatsapp_global_command_recorded',
+                        identity_type: globalIdentity.type,
+                        target_agent: commandResult.intent.targetAgent,
+                        allowed: commandResult.allowed,
+                    })
+                }
+            } catch (e) {
+                console.warn('[Webhook] WhatsApp Global identity routing failed, falling back to lead flow:', e)
             }
         }
 
