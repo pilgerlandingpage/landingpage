@@ -3544,7 +3544,7 @@ export async function POST(request: NextRequest) {
         if (instanceName) {
             const { data } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config')
+                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config, instance_type')
                 .eq('instance_name', instanceName)
                 .maybeSingle()
             instance = data
@@ -3553,7 +3553,7 @@ export async function POST(request: NextRequest) {
         if (!instance) {
             const { data } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config')
+                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config, instance_type')
                 .eq('status', 'connected')
                 .limit(1)
                 .maybeSingle()

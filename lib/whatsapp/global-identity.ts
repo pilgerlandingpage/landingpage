@@ -194,7 +194,16 @@ async function findOverride(supabase: SupabaseLike, phone: string) {
             .limit(1)
 
         if (error) return null
-        return data?.[0] || null
+        if (data?.[0]) return data[0]
+
+        const { data: fallbackData, error: fallbackError } = await supabase
+            .from('whatsapp_global_identity_overrides')
+            .select('*')
+            .eq('is_active', true)
+            .limit(500)
+
+        if (fallbackError) return null
+        return (fallbackData || []).find((row: any) => phoneLooksSame(row.phone, phone)) || null
     } catch {
         return null
     }
@@ -210,7 +219,17 @@ async function findAdminUser(supabase: SupabaseLike, phone: string) {
         .limit(1)
 
     if (error) return null
-    return data?.[0] || null
+    if (data?.[0]) return data[0]
+
+    const { data: fallbackData, error: fallbackError } = await supabase
+        .from('admin_users')
+        .select('id, name, email, phone, is_master, is_active')
+        .eq('is_active', true)
+        .not('phone', 'is', null)
+        .limit(500)
+
+    if (fallbackError) return null
+    return (fallbackData || []).find((row: any) => phoneLooksSame(row.phone, phone)) || null
 }
 
 async function findBrokerAuthorization(supabase: SupabaseLike, phone: string) {
@@ -223,7 +242,16 @@ async function findBrokerAuthorization(supabase: SupabaseLike, phone: string) {
             .limit(1)
 
         if (error) return null
-        return data?.[0] || null
+        if (data?.[0]) return data[0]
+
+        const { data: fallbackData, error: fallbackError } = await supabase
+            .from('broker_assistant_authorized_phones')
+            .select('*, virtual_brokers(id, name, phone, is_active)')
+            .eq('is_active', true)
+            .limit(500)
+
+        if (fallbackError) return null
+        return (fallbackData || []).find((row: any) => phoneLooksSame(row.phone, phone)) || null
     } catch {
         return null
     }
