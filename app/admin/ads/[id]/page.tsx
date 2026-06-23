@@ -119,7 +119,8 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             ])
 
             if (campRes.ok) {
-                const campaigns = await campRes.json()
+                const payload = await campRes.json()
+                const campaigns = Array.isArray(payload) ? payload : (payload.campaigns || [])
                 const found = campaigns.find((c: Campaign) => c.id === id)
                 setCampaign(found || null)
             }

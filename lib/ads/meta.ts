@@ -75,6 +75,256 @@ async function getMetaConfig() {
     };
 }
 
+type MetaApiParams = Record<string, string | number | boolean | null | undefined>
+
+function buildMetaUrl(path: string, params: MetaApiParams) {
+    const url = new URL(`${getBaseUrl()}/${path.replace(/^\//, '')}`)
+    for (const [key, value] of Object.entries(params)) {
+        if (value === null || value === undefined || value === '') continue
+        url.searchParams.set(key, String(value))
+    }
+    return url.toString()
+}
+
+async function fetchMetaPaged(path: string, params: MetaApiParams): Promise<any[]> {
+    let url = buildMetaUrl(path, params)
+    const rows: any[] = []
+
+    while (url) {
+        const res = await fetch(url)
+        const data = await res.json()
+
+        if (data.error) {
+            throw new Error(data.error.message || 'Erro desconhecido na Meta API.')
+        }
+
+        rows.push(...(data.data || []))
+        url = data.paging?.next || ''
+    }
+
+    return rows
+}
+
+function parseMetaNumber(value: unknown) {
+    const parsed = Number(value || 0)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function metricArrayValue(rows: any[] | undefined, keys: string[] = ['value']) {
+    const first = rows?.[0]
+    if (!first) return 0
+    for (const key of keys) {
+        if (first[key] !== undefined) return parseMetaNumber(first[key])
+    }
+    return 0
+}
+
+function actionValue(actions: any[] | undefined, actionTypes: string[]) {
+    return (actions || [])
+        .filter(action => actionTypes.includes(String(action.action_type || '')))
+        .reduce((sum, action) => sum + parseMetaNumber(action.value), 0)
+}
+
+function costActionValue(actions: any[] | undefined, actionTypes: string[]) {
+    const first = (actions || []).find(action => actionTypes.includes(String(action.action_type || '')))
+    return first ? parseMetaNumber(first.value) : 0
+}
+
+function baseInsightFields(level: MetaInsightLevel) {
+    const identityFields: Record<MetaInsightLevel, string[]> = {
+        account: [],
+        campaign: ['campaign_id', 'campaign_name'],
+        adset: ['campaign_id', 'campaign_name', 'adset_id', 'adset_name'],
+        ad: ['campaign_id', 'campaign_name', 'adset_id', 'adset_name', 'ad_id', 'ad_name'],
+    }
+
+    return [
+        ...identityFields[level],
+        'date_start', 'date_stop',
+        'impressions', 'clicks', 'ctr', 'cpm', 'cpc', 'spend',
+        'actions', 'frequency', 'reach', 'unique_clicks',
+        'outbound_clicks', 'inline_link_clicks', 'inline_link_click_ctr',
+        'cost_per_action_type',
+        'quality_ranking', 'engagement_rate_ranking', 'conversion_rate_ranking',
+        'video_thruplay_watched_actions', 'video_p25_watched_actions',
+        'video_p50_watched_actions', 'video_p75_watched_actions',
+        'video_p100_watched_actions', 'video_avg_time_watched_actions',
+    ]
+}
+
+export type MetaInsightLevel = 'account' | 'campaign' | 'adset' | 'ad'
+
+export type MetaTrafficInsightQuery = {
+    level?: MetaInsightLevel
+    datePreset?: DatePreset | 'custom'
+    timeRange?: { since: string; until: string }
+    breakdowns?: string[]
+    timeIncrement?: string | number
+    actionBreakdowns?: string[]
+    limit?: number
+}
+
+export type MetaTrafficManagerSnapshot = {
+    generated_at: string
+    date_preset: string
+    totals: {
+        spend: number
+        impressions: number
+        reach: number
+        clicks: number
+        leads: number
+        conversations: number
+        landing_page_views: number
+        link_clicks: number
+        post_engagements: number
+        avg_ctr: number
+        avg_cpc: number
+        avg_cpm: number
+        avg_cpl: number
+        frequency: number
+    }
+    coverage: {
+        campaigns: number
+        adsets: number
+        ads: number
+        lead_forms: number
+        placements: number
+        devices: number
+        demographics: number
+        daily_points: number
+    }
+    top_campaigns: any[]
+    top_adsets: any[]
+    top_ads: any[]
+    placements: any[]
+    devices: any[]
+    demographics: any[]
+    daily_series: any[]
+    lead_forms: any[]
+    diagnostics: string[]
+}
+
+function normalizeInsightRow(row: any) {
+    const spend = parseMetaNumber(row.spend)
+    const impressions = parseMetaNumber(row.impressions)
+    const clicks = parseMetaNumber(row.clicks)
+    const leads = actionValue(row.actions, ['lead', 'onsite_conversion.lead_grouped'])
+    const conversations = actionValue(row.actions, ['onsite_conversion.messaging_conversation_started_7d'])
+    const landingPageViews = actionValue(row.actions, ['landing_page_view'])
+    const linkClicks = actionValue(row.actions, ['link_click'])
+    const postEngagements = actionValue(row.actions, ['post_engagement'])
+
+    return {
+        ...row,
+        spend,
+        impressions,
+        clicks,
+        reach: parseMetaNumber(row.reach),
+        unique_clicks: parseMetaNumber(row.unique_clicks),
+        leads,
+        conversations,
+        landing_page_views: landingPageViews,
+        link_clicks: linkClicks || parseMetaNumber(row.inline_link_clicks),
+        outbound_clicks: metricArrayValue(row.outbound_clicks, ['outbound_click', 'value']),
+        post_engagements: postEngagements,
+        ctr: parseMetaNumber(row.ctr),
+        cpm: parseMetaNumber(row.cpm),
+        cpc: parseMetaNumber(row.cpc),
+        cpl: leads > 0 ? spend / leads : costActionValue(row.cost_per_action_type, ['lead', 'onsite_conversion.lead_grouped']),
+        frequency: parseMetaNumber(row.frequency),
+        thumbstop: impressions > 0 ? metricArrayValue(row.video_p25_watched_actions) / impressions : 0,
+        video_p50: metricArrayValue(row.video_p50_watched_actions),
+        video_p75: metricArrayValue(row.video_p75_watched_actions),
+        video_p100: metricArrayValue(row.video_p100_watched_actions),
+        video_avg_watch_time: metricArrayValue(row.video_avg_time_watched_actions),
+    }
+}
+
+function aggregateInsightRows(rows: any[]) {
+    const normalized = rows.map(normalizeInsightRow)
+    const totals = normalized.reduce((acc, row) => {
+        acc.spend += row.spend
+        acc.impressions += row.impressions
+        acc.reach += row.reach
+        acc.clicks += row.clicks
+        acc.leads += row.leads
+        acc.conversations += row.conversations
+        acc.landing_page_views += row.landing_page_views
+        acc.link_clicks += row.link_clicks
+        acc.post_engagements += row.post_engagements
+        acc.frequency_weight += row.frequency * row.reach
+        acc.frequency_reach += row.reach
+        return acc
+    }, {
+        spend: 0,
+        impressions: 0,
+        reach: 0,
+        clicks: 0,
+        leads: 0,
+        conversations: 0,
+        landing_page_views: 0,
+        link_clicks: 0,
+        post_engagements: 0,
+        frequency_weight: 0,
+        frequency_reach: 0,
+    })
+
+    return {
+        spend: Number(totals.spend.toFixed(2)),
+        impressions: totals.impressions,
+        reach: totals.reach,
+        clicks: totals.clicks,
+        leads: totals.leads,
+        conversations: totals.conversations,
+        landing_page_views: totals.landing_page_views,
+        link_clicks: totals.link_clicks,
+        post_engagements: totals.post_engagements,
+        avg_ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
+        avg_cpc: totals.clicks > 0 ? totals.spend / totals.clicks : 0,
+        avg_cpm: totals.impressions > 0 ? (totals.spend / totals.impressions) * 1000 : 0,
+        avg_cpl: totals.leads > 0 ? totals.spend / totals.leads : 0,
+        frequency: totals.frequency_reach > 0 ? totals.frequency_weight / totals.frequency_reach : 0,
+    }
+}
+
+function aggregateBy(rows: any[], keyBuilder: (row: any) => Record<string, string>) {
+    const map = new Map<string, any>()
+    for (const raw of rows) {
+        const row = normalizeInsightRow(raw)
+        const keys = keyBuilder(row)
+        const id = Object.entries(keys).map(([key, value]) => `${key}:${value || 'n/a'}`).join('|')
+        const current = map.get(id) || {
+            ...keys,
+            spend: 0,
+            impressions: 0,
+            reach: 0,
+            clicks: 0,
+            leads: 0,
+            conversations: 0,
+            landing_page_views: 0,
+            link_clicks: 0,
+        }
+
+        current.spend += row.spend
+        current.impressions += row.impressions
+        current.reach += row.reach
+        current.clicks += row.clicks
+        current.leads += row.leads
+        current.conversations += row.conversations
+        current.landing_page_views += row.landing_page_views
+        current.link_clicks += row.link_clicks
+        map.set(id, current)
+    }
+
+    return Array.from(map.values()).map(item => ({
+        ...item,
+        spend: Number(item.spend.toFixed(2)),
+        ctr: item.impressions > 0 ? (item.clicks / item.impressions) * 100 : 0,
+        cpl: item.leads > 0 ? item.spend / item.leads : 0,
+        cpc: item.clicks > 0 ? item.spend / item.clicks : 0,
+    })).sort((a, b) => b.spend - a.spend)
+}
+
 // --- Autenticação e Teste de Conexão ---
 
 export async function testConnection(): Promise<{ success: boolean; message: string }> {
@@ -425,6 +675,248 @@ export async function getAccountInsightsByCampaign(
     }
 
     return map
+}
+
+export async function getTrafficInsightsRows({
+    level = 'campaign',
+    datePreset = 'last_30d',
+    timeRange,
+    breakdowns = [],
+    timeIncrement,
+    actionBreakdowns = [],
+    limit = 500,
+}: MetaTrafficInsightQuery = {}): Promise<any[]> {
+    const conf = await getMetaConfig()
+    const params: MetaApiParams = {
+        fields: baseInsightFields(level).join(','),
+        level,
+        limit,
+        access_token: conf.accessToken,
+    }
+
+    if (breakdowns.length > 0) params.breakdowns = breakdowns.join(',')
+    if (actionBreakdowns.length > 0) params.action_breakdowns = actionBreakdowns.join(',')
+    if (timeIncrement) params.time_increment = timeIncrement
+
+    if (datePreset === 'custom' && timeRange) {
+        params.time_range = JSON.stringify({ since: timeRange.since, until: timeRange.until })
+    } else {
+        params.date_preset = datePreset === 'custom' ? 'last_30d' : datePreset
+    }
+
+    return fetchMetaPaged(`${conf.adAccountId}/insights`, params)
+}
+
+export async function getAllAdSets(): Promise<any[]> {
+    const conf = await getMetaConfig()
+    const fields = [
+        'id', 'name', 'status', 'effective_status',
+        'campaign_id', 'daily_budget', 'lifetime_budget',
+        'bid_strategy', 'billing_event', 'optimization_goal',
+        'start_time', 'end_time', 'targeting', 'promoted_object',
+    ].join(',')
+
+    return fetchMetaPaged(`${conf.adAccountId}/adsets`, {
+        fields,
+        effective_status: "['ACTIVE','PAUSED','IN_PROCESS','WITH_ISSUES']",
+        limit: 500,
+        access_token: conf.accessToken,
+    })
+}
+
+export async function getAllAdsWithCreatives(): Promise<any[]> {
+    const conf = await getMetaConfig()
+    const fields = [
+        'id', 'name', 'status', 'effective_status',
+        'campaign_id', 'adset_id', 'created_time', 'updated_time',
+        'creative{id,name,title,body,thumbnail_url,image_url,object_story_spec,call_to_action_type}',
+    ].join(',')
+
+    try {
+        return await fetchMetaPaged(`${conf.adAccountId}/ads`, {
+            fields,
+            effective_status: "['ACTIVE','PAUSED','IN_PROCESS','WITH_ISSUES']",
+            limit: 500,
+            access_token: conf.accessToken,
+        })
+    } catch (error) {
+        console.warn('[Meta Ads] Falha ao buscar criativos completos, usando fallback:', error instanceof Error ? error.message : error)
+        return fetchMetaPaged(`${conf.adAccountId}/ads`, {
+            fields: 'id,name,status,effective_status,campaign_id,adset_id,created_time,updated_time,creative{id,name,thumbnail_url}',
+            effective_status: "['ACTIVE','PAUSED','IN_PROCESS','WITH_ISSUES']",
+            limit: 500,
+            access_token: conf.accessToken,
+        })
+    }
+}
+
+async function safeTrafficRows(label: string, query: MetaTrafficInsightQuery) {
+    try {
+        return await getTrafficInsightsRows(query)
+    } catch (error) {
+        console.warn(`[Meta Traffic Manager] ${label} indisponivel:`, error instanceof Error ? error.message : error)
+        return []
+    }
+}
+
+function summarizeEntityRows(rows: any[], idKey: string, nameKey: string, extra?: (row: any) => Record<string, unknown>) {
+    return rows
+        .map(row => {
+            const normalized = normalizeInsightRow(row)
+            return {
+                id: row[idKey],
+                name: row[nameKey] || row[idKey],
+                campaign_id: row.campaign_id,
+                campaign_name: row.campaign_name,
+                adset_id: row.adset_id,
+                adset_name: row.adset_name,
+                spend: normalized.spend,
+                impressions: normalized.impressions,
+                reach: normalized.reach,
+                clicks: normalized.clicks,
+                leads: normalized.leads,
+                conversations: normalized.conversations,
+                landing_page_views: normalized.landing_page_views,
+                link_clicks: normalized.link_clicks,
+                ctr: normalized.ctr,
+                cpc: normalized.cpc,
+                cpm: normalized.cpm,
+                cpl: normalized.cpl,
+                frequency: normalized.frequency,
+                quality_ranking: row.quality_ranking,
+                engagement_rate_ranking: row.engagement_rate_ranking,
+                conversion_rate_ranking: row.conversion_rate_ranking,
+                thumbstop: normalized.thumbstop,
+                video_p50: normalized.video_p50,
+                video_p75: normalized.video_p75,
+                video_p100: normalized.video_p100,
+                ...(extra ? extra(row) : {}),
+            }
+        })
+        .sort((a, b) => b.spend - a.spend)
+}
+
+export async function getMetaTrafficManagerSnapshot({
+    datePreset = 'last_30d',
+    timeRange,
+}: {
+    datePreset?: DatePreset | 'custom'
+    timeRange?: { since: string; until: string }
+} = {}): Promise<MetaTrafficManagerSnapshot> {
+    const [
+        campaignInsights,
+        adsetInsights,
+        adInsights,
+        placementRows,
+        deviceRows,
+        demographicRows,
+        dailyRows,
+        adsets,
+        ads,
+        leadForms,
+    ] = await Promise.all([
+        safeTrafficRows('campanhas', { level: 'campaign', datePreset, timeRange }),
+        safeTrafficRows('conjuntos', { level: 'adset', datePreset, timeRange }),
+        safeTrafficRows('anuncios', { level: 'ad', datePreset, timeRange }),
+        safeTrafficRows('posicionamentos', { level: 'ad', datePreset, timeRange, breakdowns: ['publisher_platform', 'platform_position'] }),
+        safeTrafficRows('dispositivos', { level: 'ad', datePreset, timeRange, breakdowns: ['device_platform'] }),
+        safeTrafficRows('publico', { level: 'ad', datePreset, timeRange, breakdowns: ['age', 'gender'] }),
+        safeTrafficRows('serie diaria', { level: 'account', datePreset, timeRange, timeIncrement: 1 }),
+        getAllAdSets().catch(error => {
+            console.warn('[Meta Traffic Manager] adsets indisponiveis:', error instanceof Error ? error.message : error)
+            return []
+        }),
+        getAllAdsWithCreatives().catch(error => {
+            console.warn('[Meta Traffic Manager] ads indisponiveis:', error instanceof Error ? error.message : error)
+            return []
+        }),
+        getLeadForms().catch(() => []),
+    ])
+
+    const adsetById = new Map((adsets || []).map((item: any) => [String(item.id), item]))
+    const adById = new Map((ads || []).map((item: any) => [String(item.id), item]))
+    const topCampaigns = summarizeEntityRows(campaignInsights, 'campaign_id', 'campaign_name').slice(0, 12)
+    const topAdsets = summarizeEntityRows(adsetInsights, 'adset_id', 'adset_name', row => {
+        const adset = adsetById.get(String(row.adset_id)) || {}
+        return {
+            status: adset.effective_status || adset.status,
+            daily_budget: centsToCurrency(adset.daily_budget),
+            lifetime_budget: centsToCurrency(adset.lifetime_budget),
+            optimization_goal: adset.optimization_goal,
+            bid_strategy: adset.bid_strategy,
+            targeting: adset.targeting,
+        }
+    }).slice(0, 12)
+    const topAds = summarizeEntityRows(adInsights, 'ad_id', 'ad_name', row => {
+        const ad = adById.get(String(row.ad_id)) || {}
+        const creative = ad.creative || {}
+        return {
+            status: ad.effective_status || ad.status,
+            creative_id: creative.id,
+            creative_name: creative.name,
+            creative_title: creative.title,
+            creative_body: creative.body,
+            creative_thumbnail_url: creative.thumbnail_url || creative.image_url,
+            call_to_action_type: creative.call_to_action_type,
+        }
+    }).slice(0, 16)
+
+    const totals = aggregateInsightRows(campaignInsights.length > 0 ? campaignInsights : adInsights)
+    const placements = aggregateBy(placementRows, row => ({
+        publisher_platform: row.publisher_platform || 'nao informado',
+        platform_position: row.platform_position || 'nao informado',
+    })).slice(0, 16)
+    const devices = aggregateBy(deviceRows, row => ({
+        device_platform: row.device_platform || 'nao informado',
+    })).slice(0, 10)
+    const demographics = aggregateBy(demographicRows, row => ({
+        age: row.age || 'nao informado',
+        gender: row.gender || 'nao informado',
+    })).slice(0, 16)
+    const dailySeries = dailyRows.map(row => {
+        const normalized = normalizeInsightRow(row)
+        return {
+            date: row.date_start,
+            spend: normalized.spend,
+            impressions: normalized.impressions,
+            reach: normalized.reach,
+            clicks: normalized.clicks,
+            leads: normalized.leads,
+            cpl: normalized.cpl,
+            ctr: normalized.ctr,
+        }
+    })
+
+    const diagnostics: string[] = []
+    if (topAds.length === 0) diagnostics.push('Sem leitura por anuncio; a IA ainda nao consegue comparar criativos individualmente.')
+    if (placements.length === 0) diagnostics.push('Sem breakdown de posicionamentos; nao foi possivel separar Feed, Stories, Reels ou Messenger.')
+    if (demographics.length === 0) diagnostics.push('Sem breakdown de publico; idade e genero nao vieram da Meta neste periodo.')
+    if (totals.leads > 0 && topAds.every(item => item.leads === 0)) diagnostics.push('Ha leads em campanha, mas sem distribuicao clara por anuncio.')
+
+    return {
+        generated_at: new Date().toISOString(),
+        date_preset: datePreset,
+        totals,
+        coverage: {
+            campaigns: campaignInsights.length,
+            adsets: adsetInsights.length || adsets.length,
+            ads: adInsights.length || ads.length,
+            lead_forms: leadForms.length,
+            placements: placements.length,
+            devices: devices.length,
+            demographics: demographics.length,
+            daily_points: dailySeries.length,
+        },
+        top_campaigns: topCampaigns,
+        top_adsets: topAdsets,
+        top_ads: topAds,
+        placements,
+        devices,
+        demographics,
+        daily_series: dailySeries,
+        lead_forms: leadForms.slice(0, 20),
+        diagnostics,
+    }
 }
 
 export async function getTodayAccountSpendEstimate(currentInsightsSpend = 0): Promise<{

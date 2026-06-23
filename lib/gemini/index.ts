@@ -155,6 +155,13 @@ export interface ExtractedLeadData {
     phone?: string
     email?: string
     budget?: string
+    timeframe?: string
+    interest?: 'investimento' | 'moradia' | null
+    classification?: 'cold' | 'warm' | 'hot' | 'vip'
+    pipeline_stage?: string
+    pipeline_reason?: string
+    summary?: string
+    is_partner?: boolean
     preferences?: string[]
     is_vip?: boolean
 }
@@ -220,6 +227,7 @@ export async function extractLeadData(
     try {
         const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
         const parsed = JSON.parse(cleaned) as ExtractedLeadData
+        const highIntent = parsed.is_vip || ['vip', 'hot'].includes(String(parsed.classification || '').toLowerCase())
         await recordAgentCentralSignal({
             supabase: supabase as any,
             agentId: 'whatsapp-lead-extraction',
@@ -228,7 +236,7 @@ export async function extractLeadData(
             entityId: parsed.phone || parsed.name || 'lead_extraction',
             source: 'lead-extraction-agent',
             label: parsed.name ? `Laura extraiu dados do lead ${parsed.name}` : 'Laura extraiu dados de lead',
-            importanceScore: parsed.is_vip ? 82 : parsed.budget || parsed.preferences?.length ? 66 : 52,
+            importanceScore: highIntent ? 82 : parsed.budget || parsed.preferences?.length || parsed.pipeline_stage ? 66 : 52,
             metadata: {
                 extracted: parsed,
                 conversation_preview: conversationText.replace(/\s+/g, ' ').slice(0, 700),

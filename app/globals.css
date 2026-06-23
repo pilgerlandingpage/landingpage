@@ -774,9 +774,12 @@ h6 {
   --admin-sidebar-collapsed-width: 64px;
   --admin-sidebar-collapsed-content-offset: 104px;
   display: flex;
+  width: 100%;
+  min-width: 0;
   min-height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  overflow-x: hidden;
 }
 
 .admin-sidebar {
@@ -977,11 +980,40 @@ h6 {
 
 .admin-content {
   flex: 1;
+  min-width: 0;
   margin-left: var(--admin-sidebar-expanded-width);
   padding: 32px;
   background: var(--bg-primary);
   min-height: 100vh;
+  box-sizing: border-box;
   transition: margin-left 0.24s ease;
+}
+
+.lead-crm-page,
+.lead-crm-pipeline-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.lead-crm-pipeline-scroller {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lead-crm-pipeline-scroller::-webkit-scrollbar {
+  height: 10px;
+}
+
+.lead-crm-pipeline-scroller::-webkit-scrollbar-track {
+  background: #f5f0ea;
+  border-radius: 999px;
+}
+
+.lead-crm-pipeline-scroller::-webkit-scrollbar-thumb {
+  background: #c8a66a;
+  border: 2px solid #f5f0ea;
+  border-radius: 999px;
 }
 
 .admin-header {

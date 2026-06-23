@@ -100,8 +100,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         label: 'Leads',
         section: 'COMERCIAL',
         subItems: [
-            { href: '/admin/leads', label: 'Todos os Leads' },
-            { href: '/admin/leads/crm', label: 'CRM do Agente' },
+            { href: '/admin/leads', label: 'CRM dos Leads' },
             { href: '/admin/leads/relatorios-atendimento', label: 'Relatorios de Atendimento' },
         ],
     },
@@ -149,7 +148,6 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/whatsapp', label: 'Conectados' },
             { href: '/admin/whatsapp/global', label: 'WhatsApp Global' },
-            { href: '/admin/whatsapp/agent-config', label: 'Config do Agente' },
             { href: '/admin/whatsapp/agenda', label: 'Agenda' },
             { href: '/admin/whatsapp/campaigns', label: 'Campanhas' },
             { href: '/admin/whatsapp/labels', label: 'Etiquetas' },

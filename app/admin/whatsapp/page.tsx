@@ -325,11 +325,10 @@ export default function WhatsAppInstancesPage() {
         })
     }
 
+    const connectedCount = instances.filter(i => i.status === 'connected').length
     const globalInstances = instances.filter(i => i.instance_type === 'global')
-    const operationalInstances = instances.filter(i => i.instance_type !== 'global')
-    const connectedCount = operationalInstances.filter(i => i.status === 'connected').length
-    const agentInstances = operationalInstances.filter(i => i.broker_id)
-    const userInstances = operationalInstances.filter(i => !i.broker_id)
+    const agentInstances = instances.filter(i => i.instance_type !== 'global' && i.broker_id)
+    const userInstances = instances.filter(i => !i.broker_id && i.instance_type !== 'global')
 
     if (loading) return <AdminLoadingState message="Carregando instâncias..." minHeight="400px" />
 
@@ -353,7 +352,7 @@ export default function WhatsAppInstancesPage() {
                         <Smartphone size={26} style={{ color: 'var(--gold)' }} /> WhatsApp - Conectados
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        {operationalInstances.length} instância{operationalInstances.length !== 1 ? 's' : ''} operacional{operationalInstances.length !== 1 ? 'is' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
+                        {instances.length} instância{instances.length !== 1 ? 's' : ''} operacional{instances.length !== 1 ? 'is' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
                     </p>
                 </div>
                 <button onClick={refreshAll} disabled={refreshing}
@@ -361,26 +360,6 @@ export default function WhatsAppInstancesPage() {
                     <RefreshCw size={16} className={refreshing ? 'spin' : ''} />
                     {refreshing ? 'Atualizando...' : 'Atualizar'}
                 </button>
-            </div>
-
-            <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Globe size={16} style={{ color: '#0284c7' }} />
-                        WhatsApp Global separado dos Corretores IA
-                    </div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: 4 }}>
-                        {globalInstances.length
-                            ? `${globalInstances.length} instância global encontrada. Ela agora é gerenciada na sessão própria.`
-                            : 'Nenhuma instância global marcada ainda. Use a sessão própria para conectar ou definir o número principal.'}
-                    </div>
-                </div>
-                <Link
-                    href="/admin/whatsapp/global"
-                    style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid rgba(14,165,233,0.25)', color: '#0369a1', background: '#fff', fontWeight: 800, textDecoration: 'none', fontSize: '0.84rem' }}
-                >
-                    Abrir WhatsApp Global
-                </Link>
             </div>
 
             <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.2)' }}>
@@ -480,11 +459,71 @@ export default function WhatsAppInstancesPage() {
                 </div>
             )}
 
+            {/* Global Instance Section */}
+            {globalInstances.length > 0 && (
+                <div style={{ marginBottom: '32px' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        marginBottom: '12px',
+                    }}>
+                        <div>
+                            <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', color: '#0284c7', margin: 0 }}>
+                                <Globe size={20} /> WhatsApp Global ({globalInstances.length})
+                            </h2>
+                            <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                                Entrada oficial para leads, usuarios internos e comandos de roteamento.
+                            </p>
+                        </div>
+                        <Link
+                            href="/admin/pilger-ai/agentes?agent=whatsapp-global-agent&setor=Diretoria"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '8px 12px',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(14,165,233,0.24)',
+                                background: 'rgba(14,165,233,0.08)',
+                                color: '#0284c7',
+                                fontSize: '0.78rem',
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            <Shield size={14} />
+                            Configurar Global
+                        </Link>
+                    </div>
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                        {globalInstances.map(inst => (
+                            <InstanceCard key={inst.id} inst={inst} type="global"
+                                expanded={expandedCard === inst.id}
+                                onToggleExpand={() => setExpandedCard(expandedCard === inst.id ? null : inst.id)}
+                                settingsExpanded={expandedSettings === inst.id}
+                                onToggleSettings={() => setExpandedSettings(expandedSettings === inst.id ? null : inst.id)}
+                                config={configs[inst.id] || DEFAULT_CONFIG}
+                                onUpdateConfig={(key, val) => updateConfig(inst.id, key, val)}
+                                onSaveSettings={() => saveSettings(inst.id)}
+                                savingSettings={savingSettings === inst.id}
+                                onRunAttendance={() => runAttendanceReport(inst.id)}
+                                runningAttendance={runningAttendance === inst.id}
+                                attendanceMessage={attendanceMessage[inst.id] || null}
+                                onRefresh={() => loadInstances(true)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Agent Instances Section */}
             {agentInstances.length > 0 && (
                 <div style={{ marginBottom: '32px' }}>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', color: 'var(--gold)', marginBottom: '12px' }}>
-                        <Bot size={20} /> Agentes IA ({agentInstances.length})
+                        <Bot size={20} /> Corretores IA ({agentInstances.length})
                     </h2>
                     <div style={{ display: 'grid', gap: '12px' }}>
                         {agentInstances.map(inst => (
@@ -534,7 +573,7 @@ export default function WhatsAppInstancesPage() {
                 </div>
             )}
 
-            {operationalInstances.length === 0 && (
+            {instances.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <Smartphone size={48} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Nenhum conectado WhatsApp</p>
@@ -555,7 +594,7 @@ export default function WhatsAppInstancesPage() {
 // Instance Card Component
 
 function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, onToggleSettings, config, onUpdateConfig, onSaveSettings, savingSettings, onRunAttendance, runningAttendance, attendanceMessage, onRefresh }: {
-    inst: Instance; type: 'agent' | 'user'
+    inst: Instance; type: 'agent' | 'user' | 'global'
     expanded: boolean; onToggleExpand: () => void
     settingsExpanded: boolean; onToggleSettings: () => void
     config: InstanceConfig
@@ -579,9 +618,10 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [qrCode, setQrCode] = useState<string | null>(null)
     const [qrMessage, setQrMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const isConnected = inst.status === 'connected'
-    const accentColor = type === 'agent' ? 'var(--gold)' : '#6366f1'
-    const name = type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
-    const subtitle = type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
+    const isGlobal = inst.instance_type === 'global' || type === 'global'
+    const accentColor = isGlobal ? '#0284c7' : type === 'agent' ? 'var(--gold)' : '#6366f1'
+    const name = isGlobal ? 'WhatsApp Global' : type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
+    const subtitle = isGlobal ? 'Porta central da empresa' : type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
     const photoUrl = type === 'agent'
         ? (inst.live_data?.profilePicUrl || inst.virtual_brokers?.photo_url)
         : inst.live_data?.profilePicUrl
@@ -648,7 +688,10 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             const res = await fetch('/api/admin/whatsapp/qrcode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ instanceId: inst.id }),
+                body: JSON.stringify({
+                    instanceId: inst.id,
+                    ...(isGlobal ? { instance_type: 'global' } : {}),
+                }),
             })
             const data = await res.json()
             if (!res.ok || !data?.success) {
@@ -790,6 +833,8 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                 }}>
                     {photoUrl ? (
                         <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : isGlobal ? (
+                        <Globe size={22} style={{ color: accentColor }} />
                     ) : type === 'agent' ? (
                         <Bot size={22} style={{ color: accentColor }} />
                     ) : (
@@ -805,10 +850,10 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                         </span>
                         <span style={{
                             fontSize: '0.65rem', padding: '2px 8px', borderRadius: '20px',
-                            background: type === 'agent' ? 'rgba(201,169,110,0.15)' : 'rgba(99,102,241,0.15)',
+                            background: isGlobal ? 'rgba(14,165,233,0.12)' : type === 'agent' ? 'rgba(201,169,110,0.15)' : 'rgba(99,102,241,0.15)',
                             color: accentColor, fontWeight: 700,
                         }}>
-                            {type === 'agent' ? 'AGENTE IA' : 'CORRETOR'}
+                            {isGlobal ? 'GLOBAL' : type === 'agent' ? 'AGENTE IA' : 'CORRETOR'}
                         </span>
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -851,8 +896,9 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                             <DetailItem icon={inst.live_data.plugged ? <BatteryCharging size={13} /> : <Battery size={13} />}
                                 label="Bateria" value={`${inst.live_data.battery}%${inst.live_data.plugged ? ' ⚡' : ''}`} />
                         )}
-                        {inst.live_data?.webhookUrl && <DetailItem icon={<Link2 size={13} />} label="Webhook" value="✅ Configurado" valueColor="#22c55e" />}
+                        {inst.live_data?.webhookUrl && <DetailItem icon={<Link2 size={13} />} label="Webhook" value="Configurado" valueColor="#22c55e" />}
                         {prompt && <DetailItem icon={<MessageSquare size={13} />} label="Prompt" value={`${prompt.length} caracteres`} />}
+                        {isGlobal && <DetailItem icon={<Shield size={13} />} label="Papel" value="Entrada global oficial" valueColor={accentColor} />}
                         <DetailItem icon={<Clock size={13} />} label="Criada" value={new Date(inst.created_at).toLocaleDateString('pt-BR')} />
                     </div>
 
@@ -1170,25 +1216,42 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                         </button>
                     </div>
 
-                    <div style={{ padding: '0 20px 16px' }}>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); deleteInstance() }}
-                            disabled={deletingInstance}
-                            style={{
-                                width: '100%',
-                                padding: '10px 14px',
+                    {isGlobal ? (
+                        <div style={{ padding: '0 20px 16px' }}>
+                            <div style={{
+                                padding: '10px 12px',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(239,68,68,0.3)',
-                                background: 'rgba(239,68,68,0.1)',
-                                color: '#ef4444',
+                                border: '1px solid rgba(14,165,233,0.2)',
+                                background: 'rgba(14,165,233,0.07)',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.78rem',
                                 fontWeight: 700,
-                                cursor: 'pointer',
-                                opacity: deletingInstance ? 0.7 : 1,
-                            }}
-                        >
-                            {deletingInstance ? 'Excluindo instância...' : 'Excluir Instância'}
-                        </button>
-                    </div>
+                                lineHeight: 1.35,
+                            }}>
+                                Instância protegida: o WhatsApp Global não é removido junto dos corretores IA. Para substituir o número, conecte outra instância como Global.
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ padding: '0 20px 16px' }}>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); deleteInstance() }}
+                                disabled={deletingInstance}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 14px',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(239,68,68,0.3)',
+                                    background: 'rgba(239,68,68,0.1)',
+                                    color: '#ef4444',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    opacity: deletingInstance ? 0.7 : 1,
+                                }}
+                            >
+                                {deletingInstance ? 'Excluindo instância...' : 'Excluir Instância'}
+                            </button>
+                        </div>
+                    )}
 
                     {/* Per-Instance Settings Panel */}
                     {settingsExpanded && (

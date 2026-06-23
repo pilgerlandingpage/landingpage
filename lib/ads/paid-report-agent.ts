@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { getMetaTrafficManagerSnapshot } from '@/lib/ads/meta'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -88,7 +89,8 @@ type PaidReportPayload = {
 const SYSTEM_PROMPT = [
   'Voce e o agente de relatorio de trafego pago da Pilger Luxury Search.',
   'Analise Meta Ads e Google Ads com foco em investimento, eficiencia, leads e risco de desperdicio.',
-  'Cruze campanhas, snapshots, alertas da IA, leads internos e criativos pagos em preparo.',
+  'Cruze campanhas, snapshots, conjuntos, anuncios, criativos, posicionamentos, publico, alertas da IA, leads internos e criativos pagos em preparo.',
+  'Quando houver dados de breakdown, aja como gestor: diga onde pausar, escalar, trocar criativo, corrigir tracking e ajustar publico.',
   'Fale como um gestor senior explicando o que fazer agora, sem jargao desnecessario.',
   'Nao misture dados organicos. Este relatorio e apenas de trafego pago.',
   'Use exatamente as chaves: title, summary, insights, recommendations e metrics.',
@@ -247,7 +249,7 @@ async function loadPaidContext(supabase: SupabaseAdmin, days: number) {
   periodStart.setDate(periodStart.getDate() - days)
   const since = periodStart.toISOString()
 
-  const [{ data: snapshots }, { data: campaigns }, { data: alerts }, { data: creatives }, internalLeads] = await Promise.all([
+  const [{ data: snapshots }, { data: campaigns }, { data: alerts }, { data: creatives }, internalLeads, metaManager] = await Promise.all([
     supabase
       .from('ad_metrics_snapshots')
       .select('campaign_id, snapshot_at, impressions, clicks, ctr, cpm, cpc, spend, leads_count, cost_per_lead, reach, landing_page_views, link_clicks, conversions, cost_per_result, messaging_conversations, post_engagements, quality_ranking, engagement_rate_ranking, conversion_rate_ranking, frequency, thumbstop_ratio, video_p50, video_p75, video_p100, ad_campaigns(id, name, platform, status, total_budget, daily_budget, duration_days, start_date, end_date, ai_auto_manage, created_at)')
@@ -277,6 +279,13 @@ async function loadPaidContext(supabase: SupabaseAdmin, days: number) {
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(100),
+    getMetaTrafficManagerSnapshot({
+      datePreset: 'custom',
+      timeRange: { since: toDateOnly(periodStart), until: toDateOnly(periodEnd) },
+    }).catch((error) => {
+      console.warn('[Paid Report Agent] Meta manager snapshot unavailable:', error?.message || error)
+      return null
+    }),
   ])
 
   const campaignSummaries = summarizeCampaignSnapshots((snapshots || []) as SnapshotRow[])
@@ -313,6 +322,14 @@ async function loadPaidContext(supabase: SupabaseAdmin, days: number) {
     avg_ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
     avg_cpc: totals.clicks > 0 ? totals.spend / totals.clicks : 0,
     avg_cpl: totals.leads > 0 ? totals.spend / totals.leads : 0,
+    meta_ads_live_spend: metaManager?.totals?.spend || 0,
+    meta_ads_live_leads: metaManager?.totals?.leads || 0,
+    meta_ads_live_ads: metaManager?.coverage?.ads || 0,
+    meta_ads_live_adsets: metaManager?.coverage?.adsets || 0,
+    meta_ads_live_placements: metaManager?.coverage?.placements || 0,
+    meta_ads_live_missing_crm_attribution: metaManager?.totals?.leads
+      ? Math.max(0, (metaManager.totals.leads || 0) - leadRows.length)
+      : 0,
     ...totals,
   }
 
@@ -359,6 +376,30 @@ async function loadPaidContext(supabase: SupabaseAdmin, days: number) {
       platforms: item.platform_targets,
       context: truncate(item.ai_context, 300),
     })),
+    meta_traffic_manager: metaManager ? {
+      totals: metaManager.totals,
+      coverage: metaManager.coverage,
+      diagnostics: metaManager.diagnostics,
+      top_campaigns: metaManager.top_campaigns.slice(0, 8),
+      top_adsets: metaManager.top_adsets.slice(0, 8),
+      top_ads: metaManager.top_ads.slice(0, 10).map(item => ({
+        id: item.id,
+        name: item.name,
+        campaign_name: item.campaign_name,
+        adset_name: item.adset_name,
+        spend: item.spend,
+        leads: item.leads,
+        cpl: item.cpl,
+        ctr: item.ctr,
+        quality_ranking: item.quality_ranking,
+        creative_title: item.creative_title,
+        creative_body: truncate(item.creative_body, 220),
+      })),
+      placements: metaManager.placements.slice(0, 10),
+      devices: metaManager.devices.slice(0, 8),
+      demographics: metaManager.demographics.slice(0, 10),
+      daily_series: metaManager.daily_series.slice(-14),
+    } : null,
   }
 
   return {

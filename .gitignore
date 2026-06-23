@@ -70,3 +70,6 @@ temp_config.json
 
 # Claude Code local config
 .claude/
+
+# Codex local attachments
+.codex-remote-attachments/

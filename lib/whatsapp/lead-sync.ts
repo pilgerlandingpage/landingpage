@@ -1,5 +1,6 @@
 import { getChatDetails, getContactAvatar } from '../uazapi'
 import { recordEcosystemEvent } from '../intelligence/ecosystem'
+import { normalizeLeadPipelineStageKey } from '../leads/pipeline'
 
 type SupabaseClientLike = any
 
@@ -1016,6 +1017,7 @@ export async function syncWhatsAppLeadSnapshot(
     const budgetMaxNumber = typeof scoreSeed.budget_max === 'number' ? scoreSeed.budget_max : null
     const score = scoreCollectedLead(scoreSeed)
     const classification = classificationFromScore(score, extracted.classification)
+    const pipelineStage = normalizeLeadPipelineStageKey(extracted.pipeline_stage)
     const now = new Date().toISOString()
     const currentLog = Array.isArray(lead.conversation_log) ? lead.conversation_log : []
     const conversationLog = normalizedMessages.length > 0
@@ -1060,6 +1062,8 @@ export async function syncWhatsAppLeadSnapshot(
             bedrooms: extracted.bedrooms || null,
             timeline: scoreSeed.timeline || null,
             classification,
+            pipeline_stage: pipelineStage,
+            pipeline_reason: extracted.pipeline_reason || null,
             score,
             objections: Array.isArray(extracted.objections) ? extracted.objections : [],
         },
@@ -1140,5 +1144,5 @@ export async function syncWhatsAppLeadSnapshot(
         lastMessageAt: now,
     }).catch(() => null)
 
-    return { lead_id: lead.id, score, classification }
+    return { lead_id: lead.id, score, classification, pipeline_stage: pipelineStage }
 }

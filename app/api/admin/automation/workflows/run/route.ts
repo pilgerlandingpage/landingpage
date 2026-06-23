@@ -13,6 +13,18 @@ function normalizePhone(raw: unknown): string {
     return digits
 }
 
+function recordValue(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, any>
+        : {}
+}
+
+function canUseInstanceForWorkflowSend(instance: any, defaultInstanceId?: string | null) {
+    if (!instance?.instance_token) return false
+    if (defaultInstanceId && String(instance.id || '') === defaultInstanceId) return true
+    return recordValue(instance.config).agent_enabled === true
+}
+
 function workflowSteps(workflow: any) {
     const metadataSteps = Array.isArray(workflow?.metadata?.steps) ? workflow.metadata.steps : []
     const steps = metadataSteps
@@ -182,32 +194,42 @@ export async function POST(request: NextRequest) {
 
         let instanceId = workflow.instance_id || null
         let instanceToken: string | null = null
+        const { data: defaultInstanceConfig } = await supabase
+            .from('app_config')
+            .select('value')
+            .eq('key', 'agent_default_instance_id')
+            .maybeSingle()
+        const defaultInstanceId = String(defaultInstanceConfig?.value || '').trim()
 
         if (instanceId) {
             const { data: instance } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_token')
+                .select('id, instance_token, config')
                 .eq('id', instanceId)
                 .eq('status', 'connected')
                 .maybeSingle()
-            instanceToken = instance?.instance_token || null
+            if (canUseInstanceForWorkflowSend(instance, defaultInstanceId)) {
+                instanceToken = instance?.instance_token || null
+            }
         }
 
         if (!instanceToken) {
             const { data: instance } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_token')
+                .select('id, instance_token, config')
                 .eq('broker_id', brokerId)
                 .eq('status', 'connected')
                 .order('updated_at', { ascending: false })
                 .limit(1)
                 .maybeSingle()
-            instanceId = instance?.id || instanceId
-            instanceToken = instance?.instance_token || null
+            if (canUseInstanceForWorkflowSend(instance, defaultInstanceId)) {
+                instanceId = instance?.id || instanceId
+                instanceToken = instance?.instance_token || null
+            }
         }
 
         if (!instanceToken) {
-            return NextResponse.json({ success: false, message: 'O agente escolhido nao tem WhatsApp conectado.' }, { status: 400 })
+            return NextResponse.json({ success: false, message: 'O agente escolhido nao tem WhatsApp conectado ou esta desligado.' }, { status: 400 })
         }
 
         const firstStep = steps[0]

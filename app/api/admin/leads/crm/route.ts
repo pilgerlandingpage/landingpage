@@ -52,6 +52,34 @@ function asString(value: any): string {
     return typeof value === 'string' ? value.trim() : ''
 }
 
+function extractWhatsAppProfilePhoto(value: any): string | null {
+    if (!value || typeof value !== 'object') return null
+
+    const candidates = [
+        value.profilePicUrl,
+        value.profilePictureUrl,
+        value.picture,
+        value.avatar,
+        value.photo_url,
+        value.url,
+        value.me?.profilePicUrl,
+        value.me?.profilePictureUrl,
+        value.me?.picture,
+        value.instance?.profilePicUrl,
+        value.instance?.profilePictureUrl,
+        value.data?.url,
+        value.data?.profilePicUrl,
+        value.data?.profilePictureUrl,
+    ]
+
+    for (const candidate of candidates) {
+        const url = asString(candidate)
+        if (/^https?:\/\//i.test(url)) return url
+    }
+
+    return null
+}
+
 function reliableCrmName(value: any): string {
     const text = asString(value)
     return text && !isGenericWhatsAppLeadName(text) ? text : ''
@@ -357,6 +385,26 @@ function normalizeConversationStatusFromCrm(status: any) {
     return 'active'
 }
 
+function normalizeCrmStatusFromLeadStage(status: any) {
+    const value = String(status || '').toLowerCase()
+    if (['converted', 'closed', 'closed_won'].includes(value)) return 'converted'
+    if (value === 'lost') return 'lost'
+    if (value === 'transferred') return 'transferred'
+    if (['qualified', 'contacted', 'scheduled', 'appointment', 'scheduled_visit', 'proposal'].includes(value)) return 'qualified'
+    if (['engaged', 'qualifying'].includes(value)) return 'qualifying'
+    return 'new'
+}
+
+function normalizeLeadFunnelStageFromCrm(status: any) {
+    const value = String(status || '').toLowerCase()
+    if (value === 'converted') return 'converted'
+    if (value === 'lost') return 'lost'
+    if (value === 'transferred') return 'transferred'
+    if (value === 'qualified') return 'qualified'
+    if (value === 'qualifying') return 'qualifying'
+    return 'lead'
+}
+
 function rowMatchesSearch(row: any, searchTerm: string, emailMatchedPhones: string[]) {
     if (!searchTerm) return true
     const needle = searchTerm.toLowerCase()
@@ -407,6 +455,51 @@ function conversationToCrmRow(conversation: any) {
     }
 }
 
+function leadToCrmRow(lead: any) {
+    const metadata = asRecord(lead?.metadata)
+    const qualification = asRecord(metadata.qualification)
+    const visitor = asRecord(lead?.visitor)
+    const location = asRecord(metadata.precise_location || metadata.gps_location)
+    const latitude = Number(location.latitude)
+    const longitude = Number(location.longitude)
+    const phone = lead?.phone_e164 || lead?.phone || ''
+
+    return {
+        id: `lead:${lead.id}`,
+        __crm_source: 'lead',
+        lead_id: lead.id,
+        lead_phone: phone,
+        lead_name: lead.name || null,
+        interest: lead.lead_purpose || metadataValue(metadata, ['interest']) || metadataValue(qualification, ['interest']) || null,
+        region: [visitor.city, visitor.region, visitor.country].filter(Boolean).join(', ') || null,
+        budget_min: null,
+        budget_max: null,
+        bedrooms_wanted: null,
+        property_type: metadataValue(metadata, ['property_type']) || metadataValue(qualification, ['property_type']) || null,
+        timeline: lead.lead_timeframe || metadataValue(metadata, ['timeline']) || metadataValue(qualification, ['timeline']) || null,
+        qualification_score: Number(qualification.score || lead.lead_score || 0),
+        lead_classification: lead.lead_classification || null,
+        status: normalizeCrmStatusFromLeadStage(lead.funnel_stage),
+        notes: lead.ai_summary || null,
+        lead_purpose: lead.lead_purpose || null,
+        lead_budget: lead.lead_budget || null,
+        lead_timeframe: lead.lead_timeframe || null,
+        push_subscribed_lead: lead.push_subscribed_lead ?? null,
+        is_partner: lead.is_partner ?? null,
+        visitor_ip_address: visitor.ip_address || null,
+        visitor_referrer: visitor.referrer || null,
+        visitor_last_visit_at: visitor.last_visit_at || null,
+        documents_received: Array.isArray(metadata.documents_received) ? metadata.documents_received : [],
+        latitude: Number.isFinite(latitude) ? latitude : null,
+        longitude: Number.isFinite(longitude) ? longitude : null,
+        broker_id: null,
+        instance_id: null,
+        conversation_id: null,
+        created_at: lead.created_at,
+        updated_at: lead.updated_at || visitor.last_visit_at || lead.created_at,
+    }
+}
+
 const LEAD_ENRICH_SELECT = `
     id,
     name,
@@ -426,11 +519,14 @@ const LEAD_ENRICH_SELECT = `
     lead_purpose,
     lead_budget,
     lead_timeframe,
+    push_subscribed_lead,
+    is_partner,
     visitor:visitors (
         detected_source,
         device_type,
         browser,
         os,
+        ip_address,
         country,
         city,
         region,
@@ -496,18 +592,94 @@ async function fetchBrokerMap(supabase: ReturnType<typeof getSupabase>, rows: an
     const brokerMap = new Map<string, any>()
     if (brokerIds.length === 0) return brokerMap
 
-    const { data, error } = await supabase
+    const withPhoto = await supabase
         .from('virtual_brokers')
-        .select('id, name, is_active')
+        .select('id, name, is_active, photo_url, whatsapp_instance_id')
         .in('id', brokerIds)
 
-    if (error) {
-        console.warn('[Lead CRM] broker enrichment failed:', error.message)
+    const result = !withPhoto.error
+        ? withPhoto
+        : await supabase
+            .from('virtual_brokers')
+            .select('id, name, is_active, photo_url')
+            .in('id', brokerIds)
+
+    const fallbackResult = result.error
+        ? await supabase
+            .from('virtual_brokers')
+            .select('id, name, is_active')
+            .in('id', brokerIds)
+        : result
+
+    if (fallbackResult.error) {
+        console.warn('[Lead CRM] broker enrichment failed:', fallbackResult.error.message)
         return brokerMap
     }
 
-    for (const broker of data || []) brokerMap.set(broker.id, broker)
+    const brokerRows = (fallbackResult.data || []) as any[]
+    const linkedInstanceIds = Array.from(new Set(
+        brokerRows
+            .map((broker: any) => String(broker?.whatsapp_instance_id || '').trim())
+            .filter(Boolean)
+    ))
+    const whatsappPhotoByBroker = await fetchBrokerWhatsappPhotoMap(supabase, brokerIds, linkedInstanceIds)
+
+    for (const broker of brokerRows) {
+        const whatsappPhotoUrl = whatsappPhotoByBroker.byBrokerId.get(broker.id)
+            || (broker.whatsapp_instance_id ? whatsappPhotoByBroker.byInstanceId.get(broker.whatsapp_instance_id) : null)
+            || null
+        brokerMap.set(broker.id, {
+            ...broker,
+            whatsapp_profile_photo_url: whatsappPhotoUrl,
+            broker_photo_url: whatsappPhotoUrl || broker.photo_url || null,
+        })
+    }
+
     return brokerMap
+}
+
+async function fetchBrokerWhatsappPhotoMap(
+    supabase: ReturnType<typeof getSupabase>,
+    brokerIds: string[],
+    instanceIds: string[] = []
+) {
+    const byBrokerId = new Map<string, string>()
+    const byInstanceId = new Map<string, string>()
+
+    async function loadBy(column: 'broker_id' | 'id', ids: string[]) {
+        if (ids.length === 0) return
+
+        const withLiveData = await supabase
+            .from('whatsapp_instances')
+            .select('id, broker_id, status, live_data')
+            .in(column, ids)
+
+        const result = !withLiveData.error
+            ? withLiveData
+            : await supabase
+                .from('whatsapp_instances')
+                .select('id, broker_id, status')
+                .in(column, ids)
+
+        if (result.error) {
+            console.warn('[Lead CRM] WhatsApp profile photo enrichment failed:', result.error.message)
+            return
+        }
+
+        for (const instance of (result.data || []) as any[]) {
+            const photoUrl = extractWhatsAppProfilePhoto(instance?.live_data)
+            if (!photoUrl) continue
+            const brokerId = String(instance?.broker_id || '')
+            const instanceId = String(instance?.id || '')
+            if (brokerId && !byBrokerId.has(brokerId)) byBrokerId.set(brokerId, photoUrl)
+            if (instanceId && !byInstanceId.has(instanceId)) byInstanceId.set(instanceId, photoUrl)
+        }
+    }
+
+    await loadBy('broker_id', brokerIds)
+    await loadBy('id', instanceIds)
+
+    return { byBrokerId, byInstanceId }
 }
 
 async function fetchConversationsForRows(supabase: ReturnType<typeof getSupabase>, rows: any[]) {
@@ -615,13 +787,18 @@ function resolveHistoryMessagesForRow(row: any, historyMap: Awaited<ReturnType<t
     return messages
 }
 
-function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', lead: any, broker: any, conversation: any, historyMessages: any[] = []) {
+type CrmRowSource = 'profile' | 'legacy' | 'conversation' | 'lead'
+
+function enrichCrmRow(row: any, source: CrmRowSource, lead: any, broker: any, conversation: any, historyMessages: any[] = []) {
+    const safeRow = { ...row }
+    delete safeRow.__crm_source
     const metadata = lead?.metadata || {}
     const tracking = typeof metadata?.tracking === 'object' && metadata.tracking ? metadata.tracking : {}
     const visitor = lead?.visitor || {}
     const landingPage = lead?.landing_page || {}
     const selfReportedSource = metadataValue(tracking, ['self_reported_source'])
     const behaviorSummary = metadata?.behavior_summary || null
+    const qualificationMetadata = asRecord(metadata?.qualification)
     const followupActions = metadata?.crm_followup_actions || {}
     const behaviorSummaryWithActions = applyFollowupActionsToSummary(behaviorSummary, followupActions)
     const behaviorScore = Number(behaviorSummary?.engagement_score || 0)
@@ -630,10 +807,11 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
     const leadName = resolveCrmLeadName(row, lead)
 
     return {
-        ...row,
+        ...safeRow,
         crm_source: source,
         broker_name: broker?.name || null,
         broker_is_active: broker?.is_active ?? null,
+        broker_photo_url: broker?.broker_photo_url || broker?.whatsapp_profile_photo_url || broker?.photo_url || null,
         lead_id: lead?.id || row.lead_id || null,
         lead_name: leadName,
         lead_email: lead?.email || null,
@@ -653,8 +831,18 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
         state: visitor.region || metadataValue(tracking, ['region']) || null,
         country: visitor.country || metadataValue(tracking, ['country']) || null,
         ai_summary: lead?.ai_summary || null,
+        lead_purpose: lead?.lead_purpose || row.lead_purpose || null,
+        lead_budget: lead?.lead_budget || row.lead_budget || null,
+        lead_timeframe: lead?.lead_timeframe || row.lead_timeframe || null,
+        push_subscribed_lead: lead?.push_subscribed_lead ?? row.push_subscribed_lead ?? null,
+        is_partner: lead?.is_partner ?? row.is_partner ?? null,
+        visitor_ip_address: visitor.ip_address || row.visitor_ip_address || metadataValue(tracking, ['ip_address']) || null,
+        visitor_referrer: visitor.referrer || row.visitor_referrer || metadataValue(tracking, ['referrer']) || null,
+        visitor_last_visit_at: visitor.last_visit_at || row.visitor_last_visit_at || metadataValue(tracking, ['last_visit_at']) || null,
         lead_classification: row.lead_classification || lead?.lead_classification || behaviorSummary?.lead_classification || null,
         lead_score: lead?.lead_score || behaviorScore || null,
+        pipeline_stage: metadataValue(qualificationMetadata, ['pipeline_stage']) || metadataValue(metadata, ['pipeline_stage']) || behaviorSummary?.pipeline_stage || null,
+        pipeline_reason: metadataValue(qualificationMetadata, ['pipeline_reason']) || metadataValue(metadata, ['pipeline_reason']) || behaviorSummary?.pipeline_reason || null,
         last_whatsapp_click: metadata?.last_whatsapp_click || null,
         whatsapp_clicks: Array.isArray(metadata?.whatsapp_clicks)
             ? metadata.whatsapp_clicks.slice(-10).reverse()
@@ -677,6 +865,47 @@ function enrichCrmRow(row: any, source: 'profile' | 'legacy' | 'conversation', l
         conversation_summary: conversation?.summary || null,
         conversation_messages: conversationMessages,
     }
+}
+
+async function fetchStandaloneLeadRows(params: {
+    supabase: ReturnType<typeof getSupabase>
+    baseRows: any[]
+    status: string | null
+    searchTerm: string
+    emailMatchedPhones: string[]
+    limit: number
+}) {
+    const { supabase, baseRows, status, searchTerm, emailMatchedPhones, limit } = params
+    const seenLeadIds = new Set(baseRows.map((row: any) => String(row.lead_id || '').trim()).filter(Boolean))
+    const seenPhones = new Set(baseRows.flatMap((row: any) => phoneCandidates(row.lead_phone)))
+    const fetchLimit = searchTerm ? Math.max(1000, limit * 4) : Math.max(240, limit * 2)
+
+    const { data, error } = await supabase
+        .from('leads')
+        .select(LEAD_ENRICH_SELECT)
+        .order('updated_at', { ascending: false })
+        .limit(fetchLimit)
+
+    if (error) {
+        console.warn('[Lead CRM] standalone lead enrichment failed:', error.message)
+        return []
+    }
+
+    return (data || [])
+        .map(leadToCrmRow)
+        .filter((row: any) => {
+            if (row.lead_id && seenLeadIds.has(row.lead_id)) return false
+            const phones = phoneCandidates(row.lead_phone)
+            if (phones.some(phone => seenPhones.has(phone))) return false
+            if (status && status !== 'all' && row.status !== status) return false
+            return rowMatchesSearch(row, searchTerm, emailMatchedPhones)
+        })
+}
+
+function mergeCrmRows(baseRows: any[], extraRows: any[], limit: number) {
+    return [...baseRows, ...extraRows]
+        .sort((a, b) => Date.parse(String(b.updated_at || b.created_at || '')) - Date.parse(String(a.updated_at || a.created_at || '')))
+        .slice(0, Math.max(limit, 1))
 }
 
 async function loadCrmRows(params: {
@@ -713,7 +942,19 @@ async function loadCrmRows(params: {
 
     const profileResult = await query
     if (!profileResult.error) {
-        return { rows: profileResult.data || [], source: 'profile' as const }
+        const profileRows = profileResult.data || []
+        if (!brokerId) {
+            const standaloneRows = await fetchStandaloneLeadRows({
+                supabase,
+                baseRows: profileRows,
+                status,
+                searchTerm,
+                emailMatchedPhones,
+                limit,
+            })
+            return { rows: mergeCrmRows(profileRows, standaloneRows, limit), source: 'profile' as const }
+        }
+        return { rows: profileRows, source: 'profile' as const }
     }
 
     if (!isMissingBrokerProfilesTable(profileResult.error)) throw profileResult.error
@@ -765,7 +1006,20 @@ async function loadCrmRows(params: {
     const legacyResult = await legacyQuery
     if (legacyResult.error) throw legacyResult.error
 
-    return { rows: legacyResult.data || [], source: 'legacy' as const }
+    const legacyRows = legacyResult.data || []
+    if (!brokerId) {
+        const standaloneRows = await fetchStandaloneLeadRows({
+            supabase,
+            baseRows: legacyRows,
+            status,
+            searchTerm,
+            emailMatchedPhones,
+            limit,
+        })
+        return { rows: mergeCrmRows(legacyRows, standaloneRows, limit), source: 'legacy' as const }
+    }
+
+    return { rows: legacyRows, source: 'legacy' as const }
 }
 
 async function findLeadForFollowup(supabase: ReturnType<typeof getSupabase>, body: any) {
@@ -976,7 +1230,7 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status')
         const search = searchParams.get('search')
         const brokerId = String(searchParams.get('broker_id') || '').trim()
-        const limit = parseInt(searchParams.get('limit') || '80', 10)
+        const limit = parseInt(searchParams.get('limit') || '160', 10)
         const searchTerm = String(search || '').trim()
         let emailMatchedPhones: string[] = []
 
@@ -1023,7 +1277,8 @@ export async function GET(request: NextRequest) {
                 ? conversationMap.byId.get(row.conversation_id)
                 : conversationMap.byBrokerPhone.get(conversationKey(row.broker_id, row.lead_phone))
             const historyMessages = resolveHistoryMessagesForRow(row, historyMap)
-            return enrichCrmRow(row, source, lead, broker, conversation, historyMessages)
+            const rowSource = (row.__crm_source || source) as CrmRowSource
+            return enrichCrmRow(row, rowSource, lead, broker, conversation, historyMessages)
         })
 
         return NextResponse.json({ success: true, leads: enriched, source })
@@ -1049,6 +1304,30 @@ export async function PUT(request: NextRequest) {
         }
 
         updates.updated_at = new Date().toISOString()
+
+        if (String(id).startsWith('lead:')) {
+            const leadId = String(id).replace(/^lead:/, '')
+            const leadUpdates: Record<string, any> = {
+                updated_at: updates.updated_at,
+            }
+
+            if (Object.prototype.hasOwnProperty.call(updates, 'status')) {
+                leadUpdates.funnel_stage = normalizeLeadFunnelStageFromCrm(updates.status)
+            }
+
+            if (Object.prototype.hasOwnProperty.call(updates, 'notes')) {
+                leadUpdates.ai_summary = updates.notes
+            }
+
+            const { error } = await supabase
+                .from('leads')
+                .update(leadUpdates)
+                .eq('id', leadId)
+
+            if (error) throw error
+
+            return NextResponse.json({ success: true, source: 'lead' })
+        }
 
         if (String(id).startsWith('conversation:')) {
             const conversationId = String(id).replace(/^conversation:/, '')

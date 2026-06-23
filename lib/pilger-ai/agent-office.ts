@@ -110,6 +110,21 @@ export type AgentOfficeSnapshot = {
 
 type ConfigMap = Record<string, string>
 
+type AgentOfficeBrokerRow = {
+    id?: string | number | null
+    name?: string | null
+    creci?: string | null
+    is_active?: boolean | null
+    assignment_type?: string | null
+    system_prompt?: string | null
+    photo_url?: string | null
+    phone?: string | null
+    whatsapp_instance_id?: string | number | null
+    concierge_enabled?: boolean | null
+    updated_at?: string | null
+    created_at?: string | null
+}
+
 type AgentPersona = {
     personaName: string
     jobTitle: string
@@ -220,9 +235,9 @@ const AGENT_PERSONAS: Record<string, AgentPersona> = {
         avatarTone: 'aqua',
     },
     'whatsapp-global-agent': {
-        personaName: 'Rafael WhatsApp Global',
-        jobTitle: 'Diretor de Conversas IA',
-        bio: 'Define o comportamento base dos corretores IA para manter atendimento consultivo, natural e rastreavel.',
+        personaName: 'WhatsApp Global',
+        jobTitle: 'Instancia global do ecossistema',
+        bio: 'Atende o ecossistema pelo numero global, identifica o perfil de quem conversa e roteia pedidos para o setor correto.',
         avatarTone: 'blue',
     },
     'whatsapp-rescue-agent': {
@@ -522,21 +537,21 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         sector: 'WhatsApp',
         promptKey: 'lead_extraction_prompt',
         fallback: LEAD_EXTRACTION_PROMPT,
-        detail: 'Extrai nome, contato, intencao, origem e sinais comerciais das conversas.',
+        detail: 'Extrai nome, contato, intencao, origem, temperatura e etapa do pipeline comercial.',
         tools: ['WhatsApp', 'CRM', 'funil'],
-        autonomy: 'Classifica e organiza dados; nao envia mensagens sozinho por este prompt.',
+        autonomy: 'Classifica e organiza dados para o Kanban; nao envia mensagens sozinho por este prompt.',
         editHref: '/admin/whatsapp/agent-config',
     },
     {
         id: 'whatsapp-global-agent',
         name: 'Agente WhatsApp Global',
-        role: 'Camada comportamental de todos os corretores IA',
-        sector: 'WhatsApp',
+        role: 'Diretoria de entrada e roteamento do WhatsApp',
+        sector: 'Diretoria',
         promptKey: 'whatsapp_global_system_prompt',
         fallback: DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT,
-        detail: 'Define as regras globais aplicadas automaticamente nas conversas dos agentes de WhatsApp.',
-        tools: ['WhatsApp', 'CRM', 'catalogo', 'agenda', 'midias'],
-        autonomy: 'Entra como camada global antes da resposta final de cada corretor IA.',
+        detail: 'Centraliza o WhatsApp Global, identifica o papel de quem conversa e encaminha tarefas para agentes, corretores e setores internos.',
+        tools: ['WhatsApp Global', 'CRM', 'usuarios', 'proprietarios', 'catalogo', 'agenda', 'midias'],
+        autonomy: 'Atua como portaria inteligente: atende leads comuns, reconhece usuarios autorizados e roteia pedidos internos para o agente responsavel.',
         editHref: '/admin/whatsapp/agent-config',
     },
     {
@@ -1772,6 +1787,59 @@ function resolveGlobalModel(configs: ConfigMap) {
     return configs.gemini_model || 'gemini-2.5-flash'
 }
 
+function isGlobalWhatsAppInstance(instance: any) {
+    const type = String(instance?.instance_type || '').trim().toLowerCase()
+    const name = String(instance?.instance_name || '').trim().toLowerCase()
+    return (
+        type === 'global' ||
+        name === 'global' ||
+        name.includes('global') ||
+        name.includes('agente global') ||
+        name.includes('whatsapp global')
+    )
+}
+
+function isGlobalWhatsAppBroker(broker: any) {
+    const normalizedName = normalizeForIdentity(String(broker?.name || '').trim())
+    return (
+        normalizedName === 'global' ||
+        normalizedName.includes('global') ||
+        normalizedName.includes('agente global') ||
+        normalizedName.includes('whatsapp global')
+    )
+}
+
+function pickGlobalWhatsAppInstance(instances: any[]) {
+    return instances.find((instance: any) => instance?.status === 'connected') || instances[0] || null
+}
+
+function findLinkedInstanceForBroker(broker: any, instances: any[]) {
+    if (!broker) return null
+    const brokerId = String(broker?.id || '')
+    const brokerInstanceId = String(broker?.whatsapp_instance_id || '')
+    return instances.find((instance: any) => String(instance?.broker_id || '') === brokerId)
+        || instances.find((instance: any) => brokerInstanceId && String(instance?.id || '') === brokerInstanceId)
+        || null
+}
+
+function findGlobalWhatsAppBroker(brokers: any[], globalInstances: any[]) {
+    const globalBrokerIds = new Set(
+        globalInstances
+            .map((instance: any) => String(instance?.broker_id || ''))
+            .filter(Boolean)
+    )
+    const globalInstanceIds = new Set(
+        globalInstances
+            .map((instance: any) => String(instance?.id || ''))
+            .filter(Boolean)
+    )
+
+    return brokers.find((broker: any) => globalBrokerIds.has(String(broker?.id || '')))
+        || brokers.find((broker: any) => globalInstanceIds.has(String(broker?.whatsapp_instance_id || '')))
+        || brokers.find((broker: any) => isGlobalWhatsAppBroker(broker))
+        || null
+}
+
 function normalizeBrokerAgent(broker: any, globalProvider: string, globalModel: string, instance?: any): AgentOfficeItem {
     const active = broker?.is_active !== false
     const connected = instance?.status === 'connected'
@@ -1815,20 +1883,92 @@ function normalizeBrokerAgent(broker: any, globalProvider: string, globalModel: 
     }
 }
 
-async function loadAgentOfficeBrokers(supabase: ReturnType<typeof createAdminClient>) {
+function normalizeGlobalWhatsAppAgent(broker: any, globalProvider: string, globalModel: string, instance?: any): AgentOfficeItem {
+    const base = normalizeBrokerAgent(broker, globalProvider, globalModel, instance)
+    const connected = instance?.status === 'connected'
+    const active = broker?.is_active !== false
+    const phone = instance?.live_data?.phone || instance?.phone_number || broker?.phone || ''
+    const instanceName = instance?.instance_name || 'Instancia global'
+    const globalStatusLabel = connected
+        ? 'conectada'
+        : instance?.status === 'disconnected'
+            ? 'desconectada'
+            : 'cadastrada'
+
+    return {
+        ...base,
+        id: 'whatsapp-global-agent',
+        name: 'WhatsApp Global',
+        personaName: 'WhatsApp Global',
+        avatarInitials: 'WG',
+        jobTitle: 'Instancia global do ecossistema',
+        bio: connected
+            ? 'Instancia global conectada ao WhatsApp para atender leads, usuarios internos, proprietarios e comandos do ecossistema.'
+            : 'Instancia global do ecossistema com base operacional preservada no cadastro original.',
+        role: 'Atendimento global e roteamento da Diretoria',
+        sector: 'Diretoria',
+        status: connected ? 'Conectado' : (active ? 'Ativo' : 'Inativo'),
+        tone: connected || active ? 'success' : 'muted',
+        detail: `Instancia global ${globalStatusLabel}${phone ? ` - ${phone}` : ''}. Base preservada em ${broker?.name || 'virtual_brokers'}.`,
+        tools: broker?.concierge_enabled
+            ? ['WhatsApp Global', 'CRM', 'catalogo de imoveis', 'agenda', 'comandos internos', 'concierge']
+            : ['WhatsApp Global', 'CRM', 'catalogo de imoveis', 'agenda', 'comandos internos'],
+        autonomy: 'Atua como porteiro inteligente do ecossistema: atende leads comuns, reconhece usuarios autorizados e roteia comandos internos para o setor ou agente responsavel.',
+        runtimeFacts: [
+            {
+                label: 'Instancia WhatsApp',
+                value: instanceName,
+                tone: connected ? 'success' : 'warning',
+            },
+            {
+                label: 'Numero conectado',
+                value: phone || 'Sem numero sincronizado',
+                tone: phone ? 'success' : 'muted',
+            },
+            {
+                label: 'Base operacional',
+                value: broker?.name || 'Cadastro global',
+                tone: 'info',
+            },
+        ],
+        centralContract: resolveAgentCentralProfile('whatsapp-global-agent'),
+    }
+}
+
+async function loadAgentOfficeBrokers(supabase: ReturnType<typeof createAdminClient>): Promise<AgentOfficeBrokerRow[]> {
     const withConcierge = await supabase
         .from('virtual_brokers')
-        .select('id,name,creci,is_active,assignment_type,system_prompt,photo_url,phone,concierge_enabled,updated_at,created_at')
+        .select('id,name,creci,is_active,assignment_type,system_prompt,photo_url,phone,whatsapp_instance_id,concierge_enabled,updated_at,created_at')
         .order('name')
         .limit(80)
 
-    if (!withConcierge.error) return withConcierge.data || []
+    if (!withConcierge.error) return (withConcierge.data || []) as AgentOfficeBrokerRow[]
 
     const fallback = await supabase
         .from('virtual_brokers')
-        .select('id,name,creci,is_active,assignment_type,system_prompt,photo_url,phone,updated_at,created_at')
+        .select('id,name,creci,is_active,assignment_type,system_prompt,photo_url,phone,whatsapp_instance_id,updated_at,created_at')
         .order('name')
         .limit(80)
+
+    return (fallback.data || []) as AgentOfficeBrokerRow[]
+}
+
+async function loadAgentOfficeWhatsappInstances(supabase: ReturnType<typeof createAdminClient>) {
+    const withTypeAndLiveData = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, instance_name, instance_type, phone_number, status, live_data')
+
+    if (!withTypeAndLiveData.error) return withTypeAndLiveData.data || []
+
+    const withType = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, instance_name, instance_type, phone_number, status')
+
+    if (!withType.error) return withType.data || []
+
+    const fallback = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, instance_name, phone_number, status')
 
     return fallback.data || []
 }
@@ -1858,39 +1998,80 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
     const [{ data: configRows }, { data: brokers }, { data: instances }] = await Promise.all([
         loadAgentOfficeConfigRows(supabase).then(data => ({ data })),
         loadAgentOfficeBrokers(supabase).then(data => ({ data })),
-        supabase
-            .from('whatsapp_instances')
-            .select('id, broker_id, instance_name, phone_number, status, live_data')
-            .not('broker_id', 'is', null),
+        loadAgentOfficeWhatsappInstances(supabase).then(data => ({ data })),
     ])
 
     const configs: ConfigMap = Object.fromEntries((configRows || []).map((row: any) => [row.key, String(row.value || '')]))
     const globalProvider = configs.ai_provider || 'gemini'
     const globalModel = resolveGlobalModel(configs)
     const llmPolicy = `Herda ${globalProvider} / ${globalModel} da Sala de Manutencao`
+    const globalInstances = (instances || []).filter((instance: any) => isGlobalWhatsAppInstance(instance))
+    const globalBroker = findGlobalWhatsAppBroker(brokers || [], globalInstances)
+    const globalInstance = findLinkedInstanceForBroker(globalBroker, instances || []) || pickGlobalWhatsAppInstance(globalInstances)
+    const globalAgent = globalBroker
+        ? normalizeGlobalWhatsAppAgent(globalBroker, globalProvider, globalModel, globalInstance)
+        : null
+    const promptAgentDefinitions = globalAgent
+        ? OFFICE_PROMPT_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent')
+        : OFFICE_PROMPT_AGENTS
 
-    const promptAgents: AgentOfficeItem[] = OFFICE_PROMPT_AGENTS.map(agent => {
+    const promptAgents: AgentOfficeItem[] = promptAgentDefinitions.map(agent => {
         const persona = getPersonaForAgent(agent)
+        const isGlobalAgent = agent.id === 'whatsapp-global-agent'
+        const globalPhone = globalInstance?.phone_number || ''
+        const avatarUrl = configs[`agent_avatar_${agent.id}`] || `/api/admin/pilger-ai/agent-avatar/${agent.id}`
+        const status = isGlobalAgent && globalInstance
+            ? (globalInstance.status === 'connected' ? 'Conectado' : 'Desconectado')
+            : undefined
+        const globalStatusLabel = globalInstance?.status === 'connected'
+            ? 'conectada'
+            : globalInstance?.status === 'disconnected'
+                ? 'desconectada'
+                : 'cadastrada'
+        const detail = isGlobalAgent && globalInstance
+            ? `${agent.detail} Instancia global ${globalStatusLabel}${globalPhone ? ` - ${globalPhone}` : ''}.`
+            : agent.detail
         const promptValue = applyAgentIdentity(agent, persona, getConfig(configs, agent.promptKey, agent.fallback))
+        const runtimeFacts = [
+            ...(agent.runtimeFacts?.(configs) || []),
+            ...(isGlobalAgent ? [
+                {
+                    label: 'Instancia WhatsApp',
+                    value: globalInstance?.instance_name || 'Nao vinculada',
+                    tone: globalInstance?.status === 'connected' ? 'success' as const : 'warning' as const,
+                },
+                {
+                    label: 'Numero conectado',
+                    value: globalPhone || 'Sem numero sincronizado',
+                    tone: globalPhone ? 'success' as const : 'muted' as const,
+                },
+                {
+                    label: 'Base operacional',
+                    value: globalBroker?.name ? `Sem corretor duplicado; instancia vinda de ${globalBroker.name}` : 'Independente dos corretores IA',
+                    tone: 'info' as const,
+                },
+            ] : []),
+        ]
         return {
             ...agent,
             personaName: persona.personaName,
             avatarInitials: getInitials(persona.personaName),
             avatarTone: persona.avatarTone,
             avatarConfigKey: `agent_avatar_${agent.id}`,
-            avatarUrl: configs[`agent_avatar_${agent.id}`] || `/api/admin/pilger-ai/agent-avatar/${agent.id}`,
+            avatarUrl,
             jobTitle: persona.jobTitle,
             bio: persona.bio,
             source: 'app_config',
             promptValue,
-            status: promptValue.trim() ? 'Configurado' : 'Sem prompt',
-            tone: promptValue.trim() ? 'success' : 'warning',
+            detail,
+            status: status || (promptValue.trim() ? 'Configurado' : 'Sem prompt'),
+            tone: status === 'Conectado' ? 'success' : (promptValue.trim() ? 'success' : 'warning'),
             llmPolicy,
             behaviorControls: agent.behaviorControls?.map(control => ({
                 ...control,
                 value: getConfig(configs, control.key, control.fallback),
             })),
-            runtimeFacts: agent.runtimeFacts?.(configs),
+            runtimeFacts: runtimeFacts.length ? runtimeFacts : undefined,
             behaviorActions: agent.behaviorActions,
             centralContract: resolveAgentCentralProfile(agent.id),
             researchTopics: agent.id === 'research-pilger'
@@ -1908,11 +2089,33 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
         }
     })
 
-    const instancesByBrokerId = new Map((instances || []).map((instance: any) => [String(instance.broker_id), instance]))
-    const brokerAgents = (brokers || []).map((broker: any) =>
-        normalizeBrokerAgent(broker, globalProvider, globalModel, instancesByBrokerId.get(String(broker.id)))
+    const globalBrokerId = String(globalBroker?.id || '')
+    const globalInstanceIds = new Set(
+        [
+            ...globalInstances.map((instance: any) => String(instance.id || '')),
+            String(globalInstance?.id || ''),
+        ].filter(Boolean)
     )
-    const agents = [...promptAgents, ...brokerAgents]
+    const brokerInstances = (instances || []).filter((instance: any) => {
+        const instanceId = String(instance.id || '')
+        const brokerId = String(instance.broker_id || '')
+        return !globalInstanceIds.has(instanceId) &&
+            (!globalBrokerId || brokerId !== globalBrokerId) &&
+            !isGlobalWhatsAppInstance(instance)
+    })
+    const instancesByBrokerId = new Map(brokerInstances.map((instance: any) => [String(instance.broker_id), instance]))
+    const brokerAgents = (brokers || [])
+        .filter((broker: any) => {
+            const brokerId = String(broker.id || '')
+            const brokerInstanceId = String(broker.whatsapp_instance_id || '')
+            return brokerId !== globalBrokerId &&
+                !globalInstanceIds.has(brokerInstanceId) &&
+                !isGlobalWhatsAppBroker(broker)
+        })
+        .map((broker: any) =>
+            normalizeBrokerAgent(broker, globalProvider, globalModel, instancesByBrokerId.get(String(broker.id)))
+        )
+    const agents = [...promptAgents, ...(globalAgent ? [globalAgent] : []), ...brokerAgents]
 
     return {
         globalProvider,
@@ -1920,7 +2123,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
         totalAgents: agents.length,
         activeAgents: agents.filter(agent => agent.tone === 'success').length,
         promptAgents: promptAgents.length,
-        brokerAgents: brokerAgents.length,
+        brokerAgents: brokerAgents.length + (globalAgent ? 1 : 0),
         agents,
     }
 }

@@ -122,6 +122,10 @@ function inferInstanceType(inst: any): 'global' | 'broker' | 'sector' | 'admin' 
     return 'broker'
 }
 
+function isGlobalInstanceRecord(inst: any): boolean {
+    return inferInstanceType(inst) === 'global'
+}
+
 // GET — Lista instâncias (filtra por broker_id ou admin_user_id se fornecido)
 export async function GET(request: NextRequest) {
     try {
@@ -421,6 +425,13 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
         }
 
+        if (isGlobalInstanceRecord(instance)) {
+            return NextResponse.json({
+                success: false,
+                message: 'A instancia do WhatsApp Global e protegida. Para trocar o numero, marque outra instancia como global antes de remover esta.',
+            }, { status: 400 })
+        }
+
         if (!instance.instance_token) {
             return NextResponse.json({
                 success: false,
@@ -485,13 +496,29 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Sempre libera qualquer vínculo atual deste corretor
-        const { error: clearBrokerError } = await supabase
+        const { data: currentLinkedInstances, error: linkedError } = await supabase
             .from('whatsapp_instances')
-            .update({ broker_id: null, updated_at: new Date().toISOString() })
+            .select('id, instance_name, instance_type, broker_id')
             .eq('broker_id', brokerId)
 
-        if (clearBrokerError) {
-            return NextResponse.json({ success: false, message: clearBrokerError.message }, { status: 500 })
+        if (linkedError) {
+            return NextResponse.json({ success: false, message: linkedError.message }, { status: 500 })
+        }
+
+        const nonGlobalLinkedIds = (currentLinkedInstances || [])
+            .filter((inst: any) => !isGlobalInstanceRecord(inst))
+            .map((inst: any) => inst.id)
+            .filter(Boolean)
+
+        if (nonGlobalLinkedIds.length > 0) {
+            const { error: clearBrokerError } = await supabase
+                .from('whatsapp_instances')
+                .update({ broker_id: null, updated_at: new Date().toISOString() })
+                .in('id', nonGlobalLinkedIds)
+
+            if (clearBrokerError) {
+                return NextResponse.json({ success: false, message: clearBrokerError.message }, { status: 500 })
+            }
         }
 
         // Se instanceId vazio, apenas desvincula
@@ -502,9 +529,15 @@ export async function PATCH(request: NextRequest) {
         // Move a instância selecionada para este corretor
         const { data: selectedInstance } = await supabase
             .from('whatsapp_instances')
-            .select('config')
+            .select('config, instance_name, instance_type')
             .eq('id', instanceId)
             .maybeSingle()
+        if (isGlobalInstanceRecord(selectedInstance)) {
+            return NextResponse.json({
+                success: false,
+                message: 'Esta instancia e o WhatsApp Global e nao pode ser vinculada como corretor IA.',
+            }, { status: 400 })
+        }
         const currentConfig = selectedInstance?.config && typeof selectedInstance.config === 'object'
             ? selectedInstance.config
             : null

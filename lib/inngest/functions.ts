@@ -909,6 +909,12 @@ function objectRecord(value: unknown): Record<string, any> {
         : {}
 }
 
+function canUseInstanceForOutboundAutomation(instance: any, defaultInstanceId?: string | null) {
+    if (!instance?.instance_token) return false
+    if (defaultInstanceId && String(instance.id || '') === defaultInstanceId) return true
+    return objectRecord(instance.config).agent_enabled === true
+}
+
 function textValue(value: unknown): string | null {
     const text = String(value || '').trim()
     return text || null
@@ -929,6 +935,7 @@ async function resolveFollowupSender(params: {
     let instanceId = textValue(params.eventData.whatsapp_instance_id) || textValue(savedDestination.whatsapp_instance_id)
     let senderPhone = textValue(params.eventData.whatsapp_phone) || textValue(savedDestination.phone)
     let source = textValue(savedDestination.source) || 'unknown'
+    const defaultInstanceCfgId = params.cfg.get('agent_default_instance_id') || null
 
     if (propertyId && (!instanceId || !senderPhone)) {
         try {
@@ -946,13 +953,13 @@ async function resolveFollowupSender(params: {
     const loadInstance = async (column: 'id' | 'broker_id' | 'admin_user_id', value: string) => {
         const { data } = await params.supabase
             .from('whatsapp_instances')
-            .select('id, instance_token, broker_id, admin_user_id, phone_number, status')
+            .select('id, instance_token, broker_id, admin_user_id, phone_number, status, config')
             .eq(column, value)
             .eq('status', 'connected')
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle()
-        return data || null
+        return canUseInstanceForOutboundAutomation(data, defaultInstanceCfgId) ? data : null
     }
 
     let instance: any = null
@@ -966,7 +973,6 @@ async function resolveFollowupSender(params: {
         instance = await loadInstance('admin_user_id', adminUserId)
     }
 
-    const defaultInstanceCfgId = params.cfg.get('agent_default_instance_id') || null
     if (!instance?.instance_token && defaultInstanceCfgId) {
         instance = await loadInstance('id', defaultInstanceCfgId)
         source = source === 'unknown' ? 'global' : source
@@ -1272,28 +1278,38 @@ export const runAgentWorkflow = inngest.createFunction(
         let instanceId = workflow.instance_id || null
         let brokerId = workflow.broker_id || null
         let instanceToken: string | null = null
+        const { data: defaultInstanceConfig } = await supabase
+            .from('app_config')
+            .select('value')
+            .eq('key', 'agent_default_instance_id')
+            .maybeSingle()
+        const defaultInstanceId = String(defaultInstanceConfig?.value || '').trim()
 
         if (instanceId) {
             const { data: instance } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_token, broker_id')
+                .select('id, instance_token, broker_id, config')
                 .eq('id', instanceId)
                 .maybeSingle()
-            instanceToken = instance?.instance_token || null
-            brokerId = brokerId || instance?.broker_id || null
+            if (canUseInstanceForOutboundAutomation(instance, defaultInstanceId)) {
+                instanceToken = instance?.instance_token || null
+                brokerId = brokerId || instance?.broker_id || null
+            }
         }
 
         if (!instanceToken && brokerId) {
             const { data: instance } = await supabase
                 .from('whatsapp_instances')
-                .select('id, instance_token, broker_id')
+                .select('id, instance_token, broker_id, config')
                 .eq('broker_id', brokerId)
                 .eq('status', 'connected')
                 .order('updated_at', { ascending: false })
                 .limit(1)
                 .maybeSingle()
-            instanceToken = instance?.instance_token || null
-            instanceId = instance?.id || instanceId
+            if (canUseInstanceForOutboundAutomation(instance, defaultInstanceId)) {
+                instanceToken = instance?.instance_token || null
+                instanceId = instance?.id || instanceId
+            }
         }
 
         if (!instanceToken) return { skipped: true, reason: 'no_instance_token' }

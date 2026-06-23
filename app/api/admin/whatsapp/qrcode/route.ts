@@ -21,6 +21,12 @@ function normalizeInstanceType(value: unknown): 'global' | 'broker' | 'sector' |
     return 'broker'
 }
 
+function isGlobalInstanceRecord(instance: any): boolean {
+    const type = String(instance?.instance_type || '').trim().toLowerCase()
+    const name = String(instance?.instance_name || '').trim().toLowerCase()
+    return type === 'global' || name === 'agente global' || name === 'whatsapp global'
+}
+
 function isMissingColumnError(error: any, column: string) {
     const message = String(error?.message || error || '')
     return message.includes(column) || message.includes(`'${column}'`) || message.includes(`"${column}"`)
@@ -190,7 +196,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { instanceId, instance_name, broker_id, admin_user_id } = body
         const requestedInstanceType = normalizeInstanceType(body?.instance_type)
-        const isGlobalInstance = requestedInstanceType === 'global'
+        let isGlobalInstance = requestedInstanceType === 'global'
 
         let instance: any = null
         let autoBrokerId: string | null = null
@@ -209,6 +215,9 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: false, message: 'Instancia nao encontrada' }, { status: 404 })
             }
             instance = data
+            if (isGlobalInstanceRecord(instance)) {
+                isGlobalInstance = true
+            }
             if (isGlobalInstance) {
                 await updateInstanceWithCompatibility(supabase, instance.id, {
                     instance_type: 'global',

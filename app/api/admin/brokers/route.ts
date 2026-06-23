@@ -15,6 +15,34 @@ function normalizeBrokerPhone(value: any): string {
     return normalizeAssistantPhone(value)
 }
 
+function extractWhatsAppProfilePhoto(value: any): string | null {
+    if (!value || typeof value !== 'object') return null
+
+    const candidates = [
+        value.profilePicUrl,
+        value.profilePictureUrl,
+        value.picture,
+        value.avatar,
+        value.photo_url,
+        value.url,
+        value.me?.profilePicUrl,
+        value.me?.profilePictureUrl,
+        value.me?.picture,
+        value.instance?.profilePicUrl,
+        value.instance?.profilePictureUrl,
+        value.data?.url,
+        value.data?.profilePicUrl,
+        value.data?.profilePictureUrl,
+    ]
+
+    for (const candidate of candidates) {
+        const url = String(candidate || '').trim()
+        if (/^https?:\/\//i.test(url)) return url
+    }
+
+    return null
+}
+
 const ASSISTANT_PHONE_OPTIONAL_COLUMNS = [
     'can_manage_finance',
     'can_view_reports',
@@ -37,6 +65,7 @@ const BROKER_BASE_SELECT_FIELDS = [
     'assignment_type',
     'assigned_page_slugs',
     'phone',
+    'whatsapp_instance_id',
     'system_prompt',
     'voice_id',
     'handoff_prompt',
@@ -170,6 +199,55 @@ async function syncAssistantPhones(supabase: any, brokerId: string, phones: any[
     }
 }
 
+type BrokerWhatsappMetadata = {
+    photoUrl: string | null
+    instanceId: string | null
+    instanceName: string | null
+    instanceType: string | null
+    status: string | null
+    isGlobal: boolean
+}
+
+async function fetchBrokerWhatsappMetadataMap(supabase: any, brokerIds: string[]) {
+    const metadataByBroker = new Map<string, BrokerWhatsappMetadata>()
+    if (brokerIds.length === 0) return metadataByBroker
+
+    const withLiveData = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, instance_name, instance_type, status, live_data')
+        .in('broker_id', brokerIds)
+
+    const result = !withLiveData.error
+        ? withLiveData
+        : await supabase
+            .from('whatsapp_instances')
+            .select('id, broker_id, instance_name, status')
+            .in('broker_id', brokerIds)
+
+    if (result.error) {
+        console.warn('List broker WhatsApp metadata warning:', result.error.message)
+        return metadataByBroker
+    }
+
+    for (const instance of result.data || []) {
+        const brokerId = String(instance?.broker_id || '')
+        if (!brokerId || metadataByBroker.has(brokerId)) continue
+        const instanceType = String(instance?.instance_type || '').trim().toLowerCase()
+        const instanceName = String(instance?.instance_name || '').trim()
+        const photoUrl = extractWhatsAppProfilePhoto(instance?.live_data)
+        metadataByBroker.set(brokerId, {
+            photoUrl,
+            instanceId: instance?.id ? String(instance.id) : null,
+            instanceName: instanceName || null,
+            instanceType: instanceType || null,
+            status: instance?.status ? String(instance.status) : null,
+            isGlobal: instanceType === 'global' || instanceName.toLowerCase().includes('agente global') || instanceName.toLowerCase().includes('whatsapp global'),
+        })
+    }
+
+    return metadataByBroker
+}
+
 // GET - List brokers
 export async function GET() {
     try {
@@ -200,6 +278,7 @@ export async function GET() {
         const brokerIds = brokers.map((b: any) => b.id)
         let links: any[] = []
         let assistantPhones: any[] = []
+        const whatsappMetadataByBroker = await fetchBrokerWhatsappMetadataMap(supabase, brokerIds)
         try {
             const { data: linksData, error: linksError } = await supabase
                 .from('broker_empreendimentos')
@@ -259,7 +338,20 @@ export async function GET() {
             const empreendimento_names = rows
                 .map((r: any) => r?.empreendimentos?.nome)
                 .filter(Boolean)
-            return { ...b, empreendimento_ids, empreendimento_names, assistant_phones: assistantByBroker[b.id] || [] }
+            const whatsappMetadata = whatsappMetadataByBroker.get(b.id) || null
+            const whatsappProfilePhotoUrl = whatsappMetadata?.photoUrl || null
+            return {
+                ...b,
+                whatsapp_profile_photo_url: whatsappProfilePhotoUrl,
+                broker_avatar_url: whatsappProfilePhotoUrl || b.photo_url || null,
+                whatsapp_instance_type: whatsappMetadata?.instanceType || null,
+                whatsapp_instance_name: whatsappMetadata?.instanceName || null,
+                whatsapp_instance_status: whatsappMetadata?.status || null,
+                is_global_whatsapp_agent: Boolean(whatsappMetadata?.isGlobal),
+                empreendimento_ids,
+                empreendimento_names,
+                assistant_phones: assistantByBroker[b.id] || [],
+            }
         })
 
         return NextResponse.json({ data: enriched })

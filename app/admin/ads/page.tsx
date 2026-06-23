@@ -157,6 +157,17 @@ function formatDateTime(value: string | null | undefined) {
     })
 }
 
+function metricNumber(metrics: Record<string, unknown> | null | undefined, key: string) {
+    const raw = metrics?.[key]
+    const parsed = typeof raw === 'number' ? raw : Number(raw || 0)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function metricText(metrics: Record<string, unknown> | null | undefined, key: string) {
+    const raw = metrics?.[key]
+    return raw == null || raw === '' ? '-' : String(raw)
+}
+
 function cleanJsonBlock(value: string) {
     const cleaned = String(value || '')
         .replace(/```json\n?/gi, '')
@@ -255,6 +266,7 @@ export default function AdsPage() {
     const [paidReportLoading, setPaidReportLoading] = useState(false)
     const [paidReportError, setPaidReportError] = useState('')
     const latestPaidReport = paidReports[0] || null
+    const latestPaidMetrics = latestPaidReport?.metrics || null
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type })
@@ -600,16 +612,17 @@ export default function AdsPage() {
                         <Brain size={18} className={analyzing ? 'spin' : ''} />
                         {analyzing ? 'Analisando...' : 'Analisar com IA'}
                     </button>
-                    <button onClick={handlePaidReport} disabled={paidReportLoading}
+                    <Link href="/admin/ads/relatorio"
                         className="btn" style={{
                             background: '#17120c',
                             border: '1px solid rgba(201, 169, 110, 0.45)',
                             color: '#fffaf0',
                             display: 'flex', alignItems: 'center', gap: 8,
+                            textDecoration: 'none',
                         }}>
-                        <Sparkles size={18} className={paidReportLoading ? 'spin' : ''} />
-                        {paidReportLoading ? 'Gerando...' : 'Relatorio IA'}
-                    </button>
+                        <Sparkles size={18} />
+                        Gestor IA
+                    </Link>
                     <Link href="/admin/ads/new" className="btn btn-gold" style={{ textDecoration: 'none' }}>
                         <Plus size={18} /> Nova Campanha
                     </Link>
@@ -761,32 +774,68 @@ export default function AdsPage() {
                 )}
             </div>
 
-            <div className="chart-card" style={{
-                marginBottom: 24,
+            <div className="chart-card paid-agent-brief" style={{
+                marginBottom: 18,
                 border: '1px solid rgba(201,169,110,.18)',
-                background: 'radial-gradient(circle at top left, rgba(201,169,110,.12), transparent 32%), linear-gradient(135deg, #fff, #fbfaf7)',
+                background: 'linear-gradient(135deg, #fff, #fbfaf7)',
+                padding: 16,
             }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 16 }}>
-                    <div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.4fr) minmax(280px,.9fr)', gap: 16, alignItems: 'center' }}>
+                    <div style={{ minWidth: 0 }}>
                         <div style={{ color: 'var(--gold)', fontSize: '.68rem', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
-                            Agente pago IA
+                            Gestor de trafego pago IA
                         </div>
-                        <div className="chart-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                            <Sparkles size={18} /> Relatorio de performance paga
+                        <div className="chart-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <Sparkles size={18} /> Relatorio executivo
                         </div>
-                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.84rem' }}>
-                            Meta + Google, campanhas, alertas, leads reais e criativos pagos em uma leitura executiva.
-                        </p>
+                        {latestPaidReport ? (
+                            <>
+                                <div style={{ fontSize: '.95rem', fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {latestPaidReport.title}
+                                </div>
+                                <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '.82rem', lineHeight: 1.4, maxWidth: 980 }}>
+                                    {latestPaidReport.summary}
+                                </p>
+                                <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '.72rem', fontWeight: 700 }}>
+                                    Periodo: {formatDateOnly(latestPaidReport.period_start)} a {formatDateOnly(latestPaidReport.period_end)}
+                                </div>
+                            </>
+                        ) : (
+                            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.84rem' }}>
+                                O agente ainda nao gerou um relatorio executivo de trafego pago.
+                            </p>
+                        )}
                     </div>
-                    <button onClick={handlePaidReport} disabled={paidReportLoading} className="btn btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
-                        <Sparkles size={16} className={paidReportLoading ? 'spin' : ''} />
-                        {paidReportLoading ? 'Analisando...' : 'Nova analise'}
-                    </button>
+                    <div style={{ display: 'grid', gap: 10 }}>
+                        <div className="paid-agent-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 8 }}>
+                            <div>
+                                <span>Score</span>
+                                <strong>{metricText(latestPaidMetrics, 'health_score')}</strong>
+                            </div>
+                            <div>
+                                <span>Campanhas</span>
+                                <strong>{metricNumber(latestPaidMetrics, 'campaigns_with_metrics') || filteredCampaigns.filter(c => c.latest_metrics).length}</strong>
+                            </div>
+                            <div>
+                                <span>Risco</span>
+                                <strong>{metricText(latestPaidMetrics, 'main_risk')}</strong>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                            <button onClick={handlePaidReport} disabled={paidReportLoading} className="btn btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                                <Sparkles size={16} className={paidReportLoading ? 'spin' : ''} />
+                                {paidReportLoading ? 'Gerando...' : 'Gerar analise'}
+                            </button>
+                            <Link href="/admin/ads/relatorio" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                                Ver relatorio completo <ArrowRight size={16} />
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 {paidReportError && (
                     <div style={{
-                        marginBottom: 12,
+                        marginTop: 12,
                         padding: '10px 12px',
                         borderRadius: 10,
                         color: '#b91c1c',
@@ -796,44 +845,6 @@ export default function AdsPage() {
                         fontWeight: 700,
                     }}>
                         {paidReportError}
-                    </div>
-                )}
-
-                {latestPaidReport ? (
-                    <div className="paid-report-content" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,.8fr) minmax(0,1.2fr)', gap: 16 }}>
-                        <div style={{ padding: 16, borderRadius: 14, background: '#17120c', color: '#fffaf0' }}>
-                            <div style={{ color: 'var(--gold)', fontSize: '.72rem', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
-                                {formatDateOnly(latestPaidReport.period_start)} a {formatDateOnly(latestPaidReport.period_end)}
-                            </div>
-                            <h3 style={{ margin: '0 0 10px', color: '#fffaf0', fontSize: '1.24rem', lineHeight: 1.08 }}>{latestPaidReport.title}</h3>
-                            <p style={{ margin: 0, color: 'rgba(255,250,240,.78)', fontSize: '.88rem', lineHeight: 1.52 }}>{latestPaidReport.summary}</p>
-                        </div>
-                        <div className="paid-report-lists" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 12 }}>
-                            <div>
-                                <strong style={{ display: 'block', marginBottom: 8 }}>Insights</strong>
-                                {(latestPaidReport.insights || []).slice(0, 3).map((item, index) => (
-                                    <div key={`paid-insight-${index}`} style={{ padding: 12, border: '1px solid rgba(17,24,39,.07)', borderRadius: 12, background: 'rgba(255,255,255,.86)', marginBottom: 8 }}>
-                                        <span style={{ display: 'inline-block', marginBottom: 6, color: 'var(--gold)', fontSize: '.64rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.08em' }}>{item.impact || 'leitura'}</span>
-                                        <b style={{ display: 'block', color: 'var(--text-primary)', fontSize: '.84rem', lineHeight: 1.25, marginBottom: 5 }}>{item.title || 'Insight'}</b>
-                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.77rem', lineHeight: 1.42 }}>{item.detail || '-'}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            <div>
-                                <strong style={{ display: 'block', marginBottom: 8 }}>Acoes recomendadas</strong>
-                                {(latestPaidReport.recommendations || []).slice(0, 3).map((item, index) => (
-                                    <div key={`paid-rec-${index}`} style={{ padding: 12, border: '1px solid rgba(17,24,39,.07)', borderRadius: 12, background: 'rgba(255,255,255,.86)', marginBottom: 8 }}>
-                                        <span style={{ display: 'inline-block', marginBottom: 6, color: 'var(--gold)', fontSize: '.64rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.08em' }}>{item.priority || 'prioridade'}</span>
-                                        <b style={{ display: 'block', color: 'var(--text-primary)', fontSize: '.84rem', lineHeight: 1.25, marginBottom: 5 }}>{item.title || 'Acao'}</b>
-                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '.77rem', lineHeight: 1.42 }}>{item.action || '-'}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ padding: 18, border: '1px dashed var(--border-color)', borderRadius: 12, color: 'var(--text-muted)', textAlign: 'center', fontSize: '.84rem' }}>
-                        Gere o primeiro relatorio para a IA cruzar campanhas, custo, leads e alertas do trafego pago.
                     </div>
                 )}
             </div>
@@ -1278,6 +1289,31 @@ export default function AdsPage() {
                 }
                 .ads-metrics-bar span { color: var(--text-muted); }
                 .ads-metrics-bar strong { color: var(--text-primary); }
+                .paid-agent-metrics > div {
+                    border: 1px solid rgba(17,24,39,.08);
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: rgba(255,255,255,.82);
+                    min-width: 0;
+                }
+                .paid-agent-metrics span {
+                    display: block;
+                    color: var(--text-muted);
+                    font-size: .62rem;
+                    font-weight: 900;
+                    letter-spacing: .05em;
+                    text-transform: uppercase;
+                    margin-bottom: 5px;
+                }
+                .paid-agent-metrics strong {
+                    display: block;
+                    color: var(--text-primary);
+                    font-size: .9rem;
+                    line-height: 1.2;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
                 .ai-alert-card { transition: border-color 0.2s, transform 0.15s; }
                 .ai-alert-card:hover { border-color: rgba(139, 92, 246, 0.4); transform: translateX(2px); }
                 .report-history-card { transition: border-color 0.2s, transform 0.15s; }
@@ -1305,6 +1341,9 @@ export default function AdsPage() {
                     cursor: pointer;
                 }
                 @media (max-width: 760px) {
+                    .paid-agent-brief > div {
+                        grid-template-columns: 1fr !important;
+                    }
                     .paid-report-content,
                     .paid-report-lists {
                         grid-template-columns: 1fr !important;

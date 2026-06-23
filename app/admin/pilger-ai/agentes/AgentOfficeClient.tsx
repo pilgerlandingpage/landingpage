@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import AgentOfficeStyles from './AgentOfficeStyles'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -153,6 +153,7 @@ type OfficeBroker = {
     assignment_type?: string | null
     assigned_page_slugs?: string[] | null
     phone?: string | null
+    whatsapp_instance_id?: string | null
     summary_to_phone?: string | null
     transfer_to_phone?: string | null
     system_prompt?: string | null
@@ -1274,8 +1275,10 @@ function dataRoleLabel(role: AgentDataRole) {
 
 export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeSnapshot }) {
     const searchParams = useSearchParams()
+    const searchParamsKey = searchParams.toString()
+    const appliedSearchParamsRef = useRef('')
     const initialSector = searchParams.get('setor') || (searchParams.get('tipo') === 'corretores' ? 'Comercial' : 'Todos')
-    const initialAgentId = searchParams.get('agent') || ''
+    const initialAgentId = searchParams.get('agent') || searchParams.get('agente') || ''
     const [activeSector, setActiveSector] = useState(SECTOR_ORDER.includes(initialSector) ? initialSector : 'Todos')
     const [activeDataRole, setActiveDataRole] = useState<DataRoleFilter>('all')
     const [query, setQuery] = useState('')
@@ -1313,6 +1316,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
     const [avatarSaveState, setAvatarSaveState] = useState<SaveState>({ status: 'idle', message: '' })
     const isUploadingAvatar = avatarSaveState.status === 'saving'
     const isBrokerAgent = selectedAgent?.source === 'virtual_brokers' && Boolean(selectedAgent?.brokerId)
+    const isGlobalWhatsAppAgent = selectedAgent?.id === 'whatsapp-global-agent'
     const isEventAgent = selectedAgent?.id === 'event-agent'
     const isCandidateAgent = selectedAgent?.id === 'broker-candidate-agent'
     const [brokerDraft, setBrokerDraft] = useState<OfficeBrokerDraft | null>(null)
@@ -1354,6 +1358,8 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
     const [eventAutomationSaving, setEventAutomationSaving] = useState(false)
 
     const selectedSchedulePrefix = selectedAgent ? SCHEDULE_AGENT_PREFIX[selectedAgent.id] : null
+    const hasBehaviorControls = Boolean(selectedAgent?.behaviorControls?.length)
+    const hasRuntimeFacts = Boolean(selectedAgent?.runtimeFacts?.length)
     const agentScheduleSlots = useMemo(
         () => selectedSchedulePrefix ? getAgentScheduleSlots(behaviorDraft, selectedSchedulePrefix) : [],
         [behaviorDraft, selectedSchedulePrefix]
@@ -1717,7 +1723,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
         setActiveSector('Todos')
     }
 
-    const selectAgent = (agent: AgentOfficeItem) => {
+    const selectAgent = useCallback((agent: AgentOfficeItem) => {
         setSelectedId(agent.id)
         setDraft(agent.promptValue || '')
         setBehaviorDraft(buildBehaviorDraft(agent))
@@ -1762,7 +1768,41 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
         setEditingEventRuleId(null)
         setEventAutomationLoading(false)
         setEventAutomationSaving(false)
-    }
+    }, [])
+
+    useEffect(() => {
+        if (appliedSearchParamsRef.current === searchParamsKey) return
+        appliedSearchParamsRef.current = searchParamsKey
+
+        if (!searchParamsKey) {
+            setActiveDataRole('all')
+            setActiveSector('Todos')
+            return
+        }
+
+        const requestedAgentId = searchParams.get('agent') || searchParams.get('agente') || ''
+        const requestedSector = searchParams.get('setor') || (searchParams.get('tipo') === 'corretores' ? 'Comercial' : '')
+
+        if (requestedAgentId) {
+            const requestedAgent = agents.find(agent => agent.id === requestedAgentId)
+            if (!requestedAgent) return
+
+            setActiveDataRole('all')
+            setActiveSector(requestedAgent.sector)
+            selectAgent(requestedAgent)
+            return
+        }
+
+        if (requestedSector && SECTOR_ORDER.includes(requestedSector)) {
+            setActiveSector(requestedSector)
+        }
+    }, [agents, searchParams, searchParamsKey, selectAgent])
+
+    useEffect(() => {
+        if (!filteredAgents.length) return
+        if (filteredAgents.some(agent => agent.id === selectedId)) return
+        selectAgent(filteredAgents[0])
+    }, [filteredAgents, selectedId, selectAgent])
 
     useEffect(() => {
         if (selectedAgent?.id === 'email-orchestrator') {
@@ -1888,14 +1928,21 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
 
                 if (!broker) {
                     setBrokerDraft(null)
-                    setBrokerSaveState({ status: 'error', message: 'Cadastro tecnico deste corretor nao foi encontrado.' })
+                    setBrokerSaveState({
+                        status: 'error',
+                        message: isGlobalWhatsAppAgent
+                            ? 'Cadastro tecnico do WhatsApp Global nao foi encontrado.'
+                            : 'Cadastro tecnico deste corretor nao foi encontrado.',
+                    })
                     return
                 }
 
                 const linked = instances.find(instance => {
                     const instancePhone = getInstancePhone(instance)
                     const brokerPhone = normalizePhone(broker.phone || '')
+                    const brokerInstanceId = String(broker.whatsapp_instance_id || '')
                     return String(instance.broker_id || '') === String(broker.id) ||
+                        (!!brokerInstanceId && String(instance.id || '') === brokerInstanceId) ||
                         (!!brokerPhone && instancePhone === brokerPhone)
                 })
 
@@ -1906,7 +1953,12 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
             } catch (error: any) {
                 if (cancelled) return
                 setBrokerDraft(null)
-                setBrokerSaveState({ status: 'error', message: error?.message || 'Nao foi possivel carregar as configuracoes do corretor.' })
+                setBrokerSaveState({
+                    status: 'error',
+                    message: error?.message || (isGlobalWhatsAppAgent
+                        ? 'Nao foi possivel carregar as configuracoes do WhatsApp Global.'
+                        : 'Nao foi possivel carregar as configuracoes do corretor.'),
+                })
             } finally {
                 if (!cancelled) setBrokerLoading(false)
             }
@@ -1917,7 +1969,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
         return () => {
             cancelled = true
         }
-    }, [isBrokerAgent, selectedAgent?.brokerId])
+    }, [isBrokerAgent, isGlobalWhatsAppAgent, selectedAgent?.brokerId])
 
     useEffect(() => {
         if (!isBrokerAgent || !selectedAgent?.brokerId) {
@@ -1956,7 +2008,10 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
 
     const saveBrokerSettings = async () => {
         if (!selectedAgent?.brokerId || !brokerDraft) return
-        setBrokerSaveState({ status: 'saving', message: 'Salvando configuracoes do corretor IA...' })
+        setBrokerSaveState({
+            status: 'saving',
+            message: isGlobalWhatsAppAgent ? 'Salvando WhatsApp Global...' : 'Salvando configuracoes do corretor IA...',
+        })
 
         try {
             const selectedInstance = availableInstances.find(instance => instance.id === selectedInstanceId) || null
@@ -2001,7 +2056,9 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
             })
             const payloadResponse = await response.json().catch(() => ({}))
             if (!response.ok || payloadResponse?.success === false || payloadResponse?.error) {
-                throw new Error(payloadResponse?.message || payloadResponse?.error || 'Nao foi possivel salvar o corretor.')
+                throw new Error(payloadResponse?.message || payloadResponse?.error || (isGlobalWhatsAppAgent
+                    ? 'Nao foi possivel salvar o WhatsApp Global.'
+                    : 'Nao foi possivel salvar o corretor.'))
             }
 
             if (selectedInstanceId !== linkedInstanceId) {
@@ -2015,7 +2072,9 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                 })
                 const linkPayload = await linkResponse.json().catch(() => ({}))
                 if (!linkResponse.ok || linkPayload?.success === false) {
-                    throw new Error(linkPayload?.message || linkPayload?.error || 'Corretor salvo, mas a instancia nao foi vinculada.')
+                    throw new Error(linkPayload?.message || linkPayload?.error || (isGlobalWhatsAppAgent
+                        ? 'WhatsApp Global salvo, mas a instancia nao foi vinculada.'
+                        : 'Corretor salvo, mas a instancia nao foi vinculada.'))
                 }
                 setLinkedInstanceId(selectedInstanceId)
             }
@@ -2038,19 +2097,37 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
             setAgents(current => current.map(agent => agent.id === selectedAgent.id
                 ? {
                     ...agent,
-                    personaName: payload.name,
-                    avatarInitials: payload.name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || agent.avatarInitials,
-                    jobTitle: payload.creci ? `Corretor IA - CRECI ${payload.creci}` : 'Corretor IA',
-                    role: payload.creci ? `Corretor IA - CRECI ${payload.creci}` : 'Corretor IA',
+                    personaName: isGlobalWhatsAppAgent ? 'WhatsApp Global' : payload.name,
+                    avatarInitials: isGlobalWhatsAppAgent
+                        ? 'WG'
+                        : payload.name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || agent.avatarInitials,
+                    jobTitle: isGlobalWhatsAppAgent
+                        ? 'Instancia global do ecossistema'
+                        : payload.creci ? `Corretor IA - CRECI ${payload.creci}` : 'Corretor IA',
+                    role: isGlobalWhatsAppAgent
+                        ? 'Atendimento global e roteamento da Diretoria'
+                        : payload.creci ? `Corretor IA - CRECI ${payload.creci}` : 'Corretor IA',
                     status: payload.is_active ? 'Ativo' : 'Inativo',
                     tone: payload.is_active ? 'success' : 'muted',
-                    detail: syncedPhone ? `Instancia WhatsApp vinculada - ${formatPhoneLabel(syncedPhone)}.` : agent.detail,
+                    detail: syncedPhone
+                        ? `${isGlobalWhatsAppAgent ? 'Instancia global WhatsApp vinculada' : 'Instancia WhatsApp vinculada'} - ${formatPhoneLabel(syncedPhone)}.`
+                        : agent.detail,
                     promptValue: draft,
                 }
                 : agent))
-            setBrokerSaveState({ status: 'success', message: 'Configuracoes do corretor salvas no Escritorio do Agente.' })
+            setBrokerSaveState({
+                status: 'success',
+                message: isGlobalWhatsAppAgent
+                    ? 'WhatsApp Global salvo na Diretoria com a base operacional preservada.'
+                    : 'Configuracoes do corretor salvas no Escritorio do Agente.',
+            })
         } catch (error: any) {
-            setBrokerSaveState({ status: 'error', message: error?.message || 'Erro ao salvar configuracoes do corretor.' })
+            setBrokerSaveState({
+                status: 'error',
+                message: error?.message || (isGlobalWhatsAppAgent
+                    ? 'Erro ao salvar configuracoes do WhatsApp Global.'
+                    : 'Erro ao salvar configuracoes do corretor.'),
+            })
         }
     }
 
@@ -3182,11 +3259,15 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                         <div className="agent-office-broker-card">
                             <div className="agent-office-prompt-head">
                                 <div>
-                                    <h3><ShieldCheck size={17} /> Configuracoes do corretor IA</h3>
-                                    <p>Cadastro comercial, plantao humano e regras de atendimento agora ficam dentro do escritorio do agente.</p>
+                                    <h3><ShieldCheck size={17} /> {isGlobalWhatsAppAgent ? 'Configuracoes do WhatsApp Global' : 'Configuracoes do corretor IA'}</h3>
+                                    <p>
+                                        {isGlobalWhatsAppAgent
+                                            ? 'Instancia global, prompt, plantao humano e regras de atendimento ficam preservados na base original.'
+                                            : 'Cadastro comercial, plantao humano e regras de atendimento agora ficam dentro do escritorio do agente.'}
+                                    </p>
                                 </div>
                                 <div className="agent-office-prompt-meta">
-                                    <span>{selectedInstanceId ? 'WhatsApp vinculado' : 'Sem instancia'}</span>
+                                    <span>{selectedInstanceId ? 'WhatsApp vinculado' : (isGlobalWhatsAppAgent ? 'Sem instancia global' : 'Sem instancia')}</span>
                                     <span>{brokerDraft?.is_active ? 'Ativo' : 'Inativo'}</span>
                                 </div>
                             </div>
@@ -3194,7 +3275,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                             {brokerLoading ? (
                                 <div className="agent-office-loading-inline">
                                     <Loader2 size={16} className="spin" />
-                                    Carregando configuracoes do corretor...
+                                    {isGlobalWhatsAppAgent ? 'Carregando configuracoes do WhatsApp Global...' : 'Carregando configuracoes do corretor...'}
                                 </div>
                             ) : brokerDraft ? (
                                 <div className="agent-office-broker-body">
@@ -3203,20 +3284,20 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                         <strong>
                                             {selectedWhatsAppInstance
                                                 ? `WhatsApp ${formatPhoneLabel(getInstancePhone(selectedWhatsAppInstance)) || selectedWhatsAppInstance.instance_name}`
-                                                : 'WhatsApp ainda nao vinculado'}
+                                                : (isGlobalWhatsAppAgent ? 'WhatsApp Global ainda nao vinculado' : 'WhatsApp ainda nao vinculado')}
                                         </strong>
                                         <span>
                                             {selectedWhatsAppInstance
                                                 ? `${selectedWhatsAppInstance.instance_name} - ${selectedWhatsAppInstance.status || 'sem status'}`
-                                                : 'Escolha uma instancia conectada para este corretor.'}
+                                                : (isGlobalWhatsAppAgent ? 'Escolha a instancia global conectada para este atendimento.' : 'Escolha uma instancia conectada para este corretor.')}
                                         </span>
                                     </div>
 
                                     <section className="agent-office-control-group">
-                                        <strong>Base comercial</strong>
+                                        <strong>{isGlobalWhatsAppAgent ? 'Base global' : 'Base comercial'}</strong>
                                         <div className="agent-office-control-grid">
                                             <label className="agent-office-control">
-                                                <span>Nome do corretor</span>
+                                                <span>{isGlobalWhatsAppAgent ? 'Nome da instancia' : 'Nome do corretor'}</span>
                                                 <input
                                                     value={brokerDraft.name}
                                                     onChange={event => setBrokerDraft(current => current ? { ...current, name: event.target.value } : current)}
@@ -3238,7 +3319,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                                     className={`agent-office-toggle ${brokerDraft.is_active ? 'active' : ''}`}
                                                     onClick={() => setBrokerDraft(current => current ? { ...current, is_active: !current.is_active } : current)}
                                                 >
-                                                    <span>{brokerDraft.is_active ? 'Ativo no rodizio' : 'Inativo'}</span>
+                                                    <span>{brokerDraft.is_active ? (isGlobalWhatsAppAgent ? 'Ativo no ecossistema' : 'Ativo no rodizio') : 'Inativo'}</span>
                                                     <strong>{brokerDraft.is_active ? 'Ligado' : 'Desligado'}</strong>
                                                 </button>
                                             </label>
@@ -3260,7 +3341,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                                         )
                                                     })}
                                                 </select>
-                                                <small>O QR Code continua em WhatsApp Web. Aqui voce escolhe a instancia do agente.</small>
+                                                <small>{isGlobalWhatsAppAgent ? 'O QR Code continua em WhatsApp Web. Aqui voce escolhe a instancia global.' : 'O QR Code continua em WhatsApp Web. Aqui voce escolhe a instancia do agente.'}</small>
                                             </label>
                                             <label className="agent-office-control agent-office-control-wide agent-office-voice-control">
                                                 <span>Voz do agente</span>
@@ -3692,19 +3773,21 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                             ) : (
                                 <div className="agent-office-loading-inline">
                                     <Phone size={16} />
-                                    Selecione um corretor IA com cadastro vinculado para editar.
+                                    {isGlobalWhatsAppAgent
+                                        ? 'Selecione o WhatsApp Global com cadastro vinculado para editar.'
+                                        : 'Selecione um corretor IA com cadastro vinculado para editar.'}
                                 </div>
                             )}
 
                         </div>
                     )}
 
-                    {!!selectedAgent.behaviorControls?.length && (
+                    {(hasBehaviorControls || hasRuntimeFacts) && (
                         <div className="agent-office-behavior-card">
                             <div className="agent-office-prompt-head">
                                 <div>
                                     <h3><SlidersHorizontal size={17} /> Comportamento operacional</h3>
-                                    <p>Limites, gatilhos e rotinas deste agente ficam junto do prompt.</p>
+                                    <p>{hasBehaviorControls ? 'Limites, gatilhos e rotinas deste agente ficam junto do prompt.' : 'Fatos operacionais deste agente ficam vinculados ao escritorio.'}</p>
                                 </div>
                             </div>
 
@@ -3719,145 +3802,149 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                 </div>
                             )}
 
-                            <div className={`agent-office-control-groups ${selectedAgent.id === 'blog-intelligence' ? 'agent-office-blog-control-groups' : ''} ${selectedAgent.id === 'email-orchestrator' ? 'agent-office-email-control-groups' : ''}`}>
-                                {groupBehaviorControls(selectedAgent).map(group => (
-                                    <section key={group.title} className="agent-office-control-group">
-                                        <strong>{group.title}</strong>
-                                        <div className="agent-office-control-grid">
-                                            {group.controls?.map(control => (
-                                                <label
-                                                    key={control.key}
-                                                    className={`agent-office-control ${control.type === 'textarea' ? 'agent-office-control-wide' : ''}`}
-                                                >
-                                                    <span className="agent-office-control-label">
-                                                        <span>{control.label}</span>
-                                                        {control.help && (
-                                                            <span
-                                                                className="agent-office-help"
-                                                                tabIndex={0}
-                                                                title={control.help}
-                                                                data-help={control.help}
-                                                            >
-                                                                <Info size={12} />
-                                                            </span>
-                                                        )}
-                                                    </span>
-                                                    {control.type === 'select' ? (
-                                                        <select
-                                                            value={behaviorDraft[control.key] ?? control.fallback}
-                                                            onChange={event => updateBehaviorControl(control.key, event.target.value)}
+                            {hasBehaviorControls && (
+                                <>
+                                    <div className={`agent-office-control-groups ${selectedAgent.id === 'blog-intelligence' ? 'agent-office-blog-control-groups' : ''} ${selectedAgent.id === 'email-orchestrator' ? 'agent-office-email-control-groups' : ''}`}>
+                                        {groupBehaviorControls(selectedAgent).map(group => (
+                                            <section key={group.title} className="agent-office-control-group">
+                                                <strong>{group.title}</strong>
+                                                <div className="agent-office-control-grid">
+                                                    {group.controls?.map(control => (
+                                                        <label
+                                                            key={control.key}
+                                                            className={`agent-office-control ${control.type === 'textarea' ? 'agent-office-control-wide' : ''}`}
                                                         >
-                                                            {(control.options || []).map(option => (
-                                                                <option key={option.value} value={option.value}>{option.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    ) : control.type === 'multiselect' ? (
-                                                        <div className="agent-office-multi-control">
-                                                            {(control.options || []).map(option => {
-                                                                const selectedValues = new Set(String(behaviorDraft[control.key] ?? control.fallback).split(',').filter(Boolean))
-                                                                const active = selectedValues.has(option.value)
-                                                                return (
-                                                                    <button
-                                                                        type="button"
-                                                                        key={option.value}
-                                                                        className={active ? 'active' : ''}
-                                                                        onClick={() => setBehaviorDraft(current => ({
-                                                                            ...current,
-                                                                            [control.key]: toggleBehaviorListValue(current[control.key] ?? control.fallback, option.value),
-                                                                        }))}
+                                                            <span className="agent-office-control-label">
+                                                                <span>{control.label}</span>
+                                                                {control.help && (
+                                                                    <span
+                                                                        className="agent-office-help"
+                                                                        tabIndex={0}
+                                                                        title={control.help}
+                                                                        data-help={control.help}
                                                                     >
-                                                                        {option.label}
-                                                                    </button>
-                                                                )
-                                                            })}
-                                                        </div>
-                                                    ) : control.type === 'textarea' ? (
-                                                        <textarea
-                                                            value={behaviorDraft[control.key] ?? control.fallback}
-                                                            onChange={event => updateBehaviorControl(control.key, event.target.value)}
-                                                            rows={4}
-                                                        />
-                                                    ) : (
-                                                        <input
-                                                            type={control.type}
-                                                            min={control.min}
-                                                            max={control.max}
-                                                            step={control.step}
-                                                            value={behaviorDraft[control.key] ?? control.fallback}
-                                                            onChange={event => updateBehaviorControl(control.key, event.target.value)}
-                                                        />
-                                                    )}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </section>
-                                ))}
-                                {selectedSchedulePrefix && (
-                                    <section className="agent-office-control-group agent-office-blog-schedule-group">
-                                        <strong>{selectedSchedulePrefix === 'news_agent' ? 'Agenda de noticias' : 'Agenda do blog'}</strong>
-                                        <div className="agent-office-blog-schedule">
-                                            <div className="agent-office-blog-days" aria-label="Dias da semana">
-                                                {BLOG_WEEKDAY_OPTIONS.map(day => {
-                                                    const active = agentScheduleSlots.some(slot => slot.day === day.value)
-                                                    return (
-                                                        <button
-                                                            type="button"
-                                                            key={day.value}
-                                                            className={active ? 'active' : ''}
-                                                            onClick={() => toggleAgentScheduleDay(day.value)}
-                                                        >
-                                                            {day.label}
-                                                        </button>
-                                                    )
-                                                })}
-                                            </div>
+                                                                        <Info size={12} />
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                            {control.type === 'select' ? (
+                                                                <select
+                                                                    value={behaviorDraft[control.key] ?? control.fallback}
+                                                                    onChange={event => updateBehaviorControl(control.key, event.target.value)}
+                                                                >
+                                                                    {(control.options || []).map(option => (
+                                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                                    ))}
+                                                                </select>
+                                                            ) : control.type === 'multiselect' ? (
+                                                                <div className="agent-office-multi-control">
+                                                                    {(control.options || []).map(option => {
+                                                                        const selectedValues = new Set(String(behaviorDraft[control.key] ?? control.fallback).split(',').filter(Boolean))
+                                                                        const active = selectedValues.has(option.value)
+                                                                        return (
+                                                                            <button
+                                                                                type="button"
+                                                                                key={option.value}
+                                                                                className={active ? 'active' : ''}
+                                                                                onClick={() => setBehaviorDraft(current => ({
+                                                                                    ...current,
+                                                                                    [control.key]: toggleBehaviorListValue(current[control.key] ?? control.fallback, option.value),
+                                                                                }))}
+                                                                            >
+                                                                                {option.label}
+                                                                            </button>
+                                                                        )
+                                                                    })}
+                                                                </div>
+                                                            ) : control.type === 'textarea' ? (
+                                                                <textarea
+                                                                    value={behaviorDraft[control.key] ?? control.fallback}
+                                                                    onChange={event => updateBehaviorControl(control.key, event.target.value)}
+                                                                    rows={4}
+                                                                />
+                                                            ) : (
+                                                                <input
+                                                                    type={control.type}
+                                                                    min={control.min}
+                                                                    max={control.max}
+                                                                    step={control.step}
+                                                                    value={behaviorDraft[control.key] ?? control.fallback}
+                                                                    onChange={event => updateBehaviorControl(control.key, event.target.value)}
+                                                                />
+                                                            )}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        ))}
+                                        {selectedSchedulePrefix && (
+                                            <section className="agent-office-control-group agent-office-blog-schedule-group">
+                                                <strong>{selectedSchedulePrefix === 'news_agent' ? 'Agenda de noticias' : 'Agenda do blog'}</strong>
+                                                <div className="agent-office-blog-schedule">
+                                                    <div className="agent-office-blog-days" aria-label="Dias da semana">
+                                                        {BLOG_WEEKDAY_OPTIONS.map(day => {
+                                                            const active = agentScheduleSlots.some(slot => slot.day === day.value)
+                                                            return (
+                                                                <button
+                                                                    type="button"
+                                                                    key={day.value}
+                                                                    className={active ? 'active' : ''}
+                                                                    onClick={() => toggleAgentScheduleDay(day.value)}
+                                                                >
+                                                                    {day.label}
+                                                                </button>
+                                                            )
+                                                        })}
+                                                    </div>
 
-                                            <div className="agent-office-blog-times">
-                                                {agentScheduleSlots.map(slot => (
-                                                    <label key={slot.day} className="agent-office-control">
-                                                        <span>{getBlogWeekdayLabel(slot.day)}</span>
-                                                        <input
-                                                            type="time"
-                                                            value={slot.time}
-                                                            onChange={event => updateAgentScheduleTime(slot.day, event.target.value)}
-                                                        />
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </section>
-                                )}
-                            </div>
+                                                    <div className="agent-office-blog-times">
+                                                        {agentScheduleSlots.map(slot => (
+                                                            <label key={slot.day} className="agent-office-control">
+                                                                <span>{getBlogWeekdayLabel(slot.day)}</span>
+                                                                <input
+                                                                    type="time"
+                                                                    value={slot.time}
+                                                                    onChange={event => updateAgentScheduleTime(slot.day, event.target.value)}
+                                                                />
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        )}
+                                    </div>
 
-                            <div className="agent-office-actions">
-                                <button
-                                    type="button"
-                                    className="agent-office-save"
-                                    onClick={saveBehavior}
-                                    disabled={behaviorSaveState.status === 'saving'}
-                                >
-                                    {behaviorSaveState.status === 'saving' ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
-                                    Salvar comportamento
-                                </button>
-                                {selectedAgent.behaviorActions?.map(action => (
-                                    <button
-                                        key={action.id}
-                                        type="button"
-                                        className="agent-office-legacy-link"
-                                        onClick={() => runBehaviorAction(action.id)}
-                                        disabled={syncingAction === action.id}
-                                        title={action.help}
-                                    >
-                                        <RefreshCw size={14} className={syncingAction === action.id ? 'spin' : ''} />
-                                        {action.label}
-                                    </button>
-                                ))}
-                                {behaviorSaveState.message && (
-                                    <span className={`agent-office-save-message ${behaviorSaveState.status}`}>
-                                        {behaviorSaveState.message}
-                                    </span>
-                                )}
-                            </div>
+                                    <div className="agent-office-actions">
+                                        <button
+                                            type="button"
+                                            className="agent-office-save"
+                                            onClick={saveBehavior}
+                                            disabled={behaviorSaveState.status === 'saving'}
+                                        >
+                                            {behaviorSaveState.status === 'saving' ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
+                                            Salvar comportamento
+                                        </button>
+                                        {selectedAgent.behaviorActions?.map(action => (
+                                            <button
+                                                key={action.id}
+                                                type="button"
+                                                className="agent-office-legacy-link"
+                                                onClick={() => runBehaviorAction(action.id)}
+                                                disabled={syncingAction === action.id}
+                                                title={action.help}
+                                            >
+                                                <RefreshCw size={14} className={syncingAction === action.id ? 'spin' : ''} />
+                                                {action.label}
+                                            </button>
+                                        ))}
+                                        {behaviorSaveState.message && (
+                                            <span className={`agent-office-save-message ${behaviorSaveState.status}`}>
+                                                {behaviorSaveState.message}
+                                            </span>
+                                        )}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -4651,9 +4738,11 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                     <div className={`agent-office-prompt-card ${isBrokerAgent || isEventAgent || isCandidateAgent ? 'has-tags' : ''}`}>
                         <div className="agent-office-prompt-head">
                             <div>
-                                <h3><Sparkles size={17} /> {isBrokerAgent ? 'Prompt do agente comercial' : 'Prompt do agente'}</h3>
+                                <h3><Sparkles size={17} /> {isGlobalWhatsAppAgent ? 'Prompt do WhatsApp Global' : isBrokerAgent ? 'Prompt do agente comercial' : 'Prompt do agente'}</h3>
                                 <p>
-                                    {selectedAgent.promptKey ? `Chave: ${selectedAgent.promptKey}` : 'Prompt individual do corretor IA'}
+                                    {isGlobalWhatsAppAgent
+                                        ? 'Prompt operacional salvo na base real do WhatsApp Global'
+                                        : selectedAgent.promptKey ? `Chave: ${selectedAgent.promptKey}` : 'Prompt individual do corretor IA'}
                                 </p>
                             </div>
                             <div className="agent-office-prompt-meta">

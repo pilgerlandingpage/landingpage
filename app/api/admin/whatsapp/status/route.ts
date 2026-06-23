@@ -5,6 +5,12 @@ import { getPublicAppUrl } from '@/lib/app-url'
 
 const NULL_ADMIN_USER_ID = '00000000-0000-0000-0000-000000000000'
 
+function isGlobalInstanceRecord(instance: any): boolean {
+    const type = String(instance?.instance_type || '').trim().toLowerCase()
+    const name = String(instance?.instance_name || '').trim().toLowerCase()
+    return type === 'global' || name === 'agente global' || name === 'whatsapp global'
+}
+
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -329,9 +335,10 @@ export async function GET(request: NextRequest) {
         let brokerSyncWarning: string | null = null
         let phoneValidationWarning: string | null = null
 
+        const isGlobalInstance = isGlobalInstanceRecord(instance)
         const isRealAdminUser = Boolean(instance.admin_user_id && instance.admin_user_id !== NULL_ADMIN_USER_ID)
 
-        if (newStatus === 'connected' && isRealAdminUser) {
+        if (newStatus === 'connected' && isRealAdminUser && !isGlobalInstance) {
             const { data: adminUser } = await supabase
                 .from('admin_users')
                 .select('id, phone')
