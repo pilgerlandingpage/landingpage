@@ -12,6 +12,7 @@ import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosys
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import {
     buildWhatsAppGlobalAcknowledgement,
+    detectWhatsAppGlobalCommandIntent,
     isWhatsAppGlobalInstance,
     recordWhatsAppGlobalCommand,
     resolveWhatsAppGlobalIdentity,
@@ -3613,7 +3614,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (!isFromMe && isWhatsAppGlobalInstance(instance)) {
+        if (!isFromMe) {
             try {
                 const hasGlobalMedia = Boolean(
                     isAudio ||
@@ -3628,8 +3629,14 @@ export async function POST(request: NextRequest) {
                     phone: finalPhone,
                     senderName,
                 })
+                const globalIntent = detectWhatsAppGlobalCommandIntent(storedMessageContent || messageText || '', hasGlobalMedia)
+                const isGlobalEntrypoint = isWhatsAppGlobalInstance(instance)
+                const isInternalCommandFromAnyInstance =
+                    globalIdentity.type !== 'lead' &&
+                    globalIntent.commandType !== 'general' &&
+                    globalIntent.commandType !== 'media_received'
 
-                if (globalIdentity.type !== 'lead') {
+                if ((isGlobalEntrypoint || isInternalCommandFromAnyInstance) && globalIdentity.type !== 'lead') {
                     const commandResult = await recordWhatsAppGlobalCommand({
                         supabase,
                         instance,
@@ -3642,6 +3649,9 @@ export async function POST(request: NextRequest) {
                             message_id: messageId || null,
                             sender_name: senderName || null,
                             media: auditMedia,
+                            entrypoint: isGlobalEntrypoint ? 'whatsapp_global' : 'internal_command_from_connected_instance',
+                            source_instance_type: instance.instance_type || null,
+                            source_instance_name: instance.instance_name || null,
                         },
                     })
 
@@ -3659,12 +3669,12 @@ export async function POST(request: NextRequest) {
 
                     await saveAudit({
                         action: commandResult.allowed
-                            ? 'whatsapp_global_command_recorded'
+                            ? (isGlobalEntrypoint ? 'whatsapp_global_command_recorded' : 'whatsapp_internal_command_routed')
                             : 'whatsapp_global_command_blocked',
                     })
                     return NextResponse.json({
                         success: true,
-                        action: 'whatsapp_global_command_recorded',
+                        action: isGlobalEntrypoint ? 'whatsapp_global_command_recorded' : 'whatsapp_internal_command_routed',
                         identity_type: globalIdentity.type,
                         target_agent: commandResult.intent.targetAgent,
                         allowed: commandResult.allowed,
