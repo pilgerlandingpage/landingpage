@@ -77,7 +77,9 @@ const TIME_ZONE = 'America/Sao_Paulo'
 const MIN_CONTEXTUAL_RECOMMENDATION_SCORE = 50
 const PROPERTY_RECOMMENDATION_FIELDS = [
     'id',
+    'source_slug',
     'title',
+    'seo_title',
     'description',
     'city',
     'state',
@@ -1564,6 +1566,11 @@ function buildPropertyRecommendationContext(params: {
         post_excerpt: `${details} ${price}`.trim(),
         post_category: 'imovel',
         property_id: property.id,
+        property_source_slug: normalizeText(property.source_slug),
+        property_seo_title: normalizeText(property.seo_title),
+        property_city: normalizeText(property.city),
+        property_neighborhood: normalizeText(property.neighborhood),
+        property_type: normalizeText(property.property_type),
         property_title: title,
         recommendation_score: score,
         recommendation_contact_score: match.contactScore,
@@ -1913,7 +1920,38 @@ async function updateRun(supabase: SupabaseAdminLike, id: string, patch: Record<
     if (error) throw error
 }
 
-function baseContentUrlFromContext(context: Record<string, any>) {
+async function propertyContentUrlFromContext(supabase: SupabaseAdminLike, context: Record<string, any>) {
+    const propertyId = normalizeText(context.property_id || context.post_id)
+    if (!propertyId) return ''
+
+    try {
+        const { data, error } = await supabase
+            .from('properties')
+            .select('id, source_slug, title, seo_title, city, neighborhood, property_type')
+            .eq('id', propertyId)
+            .maybeSingle()
+
+        if (error) {
+            console.warn('[editorial-distribution] property canonical URL lookup failed:', error.message)
+        } else if (data?.id) {
+            return `${getPublicAppUrl()}${propertyDetailsPath(data)}`
+        }
+    } catch (error: any) {
+        console.warn('[editorial-distribution] property canonical URL lookup failed:', error?.message || error)
+    }
+
+    return `${getPublicAppUrl()}${propertyDetailsPath({
+        id: propertyId,
+        source_slug: normalizeText(context.source_slug || context.property_source_slug || context.property_slug || context.slug),
+        seo_title: normalizeText(context.property_seo_title || context.seo_title),
+        title: normalizeText(context.property_title || context.title || context.link_title),
+        city: normalizeText(context.property_city || context.city),
+        neighborhood: normalizeText(context.property_neighborhood || context.neighborhood),
+        property_type: normalizeText(context.property_type),
+    })}`
+}
+
+async function baseContentUrlFromContext(supabase: SupabaseAdminLike, context: Record<string, any>) {
     const contentType = normalizeText(context.content_type).toLowerCase()
     const slug = normalizeText(context.post_slug)
 
@@ -1926,27 +1964,20 @@ function baseContentUrlFromContext(context: Record<string, any>) {
     }
 
     if (contentType === 'property') {
-        const propertyId = normalizeText(context.property_id || context.post_id)
-        if (propertyId) {
-            return `${getPublicAppUrl()}${propertyDetailsPath({
-                id: propertyId,
-                source_slug: normalizeText(context.source_slug || context.property_slug || context.slug),
-                title: normalizeText(context.property_title || context.title || context.link_title),
-            })}`
-        }
+        return propertyContentUrlFromContext(supabase, context)
     }
 
     return normalizeText(context.content_url || context.link_cta)
 }
 
-function trackedWhatsAppContentUrlFromContext(context: Record<string, any>, row: Record<string, any>, phone: string) {
+async function trackedWhatsAppContentUrlFromContext(supabase: SupabaseAdminLike, context: Record<string, any>, row: Record<string, any>, phone: string) {
     const contentType = normalizeText(context.content_type).toLowerCase()
     const linkType = contentType === 'property'
         ? 'property'
         : contentType === 'news'
             ? 'news'
             : 'blog'
-    const baseUrl = baseContentUrlFromContext(context)
+    const baseUrl = await baseContentUrlFromContext(supabase, context)
     if (!baseUrl) return ''
 
     return buildTrackedWhatsAppLink({
@@ -1996,7 +2027,7 @@ async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
         } else if (channel === 'whatsapp') {
             const phone = normalizeWhatsAppPhone(context.target_phone || row.lead_phone)
             if (!phone) throw new Error('Lead sem telefone valido para WhatsApp.')
-            const contentUrl = trackedWhatsAppContentUrlFromContext(context, row, phone)
+            const contentUrl = await trackedWhatsAppContentUrlFromContext(supabase, context, row, phone)
             const message = stripTechnicalOutboundText(context.whatsapp_message)
             const ctaLabel = normalizeText(context.cta_label) || 'Abrir'
             if (!message) throw new Error('Mensagem de WhatsApp vazia apos limpeza editorial.')

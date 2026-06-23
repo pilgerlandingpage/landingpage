@@ -39,7 +39,7 @@ export function inferWhatsAppLinkType(rawUrl: string, fallback?: string | null):
 
     try {
         const parsed = new URL(rawUrl)
-        if (/\/imovel\//i.test(parsed.pathname)) return 'property'
+        if (/\/(?:imovel|imoveis)\//i.test(parsed.pathname)) return 'property'
         const host = parsed.hostname.toLowerCase()
         if (host.includes('instagram.')) return 'instagram'
         if (host.includes('facebook.') || host.includes('fb.')) return 'facebook'

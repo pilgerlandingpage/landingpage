@@ -50,11 +50,15 @@ function pathnameFromUrl(value: string | null) {
 }
 
 function propertySlugFromPath(pathname: string | null) {
-    const match = String(pathname || '').match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
-    const segment = match?.[1] ? safeDecode(match[1]) : ''
-    if (!segment || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
-        return null
-    }
+    const value = String(pathname || '')
+    const legacyMatch = value.match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
+    const seoMatch = value.match(/^\/imoveis\/[^/]+\/[^/]+\/([^/]+)\/?$/i)
+    const segment = legacyMatch?.[1]
+        ? safeDecode(legacyMatch[1])
+        : seoMatch?.[1]
+            ? safeDecode(seoMatch[1])
+            : ''
+    if (!segment) return null
     return segment
 }
 
@@ -66,7 +70,7 @@ function buildCapturePageContext(metadata: Record<string, unknown>) {
         || metadataText(metadata.property_path)
         || pathnameFromUrl(pageUrl)
     const propertyPath = metadataText(metadata.property_path)
-        || (String(pagePath || '').startsWith('/imovel/') ? pagePath : null)
+        || (/^\/(?:imovel|imoveis)\//i.test(String(pagePath || '')) ? pagePath : null)
     const propertySlug = metadataText(metadata.property_slug)
         || metadataText(metadata.propertySlug)
         || propertySlugFromPath(propertyPath || pagePath)

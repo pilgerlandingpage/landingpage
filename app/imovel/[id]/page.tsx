@@ -39,7 +39,7 @@ export default async function PropertyPage({ params, searchParams }: PageProps) 
     const supabase = await createServerSupabase()
     const query = supabase
         .from('properties')
-        .select('id, source_slug, title, seo_title, property_type')
+        .select('id, source_slug, title, seo_title, city, neighborhood, property_type')
 
     const { data: property } = idFromSeoSlug || UUID_PATTERN.test(identifier)
         ? await query.eq('id', idFromSeoSlug || identifier).maybeSingle()

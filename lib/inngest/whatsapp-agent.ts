@@ -1514,7 +1514,7 @@ function sanitizeInteractiveUrl(rawUrl: string): string {
 
     const propertyMatch = url.match(/^(https?:\/\/[^/\s]+)?\/imovel\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(\?[^ \]]*)?/i)
     if (propertyMatch) {
-        return `${propertyMatch[1] || getPublicAppUrl()}/imovel/${propertyMatch[2]}${propertyMatch[3] || ''}`
+        return `${propertyMatch[1] || getPublicAppUrl()}/imoveis/litoral-catarinense/imoveis-de-luxo/imovel-${propertyMatch[2]}${propertyMatch[3] || ''}`
     }
 
     if (url.length > 500) return ''
@@ -2182,11 +2182,11 @@ function extractPropertySearchPrefs(messages: any[]): AgentPropertySearchPrefs {
 
 function extractRecommendedPropertyIds(messages: any[]) {
     const ids = new Set<string>()
-    const re = /\/imovel\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi
+    const re = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi
     for (const message of messages || []) {
         const text = String(message?.content || '')
         let match: RegExpExecArray | null
-        while ((match = re.exec(text))) ids.add(match[1])
+        while ((match = re.exec(text))) ids.add(match[0])
     }
     return ids
 }

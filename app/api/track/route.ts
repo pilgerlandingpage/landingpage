@@ -331,11 +331,16 @@ function propertyRouteInfoFromUrl(raw: string | null) {
 
     try {
         const url = new URL(value, 'https://guilhermepilger.ai')
-        const match = url.pathname.match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
-        const segment = match?.[1] ? safeDecode(match[1]) : ''
+        const oldMatch = url.pathname.match(/^\/imovel\/([^/]+)(?:\/detalhes)?\/?$/i)
+        const seoMatch = url.pathname.match(/^\/imoveis\/[^/]+\/[^/]+\/([^/]+)\/?$/i)
+        const segment = oldMatch?.[1]
+            ? safeDecode(oldMatch[1])
+            : seoMatch?.[1]
+                ? safeDecode(seoMatch[1])
+                : ''
         return {
-            property_path: match ? url.pathname : null,
-            property_slug: segment && !isUuid(segment) ? segment : null,
+            property_path: oldMatch || seoMatch ? url.pathname : null,
+            property_slug: segment || null,
         }
     } catch {
         return { property_path: null as string | null, property_slug: null as string | null }
@@ -374,7 +379,7 @@ async function resolveTrackedTargetUrl(searchParams: URLSearchParams, requestUrl
             const propertyId = extractPropertyIdFromSeoSlug(decodedContentId) || decodedContentId
             let query = supabase
                 .from('properties')
-                .select('id, source_slug, title, seo_title, property_type')
+                .select('id, source_slug, title, seo_title, city, neighborhood, property_type')
                 .limit(1)
 
             query = isUuid(propertyId)
@@ -391,7 +396,11 @@ async function resolveTrackedTargetUrl(searchParams: URLSearchParams, requestUrl
             console.warn('[Track] property redirect resolve failed:', error)
         }
 
-        return new URL(`/imovel/${encodeURIComponent(contentId)}/detalhes`, origin).toString()
+        const fallbackId = extractPropertyIdFromSeoSlug(contentId) || contentId
+        const fallbackPath = isUuid(fallbackId)
+            ? `/imoveis/litoral-catarinense/imoveis-de-luxo/imovel-${fallbackId}`
+            : `/imovel/${encodeURIComponent(contentId)}/detalhes`
+        return new URL(fallbackPath, origin).toString()
     }
 
     try {
@@ -443,7 +452,13 @@ function buildClickMetadata(params: {
     const routeInfo = propertyRouteInfoFromUrl(redirectUrl)
     const contentPropertySlug = propertySlugFromContentId(contentType, contentId)
     const propertySlug = routeInfo.property_slug || contentPropertySlug
-    const propertyPath = routeInfo.property_path || (propertySlug ? `/imovel/${encodeURIComponent(propertySlug)}/detalhes` : null)
+    const propertyPath = routeInfo.property_path || (
+        propertySlug
+            ? isUuid(extractPropertyIdFromSeoSlug(propertySlug) || propertySlug)
+                ? `/imoveis/litoral-catarinense/imoveis-de-luxo/imovel-${extractPropertyIdFromSeoSlug(propertySlug) || propertySlug}`
+                : `/imovel/${encodeURIComponent(propertySlug)}/detalhes`
+            : null
+    )
 
     return {
         clicked_at: new Date().toISOString(),

@@ -1,3 +1,5 @@
+import { buildPropertySeoPath, slugifyPropertySegment } from './seo-url'
+
 export const PROPERTY_DESKTOP_DETAIL_QUERY = '(min-width: 820px)'
 
 type PropertyRouteInput = string | {
@@ -6,6 +8,8 @@ type PropertyRouteInput = string | {
     slug?: string | null
     title?: string | null
     seo_title?: string | null
+    city?: string | null
+    neighborhood?: string | null
     property_type?: string | null
 }
 
@@ -18,29 +22,15 @@ type PlainClickLike = {
     altKey?: boolean
 }
 
-function slugifyPropertySegment(value?: string | null, fallback = 'imovel') {
-    const slug = String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .replace(/-{2,}/g, '-')
-
-    return slug || fallback
-}
-
-function isUuid(value: string) {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
-}
-
 export function propertyDetailsSegment(property: PropertyRouteInput) {
     if (typeof property === 'string') return property
 
-    const publicSlug = slugifyPropertySegment(property.source_slug || property.slug || '')
-    if (publicSlug && publicSlug !== 'imovel' && !isUuid(publicSlug)) return publicSlug
-
     const id = String(property.id || '').trim()
+    if (id) {
+        const seoSegment = buildPropertySeoPath(property).split('/').filter(Boolean).pop()
+        if (seoSegment) return seoSegment
+    }
+
     const titleSlug = slugifyPropertySegment(
         property.seo_title || property.title || property.property_type,
         'imovel-de-luxo'
@@ -54,6 +44,10 @@ export function propertyFeedPath(property: PropertyRouteInput) {
 }
 
 export function propertyDetailsPath(property: PropertyRouteInput) {
+    if (typeof property !== 'string' && String(property.id || '').trim()) {
+        return buildPropertySeoPath(property)
+    }
+
     return `/imovel/${encodeURIComponent(propertyDetailsSegment(property))}/detalhes`
 }
 
