@@ -111,11 +111,20 @@ function parseDateLike(raw: unknown): string | null {
 }
 
 function getMessageText(raw: any): string | null {
+    const content = raw?.content && typeof raw.content === 'object' ? raw.content : null
     const candidates = [
         raw?.text,
         raw?.body,
         raw?.caption,
         raw?.content,
+        content?.text,
+        content?.body,
+        content?.caption,
+        content?.conversation,
+        content?.extendedTextMessage?.text,
+        content?.imageMessage?.caption,
+        content?.videoMessage?.caption,
+        content?.documentMessage?.caption,
         raw?.message?.conversation,
         raw?.message?.extendedTextMessage?.text,
         raw?.message?.imageMessage?.caption,
@@ -179,11 +188,12 @@ function normalizeMessage(raw: any, fallbackChatId?: string | null): NormalizedM
     ).trim()
     if (!chatId) return null
     const messageId = String(
-        raw?.id ||
         raw?.messageid ||
         raw?.messageId ||
+        raw?.providerMessageId ||
         raw?.key?.id ||
         raw?.message?.key?.id ||
+        raw?.id ||
         ''
     ).trim()
     if (!messageId) return null
@@ -207,7 +217,22 @@ function normalizeMessage(raw: any, fallbackChatId?: string | null): NormalizedM
 }
 
 function getCrmMessageBody(raw: any): string | null {
-    const candidates = [raw?.content, raw?.text, raw?.body, raw?.message]
+    const metadata = raw?.metadata && typeof raw.metadata === 'object' ? raw.metadata : null
+    const candidates = [
+        raw?.content,
+        raw?.text,
+        raw?.body,
+        raw?.message,
+        raw?.transcription,
+        raw?.transcript,
+        raw?.audio_transcription,
+        raw?.messageText,
+        metadata?.transcription,
+        metadata?.transcript,
+        metadata?.audio_transcription,
+        metadata?.message_text,
+        metadata?.text,
+    ]
     for (const candidate of candidates) {
         if (typeof candidate === 'string' && candidate.trim()) return candidate.trim()
     }
@@ -215,7 +240,19 @@ function getCrmMessageBody(raw: any): string | null {
 }
 
 function getCrmMessageTimestamp(raw: any, fallback?: string | null): string | null {
-    return parseDateLike(raw?.timestamp || raw?.created_at || raw?.createdAt || raw?.sent_at || raw?.date || fallback)
+    return parseDateLike(raw?.timestamp || raw?.created_at || raw?.createdAt || raw?.sent_at || raw?.sentAt || raw?.date || fallback)
+}
+
+function internalMessageBelongsToInstance(raw: any, instance: AttendanceInstance) {
+    const metadata = raw?.metadata && typeof raw.metadata === 'object' ? raw.metadata : {}
+    const instanceId = String(raw?.instance_id || metadata.instance_id || '').trim()
+    const brokerId = String(raw?.broker_id || metadata.broker_id || '').trim()
+    const adminUserId = String(raw?.admin_user_id || metadata.admin_user_id || raw?.broker_user_id || '').trim()
+
+    if (instance.id && instanceId === instance.id) return true
+    if (instance.broker_id && brokerId === instance.broker_id) return true
+    if (instance.admin_user_id && adminUserId === instance.admin_user_id) return true
+    return false
 }
 
 function normalizeCrmConversationMessage(conversation: any, raw: any, index: number): NormalizedMessage | null {
@@ -259,6 +296,89 @@ function normalizeCrmConversationMessage(conversation: any, raw: any, index: num
             broker_id: conversation?.broker_id || null,
             instance_id: conversation?.instance_id || null,
             lead_name: extracted?.name || extracted?.lead_name || null,
+            original: raw,
+        },
+    }
+}
+
+function normalizeLeadConversationLogMessage(lead: any, raw: any, index: number, instance: AttendanceInstance): NormalizedMessage | null {
+    const phone = cleanPhone(lead?.phone_e164 || lead?.phone || raw?.lead_phone || raw?.phone)
+    const chatId = jidFromPhoneOrJid(phone)
+    if (!phone || !chatId) return null
+
+    const body = getCrmMessageBody(raw)
+    if (!body) return null
+
+    const role = String(raw?.role || '').toLowerCase()
+    const source = String(raw?.source || '').toLowerCase()
+    const fromMe = role === 'assistant' ||
+        source === 'human' ||
+        source === 'agent' ||
+        source === 'whatsapp_agent' ||
+        source === 'shadow_agent' ||
+        source === 'ai' ||
+        source === 'assistant' ||
+        source === 'from_me_pending'
+    const timestamp = getCrmMessageTimestamp(raw, lead?.updated_at || lead?.created_at)
+    const messageId = String(raw?.message_id || raw?.id || '').trim() ||
+        `lead-log:${lead?.id || phone}:${timestamp || lead?.updated_at || index}:${index}`
+    const rawBrokerId = raw?.broker_id || raw?.metadata?.broker_id || null
+    const rawInstanceId = raw?.instance_id || raw?.metadata?.instance_id || null
+
+    return {
+        chatId,
+        messageId,
+        phone,
+        direction: fromMe ? 'outbound' : 'inbound',
+        fromMe,
+        authorType: fromMe ? (source === 'human' || source === 'from_me_pending' ? 'broker' : 'agent') : 'lead',
+        senderName: raw?.senderName || raw?.sender_name || raw?.name || lead?.name || null,
+        messageType: String(raw?.type || '').trim() || 'text',
+        body,
+        messageTimestamp: timestamp,
+        raw: {
+            attendance_source: 'lead_conversation_log',
+            lead_id: lead?.id || null,
+            broker_id: rawBrokerId || instance.broker_id || null,
+            instance_id: rawInstanceId || instance.id || null,
+            lead_name: lead?.name || null,
+            original: raw,
+        },
+    }
+}
+
+function normalizeBrokerConversationMessage(conversation: any, raw: any, index: number, instance: AttendanceInstance): NormalizedMessage | null {
+    const phone = cleanPhone(conversation?.lead_phone || raw?.lead_phone || raw?.phone)
+    const chatId = jidFromPhoneOrJid(phone)
+    if (!phone || !chatId) return null
+
+    const body = getCrmMessageBody(raw)
+    if (!body) return null
+
+    const role = String(raw?.role || '').toLowerCase()
+    const source = String(raw?.source || '').toLowerCase()
+    const fromMe = role === 'assistant' || source !== 'lead'
+    const timestamp = getCrmMessageTimestamp(raw, conversation?.updated_at || conversation?.created_at)
+    const messageId = String(raw?.message_id || raw?.id || '').trim() ||
+        `broker-conv:${conversation?.id || phone}:${timestamp || conversation?.updated_at || index}:${index}`
+
+    return {
+        chatId,
+        messageId,
+        phone,
+        direction: fromMe ? 'outbound' : 'inbound',
+        fromMe,
+        authorType: fromMe ? (source === 'shadow_agent' ? 'agent' : 'broker') : 'lead',
+        senderName: raw?.senderName || raw?.sender_name || raw?.name || null,
+        messageType: String(raw?.type || '').trim() || 'text',
+        body,
+        messageTimestamp: timestamp,
+        raw: {
+            attendance_source: 'broker_conversation',
+            broker_user_id: conversation?.broker_user_id || instance.admin_user_id || null,
+            broker_id: instance.broker_id || null,
+            instance_id: raw?.instance_id || instance.id || null,
+            lead_id: conversation?.lead_id || null,
             original: raw,
         },
     }
@@ -332,6 +452,84 @@ async function fetchCrmConversationMessages(
         const messages = Array.isArray(conversation?.messages) ? conversation.messages : []
         messages.forEach((raw: any, index: number) => {
             const normalized = normalizeCrmConversationMessage(conversation, raw, index)
+            if (!normalized?.messageTimestamp) return
+            const timestamp = new Date(normalized.messageTimestamp).getTime()
+            if (!Number.isFinite(timestamp) || timestamp < startMs || timestamp >= endMs) return
+            rows.push(normalized)
+        })
+    }
+
+    return rows
+}
+
+async function fetchLeadConversationLogMessages(
+    supabase: any,
+    instance: AttendanceInstance,
+    range: { start: string; end: string },
+    scopedPhones: Set<string>
+) {
+    const { data, error } = await supabase
+        .from('leads')
+        .select('id, name, phone, phone_e164, conversation_log, created_at, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(2000)
+
+    if (error) {
+        console.warn('[attendance-monitor] Lead conversation logs unavailable:', error.message)
+        return []
+    }
+
+    const startMs = new Date(range.start).getTime()
+    const endMs = new Date(range.end).getTime()
+    const rows: NormalizedMessage[] = []
+
+    for (const lead of data || []) {
+        const phone = cleanPhone(lead?.phone_e164 || lead?.phone)
+        const messages = Array.isArray(lead?.conversation_log) ? lead.conversation_log : []
+        messages.forEach((raw: any, index: number) => {
+            const timestamp = getCrmMessageTimestamp(raw, lead?.updated_at || lead?.created_at)
+            if (!timestamp) return
+            const time = new Date(timestamp).getTime()
+            if (!Number.isFinite(time) || time < startMs || time >= endMs) return
+            const scopedByInstance = internalMessageBelongsToInstance(raw, instance)
+            const scopedByKnownPhone = phone ? scopedPhones.has(phone) : false
+            if (!scopedByInstance && !scopedByKnownPhone) return
+            const normalized = normalizeLeadConversationLogMessage(lead, raw, index, instance)
+            if (normalized) rows.push(normalized)
+        })
+    }
+
+    return rows
+}
+
+async function fetchBrokerConversationMessages(
+    supabase: any,
+    instance: AttendanceInstance,
+    range: { start: string; end: string }
+) {
+    const adminUserId = String(instance.admin_user_id || '').trim()
+    if (!adminUserId || adminUserId === '00000000-0000-0000-0000-000000000000') return []
+
+    const { data, error } = await supabase
+        .from('whatsapp_broker_conversations')
+        .select('id, lead_id, broker_user_id, ai_conversation_id, lead_phone, messages, is_shadow_agent, created_at, updated_at')
+        .eq('broker_user_id', adminUserId)
+        .order('updated_at', { ascending: false })
+        .limit(1000)
+
+    if (error) {
+        console.warn('[attendance-monitor] Broker conversation logs unavailable:', error.message)
+        return []
+    }
+
+    const startMs = new Date(range.start).getTime()
+    const endMs = new Date(range.end).getTime()
+    const rows: NormalizedMessage[] = []
+
+    for (const conversation of data || []) {
+        const messages = Array.isArray(conversation?.messages) ? conversation.messages : []
+        messages.forEach((raw: any, index: number) => {
+            const normalized = normalizeBrokerConversationMessage(conversation, raw, index, instance)
             if (!normalized?.messageTimestamp) return
             const timestamp = new Date(normalized.messageTimestamp).getTime()
             if (!Number.isFinite(timestamp) || timestamp < startMs || timestamp >= endMs) return
@@ -416,12 +614,18 @@ async function fetchContacts(instance: AttendanceInstance, maxContacts: number) 
 
     try {
         while (contacts.length < maxContacts) {
-            const payload = await listContactsPage({ limit, offset }, token)
+            const payload = await listContactsPage({ limit, offset, contactScope: 'all' }, token)
             const page = asArray(payload, ['contacts'])
             contacts.push(...page)
-            const hasMore = Boolean(payload?.pagination && (payload.pagination.offset + payload.pagination.limit) < payload.pagination.totalRecords)
+            const pagination = payload?.pagination || {}
+            const totalRecords = Number(pagination.totalRecords ?? pagination.total_records ?? 0)
+            const currentOffset = Number(pagination.offset ?? offset)
+            const currentLimit = Number(pagination.limit ?? limit) || limit
+            const hasMore = totalRecords
+                ? currentOffset + currentLimit < totalRecords
+                : page.length >= limit
             if (!hasMore || page.length === 0) break
-            offset += limit
+            offset = currentOffset + currentLimit
         }
     } catch {
         const payload = await listContacts(token)
@@ -440,9 +644,15 @@ async function fetchChats(instance: AttendanceInstance, maxChats: number) {
         const payload = await findChats({ limit, offset, sort: '-wa_lastMsgTimestamp' }, token)
         const page = asArray(payload, ['chats', 'items', 'data'])
         chats.push(...page)
-        const hasMore = payload?.hasMore === true || Boolean(payload?.nextOffset && payload.nextOffset > offset)
+        const pagination = payload?.pagination || {}
+        const totalRecords = Number(pagination.totalRecords ?? pagination.total_records ?? 0)
+        const currentOffset = Number(pagination.offset ?? offset)
+        const currentLimit = Number(pagination.limit ?? limit) || limit
+        const hasMore = payload?.hasMore === true ||
+            Boolean(payload?.nextOffset && payload.nextOffset > offset) ||
+            (totalRecords ? currentOffset + currentLimit < totalRecords : page.length >= limit)
         if (!hasMore || page.length === 0) break
-        offset = Number(payload?.nextOffset ?? offset + limit)
+        offset = Number(payload?.nextOffset ?? currentOffset + currentLimit)
     }
     return chats.slice(0, maxChats)
 }
@@ -456,9 +666,15 @@ async function fetchMessagesForChat(instance: AttendanceInstance, chat: Normaliz
         const payload = await findMessages({ chatid: chat.chatId, limit, offset }, token)
         const page = asArray(payload, ['messages', 'items', 'data'])
         messages.push(...page)
-        const hasMore = payload?.hasMore === true || Boolean(payload?.nextOffset && payload.nextOffset > offset)
+        const pagination = payload?.pagination || {}
+        const totalRecords = Number(pagination.totalRecords ?? pagination.total_records ?? 0)
+        const currentOffset = Number(payload?.offset ?? pagination.offset ?? offset)
+        const currentLimit = Number(payload?.limit ?? pagination.limit ?? limit) || limit
+        const hasMore = payload?.hasMore === true ||
+            Boolean(payload?.nextOffset && payload.nextOffset > offset) ||
+            (totalRecords ? currentOffset + currentLimit < totalRecords : page.length >= limit)
         if (!hasMore || page.length === 0) break
-        offset = Number(payload?.nextOffset ?? offset + limit)
+        offset = Number(payload?.nextOffset ?? currentOffset + currentLimit)
     }
     return messages.slice(0, messagesPerChat)
 }
@@ -504,6 +720,7 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             messages: 0,
             history_sync_requested: 0,
             history_sync_skipped_no_anchor: 0,
+            history_sync_requested_without_anchor: 0,
             errors: [] as string[],
         }
 
@@ -567,14 +784,12 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             if (options.includeHistorySync !== false) {
                 for (const chat of normalizedChats.filter((item) => !item.isGroup).slice(0, 30)) {
                     const anchor = oldestMessageAnchors.get(chat.chatId)
-                    if (!anchor?.messageId) {
-                        summary.history_sync_skipped_no_anchor += 1
-                        continue
-                    }
                     try {
-                        await requestHistorySync({ number: chat.chatId, count: 100, messageid: anchor.messageId }, instance.instance_token)
+                        await requestHistorySync({ number: chat.chatId, count: 100, ...(anchor?.messageId ? { messageid: anchor.messageId } : {}) }, instance.instance_token)
                         summary.history_sync_requested += 1
+                        if (!anchor?.messageId) summary.history_sync_requested_without_anchor += 1
                     } catch (error: any) {
+                        if (!anchor?.messageId) summary.history_sync_skipped_no_anchor += 1
                         summary.errors.push(`history ${chat.chatId}: ${error?.message || String(error)}`)
                     }
                 }
@@ -597,7 +812,8 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
             messages: acc.messages + Number(item.messages || 0),
             history_sync_requested: acc.history_sync_requested + Number(item.history_sync_requested || 0),
             history_sync_skipped_no_anchor: acc.history_sync_skipped_no_anchor + Number(item.history_sync_skipped_no_anchor || 0),
-        }), { contacts: 0, chats: 0, messages: 0, history_sync_requested: 0, history_sync_skipped_no_anchor: 0 }),
+            history_sync_requested_without_anchor: acc.history_sync_requested_without_anchor + Number(item.history_sync_requested_without_anchor || 0),
+        }), { contacts: 0, chats: 0, messages: 0, history_sync_requested: 0, history_sync_skipped_no_anchor: 0, history_sync_requested_without_anchor: 0 }),
     }
 }
 
@@ -670,6 +886,87 @@ function potentialFor(messages: NormalizedMessage[]) {
     return 'unknown'
 }
 
+function classifyCommercialOpportunity(params: {
+    messages: NormalizedMessage[]
+    score: number
+    unanswered: boolean
+    leadPotential: string
+    avgResponse: number | null
+}) {
+    const text = params.messages.map((m) => m.body || '').join(' ').toLowerCase()
+    const lastMessageAt = params.messages.at(-1)?.messageTimestamp || null
+    const daysSinceLastMessage = lastMessageAt
+        ? Math.floor((Date.now() - new Date(lastMessageAt).getTime()) / (24 * 60 * 60 * 1000))
+        : null
+    const readyTerms = ['quero fechar', 'fechar', 'proposta', 'valor', 'preco', 'forma de pagamento', 'entrada', 'pix', 'disponivel', 'visitar', 'visita', 'agenda', 'agendar', 'proximo passo']
+    const objectionTerms = ['caro', 'desconto', 'prazo', 'documentacao', 'financiamento', 'medo', 'concorrente', 'comparando', 'localizacao', 'condominio']
+    const readyHits = readyTerms.filter((term) => text.includes(term)).length
+    const objectionHits = objectionTerms.filter((term) => text.includes(term)).length
+
+    if (params.unanswered && params.leadPotential === 'hot') {
+        return {
+            category: 'oportunidade_perdida',
+            reason: 'Lead quente ficou sem ultima resposta ou sem fechamento objetivo.',
+            next_action: 'Retomar com proposta objetiva e CTA de fechamento.',
+            suggested_message: 'Oi, vi que voce tinha interesse. Posso te mandar agora a melhor condicao e o proximo passo para avancarmos?',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+    if (params.unanswered) {
+        return {
+            category: 'cliente_abandonado',
+            reason: 'A ultima mensagem foi do cliente e nao houve resposta posterior registrada.',
+            next_action: 'Responder com acolhimento e pergunta curta para reabrir a conversa.',
+            suggested_message: 'Oi, retomei sua mensagem aqui. Ainda faz sentido te ajudar com essa busca?',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+    if (readyHits >= 2 || (params.leadPotential === 'hot' && params.score >= 75)) {
+        return {
+            category: 'cliente_pronto_para_comprar',
+            reason: 'A conversa tem sinais de preco, disponibilidade, visita, proposta ou proximo passo.',
+            next_action: 'Enviar proposta, condicao ou convite direto para visita/fechamento.',
+            suggested_message: 'Perfeito. Vou te passar a condicao mais objetiva e ja deixo o proximo passo encaminhado.',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+    if (objectionHits >= 2) {
+        return {
+            category: 'cliente_com_objecao',
+            reason: 'A conversa tem sinais de duvida sobre preco, prazo, financiamento, localizacao ou comparacao.',
+            next_action: 'Tratar a objecao antes de ofertar outro imovel.',
+            suggested_message: 'Entendi seu ponto. Posso te mostrar a melhor alternativa considerando essa preocupacao?',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+    if (daysSinceLastMessage !== null && daysSinceLastMessage >= 3 && params.leadPotential !== 'cold') {
+        return {
+            category: 'reativacao',
+            reason: 'Lead com sinal comercial ficou alguns dias sem nova interacao.',
+            next_action: 'Enviar follow-up consultivo com uma pergunta simples.',
+            suggested_message: 'Oi, passando para saber se voce ainda quer que eu filtre as melhores opcoes para o seu momento.',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+    if (params.avgResponse !== null && params.avgResponse > 3600) {
+        return {
+            category: 'cliente_mal_atendido',
+            reason: 'Tempo medio de resposta ficou alto para uma conversa comercial.',
+            next_action: 'Retomar com pedido de contexto e caminho claro.',
+            suggested_message: 'Desculpa a demora no retorno. Vou ser direto: qual faixa de valor e prazo fazem sentido para voce agora?',
+            days_since_last_message: daysSinceLastMessage,
+        }
+    }
+
+    return {
+        category: 'monitorar',
+        reason: 'Conversa sem alerta comercial forte no periodo.',
+        next_action: 'Manter acompanhamento e qualificar melhor se houver nova resposta.',
+        suggested_message: '',
+        days_since_last_message: daysSinceLastMessage,
+    }
+}
+
 function scoreConversation(chatId: string, messages: NormalizedMessage[], leadName?: string | null) {
     const sorted = [...messages].sort((a, b) => {
         const ta = a.messageTimestamp ? new Date(a.messageTimestamp).getTime() : 0
@@ -740,6 +1037,13 @@ function scoreConversation(chatId: string, messages: NormalizedMessage[], leadNa
         risks.push('Lead com potencial alto recebeu atendimento abaixo do ideal')
         recommendations.push('Priorizar este lead no follow-up do dia')
     }
+    const commercialOpportunity = classifyCommercialOpportunity({
+        messages: sorted,
+        score,
+        unanswered,
+        leadPotential,
+        avgResponse,
+    })
 
     return {
         chat_id: chatId,
@@ -759,6 +1063,11 @@ function scoreConversation(chatId: string, messages: NormalizedMessage[], leadNa
             avg_response_seconds: avgResponse,
             rapport_hits: rapportHits,
             sales_hits: salesHits,
+            commercial_category: commercialOpportunity.category,
+            commercial_reason: commercialOpportunity.reason,
+            next_action: commercialOpportunity.next_action,
+            suggested_message: commercialOpportunity.suggested_message,
+            days_since_last_message: commercialOpportunity.days_since_last_message,
         },
     }
 }
@@ -872,7 +1181,7 @@ function buildAttendanceNarrative(params: {
     const coachingReport = params.total
         ? [
             `O atendimento foi classificado como ${statusLabel}.`,
-            `Foram analisadas ${params.total} conversa(s), ${params.messages} mensagem(ns), ${params.inboundMessages} do lead e ${params.outboundMessages} do corretor/agente, incluindo ${params.crmMessages} mensagem(ns) consolidadas do CRM.`,
+            `Foram analisadas ${params.total} conversa(s), ${params.messages} mensagem(ns), ${params.inboundMessages} do lead e ${params.outboundMessages} do corretor/agente, incluindo ${params.crmMessages} mensagem(ns) internas/CRM ja gravadas.`,
             `O principal risco operacional e ${params.unansweredCount} conversa(s) sem resposta e ${params.poorConversations} conversa(s) ruins.`,
             leadQualityReport,
         ].join(' ')
@@ -925,9 +1234,23 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             },
         })) as NormalizedMessage[]
         const crmMessages = await fetchCrmConversationMessages(supabase, instance, range)
-        const mergedMessages = mergeUniqueMessages([...messages, ...crmMessages])
+        const scopedPhones = new Set(
+            [...messages, ...crmMessages]
+                .map((message) => cleanPhone(message.phone || message.chatId))
+                .filter(Boolean)
+        )
+        const [leadLogMessages, brokerConversationMessages] = await Promise.all([
+            fetchLeadConversationLogMessages(supabase, instance, range, scopedPhones),
+            fetchBrokerConversationMessages(supabase, instance, range),
+        ])
+        const mergedMessages = mergeUniqueMessages([...messages, ...crmMessages, ...leadLogMessages, ...brokerConversationMessages])
         const mergedCrmMessages = mergedMessages.filter((message) => message.raw?.attendance_source === 'crm_conversation')
-        const mergedUazapiMessages = mergedMessages.filter((message) => message.raw?.attendance_source !== 'crm_conversation')
+        const mergedLeadLogMessages = mergedMessages.filter((message) => message.raw?.attendance_source === 'lead_conversation_log')
+        const mergedBrokerConversationMessages = mergedMessages.filter((message) => message.raw?.attendance_source === 'broker_conversation')
+        const mergedInternalMessages = [...mergedCrmMessages, ...mergedLeadLogMessages, ...mergedBrokerConversationMessages]
+        const mergedUazapiMessages = mergedMessages.filter((message) =>
+            !['crm_conversation', 'lead_conversation_log', 'broker_conversation'].includes(String(message.raw?.attendance_source || ''))
+        )
 
         const { count: contactsCount } = await supabase
             .from('whatsapp_instance_contacts')
@@ -982,7 +1305,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             score,
             total: conversationScores.length,
             messages: mergedMessages.length,
-            crmMessages: mergedCrmMessages.length,
+            crmMessages: mergedInternalMessages.length,
             unansweredCount,
             hotLeads,
             warmLeads,
@@ -1015,6 +1338,9 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             messages_analyzed: mergedMessages.length,
             uazapi_messages_analyzed: mergedUazapiMessages.length,
             crm_messages_analyzed: mergedCrmMessages.length,
+            lead_log_messages_analyzed: mergedLeadLogMessages.length,
+            broker_conversation_messages_analyzed: mergedBrokerConversationMessages.length,
+            internal_messages_analyzed: mergedInternalMessages.length,
             period_start: range.start,
             period_end: range.end,
         }

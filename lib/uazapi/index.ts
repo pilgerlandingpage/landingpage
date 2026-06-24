@@ -658,11 +658,12 @@ export async function checkNumberExists(phone: string, instanceToken: string) {
 interface ListContactsOptions {
     limit?: number
     offset?: number
+    contactScope?: 'address_book' | 'outside_address_book' | 'all'
 }
 
 /** Listar contatos sem paginacao */
 export async function listContacts(instanceToken: string) {
-    return uazapiFetch('/contacts', {
+    return uazapiFetch('/contacts?contactScope=all', {
         token: instanceToken,
     })
 }
@@ -675,6 +676,7 @@ export async function listContactsPage(opts: ListContactsOptions, instanceToken:
         body: {
             limit: opts.limit ?? 1000,
             offset: opts.offset ?? 0,
+            contactScope: opts.contactScope ?? 'all',
         },
     })
 }

@@ -4,6 +4,22 @@ import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook } f
 import { getPublicAppUrl } from '@/lib/app-url'
 
 const NULL_ADMIN_USER_ID = '00000000-0000-0000-0000-000000000000'
+const REQUIRED_WEBHOOK_EVENTS = ['history', 'messages', 'messages_update', 'connection', 'chats', 'contacts', 'labels', 'chat_labels']
+const REQUIRED_WEBHOOK_EXCLUDES = ['wasSentByApi', 'isGroupYes']
+
+function normalizeStringList(value: unknown): string[] {
+    if (!Array.isArray(value)) return []
+    return value.map((item) => String(item || '').trim()).filter(Boolean)
+}
+
+function webhookNeedsUpdate(currentWebhook: any, webhookUrl: string) {
+    const currentUrl = String(currentWebhook?.url || currentWebhook?.webhook || '').trim()
+    const events = normalizeStringList(currentWebhook?.events)
+    const excludes = normalizeStringList(currentWebhook?.excludeMessages)
+    return currentUrl !== webhookUrl ||
+        REQUIRED_WEBHOOK_EVENTS.some((event) => !events.includes(event)) ||
+        REQUIRED_WEBHOOK_EXCLUDES.some((exclude) => !excludes.includes(exclude))
+}
 
 function isGlobalInstanceRecord(instance: any): boolean {
     const type = String(instance?.instance_type || '').trim().toLowerCase()
@@ -410,20 +426,19 @@ export async function GET(request: NextRequest) {
             try {
                 const webhookUrl = `${getPublicAppUrl(request.nextUrl.origin)}/api/webhooks/whatsapp`
 
-                let currentWebhook = ''
+                let currentWebhook: any = null
                 try {
-                    const whData = await getWebhook(instance.instance_token)
-                    currentWebhook = whData?.url || whData?.webhook || ''
+                    currentWebhook = await getWebhook(instance.instance_token)
                 } catch {
                     // ignore webhook read failures
                 }
 
-                if (currentWebhook !== webhookUrl) {
+                if (webhookNeedsUpdate(currentWebhook, webhookUrl)) {
                     await configureWebhook({
                         enabled: true,
                         url: webhookUrl,
-                        events: ['messages', 'messages_update', 'connection', 'chats', 'labels'],
-                        excludeMessages: ['wasSentByApi', 'isGroupYes'],
+                        events: REQUIRED_WEBHOOK_EVENTS,
+                        excludeMessages: REQUIRED_WEBHOOK_EXCLUDES,
                         addUrlEvents: false,
                         addUrlTypesMessages: false,
                     }, instance.instance_token)

@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
                 'messages_update',      // Atualizações (lido, entregue)
                 'connection',           // Conexão/desconexão
                 'chats',                // Mudanças de chat
+                'contacts',
                 'labels',               // Mudanças de etiquetas
+                'chat_labels',
             ],
             excludeMessages: [
                 'wasSentByApi',         // 🔒 CRÍTICO: Previne loops infinitos
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
             filters: {
                 antiLoop: '✅ wasSentByApi excluído (prevenção de loop)',
                 groups: '✅ Grupos excluídos (foco em leads 1:1)',
-                events: 'messages, messages_update, history, connection, chats, labels',
+                events: 'history, messages, messages_update, connection, chats, contacts, labels, chat_labels',
             }
         })
     } catch (error) {

@@ -83,6 +83,7 @@ type RunSummary = {
     messages: number
     historySyncRequested: number
     historySyncSkippedNoAnchor: number
+    historySyncRequestedWithoutAnchor: number
     reports: number
     dates: number
 }
@@ -393,6 +394,7 @@ export default function AttendanceReportsPage() {
                 messages: Number(totals.messages || 0),
                 historySyncRequested: Number(totals.history_sync_requested || 0),
                 historySyncSkippedNoAnchor: Number(totals.history_sync_skipped_no_anchor || 0),
+                historySyncRequestedWithoutAnchor: Number(totals.history_sync_requested_without_anchor || 0),
                 reports: reportsCount,
                 dates: Array.isArray(data?.dates) ? data.dates.length : 1,
             })
@@ -484,7 +486,8 @@ export default function AttendanceReportsPage() {
                         <MiniStat label="Mensagens novas" value={lastRunSummary.messages} />
                         <MiniStat label="Relatorios atualizados" value={lastRunSummary.reports} />
                         <MiniStat label="Historicos solicitados" value={lastRunSummary.historySyncRequested} />
-                        <MiniStat label="Sem ancora historica" value={lastRunSummary.historySyncSkippedNoAnchor} />
+                        <MiniStat label="Solicitados sem ancora" value={lastRunSummary.historySyncRequestedWithoutAnchor} />
+                        <MiniStat label="Falhas sem ancora" value={lastRunSummary.historySyncSkippedNoAnchor} />
                     </div>
                     {lastRunSummary.historySyncRequested > 0 && (
                         <div style={runSummaryNoteStyle}>
