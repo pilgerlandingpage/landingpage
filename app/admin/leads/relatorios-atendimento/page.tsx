@@ -112,16 +112,14 @@ type ReportBreakdown = {
 }
 
 type AttendancePipelineStageKey =
-    | 'entrada'
-    | 'fup'
-    | 'conectados'
-    | 'oportunidades'
-    | 'leads_quentes'
-    | 'visitas'
-    | 'proposta'
-    | 'contrato'
-    | 'recuperaveis'
+    | 'nao_respondidos'
     | 'perdidas'
+    | 'recuperaveis'
+    | 'leads_quentes'
+    | 'conversas_ruins'
+    | 'leads_mornos'
+    | 'leads_frios'
+    | 'boas_conversas'
 
 type AttendancePipelineStage = {
     key: AttendancePipelineStageKey
@@ -167,16 +165,14 @@ type PipelineOwnerCard = {
 }
 
 const ATTENDANCE_PIPELINE_STAGES: AttendancePipelineStage[] = [
-    { key: 'entrada', label: 'Entrada', color: '#2563eb', bg: '#eff6ff', border: 'rgba(37,99,235,0.24)', filter: 'todos' },
-    { key: 'fup', label: 'FUP', color: '#b45309', bg: '#fffbeb', border: 'rgba(180,83,9,0.24)', filter: 'sem-resposta' },
-    { key: 'conectados', label: 'Conectados', color: '#0891b2', bg: '#ecfeff', border: 'rgba(8,145,178,0.22)', filter: 'todos' },
-    { key: 'oportunidades', label: 'Oportunidades', color: '#7c3aed', bg: '#f5f3ff', border: 'rgba(124,58,237,0.22)', filter: 'mornos' },
-    { key: 'leads_quentes', label: 'Leads quentes', color: '#c2410c', bg: '#fff7ed', border: 'rgba(194,65,12,0.24)', filter: 'quentes' },
-    { key: 'visitas', label: 'Visitas', color: '#047857', bg: '#ecfdf5', border: 'rgba(4,120,87,0.22)', filter: 'quentes' },
-    { key: 'proposta', label: 'Proposta', color: '#7c3aed', bg: '#faf5ff', border: 'rgba(124,58,237,0.22)', filter: 'quentes' },
-    { key: 'contrato', label: 'Contrato', color: '#15803d', bg: '#f0fdf4', border: 'rgba(21,128,61,0.22)', filter: 'bons' },
+    { key: 'nao_respondidos', label: 'Nao respondidos', color: '#dc2626', bg: '#fef2f2', border: 'rgba(220,38,38,0.24)', filter: 'sem-resposta' },
+    { key: 'perdidas', label: 'Perdidas', color: '#b91c1c', bg: '#fff1f2', border: 'rgba(185,28,28,0.24)', filter: 'perdidas' },
     { key: 'recuperaveis', label: 'Recuperaveis', color: '#059669', bg: '#ecfdf5', border: 'rgba(5,150,105,0.24)', filter: 'recuperaveis' },
-    { key: 'perdidas', label: 'Perdidas', color: '#dc2626', bg: '#fef2f2', border: 'rgba(220,38,38,0.24)', filter: 'perdidas' },
+    { key: 'leads_quentes', label: 'Leads quentes', color: '#c2410c', bg: '#fff7ed', border: 'rgba(194,65,12,0.24)', filter: 'quentes' },
+    { key: 'conversas_ruins', label: 'Conversas ruins', color: '#dc2626', bg: '#fef2f2', border: 'rgba(220,38,38,0.22)', filter: 'ruins' },
+    { key: 'leads_mornos', label: 'Leads mornos', color: '#475569', bg: '#f8fafc', border: 'rgba(71,85,105,0.2)', filter: 'mornos' },
+    { key: 'leads_frios', label: 'Leads frios', color: '#64748b', bg: '#f8fafc', border: 'rgba(100,116,139,0.2)', filter: 'frios' },
+    { key: 'boas_conversas', label: 'Boas conversas', color: '#15803d', bg: '#f0fdf4', border: 'rgba(21,128,61,0.22)', filter: 'bons' },
 ]
 
 function compactApiText(value: string, limit = 300) {
@@ -407,37 +403,21 @@ function buildWhatsAppLeadUrl(phone?: string | null) {
     return `https://wa.me/${digits}`
 }
 
-function textIncludesAny(value: unknown, words: string[]) {
-    const text = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    return words.some((word) => text.includes(word))
-}
-
 function getAttendancePipelineStage(score: ConversationScore): AttendancePipelineStage {
     const metrics = score.metrics || {}
     const status = metrics.commercial_status || metrics.commercial_category || ''
-    const funnel = metrics.funnel_stage || ''
-    const outbound = Number(metrics.outbound_messages || 0)
     const lost = metrics.lost_opportunity === true || status === 'oportunidade_perdida'
     const recoverable = metrics.recoverable === true
 
-    if (textIncludesAny(status, ['contrato']) || textIncludesAny(funnel, ['contrato'])) {
-        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'contrato')!
-    }
-    if (textIncludesAny(status, ['proposta', 'negociacao']) || textIncludesAny(funnel, ['proposta', 'negociacao'])) {
-        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'proposta')!
-    }
-    if (textIncludesAny(status, ['visita', 'agendamento']) || textIncludesAny(funnel, ['visita', 'agendamento'])) {
-        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'visitas')!
-    }
-    if (recoverable) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'recuperaveis')!
+    if (score.unanswered) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'nao_respondidos')!
     if (lost) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'perdidas')!
+    if (recoverable) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'recuperaveis')!
+    if (Number(score.score || 0) < 60) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'conversas_ruins')!
     if (score.lead_potential === 'hot') return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_quentes')!
-    if (textIncludesAny(status, ['oportunidade', 'objecao', 'monitorar']) || score.lead_potential === 'warm') {
-        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'oportunidades')!
-    }
-    if (score.unanswered) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'fup')!
-    if (outbound > 0) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'conectados')!
-    return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'entrada')!
+    if (score.lead_potential === 'warm') return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_mornos')!
+    if (score.lead_potential === 'cold') return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_frios')!
+    if (Number(score.score || 0) >= 80) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'boas_conversas')!
+    return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_frios')!
 }
 
 function getScoreHeatLevel(score: number) {
@@ -640,6 +620,16 @@ export default function AttendanceReportsPage() {
             return b.total - a.total || a.name.localeCompare(b.name)
         })
     }, [reports, scores, scoresByReport, instanceById])
+
+    const selectedBrokerReport = useMemo(() => {
+        if (!instanceId) return null
+        return reports.find((report) => report.instance_id === instanceId) || null
+    }, [reports, instanceId])
+
+    const selectedBrokerScores = useMemo(() => {
+        if (!selectedBrokerReport) return []
+        return scoresByReport.get(selectedBrokerReport.id) || []
+    }, [selectedBrokerReport, scoresByReport])
 
     async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string; preserveMessage?: boolean } = {}) {
         setLoading(true)
@@ -847,12 +837,11 @@ export default function AttendanceReportsPage() {
                                 </button>
                             </span>
                             {[
-                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'entrada')!,
-                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'fup')!,
-                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_quentes')!,
-                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'visitas')!,
-                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'contrato')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'nao_respondidos')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'perdidas')!,
                                 ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'recuperaveis')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_quentes')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'boas_conversas')!,
                             ].map((stage) => (
                                 <span key={`metric-${stage.key}`} style={{ ...pipelineMetricPillStyle, color: stage.color, background: stage.bg, borderColor: stage.border }}>
                                     {stage.label}: {pipelineStageTotals[stage.key] || 0}
@@ -896,7 +885,7 @@ export default function AttendanceReportsPage() {
                                         <span style={{ background: '#cbd5e1' }} />
                                     </div>
                                     <span style={pipelineOwnerMetaStyle}>
-                                        {card.hot} quente | {card.warm} morno | {card.fup} FUP
+                                        {card.hot} quente | {card.warm} morno | {card.fup} sem resposta
                                     </span>
                                 </button>
                             )
@@ -993,7 +982,87 @@ export default function AttendanceReportsPage() {
                 </div>
             )}
 
-            <section style={{ display: 'grid', gap: 12 }}>
+            {reports.length === 0 ? (
+                <div style={emptyStyle}>
+                    Nenhum relatório encontrado para o filtro atual. Use o botão Gerar agora para sincronizar as instâncias conectadas.
+                </div>
+            ) : selectedBrokerReport ? (() => {
+                const report = selectedBrokerReport
+                const inst = instanceById.get(report.instance_id)
+                const ownerName = getOwnerName(inst, report.instance_id)
+                const ownerPhotoUrl = cleanLabel(inst?.owner_photo_url)
+                const ownerDetails = [
+                    cleanLabel(inst?.owner_subtitle),
+                    cleanLabel(inst?.owner_phone || inst?.phone_number) ? formatPhone(inst?.owner_phone || inst?.phone_number) : null,
+                ].filter(Boolean)
+                const breakdown = getReportBreakdown(report, selectedBrokerScores)
+                const verdict = String(report.metrics?.professional_status_label || professionalVerdict(Number(report.score || 0), breakdown))
+                const executiveOpinion = buildExecutiveOpinion(ownerName, report, breakdown)
+                const strengths = metricTextList(report, 'strengths')
+                const improvementPoints = metricTextList(report, 'improvement_points')
+                const coachingItems = improvementItems(breakdown)
+                const leadQualityReport = metricText(report, 'lead_quality_report')
+                return (
+                    <article style={selectedBrokerSummaryStyle}>
+                        <div style={selectedBrokerSummaryHeaderStyle}>
+                            <div style={ownerHeaderStyle}>
+                                <OwnerAvatar name={ownerName} photoUrl={ownerPhotoUrl} />
+                                <div style={{ minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase' }}>Ficha do corretor</div>
+                                        <span style={ownerBadgeStyle}>{ownerTypeLabel(inst?.owner_type)}</span>
+                                    </div>
+                                    <h2 style={{ margin: '5px 0 3px', fontSize: '1.1rem', lineHeight: 1.2, wordBreak: 'break-word' }}>{ownerName}</h2>
+                                    {ownerDetails.length > 0 && (
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 700 }}>
+                                            {ownerDetails.join(' | ')}
+                                        </div>
+                                    )}
+                                    <div style={reportDateStyle}>Relatório: {formatDateLabel(report.report_date)}</div>
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ color: scoreColor(Number(report.score || 0)), fontSize: '2rem', fontWeight: 950, lineHeight: 1 }}>
+                                    {Number(report.score || 0)}
+                                </div>
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 800 }}>score geral</div>
+                            </div>
+                        </div>
+
+                        <div style={selectedBrokerSummaryBodyStyle}>
+                            <div style={sectionEyebrowStyle}>Parecer do agente</div>
+                            <h3 style={executiveTitleStyle}>{verdict}</h3>
+                            <p style={executiveTextStyle}>{executiveOpinion}</p>
+                            {leadQualityReport && (
+                                <div style={leadQualityBoxStyle}>
+                                    <strong>Qualidade dos leads</strong>
+                                    <span>{leadQualityReport}</span>
+                                </div>
+                            )}
+                            <div style={narrativeGridStyle}>
+                                <div style={narrativeColumnStyle}>
+                                    <strong>Pontos fortes</strong>
+                                    {(strengths.length ? strengths : ['Ainda nao ha ponto forte consolidado para este periodo.']).slice(0, 3).map((item, index) => (
+                                        <span key={`${report.id}-strength-${index}`}>{item}</span>
+                                    ))}
+                                </div>
+                                <div style={narrativeColumnStyle}>
+                                    <strong>Pontos de melhoria</strong>
+                                    {(improvementPoints.length ? improvementPoints : coachingItems).slice(0, 3).map((item, index) => (
+                                        <span key={`${report.id}-improvement-${index}`}>{item}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                )
+            })() : (
+                <div style={selectBrokerHintStyle}>
+                    Selecione um corretor acima para abrir a ficha resumida dele. As conversas já estão agrupadas nas colunas de qualidade.
+                </div>
+            )}
+
+            <section style={{ display: 'none' }}>
                 {reports.length === 0 ? (
                     <div style={emptyStyle}>
                         Nenhum relatório encontrado para o filtro atual. Use “Gerar agora” para sincronizar as instâncias conectadas.
@@ -1274,7 +1343,7 @@ export default function AttendanceReportsPage() {
                 })}
             </section>
 
-            {jobs.length > 0 && (
+            {false && jobs.length > 0 && (
                 <section style={{ display: 'grid', gap: 8 }}>
                     <h2 style={{ margin: 0, fontSize: '0.96rem', display: 'flex', gap: 8, alignItems: 'center' }}>
                         <Clock size={17} /> Últimas sincronizações
@@ -1724,6 +1793,43 @@ const pipelineColumnMoreStyle: CSSProperties = {
     fontSize: '0.64rem',
     fontWeight: 850,
     padding: '6px 0',
+}
+
+const selectedBrokerSummaryStyle: CSSProperties = {
+    borderRadius: 12,
+    border: '1px solid #e8e5e0',
+    background: '#fff',
+    padding: 16,
+    display: 'grid',
+    gap: 12,
+    boxShadow: '0 10px 28px rgba(15,23,42,0.05)',
+}
+
+const selectedBrokerSummaryHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 12,
+    flexWrap: 'wrap',
+}
+
+const selectedBrokerSummaryBodyStyle: CSSProperties = {
+    border: '1px solid rgba(148,163,184,0.22)',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.95))',
+    borderRadius: 8,
+    padding: 14,
+    display: 'grid',
+    gap: 10,
+}
+
+const selectBrokerHintStyle: CSSProperties = {
+    borderRadius: 12,
+    border: '1px dashed #d8d3ca',
+    background: '#fff',
+    color: '#64748b',
+    padding: 18,
+    textAlign: 'center',
+    fontSize: '0.86rem',
+    fontWeight: 850,
 }
 
 const controlStyle: CSSProperties = {
