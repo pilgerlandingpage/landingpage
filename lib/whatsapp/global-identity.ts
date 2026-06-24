@@ -50,6 +50,8 @@ const BLOG_WORDS = ['blog', 'noticia', 'notícia', 'conteudo', 'conteúdo', 'pos
 const PROPERTY_WORDS = ['imovel', 'imóvel', 'apartamento', 'casa', 'disponivel', 'disponível', 'link']
 const REPORT_WORDS = ['relatorio', 'relatório', 'resultado', 'performance', 'metricas', 'métricas', 'resumo']
 
+const IDENTITY_CHECK_RE = /\b(me reconhec|qual perfil|perfil.*numero|permiss|administrador|admin|master)\b/
+
 function safeText(value: unknown, max = 500) {
     return String(value || '').trim().slice(0, max)
 }
@@ -137,12 +139,34 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
         }
     }
 
+    if (IDENTITY_CHECK_RE.test(normalized)) {
+        return {
+            commandType: 'identity_check',
+            targetAgent: 'whatsapp-global-agent',
+            requiredPermission: null,
+            label: 'Reconhecimento de identidade',
+        }
+    }
+
     return {
         commandType: hasMedia ? 'media_received' : 'general',
         targetAgent: 'whatsapp-global-agent',
         requiredPermission: null,
         label: hasMedia ? 'Midia recebida' : 'Mensagem geral',
     }
+}
+
+export function isWhatsAppGlobalOperatorMessage(text: unknown, hasMedia = false): boolean {
+    const intent = detectWhatsAppGlobalCommandIntent(text, hasMedia)
+    if (!['general', 'media_received'].includes(intent.commandType)) return true
+
+    const normalized = String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+
+    return IDENTITY_CHECK_RE.test(normalized) ||
+        /\b(vitor|trafego|campanha|criativo|ads|meta|google|subir|rodar|promover|impulsionar|comando interno)\b/.test(normalized)
 }
 
 function hasPermission(identity: WhatsAppGlobalIdentity, permission?: string | null) {
@@ -581,6 +605,24 @@ export function buildWhatsAppGlobalAcknowledgement(params: {
         return [
             propertyText,
             'Vou tratar esta conversa como atendimento de proprietario, separado dos leads comerciais.',
+        ].join('\n')
+    }
+
+    if (intent.commandType === 'identity_check') {
+        const profile = identity.type === 'admin_user'
+            ? 'administrador do sistema'
+            : identity.type === 'broker_user' || identity.type === 'broker_authorized'
+                ? 'corretor/usuario autorizado'
+                : identity.type
+        const permissionText = identity.permissions.includes('master_all')
+            ? 'Permissao identificada: master_all.'
+            : identity.permissions.length
+                ? `Permissoes identificadas: ${identity.permissions.slice(0, 12).join(', ')}.`
+                : 'Nao encontrei permissoes operacionais para este numero.'
+
+        return [
+            `${identity.label}, reconheci este numero como ${profile}.`,
+            permissionText,
         ].join('\n')
     }
 

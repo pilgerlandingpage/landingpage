@@ -14,6 +14,7 @@ import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import {
     buildWhatsAppGlobalAcknowledgement,
     isWhatsAppGlobalInstance,
+    isWhatsAppGlobalOperatorMessage,
     recordWhatsAppGlobalCommand,
     resolveWhatsAppGlobalIdentity,
 } from '@/lib/whatsapp/global-identity'
@@ -3630,21 +3631,26 @@ export async function POST(request: NextRequest) {
                     senderName,
                 })
                 const isGlobalEntrypoint = isWhatsAppGlobalInstance(instance)
+                const globalMessageText = storedMessageContent || messageText || ''
+                const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
+                    isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
-                if (isGlobalEntrypoint && globalIdentity.type !== 'lead') {
+                if (globalIdentity.type !== 'lead' && (isGlobalEntrypoint || isRecognizedOperatorMessage)) {
                     const commandResult = await recordWhatsAppGlobalCommand({
                         supabase,
                         instance,
                         phone: finalPhone,
                         identity: globalIdentity,
-                        text: storedMessageContent || messageText || '',
+                        text: globalMessageText,
                         hasMedia: hasGlobalMedia,
                         payload: {
                             message_type: messageType || null,
                             message_id: messageId || null,
                             sender_name: senderName || null,
                             media: auditMedia,
-                            entrypoint: 'whatsapp_global',
+                            entrypoint: isGlobalEntrypoint
+                                ? 'whatsapp_global'
+                                : 'recognized_operator_message',
                             source_instance_type: instance.instance_type || null,
                             source_instance_name: instance.instance_name || null,
                         },
