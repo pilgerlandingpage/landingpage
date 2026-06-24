@@ -13,6 +13,7 @@ import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import {
     buildWhatsAppGlobalAcknowledgement,
+    detectWhatsAppGlobalCommandIntent,
     isWhatsAppGlobalInstance,
     isWhatsAppGlobalOperatorMessage,
     recordWhatsAppGlobalCommand,
@@ -3575,15 +3576,15 @@ export async function POST(request: NextRequest) {
             const allowInternalInstanceMessages =
                 instance?.config?.allow_internal_instance_messages === true ||
                 instance?.config?.allow_internal_instance_messages === 'true'
-            const senderDigits = (finalPhone || '').replace(/\D/g, '')
+            const senderDigits = normalizePhoneDigits(finalPhone)
             if (senderDigits) {
                 const { data: connectedInstances } = await supabase
                     .from('whatsapp_instances')
                     .select('id, phone_number')
                     .eq('status', 'connected')
                 const internalSender = (connectedInstances || []).find((row: any) => {
-                    const rowDigits = String(row?.phone_number || '').replace(/\D/g, '')
-                    return row.id !== instance.id && rowDigits && rowDigits === senderDigits
+                    const rowDigits = normalizePhoneDigits(row?.phone_number)
+                    return row.id !== instance.id && rowDigits && phonesLookSame(rowDigits, senderDigits)
                 })
                 if (internalSender && !allowInternalInstanceMessages) {
                     console.log(`[Webhook] â›” Ignored internal instance-to-instance message from ${senderDigits}`)
@@ -3632,10 +3633,22 @@ export async function POST(request: NextRequest) {
                 })
                 const isGlobalEntrypoint = isWhatsAppGlobalInstance(instance)
                 const globalMessageText = storedMessageContent || messageText || ''
+                const globalIntent = detectWhatsAppGlobalCommandIntent(globalMessageText, hasGlobalMedia)
+                const isActionableGlobalIntent = !['general', 'media_received'].includes(globalIntent.commandType)
                 const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
-                if (globalIdentity.type !== 'lead' && (isGlobalEntrypoint || isRecognizedOperatorMessage)) {
+                if (globalIdentity.type !== 'lead' && isGlobalEntrypoint && !isActionableGlobalIntent) {
+                    await saveAudit({ action: 'whatsapp_global_internal_message_ignored' })
+                    return NextResponse.json({
+                        success: true,
+                        action: 'whatsapp_global_internal_message_ignored',
+                        identity_type: globalIdentity.type,
+                        command_type: globalIntent.commandType,
+                    })
+                }
+
+                if (globalIdentity.type !== 'lead' && (isRecognizedOperatorMessage || (isGlobalEntrypoint && isActionableGlobalIntent))) {
                     const commandResult = await recordWhatsAppGlobalCommand({
                         supabase,
                         instance,
