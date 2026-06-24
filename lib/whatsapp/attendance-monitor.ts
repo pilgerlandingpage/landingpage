@@ -1467,6 +1467,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             avgResponse !== null && avgResponse > 900 ? 'Criar meta de primeira resposta abaixo de 15 minutos.' : null,
             'Usar perguntas de descoberta: bairro, faixa de valor, prazo, forma de pagamento e objetivo.',
             'Encerrar cada conversa ativa com proximo passo claro: visita, envio de opcoes ou retorno combinado.',
+            ...(coachResult.summary?.attention_points || []),
             ...(coachResult.summary?.recovery_actions || []),
             ...(coachResult.summary?.training_focus || []),
             ...narrative.improvement_points,
@@ -1491,6 +1492,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             period_end: range.end,
         }
         const coachStrengths = uniqueTextList(coachResult.summary?.strengths, narrative.strengths)
+        const coachAttentionPoints = uniqueTextList(coachResult.summary?.attention_points, narrative.improvement_points)
         const coachImprovementPoints = uniqueTextList(coachResult.summary?.improvement_points, narrative.improvement_points)
         const coachTrainingFocus = uniqueTextList(coachResult.summary?.training_focus)
         const coachRecoveryActions = uniqueTextList(coachResult.summary?.recovery_actions)
@@ -1528,6 +1530,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             training_focus: coachTrainingFocus,
             recovery_actions: coachRecoveryActions,
             strengths: coachStrengths,
+            attention_points: coachAttentionPoints,
             improvement_points: coachImprovementPoints,
             lead_quality_report: narrative.lead_quality_report,
             coaching_report: coachExecutiveSummary,

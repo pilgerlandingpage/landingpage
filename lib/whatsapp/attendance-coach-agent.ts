@@ -8,6 +8,8 @@ export const DEFAULT_WHATSAPP_ATTENDANCE_COACH_PROMPT = [
     'Sua funcao e ler conversas de WhatsApp entre lead e corretor/agente e avaliar a qualidade comercial do atendimento.',
     'Analise intencao do lead, etapa do funil, objecoes, tempo/contexto de resposta, clareza, empatia, qualificacao, conducao para proximo passo e risco de perda.',
     'Aponte onde o corretor deixou a desejar, quais oportunidades foram perdidas, quais ainda sao recuperaveis e como melhorar a comunicacao.',
+    'No resumo do agente, escreva como um coach de atendimento: seja direto, pratico, textual e orientado a acao.',
+    'Inclua pontos de atencao, plano de treino e acoes de recuperacao que a gestao possa cobrar do corretor.',
     'Nao invente fatos, valores, nomes ou imoveis. Use apenas o historico recebido.',
     'Nunca escreva como se estivesse falando com o lead; voce esta orientando a gestao/corretor.',
     'Retorne somente JSON valido, sem markdown.',
@@ -65,6 +67,7 @@ export type AttendanceCoachConversationAnalysis = {
 export type AttendanceCoachSummary = {
     executive_summary: string
     strengths: string[]
+    attention_points: string[]
     improvement_points: string[]
     training_focus: string[]
     recovery_actions: string[]
@@ -170,9 +173,38 @@ function normalizeSummary(value: any): AttendanceCoachSummary | null {
     return {
         executive_summary: truncate(value.executive_summary || value.summary, 1800),
         strengths: normalizeStringArray(value.strengths, 8),
+        attention_points: normalizeStringArray(value.attention_points || value.points_of_attention || value.risks, 8),
         improvement_points: normalizeStringArray(value.improvement_points, 10),
         training_focus: normalizeStringArray(value.training_focus, 8),
         recovery_actions: normalizeStringArray(value.recovery_actions, 8),
+    }
+}
+
+function mergeStringArrays(...values: Array<string[] | null | undefined>) {
+    const seen = new Set<string>()
+    const merged: string[] = []
+    for (const list of values) {
+        for (const item of list || []) {
+            const text = truncate(item, 260)
+            const key = text.toLowerCase()
+            if (!text || seen.has(key)) continue
+            seen.add(key)
+            merged.push(text)
+        }
+    }
+    return merged.slice(0, 10)
+}
+
+function mergeCoachSummaries(current: AttendanceCoachSummary | null, next: AttendanceCoachSummary | null) {
+    if (!current) return next
+    if (!next) return current
+    return {
+        executive_summary: truncate([current.executive_summary, next.executive_summary].filter(Boolean).join(' '), 1800),
+        strengths: mergeStringArrays(current.strengths, next.strengths),
+        attention_points: mergeStringArrays(current.attention_points, next.attention_points),
+        improvement_points: mergeStringArrays(current.improvement_points, next.improvement_points),
+        training_focus: mergeStringArrays(current.training_focus, next.training_focus),
+        recovery_actions: mergeStringArrays(current.recovery_actions, next.recovery_actions),
     }
 }
 
@@ -208,8 +240,9 @@ function buildPromptPayload(params: {
         broker_or_instance: params.ownerName,
         output_schema: {
             agent_summary: {
-                executive_summary: 'parecer geral do atendimento do corretor no dia',
+                executive_summary: 'relatorio diario textual como coach de atendimento, com leitura clara do comportamento do corretor',
                 strengths: ['pontos fortes objetivos'],
+                attention_points: ['pontos de atencao que a gestao deve cobrar'],
                 improvement_points: ['pontos de melhoria objetivos'],
                 training_focus: ['treinos praticos para o corretor'],
                 recovery_actions: ['acoes para recuperar oportunidades'],
@@ -334,8 +367,14 @@ export async function runAttendanceCoachAnalysis(params: {
             for (const [chatId, analysis] of parsed.conversations.entries()) {
                 result.conversations.set(chatId, analysis)
             }
-            if (parsed.summary?.executive_summary || parsed.summary?.improvement_points.length) {
-                result.summary = parsed.summary
+            if (
+                parsed.summary?.executive_summary ||
+                parsed.summary?.attention_points.length ||
+                parsed.summary?.improvement_points.length ||
+                parsed.summary?.training_focus.length ||
+                parsed.summary?.recovery_actions.length
+            ) {
+                result.summary = mergeCoachSummaries(result.summary, parsed.summary)
             }
             result.analyzedCount += batch.length
         } catch (error) {

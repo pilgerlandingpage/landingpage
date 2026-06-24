@@ -346,6 +346,131 @@ function improvementItems(breakdown: ReportBreakdown) {
     return items
 }
 
+function percentage(part: number, total: number) {
+    if (!total) return 0
+    return Math.round((part / total) * 100)
+}
+
+function uniqueTextItems(...lists: Array<Array<string | null | undefined> | null | undefined>) {
+    const seen = new Set<string>()
+    const merged: string[] = []
+    lists.forEach((list) => {
+        const items = list || []
+        items.forEach((item) => {
+            const text = String(item || '').replace(/\s+/g, ' ').trim()
+            const key = text.toLowerCase()
+            if (!text || seen.has(key)) return
+            seen.add(key)
+            merged.push(text)
+        })
+    })
+    return merged
+}
+
+function collectMetricTextList(reports: AttendanceReport[], key: string) {
+    return uniqueTextItems(...reports.map((report) => metricTextList(report, key)))
+}
+
+function combineReportBreakdowns(breakdowns: ReportBreakdown[]): ReportBreakdown {
+    const sum = (key: keyof ReportBreakdown) => breakdowns.reduce((total, item) => total + Number(item[key] || 0), 0)
+    const weightedAverage = (key: keyof ReportBreakdown) => {
+        const weighted = breakdowns.filter((item) => typeof item[key] === 'number' && Number.isFinite(Number(item[key])) && item.total > 0)
+        const weight = weighted.reduce((total, item) => total + item.total, 0)
+        if (weight > 0) {
+            return Math.round(weighted.reduce((total, item) => total + Number(item[key]) * item.total, 0) / weight)
+        }
+        const values = breakdowns.map((item) => Number(item[key])).filter((value) => Number.isFinite(value))
+        return values.length ? Math.round(values.reduce((total, value) => total + value, 0) / values.length) : null
+    }
+    return {
+        total: sum('total'),
+        hot: sum('hot'),
+        warm: sum('warm'),
+        cold: sum('cold'),
+        poor: sum('poor'),
+        strong: sum('strong'),
+        unanswered: sum('unanswered'),
+        needsAttention: sum('needsAttention'),
+        lost: sum('lost'),
+        recoverable: sum('recoverable'),
+        llmAnalyzed: sum('llmAnalyzed'),
+        communicationQuality: weightedAverage('communicationQuality'),
+        closingQuality: weightedAverage('closingQuality'),
+        messages: sum('messages'),
+        inbound: sum('inbound'),
+        outbound: sum('outbound'),
+        avgResponse: weightedAverage('avgResponse'),
+    }
+}
+
+function getPeriodScore(reports: AttendanceReport[], breakdowns: ReportBreakdown[]) {
+    if (reports.length === 0) return 0
+    const totalConversations = breakdowns.reduce((total, item) => total + item.total, 0)
+    if (totalConversations > 0) {
+        return Math.round(reports.reduce((total, report, index) => total + Number(report.score || 0) * (breakdowns[index]?.total || 0), 0) / totalConversations)
+    }
+    return Math.round(reports.reduce((total, report) => total + Number(report.score || 0), 0) / reports.length)
+}
+
+function buildPeriodLabel(startDate: string, endDate: string) {
+    const range = orderedDateRange(startDate, endDate)
+    if (range.startDate === range.endDate) return formatDateLabel(range.startDate)
+    return `${formatDateLabel(range.startDate)} a ${formatDateLabel(range.endDate)}`
+}
+
+function buildCoachAttentionItems(breakdown: ReportBreakdown) {
+    const items: string[] = []
+    if (breakdown.total === 0) return ['Sem base suficiente para orientar o corretor neste periodo.']
+    if (breakdown.unanswered > 0) items.push(`${breakdown.unanswered} conversa(s) ficaram sem ultima resposta e precisam de retomada.`)
+    if (breakdown.poor > 0) items.push(`${breakdown.poor} atendimento(s) abaixo de 60 pontos indicam falha de abordagem, rapport ou fechamento.`)
+    if (breakdown.lost > 0) items.push(`${breakdown.lost} oportunidade(s) foram marcadas como perdidas e devem ser revisadas pela gestao.`)
+    if (breakdown.hot > 0 && breakdown.unanswered > 0) items.push('Ha lead quente dentro da fila de retorno; a prioridade e contato rapido com proximo passo claro.')
+    if (breakdown.avgResponse !== null && breakdown.avgResponse > 900) items.push('Tempo medio de resposta acima de 15 minutos: criar meta de primeira resposta mais rapida.')
+    if (items.length === 0) items.push('Nao ha alerta critico no periodo, mas o coach deve manter revisao diaria das novas conversas.')
+    return items
+}
+
+function buildCoachTrainingItems(breakdown: ReportBreakdown) {
+    const items: string[] = []
+    if (breakdown.poor > 0) items.push('Treinar abertura consultiva: acolher, confirmar necessidade e perguntar objetivo antes de ofertar imoveis.')
+    if (breakdown.unanswered > 0) items.push('Treinar rotina de fechamento de conversa: toda interacao precisa terminar com retorno combinado ou proxima acao.')
+    if (breakdown.hot + breakdown.warm > 0) items.push('Treinar qualificacao: bairro, faixa de valor, prazo, forma de pagamento, imovel ideal e disponibilidade para visita.')
+    if (breakdown.closingQuality !== null && breakdown.closingQuality < 70) items.push('Treinar convite para visita, envio de opcoes e proposta com prazo definido.')
+    if (items.length === 0) items.push('Manter padrao atual e usar novas conversas como amostra de calibragem do atendimento.')
+    return items
+}
+
+function buildCoachRecoveryItems(breakdown: ReportBreakdown) {
+    const items: string[] = []
+    if (breakdown.recoverable > 0) items.push(`Criar mensagem de retomada para ${breakdown.recoverable} lead(s) recuperavel(is).`)
+    if (breakdown.unanswered > 0) items.push(`Separar os ${breakdown.unanswered} lead(s) sem retorno em prioridade alta, media e baixa.`)
+    if (breakdown.lost > 0) items.push('Revisar oportunidades perdidas e registrar motivo: preco, prazo, falta de retorno, objecao ou abordagem.')
+    if (breakdown.hot > 0) items.push(`Acionar ${breakdown.hot} lead(s) quente(s) com proposta objetiva de visita ou curadoria de opcoes.`)
+    if (items.length === 0) items.push('Acompanhar diariamente e manter fila de retomada vazia.')
+    return items
+}
+
+function buildCoachPeriodNarrative(params: {
+    ownerName: string
+    periodName: 'dia' | 'semana'
+    periodLabel: string
+    reportsCount: number
+    score: number
+    breakdown: ReportBreakdown
+    savedOpinion?: string
+}) {
+    if (params.savedOpinion) return params.savedOpinion
+    const { ownerName, periodName, periodLabel, reportsCount, score, breakdown } = params
+    if (breakdown.total === 0) {
+        return `No ${periodName} ${periodLabel}, ainda nao houve base suficiente para um coach confiavel de ${ownerName}. O primeiro objetivo e ampliar a captura de conversas e garantir que toda interacao esteja registrada.`
+    }
+    const attentionPct = percentage(breakdown.needsAttention, breakdown.total)
+    const opportunity = breakdown.hot + breakdown.warm
+    const opportunityPct = percentage(opportunity, breakdown.total)
+    const reportText = reportsCount > 1 ? `${reportsCount} relatorio(s)` : '1 relatorio'
+    return `No ${periodName} ${periodLabel}, ${ownerName} ficou com score ${score}/100 em ${breakdown.total} conversa(s) e ${breakdown.messages} mensagem(ns), com base em ${reportText}. O coach deve focar em ${breakdown.needsAttention} conversa(s) de atencao (${attentionPct}% da base), ${breakdown.unanswered} sem retorno e ${breakdown.poor} abaixo de 60 pontos. A base trouxe ${opportunity} oportunidade(s) quente(s)/morna(s) (${opportunityPct}%), entao o ganho mais rapido vem de resposta ativa, qualificacao objetiva e fechamento com proximo passo.`
+}
+
 function reportDetailHref(reportId: string, filter: string) {
     return `/admin/leads/relatorios-atendimento/detalhes?report_id=${encodeURIComponent(reportId)}&filtro=${encodeURIComponent(filter)}`
 }
@@ -621,10 +746,14 @@ export default function AttendanceReportsPage() {
         })
     }, [reports, scores, scoresByReport, instanceById])
 
-    const selectedBrokerReport = useMemo(() => {
-        if (!instanceId) return null
-        return reports.find((report) => report.instance_id === instanceId) || null
+    const selectedBrokerReports = useMemo(() => {
+        if (!instanceId) return []
+        return reports
+            .filter((report) => report.instance_id === instanceId)
+            .sort((a, b) => Date.parse(b.report_date) - Date.parse(a.report_date))
     }, [reports, instanceId])
+
+    const selectedBrokerReport = selectedBrokerReports[0] || null
 
     const selectedBrokerScores = useMemo(() => {
         if (!selectedBrokerReport) return []
@@ -999,9 +1128,49 @@ export default function AttendanceReportsPage() {
                 const verdict = String(report.metrics?.professional_status_label || professionalVerdict(Number(report.score || 0), breakdown))
                 const executiveOpinion = buildExecutiveOpinion(ownerName, report, breakdown)
                 const strengths = metricTextList(report, 'strengths')
+                const attentionPoints = metricTextList(report, 'attention_points')
                 const improvementPoints = metricTextList(report, 'improvement_points')
+                const trainingFocus = metricTextList(report, 'training_focus')
+                const recoveryActions = metricTextList(report, 'recovery_actions')
                 const coachingItems = improvementItems(breakdown)
                 const leadQualityReport = metricText(report, 'lead_quality_report')
+                const periodBreakdowns = selectedBrokerReports.map((item) => getReportBreakdown(item, scoresByReport.get(item.id) || []))
+                const periodBreakdown = combineReportBreakdowns(periodBreakdowns)
+                const periodScore = getPeriodScore(selectedBrokerReports, periodBreakdowns)
+                const periodLabel = buildPeriodLabel(startDate, endDate)
+                const dailyCoachText = buildCoachPeriodNarrative({
+                    ownerName,
+                    periodName: 'dia',
+                    periodLabel: formatDateLabel(report.report_date),
+                    reportsCount: 1,
+                    score: Number(report.score || 0),
+                    breakdown,
+                    savedOpinion: executiveOpinion,
+                })
+                const weeklyCoachText = buildCoachPeriodNarrative({
+                    ownerName,
+                    periodName: 'semana',
+                    periodLabel,
+                    reportsCount: selectedBrokerReports.length,
+                    score: periodScore,
+                    breakdown: periodBreakdown,
+                })
+                const dailyAttention = uniqueTextItems(attentionPoints, improvementPoints, coachingItems).slice(0, 4)
+                const dailyTraining = uniqueTextItems(trainingFocus, buildCoachTrainingItems(breakdown)).slice(0, 4)
+                const dailyRecovery = uniqueTextItems(recoveryActions, buildCoachRecoveryItems(breakdown)).slice(0, 4)
+                const weeklyAttention = uniqueTextItems(
+                    collectMetricTextList(selectedBrokerReports, 'attention_points'),
+                    collectMetricTextList(selectedBrokerReports, 'improvement_points'),
+                    buildCoachAttentionItems(periodBreakdown)
+                ).slice(0, 5)
+                const weeklyTraining = uniqueTextItems(
+                    collectMetricTextList(selectedBrokerReports, 'training_focus'),
+                    buildCoachTrainingItems(periodBreakdown)
+                ).slice(0, 5)
+                const weeklyRecovery = uniqueTextItems(
+                    collectMetricTextList(selectedBrokerReports, 'recovery_actions'),
+                    buildCoachRecoveryItems(periodBreakdown)
+                ).slice(0, 5)
                 return (
                     <article style={selectedBrokerSummaryStyle}>
                         <div style={selectedBrokerSummaryHeaderStyle}>
@@ -1053,6 +1222,73 @@ export default function AttendanceReportsPage() {
                                     ))}
                                 </div>
                             </div>
+                            <section style={coachReportPanelStyle}>
+                                <div style={coachReportHeaderStyle}>
+                                    <div>
+                                        <div style={sectionEyebrowStyle}>Coach de atendimento</div>
+                                        <h3 style={coachReportTitleStyle}>Relatorio diario e semanal do corretor</h3>
+                                    </div>
+                                    <span style={coachAgentBadgeStyle}>
+                                        {breakdown.llmAnalyzed} conversa(s) com LLM
+                                    </span>
+                                </div>
+                                <div style={coachPeriodGridStyle}>
+                                    <div style={coachPeriodBlockStyle}>
+                                        <div style={coachPeriodTopStyle}>
+                                            <strong>Relatorio diario</strong>
+                                            <span>{formatDateLabel(report.report_date)} | score {Number(report.score || 0)}</span>
+                                        </div>
+                                        <p style={coachPeriodTextStyle}>{dailyCoachText}</p>
+                                        <div style={coachChecklistGridStyle}>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Pontos de atencao</strong>
+                                                {dailyAttention.map((item, index) => (
+                                                    <span key={`${report.id}-daily-attention-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Treino recomendado</strong>
+                                                {dailyTraining.map((item, index) => (
+                                                    <span key={`${report.id}-daily-training-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Recuperacao</strong>
+                                                {dailyRecovery.map((item, index) => (
+                                                    <span key={`${report.id}-daily-recovery-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={coachPeriodBlockStyle}>
+                                        <div style={coachPeriodTopStyle}>
+                                            <strong>Relatorio semanal</strong>
+                                            <span>{periodLabel} | score {periodScore}</span>
+                                        </div>
+                                        <p style={coachPeriodTextStyle}>{weeklyCoachText}</p>
+                                        <div style={coachChecklistGridStyle}>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Pontos de atencao</strong>
+                                                {weeklyAttention.map((item, index) => (
+                                                    <span key={`${report.id}-weekly-attention-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Treino da semana</strong>
+                                                {weeklyTraining.map((item, index) => (
+                                                    <span key={`${report.id}-weekly-training-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                            <div style={coachChecklistColumnStyle}>
+                                                <strong>Plano de recuperacao</strong>
+                                                {weeklyRecovery.map((item, index) => (
+                                                    <span key={`${report.id}-weekly-recovery-${index}`}>{item}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
                         </div>
                     </article>
                 )
@@ -1819,6 +2055,84 @@ const selectedBrokerSummaryBodyStyle: CSSProperties = {
     padding: 14,
     display: 'grid',
     gap: 10,
+}
+
+const coachReportPanelStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.2)',
+    background: 'rgba(240,249,255,0.58)',
+    borderRadius: 8,
+    padding: 12,
+    display: 'grid',
+    gap: 12,
+}
+
+const coachReportHeaderStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 10,
+    flexWrap: 'wrap',
+}
+
+const coachReportTitleStyle: CSSProperties = {
+    margin: '4px 0 0',
+    fontSize: '1rem',
+    lineHeight: 1.25,
+}
+
+const coachAgentBadgeStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.2)',
+    background: '#fff',
+    color: '#075985',
+    borderRadius: 999,
+    padding: '6px 9px',
+    fontSize: '0.72rem',
+    fontWeight: 900,
+}
+
+const coachPeriodGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))',
+    gap: 10,
+}
+
+const coachPeriodBlockStyle: CSSProperties = {
+    border: '1px solid rgba(100,116,139,0.16)',
+    background: 'rgba(255,255,255,0.88)',
+    borderRadius: 8,
+    padding: 12,
+    display: 'grid',
+    gap: 10,
+}
+
+const coachPeriodTopStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    flexWrap: 'wrap',
+    fontSize: '0.82rem',
+}
+
+const coachPeriodTextStyle: CSSProperties = {
+    margin: 0,
+    color: 'var(--text-secondary)',
+    fontSize: '0.84rem',
+    lineHeight: 1.55,
+}
+
+const coachChecklistGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 170px), 1fr))',
+    gap: 8,
+}
+
+const coachChecklistColumnStyle: CSSProperties = {
+    display: 'grid',
+    gap: 5,
+    color: 'var(--text-secondary)',
+    fontSize: '0.78rem',
+    lineHeight: 1.42,
 }
 
 const selectBrokerHintStyle: CSSProperties = {
