@@ -67,25 +67,58 @@ export function normalizeGlobalPhone(value: unknown): string {
 export function globalPhoneCandidates(value: unknown): string[] {
     const normalized = normalizeGlobalPhone(value)
     const raw = String(value || '').replace(/\D/g, '')
-    const withoutBrazil = normalized.startsWith('55') ? normalized.slice(2) : ''
-    const localWithoutNine =
-        withoutBrazil.length === 11
-            ? `${withoutBrazil.slice(0, 2)}${withoutBrazil.slice(3)}`
-            : ''
-    const localWithNine =
-        withoutBrazil.length === 10
-            ? `${withoutBrazil.slice(0, 2)}9${withoutBrazil.slice(2)}`
-            : ''
+    const candidates = new Set<string>([normalized, raw].filter(Boolean))
+    const localForms = new Set<string>()
 
-    return Array.from(new Set([
-        normalized,
-        raw,
-        withoutBrazil,
-        localWithoutNine ? `55${localWithoutNine}` : '',
-        localWithoutNine,
-        localWithNine ? `55${localWithNine}` : '',
-        localWithNine,
-    ].filter(Boolean)))
+    for (const candidate of Array.from(candidates)) {
+        localForms.add(candidate)
+        if (candidate.startsWith('55')) localForms.add(candidate.slice(2))
+        if (candidate.startsWith('550')) {
+            candidates.add(`55${candidate.slice(3)}`)
+            localForms.add(candidate.slice(3))
+        }
+    }
+
+    for (const local of Array.from(localForms)) {
+        if (local.startsWith('0')) localForms.add(local.slice(1))
+        if (local.startsWith('55')) localForms.add(local.slice(2))
+    }
+
+    for (const local of Array.from(localForms)) {
+        if (!local) continue
+        candidates.add(local)
+
+        if (local.length === 11) {
+            localForms.add(`${local.slice(0, 2)}${local.slice(3)}`)
+        }
+        if (local.length === 10) {
+            localForms.add(`${local.slice(0, 2)}9${local.slice(2)}`)
+        }
+
+        if (local.length >= 10) {
+            const ddd = local.slice(0, 2)
+            const last8 = local.slice(-8)
+            const last9 = local.slice(-9)
+            localForms.add(`${ddd}${last8}`)
+            localForms.add(`${ddd}${last9}`)
+            localForms.add(`${ddd}9${last8}`)
+        }
+
+        if (local.length >= 12) {
+            localForms.add(local.slice(1))
+            localForms.add(`${local.slice(0, 2)}${local.slice(4)}`)
+        }
+    }
+
+    for (const local of localForms) {
+        if (!local) continue
+        candidates.add(local)
+        if ((local.length === 10 || local.length === 11) && !local.startsWith('55')) {
+            candidates.add(`55${local}`)
+        }
+    }
+
+    return Array.from(candidates).filter(Boolean)
 }
 
 function phoneLooksSame(a: unknown, b: unknown): boolean {
