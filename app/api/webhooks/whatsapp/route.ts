@@ -8,12 +8,16 @@ import { generateChatResponse } from '@/lib/ai/generation'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
-import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { recordAgentConversationEcosystemEvent, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import {
     buildWhatsAppGlobalAcknowledgement,
+    buildWhatsAppGlobalConversationHistory,
+    buildWhatsAppGlobalInternalFallback,
+    buildWhatsAppGlobalInternalSystemPrompt,
     detectWhatsAppGlobalCommandIntent,
+    getOrCreateWhatsAppGlobalSession,
     isWhatsAppGlobalInstance,
     isWhatsAppGlobalOperatorMessage,
     recordWhatsAppGlobalCommand,
@@ -3644,12 +3648,96 @@ export async function POST(request: NextRequest) {
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
                 if (globalIdentity.type !== 'lead' && isGlobalEntrypoint && !isActionableGlobalIntent) {
-                    await saveAudit({ action: 'whatsapp_global_internal_message_ignored' })
+                    const inputForGlobalAgent = globalMessageText || (hasGlobalMedia ? 'Midia recebida sem texto.' : 'Mensagem recebida sem texto.')
+                    const session = await getOrCreateWhatsAppGlobalSession({
+                        supabase,
+                        phone: finalPhone,
+                        identity: globalIdentity,
+                    })
+
+                    let replyText = ''
+                    try {
+                        const configs = await loadAIConfigs(supabase, instance?.id)
+                        const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
+                        replyText = await generateChatResponse(
+                            buildWhatsAppGlobalConversationHistory(session),
+                            inputForGlobalAgent,
+                            buildWhatsAppGlobalInternalSystemPrompt(globalIdentity),
+                            {
+                                provider,
+                                geminiModel: configs['gemini_model'] || undefined,
+                                openaiModel: configs['openai_model'] || undefined,
+                            }
+                        )
+                    } catch (error) {
+                        console.warn('[Webhook] WhatsApp Global internal AI failed, using fallback:', error)
+                    }
+
+                    const outgoingText = sanitizeConciergeReply(replyText) || buildWhatsAppGlobalInternalFallback(globalIdentity)
+
+                    await getOrCreateWhatsAppGlobalSession({
+                        supabase,
+                        phone: finalPhone,
+                        identity: globalIdentity,
+                        message: {
+                            role: 'user',
+                            content: inputForGlobalAgent,
+                            has_media: hasGlobalMedia,
+                            command_type: globalIntent.commandType,
+                            timestamp: new Date().toISOString(),
+                        },
+                    })
+
+                    if (instance.instance_token && outgoingText) {
+                        await sendWhatsAppMessage({
+                            phone: finalPhone,
+                            message: outgoingText,
+                            instanceToken: instance.instance_token,
+                        })
+                        await getOrCreateWhatsAppGlobalSession({
+                            supabase,
+                            phone: finalPhone,
+                            identity: globalIdentity,
+                            message: {
+                                role: 'assistant',
+                                content: outgoingText,
+                                timestamp: new Date().toISOString(),
+                            },
+                        })
+                    }
+
+                    await recordEcosystemEvent({
+                        supabase,
+                        eventType: 'whatsapp_global_internal_conversation_updated',
+                        actorType: 'human',
+                        entityType: 'whatsapp_global_session',
+                        entityId: session?.id || finalPhone,
+                        source: 'whatsapp-global',
+                        label: `${globalIdentity.label} conversou com o WhatsApp Global`,
+                        importanceScore: globalIdentity.permissions.includes('master_all') ? 78 : 62,
+                        metadata: {
+                            phone: finalPhone,
+                            identity_type: globalIdentity.type,
+                            identity_id: globalIdentity.identityId || null,
+                            identity_source: globalIdentity.source,
+                            permissions: globalIdentity.permissions,
+                            command_type: globalIntent.commandType,
+                            has_media: hasGlobalMedia,
+                            instance_id: instance.id || null,
+                            instance_name: instance.instance_name || null,
+                            replied: Boolean(instance.instance_token && outgoingText),
+                        },
+                    }).catch(error => {
+                        console.warn('[Webhook] WhatsApp Global internal ecosystem event failed:', error?.message || error)
+                    })
+
+                    await saveAudit({ action: 'whatsapp_global_internal_identity_handled' })
                     return NextResponse.json({
                         success: true,
-                        action: 'whatsapp_global_internal_message_ignored',
+                        action: 'whatsapp_global_internal_identity_handled',
                         identity_type: globalIdentity.type,
                         command_type: globalIntent.commandType,
+                        replied: Boolean(instance.instance_token && outgoingText),
                     })
                 }
 
