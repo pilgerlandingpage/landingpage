@@ -668,6 +668,9 @@ export default function VitorTrafficManagerPage() {
           <Link href="/admin/ads/relatorio" className="btn btn-outline" style={{ textDecoration: 'none' }}>
             <BarChart3 size={17} /> Relatorios
           </Link>
+          <Link href="/admin/whatsapp/global/pre-test" className="btn btn-outline" style={{ textDecoration: 'none' }}>
+            <ClipboardList size={17} /> Pre-teste
+          </Link>
           <button type="button" className="btn btn-gold" disabled={refreshing} onClick={() => loadData(filter, true)}>
             <RefreshCw size={17} className={refreshing ? 'spin' : ''} /> Atualizar
           </button>

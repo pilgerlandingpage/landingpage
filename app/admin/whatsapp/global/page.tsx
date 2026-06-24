@@ -288,6 +288,9 @@ export default function WhatsAppGlobalPage() {
                     <Link href="/admin/ads/vitor" className="btn btn-outline">
                         <ExternalLink size={16} /> Vitor
                     </Link>
+                    <Link href="/admin/whatsapp/global/pre-test" className="btn btn-outline">
+                        <ClipboardList size={16} /> Pre-teste
+                    </Link>
                     <button type="button" className="btn btn-gold" onClick={() => loadData(true)} disabled={refreshing}>
                         {refreshing ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />} Atualizar
                     </button>
