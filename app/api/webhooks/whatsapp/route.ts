@@ -3616,6 +3616,9 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        let registeredWhatsappIdentity: Awaited<ReturnType<typeof resolveWhatsAppGlobalIdentity>> | null = null
+        let registeredWhatsappIntent: ReturnType<typeof detectWhatsAppGlobalCommandIntent> | null = null
+
         if (!isFromMe) {
             try {
                 const hasGlobalMedia = Boolean(
@@ -3631,9 +3634,11 @@ export async function POST(request: NextRequest) {
                     phone: finalPhone,
                     senderName,
                 })
+                registeredWhatsappIdentity = globalIdentity
                 const isGlobalEntrypoint = isWhatsAppGlobalInstance(instance)
                 const globalMessageText = storedMessageContent || messageText || ''
                 const globalIntent = detectWhatsAppGlobalCommandIntent(globalMessageText, hasGlobalMedia)
+                registeredWhatsappIntent = globalIntent
                 const isActionableGlobalIntent = !['general', 'media_received'].includes(globalIntent.commandType)
                 const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
@@ -3742,6 +3747,16 @@ export async function POST(request: NextRequest) {
             } catch (e) {
                 console.warn('[Webhook] Broker assistant mode failed, falling back to lead flow:', e)
             }
+        }
+
+        if (!isFromMe && registeredWhatsappIdentity && registeredWhatsappIdentity.type !== 'lead') {
+            await saveAudit({ action: 'ignored_registered_internal_message' })
+            return NextResponse.json({
+                success: true,
+                action: 'ignored_registered_internal_message',
+                identity_type: registeredWhatsappIdentity.type,
+                command_type: registeredWhatsappIntent?.commandType || null,
+            })
         }
 
         let syncedLead: any = null

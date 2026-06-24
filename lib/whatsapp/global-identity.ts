@@ -242,15 +242,23 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
 
 export function isWhatsAppGlobalOperatorMessage(text: unknown, hasMedia = false): boolean {
     const intent = detectWhatsAppGlobalCommandIntent(text, hasMedia)
-    if (!['general', 'media_received'].includes(intent.commandType)) return true
-
     const normalized = String(text || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
 
-    return IDENTITY_CHECK_RE.test(normalized) ||
-        /\b(vitor|trafego|campanha|criativo|ads|meta|google|subir|rodar|promover|impulsionar|comando interno)\b/.test(normalized)
+    if (IDENTITY_CHECK_RE.test(normalized)) return true
+    if (/\b(comando interno|whatsapp global|agente global|pilger ai)\b/.test(normalized)) return true
+    if (/\bvitor\b/.test(normalized)) return true
+
+    const trafficAction = /\b(sobe|suba|subir|rodar|rode|promover|promova|impulsionar|impulsione|aprovar|aprovado|aprove|autorizar|autorize|liberar|libere|pausar|pause|escala|escalar|escale|monitorar|monitore|analisar|analise|melhorar|melhore|cancelar|cancele|preparar|prepare|executar|execute|publicar|publique|status|resultado|resultados|metricas|relatorio)\b/.test(normalized)
+    const trafficTarget = /\b(trafego|campanha|criativo|ads|meta|google)\b/.test(normalized)
+
+    if (intent.commandType.startsWith('paid_traffic')) {
+        return trafficAction || (hasMedia && trafficTarget)
+    }
+
+    return trafficAction && trafficTarget
 }
 
 function hasPermission(identity: WhatsAppGlobalIdentity, permission?: string | null) {
@@ -338,6 +346,33 @@ async function findAdminUser(supabase: SupabaseLike, phone: string) {
 
     if (fallbackError) return null
     return (fallbackData || []).find((row: any) => phoneLooksSame(row.phone, phone)) || null
+}
+
+async function findVirtualBrokerByPhone(supabase: SupabaseLike, phone: string) {
+    try {
+        const candidates = globalPhoneCandidates(phone)
+        const { data, error } = await supabase
+            .from('virtual_brokers')
+            .select('id, name, email, phone, is_active')
+            .eq('is_active', true)
+            .in('phone', candidates)
+            .limit(1)
+
+        if (error) return null
+        if (data?.[0]) return data[0]
+
+        const { data: fallbackData, error: fallbackError } = await supabase
+            .from('virtual_brokers')
+            .select('id, name, email, phone, is_active')
+            .eq('is_active', true)
+            .not('phone', 'is', null)
+            .limit(500)
+
+        if (fallbackError) return null
+        return (fallbackData || []).find((row: any) => phoneLooksSame(row.phone, phone)) || null
+    } catch {
+        return null
+    }
 }
 
 async function findBrokerAuthorization(supabase: SupabaseLike, phone: string) {
@@ -466,6 +501,19 @@ export async function resolveWhatsAppGlobalIdentity(params: {
             source: 'admin_users',
             adminUser,
             confidence: 98,
+        }
+    }
+
+    const brokerUser = await findVirtualBrokerByPhone(supabase, normalizedPhone)
+    if (brokerUser?.id) {
+        return {
+            type: 'broker_user',
+            phone: normalizedPhone,
+            label: brokerUser.name || brokerUser.email || fallbackLabel,
+            identityId: brokerUser.id,
+            permissions: ['properties', 'leads', 'crm'],
+            source: 'virtual_brokers',
+            confidence: 94,
         }
     }
 
