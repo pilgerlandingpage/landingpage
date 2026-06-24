@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
+  Activity,
   AlertTriangle,
   ArrowLeft,
   BarChart3,
@@ -18,6 +19,7 @@ import {
   Send,
   Sparkles,
   Target,
+  TrendingUp,
   Trash2,
   UploadCloud,
   XCircle,
@@ -64,6 +66,34 @@ type ExecutionPackage = {
   guardrails?: Record<string, unknown>
   human_execution_steps?: string[]
   plain_text?: string | null
+}
+
+type VitorMonitoringAlert = {
+  type: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  title: string
+  message: string
+  recommendation: string
+  entity?: Record<string, unknown> | null
+}
+
+type VitorMonitoring = {
+  generated_at: string
+  health: {
+    score: number
+    label: string
+    tone: 'good' | 'medium' | 'risk'
+  }
+  metrics: Record<string, number>
+  alerts: VitorMonitoringAlert[]
+  recommendations: Array<{
+    title: string
+    action: string
+    priority: string
+  }>
+  top_ads: Array<Record<string, unknown>>
+  pending_execution_plans: Array<Record<string, unknown>>
+  diagnostics: string[]
 }
 
 type VitorReview = {
@@ -116,6 +146,7 @@ type VitorPayload = {
   }
   reviews: VitorReview[]
   latest_report: { id: string; title: string; summary: string | null; created_at: string } | null
+  monitoring?: VitorMonitoring | null
 }
 
 type PanelMedia = {
@@ -168,6 +199,25 @@ function moneyLabel(value: unknown) {
   const number = Number(value)
   if (!Number.isFinite(number) || number <= 0) return '-'
   return `R$ ${number.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+}
+
+function percentLabel(value: unknown) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return '-'
+  return `${number.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
+
+function integerLabel(value: unknown) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return '0'
+  return number.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
+}
+
+function severityLabel(value?: string | null) {
+  if (value === 'critical') return 'Critico'
+  if (value === 'high') return 'Alto'
+  if (value === 'medium') return 'Medio'
+  return 'Baixo'
 }
 
 function stringField(value: Record<string, unknown> | null | undefined, key: string) {
@@ -253,6 +303,7 @@ export default function VitorTrafficManagerPage() {
   const [toast, setToast] = useState('')
   const [uploading, setUploading] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [monitoringSaving, setMonitoringSaving] = useState(false)
   const [panelMedia, setPanelMedia] = useState<PanelMedia[]>([])
   const [intakeForm, setIntakeForm] = useState({
     title: '',
@@ -288,6 +339,7 @@ export default function VitorTrafficManagerPage() {
 
   const reviews = payload?.reviews || []
   const metrics = payload?.metrics
+  const monitoring = payload?.monitoring || null
   const activeReview = useMemo(
     () => reviews.find(review => review.id === activeId) || reviews[0] || null,
     [activeId, reviews],
@@ -330,6 +382,27 @@ export default function VitorTrafficManagerPage() {
       setToast(activeExecutionPackage ? 'Pacote de execucao copiado.' : 'Rascunho de execucao copiado.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nao consegui copiar o pacote de execucao.')
+    }
+  }
+
+  const registerMonitoring = async () => {
+    setMonitoringSaving(true)
+    setError('')
+    setToast('')
+    try {
+      const response = await fetch('/api/admin/paid-traffic/vitor/monitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date_preset: 'last_7d' }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao registrar monitoramento.')
+      setPayload(current => current ? { ...current, monitoring: data.monitoring } : current)
+      setToast('Monitoramento do Vitor registrado na Central.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao registrar monitoramento.')
+    } finally {
+      setMonitoringSaving(false)
     }
   }
 
@@ -468,6 +541,94 @@ export default function VitorTrafficManagerPage() {
             <small>{item.detail}</small>
           </article>
         ))}
+      </section>
+
+      <section className="chart-card vitor-monitoring-card">
+        <div className="vitor-section-title">
+          <span>Gestao continua</span>
+          <strong>{monitoring ? `Atualizado ${formatDateTime(monitoring.generated_at)}` : 'Sem leitura'}</strong>
+        </div>
+        <div className="vitor-monitoring-head">
+          <div className={`vitor-health-ring ${monitoring?.health?.tone || 'medium'}`}>
+            <span>Saude</span>
+            <strong>{monitoring?.health?.score ?? '-'}</strong>
+            <small>{monitoring?.health?.label || 'Aguardando'}</small>
+          </div>
+          <div className="vitor-monitoring-kpis">
+            {[
+              { icon: <TrendingUp size={16} />, label: 'Gasto', value: moneyLabel(monitoring?.metrics?.spend) },
+              { icon: <Target size={16} />, label: 'Leads Meta', value: integerLabel(monitoring?.metrics?.leads) },
+              { icon: <Activity size={16} />, label: 'CPL', value: moneyLabel(monitoring?.metrics?.avg_cpl) },
+              { icon: <BarChart3 size={16} />, label: 'Qualidade CRM', value: percentLabel(monitoring?.metrics?.crm_quality_rate) },
+            ].map(item => (
+              <div key={item.label}>
+                <span>{item.icon}{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="vitor-monitoring-action">
+            <button type="button" className="btn btn-gold" disabled={monitoringSaving} onClick={registerMonitoring}>
+              {monitoringSaving ? <Loader2 size={16} className="spin" /> : <CheckCircle2 size={16} />}
+              {monitoringSaving ? 'Registrando...' : 'Registrar na Central'}
+            </button>
+            <span>{monitoring?.alerts?.length || 0} alerta(s) ativos</span>
+          </div>
+        </div>
+        <div className="vitor-monitoring-grid">
+          <article>
+            <h3><AlertTriangle size={17} /> Alertas do Vitor</h3>
+            <div className="vitor-monitoring-list">
+              {(monitoring?.alerts || []).slice(0, 4).map((alert, index) => (
+                <div key={`${alert.title}-${index}`} className={`vitor-alert-item ${alert.severity}`}>
+                  <strong>{alert.title}</strong>
+                  <span>{severityLabel(alert.severity)} | {alert.message}</span>
+                  <p>{alert.recommendation}</p>
+                </div>
+              ))}
+              {(!monitoring?.alerts || monitoring.alerts.length === 0) && (
+                <p className="vitor-muted">Sem alertas relevantes nos ultimos dados.</p>
+              )}
+            </div>
+          </article>
+          <article>
+            <h3><ClipboardList size={17} /> Recomendacoes</h3>
+            <div className="vitor-monitoring-list">
+              {(monitoring?.recommendations || []).slice(0, 4).map((item, index) => (
+                <div key={`${item.title}-${index}`}>
+                  <strong>{item.title}</strong>
+                  <p>{item.action}</p>
+                </div>
+              ))}
+              {(!monitoring?.recommendations || monitoring.recommendations.length === 0) && (
+                <p className="vitor-muted">Nada urgente para recomendar agora.</p>
+              )}
+            </div>
+          </article>
+          <article>
+            <h3><Megaphone size={17} /> Criativos em campanha</h3>
+            <div className="vitor-monitoring-list">
+              {(monitoring?.top_ads || []).slice(0, 4).map((ad, index) => (
+                <div key={`${String(ad.id || ad.name || index)}`}>
+                  <strong>{String(ad.name || ad.creative_title || `Anuncio ${index + 1}`)}</strong>
+                  <span>
+                    {moneyLabel(ad.spend)} | {integerLabel(ad.leads)} lead(s) | CPL {moneyLabel(ad.cpl)}
+                  </span>
+                </div>
+              ))}
+              {(!monitoring?.top_ads || monitoring.top_ads.length === 0) && (
+                <p className="vitor-muted">Sem anuncios lidos da Meta neste periodo.</p>
+              )}
+            </div>
+          </article>
+        </div>
+        {monitoring?.diagnostics?.length ? (
+          <div className="vitor-monitoring-diagnostics">
+            {monitoring.diagnostics.slice(0, 4).map((item, index) => (
+              <span key={`${item}-${index}`}>{item}</span>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="chart-card vitor-intake">
@@ -1000,6 +1161,183 @@ export default function VitorTrafficManagerPage() {
           font-size: .78rem;
         }
 
+        .vitor-monitoring-card {
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .vitor-monitoring-head {
+          display: grid;
+          grid-template-columns: 132px minmax(0, 1fr) auto;
+          gap: 14px;
+          align-items: stretch;
+          margin-bottom: 14px;
+        }
+
+        .vitor-health-ring {
+          display: grid;
+          place-items: center;
+          align-content: center;
+          min-height: 132px;
+          border-radius: 12px;
+          color: #fff;
+          padding: 12px;
+        }
+
+        .vitor-health-ring.good {
+          background: #047857;
+        }
+
+        .vitor-health-ring.medium {
+          background: #b45309;
+        }
+
+        .vitor-health-ring.risk {
+          background: #b91c1c;
+        }
+
+        .vitor-health-ring span,
+        .vitor-health-ring small {
+          font-size: .68rem;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .vitor-health-ring strong {
+          font-size: 2.4rem;
+          line-height: 1;
+        }
+
+        .vitor-monitoring-kpis,
+        .vitor-monitoring-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .vitor-monitoring-kpis div,
+        .vitor-monitoring-grid article {
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 12px;
+          min-width: 0;
+        }
+
+        .vitor-monitoring-kpis span {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: var(--text-muted);
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        .vitor-monitoring-kpis span svg,
+        .vitor-monitoring-grid h3 svg {
+          color: var(--gold);
+          flex-shrink: 0;
+        }
+
+        .vitor-monitoring-kpis strong {
+          color: var(--text-primary);
+          font-size: 1rem;
+          line-height: 1.2;
+        }
+
+        .vitor-monitoring-action {
+          display: grid;
+          gap: 8px;
+          align-content: center;
+          justify-items: end;
+          min-width: 180px;
+        }
+
+        .vitor-monitoring-action span {
+          color: var(--text-muted);
+          font-size: .74rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .vitor-monitoring-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .vitor-monitoring-grid h3 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0 0 10px;
+          color: var(--text-primary);
+          font-size: .92rem;
+        }
+
+        .vitor-monitoring-list {
+          display: grid;
+          gap: 8px;
+        }
+
+        .vitor-monitoring-list div {
+          border-top: 1px solid rgba(17, 24, 39, .07);
+          padding-top: 8px;
+        }
+
+        .vitor-monitoring-list div:first-child {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .vitor-monitoring-list strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .82rem;
+          line-height: 1.28;
+          margin-bottom: 4px;
+        }
+
+        .vitor-monitoring-list span,
+        .vitor-monitoring-list p {
+          display: block;
+          color: var(--text-muted);
+          font-size: .74rem;
+          line-height: 1.38;
+          margin: 0;
+        }
+
+        .vitor-alert-item.critical strong,
+        .vitor-alert-item.high strong {
+          color: #b91c1c;
+        }
+
+        .vitor-alert-item.medium strong {
+          color: #92400e;
+        }
+
+        .vitor-alert-item.low strong {
+          color: #047857;
+        }
+
+        .vitor-monitoring-diagnostics {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .vitor-monitoring-diagnostics span {
+          border: 1px solid rgba(245, 158, 11, .22);
+          border-radius: 999px;
+          background: rgba(245, 158, 11, .08);
+          color: #92400e;
+          font-size: .7rem;
+          font-weight: 800;
+          padding: 7px 10px;
+        }
+
         .vitor-report-strip {
           display: grid;
           grid-template-columns: 28px minmax(0, 1fr) auto;
@@ -1464,9 +1802,20 @@ export default function VitorTrafficManagerPage() {
 
         @media (max-width: 1180px) {
           .vitor-metrics-grid,
+          .vitor-monitoring-kpis,
+          .vitor-monitoring-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .vitor-monitoring-head {
+            grid-template-columns: 132px minmax(0, 1fr);
+          }
+
+          .vitor-monitoring-action {
+            grid-column: 1 / -1;
+            justify-items: start;
           }
 
           .vitor-layout {
@@ -1480,6 +1829,9 @@ export default function VitorTrafficManagerPage() {
 
         @media (max-width: 760px) {
           .vitor-metrics-grid,
+          .vitor-monitoring-head,
+          .vitor-monitoring-kpis,
+          .vitor-monitoring-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid,
           .vitor-plan-lines,

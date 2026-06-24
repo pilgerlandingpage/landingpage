@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 import { processVitorPanelCreative, type MediaItem } from '@/lib/ads/vitor-traffic-manager'
+import { buildVitorMonitoringSnapshot } from '@/lib/ads/vitor-monitoring'
 
 export const dynamic = 'force-dynamic'
 
@@ -335,7 +336,7 @@ export async function GET(request: NextRequest) {
     const creativeIds = unique(reviewRows.map((review: any) => review.creative_id))
     const commandIds = unique(reviewRows.map((review: any) => review.command_id))
 
-    const [plans, creatives, commands, latestReports] = await Promise.all([
+    const [plans, creatives, commands, latestReports, monitoring] = await Promise.all([
       reviewIds.length
         ? supabase
           .from('paid_traffic_campaign_plans')
@@ -366,6 +367,27 @@ export async function GET(request: NextRequest) {
         .order('created_at', { ascending: false })
         .limit(1)
         .then((res: any) => res.data || []),
+      buildVitorMonitoringSnapshot({ supabase, datePreset: 'last_7d' }).catch((error: any) => ({
+        generated_at: new Date().toISOString(),
+        date_preset: 'last_7d',
+        health: { score: 45, label: 'Integracao pendente', tone: 'risk' },
+        metrics: {},
+        alerts: [{
+          type: 'integration',
+          severity: 'critical',
+          title: 'Monitoramento indisponivel',
+          message: error?.message || 'Nao foi possivel carregar as metricas do Vitor.',
+          recommendation: 'Revisar integracao Meta/CRM antes do teste final.',
+          entity: null,
+        }],
+        recommendations: [],
+        top_campaigns: [],
+        top_ads: [],
+        pending_execution_plans: [],
+        crm_lead_quality: { paid_leads: 0, qualified_leads: 0, poor_leads: 0, quality_rate: 0, recent_leads: [] },
+        diagnostics: [error?.message || String(error || 'Monitoramento indisponivel')],
+        latest_report: null,
+      })),
     ])
 
     const creativeMap = byId(creatives)
@@ -388,6 +410,7 @@ export async function GET(request: NextRequest) {
         campaign_plan: plansByReview.get(String(review.id)) || null,
       })),
       latest_report: latestReports?.[0] || null,
+      monitoring,
     })
   } catch (error) {
     console.error('[Vitor Traffic Manager] Error:', error)
