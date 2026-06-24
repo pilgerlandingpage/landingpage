@@ -478,7 +478,7 @@ export default function WhatsAppInstancesPage() {
                             </p>
                         </div>
                         <Link
-                            href="/admin/pilger-ai/agentes?agent=whatsapp-global-agent&setor=Diretoria"
+                            href="/admin/whatsapp/global"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -495,7 +495,7 @@ export default function WhatsAppInstancesPage() {
                             }}
                         >
                             <Shield size={14} />
-                            Configurar Global
+                            Abrir central
                         </Link>
                     </div>
                     <div style={{ display: 'grid', gap: '12px' }}>
