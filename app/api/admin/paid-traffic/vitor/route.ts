@@ -33,6 +33,210 @@ function cleanString(value: unknown, max = 3000) {
   return text.length > max ? text.slice(0, max) : text
 }
 
+function safeRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function numberOrNull(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
+function stringRows(value: unknown, fallback: string[] = []) {
+  if (!Array.isArray(value)) return fallback
+  const rows = value
+    .map(item => cleanString(item, 280))
+    .filter(Boolean)
+  return rows.length ? rows : fallback
+}
+
+function normalizeCampaignName(value: unknown, fallback: string) {
+  const text = cleanString(value, 120) || fallback
+  return text
+    .replace(/[^\w-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 120) || fallback
+}
+
+function normalizeCopyVariations(value: unknown) {
+  return safeArray(value).slice(0, 6).map((copy: any, index: number) => {
+    const row = safeRecord(copy)
+    return {
+      label: cleanString(row.label || row.headline || `Copy ${index + 1}`, 120),
+      headline: cleanString(row.headline || row.label || `Copy ${index + 1}`, 180),
+      primary_text: cleanString(row.primary_text || row.text || row.caption, 900),
+      description: cleanString(row.description, 500),
+      cta: cleanString(row.cta, 80) || 'Falar no WhatsApp',
+    }
+  })
+}
+
+function buildExecutionPackagePlainText(pkg: Record<string, any>) {
+  const setup = safeRecord(pkg.setup)
+  const tracking = safeRecord(pkg.tracking)
+  const creative = safeRecord(pkg.creative)
+  const review = safeRecord(pkg.review)
+  const guardrails = safeRecord(pkg.guardrails)
+  const copyRows = safeArray(pkg.copy_variations)
+  const checklist = stringRows(guardrails.pre_launch_checklist)
+  const pauseRules = stringRows(guardrails.pause_rules)
+  const scaleRules = stringRows(guardrails.scale_rules)
+  const steps = stringRows(pkg.human_execution_steps)
+
+  return [
+    'PACOTE DE EXECUCAO HUMANA - VITOR TRAFEGO PAGO',
+    `Campanha: ${pkg.campaign_name || '-'}`,
+    `Plataforma sugerida: ${pkg.platform || 'meta_ads'}`,
+    `Modo: ${pkg.publication_mode || 'human_execution_required'}`,
+    `Seguranca: ${pkg.publication_guardrail || 'Nada foi publicado automaticamente.'}`,
+    '',
+    'SCORE E LEITURA',
+    `Score: ${review.score ?? '-'} (${review.score_label || '-'})`,
+    `Recomendacao: ${review.recommendation || '-'}`,
+    '',
+    'CRIATIVO',
+    `Titulo: ${creative.title || '-'}`,
+    `Tipo: ${creative.asset_type || creative.content_type || '-'}`,
+    `URL: ${creative.asset_url || creative.thumbnail_url || '-'}`,
+    '',
+    'SETUP DE CAMPANHA',
+    `Objetivo: ${setup.objective || '-'}`,
+    `Otimizacao: ${setup.optimization_goal || '-'}`,
+    `Destino: ${setup.destination || '-'}`,
+    `Verba diaria: ${setup.daily_budget_brl ? `R$ ${setup.daily_budget_brl}` : '-'}`,
+    `Verba total teste: ${setup.total_test_budget_brl ? `R$ ${setup.total_test_budget_brl}` : '-'}`,
+    `Duracao: ${setup.duration_days || '-'} dias`,
+    '',
+    'TRACKING',
+    `utm_source=${tracking.utm_source || '-'}`,
+    `utm_medium=${tracking.utm_medium || '-'}`,
+    `utm_campaign=${tracking.utm_campaign || '-'}`,
+    `utm_content=${tracking.utm_content || '-'}`,
+    '',
+    'COPYS',
+    ...(copyRows.length
+      ? copyRows.flatMap((copy: any, index: number) => {
+        const row = safeRecord(copy)
+        return [
+          `${index + 1}. ${row.headline || row.label || 'Copy'}`,
+          `Texto: ${row.primary_text || '-'}`,
+          `CTA: ${row.cta || 'Falar no WhatsApp'}`,
+        ]
+      })
+      : ['- Sem variacoes de copy registradas.']),
+    '',
+    'CHECKLIST PRE-LANCAMENTO',
+    ...(checklist.length ? checklist.map(row => `- ${row}`) : ['- Revisar criativo, publico, verba, UTM e destino antes de ativar.']),
+    '',
+    'REGRAS DE PAUSA',
+    ...(pauseRules.length ? pauseRules.map(row => `- ${row}`) : ['- Pausar se CPL, CTR ou qualidade comercial ficarem fora do esperado.']),
+    '',
+    'REGRAS DE ESCALA',
+    ...(scaleRules.length ? scaleRules.map(row => `- ${row}`) : ['- Escalar apenas com lead qualificado e custo sustentavel.']),
+    '',
+    'PASSOS HUMANOS',
+    ...(steps.length ? steps.map((row, index) => `${index + 1}. ${row}`) : ['1. Criar rascunho no gerenciador de anuncios com os dados acima.']),
+  ].join('\n')
+}
+
+function buildHumanExecutionPackage(params: {
+  review: any
+  plan: any
+  creative: any
+  generatedAt: string
+  notes?: string | null
+}) {
+  const { review, plan, creative, generatedAt, notes } = params
+  const budget = safeRecord(plan?.budget_suggestion)
+  const utm = safeRecord(plan?.utm)
+  const pauseScale = safeRecord(plan?.pause_scale_rules)
+  const fallbackCampaign = `vitor_${String(review?.id || 'campanha').slice(0, 8)}`
+  const campaignName = normalizeCampaignName(utm.campaign, fallbackCampaign)
+
+  const dailyBudget = numberOrNull(budget.daily_budget_brl || budget.daily || budget.daily_budget)
+  const totalBudget = numberOrNull(
+    budget.total_test_budget_brl
+    || budget.total_budget_brl
+    || (dailyBudget && Number(plan?.duration_days) ? dailyBudget * Number(plan.duration_days) : null),
+  )
+
+  const pkg: Record<string, any> = {
+    version: 1,
+    generated_at: generatedAt,
+    status: 'ready_for_human_execution',
+    publication_mode: 'human_execution_required',
+    publication_guardrail: 'O Vitor preparou o pacote, mas nao publicou campanha automaticamente.',
+    campaign_name: campaignName,
+    platform: 'meta_ads',
+    review: {
+      id: review?.id || null,
+      score: review?.score ?? null,
+      score_label: review?.score_label || null,
+      recommendation: review?.recommendation || null,
+      risks: safeArray(review?.risks).slice(0, 6),
+      improvements: safeArray(review?.improvements).slice(0, 6),
+    },
+    creative: {
+      id: creative?.id || review?.creative_id || null,
+      title: creative?.title || null,
+      asset_type: creative?.asset_type || null,
+      content_type: creative?.content_type || null,
+      asset_url: creative?.asset_url || null,
+      thumbnail_url: creative?.thumbnail_url || null,
+      property_sku: creative?.property_sku || null,
+    },
+    setup: {
+      objective: plan?.objective || 'Gerar conversas qualificadas no WhatsApp',
+      optimization_goal: 'Conversas ou leads qualificados',
+      destination: 'WhatsApp ou formulario de lead conforme disponibilidade da conta',
+      daily_budget_brl: dailyBudget,
+      total_test_budget_brl: totalBudget,
+      duration_days: numberOrNull(plan?.duration_days),
+      audience: safeRecord(plan?.audience),
+      locations: safeArray(plan?.locations),
+    },
+    copy_variations: normalizeCopyVariations(plan?.copy_variations),
+    tracking: {
+      utm_source: cleanString(utm.source || utm.utm_source, 80) || 'meta_ads',
+      utm_medium: cleanString(utm.medium || utm.utm_medium, 80) || 'paid_social',
+      utm_campaign: cleanString(utm.campaign || utm.utm_campaign, 120) || campaignName,
+      utm_content: cleanString(utm.content || utm.utm_content, 120) || 'vitor_creative_review',
+    },
+    guardrails: {
+      pre_launch_checklist: [
+        'Conferir se o criativo abre corretamente no painel.',
+        'Validar se a copy nao promete retorno financeiro ou valorizacao garantida.',
+        'Confirmar localizacao, publico e verba antes de ativar.',
+        'Aplicar UTM em todos os links ou formularios.',
+        'Registrar no CRM a origem Vitor/Meta Ads para medir qualidade do lead.',
+      ],
+      pause_rules: stringRows(pauseScale.pause_if || pauseScale.pause_rules, [
+        'Pausar se o CPL passar 35% acima da meta apos volume minimo de conversas.',
+        'Pausar se os leads forem majoritariamente fora da regiao ou sem perfil financeiro.',
+        'Pausar se CTR cair abaixo do esperado e houver frequencia elevada.',
+      ]),
+      scale_rules: stringRows(pauseScale.scale_if || pauseScale.scale_rules, [
+        'Escalar 20% a 30% quando CPL estiver saudavel por 48 horas.',
+        'Escalar apenas se o CRM confirmar lead qualificado ou oportunidade real.',
+        'Duplicar variacao vencedora antes de ampliar demais o conjunto original.',
+      ]),
+    },
+    human_execution_steps: [
+      'Abrir o gerenciador de anuncios e criar campanha em rascunho.',
+      'Usar o nome de campanha, objetivo, verba, duracao e publico deste pacote.',
+      'Adicionar criativo e copy vencedora ou variacoes sugeridas.',
+      'Aplicar UTM e conferir destino WhatsApp/formulario.',
+      'Publicar somente apos conferencia humana final.',
+      'Monitorar primeiras 24 a 48 horas e registrar qualidade no CRM.',
+    ],
+    notes: notes || null,
+  }
+
+  pkg.plain_text = buildExecutionPackagePlainText(pkg)
+  return pkg
+}
+
 function normalizeMediaItems(value: unknown): MediaItem[] {
   if (!Array.isArray(value)) return []
   return value
@@ -313,25 +517,48 @@ export async function PATCH(request: NextRequest) {
     if (decision.planStatus) {
       const { data: currentPlan, error: planReadError } = await supabase
         .from('paid_traffic_campaign_plans')
-        .select('id, raw_plan')
+        .select('*')
         .eq('review_id', reviewId)
         .maybeSingle()
 
       if (planReadError) throw planReadError
+
+      let creative: any = null
+      if (action === 'export' && review.creative_id) {
+        const { data: creativeData, error: creativeReadError } = await supabase
+          .from('marketing_creatives')
+          .select('id, title, description, asset_url, thumbnail_url, asset_type, content_type, property_sku, status, raw')
+          .eq('id', review.creative_id)
+          .maybeSingle()
+        if (creativeReadError) throw creativeReadError
+        creative = creativeData || null
+      }
+
+      const nextRawPlan: Record<string, any> = {
+        ...safeRecord(currentPlan?.raw_plan),
+        human_decision: {
+          action,
+          notes: notes || null,
+          decided_at: now,
+        },
+      }
+
+      if (action === 'export' && currentPlan?.id) {
+        nextRawPlan.execution_package = buildHumanExecutionPackage({
+          review,
+          plan: currentPlan,
+          creative,
+          generatedAt: now,
+          notes: notes || null,
+        })
+      }
 
       const { data: planData, error: planError } = await supabase
         .from('paid_traffic_campaign_plans')
         .update({
           status: decision.planStatus,
           updated_at: now,
-          raw_plan: {
-            ...(currentPlan?.raw_plan || {}),
-            human_decision: {
-              action,
-              notes: notes || null,
-              decided_at: now,
-            },
-          },
+          raw_plan: nextRawPlan,
         })
         .eq('id', currentPlan?.id || '00000000-0000-0000-0000-000000000000')
         .select('*')
@@ -365,6 +592,7 @@ export async function PATCH(request: NextRequest) {
         review_id: reviewId,
         creative_id: review.creative_id || null,
         campaign_plan_id: updatedPlan?.id || null,
+        execution_package_ready: Boolean(safeRecord(updatedPlan?.raw_plan).execution_package),
         previous_status: review.status,
         next_status: decision.reviewStatus,
       },

@@ -8,6 +8,7 @@ import {
   BarChart3,
   CheckCircle2,
   ClipboardList,
+  Copy,
   Edit3,
   FileText,
   ImageIcon,
@@ -49,6 +50,20 @@ type VitorPlan = {
   copy_variations: Array<Record<string, unknown>>
   utm: Record<string, unknown>
   pause_scale_rules: Record<string, unknown>
+  raw_plan?: Record<string, unknown> | null
+}
+
+type ExecutionPackage = {
+  generated_at?: string | null
+  campaign_name?: string | null
+  platform?: string | null
+  publication_mode?: string | null
+  publication_guardrail?: string | null
+  setup?: Record<string, unknown>
+  tracking?: Record<string, unknown>
+  guardrails?: Record<string, unknown>
+  human_execution_steps?: string[]
+  plain_text?: string | null
 }
 
 type VitorReview = {
@@ -160,6 +175,64 @@ function stringField(value: Record<string, unknown> | null | undefined, key: str
   return raw == null || raw === '' ? '-' : String(raw)
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function stringRows(value: unknown) {
+  return Array.isArray(value)
+    ? value.map(item => String(item || '').trim()).filter(Boolean)
+    : []
+}
+
+function getExecutionPackage(review: VitorReview | null): ExecutionPackage | null {
+  const rawPlan = asRecord(review?.campaign_plan?.raw_plan)
+  const executionPackage = asRecord(rawPlan.execution_package)
+  return Object.keys(executionPackage).length ? executionPackage as ExecutionPackage : null
+}
+
+function buildExecutionPackageText(review: VitorReview) {
+  const stored = getExecutionPackage(review)?.plain_text
+  if (stored && stored.trim()) return stored
+
+  const plan = review.campaign_plan
+  const copies = plan?.copy_variations || []
+  return [
+    'PACOTE DE EXECUCAO HUMANA - VITOR TRAFEGO PAGO',
+    `Campanha: ${stringField(plan?.utm, 'campaign')}`,
+    `Status: ${statusLabel(plan?.status)}`,
+    `Score: ${Number(review.score || 0)} (${review.score_label || '-'})`,
+    `Recomendacao: ${review.recommendation || '-'}`,
+    '',
+    'SETUP',
+    `Objetivo: ${plan?.objective || '-'}`,
+    `Verba diaria: ${moneyLabel(plan?.budget_suggestion?.daily_budget_brl)}`,
+    `Duracao: ${plan?.duration_days || '-'} dias`,
+    '',
+    'CRIATIVO',
+    `Titulo: ${review.creative?.title || '-'}`,
+    `URL: ${review.creative?.asset_url || review.creative?.thumbnail_url || '-'}`,
+    '',
+    'COPYS',
+    ...(copies.length
+      ? copies.slice(0, 3).flatMap((copy, index) => [
+        `${index + 1}. ${String(copy.headline || copy.label || `Copy ${index + 1}`)}`,
+        `Texto: ${String(copy.primary_text || copy.text || copy.caption || '-')}`,
+        `CTA: ${String(copy.cta || 'Falar no WhatsApp')}`,
+      ])
+      : ['- Sem variacoes registradas.']),
+    '',
+    'RISCOS',
+    ...((review.risks || []).slice(0, 5).map(row => `- ${row}`)),
+    '',
+    'MELHORIAS',
+    ...((review.improvements || []).slice(0, 5).map(row => `- ${row}`)),
+    '',
+    'OBSERVACAO',
+    'Nada foi publicado automaticamente. Este pacote exige execucao e conferencia humana.',
+  ].join('\n')
+}
+
 function ListBlock({ title, rows }: { title: string; rows: string[] }) {
   return (
     <div className="vitor-list-block">
@@ -219,6 +292,12 @@ export default function VitorTrafficManagerPage() {
     () => reviews.find(review => review.id === activeId) || reviews[0] || null,
     [activeId, reviews],
   )
+  const activeExecutionPackage = getExecutionPackage(activeReview)
+  const activeExecutionSetup = asRecord(activeExecutionPackage?.setup)
+  const activeExecutionTracking = asRecord(activeExecutionPackage?.tracking)
+  const activeExecutionGuardrails = asRecord(activeExecutionPackage?.guardrails)
+  const activeExecutionChecklist = stringRows(activeExecutionGuardrails.pre_launch_checklist)
+  const activeExecutionSteps = stringRows(activeExecutionPackage?.human_execution_steps)
 
   const decide = async (action: 'approve' | 'improve' | 'cancel' | 'export') => {
     if (!activeReview) return
@@ -233,12 +312,24 @@ export default function VitorTrafficManagerPage() {
       })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao atualizar decisao.')
-      setToast(action === 'approve' ? 'Plano aprovado para execucao humana.' : action === 'improve' ? 'Criativo marcado para melhoria.' : action === 'export' ? 'Plano marcado como exportado.' : 'Plano cancelado.')
+      setToast(action === 'approve' ? 'Plano aprovado para execucao humana.' : action === 'improve' ? 'Criativo marcado para melhoria.' : action === 'export' ? 'Pacote de execucao preparado.' : 'Plano cancelado.')
       await loadData(filter, true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar decisao.')
     } finally {
       setUpdating('')
+    }
+  }
+
+  const copyExecutionPackage = async () => {
+    if (!activeReview) return
+    setError('')
+    setToast('')
+    try {
+      await navigator.clipboard.writeText(buildExecutionPackageText(activeReview))
+      setToast(activeExecutionPackage ? 'Pacote de execucao copiado.' : 'Rascunho de execucao copiado.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nao consegui copiar o pacote de execucao.')
     }
   }
 
@@ -567,7 +658,7 @@ export default function VitorTrafficManagerPage() {
                       <Edit3 size={16} /> Melhorar criativo
                     </button>
                     <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('export')}>
-                      <ClipboardList size={16} /> Exportado
+                      <ClipboardList size={16} /> {updating === 'export' ? 'Preparando...' : 'Preparar execucao'}
                     </button>
                     <button type="button" className="btn btn-outline danger" disabled={Boolean(updating)} onClick={() => decide('cancel')}>
                       <XCircle size={16} /> Cancelar
@@ -651,6 +742,73 @@ export default function VitorTrafficManagerPage() {
                     </div>
                   </div>
                 </article>
+              </section>
+
+              <section className="chart-card vitor-execution-card">
+                <div className="vitor-section-title">
+                  <span>Pacote de execucao humana</span>
+                  <strong>
+                    {activeExecutionPackage
+                      ? `Gerado ${formatDateTime(activeExecutionPackage.generated_at)}`
+                      : 'Aguardando preparo'}
+                  </strong>
+                </div>
+                <div className="vitor-execution-grid">
+                  <div>
+                    <span>Campanha</span>
+                    <strong>{activeExecutionPackage?.campaign_name || stringField(activeReview.campaign_plan?.utm, 'campaign')}</strong>
+                  </div>
+                  <div>
+                    <span>Plataforma</span>
+                    <strong>{activeExecutionPackage?.platform || 'meta_ads'}</strong>
+                  </div>
+                  <div>
+                    <span>Verba diaria</span>
+                    <strong>{moneyLabel(activeExecutionSetup.daily_budget_brl || activeReview.campaign_plan?.budget_suggestion?.daily_budget_brl)}</strong>
+                  </div>
+                  <div>
+                    <span>UTM</span>
+                    <strong>{stringField(activeExecutionTracking, 'utm_campaign')}</strong>
+                  </div>
+                </div>
+                <div className="vitor-execution-warning">
+                  <AlertTriangle size={16} />
+                  <span>{activeExecutionPackage?.publication_guardrail || 'Nada foi publicado automaticamente.'}</span>
+                </div>
+                <div className="vitor-execution-actions">
+                  <button type="button" className="btn btn-outline" onClick={copyExecutionPackage}>
+                    <Copy size={16} /> {activeExecutionPackage ? 'Copiar pacote' : 'Copiar rascunho'}
+                  </button>
+                  <span>{activeExecutionPackage ? statusLabel(activeReview.campaign_plan?.status) : 'Rascunho disponivel'}</span>
+                </div>
+                <div className="vitor-execution-lists">
+                  <div>
+                    <strong>Checklist</strong>
+                    {(activeExecutionChecklist.length
+                      ? activeExecutionChecklist
+                      : [
+                        'Conferir criativo, publico e verba.',
+                        'Validar copy e destino antes de ativar.',
+                        'Aplicar UTM e registrar origem no CRM.',
+                      ]
+                    ).slice(0, 5).map((row, index) => (
+                      <span key={`check-${index}`}>{row}</span>
+                    ))}
+                  </div>
+                  <div>
+                    <strong>Passos</strong>
+                    {(activeExecutionSteps.length
+                      ? activeExecutionSteps
+                      : [
+                        'Criar campanha em rascunho no gerenciador.',
+                        'Adicionar criativo, copy e publico sugerido.',
+                        'Publicar somente apos conferencia humana.',
+                      ]
+                    ).slice(0, 5).map((row, index) => (
+                      <span key={`step-${index}`}>{row}</span>
+                    ))}
+                  </div>
+                </div>
               </section>
             </>
           )}
@@ -1121,12 +1279,15 @@ export default function VitorTrafficManagerPage() {
         }
 
         .vitor-plan-card,
-        .vitor-intel-card {
+        .vitor-intel-card,
+        .vitor-execution-card {
           padding: 16px;
         }
 
         .vitor-plan-lines,
-        .vitor-intel-grid {
+        .vitor-intel-grid,
+        .vitor-execution-grid,
+        .vitor-execution-lists {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 10px;
@@ -1135,7 +1296,9 @@ export default function VitorTrafficManagerPage() {
 
         .vitor-plan-lines div,
         .vitor-intel-grid div,
-        .vitor-copy-list div {
+        .vitor-copy-list div,
+        .vitor-execution-grid div,
+        .vitor-execution-lists div {
           border: 1px solid rgba(17, 24, 39, .08);
           border-radius: 10px;
           background: rgba(255,255,255,.72);
@@ -1143,7 +1306,8 @@ export default function VitorTrafficManagerPage() {
         }
 
         .vitor-plan-lines span,
-        .vitor-intel-grid span {
+        .vitor-intel-grid span,
+        .vitor-execution-grid span {
           display: block;
           color: var(--text-muted);
           font-size: .66rem;
@@ -1154,7 +1318,9 @@ export default function VitorTrafficManagerPage() {
 
         .vitor-plan-lines strong,
         .vitor-intel-grid strong,
-        .vitor-copy-list strong {
+        .vitor-copy-list strong,
+        .vitor-execution-grid strong,
+        .vitor-execution-lists strong {
           color: var(--text-primary);
           font-size: .86rem;
           line-height: 1.3;
@@ -1179,6 +1345,55 @@ export default function VitorTrafficManagerPage() {
           color: var(--gold);
           font-size: .7rem;
           font-weight: 900;
+        }
+
+        .vitor-execution-warning,
+        .vitor-execution-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+
+        .vitor-execution-warning {
+          border: 1px solid rgba(180, 83, 9, .22);
+          border-radius: 10px;
+          background: rgba(180, 83, 9, .07);
+          color: #92400e;
+          font-size: .78rem;
+          font-weight: 800;
+          padding: 10px 12px;
+        }
+
+        .vitor-execution-warning svg {
+          flex: 0 0 auto;
+        }
+
+        .vitor-execution-actions {
+          justify-content: space-between;
+        }
+
+        .vitor-execution-actions > span {
+          color: var(--text-muted);
+          font-size: .74rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .vitor-execution-lists {
+          margin-bottom: 0;
+        }
+
+        .vitor-execution-lists div {
+          display: grid;
+          gap: 7px;
+        }
+
+        .vitor-execution-lists span {
+          color: var(--text-muted);
+          font-size: .76rem;
+          line-height: 1.38;
         }
 
         .vitor-empty,
@@ -1269,6 +1484,8 @@ export default function VitorTrafficManagerPage() {
           .vitor-bottom-grid,
           .vitor-plan-lines,
           .vitor-intel-grid,
+          .vitor-execution-grid,
+          .vitor-execution-lists,
           .vitor-intake-grid,
           .vitor-detail-hero,
           .vitor-report-strip {
