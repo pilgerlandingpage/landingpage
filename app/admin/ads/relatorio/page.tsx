@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
-    ArrowLeft, ArrowRight, BarChart3, Brain, CheckCircle, DollarSign,
+    ArrowLeft, ArrowRight, BarChart3, Brain, CheckCircle, ClipboardList, DollarSign,
     RefreshCw, Sparkles, Target, TrendingUp, AlertCircle,
     Eye, Layers, MousePointerClick, Smartphone, Users, Zap,
 } from 'lucide-react'
@@ -302,6 +302,10 @@ export default function PaidTrafficReportPage() {
                     <RefreshCw size={17} className={generating ? 'spin' : ''} />
                     {generating ? 'Gerando...' : 'Nova analise'}
                 </button>
+                <Link href="/admin/ads/vitor" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+                    <ClipboardList size={17} />
+                    Area do Vitor
+                </Link>
             </div>
 
             {error && (

@@ -1,0 +1,973 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BarChart3,
+  CheckCircle2,
+  ClipboardList,
+  Edit3,
+  FileText,
+  ImageIcon,
+  Megaphone,
+  RefreshCw,
+  Sparkles,
+  Target,
+  XCircle,
+} from 'lucide-react'
+import AdminLoadingState from '@/components/admin/AdminLoadingState'
+
+type Creative = {
+  id: string
+  title: string
+  description: string | null
+  asset_url: string | null
+  thumbnail_url: string | null
+  asset_type: string
+  content_type: string
+  campaign_type: string
+  platform_targets: string[]
+  property_sku: string | null
+  ai_context: string | null
+  status: string
+}
+
+type VitorPlan = {
+  id: string
+  status: string
+  objective: string | null
+  audience: Record<string, unknown>
+  locations: Array<Record<string, unknown>>
+  budget_suggestion: Record<string, unknown>
+  duration_days: number | null
+  copy_variations: Array<Record<string, unknown>>
+  utm: Record<string, unknown>
+  pause_scale_rules: Record<string, unknown>
+}
+
+type VitorReview = {
+  id: string
+  requested_by_phone: string | null
+  requested_by_label: string | null
+  source: string
+  asset_summary: string | null
+  briefing: string | null
+  score: number | null
+  score_label: string | null
+  status: string
+  recommendation: string | null
+  decision: string | null
+  strengths: string[]
+  risks: string[]
+  improvements: string[]
+  persona: Record<string, unknown>
+  locations: Array<Record<string, unknown>>
+  campaign_angle: Record<string, unknown>
+  expected_lead_quality: Record<string, unknown>
+  approval_question: string | null
+  created_at: string
+  updated_at: string
+  creative: Creative | null
+  command: {
+    id: string
+    identity_label: string | null
+    identity_type: string | null
+    command_text: string | null
+    created_at: string
+  } | null
+  campaign_plan: VitorPlan | null
+}
+
+type VitorPayload = {
+  success: boolean
+  ready: boolean
+  error?: string
+  metrics: {
+    total_reviews: number
+    avg_score: number
+    inbox: number
+    needs_improvement: number
+    approved_reviews: number
+    draft_plans: number
+    approved_plans: number
+    pending_human_decision: number
+    high_risk: number
+  }
+  reviews: VitorReview[]
+  latest_report: { id: string; title: string; summary: string | null; created_at: string } | null
+}
+
+const statusLabels: Record<string, string> = {
+  queued: 'Na fila',
+  processing: 'Processando',
+  reviewed: 'Revisado',
+  failed: 'Falhou',
+  cancelled: 'Cancelado',
+  approved: 'Aprovado',
+  needs_improvement: 'Melhorar',
+  draft: 'Rascunho',
+  exported: 'Exportado',
+  published: 'Publicado',
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function compact(value: unknown, max = 140) {
+  const text = String(value || '').trim()
+  return text.length > max ? `${text.slice(0, max - 3)}...` : text
+}
+
+function statusLabel(value?: string | null) {
+  return statusLabels[String(value || '')] || String(value || '-')
+}
+
+function scoreTone(score?: number | null) {
+  const value = Number(score || 0)
+  if (value >= 75) return 'good'
+  if (value >= 55) return 'medium'
+  return 'risk'
+}
+
+function moneyLabel(value: unknown) {
+  const number = Number(value)
+  if (!Number.isFinite(number) || number <= 0) return '-'
+  return `R$ ${number.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+}
+
+function stringField(value: Record<string, unknown> | null | undefined, key: string) {
+  const raw = value?.[key]
+  return raw == null || raw === '' ? '-' : String(raw)
+}
+
+function ListBlock({ title, rows }: { title: string; rows: string[] }) {
+  return (
+    <div className="vitor-list-block">
+      <strong>{title}</strong>
+      {rows.length ? rows.slice(0, 5).map((row, index) => <span key={`${row}-${index}`}>{row}</span>) : <span>-</span>}
+    </div>
+  )
+}
+
+export default function VitorTrafficManagerPage() {
+  const [payload, setPayload] = useState<VitorPayload | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [updating, setUpdating] = useState('')
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [filter, setFilter] = useState('all')
+  const [error, setError] = useState('')
+  const [toast, setToast] = useState('')
+
+  const loadData = async (nextFilter = filter, silent = false) => {
+    if (silent) setRefreshing(true)
+    else setLoading(true)
+    setError('')
+    try {
+      const params = new URLSearchParams({ limit: '80' })
+      if (nextFilter !== 'all') params.set('status', nextFilter)
+      const response = await fetch(`/api/admin/paid-traffic/vitor?${params.toString()}`, { cache: 'no-store' })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao carregar Vitor.')
+      setPayload(data)
+      setActiveId(current => current || data.reviews?.[0]?.id || null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar Vitor.')
+      setPayload(null)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadData(filter)
+  }, [filter])
+
+  const reviews = payload?.reviews || []
+  const metrics = payload?.metrics
+  const activeReview = useMemo(
+    () => reviews.find(review => review.id === activeId) || reviews[0] || null,
+    [activeId, reviews],
+  )
+
+  const decide = async (action: 'approve' | 'improve' | 'cancel' | 'export') => {
+    if (!activeReview) return
+    setUpdating(action)
+    setError('')
+    setToast('')
+    try {
+      const response = await fetch('/api/admin/paid-traffic/vitor', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ review_id: activeReview.id, action }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao atualizar decisao.')
+      setToast(action === 'approve' ? 'Plano aprovado para execucao humana.' : action === 'improve' ? 'Criativo marcado para melhoria.' : action === 'export' ? 'Plano marcado como exportado.' : 'Plano cancelado.')
+      await loadData(filter, true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar decisao.')
+    } finally {
+      setUpdating('')
+    }
+  }
+
+  if (loading && !payload) return <AdminLoadingState message="Carregando area do Vitor..." />
+
+  if (payload && !payload.ready) {
+    return (
+      <div className="chart-card vitor-not-ready">
+        <AlertTriangle size={30} />
+        <h1>Area do Vitor aguardando banco</h1>
+        <p>A API nao encontrou as tabelas de reviews e planos. Confirme a migration do Vitor no Supabase e atualize a pagina.</p>
+        <button type="button" className="btn btn-gold" onClick={() => loadData(filter)}>
+          <RefreshCw size={16} /> Atualizar
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {(toast || error) && (
+        <div className={`vitor-toast ${error ? 'error' : 'success'}`}>
+          {error ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+          {error || toast}
+        </div>
+      )}
+
+      <div className="admin-header vitor-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href="/admin/ads" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>
+            <ArrowLeft size={16} />
+          </Link>
+          <div>
+            <h1 style={{ display: 'flex', alignItems: 'center', gap: 10, margin: 0 }}>
+              <Sparkles size={26} /> Vitor Trafego Pago
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '.86rem', marginTop: 4 }}>
+              Caixa de entrada, score de criativos, planos em rascunho e aprovacao humana.
+            </p>
+          </div>
+        </div>
+        <div className="vitor-header-actions">
+          <Link href="/admin/ads/creatives" className="btn btn-outline" style={{ textDecoration: 'none' }}>
+            <ImageIcon size={17} /> Criativos
+          </Link>
+          <Link href="/admin/ads/relatorio" className="btn btn-outline" style={{ textDecoration: 'none' }}>
+            <BarChart3 size={17} /> Relatorios
+          </Link>
+          <button type="button" className="btn btn-gold" disabled={refreshing} onClick={() => loadData(filter, true)}>
+            <RefreshCw size={17} className={refreshing ? 'spin' : ''} /> Atualizar
+          </button>
+        </div>
+      </div>
+
+      <section className="vitor-metrics-grid">
+        {[
+          { icon: <ClipboardList size={18} />, label: 'Inbox', value: metrics?.inbox || 0, detail: `${metrics?.pending_human_decision || 0} aguardam decisao` },
+          { icon: <Target size={18} />, label: 'Score medio', value: metrics?.avg_score || 0, detail: `${metrics?.high_risk || 0} risco alto` },
+          { icon: <Edit3 size={18} />, label: 'Melhorias', value: metrics?.needs_improvement || 0, detail: 'criativos para ajustar' },
+          { icon: <CheckCircle2 size={18} />, label: 'Aprovados', value: metrics?.approved_plans || 0, detail: `${metrics?.draft_plans || 0} planos em rascunho` },
+        ].map(item => (
+          <article key={item.label} className="vitor-metric-card">
+            <span>{item.icon}{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </article>
+        ))}
+      </section>
+
+      {payload?.latest_report && (
+        <section className="chart-card vitor-report-strip">
+          <FileText size={18} />
+          <div>
+            <strong>{payload.latest_report.title}</strong>
+            <span>{compact(payload.latest_report.summary, 220)}</span>
+          </div>
+          <Link href="/admin/ads/relatorio" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>
+            Ver
+          </Link>
+        </section>
+      )}
+
+      <div className="vitor-toolbar">
+        <div className="vitor-tabs">
+          {[
+            ['all', 'Todos'],
+            ['reviewed', 'Revisados'],
+            ['needs_improvement', 'Melhorar'],
+            ['approved', 'Aprovados'],
+            ['cancelled', 'Cancelados'],
+          ].map(([key, label]) => (
+            <button key={key} type="button" className={filter === key ? 'active' : ''} onClick={() => setFilter(key)}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <span>{reviews.length} analise(s)</span>
+      </div>
+
+      <div className="vitor-layout">
+        <section className="chart-card vitor-inbox">
+          <div className="vitor-section-title">
+            <span>Inbox de criativos</span>
+            <strong>{reviews.length}</strong>
+          </div>
+          <div className="vitor-review-list">
+            {reviews.map(review => (
+              <button
+                key={review.id}
+                type="button"
+                className={`vitor-review-item ${activeReview?.id === review.id ? 'active' : ''}`}
+                onClick={() => setActiveId(review.id)}
+              >
+                <div className={`vitor-score-pill ${scoreTone(review.score)}`}>
+                  {Number(review.score || 0)}
+                </div>
+                <div>
+                  <strong>{review.creative?.title || compact(review.briefing, 80) || 'Criativo recebido'}</strong>
+                  <p>{compact(review.recommendation || review.briefing || 'Sem recomendacao registrada.', 150)}</p>
+                  <span>{statusLabel(review.status)} | {formatDateTime(review.created_at)}</span>
+                </div>
+              </button>
+            ))}
+            {reviews.length === 0 && (
+              <div className="vitor-empty">Nenhum criativo analisado neste filtro.</div>
+            )}
+          </div>
+        </section>
+
+        <main className="vitor-detail">
+          {!activeReview ? (
+            <section className="chart-card vitor-empty-detail">
+              <Megaphone size={34} />
+              <h2>Aguardando primeiro comando</h2>
+              <p>Quando o WhatsApp Global receber pedidos de trafego, o Vitor vai listar score, riscos e plano aqui.</p>
+            </section>
+          ) : (
+            <>
+              <section className="chart-card vitor-detail-hero">
+                <div className="vitor-creative-preview">
+                  {activeReview.creative?.thumbnail_url || activeReview.creative?.asset_url ? (
+                    <img src={activeReview.creative.thumbnail_url || activeReview.creative.asset_url || ''} alt="" />
+                  ) : (
+                    <ImageIcon size={34} />
+                  )}
+                </div>
+                <div className="vitor-detail-main">
+                  <div className="vitor-detail-kicker">
+                    <span>{statusLabel(activeReview.status)}</span>
+                    <span>{activeReview.creative?.asset_type || 'criativo'}</span>
+                    <span>{activeReview.requested_by_label || activeReview.command?.identity_label || 'WhatsApp Global'}</span>
+                  </div>
+                  <h2>{activeReview.creative?.title || 'Criativo recebido pelo WhatsApp Global'}</h2>
+                  <p>{activeReview.recommendation || activeReview.briefing || 'Sem recomendacao registrada.'}</p>
+                  <div className="vitor-decision-row">
+                    <button type="button" className="btn btn-gold" disabled={Boolean(updating)} onClick={() => decide('approve')}>
+                      <CheckCircle2 size={16} /> {updating === 'approve' ? 'Aprovando...' : 'Aprovar plano'}
+                    </button>
+                    <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('improve')}>
+                      <Edit3 size={16} /> Melhorar criativo
+                    </button>
+                    <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('export')}>
+                      <ClipboardList size={16} /> Exportado
+                    </button>
+                    <button type="button" className="btn btn-outline danger" disabled={Boolean(updating)} onClick={() => decide('cancel')}>
+                      <XCircle size={16} /> Cancelar
+                    </button>
+                  </div>
+                </div>
+                <div className={`vitor-score-card ${scoreTone(activeReview.score)}`}>
+                  <span>Score</span>
+                  <strong>{Number(activeReview.score || 0)}</strong>
+                  <small>{activeReview.score_label || '-'}</small>
+                </div>
+              </section>
+
+              <section className="vitor-analysis-grid">
+                <ListBlock title="Pontos fortes" rows={activeReview.strengths || []} />
+                <ListBlock title="Riscos" rows={activeReview.risks || []} />
+                <ListBlock title="Melhorias" rows={activeReview.improvements || []} />
+              </section>
+
+              <section className="vitor-bottom-grid">
+                <article className="chart-card vitor-plan-card">
+                  <div className="vitor-section-title">
+                    <span>Rascunho de campanha</span>
+                    <strong>{statusLabel(activeReview.campaign_plan?.status)}</strong>
+                  </div>
+                  <div className="vitor-plan-lines">
+                    <div>
+                      <span>Objetivo</span>
+                      <strong>{activeReview.campaign_plan?.objective || '-'}</strong>
+                    </div>
+                    <div>
+                      <span>Verba teste</span>
+                      <strong>
+                        {moneyLabel(activeReview.campaign_plan?.budget_suggestion?.daily_budget_brl)}
+                        {' / dia'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Duracao</span>
+                      <strong>{activeReview.campaign_plan?.duration_days || '-'} dias</strong>
+                    </div>
+                    <div>
+                      <span>UTM</span>
+                      <strong>{stringField(activeReview.campaign_plan?.utm, 'campaign')}</strong>
+                    </div>
+                  </div>
+                  <div className="vitor-copy-list">
+                    {(activeReview.campaign_plan?.copy_variations || []).slice(0, 3).map((copy, index) => (
+                      <div key={index}>
+                        <strong>{String(copy.headline || copy.label || `Copy ${index + 1}`)}</strong>
+                        <p>{compact(copy.primary_text || copy.text || copy.caption, 220)}</p>
+                        <span>{String(copy.cta || 'Falar no WhatsApp')}</span>
+                      </div>
+                    ))}
+                    {(activeReview.campaign_plan?.copy_variations || []).length === 0 && (
+                      <p className="vitor-muted">Sem variacoes de copy registradas.</p>
+                    )}
+                  </div>
+                </article>
+
+                <article className="chart-card vitor-intel-card">
+                  <div className="vitor-section-title">
+                    <span>Leitura comercial</span>
+                    <strong>{activeReview.approval_question || 'Aguardando decisao'}</strong>
+                  </div>
+                  <div className="vitor-intel-grid">
+                    <div>
+                      <span>Persona</span>
+                      <strong>{stringField(activeReview.persona, 'label')}</strong>
+                      <p>{stringField(activeReview.persona, 'intent')}</p>
+                    </div>
+                    <div>
+                      <span>Gancho</span>
+                      <strong>{stringField(activeReview.campaign_angle, 'hook')}</strong>
+                      <p>{stringField(activeReview.campaign_angle, 'cta')}</p>
+                    </div>
+                    <div>
+                      <span>Qualidade esperada</span>
+                      <strong>{stringField(activeReview.expected_lead_quality, 'quality')}</strong>
+                      <p>{stringField(activeReview.expected_lead_quality, 'reason')}</p>
+                    </div>
+                  </div>
+                </article>
+              </section>
+            </>
+          )}
+        </main>
+      </div>
+
+      <style jsx>{`
+        .vitor-header {
+          gap: 16px;
+        }
+
+        .vitor-header-actions,
+        .vitor-decision-row,
+        .vitor-toolbar,
+        .vitor-tabs {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .vitor-metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
+          margin-bottom: 16px;
+        }
+
+        .vitor-metric-card {
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          background: #fff;
+          padding: 16px;
+          min-height: 132px;
+          display: grid;
+          gap: 7px;
+        }
+
+        .vitor-metric-card span {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: var(--text-muted);
+          font-size: .72rem;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .vitor-metric-card span svg {
+          color: var(--gold);
+        }
+
+        .vitor-metric-card strong {
+          color: var(--text-primary);
+          font-size: 2rem;
+          line-height: 1;
+        }
+
+        .vitor-metric-card small,
+        .vitor-toolbar > span,
+        .vitor-muted {
+          color: var(--text-muted);
+          font-size: .78rem;
+        }
+
+        .vitor-report-strip {
+          display: grid;
+          grid-template-columns: 28px minmax(0, 1fr) auto;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 16px;
+          padding: 14px;
+        }
+
+        .vitor-report-strip svg {
+          color: var(--gold);
+        }
+
+        .vitor-report-strip strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .9rem;
+          margin-bottom: 3px;
+        }
+
+        .vitor-report-strip span {
+          display: block;
+          color: var(--text-muted);
+          font-size: .78rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .vitor-toolbar {
+          justify-content: space-between;
+          margin-bottom: 16px;
+        }
+
+        .vitor-tabs button {
+          border: 1px solid var(--border-color);
+          border-radius: 999px;
+          background: #fff;
+          color: var(--text-primary);
+          padding: 8px 12px;
+          font-size: .74rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .vitor-tabs button.active {
+          background: #17120c;
+          color: #fffaf0;
+          border-color: rgba(201, 169, 110, .55);
+        }
+
+        .vitor-layout {
+          display: grid;
+          grid-template-columns: 380px minmax(0, 1fr);
+          gap: 18px;
+          align-items: start;
+        }
+
+        .vitor-inbox {
+          padding: 14px;
+          position: sticky;
+          top: 18px;
+        }
+
+        .vitor-section-title {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .vitor-section-title span {
+          color: var(--gold);
+          font-size: .7rem;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .vitor-section-title strong {
+          color: var(--text-muted);
+          font-size: .78rem;
+          text-align: right;
+        }
+
+        .vitor-review-list {
+          display: grid;
+          gap: 10px;
+          max-height: 760px;
+          overflow: auto;
+          padding-right: 4px;
+        }
+
+        .vitor-review-item {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 54px minmax(0, 1fr);
+          gap: 10px;
+          align-items: start;
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          background: #fff;
+          color: var(--text-primary);
+          padding: 11px;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .vitor-review-item.active,
+        .vitor-review-item:hover {
+          border-color: rgba(201, 169, 110, .55);
+          background: rgba(201, 169, 110, .08);
+        }
+
+        .vitor-review-item strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .86rem;
+          line-height: 1.25;
+          margin-bottom: 5px;
+        }
+
+        .vitor-review-item p {
+          margin: 0 0 6px;
+          color: var(--text-muted);
+          font-size: .75rem;
+          line-height: 1.38;
+        }
+
+        .vitor-review-item span {
+          color: var(--text-muted);
+          font-size: .68rem;
+          font-weight: 800;
+        }
+
+        .vitor-score-pill,
+        .vitor-score-card {
+          display: grid;
+          place-items: center;
+          border-radius: 12px;
+          font-weight: 900;
+        }
+
+        .vitor-score-pill {
+          height: 54px;
+          color: #fff;
+        }
+
+        .vitor-score-pill.good,
+        .vitor-score-card.good {
+          background: #047857;
+        }
+
+        .vitor-score-pill.medium,
+        .vitor-score-card.medium {
+          background: #b45309;
+        }
+
+        .vitor-score-pill.risk,
+        .vitor-score-card.risk {
+          background: #b91c1c;
+        }
+
+        .vitor-detail {
+          display: grid;
+          gap: 16px;
+          min-width: 0;
+        }
+
+        .vitor-detail-hero {
+          display: grid;
+          grid-template-columns: 156px minmax(0, 1fr) 116px;
+          gap: 16px;
+          align-items: stretch;
+          padding: 16px;
+        }
+
+        .vitor-creative-preview {
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          background: rgba(201, 169, 110, .1);
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          min-height: 156px;
+          color: var(--gold);
+        }
+
+        .vitor-creative-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .vitor-detail-kicker {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-bottom: 10px;
+        }
+
+        .vitor-detail-kicker span {
+          border: 1px solid rgba(201, 169, 110, .28);
+          border-radius: 999px;
+          background: rgba(201, 169, 110, .1);
+          color: #92400e;
+          padding: 4px 8px;
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .vitor-detail-main h2 {
+          margin: 0 0 8px;
+          color: var(--text-primary);
+          font-size: 1.35rem;
+          line-height: 1.15;
+        }
+
+        .vitor-detail-main p {
+          margin: 0 0 14px;
+          color: var(--text-muted);
+          font-size: .88rem;
+          line-height: 1.5;
+        }
+
+        .vitor-score-card {
+          color: #fff;
+          min-height: 156px;
+          align-content: center;
+          gap: 4px;
+          padding: 12px;
+        }
+
+        .vitor-score-card span,
+        .vitor-score-card small {
+          font-size: .7rem;
+          text-transform: uppercase;
+          letter-spacing: .08em;
+        }
+
+        .vitor-score-card strong {
+          font-size: 2.7rem;
+          line-height: 1;
+        }
+
+        .vitor-analysis-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .vitor-list-block {
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          background: #fff;
+          padding: 14px;
+          display: grid;
+          gap: 8px;
+        }
+
+        .vitor-list-block strong {
+          color: var(--text-primary);
+          font-size: .88rem;
+        }
+
+        .vitor-list-block span {
+          color: var(--text-muted);
+          font-size: .78rem;
+          line-height: 1.38;
+        }
+
+        .vitor-bottom-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr);
+          gap: 16px;
+        }
+
+        .vitor-plan-card,
+        .vitor-intel-card {
+          padding: 16px;
+        }
+
+        .vitor-plan-lines,
+        .vitor-intel-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .vitor-plan-lines div,
+        .vitor-intel-grid div,
+        .vitor-copy-list div {
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 11px;
+        }
+
+        .vitor-plan-lines span,
+        .vitor-intel-grid span {
+          display: block;
+          color: var(--text-muted);
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+
+        .vitor-plan-lines strong,
+        .vitor-intel-grid strong,
+        .vitor-copy-list strong {
+          color: var(--text-primary);
+          font-size: .86rem;
+          line-height: 1.3;
+        }
+
+        .vitor-copy-list {
+          display: grid;
+          gap: 9px;
+        }
+
+        .vitor-copy-list p,
+        .vitor-intel-grid p {
+          margin: 6px 0 0;
+          color: var(--text-muted);
+          font-size: .77rem;
+          line-height: 1.4;
+        }
+
+        .vitor-copy-list span {
+          display: inline-block;
+          margin-top: 6px;
+          color: var(--gold);
+          font-size: .7rem;
+          font-weight: 900;
+        }
+
+        .vitor-empty,
+        .vitor-empty-detail,
+        .vitor-not-ready {
+          border: 1px dashed var(--border-color);
+          border-radius: 12px;
+          color: var(--text-muted);
+          text-align: center;
+          padding: 28px;
+        }
+
+        .vitor-empty-detail,
+        .vitor-not-ready {
+          display: grid;
+          justify-items: center;
+          gap: 10px;
+        }
+
+        .vitor-empty-detail svg,
+        .vitor-not-ready svg {
+          color: var(--gold);
+        }
+
+        .vitor-empty-detail h2,
+        .vitor-not-ready h1 {
+          margin: 0;
+          color: var(--text-primary);
+        }
+
+        .vitor-empty-detail p,
+        .vitor-not-ready p {
+          margin: 0;
+          max-width: 520px;
+        }
+
+        .btn.danger,
+        .btn.btn-outline.danger {
+          border-color: rgba(185, 28, 28, .28);
+          color: #b91c1c;
+        }
+
+        .vitor-toast {
+          position: fixed;
+          top: 24px;
+          right: 24px;
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border-radius: 12px;
+          padding: 13px 18px;
+          font-weight: 800;
+          box-shadow: 0 8px 30px rgba(0,0,0,.18);
+        }
+
+        .vitor-toast.success {
+          border: 1px solid rgba(34, 197, 94, .28);
+          background: rgba(34, 197, 94, .12);
+          color: #047857;
+        }
+
+        .vitor-toast.error {
+          border: 1px solid rgba(239, 68, 68, .28);
+          background: rgba(239, 68, 68, .1);
+          color: #b91c1c;
+        }
+
+        @media (max-width: 1180px) {
+          .vitor-metrics-grid,
+          .vitor-analysis-grid,
+          .vitor-bottom-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .vitor-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .vitor-inbox {
+            position: static;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .vitor-metrics-grid,
+          .vitor-analysis-grid,
+          .vitor-bottom-grid,
+          .vitor-plan-lines,
+          .vitor-intel-grid,
+          .vitor-detail-hero,
+          .vitor-report-strip {
+            grid-template-columns: 1fr;
+          }
+
+          .vitor-score-card {
+            min-height: 110px;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}

@@ -1,4 +1,7 @@
-export const DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT = `DIRETRIZES GLOBAIS DOS AGENTES WHATSAPP
+INSERT INTO public.app_config (key, value, description)
+VALUES (
+  'whatsapp_global_system_prompt',
+  $prompt$DIRETRIZES GLOBAIS DOS AGENTES WHATSAPP
 
 PAPEL DO WHATSAPP GLOBAL
 - Esta instancia e a portaria inteligente da Pilger, separada dos WhatsApps dos corretores IA.
@@ -49,4 +52,17 @@ RESPOSTAS QUANDO O CLIENTE ENVIA MIDIA
 - Se o cliente enviar imagem, video ou documento, responda com blocos curtos, como conversa real de WhatsApp.
 - Ao reconhecer um imovel por imagem, cite apenas o essencial: nome, cidade/regiao e um ponto forte.
 - Se enviar botao de imovel, deixe a explicacao fora do card e use o card apenas como chamada curta, por exemplo "Ver imovel".
-- Nao envie textao junto com botao. Faca no maximo uma pergunta de continuacao.`
+- Nao envie textao junto com botao. Faca no maximo uma pergunta de continuacao.$prompt$,
+  'Prompt do WhatsApp Global como portaria inteligente para leads, admins, corretores, proprietarios e comandos internos.'
+)
+ON CONFLICT (key) DO UPDATE
+SET
+  value = CASE
+    WHEN public.app_config.value IS NULL
+      OR btrim(public.app_config.value) = ''
+      OR public.app_config.value LIKE 'DIRETRIZES GLOBAIS DOS AGENTES WHATSAPP%'
+    THEN EXCLUDED.value
+    ELSE public.app_config.value
+  END,
+  description = EXCLUDED.description,
+  updated_at = now();

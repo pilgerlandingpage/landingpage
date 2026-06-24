@@ -1,0 +1,742 @@
+import { chatWithGemini } from '@/lib/gemini'
+import { VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT } from '@/lib/ai/prompts'
+import {
+  buildCentralContextPrompt,
+  getAgentCentralContext,
+  recordAgentCentralSignal,
+  saveAgentCentralSnapshot,
+} from '@/lib/intelligence/agent-runtime'
+import { sendWhatsAppMessage } from '@/lib/uazapi'
+
+type SupabaseLike = {
+  from: (table: string) => any
+}
+
+type MediaItem = {
+  url: string
+  mime: string
+  kind: string
+  filename?: string | null
+}
+
+type VitorCampaignPlan = {
+  objective: string
+  audience: Record<string, unknown>
+  locations: Array<Record<string, unknown>>
+  budget_suggestion: Record<string, unknown>
+  duration_days: number
+  copy_variations: Array<Record<string, unknown>>
+  utm: Record<string, unknown>
+  pause_scale_rules: Record<string, unknown>
+}
+
+type VitorCreativeAnalysis = {
+  score: number
+  score_label: string
+  recommendation: string
+  decision: string
+  strengths: string[]
+  risks: string[]
+  improvements: string[]
+  persona: Record<string, unknown>
+  locations: Array<Record<string, unknown>>
+  campaign_angle: Record<string, unknown>
+  expected_lead_quality: Record<string, unknown>
+  approval_question: string
+  campaign_plan: VitorCampaignPlan
+  raw?: Record<string, unknown>
+  fallback?: boolean
+}
+
+export type ProcessVitorPaidTrafficCommandResult = {
+  handled: boolean
+  whatsappSent: boolean
+  creativeId?: string
+  reviewId?: string
+  campaignPlanId?: string
+  score?: number
+  error?: string
+  fallback?: boolean
+}
+
+type ProcessVitorPaidTrafficCommandParams = {
+  supabase: SupabaseLike
+  command: any
+  instance?: any
+  instanceToken?: string | null
+  sendResponse?: boolean
+}
+
+const DEFAULT_COPY_VARIATIONS = [
+  {
+    label: 'Direto',
+    primary_text: 'Conheca uma oportunidade imobiliaria selecionada pela Pilger. Fale com nossa equipe e receba os detalhes.',
+    headline: 'Oportunidade Pilger',
+    cta: 'Falar no WhatsApp',
+  },
+]
+
+function cleanString(value: unknown, max = 3000) {
+  const text = String(value || '').trim().replace(/\s+/g, ' ')
+  return text.length > max ? text.slice(0, max) : text
+}
+
+function safeJsonObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
+}
+
+function safeArray(value: unknown, max = 8): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map(item => cleanString(item, 220))
+      .filter(Boolean)
+      .slice(0, max)
+  }
+  return cleanString(value)
+    .split(/\n|;/)
+    .map(item => cleanString(item, 220))
+    .filter(Boolean)
+    .slice(0, max)
+}
+
+function clampScore(value: unknown) {
+  const score = Number(value)
+  if (!Number.isFinite(score)) return 50
+  return Math.min(100, Math.max(0, Math.round(score)))
+}
+
+function isUuid(value: unknown) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''))
+}
+
+function pickMediaUrl(value: Record<string, unknown>) {
+  return cleanString(
+    value.stored_url
+    || value.r2_url
+    || value.url
+    || value.mediaUrl
+    || value.file_url
+    || value.original_url
+    || value.originalUrl,
+    1200,
+  )
+}
+
+function extractCommandMedia(command: any): MediaItem[] {
+  const payload = safeJsonObject(command?.payload)
+  const mediaRows = Array.isArray(payload.media) ? payload.media : []
+  return mediaRows
+    .map((item): MediaItem | null => {
+      const media = safeJsonObject(item)
+      const url = pickMediaUrl(media)
+      if (!url) return null
+      return {
+        url,
+        mime: cleanString(media.mime || media.mimetype || media.media_mimetype, 160),
+        kind: cleanString(media.media_kind || media.kind || media.type || payload.message_type || 'media', 60),
+        filename: cleanString(media.filename, 180) || null,
+      }
+    })
+    .filter((item): item is MediaItem => Boolean(item))
+    .slice(0, 10)
+}
+
+function inferAssetType(mediaItems: MediaItem[], command: any) {
+  const media = mediaItems[0]
+  const signature = `${media?.kind || ''} ${media?.mime || ''} ${command?.payload?.message_type || ''}`.toLowerCase()
+  if (mediaItems.length > 1) return 'carousel'
+  if (signature.includes('video') || signature.includes('mp4')) return 'video'
+  if (signature.includes('image') || signature.includes('jpeg') || signature.includes('png') || signature.includes('webp')) return 'image'
+  if (signature.includes('document') || signature.includes('pdf')) return 'document'
+  return 'other'
+}
+
+function inferContentType(assetType: string, text: string) {
+  const normalized = text.toLowerCase()
+  if (normalized.includes('story')) return 'story'
+  if (normalized.includes('reel') || assetType === 'video') return 'reel'
+  if (normalized.includes('email')) return 'email'
+  return 'ad'
+}
+
+function buildCreativeTitle(command: any) {
+  const text = cleanString(command?.command_text, 90)
+  if (text) return `Vitor - ${text}`.slice(0, 160)
+  const label = cleanString(command?.identity_label, 80) || cleanString(command?.phone, 40) || 'WhatsApp Global'
+  return `Vitor - criativo recebido de ${label}`.slice(0, 160)
+}
+
+function summarizeMedia(mediaItems: MediaItem[]) {
+  if (!mediaItems.length) return 'Sem arquivo de midia anexado; analise baseada no briefing escrito.'
+  return mediaItems
+    .map((item, index) => {
+      const parts = [
+        `#${index + 1}`,
+        item.kind || 'media',
+        item.mime || 'mime desconhecido',
+        item.filename ? `arquivo ${item.filename}` : '',
+      ].filter(Boolean)
+      return parts.join(' - ')
+    })
+    .join('\n')
+}
+
+async function ensureCreativeFromCommand(supabase: SupabaseLike, command: any) {
+  const payload = safeJsonObject(command?.payload)
+  const existingCreativeId = cleanString(payload.creative_id, 80)
+  if (existingCreativeId) {
+    const existing = await supabase
+      .from('marketing_creatives')
+      .select('*')
+      .eq('id', existingCreativeId)
+      .maybeSingle()
+    if (existing.data?.id) return existing.data
+  }
+
+  const mediaItems = extractCommandMedia(command)
+  const assetType = inferAssetType(mediaItems, command)
+  const text = cleanString(command?.command_text, 2400)
+  const now = new Date().toISOString()
+  const row = {
+    title: buildCreativeTitle(command),
+    description: text || null,
+    asset_url: mediaItems[0]?.url || null,
+    thumbnail_url: mediaItems.find(item => item.kind === 'image')?.url || null,
+    asset_type: assetType,
+    content_type: inferContentType(assetType, text),
+    campaign_type: 'paid',
+    platform_targets: ['meta_ads'],
+    property_sku: null,
+    ai_context: [
+      'Criativo recebido pelo WhatsApp Global para analise do Vitor Trafego Pago.',
+      text ? `Briefing: ${text}` : '',
+      mediaItems.length ? `Midias: ${summarizeMedia(mediaItems)}` : '',
+    ].filter(Boolean).join('\n').slice(0, 3000),
+    status: 'review',
+    created_by: command?.identity_type === 'admin_user' && isUuid(command?.identity_id) ? command.identity_id : null,
+    raw: {
+      source: 'whatsapp_global',
+      whatsapp_global_command_id: command?.id || null,
+      whatsapp_global_session_id: command?.session_id || null,
+      requested_by_phone: command?.phone || null,
+      requested_by_label: command?.identity_label || null,
+      media: mediaItems,
+      payload,
+    },
+    updated_at: now,
+  }
+
+  const { data, error } = await supabase
+    .from('marketing_creatives')
+    .insert(row)
+    .select('*')
+    .single()
+
+  if (error || !data) {
+    throw new Error(error?.message || 'Nao foi possivel criar o criativo do Vitor.')
+  }
+
+  return data
+}
+
+function extractJsonObject(text: string): Record<string, unknown> | null {
+  const cleaned = String(text || '')
+    .replace(/```json/gi, '```')
+    .replace(/```/g, '')
+    .trim()
+  const start = cleaned.indexOf('{')
+  const end = cleaned.lastIndexOf('}')
+  if (start < 0 || end <= start) return null
+  try {
+    return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function normalizePlan(value: unknown, analysis: Record<string, unknown>, score: number): VitorCampaignPlan {
+  const plan = safeJsonObject(value)
+  const campaignAngle = safeJsonObject(analysis.campaign_angle)
+  const dailyBudget = score >= 70 ? 80 : score >= 50 ? 50 : 30
+  const durationDays = score >= 70 ? 7 : 3
+  const locations = Array.isArray(analysis.locations) ? analysis.locations as Array<Record<string, unknown>> : []
+
+  return {
+    objective: cleanString(plan.objective, 500) || 'Gerar conversas qualificadas no WhatsApp sem publicar automaticamente antes de aprovacao humana.',
+    audience: safeJsonObject(plan.audience),
+    locations: Array.isArray(plan.locations) ? plan.locations as Array<Record<string, unknown>> : locations,
+    budget_suggestion: {
+      daily_budget_brl: dailyBudget,
+      total_test_budget_brl: dailyBudget * durationDays,
+      rationale: score >= 70
+        ? 'Score bom para teste inicial com leitura rapida de CPL e qualidade.'
+        : 'Score pede teste controlado para evitar desperdicio enquanto o criativo melhora.',
+      ...safeJsonObject(plan.budget_suggestion),
+    },
+    duration_days: Number(plan.duration_days) > 0 ? Math.min(30, Math.round(Number(plan.duration_days))) : durationDays,
+    copy_variations: Array.isArray(plan.copy_variations) && plan.copy_variations.length
+      ? plan.copy_variations as Array<Record<string, unknown>>
+      : [{
+        label: 'Vitor inicial',
+        primary_text: cleanString(campaignAngle.primary_text, 500) || DEFAULT_COPY_VARIATIONS[0].primary_text,
+        headline: cleanString(campaignAngle.headline, 120) || DEFAULT_COPY_VARIATIONS[0].headline,
+        cta: cleanString(campaignAngle.cta, 80) || DEFAULT_COPY_VARIATIONS[0].cta,
+      }],
+    utm: {
+      source: 'meta_ads',
+      medium: 'paid_social',
+      campaign: 'vitor_whatsapp_global',
+      content: 'creative_review',
+      ...safeJsonObject(plan.utm),
+    },
+    pause_scale_rules: {
+      pause_if: ['CPL acima do esperado depois de volume minimo', 'leads sem perfil comercial', 'CTR muito baixo no teste'],
+      scale_if: ['CPL saudavel', 'conversas reais no CRM', 'corretor valida qualidade dos leads'],
+      ...safeJsonObject(plan.pause_scale_rules),
+    },
+  }
+}
+
+function normalizeAnalysis(parsed: Record<string, unknown> | null, command: any, mediaItems: MediaItem[]): VitorCreativeAnalysis {
+  const source = parsed || {}
+  const score = clampScore(source.score)
+  const hasMedia = mediaItems.length > 0
+  const fallback = !parsed
+  const fallbackRisks = [
+    'Ainda nao ha leitura visual profunda confirmada deste criativo.',
+    'A atribuicao atual de trafego pago precisa ser tratada com cautela antes de escalar verba.',
+    hasMedia ? 'Validar se o arquivo abre corretamente no painel antes de subir campanha.' : 'Criativo sem midia anexada depende muito do briefing.',
+  ]
+
+  const analysisShape: Record<string, unknown> = {
+    score,
+    score_label: cleanString(source.score_label, 80) || (score >= 75 ? 'bom' : score >= 55 ? 'medio' : 'baixo'),
+    recommendation: cleanString(source.recommendation, 1000) || 'Rodar apenas como teste controlado, com aprovacao humana e leitura de qualidade dos leads antes de aumentar verba.',
+    decision: cleanString(source.decision, 400) || 'nao_publicar_sem_aprovacao_humana',
+    strengths: safeArray(source.strengths).length ? safeArray(source.strengths) : [
+      'Comando chegou por canal autorizado do WhatsApp Global.',
+      hasMedia ? 'Ha midia vinculada ao pedido.' : 'Ha briefing textual para orientar a primeira analise.',
+    ],
+    risks: safeArray(source.risks).length ? safeArray(source.risks) : fallbackRisks,
+    improvements: safeArray(source.improvements).length ? safeArray(source.improvements) : [
+      'Conferir se o hook aparece nos primeiros segundos ou na primeira dobra.',
+      'Deixar oferta, localizacao e proximo passo muito claros.',
+      'Usar UTM e acompanhar qualidade no CRM, nao apenas volume de conversas.',
+    ],
+    persona: {
+      label: 'lead imobiliario de media/alta intencao',
+      intent: 'avaliar oportunidade imobiliaria',
+      objections: ['preco', 'localizacao', 'confianca no anuncio'],
+      ...safeJsonObject(source.persona),
+    },
+    locations: Array.isArray(source.locations) && source.locations.length ? source.locations : [
+      { name: 'Regioes comerciais ja validadas pela Pilger', priority: 'media', reason: 'Sem local especifico no briefing.' },
+    ],
+    campaign_angle: {
+      hook: 'Oportunidade imobiliaria selecionada',
+      offer: 'Atendimento consultivo via WhatsApp',
+      cta: 'Falar no WhatsApp',
+      ...safeJsonObject(source.campaign_angle),
+    },
+    expected_lead_quality: {
+      quality: score >= 70 ? 'boa' : score >= 50 ? 'media' : 'instavel',
+      reason: 'Qualidade depende do encaixe entre criativo, oferta, regiao e follow-up comercial.',
+      ...safeJsonObject(source.expected_lead_quality),
+    },
+    approval_question: cleanString(source.approval_question, 500) || 'Quer que eu melhore o criativo primeiro ou prefere rodar um teste controlado mesmo assim?',
+  }
+
+  return {
+    score: analysisShape.score as number,
+    score_label: analysisShape.score_label as string,
+    recommendation: analysisShape.recommendation as string,
+    decision: analysisShape.decision as string,
+    strengths: analysisShape.strengths as string[],
+    risks: analysisShape.risks as string[],
+    improvements: analysisShape.improvements as string[],
+    persona: analysisShape.persona as Record<string, unknown>,
+    locations: analysisShape.locations as Array<Record<string, unknown>>,
+    campaign_angle: analysisShape.campaign_angle as Record<string, unknown>,
+    expected_lead_quality: analysisShape.expected_lead_quality as Record<string, unknown>,
+    approval_question: analysisShape.approval_question as string,
+    campaign_plan: normalizePlan(source.campaign_plan, analysisShape, score),
+    raw: source,
+    fallback,
+  }
+}
+
+async function getLatestPaidReport(supabase: SupabaseLike) {
+  try {
+    const { data } = await supabase
+      .from('marketing_ai_reports')
+      .select('id, title, summary, recommendations, metrics, created_at')
+      .eq('report_type', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    return data || null
+  } catch {
+    return null
+  }
+}
+
+async function getConfiguredVitorPrompt(supabase: SupabaseLike) {
+  try {
+    const { data, error } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', 'vitor_creative_review_system_prompt')
+      .maybeSingle()
+
+    if (error) throw error
+
+    const value = cleanString(data?.value, 12000)
+    if (value) return value
+  } catch (error: any) {
+    console.warn('[Vitor] prompt config unavailable:', error?.message || error)
+  }
+
+  return VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT
+}
+
+async function runVitorAnalysis(params: {
+  supabase: SupabaseLike
+  command: any
+  creative: any
+  mediaItems: MediaItem[]
+}) {
+  const { supabase, command, creative, mediaItems } = params
+  const [centralContext, latestPaidReport, systemPrompt] = await Promise.all([
+    getAgentCentralContext({
+      supabase,
+      agentId: 'ads-analyst',
+      days: 30,
+      limit: 90,
+      recordRead: true,
+    })
+      .then(context => buildCentralContextPrompt(context))
+      .catch((error: any) => {
+        console.warn('[Vitor] central context unavailable:', error?.message || error)
+        return ''
+      }),
+    getLatestPaidReport(supabase),
+    getConfiguredVitorPrompt(supabase),
+  ])
+
+  const userMessage = [
+    centralContext,
+    latestPaidReport ? [
+      'ULTIMO RELATORIO DE TRAFEGO PAGO',
+      `Titulo: ${cleanString(latestPaidReport.title, 240)}`,
+      `Resumo: ${cleanString(latestPaidReport.summary, 700)}`,
+      `Metricas: ${JSON.stringify(latestPaidReport.metrics || {}).slice(0, 1200)}`,
+      `Recomendacoes: ${JSON.stringify(latestPaidReport.recommendations || []).slice(0, 1200)}`,
+    ].join('\n') : '',
+    'COMANDO RECEBIDO PELO WHATSAPP GLOBAL',
+    `Solicitante: ${cleanString(command?.identity_label, 160)} (${cleanString(command?.identity_type, 80)})`,
+    `Texto: ${cleanString(command?.command_text, 2400) || '[sem texto]'}`,
+    '',
+    'CRIATIVO REGISTRADO',
+    `Titulo: ${cleanString(creative?.title, 180)}`,
+    `Tipo: ${cleanString(creative?.asset_type, 80)} / ${cleanString(creative?.content_type, 80)}`,
+    `Midias: ${summarizeMedia(mediaItems)}`,
+  ].filter(Boolean).join('\n\n')
+
+  try {
+    const response = await Promise.race([
+      chatWithGemini({
+        systemPrompt,
+        history: [],
+        userMessage,
+        temperature: 0.25,
+        maxTokens: 1800,
+      }),
+      new Promise<string>((_, reject) => {
+        setTimeout(() => reject(new Error('Tempo limite na analise do Vitor.')), 18000)
+      }),
+    ])
+    return normalizeAnalysis(extractJsonObject(response), command, mediaItems)
+  } catch (error: any) {
+    console.warn('[Vitor] Gemini analysis failed, using fallback:', error?.message || error)
+    return normalizeAnalysis(null, command, mediaItems)
+  }
+}
+
+async function insertReview(params: {
+  supabase: SupabaseLike
+  command: any
+  creative: any
+  mediaItems: MediaItem[]
+  analysis: VitorCreativeAnalysis
+}) {
+  const { supabase, command, creative, mediaItems, analysis } = params
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('paid_traffic_creative_reviews')
+    .insert({
+      command_id: command?.id || null,
+      creative_id: creative?.id || null,
+      requested_by_phone: command?.phone || null,
+      requested_by_label: command?.identity_label || null,
+      source: 'whatsapp_global',
+      asset_summary: summarizeMedia(mediaItems),
+      briefing: cleanString(command?.command_text, 3000) || null,
+      score: analysis.score,
+      score_label: analysis.score_label,
+      status: analysis.score >= 60 ? 'reviewed' : 'needs_improvement',
+      recommendation: analysis.recommendation,
+      decision: analysis.decision,
+      strengths: analysis.strengths,
+      risks: analysis.risks,
+      improvements: analysis.improvements,
+      persona: analysis.persona,
+      locations: analysis.locations,
+      campaign_angle: analysis.campaign_angle,
+      expected_lead_quality: analysis.expected_lead_quality,
+      approval_question: analysis.approval_question,
+      raw_analysis: {
+        ...(analysis.raw || {}),
+        fallback: Boolean(analysis.fallback),
+        creative_id: creative?.id || null,
+      },
+      updated_at: now,
+    })
+    .select('*')
+    .single()
+
+  if (error || !data) throw new Error(error?.message || 'Nao foi possivel salvar a analise do Vitor.')
+  return data
+}
+
+async function insertCampaignPlan(params: {
+  supabase: SupabaseLike
+  command: any
+  creative: any
+  review: any
+  analysis: VitorCreativeAnalysis
+}) {
+  const { supabase, command, creative, review, analysis } = params
+  const plan = analysis.campaign_plan
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('paid_traffic_campaign_plans')
+    .insert({
+      review_id: review?.id || null,
+      command_id: command?.id || null,
+      creative_id: creative?.id || null,
+      status: 'draft',
+      objective: plan.objective,
+      audience: plan.audience,
+      locations: plan.locations,
+      budget_suggestion: plan.budget_suggestion,
+      duration_days: plan.duration_days,
+      copy_variations: plan.copy_variations,
+      utm: plan.utm,
+      pause_scale_rules: plan.pause_scale_rules,
+      raw_plan: plan,
+      updated_at: now,
+    })
+    .select('*')
+    .single()
+
+  if (error || !data) throw new Error(error?.message || 'Nao foi possivel salvar o rascunho de campanha do Vitor.')
+  return data
+}
+
+function buildWhatsAppReviewMessage(analysis: VitorCreativeAnalysis) {
+  const strengths = analysis.strengths.slice(0, 3).map(item => `- ${item}`)
+  const risks = analysis.risks.slice(0, 3).map(item => `- ${item}`)
+  const improvements = analysis.improvements.slice(0, 3).map(item => `- ${item}`)
+  const budget = safeJsonObject(analysis.campaign_plan.budget_suggestion)
+  const dailyBudget = budget.daily_budget_brl ? `R$ ${budget.daily_budget_brl}/dia` : 'verba teste controlada'
+
+  return [
+    'Vitor Trafego Pago recebeu seu pedido.',
+    '',
+    `Score do criativo: ${analysis.score}/100 (${analysis.score_label})`,
+    `Leitura: ${analysis.recommendation}`,
+    '',
+    'Pontos fortes:',
+    strengths.length ? strengths.join('\n') : '- Briefing recebido.',
+    '',
+    'Riscos:',
+    risks.length ? risks.join('\n') : '- Sem riscos criticos identificados agora.',
+    '',
+    'Melhorias sugeridas:',
+    improvements.length ? improvements.join('\n') : '- Manter teste pequeno e medir qualidade no CRM.',
+    '',
+    'Rascunho de campanha:',
+    `- Objetivo: ${analysis.campaign_plan.objective}`,
+    `- Verba teste: ${dailyBudget} por ${analysis.campaign_plan.duration_days} dias`,
+    '- Status: aguardando aprovacao humana, nada foi publicado ainda.',
+    '- Registro: salvo no painel e na Central de Inteligencia.',
+    '',
+    analysis.approval_question,
+  ].filter(Boolean).join('\n')
+}
+
+async function updateCommandStatus(supabase: SupabaseLike, commandId: string | null, status: string, result: Record<string, unknown>) {
+  if (!commandId) return
+  await supabase
+    .from('whatsapp_global_commands')
+    .update({
+      status,
+      result,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', commandId)
+}
+
+async function sendVitorResponse(params: {
+  phone: string
+  message: string
+  instanceToken?: string | null
+}) {
+  const phone = cleanString(params.phone, 40)
+  if (!phone) return false
+  try {
+    await sendWhatsAppMessage({
+      phone,
+      message: params.message,
+      instanceToken: params.instanceToken || undefined,
+    })
+    return true
+  } catch (error: any) {
+    console.warn('[Vitor] WhatsApp response failed:', error?.message || error)
+    return false
+  }
+}
+
+export async function processVitorPaidTrafficCommand(
+  params: ProcessVitorPaidTrafficCommandParams,
+): Promise<ProcessVitorPaidTrafficCommandResult> {
+  const { supabase, command } = params
+  if (!command?.id) return { handled: false, whatsappSent: false, error: 'missing_command' }
+  if (command.command_type !== 'paid_traffic' || command.target_agent !== 'ads-analyst') {
+    return { handled: false, whatsappSent: false }
+  }
+  if (command.status === 'blocked') return { handled: false, whatsappSent: false, error: 'blocked_command' }
+
+  const instanceToken = params.instanceToken || params.instance?.instance_token || null
+  const shouldSendResponse = params.sendResponse !== false
+
+  try {
+    await updateCommandStatus(supabase, command.id, 'processing', {
+      stage: 'vitor_processing_started',
+      started_at: new Date().toISOString(),
+    })
+
+    const mediaItems = extractCommandMedia(command)
+    const creative = await ensureCreativeFromCommand(supabase, command)
+    const analysis = await runVitorAnalysis({ supabase, command, creative, mediaItems })
+    const review = await insertReview({ supabase, command, creative, mediaItems, analysis })
+    const campaignPlan = await insertCampaignPlan({ supabase, command, creative, review, analysis })
+
+    const result = {
+      stage: 'vitor_review_completed',
+      creative_id: creative.id,
+      review_id: review.id,
+      campaign_plan_id: campaignPlan.id,
+      score: analysis.score,
+      score_label: analysis.score_label,
+      fallback: Boolean(analysis.fallback),
+      completed_at: new Date().toISOString(),
+    }
+
+    await updateCommandStatus(supabase, command.id, 'completed', result)
+
+    await recordAgentCentralSignal({
+      supabase,
+      agentId: 'ads-analyst',
+      eventType: 'paid_traffic_creative_review_created',
+      entityType: 'paid_traffic_creative_review',
+      entityId: review.id,
+      source: 'vitor-traffic-manager',
+      label: `Vitor analisou criativo recebido pelo WhatsApp Global com score ${analysis.score}`,
+      importanceScore: analysis.score >= 70 ? 74 : analysis.score >= 50 ? 62 : 82,
+      metadata: {
+        creative_id: creative.id,
+        command_id: command.id,
+        campaign_plan_id: campaignPlan.id,
+        score: analysis.score,
+        score_label: analysis.score_label,
+        risks: analysis.risks,
+        improvements: analysis.improvements,
+        requested_by_phone: command.phone || null,
+        requested_by_label: command.identity_label || null,
+        fallback: Boolean(analysis.fallback),
+      },
+      handoffTargets: ['whatsapp-global-agent', 'creative-strategy-agent', 'ceo-agent'],
+    }).catch((error: any) => {
+      console.warn('[Vitor] central signal failed:', error?.message || error)
+    })
+
+    await saveAgentCentralSnapshot({
+      supabase,
+      agentId: 'ads-analyst',
+      scope: 'creative_review',
+      subjectId: review.id,
+      createdBy: 'vitor-traffic-manager',
+      summary: `Review de criativo: score ${analysis.score}/100; aguardando aprovacao humana.`,
+      context: {
+        creative,
+        review,
+        campaign_plan: campaignPlan,
+        command_id: command.id,
+      },
+      signals: {
+        score: analysis.score,
+        status: review.status,
+        publication_guardrail: 'human_approval_required',
+      },
+    }).catch((error: any) => {
+      console.warn('[Vitor] central snapshot failed:', error?.message || error)
+    })
+
+    const whatsappSent = shouldSendResponse
+      ? await sendVitorResponse({
+        phone: command.phone,
+        message: buildWhatsAppReviewMessage(analysis),
+        instanceToken,
+      })
+      : false
+
+    return {
+      handled: true,
+      whatsappSent,
+      creativeId: creative.id,
+      reviewId: review.id,
+      campaignPlanId: campaignPlan.id,
+      score: analysis.score,
+      fallback: Boolean(analysis.fallback),
+    }
+  } catch (error: any) {
+    const message = error?.message || String(error)
+    console.error('[Vitor] paid traffic command failed:', message)
+    await updateCommandStatus(supabase, command.id, 'failed', {
+      stage: 'vitor_review_failed',
+      error: message,
+      failed_at: new Date().toISOString(),
+    }).catch(() => null)
+
+    const whatsappSent = shouldSendResponse
+      ? await sendVitorResponse({
+        phone: command.phone,
+        message: [
+          'Vitor recebeu seu pedido de trafego, mas nao conseguiu finalizar a analise automatica agora.',
+          'O comando ficou registrado no WhatsApp Global para revisao interna.',
+          'Nada foi publicado automaticamente.',
+        ].join('\n'),
+        instanceToken,
+      })
+      : false
+
+    return {
+      handled: true,
+      whatsappSent,
+      error: message,
+    }
+  }
+}

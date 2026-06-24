@@ -623,6 +623,17 @@ export default function AdsPage() {
                         <Sparkles size={18} />
                         Gestor IA
                     </Link>
+                    <Link href="/admin/ads/vitor"
+                        className="btn" style={{
+                            background: 'rgba(201, 169, 110, 0.12)',
+                            border: '1px solid rgba(201, 169, 110, 0.35)',
+                            color: 'var(--gold)',
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            textDecoration: 'none',
+                        }}>
+                        <Brain size={18} />
+                        Vitor
+                    </Link>
                     <Link href="/admin/ads/new" className="btn btn-gold" style={{ textDecoration: 'none' }}>
                         <Plus size={18} /> Nova Campanha
                     </Link>

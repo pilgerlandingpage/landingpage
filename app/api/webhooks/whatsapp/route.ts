@@ -10,6 +10,7 @@ import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-trac
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
 import { recordAgentConversationEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
+import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import {
     buildWhatsAppGlobalAcknowledgement,
     isWhatsAppGlobalInstance,
@@ -3649,7 +3650,17 @@ export async function POST(request: NextRequest) {
                         },
                     })
 
-                    if (instance.instance_token) {
+                    let vitorResult: Awaited<ReturnType<typeof processVitorPaidTrafficCommand>> | null = null
+                    if (commandResult.allowed && commandResult.command?.id) {
+                        vitorResult = await processVitorPaidTrafficCommand({
+                            supabase,
+                            command: commandResult.command,
+                            instance,
+                            instanceToken: instance.instance_token,
+                        })
+                    }
+
+                    if (instance.instance_token && !vitorResult?.whatsappSent) {
                         await sendWhatsAppMessage({
                             phone: finalPhone,
                             message: buildWhatsAppGlobalAcknowledgement({
@@ -3668,10 +3679,22 @@ export async function POST(request: NextRequest) {
                     })
                     return NextResponse.json({
                         success: true,
-                        action: 'whatsapp_global_command_recorded',
+                        action: vitorResult?.handled
+                            ? 'whatsapp_global_paid_traffic_processed'
+                            : 'whatsapp_global_command_recorded',
                         identity_type: globalIdentity.type,
                         target_agent: commandResult.intent.targetAgent,
                         allowed: commandResult.allowed,
+                        vitor: vitorResult ? {
+                            handled: vitorResult.handled,
+                            whatsapp_sent: vitorResult.whatsappSent,
+                            creative_id: vitorResult.creativeId || null,
+                            review_id: vitorResult.reviewId || null,
+                            campaign_plan_id: vitorResult.campaignPlanId || null,
+                            score: vitorResult.score || null,
+                            fallback: Boolean(vitorResult.fallback),
+                            error: vitorResult.error || null,
+                        } : null,
                     })
                 }
             } catch (e) {
