@@ -103,6 +103,22 @@ type ReportBreakdown = {
     avgResponse: number | null
 }
 
+function compactApiText(value: string, limit = 300) {
+    return value.replace(/\s+/g, ' ').trim().slice(0, limit)
+}
+
+async function readApiJson(res: Response) {
+    const text = await res.text()
+    if (!text.trim()) return {}
+
+    try {
+        return JSON.parse(text)
+    } catch {
+        const preview = compactApiText(text)
+        throw new Error(`A API de relatorios retornou resposta invalida (${res.status}). ${preview || 'Sem detalhes.'}`)
+    }
+}
+
 function todayDate() {
     return new Date().toISOString().slice(0, 10)
 }
@@ -346,7 +362,7 @@ export default function AttendanceReportsPage() {
             if (range.endDate) params.set('end_date', range.endDate)
             if (selectedInstanceId) params.set('instance_id', selectedInstanceId)
             const res = await fetch(`/api/admin/leads/attendance-reports?${params.toString()}`)
-            const data = await res.json()
+            const data = await readApiJson(res)
             if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao carregar relatórios')
             setReports(data.reports || [])
             setScores(data.conversation_scores || [])
@@ -380,7 +396,7 @@ export default function AttendanceReportsPage() {
                     messages_per_chat: 120,
                 }),
             })
-            const data = await res.json()
+            const data = await readApiJson(res)
             if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao gerar relatório')
             const totals = data?.sync?.totals || {}
             const reportRuns = Array.isArray(data?.report_runs) ? data.report_runs : []

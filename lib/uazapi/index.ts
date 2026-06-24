@@ -125,6 +125,58 @@ export async function getUazapiConfig(): Promise<UazapiConfig> {
 
 // ── Helper: Fetch com auth ──────────────────────────────────────
 
+function compactResponseText(value: string, limit = 500) {
+    return value.replace(/\s+/g, ' ').trim().slice(0, limit)
+}
+
+function getUazapiErrorMessage(payload: unknown) {
+    if (!payload) return 'resposta vazia'
+    if (typeof payload === 'string') return compactResponseText(payload)
+    if (typeof payload !== 'object') return String(payload)
+
+    const data = payload as Record<string, any>
+    const candidates = [
+        data.error,
+        data.message,
+        data.details,
+        data.detail,
+        data.data?.error,
+        data.data?.message,
+    ]
+    const text = candidates.find((item) => typeof item === 'string' && item.trim())
+    if (text) return compactResponseText(text)
+
+    try {
+        return compactResponseText(JSON.stringify(data))
+    } catch {
+        return 'erro sem detalhes'
+    }
+}
+
+async function readUazapiPayload(response: Response, path: string) {
+    const raw = await response.text()
+    const trimmed = raw.trim()
+    if (!trimmed) return null
+
+    const contentType = response.headers.get('content-type') || ''
+    const looksLikeJson = contentType.includes('application/json') || /^[\[{]/.test(trimmed)
+
+    if (!looksLikeJson) {
+        const preview = compactResponseText(trimmed)
+        if (response.ok) {
+            throw new Error(`uazapi invalid response (${response.status}) em ${path}: ${preview}`)
+        }
+        return preview
+    }
+
+    try {
+        return JSON.parse(trimmed)
+    } catch {
+        const preview = compactResponseText(trimmed)
+        throw new Error(`uazapi invalid json (${response.status}) em ${path}: ${preview}`)
+    }
+}
+
 async function uazapiFetch(
     path: string,
     options: {
@@ -154,12 +206,13 @@ async function uazapiFetch(
         body: options.body ? JSON.stringify(options.body) : undefined,
     })
 
+    const payload = await readUazapiPayload(response, path)
+
     if (!response.ok) {
-        const error = await response.text()
-        throw new Error(`uazapi error (${response.status}): ${error}`)
+        throw new Error(`uazapi error (${response.status}) em ${path}: ${getUazapiErrorMessage(payload)}`)
     }
 
-    return response.json()
+    return payload ?? {}
 }
 
 // ═══════════════════════════════════════════════════════════════
