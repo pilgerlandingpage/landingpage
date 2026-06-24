@@ -265,6 +265,134 @@ function averageScore(reviews: any[]) {
   return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
 }
 
+function dateDaysAgo(days: number) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+}
+
+function eventLooksLikeVitor(row: any) {
+  const metadata = safeRecord(row?.metadata)
+  const handoffs = safeArray(metadata.handoff_targets).map(item => cleanString(item, 80))
+  const signature = [
+    row?.event_type,
+    row?.entity_type,
+    row?.source,
+    row?.label,
+    metadata.agent_id,
+    metadata.ecosystem_agent,
+    metadata.source,
+    metadata.campaign,
+    metadata.command_type,
+  ]
+    .map(item => cleanString(item, 180).toLowerCase())
+    .join(' ')
+
+  return metadata.agent_id === 'ads-analyst'
+    || metadata.ecosystem_agent === 'traffic'
+    || handoffs.includes('ads-analyst')
+    || signature.includes('vitor')
+    || signature.includes('paid_traffic')
+    || signature.includes('trafego')
+    || signature.includes('traffic')
+}
+
+function serializeCentralEvent(row: any) {
+  const metadata = safeRecord(row?.metadata)
+  const handoffs = safeArray(metadata.handoff_targets)
+    .map(item => cleanString(item, 80))
+    .filter(Boolean)
+
+  return {
+    id: row.id,
+    event_type: row.event_type,
+    actor_type: row.actor_type,
+    entity_type: row.entity_type,
+    entity_id: row.entity_id,
+    source: row.source,
+    label: cleanString(row.label, 280),
+    importance_score: Number(row.importance_score || 0),
+    occurred_at: row.occurred_at,
+    agent_id: cleanString(metadata.agent_id, 80) || null,
+    ecosystem_agent: cleanString(metadata.ecosystem_agent, 80) || null,
+    handoff_targets: handoffs,
+    metadata_summary: {
+      score: metadata.score ?? metadata.health_score ?? null,
+      score_label: metadata.score_label || metadata.health_label || null,
+      action: metadata.action || null,
+      creative_id: metadata.creative_id || null,
+      review_id: metadata.review_id || null,
+      campaign_plan_id: metadata.campaign_plan_id || null,
+      fallback: Boolean(metadata.fallback),
+    },
+  }
+}
+
+function serializeCentralSnapshot(row: any) {
+  const signals = safeRecord(row?.signals)
+  const contract = safeRecord(signals.agent_central_contract)
+  return {
+    id: row.id,
+    scope: row.scope,
+    agent: row.agent,
+    subject_id: row.subject_id,
+    status: row.status,
+    summary: cleanString(row.summary || row.source_summary?.executive_summary, 500),
+    generated_at: row.generated_at,
+    created_by: row.created_by,
+    signals: {
+      score: signals.score ?? null,
+      status: signals.status || null,
+      publication_guardrail: signals.publication_guardrail || null,
+      agent_id: contract.agent_id || null,
+      handoff_targets: safeArray(contract.handoff_targets).slice(0, 6),
+    },
+  }
+}
+
+async function fetchVitorCentralTimeline(supabase: any) {
+  try {
+    const { data, error } = await supabase
+      .from('ecosystem_events')
+      .select('id, event_type, actor_type, entity_type, entity_id, source, label, metadata, importance_score, occurred_at')
+      .gte('occurred_at', dateDaysAgo(45))
+      .order('occurred_at', { ascending: false })
+      .limit(180)
+
+    if (error) return { ready: !isMissingRelation(error), events: [], error: error.message }
+
+    return {
+      ready: true,
+      events: safeArray(data)
+        .filter(eventLooksLikeVitor)
+        .slice(0, 30)
+        .map(serializeCentralEvent),
+      error: null,
+    }
+  } catch (error: any) {
+    return { ready: false, events: [], error: error?.message || String(error) }
+  }
+}
+
+async function fetchVitorCentralSnapshots(supabase: any) {
+  try {
+    const { data, error } = await supabase
+      .from('ecosystem_context_snapshots')
+      .select('id, scope, agent, subject_id, status, summary, signals, source_summary, created_by, generated_at')
+      .eq('agent', 'traffic')
+      .order('generated_at', { ascending: false })
+      .limit(12)
+
+    if (error) return { ready: !isMissingRelation(error), snapshots: [], error: error.message }
+
+    return {
+      ready: true,
+      snapshots: safeArray(data).map(serializeCentralSnapshot),
+      error: null,
+    }
+  } catch (error: any) {
+    return { ready: false, snapshots: [], error: error?.message || String(error) }
+  }
+}
+
 function buildMetrics(reviews: any[], plans: any[]) {
   const reviewStatuses = reviews.reduce((acc: Record<string, number>, review) => {
     const status = String(review.status || 'unknown')
@@ -567,7 +695,7 @@ export async function GET(request: NextRequest) {
     const creativeIds = unique(reviewRows.map((review: any) => review.creative_id))
     const commandIds = unique(reviewRows.map((review: any) => review.command_id))
 
-    const [plans, creatives, commands, latestReports, monitoring] = await Promise.all([
+    const [plans, creatives, commands, latestReports, monitoring, centralTimeline, centralSnapshots] = await Promise.all([
       reviewIds.length
         ? supabase
           .from('paid_traffic_campaign_plans')
@@ -619,6 +747,8 @@ export async function GET(request: NextRequest) {
         diagnostics: [error?.message || String(error || 'Monitoramento indisponivel')],
         latest_report: null,
       })),
+      fetchVitorCentralTimeline(supabase),
+      fetchVitorCentralSnapshots(supabase),
     ])
 
     const creativeMap = byId(creatives)
@@ -650,6 +780,14 @@ export async function GET(request: NextRequest) {
       latest_report: latestReports?.[0] || null,
       monitoring,
       readiness,
+      central: {
+        timeline_ready: centralTimeline.ready,
+        snapshots_ready: centralSnapshots.ready,
+        timeline_error: centralTimeline.error,
+        snapshots_error: centralSnapshots.error,
+        events: centralTimeline.events,
+        snapshots: centralSnapshots.snapshots,
+      },
     })
   } catch (error) {
     console.error('[Vitor Traffic Manager] Error:', error)

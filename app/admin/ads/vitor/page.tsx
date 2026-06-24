@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Copy,
+  Database,
   Edit3,
   FileText,
   ImageIcon,
@@ -17,6 +18,7 @@ import {
   Megaphone,
   PauseCircle,
   RefreshCw,
+  Route,
   Send,
   Sparkles,
   Target,
@@ -156,6 +158,48 @@ type VitorReview = {
   campaign_plan: VitorPlan | null
 }
 
+type VitorCentralEvent = {
+  id: string
+  event_type: string
+  actor_type: string
+  entity_type: string | null
+  entity_id: string | null
+  source: string | null
+  label: string | null
+  importance_score: number
+  occurred_at: string
+  agent_id: string | null
+  ecosystem_agent: string | null
+  handoff_targets: string[]
+  metadata_summary: {
+    score: number | null
+    score_label: string | null
+    action: string | null
+    creative_id: string | null
+    review_id: string | null
+    campaign_plan_id: string | null
+    fallback: boolean
+  }
+}
+
+type VitorCentralSnapshot = {
+  id: string
+  scope: string
+  agent: string
+  subject_id: string | null
+  status: string
+  summary: string | null
+  generated_at: string
+  created_by: string
+  signals: {
+    score: number | null
+    status: string | null
+    publication_guardrail: string | null
+    agent_id: string | null
+    handoff_targets: string[]
+  }
+}
+
 type VitorPayload = {
   success: boolean
   ready: boolean
@@ -177,6 +221,14 @@ type VitorPayload = {
   latest_report: { id: string; title: string; summary: string | null; created_at: string } | null
   monitoring?: VitorMonitoring | null
   readiness?: VitorReadiness | null
+  central?: {
+    timeline_ready: boolean
+    snapshots_ready: boolean
+    timeline_error?: string | null
+    snapshots_error?: string | null
+    events: VitorCentralEvent[]
+    snapshots: VitorCentralSnapshot[]
+  } | null
 }
 
 type PanelMedia = {
@@ -262,6 +314,27 @@ function readinessSummary(readiness?: VitorReadiness | null) {
   if (readiness.status === 'ok') return 'Pronto para teste'
   if (readiness.blockers > 0) return `${readiness.blockers} pendencia(s)`
   return `${readiness.warnings} atencao(oes)`
+}
+
+function centralEventDetail(event: VitorCentralEvent) {
+  const summary = event.metadata_summary || {}
+  const parts = [
+    summary.score != null ? `score ${summary.score}${summary.score_label ? ` (${summary.score_label})` : ''}` : '',
+    summary.action ? `acao ${summary.action}` : '',
+    event.handoff_targets?.length ? `handoff: ${event.handoff_targets.slice(0, 3).join(', ')}` : '',
+    event.source ? `origem ${event.source}` : '',
+  ].filter(Boolean)
+  return parts.length ? parts.join(' | ') : event.event_type
+}
+
+function centralSnapshotDetail(snapshot: VitorCentralSnapshot) {
+  const signals = snapshot.signals || {}
+  const parts = [
+    signals.score != null ? `score ${signals.score}` : '',
+    signals.status ? `status ${signals.status}` : '',
+    signals.publication_guardrail || '',
+  ].filter(Boolean)
+  return parts.length ? parts.join(' | ') : snapshot.scope
 }
 
 function stringField(value: Record<string, unknown> | null | undefined, key: string) {
@@ -385,6 +458,11 @@ export default function VitorTrafficManagerPage() {
   const metrics = payload?.metrics
   const monitoring = payload?.monitoring || null
   const readiness = payload?.readiness || null
+  const central = payload?.central || null
+  const centralHandoffTargets = useMemo(
+    () => Array.from(new Set((central?.events || []).flatMap(event => event.handoff_targets || []))).slice(0, 8),
+    [central?.events],
+  )
   const activeReview = useMemo(
     () => reviews.find(review => review.id === activeId) || reviews[0] || null,
     [activeId, reviews],
@@ -750,6 +828,55 @@ export default function VitorTrafficManagerPage() {
             ))}
           </div>
         ) : null}
+      </section>
+
+      <section className="chart-card vitor-central-card">
+        <div className="vitor-section-title">
+          <span>Retroalimentacao da Central</span>
+          <strong>
+            {(central?.events?.length || 0)} evento(s) | {(central?.snapshots?.length || 0)} snapshot(s)
+          </strong>
+        </div>
+        <div className="vitor-central-grid">
+          <article>
+            <h3><Database size={17} /> Linha do tempo</h3>
+            <div className="vitor-central-list">
+              {(central?.events || []).slice(0, 6).map(event => (
+                <div key={event.id} className={`vitor-central-event ${event.importance_score >= 80 ? 'high' : event.importance_score >= 60 ? 'medium' : 'low'}`}>
+                  <strong>{event.label || event.event_type}</strong>
+                  <span>{formatDateTime(event.occurred_at)} | {centralEventDetail(event)}</span>
+                </div>
+              ))}
+              {(!central?.events || central.events.length === 0) && (
+                <p className="vitor-muted">{central?.timeline_error || 'Ainda nao ha eventos recentes do Vitor na Central.'}</p>
+              )}
+            </div>
+          </article>
+          <article>
+            <h3><Sparkles size={17} /> Memorias salvas</h3>
+            <div className="vitor-central-list">
+              {(central?.snapshots || []).slice(0, 5).map(snapshot => (
+                <div key={snapshot.id}>
+                  <strong>{snapshot.summary || `${snapshot.scope} - ${snapshot.subject_id || 'trafego'}`}</strong>
+                  <span>{formatDateTime(snapshot.generated_at)} | {centralSnapshotDetail(snapshot)}</span>
+                </div>
+              ))}
+              {(!central?.snapshots || central.snapshots.length === 0) && (
+                <p className="vitor-muted">{central?.snapshots_error || 'Ainda sem snapshots de trafego salvos.'}</p>
+              )}
+            </div>
+          </article>
+          <article>
+            <h3><Route size={17} /> Agentes alimentados</h3>
+            <div className="vitor-central-targets">
+              {centralHandoffTargets.length ? centralHandoffTargets.map(target => (
+                <span key={target}>{target}</span>
+              )) : (
+                <p className="vitor-muted">Sem handoffs recentes registrados.</p>
+              )}
+            </div>
+          </article>
+        </div>
       </section>
 
       <section className="chart-card vitor-intake">
@@ -1600,6 +1727,96 @@ export default function VitorTrafficManagerPage() {
           padding: 7px 10px;
         }
 
+        .vitor-central-card {
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .vitor-central-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, .95fr) minmax(220px, .55fr);
+          gap: 10px;
+        }
+
+        .vitor-central-grid article {
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 12px;
+          min-width: 0;
+        }
+
+        .vitor-central-grid h3 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0 0 10px;
+          color: var(--text-primary);
+          font-size: .92rem;
+        }
+
+        .vitor-central-grid h3 svg {
+          color: var(--gold);
+        }
+
+        .vitor-central-list {
+          display: grid;
+          gap: 8px;
+        }
+
+        .vitor-central-list div {
+          border-top: 1px solid rgba(17, 24, 39, .07);
+          padding-top: 8px;
+        }
+
+        .vitor-central-list div:first-child {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .vitor-central-list strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .82rem;
+          line-height: 1.3;
+          margin-bottom: 4px;
+        }
+
+        .vitor-central-list span {
+          display: block;
+          color: var(--text-muted);
+          font-size: .74rem;
+          line-height: 1.38;
+        }
+
+        .vitor-central-event.high strong {
+          color: #b91c1c;
+        }
+
+        .vitor-central-event.medium strong {
+          color: #92400e;
+        }
+
+        .vitor-central-event.low strong {
+          color: #047857;
+        }
+
+        .vitor-central-targets {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .vitor-central-targets span {
+          border: 1px solid rgba(201, 169, 110, .28);
+          border-radius: 999px;
+          background: rgba(201, 169, 110, .1);
+          color: #92400e;
+          font-size: .7rem;
+          font-weight: 900;
+          padding: 7px 9px;
+        }
+
         .vitor-report-strip {
           display: grid;
           grid-template-columns: 28px minmax(0, 1fr) auto;
@@ -2067,6 +2284,7 @@ export default function VitorTrafficManagerPage() {
           .vitor-readiness-grid,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
+          .vitor-central-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2098,6 +2316,7 @@ export default function VitorTrafficManagerPage() {
           .vitor-monitoring-head,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
+          .vitor-central-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid,
           .vitor-plan-lines,
