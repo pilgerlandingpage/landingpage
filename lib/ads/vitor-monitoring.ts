@@ -147,16 +147,24 @@ function isPoorLead(row: any) {
 
 function campaignNameFromPlan(plan: any) {
   const rawPlan = safeRecord(plan?.raw_plan)
+  const executionRecord = safeRecord(rawPlan.execution_record)
   const executionPackage = safeRecord(rawPlan.execution_package)
   const tracking = safeRecord(executionPackage.tracking)
   const utm = safeRecord(plan?.utm)
   return String(
-    executionPackage.campaign_name
+    executionRecord.campaign_name
+    || executionPackage.campaign_name
     || tracking.utm_campaign
     || utm.campaign
     || utm.utm_campaign
     || '',
   ).trim()
+}
+
+function campaignIdFromPlan(plan: any) {
+  const rawPlan = safeRecord(plan?.raw_plan)
+  const executionRecord = safeRecord(rawPlan.execution_record)
+  return String(executionRecord.campaign_id || '').trim()
 }
 
 function alertPriorityScore(severity: VitorAlertSeverity) {
@@ -463,18 +471,23 @@ function buildVitorLearnings({
     .slice(0, 8)
 }
 
-function summarizePendingPlans(plans: any[], metaCampaignNames: Set<string>) {
+function summarizePendingPlans(plans: any[], metaCampaignNames: Set<string>, metaCampaignIds: Set<string>) {
   return plans
     .filter(plan => ['approved', 'exported', 'pending_human_approval'].includes(String(plan.status || '')))
     .map(plan => {
       const campaignName = campaignNameFromPlan(plan)
+      const campaignId = campaignIdFromPlan(plan)
       return {
         id: plan.id,
         status: plan.status,
         campaign_name: campaignName || null,
+        campaign_id: campaignId || null,
         objective: plan.objective || null,
         created_at: plan.created_at,
-        matched_in_meta: campaignName ? metaCampaignNames.has(normalizeKey(campaignName)) : false,
+        matched_in_meta: Boolean(
+          (campaignName && metaCampaignNames.has(normalizeKey(campaignName))) ||
+          (campaignId && metaCampaignIds.has(normalizeKey(campaignId))),
+        ),
       }
     })
     .filter(plan => !plan.matched_in_meta)
@@ -534,7 +547,8 @@ export async function buildVitorMonitoringSnapshot({
   const topCampaigns = safeArray(meta?.top_campaigns).slice(0, 8)
   const topAds = safeArray(meta?.top_ads).slice(0, 10)
   const metaCampaignNames = new Set(topCampaigns.map(item => normalizeKey(item.name || item.campaign_name)))
-  const pendingExecutionPlans = summarizePendingPlans(plans, metaCampaignNames)
+  const metaCampaignIds = new Set(topCampaigns.map(item => normalizeKey(item.id || item.campaign_id)))
+  const pendingExecutionPlans = summarizePendingPlans(plans, metaCampaignNames, metaCampaignIds)
 
   const totals = safeRecord(meta?.totals)
   const coverage = safeRecord(meta?.coverage)
@@ -716,6 +730,10 @@ export async function buildVitorMonitoringSnapshot({
       crm_quality_rate: crmQualityRate,
       missing_attribution: missingAttribution,
       prepared_plans: plans.filter(plan => ['approved', 'exported', 'pending_human_approval'].includes(String(plan.status || ''))).length,
+      executed_vitor_plans: plans.filter(plan => {
+        const rawPlan = safeRecord(plan?.raw_plan)
+        return ['published', 'paused'].includes(String(plan.status || '')) || Object.keys(safeRecord(rawPlan.execution_record)).length > 0
+      }).length,
       pending_execution_plans: pendingExecutionPlans.length,
       meta_campaigns: numeric(coverage.campaigns),
       meta_ads: numeric(coverage.ads),

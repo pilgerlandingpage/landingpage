@@ -71,6 +71,24 @@ type ExecutionPackage = {
   plain_text?: string | null
 }
 
+type VitorExecutionRecord = {
+  version?: number
+  source?: string | null
+  status?: string | null
+  platform?: string | null
+  campaign_name?: string | null
+  campaign_id?: string | null
+  adset_id?: string | null
+  ad_id?: string | null
+  manager_url?: string | null
+  daily_budget_brl?: number | null
+  total_budget_brl?: number | null
+  started_at?: string | null
+  notes?: string | null
+  recorded_at?: string | null
+  updated_at?: string | null
+}
+
 type VitorMonitoringAlert = {
   type: string
   severity: 'critical' | 'high' | 'medium' | 'low'
@@ -358,6 +376,35 @@ function getExecutionPackage(review: VitorReview | null): ExecutionPackage | nul
   return Object.keys(executionPackage).length ? executionPackage as ExecutionPackage : null
 }
 
+function getExecutionRecord(review: VitorReview | null): VitorExecutionRecord | null {
+  const rawPlan = asRecord(review?.campaign_plan?.raw_plan)
+  const executionRecord = asRecord(rawPlan.execution_record)
+  return Object.keys(executionRecord).length ? executionRecord as VitorExecutionRecord : null
+}
+
+function inputDateTimeValue(value?: string | null) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (input: number) => String(input).padStart(2, '0')
+  return [
+    date.getFullYear(),
+    '-',
+    pad(date.getMonth() + 1),
+    '-',
+    pad(date.getDate()),
+    'T',
+    pad(date.getHours()),
+    ':',
+    pad(date.getMinutes()),
+  ].join('')
+}
+
+function formText(value: unknown) {
+  const text = String(value || '').trim()
+  return text === '-' ? '' : text
+}
+
 function buildExecutionPackageText(review: VitorReview) {
   const stored = getExecutionPackage(review)?.plain_text
   if (stored && stored.trim()) return stored
@@ -421,12 +468,26 @@ export default function VitorTrafficManagerPage() {
   const [uploading, setUploading] = useState(false)
   const [creating, setCreating] = useState(false)
   const [monitoringSaving, setMonitoringSaving] = useState(false)
+  const [executionSaving, setExecutionSaving] = useState(false)
   const [panelMedia, setPanelMedia] = useState<PanelMedia[]>([])
   const [intakeForm, setIntakeForm] = useState({
     title: '',
     briefing: '',
     asset_type: 'image',
     content_type: 'ad',
+  })
+  const [executionForm, setExecutionForm] = useState({
+    status: 'published',
+    platform: 'meta_ads',
+    campaign_name: '',
+    campaign_id: '',
+    adset_id: '',
+    ad_id: '',
+    manager_url: '',
+    daily_budget_brl: '',
+    total_budget_brl: '',
+    started_at: '',
+    notes: '',
   })
 
   const loadData = async (nextFilter = filter, silent = false) => {
@@ -468,11 +529,31 @@ export default function VitorTrafficManagerPage() {
     [activeId, reviews],
   )
   const activeExecutionPackage = getExecutionPackage(activeReview)
+  const activeExecutionRecord = getExecutionRecord(activeReview)
   const activeExecutionSetup = asRecord(activeExecutionPackage?.setup)
   const activeExecutionTracking = asRecord(activeExecutionPackage?.tracking)
   const activeExecutionGuardrails = asRecord(activeExecutionPackage?.guardrails)
   const activeExecutionChecklist = stringRows(activeExecutionGuardrails.pre_launch_checklist)
   const activeExecutionSteps = stringRows(activeExecutionPackage?.human_execution_steps)
+
+  useEffect(() => {
+    const record = getExecutionRecord(activeReview)
+    const executionPackage = getExecutionPackage(activeReview)
+    const setup = asRecord(executionPackage?.setup)
+    setExecutionForm({
+      status: formText(record?.status) || 'published',
+      platform: formText(record?.platform || executionPackage?.platform) || 'meta_ads',
+      campaign_name: formText(record?.campaign_name || executionPackage?.campaign_name || activeReview?.campaign_plan?.utm?.campaign || activeReview?.campaign_plan?.utm?.utm_campaign),
+      campaign_id: formText(record?.campaign_id),
+      adset_id: formText(record?.adset_id),
+      ad_id: formText(record?.ad_id),
+      manager_url: formText(record?.manager_url),
+      daily_budget_brl: formText(record?.daily_budget_brl || setup.daily_budget_brl || activeReview?.campaign_plan?.budget_suggestion?.daily_budget_brl),
+      total_budget_brl: formText(record?.total_budget_brl || setup.total_test_budget_brl || activeReview?.campaign_plan?.budget_suggestion?.total_test_budget_brl),
+      started_at: inputDateTimeValue(record?.started_at),
+      notes: formText(record?.notes),
+    })
+  }, [activeReview?.id])
 
   const decide = async (action: 'approve' | 'improve' | 'cancel' | 'export' | 'publish' | 'pause') => {
     if (!activeReview) return
@@ -517,6 +598,39 @@ export default function VitorTrafficManagerPage() {
       setToast(activeExecutionPackage ? 'Pacote de execucao copiado.' : 'Rascunho de execucao copiado.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nao consegui copiar o pacote de execucao.')
+    }
+  }
+
+  const recordExecution = async () => {
+    if (!activeReview) return
+    if (!executionForm.campaign_name.trim() && !executionForm.campaign_id.trim()) {
+      setError('Informe pelo menos o nome ou ID da campanha executada.')
+      return
+    }
+    setExecutionSaving(true)
+    setError('')
+    setToast('')
+    try {
+      const response = await fetch('/api/admin/paid-traffic/vitor', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          review_id: activeReview.id,
+          action: 'record_execution',
+          execution: {
+            ...executionForm,
+            started_at: executionForm.started_at ? new Date(executionForm.started_at).toISOString() : null,
+          },
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao registrar execucao.')
+      setToast('Execucao real registrada para o Vitor acompanhar.')
+      await loadData(filter, true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao registrar execucao.')
+    } finally {
+      setExecutionSaving(false)
     }
   }
 
@@ -1198,6 +1312,134 @@ export default function VitorTrafficManagerPage() {
                     <Copy size={16} /> {activeExecutionPackage ? 'Copiar pacote' : 'Copiar rascunho'}
                   </button>
                   <span>{activeExecutionPackage ? statusLabel(activeReview.campaign_plan?.status) : 'Rascunho disponivel'}</span>
+                </div>
+                {activeExecutionRecord && (
+                  <div className="vitor-execution-record">
+                    <CheckCircle2 size={17} />
+                    <div>
+                      <strong>Execucao registrada</strong>
+                      <span>
+                        {activeExecutionRecord.campaign_name || activeExecutionRecord.campaign_id || 'Campanha registrada'}
+                        {' | '}
+                        {activeExecutionRecord.platform || 'meta_ads'}
+                        {' | '}
+                        {formatDateTime(activeExecutionRecord.recorded_at || activeExecutionRecord.updated_at)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="vitor-execution-form">
+                  <label>
+                    <span>Status</span>
+                    <select
+                      value={executionForm.status}
+                      onChange={event => setExecutionForm(current => ({ ...current, status: event.target.value }))}
+                    >
+                      <option value="published">Publicada/ativa</option>
+                      <option value="paused">Pausada</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Plataforma</span>
+                    <select
+                      value={executionForm.platform}
+                      onChange={event => setExecutionForm(current => ({ ...current, platform: event.target.value }))}
+                    >
+                      <option value="meta_ads">Meta Ads</option>
+                      <option value="google_ads">Google Ads</option>
+                      <option value="manual">Manual</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Campanha</span>
+                    <input
+                      value={executionForm.campaign_name}
+                      onChange={event => setExecutionForm(current => ({ ...current, campaign_name: event.target.value }))}
+                      placeholder="Nome usado no gerenciador"
+                    />
+                  </label>
+                  <label>
+                    <span>ID campanha</span>
+                    <input
+                      value={executionForm.campaign_id}
+                      onChange={event => setExecutionForm(current => ({ ...current, campaign_id: event.target.value }))}
+                      placeholder="Opcional"
+                    />
+                  </label>
+                  <label>
+                    <span>ID conjunto</span>
+                    <input
+                      value={executionForm.adset_id}
+                      onChange={event => setExecutionForm(current => ({ ...current, adset_id: event.target.value }))}
+                      placeholder="Opcional"
+                    />
+                  </label>
+                  <label>
+                    <span>ID anuncio</span>
+                    <input
+                      value={executionForm.ad_id}
+                      onChange={event => setExecutionForm(current => ({ ...current, ad_id: event.target.value }))}
+                      placeholder="Opcional"
+                    />
+                  </label>
+                  <label>
+                    <span>Verba diaria</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={executionForm.daily_budget_brl}
+                      onChange={event => setExecutionForm(current => ({ ...current, daily_budget_brl: event.target.value }))}
+                      placeholder="R$"
+                    />
+                  </label>
+                  <label>
+                    <span>Verba total</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={executionForm.total_budget_brl}
+                      onChange={event => setExecutionForm(current => ({ ...current, total_budget_brl: event.target.value }))}
+                      placeholder="R$"
+                    />
+                  </label>
+                  <label>
+                    <span>Inicio</span>
+                    <input
+                      type="datetime-local"
+                      value={executionForm.started_at}
+                      onChange={event => setExecutionForm(current => ({ ...current, started_at: event.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    <span>URL gerenciador</span>
+                    <input
+                      value={executionForm.manager_url}
+                      onChange={event => setExecutionForm(current => ({ ...current, manager_url: event.target.value }))}
+                      placeholder="https://"
+                    />
+                  </label>
+                  <label className="vitor-execution-notes">
+                    <span>Observacoes</span>
+                    <textarea
+                      value={executionForm.notes}
+                      onChange={event => setExecutionForm(current => ({ ...current, notes: event.target.value }))}
+                      placeholder="Ajustes feitos na execucao, verba real, publico alterado ou criterio de pausa."
+                    />
+                  </label>
+                  <div className="vitor-execution-submit">
+                    <button
+                      type="button"
+                      className="btn btn-gold"
+                      disabled={executionSaving || !activeReview.campaign_plan}
+                      onClick={recordExecution}
+                    >
+                      {executionSaving ? <Loader2 size={16} className="spin" /> : <CheckCircle2 size={16} />}
+                      {activeExecutionRecord ? 'Atualizar execucao' : 'Registrar execucao'}
+                    </button>
+                    <span>{activeExecutionRecord ? 'O Vitor ja consegue cruzar este plano com a campanha real.' : 'O registro marca o plano como publicado.'}</span>
+                  </div>
                 </div>
                 <div className="vitor-execution-lists">
                   <div>
@@ -2168,7 +2410,8 @@ export default function VitorTrafficManagerPage() {
         }
 
         .vitor-execution-warning,
-        .vitor-execution-actions {
+        .vitor-execution-actions,
+        .vitor-execution-record {
           display: flex;
           align-items: center;
           gap: 10px;
@@ -2199,6 +2442,100 @@ export default function VitorTrafficManagerPage() {
           font-size: .74rem;
           font-weight: 900;
           text-transform: uppercase;
+        }
+
+        .vitor-execution-record {
+          align-items: flex-start;
+          border: 1px solid rgba(4, 120, 87, .18);
+          border-radius: 10px;
+          background: rgba(4, 120, 87, .07);
+          color: #065f46;
+          padding: 10px 12px;
+        }
+
+        .vitor-execution-record svg {
+          flex: 0 0 auto;
+          margin-top: 1px;
+        }
+
+        .vitor-execution-record strong,
+        .vitor-execution-record span {
+          display: block;
+        }
+
+        .vitor-execution-record span {
+          color: #047857;
+          font-size: .78rem;
+          margin-top: 2px;
+        }
+
+        .vitor-execution-form {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 12px;
+          margin-bottom: 12px;
+        }
+
+        .vitor-execution-form label {
+          display: grid;
+          gap: 6px;
+          min-width: 0;
+        }
+
+        .vitor-execution-form label > span {
+          color: var(--text-muted);
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .vitor-execution-form input,
+        .vitor-execution-form select,
+        .vitor-execution-form textarea {
+          width: 100%;
+          min-width: 0;
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          background: #fff;
+          color: var(--text-primary);
+          font: inherit;
+          font-size: .82rem;
+          padding: 9px 10px;
+          outline: none;
+        }
+
+        .vitor-execution-form textarea {
+          min-height: 86px;
+          resize: vertical;
+        }
+
+        .vitor-execution-form input:focus,
+        .vitor-execution-form select:focus,
+        .vitor-execution-form textarea:focus {
+          border-color: rgba(201, 169, 110, .72);
+          box-shadow: 0 0 0 3px rgba(201, 169, 110, .14);
+        }
+
+        .vitor-execution-notes {
+          grid-column: span 3;
+        }
+
+        .vitor-execution-submit {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 10px;
+          grid-column: span 4;
+          flex-wrap: wrap;
+        }
+
+        .vitor-execution-submit span {
+          color: var(--text-muted);
+          font-size: .78rem;
         }
 
         .vitor-execution-lists {
@@ -2326,10 +2663,16 @@ export default function VitorTrafficManagerPage() {
           .vitor-intel-grid,
           .vitor-execution-grid,
           .vitor-execution-lists,
+          .vitor-execution-form,
           .vitor-intake-grid,
           .vitor-detail-hero,
           .vitor-report-strip {
             grid-template-columns: 1fr;
+          }
+
+          .vitor-execution-notes,
+          .vitor-execution-submit {
+            grid-column: span 1;
           }
 
           .vitor-score-card {

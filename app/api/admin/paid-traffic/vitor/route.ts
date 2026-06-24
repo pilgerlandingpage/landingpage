@@ -238,6 +238,57 @@ function buildHumanExecutionPackage(params: {
   return pkg
 }
 
+function normalizeIsoDate(value: unknown) {
+  const text = cleanString(value, 80)
+  if (!text) return null
+  const date = new Date(text)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toISOString()
+}
+
+function normalizeExecutionRecord(params: {
+  payload: Record<string, unknown>
+  plan: any
+  generatedAt: string
+}) {
+  const { payload, plan, generatedAt } = params
+  const rawPlan = safeRecord(plan?.raw_plan)
+  const executionPackage = safeRecord(rawPlan.execution_package)
+  const packageSetup = safeRecord(executionPackage.setup)
+  const packageTracking = safeRecord(executionPackage.tracking)
+  const planBudget = safeRecord(plan?.budget_suggestion)
+  const planUtm = safeRecord(plan?.utm)
+  const campaignName = normalizeCampaignName(
+    payload.campaign_name
+    || payload.name
+    || executionPackage.campaign_name
+    || packageTracking.utm_campaign
+    || planUtm.campaign
+    || planUtm.utm_campaign,
+    `vitor_${String(plan?.id || 'campanha').slice(0, 8)}`,
+  )
+  const platform = cleanString(payload.platform, 60) || cleanString(executionPackage.platform, 60) || 'meta_ads'
+  const status = cleanString(payload.status, 60) || 'published'
+
+  return {
+    version: 1,
+    source: 'human_panel',
+    status,
+    platform,
+    campaign_name: campaignName,
+    campaign_id: cleanString(payload.campaign_id, 140) || null,
+    adset_id: cleanString(payload.adset_id || payload.ad_set_id, 140) || null,
+    ad_id: cleanString(payload.ad_id, 140) || null,
+    manager_url: cleanString(payload.manager_url || payload.url, 1200) || null,
+    daily_budget_brl: numberOrNull(payload.daily_budget_brl || payload.daily_budget || packageSetup.daily_budget_brl || planBudget.daily_budget_brl),
+    total_budget_brl: numberOrNull(payload.total_budget_brl || payload.total_budget || packageSetup.total_test_budget_brl || planBudget.total_test_budget_brl),
+    started_at: normalizeIsoDate(payload.started_at || payload.published_at || payload.startedAt),
+    notes: cleanString(payload.notes, 1000) || null,
+    recorded_at: generatedAt,
+    updated_at: generatedAt,
+  }
+}
+
 function normalizeMediaItems(value: unknown): MediaItem[] {
   if (!Array.isArray(value)) return []
   return value
@@ -886,6 +937,10 @@ export async function PATCH(request: NextRequest) {
         creativeStatus: 'approved',
         label: 'marcou a campanha do Vitor como pausada',
       },
+      record_execution: {
+        reviewStatus: 'approved',
+        label: 'registrou a execucao real da campanha do Vitor',
+      },
     }
 
     const decision = actions[action]
@@ -903,6 +958,133 @@ export async function PATCH(request: NextRequest) {
     if (!review?.id) return NextResponse.json({ success: false, error: 'Analise nao encontrada.' }, { status: 404 })
 
     const now = new Date().toISOString()
+
+    if (action === 'record_execution') {
+      const { data: currentPlan, error: planReadError } = await supabase
+        .from('paid_traffic_campaign_plans')
+        .select('*')
+        .eq('review_id', reviewId)
+        .maybeSingle()
+
+      if (planReadError) throw planReadError
+      if (!currentPlan?.id) {
+        return NextResponse.json({ success: false, error: 'Plano do Vitor nao encontrado para registrar execucao.' }, { status: 404 })
+      }
+
+      let creative: any = null
+      if (review.creative_id) {
+        const { data: creativeData, error: creativeReadError } = await supabase
+          .from('marketing_creatives')
+          .select('id, title, description, asset_url, thumbnail_url, asset_type, content_type, property_sku, status, raw')
+          .eq('id', review.creative_id)
+          .maybeSingle()
+        if (creativeReadError) throw creativeReadError
+        creative = creativeData || null
+      }
+
+      const executionRecord = normalizeExecutionRecord({
+        payload: safeRecord(body?.execution || body),
+        plan: currentPlan,
+        generatedAt: now,
+      })
+
+      if (!executionRecord.campaign_name && !executionRecord.campaign_id) {
+        return NextResponse.json({ success: false, error: 'Informe nome ou ID da campanha executada.' }, { status: 400 })
+      }
+
+      const nextRawPlan: Record<string, any> = {
+        ...safeRecord(currentPlan.raw_plan),
+        human_decision: {
+          action,
+          notes: notes || executionRecord.notes || null,
+          decided_at: now,
+        },
+        execution_record: executionRecord,
+      }
+
+      if (!safeRecord(nextRawPlan.execution_package).version) {
+        nextRawPlan.execution_package = buildHumanExecutionPackage({
+          review,
+          plan: currentPlan,
+          creative,
+          generatedAt: now,
+          notes: notes || executionRecord.notes || null,
+        })
+      }
+
+      const nextPlanStatus = executionRecord.status === 'paused' ? 'paused' : 'published'
+
+      const { data: updatedReview, error: reviewUpdateError } = await supabase
+        .from('paid_traffic_creative_reviews')
+        .update({
+          status: 'approved',
+          raw_analysis: {
+            ...safeRecord(review.raw_analysis),
+            human_decision: {
+              action,
+              notes: notes || executionRecord.notes || null,
+              decided_at: now,
+            },
+            execution_record: executionRecord,
+          },
+          updated_at: now,
+        })
+        .eq('id', reviewId)
+        .select('*')
+        .single()
+
+      if (reviewUpdateError) throw reviewUpdateError
+
+      const { data: updatedPlan, error: planUpdateError } = await supabase
+        .from('paid_traffic_campaign_plans')
+        .update({
+          status: nextPlanStatus,
+          raw_plan: nextRawPlan,
+          updated_at: now,
+        })
+        .eq('id', currentPlan.id)
+        .select('*')
+        .single()
+
+      if (planUpdateError) throw planUpdateError
+
+      if (review.creative_id) {
+        await supabase
+          .from('marketing_creatives')
+          .update({ status: 'approved', updated_at: now })
+          .eq('id', review.creative_id)
+      }
+
+      await recordAgentCentralSignal({
+        supabase,
+        agentId: 'ads-analyst',
+        eventType: 'paid_traffic_vitor_execution_recorded',
+        entityType: 'paid_traffic_campaign_plan',
+        entityId: currentPlan.id,
+        source: 'vitor-panel',
+        label: `Execucao registrada: ${executionRecord.campaign_name}`,
+        importanceScore: 84,
+        metadata: {
+          action,
+          review_id: reviewId,
+          creative_id: review.creative_id || null,
+          campaign_plan_id: currentPlan.id,
+          execution_record: executionRecord,
+          next_status: nextPlanStatus,
+        },
+        handoffTargets: ['whatsapp-global-agent', 'ceo-agent', 'crm-intelligence-agent'],
+      }).catch((error: any) => {
+        console.warn('[Vitor Traffic Manager] execution central signal failed:', error?.message || error)
+      })
+
+      return NextResponse.json({
+        success: true,
+        review: updatedReview,
+        campaign_plan: updatedPlan,
+        execution_record: executionRecord,
+      })
+    }
+
     const rawAnalysis = {
       ...(review.raw_analysis || {}),
       human_decision: {
