@@ -6,6 +6,7 @@ import {
   recordAgentCentralSignal,
   saveAgentCentralSnapshot,
 } from '@/lib/intelligence/agent-runtime'
+import { buildVitorMonitoringSnapshot, persistVitorMonitoringSnapshot, type VitorMonitoringSnapshot } from '@/lib/ads/vitor-monitoring'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
 
 type SupabaseLike = {
@@ -55,6 +56,8 @@ export type ProcessVitorPaidTrafficCommandResult = {
   reviewId?: string
   campaignPlanId?: string
   score?: number
+  monitoringHealth?: number
+  monitoringAlerts?: number
   error?: string
   fallback?: boolean
 }
@@ -663,6 +666,48 @@ function buildWhatsAppReviewMessage(analysis: VitorCreativeAnalysis) {
   ].filter(Boolean).join('\n')
 }
 
+function moneyLabel(value: unknown) {
+  const number = Number(value || 0)
+  if (!Number.isFinite(number) || number <= 0) return 'R$ 0'
+  return `R$ ${number.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+}
+
+function percentLabel(value: unknown) {
+  const number = Number(value || 0)
+  if (!Number.isFinite(number)) return '0%'
+  return `${number.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
+
+function buildWhatsAppMonitoringMessage(snapshot: VitorMonitoringSnapshot) {
+  const metrics = snapshot.metrics || {}
+  const alerts = snapshot.alerts.slice(0, 4)
+  const recommendations = snapshot.recommendations.slice(0, 4)
+
+  return [
+    'Vitor Trafego Pago - monitoramento continuo',
+    '',
+    `Saude do trafego: ${snapshot.health.score}/100 (${snapshot.health.label})`,
+    `Gasto lido: ${moneyLabel(metrics.spend)}`,
+    `Leads Meta: ${metrics.leads || 0}`,
+    `Leads pagos no CRM: ${metrics.crm_paid_leads || 0}`,
+    `CPL medio: ${moneyLabel(metrics.avg_cpl)}`,
+    `Qualidade CRM: ${percentLabel(metrics.crm_quality_rate)}`,
+    '',
+    'Alertas:',
+    alerts.length
+      ? alerts.map(alert => `- ${alert.title}: ${alert.recommendation}`).join('\n')
+      : '- Nenhum alerta relevante nos dados atuais.',
+    '',
+    'Recomendacoes:',
+    recommendations.length
+      ? recommendations.map(item => `- ${item.action}`).join('\n')
+      : '- Manter observacao e nao escalar verba sem validar qualidade no CRM.',
+    '',
+    'Nada foi pausado, publicado ou escalado automaticamente.',
+    'A leitura foi registrada na Central de Inteligencia para o CEO, WhatsApp Global e Criativos.',
+  ].filter(Boolean).join('\n')
+}
+
 async function updateCommandStatus(supabase: SupabaseLike, commandId: string | null, status: string, result: Record<string, unknown>) {
   if (!commandId) return
   await supabase
@@ -807,7 +852,8 @@ export async function processVitorPaidTrafficCommand(
 ): Promise<ProcessVitorPaidTrafficCommandResult> {
   const { supabase, command } = params
   if (!command?.id) return { handled: false, whatsappSent: false, error: 'missing_command' }
-  if (command.command_type !== 'paid_traffic' || command.target_agent !== 'ads-analyst') {
+  const isVitorMonitoringCommand = command.command_type === 'paid_traffic_monitoring'
+  if (!['paid_traffic', 'paid_traffic_monitoring'].includes(String(command.command_type || '')) || command.target_agent !== 'ads-analyst') {
     return { handled: false, whatsappSent: false }
   }
   if (command.status === 'blocked') return { handled: false, whatsappSent: false, error: 'blocked_command' }
@@ -820,6 +866,37 @@ export async function processVitorPaidTrafficCommand(
       stage: 'vitor_processing_started',
       started_at: new Date().toISOString(),
     })
+
+    if (isVitorMonitoringCommand) {
+      const snapshot = await buildVitorMonitoringSnapshot({ supabase, datePreset: 'last_7d' })
+      const report = await persistVitorMonitoringSnapshot({ supabase, snapshot })
+      const result = {
+        stage: 'vitor_monitoring_completed',
+        report_id: report?.id || null,
+        health_score: snapshot.health.score,
+        health_label: snapshot.health.label,
+        alerts: snapshot.alerts.length,
+        recommendations: snapshot.recommendations.length,
+        completed_at: new Date().toISOString(),
+      }
+
+      await updateCommandStatus(supabase, command.id, 'completed', result)
+
+      const whatsappSent = shouldSendResponse
+        ? await sendVitorResponse({
+          phone: command.phone,
+          message: buildWhatsAppMonitoringMessage(snapshot),
+          instanceToken,
+        })
+        : false
+
+      return {
+        handled: true,
+        whatsappSent,
+        monitoringHealth: snapshot.health.score,
+        monitoringAlerts: snapshot.alerts.length,
+      }
+    }
 
     const mediaItems = extractCommandMedia(command)
     const creative = await ensureCreativeFromCommand(supabase, command)

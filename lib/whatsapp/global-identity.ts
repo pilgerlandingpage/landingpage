@@ -46,6 +46,18 @@ const TRAFFIC_WORDS = [
     'cpl',
 ]
 
+const TRAFFIC_MONITOR_WORDS = [
+    'status',
+    'monitor',
+    'monitorar',
+    'relatorio',
+    'resultado',
+    'performance',
+    'metricas',
+    'saude',
+    'resumo',
+]
+
 const BLOG_WORDS = ['blog', 'noticia', 'notícia', 'conteudo', 'conteúdo', 'post']
 const PROPERTY_WORDS = ['imovel', 'imóvel', 'apartamento', 'casa', 'disponivel', 'disponível', 'link']
 const REPORT_WORDS = ['relatorio', 'relatório', 'resultado', 'performance', 'metricas', 'métricas', 'resumo']
@@ -135,6 +147,19 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
+
+    if (
+        (includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')) &&
+        includesAny(normalized, TRAFFIC_MONITOR_WORDS) &&
+        !/(criativo|imagem|video|carrossel|subir|rodar|promover|impulsionar)/.test(normalized)
+    ) {
+        return {
+            commandType: 'paid_traffic_monitoring',
+            targetAgent: 'ads-analyst',
+            requiredPermission: 'ads',
+            label: 'Monitoramento de trafego pago',
+        }
+    }
 
     if (includesAny(normalized, TRAFFIC_WORDS) || (hasMedia && /(rodar|subir|promover|impulsionar)/.test(normalized))) {
         return {
