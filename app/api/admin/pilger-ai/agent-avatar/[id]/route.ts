@@ -14,6 +14,7 @@ const FEMALE_IDS = new Set([
     'property-triage',
     'property-register',
     'whatsapp-lead-extraction',
+    'whatsapp-attendance-coach',
     'whatsapp-rescue-agent',
     'user-first-access-agent',
     'pilger-daily-report',

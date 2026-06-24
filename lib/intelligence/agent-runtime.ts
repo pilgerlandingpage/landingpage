@@ -104,6 +104,16 @@ const AGENT_CENTRAL_PROFILES: Record<string, AgentCentralProfile> = {
     produces: ['perfil do lead', 'orcamento', 'intencao', 'regiao', 'objecoes', 'score comercial'],
     defaultHandoffTargets: ['whatsapp-global-agent', 'ads-analyst', 'blog-intelligence', 'ceo-agent'],
   },
+  'whatsapp-attendance-coach': {
+    agentId: 'whatsapp-attendance-coach',
+    ecosystemAgent: 'whatsapp',
+    name: 'Helena Auditoria Comercial',
+    sector: 'WhatsApp',
+    status: 'full',
+    consumes: ['historico de conversas WhatsApp', 'CRM dos leads', 'relatorios de atendimento', 'tempos de resposta'],
+    produces: ['score de atendimento', 'oportunidades perdidas', 'leads recuperaveis', 'plano de melhoria do corretor'],
+    defaultHandoffTargets: ['whatsapp-lead-extraction', 'whatsapp-followup-agent', 'whatsapp-rescue-agent', 'ceo-agent'],
+  },
   'whatsapp-global-agent': {
     agentId: 'whatsapp-global-agent',
     ecosystemAgent: 'whatsapp',

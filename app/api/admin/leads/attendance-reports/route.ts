@@ -19,6 +19,79 @@ function extractAvatarUrl(payload: any): string | null {
         null
 }
 
+function cleanPhone(raw: unknown): string {
+    const text = String(raw || '').trim()
+    const beforeAt = text.split('@')[0] || text
+    const beforeDevice = beforeAt.split(':')[0] || beforeAt
+    return beforeDevice.replace(/\D/g, '')
+}
+
+function leadContactKey(instanceId: unknown, phone: unknown, chatId?: unknown) {
+    const clean = cleanPhone(phone) || cleanPhone(chatId)
+    return clean ? `${instanceId}:${clean}` : ''
+}
+
+async function enrichScoresWithContactData(supabase: any, scores: any[]) {
+    if (scores.length === 0) return scores
+    const instanceIds = Array.from(new Set(scores.map((score) => score.instance_id).filter(Boolean)))
+    const phones = Array.from(new Set(scores.map((score) => cleanPhone(score.phone || score.chat_id)).filter(Boolean)))
+    if (instanceIds.length === 0) return scores
+
+    const [contactsRes, leadsRes] = await Promise.all([
+        supabase
+            .from('whatsapp_instance_contacts')
+            .select('instance_id, phone, jid, contact_name, first_name, raw')
+            .in('instance_id', instanceIds)
+            .limit(10000),
+        phones.length > 0
+            ? supabase
+                .from('leads')
+                .select('name, phone, phone_e164, avatar_url')
+                .limit(10000)
+            : Promise.resolve({ data: [], error: null }),
+    ])
+
+    if (contactsRes.error) {
+        console.warn('[attendance-reports GET] Falha ao enriquecer contatos do relatorio', contactsRes.error.message)
+    }
+
+    if (leadsRes.error) {
+        console.warn('[attendance-reports GET] Falha ao enriquecer leads do relatorio', leadsRes.error.message)
+    }
+
+    const contactMap = new Map<string, any>()
+    for (const contact of contactsRes.data || []) {
+        const keys = [
+            leadContactKey(contact.instance_id, contact.phone),
+            leadContactKey(contact.instance_id, contact.jid),
+        ].filter(Boolean)
+        for (const key of keys) {
+            if (!contactMap.has(key)) contactMap.set(key, contact)
+        }
+    }
+
+    const leadMap = new Map<string, any>()
+    const wantedPhones = new Set(phones)
+    for (const lead of leadsRes.data || []) {
+        const keys = [cleanPhone(lead.phone), cleanPhone(lead.phone_e164)].filter(Boolean)
+        if (!keys.some((key) => wantedPhones.has(key))) continue
+        for (const key of keys) {
+            if (!leadMap.has(key)) leadMap.set(key, lead)
+        }
+    }
+
+    return scores.map((score) => {
+        const contact = contactMap.get(leadContactKey(score.instance_id, score.phone, score.chat_id))
+        const lead = leadMap.get(cleanPhone(score.phone || score.chat_id))
+        const raw = contact?.raw && typeof contact.raw === 'object' ? contact.raw : {}
+        return {
+            ...score,
+            lead_display_name: score.lead_name || lead?.name || contact?.contact_name || contact?.first_name || raw.name || raw.pushName || null,
+            lead_avatar_url: lead?.avatar_url || extractAvatarUrl(raw),
+        }
+    })
+}
+
 function normalizeDateValue(value: unknown) {
     const text = String(value || '').trim()
     return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null
@@ -308,6 +381,15 @@ export async function GET(request: NextRequest) {
             const scoresRes = await scoresQuery
             if (scoresRes.error) throw scoresRes.error
             scores = scoresRes.data || []
+            if (scoreFilter === 'perdidas') {
+                scores = scores.filter((score: any) =>
+                    score?.metrics?.lost_opportunity === true ||
+                    score?.metrics?.commercial_status === 'oportunidade_perdida'
+                )
+            } else if (scoreFilter === 'recuperaveis') {
+                scores = scores.filter((score: any) => score?.metrics?.recoverable === true)
+            }
+            scores = await enrichScoresWithContactData(supabase, scores)
         }
 
         return NextResponse.json({

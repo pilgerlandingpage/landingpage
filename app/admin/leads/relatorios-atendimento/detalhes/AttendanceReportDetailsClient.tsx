@@ -21,6 +21,9 @@ type ConversationScore = {
     report_id: string
     chat_id: string
     phone?: string | null
+    lead_name?: string | null
+    lead_display_name?: string | null
+    lead_avatar_url?: string | null
     score: number
     lead_potential: 'hot' | 'warm' | 'cold' | 'unknown'
     response_time_seconds?: number | null
@@ -51,12 +54,30 @@ const filters = [
     { key: 'todos', label: 'Todas' },
     { key: 'critica', label: 'Amostra critica' },
     { key: 'sem-resposta', label: 'Sem resposta' },
+    { key: 'perdidas', label: 'Perdidas' },
+    { key: 'recuperaveis', label: 'Recuperaveis' },
     { key: 'quentes', label: 'Leads quentes' },
     { key: 'ruins', label: 'Ruins' },
     { key: 'mornos', label: 'Mornos' },
     { key: 'frios', label: 'Frios' },
     { key: 'bons', label: 'Boas' },
 ] as const
+
+function compactApiText(value: string, limit = 300) {
+    return value.replace(/\s+/g, ' ').trim().slice(0, limit)
+}
+
+async function readApiJson(res: Response) {
+    const text = await res.text()
+    if (!text.trim()) return {}
+
+    try {
+        return JSON.parse(text)
+    } catch {
+        const preview = compactApiText(text)
+        throw new Error(`A API de detalhes retornou resposta invalida (${res.status}). ${preview || 'Sem detalhes.'}`)
+    }
+}
 
 function formatDateLabel(value?: string | null) {
     if (!value) return ''
@@ -97,6 +118,31 @@ function getOwnerName(instance?: InstanceRow, fallback?: string) {
     return instance?.owner_name || instance?.instance_name || fallback || 'WhatsApp sem dono'
 }
 
+function cleanLabel(value?: string | null) {
+    const text = String(value || '').trim()
+    return text || null
+}
+
+function getLeadName(score: ConversationScore) {
+    return cleanLabel(score.lead_display_name) || cleanLabel(score.lead_name) || cleanLabel(score.metrics?.lead_name) || 'Lead sem nome'
+}
+
+function getInitials(value?: string | null) {
+    const parts = String(value || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+
+    const initials = parts.map((part) => part[0]).join('').toUpperCase()
+    return initials || 'WA'
+}
+
+function metricNumber(metrics: Record<string, any>, key: string) {
+    const value = Number(metrics?.[key])
+    return Number.isFinite(value) ? value : null
+}
+
 function getBreakdown(scores: ConversationScore[], report?: AttendanceReport | null) {
     const metrics = report?.metrics || {}
     const coverage = report?.coverage || {}
@@ -106,12 +152,34 @@ function getBreakdown(scores: ConversationScore[], report?: AttendanceReport | n
         unanswered: scores.filter((score) => score.unanswered).length || Number(metrics.unanswered_conversations || 0),
         poor: scores.filter((score) => Number(score.score || 0) < 60).length || Number(metrics.poor_conversations || 0),
         strong: scores.filter((score) => Number(score.score || 0) >= 80).length || Number(metrics.strong_conversations || 0),
+        lost: scores.filter((score) => score.metrics?.lost_opportunity === true || score.metrics?.commercial_status === 'oportunidade_perdida').length || Number(metrics.lost_opportunities || 0),
+        recoverable: scores.filter((score) => score.metrics?.recoverable === true).length || Number(metrics.recoverable_opportunities || 0),
+        llmAnalyzed: Number(metrics.attendance_coach_conversations_analyzed || coverage.llm_conversations_analyzed || 0),
         messages: Number(coverage.messages_analyzed || 0),
     }
 }
 
 function detailHref(reportId: string, filter: string) {
     return `/admin/leads/relatorios-atendimento/detalhes?report_id=${encodeURIComponent(reportId)}&filtro=${encodeURIComponent(filter)}`
+}
+
+function LeadAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
+    const imageUrl = cleanLabel(avatarUrl)
+    return (
+        <div
+            aria-label={`Foto de ${name}`}
+            style={{
+                ...leadAvatarStyle,
+                ...(imageUrl ? {
+                    backgroundImage: `url("${imageUrl.replace(/"/g, '%22')}")`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                } : {}),
+            }}
+        >
+            {!imageUrl && <span>{getInitials(name)}</span>}
+        </div>
+    )
 }
 
 export default function AttendanceReportDetailsClient({ reportId, filter }: { reportId: string; filter: string }) {
@@ -133,7 +201,7 @@ export default function AttendanceReportDetailsClient({ reportId, filter }: { re
             try {
                 const params = new URLSearchParams({ report_id: reportId, filtro: filter || 'todos' })
                 const res = await fetch(`/api/admin/leads/attendance-reports?${params.toString()}`, { signal: controller.signal })
-                const data = await res.json()
+                const data = await readApiJson(res)
                 if (!res.ok || !data?.success) throw new Error(data?.error || 'Falha ao carregar detalhes.')
                 setPayload(data)
             } catch (loadError) {
@@ -187,6 +255,9 @@ export default function AttendanceReportDetailsClient({ reportId, filter }: { re
                         <Metric icon={<MessageSquare size={18} />} label="Conversas no filtro" value={String(breakdown.total)} />
                         <Metric icon={<Flame size={18} />} label="Leads quentes" value={String(breakdown.hot)} />
                         <Metric icon={<AlertTriangle size={18} />} label="Sem resposta" value={String(breakdown.unanswered)} />
+                        <Metric icon={<AlertTriangle size={18} />} label="Perdidas" value={String(breakdown.lost)} />
+                        <Metric icon={<RefreshCw size={18} />} label="Recuperaveis" value={String(breakdown.recoverable)} />
+                        <Metric icon={<BarChart3 size={18} />} label="Coach LLM" value={String(breakdown.llmAnalyzed)} />
                         <Metric icon={<AlertTriangle size={18} />} label="Conversas ruins" value={String(breakdown.poor)} />
                         <Metric icon={<BarChart3 size={18} />} label="Boas conversas" value={String(breakdown.strong)} />
                     </section>
@@ -216,18 +287,51 @@ export default function AttendanceReportDetailsClient({ reportId, filter }: { re
                             const metrics = score.metrics || {}
                             const risks = Array.isArray(score.risks) ? score.risks : []
                             const recommendations = Array.isArray(score.recommendations) ? score.recommendations : []
+                            const leadName = getLeadName(score)
+                            const leadIntent = cleanLabel(metrics.lead_intent)
+                            const funnelStage = cleanLabel(metrics.funnel_stage)
+                            const commercialStatus = cleanLabel(metrics.commercial_status)
+                            const mainIssue = cleanLabel(metrics.main_issue)
+                            const nextAction = cleanLabel(metrics.recommended_next_action)
+                            const suggestedMessage = cleanLabel(metrics.suggested_message)
+                            const isLost = metrics.lost_opportunity === true || metrics.commercial_status === 'oportunidade_perdida'
+                            const isRecoverable = metrics.recoverable === true
+                            const dimensions = [
+                                ['Comunicacao', metricNumber(metrics, 'communication_quality')],
+                                ['Resposta', metricNumber(metrics, 'response_quality')],
+                                ['Qualificacao', metricNumber(metrics, 'qualification_quality')],
+                                ['Empatia', metricNumber(metrics, 'empathy_quality')],
+                                ['Fechamento', metricNumber(metrics, 'closing_quality')],
+                            ].filter(([, value]) => value !== null) as [string, number][]
                             return (
                                 <article key={score.id || score.chat_id} style={conversationStyle}>
                                     <div style={conversationTopStyle}>
-                                        <div>
-                                            <strong style={{ color: scoreColor(score.score), fontSize: '1.05rem' }}>{score.score}/100</strong>
-                                            <span style={phoneStyle}>{formatPhone(score.phone)}</span>
+                                        <div style={leadHeaderStyle}>
+                                            <LeadAvatar name={leadName} avatarUrl={score.lead_avatar_url} />
+                                            <div style={{ minWidth: 0 }}>
+                                                <strong style={leadNameStyle}>{leadName}</strong>
+                                                <div style={leadMetaStyle}>
+                                                    <span>{formatPhone(score.phone)}</span>
+                                                    <span style={{ color: scoreColor(score.score), fontWeight: 950 }}>{score.score}/100</span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div style={chipRowStyle}>
                                             <span style={badgeStyle}>{potentialLabel(score.lead_potential)}</span>
                                             {score.unanswered && <span style={dangerBadgeStyle}>Sem resposta</span>}
+                                            {isLost && <span style={dangerBadgeStyle}>Perdida</span>}
+                                            {isRecoverable && <span style={recoverableBadgeStyle}>Recuperavel</span>}
+                                            {metrics.llm_analyzed && <span style={coachBadgeStyle}>Helena LLM</span>}
                                         </div>
                                     </div>
+
+                                    {(leadIntent || funnelStage || commercialStatus) && (
+                                        <div style={coachInfoRowStyle}>
+                                            {leadIntent && <span>Intencao: {leadIntent}</span>}
+                                            {funnelStage && <span>Etapa: {funnelStage}</span>}
+                                            {commercialStatus && <span>Status: {commercialStatus}</span>}
+                                        </div>
+                                    )}
 
                                     <div style={metricsGridStyle}>
                                         <MiniStat label="Msgs lead" value={metrics.inbound_messages || 0} />
@@ -235,9 +339,36 @@ export default function AttendanceReportDetailsClient({ reportId, filter }: { re
                                         <MiniStat label="Tempo medio" value={formatDuration(score.response_time_seconds)} />
                                         <MiniStat label="Rapport" value={metrics.rapport_hits || 0} />
                                         <MiniStat label="Venda" value={metrics.sales_hits || 0} />
+                                        {dimensions.map(([label, value]) => (
+                                            <MiniStat key={`${score.id || score.chat_id}-${label}`} label={label} value={`${value}/100`} />
+                                        ))}
                                     </div>
 
                                     <p style={conversationSummaryStyle}>{score.summary || 'Conversa analisada.'}</p>
+
+                                    {(mainIssue || nextAction) && (
+                                        <div style={coachInsightStyle}>
+                                            {mainIssue && (
+                                                <div style={coachInsightColumnBase}>
+                                                    <strong>Ponto critico</strong>
+                                                    <span>{mainIssue}</span>
+                                                </div>
+                                            )}
+                                            {nextAction && (
+                                                <div style={coachInsightColumnBase}>
+                                                    <strong>Proximo passo</strong>
+                                                    <span>{nextAction}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {suggestedMessage && (
+                                        <div style={suggestedMessageStyle}>
+                                            <strong>Mensagem sugerida</strong>
+                                            <span>{suggestedMessage}</span>
+                                        </div>
+                                    )}
 
                                     {risks.length > 0 && (
                                         <div style={chipRowStyle}>
@@ -385,13 +516,48 @@ const conversationStyle: CSSProperties = {
 const conversationTopStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 10,
     flexWrap: 'wrap',
 }
 
-const phoneStyle: CSSProperties = {
+const leadHeaderStyle: CSSProperties = {
+    minWidth: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+}
+
+const leadAvatarStyle: CSSProperties = {
+    width: 44,
+    height: 44,
+    flex: '0 0 44px',
+    borderRadius: '50%',
+    border: '2px solid rgba(201,169,110,0.34)',
+    background: 'linear-gradient(135deg, #c9a96e, #334155)',
+    color: '#fff',
+    display: 'grid',
+    placeItems: 'center',
+    overflow: 'hidden',
+    fontSize: '0.72rem',
+    fontWeight: 950,
+}
+
+const leadNameStyle: CSSProperties = {
+    display: 'block',
+    color: 'var(--text-primary)',
+    fontSize: '0.98rem',
+    lineHeight: 1.2,
+    overflowWrap: 'anywhere',
+}
+
+const leadMetaStyle: CSSProperties = {
+    marginTop: 3,
     color: 'var(--text-secondary)',
-    marginLeft: 8,
+    display: 'flex',
+    gap: 8,
+    flexWrap: 'wrap',
+    fontSize: '0.78rem',
     fontWeight: 850,
 }
 
@@ -439,6 +605,54 @@ const dangerBadgeStyle: CSSProperties = {
     borderColor: 'rgba(239,68,68,0.22)',
     background: 'rgba(254,226,226,0.78)',
     color: '#991b1b',
+}
+
+const recoverableBadgeStyle: CSSProperties = {
+    ...badgeStyle,
+    borderColor: 'rgba(34,197,94,0.24)',
+    background: 'rgba(220,252,231,0.82)',
+    color: '#166534',
+}
+
+const coachBadgeStyle: CSSProperties = {
+    ...badgeStyle,
+    borderColor: 'rgba(14,165,233,0.24)',
+    background: 'rgba(224,242,254,0.82)',
+    color: '#075985',
+}
+
+const coachInfoRowStyle: CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 6,
+    color: '#075985',
+    fontSize: '0.76rem',
+    fontWeight: 850,
+}
+
+const coachInsightStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+    gap: 8,
+}
+
+const coachInsightColumnBase: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.18)',
+    background: 'rgba(240,249,255,0.72)',
+    color: '#075985',
+    borderRadius: 8,
+    padding: '9px 10px',
+    display: 'grid',
+    gap: 4,
+    fontSize: '0.79rem',
+    lineHeight: 1.45,
+}
+
+const suggestedMessageStyle: CSSProperties = {
+    ...coachInsightColumnBase,
+    borderColor: 'rgba(34,197,94,0.22)',
+    background: 'rgba(240,253,244,0.78)',
+    color: '#166534',
 }
 
 const riskChipStyle: CSSProperties = {

@@ -30,6 +30,10 @@ import {
     DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
     DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
 } from '@/lib/whatsapp/commercial-automation-prompts'
+import {
+    DEFAULT_WHATSAPP_ATTENDANCE_COACH_PROMPT,
+    WHATSAPP_ATTENDANCE_COACH_PROMPT_KEY,
+} from '@/lib/whatsapp/attendance-coach-agent'
 import { getDefaultResearchPilgerTopicsJson } from '@/lib/research/topics'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from '@/lib/events/agent-prompt'
 import { DEFAULT_BROKER_CANDIDATE_AGENT_PROMPT } from '@/lib/broker-candidates/agent-prompt'
@@ -233,6 +237,12 @@ const AGENT_PERSONAS: Record<string, AgentPersona> = {
         jobTitle: 'Analista de Leads WhatsApp',
         bio: 'Le conversas, identifica intencao, origem e sinais comerciais para alimentar o CRM com precisao.',
         avatarTone: 'aqua',
+    },
+    'whatsapp-attendance-coach': {
+        personaName: 'Helena Auditoria Comercial',
+        jobTitle: 'Coach de Atendimento WhatsApp',
+        bio: 'Audita conversas dos corretores, encontra oportunidades perdidas e transforma atendimentos em plano de melhoria diario.',
+        avatarTone: 'emerald',
     },
     'whatsapp-global-agent': {
         personaName: 'WhatsApp Global',
@@ -541,6 +551,76 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['WhatsApp', 'CRM', 'funil'],
         autonomy: 'Classifica e organiza dados para o Kanban; nao envia mensagens sozinho por este prompt.',
         editHref: '/admin/whatsapp/agent-config',
+    },
+    {
+        id: 'whatsapp-attendance-coach',
+        name: 'Agente Coach de Atendimento',
+        role: 'Auditoria diaria das conversas dos corretores',
+        sector: 'WhatsApp',
+        promptKey: WHATSAPP_ATTENDANCE_COACH_PROMPT_KEY,
+        fallback: DEFAULT_WHATSAPP_ATTENDANCE_COACH_PROMPT,
+        detail: 'Analisa conversas do WhatsApp com LLM, pontua qualidade do atendimento, oportunidades perdidas e recuperaveis.',
+        tools: ['WhatsApp', 'CRM', 'relatorios de atendimento', 'coaching comercial'],
+        autonomy: 'Gera relatorios e sugestoes para gestores e corretores; nao envia mensagens automaticamente ao lead.',
+        editHref: '/admin/leads/relatorios-atendimento',
+        behaviorControls: [
+            {
+                key: 'whatsapp_attendance_coach_enabled',
+                label: 'Auditoria LLM ativa',
+                type: 'select',
+                fallback: 'true',
+                options: [
+                    { label: 'Ativa', value: 'true' },
+                    { label: 'Pausada', value: 'false' },
+                ],
+                help: 'Controla se a Helena usa LLM para enriquecer os relatorios diarios de atendimento.',
+            },
+            {
+                key: 'whatsapp_attendance_coach_max_conversations',
+                label: 'Conversas por relatorio',
+                type: 'number',
+                fallback: '40',
+                min: 1,
+                max: 200,
+                step: 1,
+                help: 'Limite de conversas priorizadas para analise LLM por corretor em cada relatorio.',
+            },
+            {
+                key: 'whatsapp_attendance_coach_batch_size',
+                label: 'Lote por chamada LLM',
+                type: 'number',
+                fallback: '8',
+                min: 1,
+                max: 20,
+                step: 1,
+                help: 'Quantidade de conversas enviadas por chamada para controlar custo e estabilidade.',
+            },
+            {
+                key: 'whatsapp_attendance_coach_min_messages',
+                label: 'Minimo de mensagens',
+                type: 'number',
+                fallback: '2',
+                min: 1,
+                max: 20,
+                step: 1,
+                help: 'Conversas abaixo desse volume continuam no relatorio, mas nao precisam gastar LLM.',
+            },
+        ],
+        runtimeFacts: configs => [
+            {
+                label: 'Modo atual',
+                value: configs.whatsapp_attendance_coach_enabled === 'false' ? 'Auditoria pausada' : 'Auditoria LLM ativa',
+                tone: configs.whatsapp_attendance_coach_enabled === 'false' ? 'warning' : 'success',
+            },
+            {
+                label: 'Conversas por relatorio',
+                value: `${configs.whatsapp_attendance_coach_max_conversations || '40'} conversas`,
+            },
+            {
+                label: 'Lote LLM',
+                value: `${configs.whatsapp_attendance_coach_batch_size || '8'} por chamada`,
+            },
+        ],
     },
     {
         id: 'whatsapp-global-agent',

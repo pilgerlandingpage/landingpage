@@ -6,6 +6,13 @@ import {
     listContactsPage,
     requestHistorySync,
 } from '@/lib/uazapi'
+import {
+    loadAttendanceCoachSettings,
+    runAttendanceCoachAnalysis,
+    WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+    type AttendanceCoachConversationAnalysis,
+    type AttendanceCoachConversationInput,
+} from './attendance-coach-agent'
 import { normalizeWhatsAppInstanceConfig } from './instance-config'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
@@ -1072,6 +1079,116 @@ function scoreConversation(chatId: string, messages: NormalizedMessage[], leadNa
     }
 }
 
+type ConversationScoreDraft = Omit<ReturnType<typeof scoreConversation>, 'metrics'> & {
+    metrics: ReturnType<typeof scoreConversation>['metrics'] & Record<string, any>
+}
+
+function uniqueTextList(...lists: unknown[]) {
+    const seen = new Set<string>()
+    const items: string[] = []
+    for (const list of lists) {
+        const values = Array.isArray(list) ? list : typeof list === 'string' ? [list] : []
+        for (const value of values) {
+            const text = String(value || '').trim()
+            if (!text || seen.has(text)) continue
+            seen.add(text)
+            items.push(text)
+        }
+    }
+    return items.slice(0, 8)
+}
+
+function coachCandidateWeight(score: ConversationScoreDraft, messages: NormalizedMessage[]) {
+    const lastMessageAt = messages.at(-1)?.messageTimestamp
+    const ageHours = lastMessageAt
+        ? Math.max(0, (Date.now() - new Date(lastMessageAt).getTime()) / (60 * 60 * 1000))
+        : 999
+    return (
+        (score.unanswered ? 100 : 0) +
+        (score.lead_potential === 'hot' ? 80 : score.lead_potential === 'warm' ? 45 : 0) +
+        (score.score < 60 ? 70 : score.score < 75 ? 35 : 0) +
+        (Number(score.metrics?.commercial_category === 'oportunidade_perdida') ? 60 : 0) +
+        Math.max(0, 30 - Math.min(30, ageHours)) +
+        Math.min(20, messages.length)
+    )
+}
+
+function selectCoachCandidates(
+    conversationScores: ConversationScoreDraft[],
+    groupedMessages: Map<string, NormalizedMessage[]>,
+    maxConversations: number
+) {
+    return [...conversationScores]
+        .map((score) => ({
+            score,
+            messages: groupedMessages.get(score.chat_id) || [],
+            weight: coachCandidateWeight(score, groupedMessages.get(score.chat_id) || []),
+        }))
+        .filter((item) => item.messages.some((message) => String(message.body || '').trim()))
+        .sort((a, b) => b.weight - a.weight || a.score.score - b.score.score)
+        .slice(0, maxConversations)
+}
+
+function toCoachInput(item: { score: ConversationScoreDraft; messages: NormalizedMessage[] }): AttendanceCoachConversationInput {
+    const sorted = [...item.messages].sort((a, b) => {
+        const ta = a.messageTimestamp ? new Date(a.messageTimestamp).getTime() : 0
+        const tb = b.messageTimestamp ? new Date(b.messageTimestamp).getTime() : 0
+        return ta - tb
+    })
+    return {
+        chat_id: item.score.chat_id,
+        phone: item.score.phone || null,
+        lead_name: item.score.lead_name || null,
+        baseline_score: item.score.score,
+        baseline_potential: item.score.lead_potential,
+        unanswered: item.score.unanswered,
+        response_time_seconds: item.score.response_time_seconds,
+        messages: sorted
+            .map((message) => ({
+                role: message.authorType || (message.fromMe ? 'broker' : 'lead'),
+                text: String(message.body || '').trim(),
+                at: message.messageTimestamp || null,
+            }))
+            .filter((message) => message.text),
+    }
+}
+
+function mergeCoachAnalysis(score: ConversationScoreDraft, analysis?: AttendanceCoachConversationAnalysis | null): ConversationScoreDraft {
+    if (!analysis) return score
+    return {
+        ...score,
+        score: analysis.score,
+        lead_potential: analysis.lead_potential,
+        summary: analysis.summary || score.summary,
+        risks: uniqueTextList(analysis.risks, score.risks),
+        recommendations: uniqueTextList(analysis.recommendations, score.recommendations, analysis.recommended_next_action),
+        metrics: {
+            ...score.metrics,
+            llm_agent_id: WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+            llm_analyzed: true,
+            llm_score: analysis.score,
+            lead_intent: analysis.lead_intent,
+            funnel_stage: analysis.funnel_stage,
+            commercial_status: analysis.commercial_status,
+            lost_opportunity: analysis.lost_opportunity,
+            recoverable: analysis.recoverable,
+            communication_quality: analysis.communication_quality,
+            response_quality: analysis.response_quality,
+            closing_quality: analysis.closing_quality,
+            empathy_quality: analysis.empathy_quality,
+            qualification_quality: analysis.qualification_quality,
+            main_issue: analysis.main_issue,
+            what_broker_did_well: analysis.what_broker_did_well,
+            what_broker_missed: analysis.what_broker_missed,
+            recommended_next_action: analysis.recommended_next_action,
+            suggested_message: analysis.suggested_message,
+            commercial_category: analysis.commercial_status || score.metrics?.commercial_category,
+            commercial_reason: analysis.main_issue || score.metrics?.commercial_reason,
+            next_action: analysis.recommended_next_action || score.metrics?.next_action,
+        },
+    }
+}
+
 function formatDurationBrief(seconds: number | null) {
     if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return 'sem tempo medio calculado'
     if (seconds < 60) return `${seconds}s`
@@ -1205,6 +1322,7 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
     const supabase = options.supabase || createAdminClient()
     const range = dayRange(options.date)
     const instances = (await loadInstances(supabase, options.instanceId)).filter((instance) => shouldReportInstance(instance, options.force, options.respectReportHour))
+    const coachSettings = await loadAttendanceCoachSettings(supabase)
     const reports = []
 
     for (const instance of instances) {
@@ -1271,7 +1389,17 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             if (leadName && !leadNameByChat.has(msg.chatId)) leadNameByChat.set(msg.chatId, leadName)
         }
 
-        const conversationScores = Array.from(grouped.entries()).map(([chatId, list]) => scoreConversation(chatId, list, leadNameByChat.get(chatId)))
+        let conversationScores: ConversationScoreDraft[] = Array.from(grouped.entries()).map(([chatId, list]) => scoreConversation(chatId, list, leadNameByChat.get(chatId)))
+        const coachCandidates = selectCoachCandidates(conversationScores, grouped, coachSettings.maxConversations)
+        const coachResult = await runAttendanceCoachAnalysis({
+            settings: coachSettings,
+            ownerName: instance.instance_name || instance.phone_number || instance.id,
+            reportDate: range.date,
+            conversations: coachCandidates.map(toCoachInput),
+        })
+        if (coachResult.conversations.size > 0) {
+            conversationScores = conversationScores.map((item) => mergeCoachAnalysis(item, coachResult.conversations.get(item.chat_id)))
+        }
         const score = conversationScores.length
             ? Math.round(conversationScores.reduce((sum, item) => sum + item.score, 0) / conversationScores.length)
             : 0
@@ -1284,6 +1412,15 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
         const strongConversations = conversationScores.filter((item) => item.score >= 80).length
         const needsAttention = conversationScores.filter((item) => item.unanswered || item.score < 60).length
         const hotUnanswered = conversationScores.filter((item) => item.lead_potential === 'hot' && item.unanswered).length
+        const llmAnalyzedConversations = conversationScores.filter((item) => item.metrics?.llm_analyzed === true).length
+        const lostOpportunities = conversationScores.filter((item) => item.metrics?.lost_opportunity === true || item.metrics?.commercial_status === 'oportunidade_perdida').length
+        const recoverableOpportunities = conversationScores.filter((item) => item.metrics?.recoverable === true).length
+        const avgCoachMetric = (key: string) => {
+            const values = conversationScores
+                .map((item) => Number(item.metrics?.[key]))
+                .filter((value) => Number.isFinite(value))
+            return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null
+        }
         const professionalStatus = conversationScores.length === 0
             ? 'sem_base'
             : score >= 78 && unansweredCount === 0 && poorConversations <= Math.max(1, Math.floor(conversationScores.length * 0.15))
@@ -1325,9 +1462,13 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
         const recommendations = [
             unansweredCount > 0 ? `Retomar ${unansweredCount} conversa(s) que ficaram sem ultima resposta.` : null,
             hotLeads > 0 ? `Priorizar ${hotLeads} lead(s) com potencial alto.` : null,
+            lostOpportunities > 0 ? `Revisar ${lostOpportunities} oportunidade(s) perdida(s) apontadas pela Helena Auditoria Comercial.` : null,
+            recoverableOpportunities > 0 ? `Atacar ${recoverableOpportunities} conversa(s) recuperavel(is) com mensagem objetiva.` : null,
             avgResponse !== null && avgResponse > 900 ? 'Criar meta de primeira resposta abaixo de 15 minutos.' : null,
             'Usar perguntas de descoberta: bairro, faixa de valor, prazo, forma de pagamento e objetivo.',
             'Encerrar cada conversa ativa com proximo passo claro: visita, envio de opcoes ou retorno combinado.',
+            ...(coachResult.summary?.recovery_actions || []),
+            ...(coachResult.summary?.training_focus || []),
             ...narrative.improvement_points,
         ].filter(Boolean)
 
@@ -1341,9 +1482,19 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             lead_log_messages_analyzed: mergedLeadLogMessages.length,
             broker_conversation_messages_analyzed: mergedBrokerConversationMessages.length,
             internal_messages_analyzed: mergedInternalMessages.length,
+            llm_agent_id: WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+            llm_enabled: coachSettings.enabled,
+            llm_candidate_conversations: coachCandidates.length,
+            llm_conversations_analyzed: llmAnalyzedConversations,
+            llm_errors: coachResult.errors,
             period_start: range.start,
             period_end: range.end,
         }
+        const coachStrengths = uniqueTextList(coachResult.summary?.strengths, narrative.strengths)
+        const coachImprovementPoints = uniqueTextList(coachResult.summary?.improvement_points, narrative.improvement_points)
+        const coachTrainingFocus = uniqueTextList(coachResult.summary?.training_focus)
+        const coachRecoveryActions = uniqueTextList(coachResult.summary?.recovery_actions)
+        const coachExecutiveSummary = coachResult.summary?.executive_summary || narrative.coaching_report
         const metrics = {
             score,
             unanswered_conversations: unansweredCount,
@@ -1362,13 +1513,29 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             outbound_messages: outboundMessages,
             rapport_hits: rapportHits,
             sales_hits: salesHits,
-            strengths: narrative.strengths,
-            improvement_points: narrative.improvement_points,
+            attendance_coach_agent_id: WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+            attendance_coach_enabled: coachSettings.enabled,
+            attendance_coach_conversations_analyzed: llmAnalyzedConversations,
+            attendance_coach_candidate_conversations: coachCandidates.length,
+            attendance_coach_errors: coachResult.errors,
+            lost_opportunities: lostOpportunities,
+            recoverable_opportunities: recoverableOpportunities,
+            communication_quality_avg: avgCoachMetric('communication_quality'),
+            response_quality_avg: avgCoachMetric('response_quality'),
+            closing_quality_avg: avgCoachMetric('closing_quality'),
+            empathy_quality_avg: avgCoachMetric('empathy_quality'),
+            qualification_quality_avg: avgCoachMetric('qualification_quality'),
+            training_focus: coachTrainingFocus,
+            recovery_actions: coachRecoveryActions,
+            strengths: coachStrengths,
+            improvement_points: coachImprovementPoints,
             lead_quality_report: narrative.lead_quality_report,
-            coaching_report: narrative.coaching_report,
+            coaching_report: coachExecutiveSummary,
         }
 
-        const summary = narrative.summary
+        const summary = coachResult.summary?.executive_summary
+            ? `Parecer IA: ${coachResult.summary.executive_summary}`
+            : narrative.summary
 
         const { data: report, error: reportError } = await supabase
             .from('broker_attendance_reports')

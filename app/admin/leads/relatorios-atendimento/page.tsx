@@ -97,6 +97,11 @@ type ReportBreakdown = {
     strong: number
     unanswered: number
     needsAttention: number
+    lost: number
+    recoverable: number
+    llmAnalyzed: number
+    communicationQuality: number | null
+    closingQuality: number | null
     messages: number
     inbound: number
     outbound: number
@@ -191,6 +196,8 @@ function getReportBreakdown(report: AttendanceReport, scores: ConversationScore[
     const coverage = report.coverage || {}
     const metrics = report.metrics || {}
     const avgResponse = Number(metrics.avg_response_seconds)
+    const communicationQuality = Number(metrics.communication_quality_avg)
+    const closingQuality = Number(metrics.closing_quality_avg)
     const total = scores.length || Number(coverage.conversations_analyzed || 0)
     return {
         total,
@@ -201,6 +208,11 @@ function getReportBreakdown(report: AttendanceReport, scores: ConversationScore[
         strong: scores.filter((score) => Number(score.score || 0) >= 80).length || Number(metrics.strong_conversations || 0),
         unanswered: scores.filter((score) => score.unanswered).length || Number(metrics.unanswered_conversations || 0),
         needsAttention: scores.filter((score) => score.unanswered || Number(score.score || 0) < 60).length || Number(metrics.needs_attention || 0),
+        lost: scores.filter((score) => score.metrics?.lost_opportunity === true || score.metrics?.commercial_status === 'oportunidade_perdida').length || Number(metrics.lost_opportunities || 0),
+        recoverable: scores.filter((score) => score.metrics?.recoverable === true).length || Number(metrics.recoverable_opportunities || 0),
+        llmAnalyzed: Number(metrics.attendance_coach_conversations_analyzed || coverage.llm_conversations_analyzed || 0),
+        communicationQuality: Number.isFinite(communicationQuality) ? communicationQuality : null,
+        closingQuality: Number.isFinite(closingQuality) ? closingQuality : null,
         messages: Number(coverage.messages_analyzed || 0),
         inbound: Number(metrics.inbound_messages || 0),
         outbound: Number(metrics.outbound_messages || 0),
@@ -259,6 +271,8 @@ function improvementItems(breakdown: ReportBreakdown) {
     const items: string[] = []
     if (breakdown.unanswered > 0) items.push(`Retomar ${breakdown.unanswered} conversa(s) sem ultima resposta.`)
     if (breakdown.hot > 0) items.push(`Priorizar ${breakdown.hot} lead(s) quente(s) com proximo passo claro.`)
+    if (breakdown.lost > 0) items.push(`Revisar ${breakdown.lost} oportunidade(s) perdida(s) para entender falha de abordagem.`)
+    if (breakdown.recoverable > 0) items.push(`Enviar plano de recuperacao para ${breakdown.recoverable} lead(s) ainda recuperavel(is).`)
     if (breakdown.poor > 0) items.push(`Revisar ${breakdown.poor} conversa(s) ruins para corrigir abordagem, rapport e fechamento.`)
     if (breakdown.avgResponse !== null && breakdown.avgResponse > 900) items.push('Reduzir tempo medio de resposta para abaixo de 15 minutos.')
     if (items.length === 0) items.push('Manter padrao atual e acompanhar novas conversas importadas.')
@@ -348,8 +362,11 @@ export default function AttendanceReportsPage() {
             messages: acc.messages + Number(coverage.messages_analyzed || 0),
             hot: acc.hot + Number(metrics.hot_leads || 0),
             unanswered: acc.unanswered + Number(metrics.unanswered_conversations || 0),
+            lost: acc.lost + Number(metrics.lost_opportunities || 0),
+            recoverable: acc.recoverable + Number(metrics.recoverable_opportunities || 0),
+            llmAnalyzed: acc.llmAnalyzed + Number(metrics.attendance_coach_conversations_analyzed || coverage.llm_conversations_analyzed || 0),
         }
-    }, { conversations: 0, messages: 0, hot: 0, unanswered: 0 }), [reports])
+    }, { conversations: 0, messages: 0, hot: 0, unanswered: 0, lost: 0, recoverable: 0, llmAnalyzed: 0 }), [reports])
 
     async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string; preserveMessage?: boolean } = {}) {
         setLoading(true)
@@ -519,6 +536,9 @@ export default function AttendanceReportsPage() {
                 <Metric icon={<Database size={18} />} label="Mensagens analisadas" value={String(totals.messages)} />
                 <Metric icon={<Flame size={18} />} label="Leads quentes" value={String(totals.hot)} />
                 <Metric icon={<AlertTriangle size={18} />} label="Sem última resposta" value={String(totals.unanswered)} />
+                <Metric icon={<AlertTriangle size={18} />} label="Oportunidades perdidas" value={String(totals.lost)} />
+                <Metric icon={<RefreshCw size={18} />} label="Recuperaveis" value={String(totals.recoverable)} />
+                <Metric icon={<BarChart3 size={18} />} label="Coach LLM" value={String(totals.llmAnalyzed)} />
             </section>
 
             {reports.length > 0 && totals.messages === 0 && latestReportWithMessages && !isDateInRange(latestReportWithMessages.report_date, startDate, endDate) && (
@@ -557,6 +577,8 @@ export default function AttendanceReportsPage() {
                     const coachingItems = improvementItems(breakdown)
                     const strengths = metricTextList(report, 'strengths')
                     const improvementPoints = metricTextList(report, 'improvement_points')
+                    const trainingFocus = metricTextList(report, 'training_focus')
+                    const recoveryActions = metricTextList(report, 'recovery_actions')
                     const leadQualityReport = metricText(report, 'lead_quality_report')
                     const messageActivity = inst?.message_activity || {}
                     const totalImportedMessages = Number(messageActivity.total_messages || 0)
@@ -632,6 +654,20 @@ export default function AttendanceReportsPage() {
                                         tone="danger"
                                     />
                                     <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'perdidas')}
+                                        label="Perdidas"
+                                        value={breakdown.lost}
+                                        detail="Oportunidades que a Helena marcou como perdidas"
+                                        tone="danger"
+                                    />
+                                    <InsightLinkCard
+                                        href={reportDetailHref(report.id, 'recuperaveis')}
+                                        label="Recuperaveis"
+                                        value={breakdown.recoverable}
+                                        detail="Leads que ainda podem receber retomada"
+                                        tone="success"
+                                    />
+                                    <InsightLinkCard
                                         href={reportDetailHref(report.id, 'quentes')}
                                         label="Leads quentes"
                                         value={breakdown.hot}
@@ -686,6 +722,32 @@ export default function AttendanceReportsPage() {
                                             <strong>Pontos de melhoria</strong>
                                             {(improvementPoints.length ? improvementPoints : coachingItems).slice(0, 4).map((item, index) => (
                                                 <span key={`${report.id}-improvement-${index}`}>{item}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {(trainingFocus.length > 0 || recoveryActions.length > 0 || breakdown.llmAnalyzed > 0) && (
+                                    <div style={coachActionGridStyle}>
+                                        <div style={coachActionColumnStyle}>
+                                            <strong>Coach LLM</strong>
+                                            <span>{breakdown.llmAnalyzed} conversa(s) passaram pela Helena Auditoria Comercial.</span>
+                                            {breakdown.communicationQuality !== null && (
+                                                <span>Qualidade de comunicacao: {breakdown.communicationQuality}/100.</span>
+                                            )}
+                                            {breakdown.closingQuality !== null && (
+                                                <span>Fechamento e proximo passo: {breakdown.closingQuality}/100.</span>
+                                            )}
+                                        </div>
+                                        <div style={coachActionColumnStyle}>
+                                            <strong>Treino recomendado</strong>
+                                            {(trainingFocus.length ? trainingFocus : improvementPoints).slice(0, 3).map((item, index) => (
+                                                <span key={`${report.id}-training-${index}`}>{item}</span>
+                                            ))}
+                                        </div>
+                                        <div style={coachActionColumnStyle}>
+                                            <strong>Recuperacao</strong>
+                                            {(recoveryActions.length ? recoveryActions : coachingItems).slice(0, 3).map((item, index) => (
+                                                <span key={`${report.id}-recovery-${index}`}>{item}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -762,12 +824,17 @@ export default function AttendanceReportsPage() {
                                 <MiniStat label="Ultima msg importada" value={messageActivity.latest_message_at ? formatDateTimeLabel(messageActivity.latest_message_at) : 'sem registro'} />
                                 <MiniStat label="Ultima msg CRM" value={messageActivity.latest_crm_message_at ? formatDateTimeLabel(messageActivity.latest_crm_message_at) : 'sem registro'} />
                                 <MiniStat label="Conversas analisadas" value={breakdown.total} />
+                                <MiniStat label="Coach LLM" value={breakdown.llmAnalyzed} />
+                                <MiniStat label="Perdidas" value={breakdown.lost} />
+                                <MiniStat label="Recuperaveis" value={breakdown.recoverable} />
                                 <MiniStat label="Mensagens" value={breakdown.messages} />
                                 <MiniStat label="Analisadas Uazapi" value={uazapiMessagesAnalyzed || 0} />
                                 <MiniStat label="Analisadas CRM" value={crmMessagesAnalyzed || 0} />
                                 <MiniStat label="Msgs lead" value={breakdown.inbound} />
                                 <MiniStat label="Resp. corretor" value={breakdown.outbound} />
                                 <MiniStat label="Resp. media" value={formatDuration(breakdown.avgResponse)} />
+                                <MiniStat label="Comunicacao" value={breakdown.communicationQuality !== null ? `${breakdown.communicationQuality}/100` : 'sem LLM'} />
+                                <MiniStat label="Fechamento" value={breakdown.closingQuality !== null ? `${breakdown.closingQuality}/100` : 'sem LLM'} />
                             </div>
 
                         </article>
@@ -1150,6 +1217,24 @@ const narrativeColumnStyle: CSSProperties = {
     gap: 6,
     color: 'var(--text-secondary)',
     fontSize: '0.8rem',
+    lineHeight: 1.45,
+}
+
+const coachActionGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))',
+    gap: 8,
+}
+
+const coachActionColumnStyle: CSSProperties = {
+    border: '1px solid rgba(14,165,233,0.18)',
+    background: 'rgba(240,249,255,0.72)',
+    borderRadius: 8,
+    padding: '10px 11px',
+    display: 'grid',
+    gap: 5,
+    color: '#075985',
+    fontSize: '0.79rem',
     lineHeight: 1.45,
 }
 

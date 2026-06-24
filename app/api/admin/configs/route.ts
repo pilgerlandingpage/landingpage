@@ -29,6 +29,10 @@ import {
     DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
     DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
 } from '@/lib/whatsapp/commercial-automation-prompts'
+import {
+    DEFAULT_WHATSAPP_ATTENDANCE_COACH_PROMPT,
+    WHATSAPP_ATTENDANCE_COACH_PROMPT_KEY,
+} from '@/lib/whatsapp/attendance-coach-agent'
 import { getDefaultResearchPilgerTopicsJson } from '@/lib/research/topics'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from '@/lib/events/agent-prompt'
 import { getDefaultEmailAgentTemplatesJson, normalizeEmailAgentTemplatesJson } from '@/lib/email/agent-templates'
@@ -146,6 +150,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
     whatsapp_global_system_prompt: DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT,
     whatsapp_rescue_system_prompt: DEFAULT_WHATSAPP_RESCUE_SYSTEM_PROMPT,
     whatsapp_followup_system_prompt: DEFAULT_WHATSAPP_FOLLOWUP_SYSTEM_PROMPT,
+    [WHATSAPP_ATTENDANCE_COACH_PROMPT_KEY]: DEFAULT_WHATSAPP_ATTENDANCE_COACH_PROMPT,
     event_agent_system_prompt: DEFAULT_EVENT_AGENT_SYSTEM_PROMPT,
 }
 
@@ -158,6 +163,11 @@ const CONFIG_AGENT_CENTRAL_MAP: Record<string, string> = {
     whatsapp_global_system_prompt: 'whatsapp-global-agent',
     whatsapp_rescue_system_prompt: 'whatsapp-rescue-agent',
     whatsapp_followup_system_prompt: 'whatsapp-followup-agent',
+    [WHATSAPP_ATTENDANCE_COACH_PROMPT_KEY]: 'whatsapp-attendance-coach',
+    whatsapp_attendance_coach_enabled: 'whatsapp-attendance-coach',
+    whatsapp_attendance_coach_max_conversations: 'whatsapp-attendance-coach',
+    whatsapp_attendance_coach_batch_size: 'whatsapp-attendance-coach',
+    whatsapp_attendance_coach_min_messages: 'whatsapp-attendance-coach',
     whatsapp_rescue_message_template: 'whatsapp-rescue-agent',
     whatsapp_followup_message_template: 'whatsapp-followup-agent',
     user_first_access_whatsapp_message: 'user-first-access-agent',
@@ -197,6 +207,10 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     gemini_model: 'gemini-2.5-flash',
     openai_model: 'gpt-4o-mini',
     whatsapp_legacy_property_catalog_enabled: 'false',
+    whatsapp_attendance_coach_enabled: 'true',
+    whatsapp_attendance_coach_max_conversations: '40',
+    whatsapp_attendance_coach_batch_size: '8',
+    whatsapp_attendance_coach_min_messages: '2',
     ads_sync_interval_minutes: '60',
     pilger_daily_days: '0,1,2,3,4,5,6',
     pilger_daily_time: '23',

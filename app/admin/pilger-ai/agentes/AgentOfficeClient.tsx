@@ -64,6 +64,7 @@ const DATA_ROLE_COLLECTOR_IDS = new Set([
 ])
 const DATA_ROLE_HYBRID_IDS = new Set([
     'whatsapp-lead-extraction',
+    'whatsapp-attendance-coach',
     'whatsapp-global-agent',
     'ads-analyst',
     'social-attendance-agent',
