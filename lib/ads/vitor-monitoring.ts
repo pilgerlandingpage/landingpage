@@ -21,6 +21,15 @@ export type VitorMonitoringAlert = {
   entity?: Record<string, unknown> | null
 }
 
+export type VitorMonitoringLearning = {
+  type: 'creative' | 'region' | 'source' | 'lead_quality' | 'tracking' | 'execution'
+  priority: VitorAlertSeverity
+  title: string
+  insight: string
+  recommendation: string
+  evidence?: Record<string, unknown> | null
+}
+
 export type VitorMonitoringSnapshot = {
   generated_at: string
   date_preset: DatePreset
@@ -36,6 +45,7 @@ export type VitorMonitoringSnapshot = {
     action: string
     priority: VitorAlertSeverity
   }>
+  learnings: VitorMonitoringLearning[]
   top_campaigns: any[]
   top_ads: any[]
   pending_execution_plans: Array<Record<string, unknown>>
@@ -183,6 +193,274 @@ function buildRecommendations(alerts: VitorMonitoringAlert[]) {
       action: alert.recommendation,
       priority: alert.severity,
     }))
+}
+
+function leadSourceLabel(row: any) {
+  const visitor = firstRelation(row?.visitors)
+  const metadata = safeRecord(row?.metadata)
+  return compact(
+    row?.acquired_via
+    || row?.source
+    || row?.detected_source
+    || visitor?.utm_campaign
+    || visitor?.utm_source
+    || visitor?.detected_source
+    || metadata.utm_campaign
+    || metadata.utm_source
+    || metadata.source
+    || metadata.origem
+    || 'Origem paga sem campanha definida',
+    120,
+  )
+}
+
+function leadRegionLabel(row: any) {
+  const metadata = safeRecord(row?.metadata)
+  const city = metadata.city
+    || metadata.cidade
+    || metadata.lead_city
+    || metadata.location_city
+    || metadata.localidade
+    || metadata.region
+    || metadata.regiao
+  const state = metadata.state || metadata.estado || metadata.uf
+  const label = [city, state].filter(Boolean).join(' / ')
+  return compact(label, 120)
+}
+
+function addLearning(
+  learnings: VitorMonitoringLearning[],
+  learning: VitorMonitoringLearning,
+) {
+  const exists = learnings.some(item => item.type === learning.type && item.title === learning.title)
+  if (!exists) learnings.push({ ...learning, evidence: learning.evidence || null })
+}
+
+function buildVitorLearnings({
+  topAds,
+  topCampaigns,
+  paidLeads,
+  crmQualityRate,
+  avgCpl,
+  missingAttribution,
+  metaLeads,
+  pendingExecutionPlans,
+}: {
+  topAds: any[]
+  topCampaigns: any[]
+  paidLeads: any[]
+  crmQualityRate: number
+  avgCpl: number
+  missingAttribution: number
+  metaLeads: number
+  pendingExecutionPlans: Array<Record<string, unknown>>
+}) {
+  const learnings: VitorMonitoringLearning[] = []
+
+  const bestAd = topAds
+    .map(ad => ({
+      ad,
+      spend: numeric(ad.spend),
+      leads: numeric(ad.leads),
+      cpl: numeric(ad.cpl || ad.cost_per_lead || ad.cost_per_result),
+    }))
+    .filter(item => item.leads >= 2 && (avgCpl <= 0 || item.cpl <= avgCpl * 0.85))
+    .sort((a, b) => (a.cpl || 999999) - (b.cpl || 999999))[0]
+
+  if (bestAd) {
+    addLearning(learnings, {
+      type: 'creative',
+      priority: 'low',
+      title: 'Criativo com sinal de escala',
+      insight: `${compact(bestAd.ad.name || bestAd.ad.creative_title || 'Anuncio', 90)} aparece entre os melhores sinais do periodo.`,
+      recommendation: 'Reaproveitar hook, oferta e formato em novas variacoes antes de criar uma linha totalmente nova.',
+      evidence: {
+        ad_id: bestAd.ad.id || null,
+        leads: bestAd.leads,
+        cpl: bestAd.cpl,
+        avg_cpl: avgCpl,
+      },
+    })
+  }
+
+  const weakAd = topAds
+    .map(ad => ({
+      ad,
+      spend: numeric(ad.spend),
+      leads: numeric(ad.leads),
+      cpl: numeric(ad.cpl || ad.cost_per_lead || ad.cost_per_result),
+    }))
+    .filter(item => item.spend >= 80 && (item.leads === 0 || (avgCpl > 0 && item.cpl > avgCpl * 1.45)))
+    .sort((a, b) => b.spend - a.spend)[0]
+
+  if (weakAd) {
+    addLearning(learnings, {
+      type: 'creative',
+      priority: 'medium',
+      title: 'Criativo com desgaste ou baixa aderencia',
+      insight: `${compact(weakAd.ad.name || weakAd.ad.creative_title || 'Anuncio', 90)} gastou sem acompanhar a media de resultado.`,
+      recommendation: 'Nao usar este criativo como referencia principal; pedir nova abertura visual/hook e manter historico como risco.',
+      evidence: {
+        ad_id: weakAd.ad.id || null,
+        spend: weakAd.spend,
+        leads: weakAd.leads,
+        cpl: weakAd.cpl,
+      },
+    })
+  }
+
+  const sourceBuckets = new Map<string, { total: number; qualified: number; poor: number }>()
+  const regionBuckets = new Map<string, { total: number; qualified: number; poor: number }>()
+
+  for (const lead of paidLeads) {
+    const source = leadSourceLabel(lead)
+    const region = leadRegionLabel(lead)
+    const qualified = isQualifiedLead(lead)
+    const poor = isPoorLead(lead)
+
+    if (source) {
+      const bucket = sourceBuckets.get(source) || { total: 0, qualified: 0, poor: 0 }
+      bucket.total += 1
+      if (qualified) bucket.qualified += 1
+      if (poor) bucket.poor += 1
+      sourceBuckets.set(source, bucket)
+    }
+
+    if (region) {
+      const bucket = regionBuckets.get(region) || { total: 0, qualified: 0, poor: 0 }
+      bucket.total += 1
+      if (qualified) bucket.qualified += 1
+      if (poor) bucket.poor += 1
+      regionBuckets.set(region, bucket)
+    }
+  }
+
+  const bestSource = [...sourceBuckets.entries()]
+    .filter(([, bucket]) => bucket.total >= 3 && bucket.qualified / bucket.total >= 0.45)
+    .sort((a, b) => (b[1].qualified / b[1].total) - (a[1].qualified / a[1].total))[0]
+
+  if (bestSource) {
+    const [source, bucket] = bestSource
+    addLearning(learnings, {
+      type: 'source',
+      priority: 'low',
+      title: 'Origem paga com melhor qualidade',
+      insight: `${source} trouxe ${bucket.total} lead(s), com ${Math.round((bucket.qualified / bucket.total) * 100)}% qualificado(s).`,
+      recommendation: 'Priorizar essa origem/campanha em proximos testes e cruzar com o estoque que mais converteu.',
+      evidence: bucket,
+    })
+  }
+
+  const weakSource = [...sourceBuckets.entries()]
+    .filter(([, bucket]) => bucket.total >= 3 && (bucket.poor / bucket.total >= 0.35 || bucket.qualified / bucket.total < 0.25))
+    .sort((a, b) => (b[1].poor / b[1].total) - (a[1].poor / a[1].total))[0]
+
+  if (weakSource) {
+    const [source, bucket] = weakSource
+    addLearning(learnings, {
+      type: 'source',
+      priority: 'medium',
+      title: 'Origem paga com risco de lead ruim',
+      insight: `${source} trouxe ${bucket.total} lead(s), mas a qualificacao comercial ficou baixa.`,
+      recommendation: 'Rever publico, promessa e formulario/WhatsApp desta origem antes de aumentar investimento.',
+      evidence: bucket,
+    })
+  }
+
+  const bestRegion = [...regionBuckets.entries()]
+    .filter(([, bucket]) => bucket.total >= 3 && bucket.qualified / bucket.total >= 0.45)
+    .sort((a, b) => (b[1].qualified / b[1].total) - (a[1].qualified / a[1].total))[0]
+
+  if (bestRegion) {
+    const [region, bucket] = bestRegion
+    addLearning(learnings, {
+      type: 'region',
+      priority: 'low',
+      title: 'Regiao com melhor sinal comercial',
+      insight: `${region} concentrou leads pagos com boa qualificacao (${bucket.qualified}/${bucket.total}).`,
+      recommendation: 'Manter essa regiao como candidata a escala controlada e comparar com disponibilidade real de imoveis.',
+      evidence: bucket,
+    })
+  }
+
+  const weakRegion = [...regionBuckets.entries()]
+    .filter(([, bucket]) => bucket.total >= 3 && (bucket.poor / bucket.total >= 0.35 || bucket.qualified / bucket.total < 0.25))
+    .sort((a, b) => (b[1].poor / b[1].total) - (a[1].poor / a[1].total))[0]
+
+  if (weakRegion) {
+    const [region, bucket] = weakRegion
+    addLearning(learnings, {
+      type: 'region',
+      priority: 'medium',
+      title: 'Regiao com baixa qualidade comercial',
+      insight: `${region} gerou volume, mas com pouco sinal de oportunidade real.`,
+      recommendation: 'Reduzir peso dessa regiao ou trocar oferta antes de insistir em escala.',
+      evidence: bucket,
+    })
+  }
+
+  if (paidLeads.length >= 5 && crmQualityRate >= 55) {
+    addLearning(learnings, {
+      type: 'lead_quality',
+      priority: 'low',
+      title: 'Qualidade comercial positiva',
+      insight: `${Math.round(crmQualityRate)}% dos leads pagos recentes aparecem como qualificados no CRM.`,
+      recommendation: 'Usar essa janela como benchmark para proximas campanhas e salvar os criativos que originaram os melhores leads.',
+      evidence: { paid_leads: paidLeads.length, quality_rate: crmQualityRate },
+    })
+  } else if (paidLeads.length >= 5 && crmQualityRate < 25) {
+    addLearning(learnings, {
+      type: 'lead_quality',
+      priority: 'high',
+      title: 'Leads pagos com baixa qualidade',
+      insight: `Apenas ${Math.round(crmQualityRate)}% dos leads pagos recentes aparecem como qualificados no CRM.`,
+      recommendation: 'Antes de subir verba, o Vitor deve estreitar persona, regiao e promessa do criativo.',
+      evidence: { paid_leads: paidLeads.length, quality_rate: crmQualityRate },
+    })
+  }
+
+  if (metaLeads > 0 && missingAttribution >= Math.max(3, metaLeads * 0.35)) {
+    addLearning(learnings, {
+      type: 'tracking',
+      priority: 'high',
+      title: 'Atribuicao ainda incompleta',
+      insight: `Meta mostra ${metaLeads} lead(s), mas ${missingAttribution} nao foram reconciliados como origem paga no CRM.`,
+      recommendation: 'Tratar UTMs e origem do WhatsApp como prioridade antes de confiar cegamente em escala ou pausa automatica.',
+      evidence: { meta_leads: metaLeads, missing_attribution: missingAttribution },
+    })
+  }
+
+  if (pendingExecutionPlans.length > 0) {
+    addLearning(learnings, {
+      type: 'execution',
+      priority: 'low',
+      title: 'Plano aprovado precisa voltar para o ciclo',
+      insight: `${pendingExecutionPlans.length} plano(s) do Vitor ainda nao aparecem como campanha lida na Meta.`,
+      recommendation: 'Ao executar manualmente, manter nome/UTM sugeridos para o Vitor conseguir fechar o aprendizado depois.',
+      evidence: { pending_execution_plans: pendingExecutionPlans.length },
+    })
+  }
+
+  if (!bestAd && topCampaigns.length > 0) {
+    const campaign = topCampaigns[0]
+    addLearning(learnings, {
+      type: 'creative',
+      priority: 'low',
+      title: 'Campanha de referencia para analise',
+      insight: `${compact(campaign.name || campaign.campaign_name || 'Campanha', 90)} esta entre as principais campanhas do periodo.`,
+      recommendation: 'Usar a campanha como ponto de comparacao, mas pedir leitura de criativo antes de escalar.',
+      evidence: {
+        campaign_id: campaign.id || null,
+        spend: numeric(campaign.spend),
+        leads: numeric(campaign.leads),
+        cpl: numeric(campaign.cpl || campaign.cost_per_lead),
+      },
+    })
+  }
+
+  return learnings
+    .sort((a, b) => alertPriorityScore(b.priority) - alertPriorityScore(a.priority))
+    .slice(0, 8)
 }
 
 function summarizePendingPlans(plans: any[], metaCampaignNames: Set<string>) {
@@ -405,6 +683,16 @@ export async function buildVitorMonitoringSnapshot({
   if (spend > 0 && paidLeads.length === 0) healthScore -= 8
   healthScore = Math.round(clamp(healthScore, 0, 100))
   const labeledHealth = healthLabel(healthScore)
+  const learnings = buildVitorLearnings({
+    topAds,
+    topCampaigns,
+    paidLeads,
+    crmQualityRate,
+    avgCpl,
+    missingAttribution,
+    metaLeads: leads,
+    pendingExecutionPlans,
+  })
 
   return {
     generated_at: generatedAt,
@@ -436,6 +724,7 @@ export async function buildVitorMonitoringSnapshot({
       .sort((a, b) => alertPriorityScore(b.severity) - alertPriorityScore(a.severity))
       .slice(0, 12),
     recommendations: buildRecommendations(alerts),
+    learnings,
     top_campaigns: topCampaigns,
     top_ads: topAds,
     pending_execution_plans: pendingExecutionPlans,
@@ -469,6 +758,7 @@ export async function persistVitorMonitoringSnapshot({
   const summary = [
     `Monitoramento do Vitor: saude ${snapshot.health.score}/100 (${snapshot.health.label}).`,
     `${snapshot.alerts.length} alerta(s), R$ ${Math.round(snapshot.metrics.spend || 0)} investidos, ${snapshot.metrics.leads || 0} lead(s) Meta e ${snapshot.metrics.crm_paid_leads || 0} lead(s) pagos no CRM.`,
+    `${snapshot.learnings.length} aprendizado(s) devolvidos para a Central.`,
   ].join(' ')
 
   const { data: report, error: reportError } = await supabase
@@ -479,12 +769,13 @@ export async function persistVitorMonitoringSnapshot({
       period_end: today,
       title: `Vitor - monitoramento ${snapshot.health.label}`,
       summary,
-      insights: snapshot.alerts.slice(0, 6),
+      insights: [...snapshot.alerts, ...snapshot.learnings].slice(0, 8),
       recommendations: snapshot.recommendations.slice(0, 8),
       metrics: {
         ...snapshot.metrics,
         health: snapshot.health,
         diagnostics: snapshot.diagnostics,
+        learnings: snapshot.learnings,
       },
       generated_by: 'vitor-monitoring-agent',
       updated_at: new Date().toISOString(),
@@ -510,6 +801,7 @@ export async function persistVitorMonitoringSnapshot({
       health: snapshot.health,
       metrics: snapshot.metrics,
       alerts: snapshot.alerts.slice(0, 8),
+      learnings: snapshot.learnings.slice(0, 8),
       recommendations: snapshot.recommendations.slice(0, 8),
       diagnostics: snapshot.diagnostics,
     },
@@ -530,6 +822,7 @@ export async function persistVitorMonitoringSnapshot({
         health: snapshot.health,
         metrics: snapshot.metrics,
         alerts: snapshot.alerts.slice(0, 8),
+        learnings: snapshot.learnings.slice(0, 8),
         recommendations: snapshot.recommendations.slice(0, 8),
       },
     },

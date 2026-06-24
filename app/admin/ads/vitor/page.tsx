@@ -77,6 +77,15 @@ type VitorMonitoringAlert = {
   entity?: Record<string, unknown> | null
 }
 
+type VitorMonitoringLearning = {
+  type: string
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  title: string
+  insight: string
+  recommendation: string
+  evidence?: Record<string, unknown> | null
+}
+
 type VitorMonitoring = {
   generated_at: string
   health: {
@@ -91,6 +100,7 @@ type VitorMonitoring = {
     action: string
     priority: string
   }>
+  learnings: VitorMonitoringLearning[]
   top_ads: Array<Record<string, unknown>>
   pending_execution_plans: Array<Record<string, unknown>>
   diagnostics: string[]
@@ -618,6 +628,21 @@ export default function VitorTrafficManagerPage() {
               ))}
               {(!monitoring?.top_ads || monitoring.top_ads.length === 0) && (
                 <p className="vitor-muted">Sem anuncios lidos da Meta neste periodo.</p>
+              )}
+            </div>
+          </article>
+          <article>
+            <h3><Sparkles size={17} /> Aprendizados</h3>
+            <div className="vitor-monitoring-list">
+              {(monitoring?.learnings || []).slice(0, 4).map((item, index) => (
+                <div key={`${item.title}-${index}`} className={`vitor-alert-item ${item.priority}`}>
+                  <strong>{item.title}</strong>
+                  <span>{severityLabel(item.priority)} | {item.insight}</span>
+                  <p>{item.recommendation}</p>
+                </div>
+              ))}
+              {(!monitoring?.learnings || monitoring.learnings.length === 0) && (
+                <p className="vitor-muted">Ainda sem aprendizados suficientes nesta janela.</p>
               )}
             </div>
           </article>
@@ -1264,7 +1289,7 @@ export default function VitorTrafficManagerPage() {
         }
 
         .vitor-monitoring-grid {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
         }
 
         .vitor-monitoring-grid h3 {

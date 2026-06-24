@@ -91,11 +91,13 @@ export async function GET(request: NextRequest) {
       vitor_monitoring_cron_last_reason: reason,
       vitor_monitoring_cron_last_health: String(snapshot.health.score),
       vitor_monitoring_cron_last_alerts: String(snapshot.alerts.length),
+      vitor_monitoring_cron_last_learnings: String(snapshot.learnings.length),
       vitor_monitoring_cron_last_result: JSON.stringify({
         generated_at: snapshot.generated_at,
         health: snapshot.health,
         metrics: snapshot.metrics,
         alerts: snapshot.alerts.slice(0, 6),
+        learnings: snapshot.learnings.slice(0, 6),
         diagnostics: snapshot.diagnostics.slice(0, 6),
         persisted: Boolean(report?.id),
         report_id: report?.id || null,
