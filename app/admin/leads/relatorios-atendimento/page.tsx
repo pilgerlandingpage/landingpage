@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, BarChart3, Clock, Database, Flame, MessageSquare, PlayCircle, RefreshCw, Users } from 'lucide-react'
+import { AlertTriangle, BarChart3, ChevronLeft, ChevronRight, Clock, Database, Flame, MessageSquare, PlayCircle, RefreshCw, Users } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import { normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
 
@@ -50,6 +50,9 @@ type ConversationScore = {
     report_id: string
     chat_id: string
     phone?: string | null
+    lead_name?: string | null
+    lead_display_name?: string | null
+    lead_avatar_url?: string | null
     score: number
     lead_potential: 'hot' | 'warm' | 'cold' | 'unknown'
     response_time_seconds?: number | null
@@ -107,6 +110,74 @@ type ReportBreakdown = {
     outbound: number
     avgResponse: number | null
 }
+
+type AttendancePipelineStageKey =
+    | 'entrada'
+    | 'fup'
+    | 'conectados'
+    | 'oportunidades'
+    | 'leads_quentes'
+    | 'visitas'
+    | 'proposta'
+    | 'contrato'
+    | 'recuperaveis'
+    | 'perdidas'
+
+type AttendancePipelineStage = {
+    key: AttendancePipelineStageKey
+    label: string
+    color: string
+    bg: string
+    border: string
+    filter: string
+}
+
+type AttendancePipelineLead = {
+    id: string
+    reportId: string
+    stageKey: AttendancePipelineStageKey
+    filter: string
+    name: string
+    avatarUrl: string | null
+    phone: string | null
+    score: number
+    leadPotential: ConversationScore['lead_potential']
+    summary: string
+    reason: string
+    ownerName: string
+    ownerPhotoUrl: string | null
+    reportDate: string
+    whatsappUrl: string | null
+    unanswered: boolean
+}
+
+type PipelineOwnerCard = {
+    id: string
+    name: string
+    photoUrl: string | null
+    total: number
+    hot: number
+    warm: number
+    cold: number
+    fup: number
+    lost: number
+    recoverable: number
+    score: number
+    isAll: boolean
+}
+
+const ATTENDANCE_PIPELINE_STAGES: AttendancePipelineStage[] = [
+    { key: 'entrada', label: 'Entrada', color: '#2563eb', bg: '#eff6ff', border: 'rgba(37,99,235,0.24)', filter: 'todos' },
+    { key: 'fup', label: 'FUP', color: '#b45309', bg: '#fffbeb', border: 'rgba(180,83,9,0.24)', filter: 'sem-resposta' },
+    { key: 'conectados', label: 'Conectados', color: '#0891b2', bg: '#ecfeff', border: 'rgba(8,145,178,0.22)', filter: 'todos' },
+    { key: 'oportunidades', label: 'Oportunidades', color: '#7c3aed', bg: '#f5f3ff', border: 'rgba(124,58,237,0.22)', filter: 'mornos' },
+    { key: 'leads_quentes', label: 'Leads quentes', color: '#c2410c', bg: '#fff7ed', border: 'rgba(194,65,12,0.24)', filter: 'quentes' },
+    { key: 'visitas', label: 'Visitas', color: '#047857', bg: '#ecfdf5', border: 'rgba(4,120,87,0.22)', filter: 'quentes' },
+    { key: 'proposta', label: 'Proposta', color: '#7c3aed', bg: '#faf5ff', border: 'rgba(124,58,237,0.22)', filter: 'quentes' },
+    { key: 'contrato', label: 'Contrato', color: '#15803d', bg: '#f0fdf4', border: 'rgba(21,128,61,0.22)', filter: 'bons' },
+    { key: 'recuperaveis', label: 'Recuperaveis', color: '#059669', bg: '#ecfdf5', border: 'rgba(5,150,105,0.24)', filter: 'recuperaveis' },
+    { key: 'perdidas', label: 'Perdidas', color: '#dc2626', bg: '#fef2f2', border: 'rgba(220,38,38,0.24)', filter: 'perdidas' },
+]
 
 function compactApiText(value: string, limit = 300) {
     return value.replace(/\s+/g, ' ').trim().slice(0, limit)
@@ -316,6 +387,79 @@ function getInitials(value?: string | null) {
     return initials || 'WA'
 }
 
+function getLeadDisplayName(score: ConversationScore) {
+    return cleanLabel(score.lead_display_name) ||
+        cleanLabel(score.lead_name) ||
+        cleanLabel(score.metrics?.lead_name) ||
+        cleanLabel(score.metrics?.lead_intent) ||
+        'Lead sem nome'
+}
+
+function compactLabel(value?: string | null, limit = 46) {
+    const text = String(value || '').replace(/\s+/g, ' ').trim()
+    if (!text) return ''
+    return text.length > limit ? `${text.slice(0, limit - 3)}...` : text
+}
+
+function buildWhatsAppLeadUrl(phone?: string | null) {
+    const digits = String(phone || '').replace(/\D/g, '')
+    if (!digits) return null
+    return `https://wa.me/${digits}`
+}
+
+function textIncludesAny(value: unknown, words: string[]) {
+    const text = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    return words.some((word) => text.includes(word))
+}
+
+function getAttendancePipelineStage(score: ConversationScore): AttendancePipelineStage {
+    const metrics = score.metrics || {}
+    const status = metrics.commercial_status || metrics.commercial_category || ''
+    const funnel = metrics.funnel_stage || ''
+    const outbound = Number(metrics.outbound_messages || 0)
+    const lost = metrics.lost_opportunity === true || status === 'oportunidade_perdida'
+    const recoverable = metrics.recoverable === true
+
+    if (textIncludesAny(status, ['contrato']) || textIncludesAny(funnel, ['contrato'])) {
+        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'contrato')!
+    }
+    if (textIncludesAny(status, ['proposta', 'negociacao']) || textIncludesAny(funnel, ['proposta', 'negociacao'])) {
+        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'proposta')!
+    }
+    if (textIncludesAny(status, ['visita', 'agendamento']) || textIncludesAny(funnel, ['visita', 'agendamento'])) {
+        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'visitas')!
+    }
+    if (recoverable) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'recuperaveis')!
+    if (lost) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'perdidas')!
+    if (score.lead_potential === 'hot') return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_quentes')!
+    if (textIncludesAny(status, ['oportunidade', 'objecao', 'monitorar']) || score.lead_potential === 'warm') {
+        return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'oportunidades')!
+    }
+    if (score.unanswered) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'fup')!
+    if (outbound > 0) return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'conectados')!
+    return ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'entrada')!
+}
+
+function getScoreHeatLevel(score: number) {
+    if (score >= 88) return 5
+    if (score >= 76) return 4
+    if (score >= 62) return 3
+    if (score >= 45) return 2
+    return 1
+}
+
+function getPipelineReason(score: ConversationScore) {
+    const metrics = score.metrics || {}
+    return compactLabel(
+        metrics.lead_intent ||
+        metrics.main_issue ||
+        metrics.commercial_reason ||
+        metrics.funnel_stage ||
+        score.summary,
+        52
+    ) || 'Conversa analisada'
+}
+
 export default function AttendanceReportsPage() {
     const [loading, setLoading] = useState(true)
     const [running, setRunning] = useState(false)
@@ -329,8 +473,10 @@ export default function AttendanceReportsPage() {
     const [recentReports, setRecentReports] = useState<RecentReport[]>([])
     const [lastRunSummary, setLastRunSummary] = useState<RunSummary | null>(null)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const pipelineScrollerRef = useRef<HTMLDivElement | null>(null)
 
     const instanceById = useMemo(() => new Map(instances.map((item) => [item.id, item])), [instances])
+    const reportById = useMemo(() => new Map(reports.map((item) => [item.id, item])), [reports])
     const latestReportWithMessages = recentReports[0] || null
     const latestReportByInstance = useMemo(() => {
         const map = new Map<string, RecentReport>()
@@ -368,6 +514,133 @@ export default function AttendanceReportsPage() {
         }
     }, { conversations: 0, messages: 0, hot: 0, unanswered: 0, lost: 0, recoverable: 0, llmAnalyzed: 0 }), [reports])
 
+    const pipelineLeads = useMemo(() => {
+        return scores
+            .map((score): AttendancePipelineLead | null => {
+                const report = reportById.get(score.report_id)
+                if (!report) return null
+                const inst = instanceById.get(report.instance_id)
+                const stage = getAttendancePipelineStage(score)
+                const ownerName = getOwnerName(inst, report.instance_id)
+                const phone = score.phone || null
+                return {
+                    id: score.id || score.chat_id,
+                    reportId: report.id,
+                    stageKey: stage.key,
+                    filter: stage.filter,
+                    name: getLeadDisplayName(score),
+                    avatarUrl: cleanLabel(score.lead_avatar_url),
+                    phone,
+                    score: Number(score.score || 0),
+                    leadPotential: score.lead_potential,
+                    summary: compactLabel(score.summary, 90),
+                    reason: getPipelineReason(score),
+                    ownerName,
+                    ownerPhotoUrl: cleanLabel(inst?.owner_photo_url),
+                    reportDate: report.report_date,
+                    whatsappUrl: buildWhatsAppLeadUrl(phone),
+                    unanswered: Boolean(score.unanswered),
+                }
+            })
+            .filter((item): item is AttendancePipelineLead => Boolean(item))
+    }, [scores, reportById, instanceById])
+
+    const pipelineColumns = useMemo(() => {
+        return ATTENDANCE_PIPELINE_STAGES.map((stage) => ({
+            ...stage,
+            leads: pipelineLeads
+                .filter((lead) => lead.stageKey === stage.key)
+                .sort((a, b) => {
+                    const priorityStage = ['leads_quentes', 'visitas', 'proposta', 'contrato', 'recuperaveis']
+                    if (priorityStage.includes(stage.key)) return b.score - a.score
+                    return Date.parse(b.reportDate) - Date.parse(a.reportDate) || b.score - a.score
+                }),
+        }))
+    }, [pipelineLeads])
+
+    const pipelineStageTotals = useMemo(() => {
+        return pipelineColumns.reduce((acc, column) => {
+            acc[column.key] = column.leads.length
+            return acc
+        }, {} as Record<AttendancePipelineStageKey, number>)
+    }, [pipelineColumns])
+
+    const pipelineOwnerCards = useMemo<PipelineOwnerCard[]>(() => {
+        const averageScore = reports.length
+            ? Math.round(reports.reduce((sum, report) => sum + Number(report.score || 0), 0) / reports.length)
+            : 0
+        const allCard: PipelineOwnerCard = {
+            id: '',
+            name: 'Todos os corretores',
+            photoUrl: null,
+            total: scores.length,
+            hot: scores.filter((score) => score.lead_potential === 'hot').length,
+            warm: scores.filter((score) => score.lead_potential === 'warm').length,
+            cold: scores.filter((score) => score.lead_potential === 'cold').length,
+            fup: scores.filter((score) => score.unanswered).length,
+            lost: scores.filter((score) => score.metrics?.lost_opportunity === true || score.metrics?.commercial_status === 'oportunidade_perdida').length,
+            recoverable: scores.filter((score) => score.metrics?.recoverable === true).length,
+            score: averageScore,
+            isAll: true,
+        }
+        const ownerMap = new Map<string, PipelineOwnerCard & { scoreSum: number; reportCount: number }>()
+        reports.forEach((report) => {
+            const inst = instanceById.get(report.instance_id)
+            const reportScores = scoresByReport.get(report.id) || []
+            const breakdown = getReportBreakdown(report, reportScores)
+            const existing = ownerMap.get(report.instance_id)
+            if (existing) {
+                existing.total += breakdown.total
+                existing.hot += breakdown.hot
+                existing.warm += breakdown.warm
+                existing.cold += breakdown.cold
+                existing.fup += breakdown.unanswered
+                existing.lost += breakdown.lost
+                existing.recoverable += breakdown.recoverable
+                existing.scoreSum += Number(report.score || 0)
+                existing.reportCount += 1
+                existing.score = Math.round(existing.scoreSum / existing.reportCount)
+                ownerMap.set(report.instance_id, existing)
+            } else {
+                ownerMap.set(report.instance_id, {
+                    id: report.instance_id,
+                    name: getOwnerName(inst, report.instance_id),
+                    photoUrl: cleanLabel(inst?.owner_photo_url),
+                    total: breakdown.total,
+                    hot: breakdown.hot,
+                    warm: breakdown.warm,
+                    cold: breakdown.cold,
+                    fup: breakdown.unanswered,
+                    lost: breakdown.lost,
+                    recoverable: breakdown.recoverable,
+                    score: Number(report.score || 0),
+                    isAll: false,
+                    scoreSum: Number(report.score || 0),
+                    reportCount: 1,
+                })
+            }
+        })
+        const cards = Array.from(ownerMap.values()).map((item) => ({
+            id: item.id,
+            name: item.name,
+            photoUrl: item.photoUrl,
+            total: item.total,
+            hot: item.hot,
+            warm: item.warm,
+            cold: item.cold,
+            fup: item.fup,
+            lost: item.lost,
+            recoverable: item.recoverable,
+            score: item.score,
+            isAll: item.isAll,
+        }))
+        return [allCard, ...cards].sort((a, b) => {
+            if (a.isAll) return -1
+            if (b.isAll) return 1
+            return b.total - a.total || a.name.localeCompare(b.name)
+        })
+    }, [reports, scores, scoresByReport, instanceById])
+
     async function load(overrides: { startDate?: string; endDate?: string; instanceId?: string; preserveMessage?: boolean } = {}) {
         setLoading(true)
         if (!overrides.preserveMessage) setMessage(null)
@@ -391,6 +664,18 @@ export default function AttendanceReportsPage() {
         } finally {
             setLoading(false)
         }
+    }
+
+    function selectPipelineInstance(nextInstanceId: string) {
+        setInstanceId(nextInstanceId)
+        void load({ instanceId: nextInstanceId })
+    }
+
+    function scrollAttendancePipeline(direction: -1 | 1) {
+        pipelineScrollerRef.current?.scrollBy({
+            left: direction * 460,
+            behavior: 'smooth',
+        })
     }
 
     async function runNow() {
@@ -540,6 +825,153 @@ export default function AttendanceReportsPage() {
                 <Metric icon={<RefreshCw size={18} />} label="Recuperaveis" value={String(totals.recoverable)} />
                 <Metric icon={<BarChart3 size={18} />} label="Coach LLM" value={String(totals.llmAnalyzed)} />
             </section>
+
+            {reports.length > 0 && (
+                <section style={pipelineSectionStyle}>
+                    <div style={pipelineHeaderStyle}>
+                        <div>
+                            <span style={pipelineEyebrowStyle}>Pipeline IA</span>
+                            <strong style={pipelineTitleStyle}>
+                                {instanceId
+                                    ? pipelineOwnerCards.find((card) => card.id === instanceId)?.name || 'Corretor selecionado'
+                                    : 'Todos os corretores'}
+                            </strong>
+                        </div>
+                        <div style={pipelineHeaderActionsStyle}>
+                            <span style={pipelineScrollControlsStyle}>
+                                <button type="button" onClick={() => scrollAttendancePipeline(-1)} title="Etapas anteriores" style={pipelineRoundButtonStyle}>
+                                    <ChevronLeft size={16} />
+                                </button>
+                                <button type="button" onClick={() => scrollAttendancePipeline(1)} title="Proximas etapas" style={pipelineRoundButtonStyle}>
+                                    <ChevronRight size={16} />
+                                </button>
+                            </span>
+                            {[
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'entrada')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'fup')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'leads_quentes')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'visitas')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'contrato')!,
+                                ATTENDANCE_PIPELINE_STAGES.find((stage) => stage.key === 'recuperaveis')!,
+                            ].map((stage) => (
+                                <span key={`metric-${stage.key}`} style={{ ...pipelineMetricPillStyle, color: stage.color, background: stage.bg, borderColor: stage.border }}>
+                                    {stage.label}: {pipelineStageTotals[stage.key] || 0}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={pipelineOwnerGridStyle}>
+                        {pipelineOwnerCards.map((card) => {
+                            const isSelected = card.id === instanceId || (!instanceId && card.isAll)
+                            const heatTotal = Math.max(1, card.hot + card.warm + card.cold)
+                            return (
+                                <button
+                                    key={card.isAll ? 'all-pipeline-owners' : card.id}
+                                    type="button"
+                                    onClick={() => selectPipelineInstance(card.id)}
+                                    style={{
+                                        ...pipelineOwnerCardStyle,
+                                        ...(isSelected ? pipelineOwnerCardSelectedStyle : {}),
+                                    }}
+                                >
+                                    <div style={pipelineOwnerTopStyle}>
+                                        <div style={pipelineOwnerIdentityStyle}>
+                                            {!card.isAll && <OwnerAvatar name={card.name} photoUrl={card.photoUrl} size={28} />}
+                                            <strong style={pipelineOwnerNameStyle}>{card.isAll && instanceId ? 'Ver todos' : card.name}</strong>
+                                        </div>
+                                        <span style={pipelineOwnerTotalStyle}>{card.isAll && instanceId ? 'geral' : card.total}</span>
+                                    </div>
+                                    {!card.isAll && card.score > 0 && (
+                                        <span style={pipelineScoreBadgeStyle}>Score {card.score}</span>
+                                    )}
+                                    <div
+                                        style={{
+                                            ...pipelineHeatBarStyle,
+                                            gridTemplateColumns: `${Math.max(6, Math.round((card.hot / heatTotal) * 100))}% ${Math.max(6, Math.round((card.warm / heatTotal) * 100))}% 1fr`,
+                                        }}
+                                    >
+                                        <span style={{ background: '#b45309' }} />
+                                        <span style={{ background: '#c8a66a' }} />
+                                        <span style={{ background: '#cbd5e1' }} />
+                                    </div>
+                                    <span style={pipelineOwnerMetaStyle}>
+                                        {card.hot} quente | {card.warm} morno | {card.fup} FUP
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+
+                    <div ref={pipelineScrollerRef} style={pipelineScrollerStyle}>
+                        {pipelineColumns.map((column) => (
+                            <section key={column.key} style={{ ...pipelineColumnStyle, borderColor: column.border }}>
+                                <div style={{ ...pipelineColumnHeaderStyle, borderColor: column.border }}>
+                                    <strong style={pipelineColumnTitleStyle}>{column.label}</strong>
+                                    <span style={{ ...pipelineColumnCountStyle, color: column.color, background: column.bg }}>
+                                        {column.leads.length}
+                                    </span>
+                                </div>
+                                <div style={pipelineColumnBodyStyle}>
+                                    {column.leads.length === 0 ? (
+                                        <div style={pipelineEmptyColumnStyle}>Sem leads</div>
+                                    ) : column.leads.slice(0, 32).map((lead) => {
+                                        const heatLevel = getScoreHeatLevel(lead.score)
+                                        return (
+                                            <article key={`${column.key}:${lead.reportId}:${lead.id}`} style={{ ...pipelineLeadCardStyle, borderColor: column.border }}>
+                                                <div style={pipelineLeadButtonStyle}>
+                                                    <div style={pipelineLeadHeaderStyle}>
+                                                        <OwnerAvatar name={lead.name} photoUrl={lead.avatarUrl} size={34} />
+                                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                                            <div style={pipelineLeadNameRowStyle}>
+                                                                <strong style={pipelineLeadNameStyle}>{lead.name}</strong>
+                                                                <span style={{ ...pipelineLeadScoreStyle, color: column.color, background: column.bg, borderColor: column.border }}>{lead.score}</span>
+                                                            </div>
+                                                            <span style={{ ...pipelineLeadReasonStyle, color: column.color }}>
+                                                                {lead.leadPotential === 'hot' ? 'Quente' : lead.leadPotential === 'warm' ? 'Morno' : lead.leadPotential === 'cold' ? 'Frio' : 'Novo'} | {lead.reason}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div style={pipelineLeadHeatStyle}>
+                                                        {Array.from({ length: 5 }).map((_, index) => (
+                                                            <span
+                                                                key={index}
+                                                                style={{
+                                                                    height: 5,
+                                                                    borderRadius: 999,
+                                                                    background: index < heatLevel ? column.color : '#edf0f2',
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span style={pipelineLeadPhoneStyle}>{formatPhone(lead.phone)}</span>
+                                                    <div style={pipelineLeadOwnerStyle}>
+                                                        <OwnerAvatar name={lead.ownerName} photoUrl={lead.ownerPhotoUrl} size={16} />
+                                                        <span>{lead.ownerName} | {formatDateLabel(lead.reportDate)}</span>
+                                                    </div>
+                                                </div>
+                                                <div style={pipelineLeadActionsStyle}>
+                                                    <Link href={reportDetailHref(lead.reportId, lead.filter)} style={pipelineLeadActionStyle}>
+                                                        Abrir
+                                                    </Link>
+                                                    {lead.whatsappUrl && (
+                                                        <a href={lead.whatsappUrl} target="_blank" rel="noreferrer" style={{ ...pipelineLeadActionStyle, ...pipelineLeadWhatsappActionStyle }}>
+                                                            WhatsApp
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </article>
+                                        )
+                                    })}
+                                    {column.leads.length > 32 && (
+                                        <div style={pipelineColumnMoreStyle}>+{column.leads.length - 32} no filtro atual</div>
+                                    )}
+                                </div>
+                            </section>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {reports.length > 0 && totals.messages === 0 && latestReportWithMessages && !isDateInRange(latestReportWithMessages.report_date, startDate, endDate) && (
                 <div style={dateHintStyle}>
@@ -907,13 +1339,21 @@ function InsightLinkCard({ href, label, value, detail, tone }: {
     )
 }
 
-function OwnerAvatar({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
+function OwnerAvatar({ name, photoUrl, size = 54 }: { name: string; photoUrl?: string | null; size?: number }) {
     const imageUrl = cleanLabel(photoUrl)
+    const sizedAvatarStyle: CSSProperties = {
+        ...ownerAvatarStyle,
+        width: size,
+        height: size,
+        flex: `0 0 ${size}px`,
+        fontSize: size <= 18 ? '0.55rem' : size <= 34 ? '0.72rem' : '0.82rem',
+        boxShadow: size <= 34 ? 'none' : ownerAvatarStyle.boxShadow,
+    }
     return (
         <div
             aria-label={`Foto de ${name}`}
             style={{
-                ...ownerAvatarStyle,
+                ...sizedAvatarStyle,
                 ...(imageUrl ? {
                     backgroundImage: `url("${imageUrl.replace(/"/g, '%22')}")`,
                     backgroundSize: 'cover',
@@ -924,6 +1364,366 @@ function OwnerAvatar({ name, photoUrl }: { name: string; photoUrl?: string | nul
             {!imageUrl && <span>{getInitials(name)}</span>}
         </div>
     )
+}
+
+const pipelineSectionStyle: CSSProperties = {
+    maxWidth: '100%',
+    minWidth: 0,
+    padding: 18,
+    borderRadius: 12,
+    border: '1px solid #e8e5e0',
+    background: '#fff',
+    boxShadow: '0 10px 28px rgba(15,23,42,0.06)',
+    overflow: 'hidden',
+}
+
+const pipelineHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 12,
+    flexWrap: 'wrap',
+}
+
+const pipelineEyebrowStyle: CSSProperties = {
+    display: 'block',
+    color: '#8a6a1f',
+    fontSize: '0.68rem',
+    fontWeight: 950,
+    letterSpacing: 0,
+    textTransform: 'uppercase',
+}
+
+const pipelineTitleStyle: CSSProperties = {
+    display: 'block',
+    color: '#1a1a1a',
+    fontSize: '1.05rem',
+    lineHeight: 1.25,
+    marginTop: 2,
+}
+
+const pipelineHeaderActionsStyle: CSSProperties = {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+}
+
+const pipelineScrollControlsStyle: CSSProperties = {
+    display: 'inline-flex',
+    gap: 5,
+    padding: 2,
+    borderRadius: 999,
+    background: '#fafafa',
+    border: '1px solid #e8e5e0',
+}
+
+const pipelineRoundButtonStyle: CSSProperties = {
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
+    border: 'none',
+    background: '#fff',
+    color: '#6b4f1d',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+}
+
+const pipelineMetricPillStyle: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 5,
+    padding: '5px 8px',
+    borderRadius: 999,
+    border: '1px solid',
+    fontSize: '0.68rem',
+    fontWeight: 900,
+}
+
+const pipelineOwnerGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(178px, 1fr))',
+    gap: 8,
+    marginBottom: 14,
+}
+
+const pipelineOwnerCardStyle: CSSProperties = {
+    minHeight: 82,
+    borderRadius: 10,
+    border: '1px solid #e8e5e0',
+    background: '#fafafa',
+    color: '#1a1a1a',
+    padding: 10,
+    textAlign: 'left',
+    cursor: 'pointer',
+}
+
+const pipelineOwnerCardSelectedStyle: CSSProperties = {
+    borderColor: '#c8a66a',
+    background: '#f8f1df',
+    boxShadow: '0 8px 20px rgba(200,166,106,0.16)',
+}
+
+const pipelineOwnerTopStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 8,
+    alignItems: 'center',
+}
+
+const pipelineOwnerIdentityStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
+    minWidth: 0,
+}
+
+const pipelineOwnerNameStyle: CSSProperties = {
+    display: 'block',
+    fontSize: '0.78rem',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}
+
+const pipelineOwnerTotalStyle: CSSProperties = {
+    flexShrink: 0,
+    color: '#64748b',
+    fontSize: '0.68rem',
+    fontWeight: 950,
+}
+
+const pipelineScoreBadgeStyle: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    width: 'fit-content',
+    marginTop: 6,
+    padding: '2px 7px',
+    borderRadius: 999,
+    background: '#111827',
+    color: '#fff7ed',
+    border: '1px solid rgba(200,166,106,0.55)',
+    fontSize: '0.58rem',
+    fontWeight: 950,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
+}
+
+const pipelineHeatBarStyle: CSSProperties = {
+    display: 'grid',
+    height: 5,
+    borderRadius: 999,
+    overflow: 'hidden',
+    background: '#edf0f2',
+    marginTop: 10,
+}
+
+const pipelineOwnerMetaStyle: CSSProperties = {
+    display: 'block',
+    marginTop: 7,
+    color: '#64748b',
+    fontSize: '0.64rem',
+    fontWeight: 800,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}
+
+const pipelineScrollerStyle: CSSProperties = {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridAutoColumns: 'minmax(188px, 208px)',
+    gap: 10,
+    alignItems: 'start',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    paddingBottom: 14,
+    scrollbarGutter: 'stable',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#c8a66a #f5f0ea',
+}
+
+const pipelineColumnStyle: CSSProperties = {
+    minHeight: 240,
+    height: 560,
+    overflowY: 'auto',
+    borderRadius: 10,
+    border: '1px solid',
+    background: '#fafafa',
+}
+
+const pipelineColumnHeaderStyle: CSSProperties = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+    padding: '9px 10px',
+    background: '#fff',
+    borderBottom: '1px solid',
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 8,
+    alignItems: 'center',
+}
+
+const pipelineColumnTitleStyle: CSSProperties = {
+    color: '#1a1a1a',
+    fontSize: '0.72rem',
+    textTransform: 'uppercase',
+    letterSpacing: 0,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}
+
+const pipelineColumnCountStyle: CSSProperties = {
+    display: 'inline-flex',
+    minWidth: 24,
+    justifyContent: 'center',
+    padding: '2px 6px',
+    borderRadius: 999,
+    fontSize: '0.66rem',
+    fontWeight: 950,
+}
+
+const pipelineColumnBodyStyle: CSSProperties = {
+    display: 'grid',
+    gap: 7,
+    padding: 8,
+}
+
+const pipelineEmptyColumnStyle: CSSProperties = {
+    minHeight: 70,
+    borderRadius: 8,
+    border: '1px dashed #d8d3ca',
+    color: '#94a3b8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.68rem',
+    fontWeight: 800,
+}
+
+const pipelineLeadCardStyle: CSSProperties = {
+    borderRadius: 9,
+    border: '1px solid',
+    background: '#fff',
+    boxShadow: '0 4px 14px rgba(15,23,42,0.06)',
+    overflow: 'hidden',
+}
+
+const pipelineLeadButtonStyle: CSSProperties = {
+    width: '100%',
+    padding: 9,
+    textAlign: 'left',
+}
+
+const pipelineLeadHeaderStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 8,
+}
+
+const pipelineLeadNameRowStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 6,
+    alignItems: 'flex-start',
+}
+
+const pipelineLeadNameStyle: CSSProperties = {
+    display: 'block',
+    color: '#1a1a1a',
+    fontSize: '0.74rem',
+    lineHeight: 1.2,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+}
+
+const pipelineLeadScoreStyle: CSSProperties = {
+    flexShrink: 0,
+    border: '1px solid',
+    borderRadius: 999,
+    padding: '2px 6px',
+    fontSize: '0.58rem',
+    fontWeight: 950,
+}
+
+const pipelineLeadReasonStyle: CSSProperties = {
+    display: 'block',
+    fontSize: '0.62rem',
+    fontWeight: 900,
+    marginTop: 3,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}
+
+const pipelineLeadHeatStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gap: 3,
+    marginTop: 8,
+}
+
+const pipelineLeadPhoneStyle: CSSProperties = {
+    display: 'block',
+    color: '#475569',
+    fontSize: '0.62rem',
+    fontWeight: 750,
+    marginTop: 7,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}
+
+const pipelineLeadOwnerStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    color: '#94a3b8',
+    fontSize: '0.6rem',
+    fontWeight: 750,
+    marginTop: 4,
+    minWidth: 0,
+}
+
+const pipelineLeadActionsStyle: CSSProperties = {
+    display: 'flex',
+    borderTop: '1px solid #edf0f2',
+}
+
+const pipelineLeadActionStyle: CSSProperties = {
+    flex: 1,
+    textAlign: 'center',
+    textDecoration: 'none',
+    border: 'none',
+    background: '#fafafa',
+    color: '#334155',
+    padding: '6px 8px',
+    fontSize: '0.62rem',
+    fontWeight: 950,
+}
+
+const pipelineLeadWhatsappActionStyle: CSSProperties = {
+    background: '#ecfdf5',
+    color: '#047857',
+}
+
+const pipelineColumnMoreStyle: CSSProperties = {
+    color: '#64748b',
+    textAlign: 'center',
+    fontSize: '0.64rem',
+    fontWeight: 850,
+    padding: '6px 0',
 }
 
 const controlStyle: CSSProperties = {
