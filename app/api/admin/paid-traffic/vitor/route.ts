@@ -285,6 +285,8 @@ function buildMetrics(reviews: any[], plans: any[]) {
     approved_reviews: reviewStatuses.approved || 0,
     draft_plans: planStatuses.draft || 0,
     approved_plans: planStatuses.approved || 0,
+    published_plans: planStatuses.published || 0,
+    paused_plans: planStatuses.paused || 0,
     pending_human_decision: reviews.filter(review => ['reviewed', 'needs_improvement'].includes(String(review.status || ''))).length,
     high_risk: reviews.filter(review => Number(review.score || 0) < 60).length,
     review_statuses: reviewStatuses,
@@ -734,6 +736,18 @@ export async function PATCH(request: NextRequest) {
         creativeStatus: 'approved',
         label: 'marcou o plano do Vitor como exportado para execucao',
       },
+      publish: {
+        reviewStatus: 'approved',
+        planStatus: 'published',
+        creativeStatus: 'approved',
+        label: 'marcou a campanha do Vitor como publicada',
+      },
+      pause: {
+        reviewStatus: 'approved',
+        planStatus: 'paused',
+        creativeStatus: 'approved',
+        label: 'marcou a campanha do Vitor como pausada',
+      },
     }
 
     const decision = actions[action]
@@ -784,7 +798,7 @@ export async function PATCH(request: NextRequest) {
       if (planReadError) throw planReadError
 
       let creative: any = null
-      if (action === 'export' && review.creative_id) {
+      if ((action === 'export' || action === 'publish') && review.creative_id) {
         const { data: creativeData, error: creativeReadError } = await supabase
           .from('marketing_creatives')
           .select('id, title, description, asset_url, thumbnail_url, asset_type, content_type, property_sku, status, raw')
@@ -803,7 +817,7 @@ export async function PATCH(request: NextRequest) {
         },
       }
 
-      if (action === 'export' && currentPlan?.id) {
+      if ((action === 'export' || action === 'publish') && currentPlan?.id && !safeRecord(nextRawPlan.execution_package).version) {
         nextRawPlan.execution_package = buildHumanExecutionPackage({
           review,
           plan: currentPlan,
@@ -845,7 +859,7 @@ export async function PATCH(request: NextRequest) {
       entityId: reviewId,
       source: 'vitor-panel',
       label: `Humano ${decision.label}`,
-      importanceScore: action === 'approve' ? 78 : action === 'cancel' ? 70 : 64,
+      importanceScore: action === 'publish' ? 86 : action === 'approve' || action === 'export' ? 78 : action === 'pause' ? 76 : action === 'cancel' ? 70 : 64,
       metadata: {
         action,
         notes: notes || null,

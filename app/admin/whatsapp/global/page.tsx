@@ -15,6 +15,7 @@ import {
     MessageSquareText,
     RefreshCw,
     Route,
+    Send,
     ShieldCheck,
     UserRound,
     XCircle,
@@ -226,11 +227,40 @@ export default function WhatsAppGlobalPage() {
         }
     }
 
+    const processWithVitor = async (commandId: string) => {
+        setUpdating(`${commandId}:process_vitor`)
+        setToast(null)
+        try {
+            const response = await fetch('/api/admin/whatsapp/global', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command_id: commandId, action: 'process_vitor' }),
+            })
+            const payload = await response.json()
+            if (!response.ok || !payload?.success) throw new Error(payload?.error || 'Falha ao processar com o Vitor.')
+            const vitor = payload.vitor || {}
+            const detail = vitor.score ? ` Score: ${vitor.score}/100.` : ''
+            setToast({ type: 'success', text: `Comando processado pelo Vitor.${detail}` })
+            await loadData(true)
+        } catch (err) {
+            setToast({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao processar com o Vitor.' })
+        } finally {
+            setUpdating(null)
+        }
+    }
+
     const copyCommand = (text: string) => {
         if (!text || typeof navigator === 'undefined') return
         void navigator.clipboard.writeText(text)
         setToast({ type: 'success', text: 'Texto copiado.' })
     }
+
+    const canProcessActiveCommand = Boolean(
+        activeCommand
+        && activeCommand.target_agent === 'ads-analyst'
+        && activeCommand.command_type.startsWith('paid_traffic')
+        && !['blocked', 'cancelled', 'processing', 'completed'].includes(activeCommand.status),
+    )
 
     if (loading) return <AdminLoadingState message="Carregando WhatsApp Global..." />
 
@@ -376,6 +406,17 @@ export default function WhatsAppGlobalPage() {
                                     <h2>{activeCommand.identity_label || activeCommand.phone_masked}</h2>
                                     <p>{activeCommand.command_text || activeCommand.session?.last_user_message || 'Sem texto registrado.'}</p>
                                     <div className="global-action-row">
+                                        {canProcessActiveCommand && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-gold"
+                                                onClick={() => processWithVitor(activeCommand.id)}
+                                                disabled={Boolean(updating)}
+                                            >
+                                                {updating === `${activeCommand.id}:process_vitor` ? <Loader2 size={15} className="spin" /> : <Send size={15} />}
+                                                Processar Vitor
+                                            </button>
+                                        )}
                                         {['queued', 'processing', 'completed', 'failed', 'cancelled'].map(status => (
                                             <button
                                                 key={status}

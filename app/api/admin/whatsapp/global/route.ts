@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import { isWhatsAppGlobalInstance } from '@/lib/whatsapp/global-identity'
 
 export const dynamic = 'force-dynamic'
@@ -423,15 +424,13 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}))
+        const action = cleanText(body?.action, 40)
         const commandId = cleanText(body?.command_id, 80)
         const nextStatus = cleanText(body?.status, 40)
         const note = cleanText(body?.note, 800)
 
         if (!commandId) {
             return NextResponse.json({ success: false, error: 'command_id obrigatorio.' }, { status: 400 })
-        }
-        if (!COMMAND_STATUSES.has(nextStatus)) {
-            return NextResponse.json({ success: false, error: 'Status invalido.' }, { status: 400 })
         }
 
         const supabase = createAdminClient()
@@ -443,6 +442,75 @@ export async function PATCH(request: NextRequest) {
 
         if (readError) throw readError
         if (!current?.id) return NextResponse.json({ success: false, error: 'Comando nao encontrado.' }, { status: 404 })
+
+        if (action === 'process_vitor') {
+            const commandType = String(current.command_type || '')
+            if (current.target_agent !== 'ads-analyst' || !commandType.startsWith('paid_traffic')) {
+                return NextResponse.json({ success: false, error: 'Este comando nao pertence ao Vitor Trafego Pago.' }, { status: 400 })
+            }
+            if (['blocked', 'cancelled'].includes(String(current.status || ''))) {
+                return NextResponse.json({ success: false, error: 'Comandos bloqueados ou cancelados nao devem ser processados pelo Vitor.' }, { status: 400 })
+            }
+
+            let instance: any = null
+            if (current.instance_id) {
+                const { data: commandInstance } = await supabase
+                    .from('whatsapp_instances')
+                    .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config, instance_type')
+                    .eq('id', current.instance_id)
+                    .maybeSingle()
+                instance = commandInstance || null
+            }
+            if (!instance) {
+                instance = await getGlobalInstance(supabase)
+            }
+
+            const vitorResult = await processVitorPaidTrafficCommand({
+                supabase,
+                command: current,
+                instance,
+                instanceToken: instance?.instance_token || null,
+                sendResponse: false,
+            })
+
+            const { data: refreshed } = await supabase
+                .from('whatsapp_global_commands')
+                .select('*')
+                .eq('id', commandId)
+                .maybeSingle()
+
+            await recordEcosystemEvent({
+                supabase,
+                eventType: 'whatsapp_global_command_vitor_processed_from_panel',
+                actorType: 'human',
+                entityType: 'whatsapp_global_command',
+                entityId: commandId,
+                source: 'admin-whatsapp-global',
+                label: `Comando do WhatsApp Global processado pelo Vitor via painel`,
+                importanceScore: vitorResult.error ? 82 : 74,
+                metadata: {
+                    command_id: commandId,
+                    previous_status: current.status || null,
+                    target_agent: current.target_agent || null,
+                    command_type: current.command_type || null,
+                    identity_type: current.identity_type || null,
+                    identity_label: current.identity_label || null,
+                    vitor: vitorResult,
+                },
+            }).catch((error: any) => {
+                console.warn('[WhatsApp Global] failed to record Vitor processing event:', error?.message || error)
+            })
+
+            return NextResponse.json({
+                success: true,
+                command: serializeCommand(refreshed || current, new Map()),
+                vitor: vitorResult,
+            })
+        }
+
+        if (!COMMAND_STATUSES.has(nextStatus)) {
+            return NextResponse.json({ success: false, error: 'Status invalido.' }, { status: 400 })
+        }
 
         const now = new Date().toISOString()
         const previousResult = current.result && typeof current.result === 'object' ? current.result : {}

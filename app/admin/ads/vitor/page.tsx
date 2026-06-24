@@ -15,6 +15,7 @@ import {
   ImageIcon,
   Loader2,
   Megaphone,
+  PauseCircle,
   RefreshCw,
   Send,
   Sparkles,
@@ -167,6 +168,8 @@ type VitorPayload = {
     approved_reviews: number
     draft_plans: number
     approved_plans: number
+    published_plans: number
+    paused_plans: number
     pending_human_decision: number
     high_risk: number
   }
@@ -194,6 +197,7 @@ const statusLabels: Record<string, string> = {
   draft: 'Rascunho',
   exported: 'Exportado',
   published: 'Publicado',
+  paused: 'Pausado',
 }
 
 function formatDateTime(value?: string | null) {
@@ -392,7 +396,7 @@ export default function VitorTrafficManagerPage() {
   const activeExecutionChecklist = stringRows(activeExecutionGuardrails.pre_launch_checklist)
   const activeExecutionSteps = stringRows(activeExecutionPackage?.human_execution_steps)
 
-  const decide = async (action: 'approve' | 'improve' | 'cancel' | 'export') => {
+  const decide = async (action: 'approve' | 'improve' | 'cancel' | 'export' | 'publish' | 'pause') => {
     if (!activeReview) return
     setUpdating(action)
     setError('')
@@ -405,7 +409,19 @@ export default function VitorTrafficManagerPage() {
       })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao atualizar decisao.')
-      setToast(action === 'approve' ? 'Plano aprovado para execucao humana.' : action === 'improve' ? 'Criativo marcado para melhoria.' : action === 'export' ? 'Pacote de execucao preparado.' : 'Plano cancelado.')
+      setToast(
+        action === 'approve'
+          ? 'Plano aprovado para execucao humana.'
+          : action === 'improve'
+            ? 'Criativo marcado para melhoria.'
+            : action === 'export'
+              ? 'Pacote de execucao preparado.'
+              : action === 'publish'
+                ? 'Campanha marcada como publicada.'
+                : action === 'pause'
+                  ? 'Campanha marcada como pausada.'
+                  : 'Plano cancelado.',
+      )
       await loadData(filter, true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar decisao.')
@@ -585,7 +601,7 @@ export default function VitorTrafficManagerPage() {
           { icon: <ClipboardList size={18} />, label: 'Inbox', value: metrics?.inbox || 0, detail: `${metrics?.pending_human_decision || 0} aguardam decisao` },
           { icon: <Target size={18} />, label: 'Score medio', value: metrics?.avg_score || 0, detail: `${metrics?.high_risk || 0} risco alto` },
           { icon: <Edit3 size={18} />, label: 'Melhorias', value: metrics?.needs_improvement || 0, detail: 'criativos para ajustar' },
-          { icon: <CheckCircle2 size={18} />, label: 'Aprovados', value: metrics?.approved_plans || 0, detail: `${metrics?.draft_plans || 0} planos em rascunho` },
+          { icon: <CheckCircle2 size={18} />, label: 'Ativos', value: metrics?.published_plans || 0, detail: `${metrics?.approved_plans || 0} aprovados | ${metrics?.draft_plans || 0} rascunhos` },
         ].map(item => (
           <article key={item.label} className="vitor-metric-card">
             <span>{item.icon}{item.label}</span>
@@ -926,6 +942,12 @@ export default function VitorTrafficManagerPage() {
                     <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('export')}>
                       <ClipboardList size={16} /> {updating === 'export' ? 'Preparando...' : 'Preparar execucao'}
                     </button>
+                    <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('publish')}>
+                      <Megaphone size={16} /> {updating === 'publish' ? 'Marcando...' : 'Marcar publicada'}
+                    </button>
+                    <button type="button" className="btn btn-outline" disabled={Boolean(updating)} onClick={() => decide('pause')}>
+                      <PauseCircle size={16} /> {updating === 'pause' ? 'Pausando...' : 'Pausar'}
+                    </button>
                     <button type="button" className="btn btn-outline danger" disabled={Boolean(updating)} onClick={() => decide('cancel')}>
                       <XCircle size={16} /> Cancelar
                     </button>
@@ -1081,7 +1103,7 @@ export default function VitorTrafficManagerPage() {
         </main>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .vitor-header {
           gap: 16px;
         }
