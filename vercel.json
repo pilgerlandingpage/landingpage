@@ -40,6 +40,10 @@
         {
             "path": "/api/cron/lead-executive-briefs",
             "schedule": "15 11 * * *"
+        },
+        {
+            "path": "/api/cron/vitor-monitoring",
+            "schedule": "45 * * * *"
         }
     ]
 }
