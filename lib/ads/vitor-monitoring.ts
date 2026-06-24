@@ -39,6 +39,16 @@ export type VitorMonitoringSnapshot = {
     tone: 'good' | 'medium' | 'risk'
   }
   metrics: Record<string, number>
+  executive_report: {
+    summary: string
+    performance: string
+    lead_quality: string
+    execution: string
+    winners: string[]
+    risks: string[]
+    next_actions: string[]
+    test_readiness: 'ready' | 'attention' | 'blocked'
+  }
   alerts: VitorMonitoringAlert[]
   recommendations: Array<{
     title: string
@@ -178,6 +188,67 @@ function healthLabel(score: number) {
   if (score >= 75) return { label: 'Saudavel', tone: 'good' as const }
   if (score >= 55) return { label: 'Atencao', tone: 'medium' as const }
   return { label: 'Critico', tone: 'risk' as const }
+}
+
+function moneyText(value: unknown) {
+  const amount = numeric(value)
+  if (amount <= 0) return 'R$ 0'
+  return `R$ ${Math.round(amount).toLocaleString('pt-BR')}`
+}
+
+function percentText(value: unknown) {
+  const amount = numeric(value)
+  return `${amount.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
+
+function buildExecutiveReport(params: {
+  health: { score: number; label: string }
+  metrics: Record<string, number>
+  alerts: VitorMonitoringAlert[]
+  learnings: VitorMonitoringLearning[]
+  pendingExecutionPlans: Array<Record<string, unknown>>
+  topAds: any[]
+}) {
+  const { health, metrics, alerts, learnings, pendingExecutionPlans, topAds } = params
+  const highAlerts = alerts.filter(alert => alert.severity === 'critical' || alert.severity === 'high')
+  const bestSignals = learnings
+    .filter(item => item.priority === 'low' || item.type === 'creative' || item.type === 'region' || item.type === 'source')
+    .slice(0, 3)
+    .map(item => `${item.title}: ${item.insight}`)
+  const risks = alerts.length
+    ? alerts.slice(0, 4).map(alert => `${alert.title}: ${alert.recommendation}`)
+    : ['Sem risco operacional forte nos dados atuais; manter leitura de CRM antes de escalar.']
+  const nextActions = alerts.length
+    ? alerts
+      .sort((a, b) => alertPriorityScore(b.severity) - alertPriorityScore(a.severity))
+      .slice(0, 5)
+      .map(alert => alert.recommendation)
+    : [
+      'Manter monitoramento diario de CPL, CTR e qualidade comercial.',
+      'Registrar no CRM a origem dos leads para fechar aprendizado por criativo.',
+    ]
+  const topAd = topAds[0]
+  const winners = bestSignals.length
+    ? bestSignals
+    : topAd
+      ? [`Campanha/anuncio de referencia: ${compact(topAd.name || topAd.creative_title || 'principal', 90)}.`]
+      : ['Ainda nao ha vencedor claro; aguardar volume minimo ou registrar execucao real das campanhas do Vitor.']
+  const testReadiness: 'ready' | 'attention' | 'blocked' = highAlerts.some(alert => alert.type === 'integration')
+    ? 'blocked'
+    : highAlerts.length || pendingExecutionPlans.length
+      ? 'attention'
+      : 'ready'
+
+  return {
+    summary: `Saude ${health.score}/100 (${health.label}); ${alerts.length} alerta(s), ${learnings.length} aprendizado(s) e ${pendingExecutionPlans.length} plano(s) pendente(s) de fechamento.`,
+    performance: `Gasto ${moneyText(metrics.spend)}, ${Math.round(metrics.leads || 0)} lead(s) Meta, CPL medio ${moneyText(metrics.avg_cpl)} e CTR ${percentText(metrics.avg_ctr)}.`,
+    lead_quality: `${Math.round(metrics.crm_paid_leads || 0)} lead(s) pagos no CRM; ${Math.round(metrics.crm_qualified_leads || 0)} qualificado(s), ${Math.round(metrics.crm_poor_leads || 0)} ruim(ns), qualidade ${percentText(metrics.crm_quality_rate)}.`,
+    execution: `${Math.round(metrics.prepared_plans || 0)} plano(s) preparado(s), ${Math.round(metrics.executed_vitor_plans || 0)} execucao(oes) registrada(s) e ${Math.round(metrics.pending_execution_plans || 0)} pendente(s) de reconciliar com campanha real.`,
+    winners,
+    risks,
+    next_actions: Array.from(new Set(nextActions)).slice(0, 5),
+    test_readiness: testReadiness,
+  }
 }
 
 function pushAlert(
@@ -707,6 +778,32 @@ export async function buildVitorMonitoringSnapshot({
     metaLeads: leads,
     pendingExecutionPlans,
   })
+  const metrics = {
+    spend,
+    impressions: numeric(totals.impressions),
+    clicks: numeric(totals.clicks),
+    leads,
+    conversations,
+    avg_ctr: avgCtr,
+    avg_cpl: avgCpl,
+    frequency,
+    crm_paid_leads: paidLeads.length,
+    crm_qualified_leads: qualifiedLeads.length,
+    crm_poor_leads: poorLeads.length,
+    crm_quality_rate: crmQualityRate,
+    missing_attribution: missingAttribution,
+    prepared_plans: plans.filter(plan => ['approved', 'exported', 'pending_human_approval'].includes(String(plan.status || ''))).length,
+    executed_vitor_plans: plans.filter(plan => {
+      const rawPlan = safeRecord(plan?.raw_plan)
+      return ['published', 'paused'].includes(String(plan.status || '')) || Object.keys(safeRecord(rawPlan.execution_record)).length > 0
+    }).length,
+    pending_execution_plans: pendingExecutionPlans.length,
+    meta_campaigns: numeric(coverage.campaigns),
+    meta_ads: numeric(coverage.ads),
+  }
+  const sortedAlerts = alerts
+    .sort((a, b) => alertPriorityScore(b.severity) - alertPriorityScore(a.severity))
+    .slice(0, 12)
 
   return {
     generated_at: generatedAt,
@@ -715,33 +812,20 @@ export async function buildVitorMonitoringSnapshot({
       score: healthScore,
       ...labeledHealth,
     },
-    metrics: {
-      spend,
-      impressions: numeric(totals.impressions),
-      clicks: numeric(totals.clicks),
-      leads,
-      conversations,
-      avg_ctr: avgCtr,
-      avg_cpl: avgCpl,
-      frequency,
-      crm_paid_leads: paidLeads.length,
-      crm_qualified_leads: qualifiedLeads.length,
-      crm_poor_leads: poorLeads.length,
-      crm_quality_rate: crmQualityRate,
-      missing_attribution: missingAttribution,
-      prepared_plans: plans.filter(plan => ['approved', 'exported', 'pending_human_approval'].includes(String(plan.status || ''))).length,
-      executed_vitor_plans: plans.filter(plan => {
-        const rawPlan = safeRecord(plan?.raw_plan)
-        return ['published', 'paused'].includes(String(plan.status || '')) || Object.keys(safeRecord(rawPlan.execution_record)).length > 0
-      }).length,
-      pending_execution_plans: pendingExecutionPlans.length,
-      meta_campaigns: numeric(coverage.campaigns),
-      meta_ads: numeric(coverage.ads),
-    },
-    alerts: alerts
-      .sort((a, b) => alertPriorityScore(b.severity) - alertPriorityScore(a.severity))
-      .slice(0, 12),
-    recommendations: buildRecommendations(alerts),
+    metrics,
+    executive_report: buildExecutiveReport({
+      health: {
+        score: healthScore,
+        label: labeledHealth.label,
+      },
+      metrics,
+      alerts: sortedAlerts,
+      learnings,
+      pendingExecutionPlans,
+      topAds,
+    }),
+    alerts: sortedAlerts,
+    recommendations: buildRecommendations(sortedAlerts),
     learnings,
     top_campaigns: topCampaigns,
     top_ads: topAds,
@@ -792,6 +876,7 @@ export async function persistVitorMonitoringSnapshot({
       metrics: {
         ...snapshot.metrics,
         health: snapshot.health,
+        executive_report: snapshot.executive_report,
         diagnostics: snapshot.diagnostics,
         learnings: snapshot.learnings,
       },
@@ -821,6 +906,7 @@ export async function persistVitorMonitoringSnapshot({
       alerts: snapshot.alerts.slice(0, 8),
       learnings: snapshot.learnings.slice(0, 8),
       recommendations: snapshot.recommendations.slice(0, 8),
+      executive_report: snapshot.executive_report,
       diagnostics: snapshot.diagnostics,
     },
     handoffTargets: ['ceo-agent', 'whatsapp-global-agent', 'creative-strategy-agent'],
@@ -842,6 +928,7 @@ export async function persistVitorMonitoringSnapshot({
         alerts: snapshot.alerts.slice(0, 8),
         learnings: snapshot.learnings.slice(0, 8),
         recommendations: snapshot.recommendations.slice(0, 8),
+        executive_report: snapshot.executive_report,
       },
     },
   })

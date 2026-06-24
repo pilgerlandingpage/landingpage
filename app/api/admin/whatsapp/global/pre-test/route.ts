@@ -393,6 +393,115 @@ function summarizeCounts(values: Record<string, { count: number }>) {
     return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, value.count]))
 }
 
+function buildIdentityMatrix(params: {
+    adminPhones: { count: number; ready: boolean }
+    masterPhones: { count: number; ready: boolean }
+    brokerPhones: { count: number; ready: boolean }
+    authorizedPhones: { count: number; ready: boolean }
+    propertyOwnerPhones: { count: number; ready: boolean }
+    privateOwnerRows: { count: number; ready: boolean }
+    overrides: { count: number; ready: boolean }
+}) {
+    const ownerCount = params.propertyOwnerPhones.count + params.privateOwnerRows.count
+    return [
+        {
+            key: 'master',
+            label: 'Master/admin',
+            detected: params.masterPhones.count,
+            ready: params.adminPhones.ready && params.masterPhones.count > 0,
+            permissions: ['master_all'],
+            expected_behavior: 'Responder como diretoria/master, permitir comandos internos e Vitor.',
+        },
+        {
+            key: 'admin',
+            label: 'Admin comum',
+            detected: Math.max(0, params.adminPhones.count - params.masterPhones.count),
+            ready: params.adminPhones.ready && params.adminPhones.count > 0,
+            permissions: ['conforme setores do painel'],
+            expected_behavior: 'Responder como usuario interno e bloquear somente acoes sem permissao.',
+        },
+        {
+            key: 'broker',
+            label: 'Corretor cadastrado',
+            detected: params.brokerPhones.count,
+            ready: params.brokerPhones.ready && params.brokerPhones.count > 0,
+            permissions: ['properties', 'leads', 'crm'],
+            expected_behavior: 'Apoiar leads, CRM, agenda e estoque sem tratar como comprador.',
+        },
+        {
+            key: 'authorized_phone',
+            label: 'Telefone autorizado',
+            detected: params.authorizedPhones.count,
+            ready: params.authorizedPhones.ready && params.authorizedPhones.count > 0,
+            permissions: ['conforme cadastro do telefone'],
+            expected_behavior: 'Atender como representante do corretor e respeitar flags de permissao.',
+        },
+        {
+            key: 'owner',
+            label: 'Proprietario',
+            detected: ownerCount,
+            ready: (params.propertyOwnerPhones.ready || params.privateOwnerRows.ready) && ownerCount > 0,
+            permissions: ['owner_properties'],
+            expected_behavior: 'Atender como proprietario, separado do funil de leads compradores.',
+        },
+        {
+            key: 'manual_override',
+            label: 'Override manual',
+            detected: params.overrides.count,
+            ready: params.overrides.ready,
+            permissions: ['permission_keys do override'],
+            expected_behavior: 'Corrigir perfil quando o historico ou cadastro antigo conflitar com o numero real.',
+        },
+    ]
+}
+
+function buildEndToEndTestPlan() {
+    return [
+        {
+            key: 'identity_master',
+            label: 'Reconhecer master',
+            message: 'Sou o Magno Macedo. Voce me reconhece como administrador master da Pilger? Responda apenas qual perfil voce identificou para este numero.',
+            expected: 'Responder master/admin e nunca lead.',
+        },
+        {
+            key: 'identity_broker',
+            label: 'Reconhecer corretor',
+            message: 'Sou corretor cadastrado da Pilger. Qual perfil voce identificou para este numero?',
+            expected: 'Responder corretor/usuario interno se o telefone estiver cadastrado.',
+        },
+        {
+            key: 'identity_owner',
+            label: 'Reconhecer proprietario',
+            message: 'Sou proprietario de um imovel cadastrado. Qual perfil voce identificou para este numero?',
+            expected: 'Responder proprietario quando houver owner_phone/privado vinculado.',
+        },
+        {
+            key: 'vitor_creative',
+            label: 'Criativo para Vitor',
+            message: 'Vitor, analisar este criativo para subir trafego. Objetivo: gerar conversas qualificadas no WhatsApp.',
+            expected: 'Criar comando, review, score, riscos e plano no painel do Vitor.',
+        },
+        {
+            key: 'vitor_monitoring',
+            label: 'Monitoramento',
+            message: 'Vitor, me diga o status do trafego pago hoje.',
+            expected: 'Gerar leitura de monitoramento ou registrar indisponibilidade sem inventar metricas.',
+        },
+        {
+            key: 'vitor_approval',
+            label: 'Aprovacao humana',
+            message: 'Aprovar plano do Vitor.',
+            expected: 'Atualizar status do plano/review sem publicar campanha automaticamente.',
+        },
+        {
+            key: 'vitor_execution',
+            label: 'Pacote de execucao',
+            message: 'Preparar execucao do Vitor.',
+            expected: 'Gerar pacote humano com nome de campanha, copy, UTM, checklist e regras de pausa/escala.',
+        },
+    ]
+}
+
 export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     const generatedAt = new Date().toISOString()
@@ -722,6 +831,16 @@ export async function GET(request: NextRequest) {
         const warnings = sections.flatMap(row => row.items).filter(row => row.status === 'warn')
         const score = Math.max(0, Math.round((sections.reduce((sum, row) => sum + row.score, 0) / Math.max(sections.length, 1))))
         const status: CheckStatus = blockers.length > 0 ? 'missing' : warnings.length > 0 ? 'warn' : 'ok'
+        const identityMatrix = buildIdentityMatrix({
+            adminPhones,
+            masterPhones,
+            brokerPhones,
+            authorizedPhones,
+            propertyOwnerPhones,
+            privateOwnerRows,
+            overrides,
+        })
+        const testPlan = buildEndToEndTestPlan()
 
         return NextResponse.json({
             success: true,
@@ -754,34 +873,15 @@ export async function GET(request: NextRequest) {
                     ecosystem_snapshots: ecosystemSnapshots.count,
                 },
             },
+            identity_matrix: identityMatrix,
             sections,
-            test_messages: [
-                {
-                    key: 'identity',
-                    label: 'Reconhecimento master',
-                    text: 'Sou o Magno Macedo. Voce me reconhece como administrador master da Pilger? Responda apenas qual perfil voce identificou para este numero.',
-                },
-                {
-                    key: 'monitoring',
-                    label: 'Status do Vitor',
-                    text: 'Vitor, me diga o status do trafego pago hoje.',
-                },
-                {
-                    key: 'creative',
-                    label: 'Analise de criativo',
-                    text: 'Vitor, analisar este criativo para subir trafego. Objetivo: gerar conversas qualificadas no WhatsApp.',
-                },
-                {
-                    key: 'approval',
-                    label: 'Aprovacao humana',
-                    text: 'Aprovar plano do Vitor.',
-                },
-                {
-                    key: 'execution',
-                    label: 'Pacote de execucao',
-                    text: 'Preparar execucao do Vitor.',
-                },
-            ],
+            test_plan: testPlan,
+            test_messages: testPlan.map(step => ({
+                key: step.key,
+                label: step.label,
+                text: step.message,
+                expected: step.expected,
+            })),
             links: [
                 { label: 'WhatsApp Global', href: '/admin/whatsapp/global' },
                 { label: 'Painel do Vitor', href: '/admin/ads/vitor' },

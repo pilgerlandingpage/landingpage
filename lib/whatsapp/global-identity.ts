@@ -61,11 +61,27 @@ const TRAFFIC_MONITOR_WORDS = [
 const TRAFFIC_DECISION_WORDS = [
     'aprovar',
     'aprovado',
+    'autorizar',
+    'autorizado',
+    'liberar',
+    'liberado',
+    'registrar',
+    'registrado',
+    'registrada',
     'preparar',
     'exportar',
     'executar',
     'execucao',
     'execução',
+    'publicar',
+    'publicado',
+    'publicada',
+    'publique',
+    'ativar',
+    'ativado',
+    'pausar',
+    'pause',
+    'pausado',
     'melhorar',
     'ajustar',
     'cancelar',
@@ -295,8 +311,8 @@ async function getAdminPermissions(supabase: SupabaseLike, adminUser: any): Prom
     ))
 }
 
-function classifyAdminIdentity(adminUser: any, permissions: string[]): WhatsAppGlobalIdentityType {
-    if (adminUser?.is_master || permissions.includes('ads') || permissions.includes('settings_users')) return 'admin_user'
+function classifyAdminIdentity(adminUser: any, _permissions: string[]): WhatsAppGlobalIdentityType {
+    if (adminUser?.id) return 'admin_user'
     return 'broker_user'
 }
 
@@ -648,10 +664,14 @@ function globalIdentityCapabilityLines(identity: WhatsAppGlobalIdentity): string
             ? [
                 'Pode solicitar visao geral da operacao, relatorios, status dos setores, comandos ao Vitor e encaminhamentos internos.',
                 'Pode receber respostas de diretoria, com linguagem objetiva e operacional.',
+                'Pode aprovar, exportar, registrar execucao, pausar e pedir monitoramento do Vitor, sempre com aprovacao humana antes de publicacao automatica.',
             ]
             : [
                 `Pode ser atendido conforme as permissoes ativas: ${identity.permissions.length ? identity.permissions.join(', ') : 'nenhuma permissao operacional localizada'}.`,
                 'Se pedir algo fora da permissao, explique que precisa de liberacao de um master.',
+                identity.permissions.includes('ads')
+                    ? 'Pode enviar criativos e comandos de trafego pago ao Vitor.'
+                    : 'Nao pode comandar trafego pago sem permissao ads.',
             ]
     }
 
@@ -659,6 +679,7 @@ function globalIdentityCapabilityLines(identity: WhatsAppGlobalIdentity): string
         return [
             'Pode pedir apoio sobre leads, CRM, imoveis, agenda comercial e operacao do corretor.',
             'Nao trate como cliente comprador; trate como membro da equipe comercial.',
+            'Nao pode aprovar verba, publicar campanha ou executar comandos do Vitor sem permissao explicita.',
         ]
     }
 
@@ -666,6 +687,9 @@ function globalIdentityCapabilityLines(identity: WhatsAppGlobalIdentity): string
         return [
             `Pode ser atendido conforme permissoes do telefone autorizado: ${identity.permissions.length ? identity.permissions.join(', ') : 'nenhuma permissao operacional localizada'}.`,
             'Nao trate como lead; trate como representante/autorizado do corretor.',
+            identity.permissions.includes('ads')
+                ? 'Pode acionar demandas de trafego pago se a permissao ads estiver ativa.'
+                : 'Nao pode comandar trafego pago sem permissao ads.',
         ]
     }
 
@@ -707,9 +731,12 @@ export function buildWhatsAppGlobalInternalSystemPrompt(identity: WhatsAppGlobal
         ...globalIdentityCapabilityLines(identity).map(line => `- ${line}`),
         '',
         'Regras obrigatorias:',
+        '- A identidade resolvida acima vence o historico da conversa. Se o sistema disse admin, corretor ou proprietario, nunca rebaixe para lead por causa de mensagens antigas.',
         '- Nunca trate esta pessoa como lead comercial.',
         '- Nunca qualifique interesse de morar/investir para numeros cadastrados.',
         '- Nunca ofereca imoveis como se a pessoa fosse cliente final, a menos que ela peca apoio operacional sobre estoque.',
+        '- Respeite permissoes: master_all pode tudo; ads aciona Vitor; dashboard pede relatorios; properties consulta estoque; crm/leads/agenda apoiam operacao comercial.',
+        '- Se o usuario cadastrado pedir algo sem permissao, responda que reconheceu o perfil, mas precisa de liberacao de um master.',
         '- Responda curto, natural e profissional para WhatsApp.',
         '- Se a pessoa pedir uma acao que ainda depende de ferramenta, diga o que voce entendeu e peca o dado minimo para encaminhar ou registrar.',
         '- Se for comando de trafego pago, oriente a usar uma frase explicita com Vitor, trafego, campanha ou criativo.',
@@ -842,24 +869,18 @@ export function buildWhatsAppGlobalAcknowledgement(params: {
         ].join('\n')
     }
 
-    if (identity.type === 'property_owner') {
-        const properties = identity.ownerProperties || []
-        const firstProperty = properties[0]
-        const propertyText = firstProperty
-            ? `Identifiquei voce como proprietario de ${ownerPropertyLabel(firstProperty)}.`
-            : 'Identifiquei voce como proprietario cadastrado.'
-        return [
-            propertyText,
-            'Vou tratar esta conversa como atendimento de proprietario, separado dos leads comerciais.',
-        ].join('\n')
-    }
-
     if (intent.commandType === 'identity_check') {
         const profile = identity.type === 'admin_user'
-            ? 'administrador do sistema'
-            : identity.type === 'broker_user' || identity.type === 'broker_authorized'
-                ? 'corretor/usuario autorizado'
-                : identity.type
+            ? identity.permissions.includes('master_all')
+                ? 'administrador master / diretoria'
+                : 'administrador do sistema'
+            : identity.type === 'broker_user'
+                ? 'corretor cadastrado'
+                : identity.type === 'broker_authorized'
+                    ? 'telefone autorizado de corretor'
+                    : identity.type === 'property_owner'
+                        ? 'proprietario cadastrado'
+                        : identity.type
         const permissionText = identity.permissions.includes('master_all')
             ? 'Permissao identificada: master_all.'
             : identity.permissions.length
@@ -872,10 +893,23 @@ export function buildWhatsAppGlobalAcknowledgement(params: {
         ].join('\n')
     }
 
+    if (identity.type === 'property_owner') {
+        const properties = identity.ownerProperties || []
+        const firstProperty = properties[0]
+        const propertyText = firstProperty
+            ? `Identifiquei voce como proprietario de ${ownerPropertyLabel(firstProperty)}.`
+            : 'Identifiquei voce como proprietario cadastrado.'
+        return [
+            propertyText,
+            'Vou tratar esta conversa como atendimento de proprietario, separado dos leads comerciais.',
+        ].join('\n')
+    }
+
     if (intent.targetAgent === 'ads-analyst') {
         return [
             `${identity.label}, recebi seu pedido para o Vitor Trafego Pago.`,
-            'Nesta fase eu ja registrei o comando e vou usar essa entrada para a fila do gestor de trafego IA.',
+            'Vou transformar essa entrada em score, riscos, plano e pacote de execucao humana quando houver criativo/briefing suficiente.',
+            'Nada sera publicado automaticamente sem aprovacao humana.',
         ].join('\n')
     }
 

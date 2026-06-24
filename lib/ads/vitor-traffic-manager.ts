@@ -1,5 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
-import { VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT } from '@/lib/ai/prompts'
+import { VITOR_CREATIVE_REVIEW_RUNTIME_GUARDRAILS, VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT } from '@/lib/ai/prompts'
 import {
   buildCentralContextPrompt,
   getAgentCentralContext,
@@ -479,12 +479,12 @@ async function getConfiguredVitorPrompt(supabase: SupabaseLike) {
     if (error) throw error
 
     const value = cleanString(data?.value, 12000)
-    if (value) return value
+    if (value) return `${value}\n\n${VITOR_CREATIVE_REVIEW_RUNTIME_GUARDRAILS}`
   } catch (error: any) {
     console.warn('[Vitor] prompt config unavailable:', error?.message || error)
   }
 
-  return VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT
+  return `${VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT}\n\n${VITOR_CREATIVE_REVIEW_RUNTIME_GUARDRAILS}`
 }
 
 async function runVitorAnalysis(params: {
@@ -741,7 +741,7 @@ async function sendVitorResponse(params: {
   }
 }
 
-type VitorDecisionAction = 'approve' | 'improve' | 'cancel' | 'export'
+type VitorDecisionAction = 'approve' | 'improve' | 'cancel' | 'export' | 'publish' | 'pause'
 
 function detectVitorDecisionAction(text: unknown): VitorDecisionAction | null {
   const normalized = cleanString(text, 1000)
@@ -750,7 +750,9 @@ function detectVitorDecisionAction(text: unknown): VitorDecisionAction | null {
     .replace(/[\u0300-\u036f]/g, '')
 
   if (/\b(cancelar|cancela|cancelado|nao rodar|nao publicar|descartar)\b/.test(normalized)) return 'cancel'
+  if (/\b(pausar|pause|pausado|pausar campanha)\b/.test(normalized)) return 'pause'
   if (/\b(melhorar|ajustar|refazer|corrigir|revisar criativo|melhoria)\b/.test(normalized)) return 'improve'
+  if (/\b(publicar|publicado|publicada|marcar publicada|marcar publicado|ativar|ativado|ativada|registrar campanha)\b/.test(normalized)) return 'publish'
   if (/\b(preparar|exportar|executar|execucao|pacote|subir mesmo assim|rodar mesmo assim)\b/.test(normalized)) return 'export'
   if (/\b(aprovar|aprovado|autorizar|pode rodar|pode subir|liberar)\b/.test(normalized)) return 'approve'
   return null
@@ -760,6 +762,8 @@ function vitorDecisionLabel(action: VitorDecisionAction) {
   if (action === 'approve') return 'aprovou o plano do Vitor'
   if (action === 'improve') return 'pediu melhoria no criativo do Vitor'
   if (action === 'cancel') return 'cancelou o plano do Vitor'
+  if (action === 'publish') return 'marcou a campanha do Vitor como publicada'
+  if (action === 'pause') return 'marcou a campanha do Vitor como pausada'
   return 'marcou o plano do Vitor como pronto para execucao humana'
 }
 
@@ -767,6 +771,8 @@ function vitorDecisionStatuses(action: VitorDecisionAction) {
   if (action === 'approve') return { reviewStatus: 'approved', planStatus: 'approved', creativeStatus: 'approved' }
   if (action === 'improve') return { reviewStatus: 'needs_improvement', planStatus: 'draft', creativeStatus: 'review' }
   if (action === 'cancel') return { reviewStatus: 'cancelled', planStatus: 'cancelled', creativeStatus: 'archived' }
+  if (action === 'publish') return { reviewStatus: 'approved', planStatus: 'published', creativeStatus: 'approved' }
+  if (action === 'pause') return { reviewStatus: 'approved', planStatus: 'paused', creativeStatus: 'approved' }
   return { reviewStatus: 'approved', planStatus: 'exported', creativeStatus: 'approved' }
 }
 
@@ -800,7 +806,11 @@ function buildVitorDecisionMessage(params: {
       ? 'Criativo marcado para melhoria antes de rodar.'
       : action === 'cancel'
         ? 'Plano cancelado. Nada sera publicado.'
-        : 'Plano marcado como pronto/exportado para execucao humana.'
+        : action === 'publish'
+          ? 'Campanha marcada como publicada por decisao humana.'
+          : action === 'pause'
+            ? 'Campanha marcada como pausada por decisao humana.'
+            : 'Plano marcado como pronto/exportado para execucao humana.'
 
   return [
     'Vitor Trafego Pago registrou sua decisao.',
@@ -904,7 +914,7 @@ async function processVitorDecisionCommand(params: {
     entityId: review.id,
     source: 'vitor-whatsapp-global',
     label: `${command.identity_label || 'Humano'} ${vitorDecisionLabel(action)}`,
-    importanceScore: action === 'approve' || action === 'export' ? 78 : action === 'cancel' ? 70 : 64,
+    importanceScore: action === 'publish' ? 86 : action === 'approve' || action === 'export' ? 78 : action === 'pause' ? 76 : action === 'cancel' ? 70 : 64,
     metadata: {
       action,
       source: 'whatsapp_global',

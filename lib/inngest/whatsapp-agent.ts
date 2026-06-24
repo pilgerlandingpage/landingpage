@@ -25,7 +25,7 @@ import {
 import { getPublicAppUrl } from '../app-url'
 import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
 import { recordGeminiUsage } from '../ai/gemini-costs'
-import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT } from '../whatsapp/agent-global-prompt'
+import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT, WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS } from '../whatsapp/agent-global-prompt'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
@@ -4213,6 +4213,7 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
     if (globalWhatsAppPrompt) {
         systemPrompt += `\n\n${globalWhatsAppPrompt}`
     }
+    systemPrompt += `\n\n${WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS}`
 
     systemPrompt += buildSpecialLeadScenarioPrompt(configs)
 

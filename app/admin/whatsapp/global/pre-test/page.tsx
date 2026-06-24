@@ -61,11 +61,26 @@ type PreTestPayload = {
         } | null
         counts: Record<string, number>
     }
+    identity_matrix?: Array<{
+        key: string
+        label: string
+        detected: number
+        ready: boolean
+        permissions: string[]
+        expected_behavior: string
+    }>
     sections: CheckSection[]
+    test_plan?: Array<{
+        key: string
+        label: string
+        message: string
+        expected: string
+    }>
     test_messages: Array<{
         key: string
         label: string
         text: string
+        expected?: string
     }>
     links: Array<{
         label: string
@@ -257,6 +272,26 @@ export default function WhatsAppGlobalPreTestPage() {
                         <SummaryMetric label="Central" value={counts.ecosystem_events || 0} hint="eventos consolidados" />
                     </section>
 
+                    <section className="pretest-identity-matrix">
+                        <div className="pretest-section-title">
+                            <ShieldCheck size={18} />
+                            <div>
+                                <h2>Matriz de reconhecimento</h2>
+                                <p>Perfis que o WhatsApp Global deve separar antes de qualquer atendimento como lead.</p>
+                            </div>
+                        </div>
+                        <div className="pretest-identity-grid">
+                            {(data.identity_matrix || []).map(row => (
+                                <article key={row.key} className={row.ready ? 'ready' : 'attention'}>
+                                    <span>{row.ready ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />} {row.label}</span>
+                                    <strong>{row.detected}</strong>
+                                    <p>{row.expected_behavior}</p>
+                                    <small>{row.permissions.join(', ')}</small>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+
                     <section className="pretest-links">
                         {(data.links || []).map(link => (
                             <Link key={link.href} href={link.href}>
@@ -287,8 +322,8 @@ export default function WhatsAppGlobalPreTestPage() {
                         <div className="pretest-section-title">
                             <ClipboardList size={18} />
                             <div>
-                                <h2>Mensagens da bateria</h2>
-                                <p>Use quando o checklist estiver verde ou quando quiser isolar um ponto especifico.</p>
+                                <h2>Bateria final de testes</h2>
+                                <p>Execute em ordem quando o checklist estiver verde ou para isolar um ponto especifico.</p>
                             </div>
                         </div>
                         <div className="pretest-message-grid">
@@ -296,6 +331,7 @@ export default function WhatsAppGlobalPreTestPage() {
                                 <article key={message.key} className="pretest-message">
                                     <span>{message.label}</span>
                                     <p>{message.text}</p>
+                                    {message.expected && <small>{message.expected}</small>}
                                     <button type="button" className="btn btn-outline btn-sm" onClick={() => copyText(message.text)}>
                                         <Copy size={14} /> Copiar
                                     </button>
@@ -460,6 +496,7 @@ export default function WhatsAppGlobalPreTestPage() {
                 }
 
                 .pretest-metrics,
+                .pretest-identity-grid,
                 .pretest-grid,
                 .pretest-message-grid {
                     display: grid;
@@ -471,7 +508,17 @@ export default function WhatsAppGlobalPreTestPage() {
                     margin-bottom: 16px;
                 }
 
+                .pretest-identity-matrix {
+                    margin-bottom: 18px;
+                }
+
+                .pretest-identity-grid {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    margin-top: 12px;
+                }
+
                 .pretest-metric,
+                .pretest-identity-grid article,
                 .pretest-section,
                 .pretest-message {
                     border: 1px solid #dfe8e2;
@@ -481,6 +528,40 @@ export default function WhatsAppGlobalPreTestPage() {
 
                 .pretest-metric {
                     padding: 16px;
+                }
+
+                .pretest-identity-grid article {
+                    display: grid;
+                    gap: 8px;
+                    padding: 14px;
+                    border-left: 4px solid #1f8f5f;
+                }
+
+                .pretest-identity-grid article.attention {
+                    border-left-color: #b7791f;
+                }
+
+                .pretest-identity-grid article span {
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    color: #244238;
+                    font-size: .8rem;
+                    font-weight: 800;
+                }
+
+                .pretest-identity-grid article strong {
+                    font-size: 1.55rem;
+                    line-height: 1;
+                }
+
+                .pretest-identity-grid article p,
+                .pretest-identity-grid article small,
+                .pretest-message small {
+                    margin: 0;
+                    color: #66766f;
+                    font-size: .78rem;
+                    line-height: 1.35;
                 }
 
                 .pretest-metric span,
@@ -646,6 +727,11 @@ export default function WhatsAppGlobalPreTestPage() {
                     font-size: .92rem;
                 }
 
+                .pretest-message small {
+                    display: block;
+                    min-height: 40px;
+                }
+
                 .pretest-message button {
                     width: fit-content;
                 }
@@ -690,6 +776,7 @@ export default function WhatsAppGlobalPreTestPage() {
                 }
 
                 @media (max-width: 1180px) {
+                    .pretest-identity-grid,
                     .pretest-message-grid {
                         grid-template-columns: repeat(3, minmax(0, 1fr));
                     }
@@ -709,6 +796,7 @@ export default function WhatsAppGlobalPreTestPage() {
                     }
 
                     .pretest-metrics,
+                    .pretest-identity-grid,
                     .pretest-grid {
                         grid-template-columns: 1fr;
                     }

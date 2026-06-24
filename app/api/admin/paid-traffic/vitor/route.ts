@@ -703,10 +703,12 @@ async function buildVitorReadiness(params: {
     global_instance: globalInstance || null,
     test_commands: [
       'Sou o Magno Macedo. Voce me reconhece como administrador master da Pilger? Responda apenas qual perfil voce identificou para este numero.',
+      'Sou corretor cadastrado da Pilger. Qual perfil voce identificou para este numero?',
       'Vitor, me diga o status do trafego pago hoje.',
       'Vitor, analisar este criativo para subir trafego. Objetivo: gerar conversas qualificadas no WhatsApp.',
       'Aprovar plano do Vitor.',
       'Preparar execucao do Vitor.',
+      'Registrar campanha do Vitor como publicada com o nome vitor_teste_whatsapp_global.',
     ],
   }
 }
@@ -782,6 +784,16 @@ export async function GET(request: NextRequest) {
         date_preset: 'last_7d',
         health: { score: 45, label: 'Integracao pendente', tone: 'risk' },
         metrics: {},
+        executive_report: {
+          summary: 'Monitoramento indisponivel; validar integracoes antes da bateria completa.',
+          performance: 'Sem leitura de gasto, leads, CPL ou CTR nesta chamada.',
+          lead_quality: 'Sem leitura de qualidade comercial do CRM nesta chamada.',
+          execution: 'Sem reconciliacao de planos executados nesta chamada.',
+          winners: [],
+          risks: ['Monitoramento indisponivel para validar performance.'],
+          next_actions: ['Revisar integracao Meta/CRM e tentar registrar monitoramento novamente.'],
+          test_readiness: 'blocked',
+        },
         alerts: [{
           type: 'integration',
           severity: 'critical',
@@ -791,6 +803,7 @@ export async function GET(request: NextRequest) {
           entity: null,
         }],
         recommendations: [],
+        learnings: [],
         top_campaigns: [],
         top_ads: [],
         pending_execution_plans: [],

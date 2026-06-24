@@ -303,6 +303,14 @@ Responda apenas JSON valido, sem markdown, no formato:
 }
 `
 
+export const VITOR_CREATIVE_REVIEW_RUNTIME_GUARDRAILS = `GUARDRAILS DE RUNTIME DO VITOR
+- Nunca recuse rodar trafego; entregue score, risco, melhoria e pergunta de decisao humana.
+- Quando houver imagem, video, carrossel, documento, link ou briefing, trate o material como insumo de criativo e diga se a leitura e observada ou inferida.
+- Nunca diga que publicou, ativou ou pausou uma campanha por conta propria; o sistema apenas prepara plano, pacote e registro humano.
+- O plano deve sempre conter objetivo, publico/persona, localizacao, verba, prazo, copy, UTMs e criterios de pausa/escala.
+- Sempre considere qualidade comercial no CRM, origem dos leads, regioes, estoque disponivel e aprendizados anteriores quando o contexto existir.
+- Retorne somente JSON valido no formato solicitado, sem markdown e sem texto extra.`
+
 export function buildMetricsAnalysisPrompt(data: any): string {
     return `Analise esta campanha:
 Nome: ${data.campaign_name} (${data.platform})

@@ -115,6 +115,16 @@ type VitorMonitoring = {
     tone: 'good' | 'medium' | 'risk'
   }
   metrics: Record<string, number>
+  executive_report?: {
+    summary: string
+    performance: string
+    lead_quality: string
+    execution: string
+    winners: string[]
+    risks: string[]
+    next_actions: string[]
+    test_readiness: 'ready' | 'attention' | 'blocked'
+  } | null
   alerts: VitorMonitoringAlert[]
   recommendations: Array<{
     title: string
@@ -876,6 +886,39 @@ export default function VitorTrafficManagerPage() {
             <span>{monitoring?.alerts?.length || 0} alerta(s) ativos</span>
           </div>
         </div>
+        {monitoring?.executive_report && (
+          <div className={`vitor-executive-report ${monitoring.executive_report.test_readiness}`}>
+            <div>
+              <span>Relatorio executivo do Vitor</span>
+              <strong>{monitoring.executive_report.summary}</strong>
+            </div>
+            <div className="vitor-executive-lines">
+              <p>{monitoring.executive_report.performance}</p>
+              <p>{monitoring.executive_report.lead_quality}</p>
+              <p>{monitoring.executive_report.execution}</p>
+            </div>
+            <div className="vitor-executive-columns">
+              <section>
+                <span>Sinais bons</span>
+                {(monitoring.executive_report.winners || []).slice(0, 3).map((item, index) => (
+                  <p key={`winner-${index}`}>{item}</p>
+                ))}
+              </section>
+              <section>
+                <span>Riscos</span>
+                {(monitoring.executive_report.risks || []).slice(0, 3).map((item, index) => (
+                  <p key={`risk-${index}`}>{item}</p>
+                ))}
+              </section>
+              <section>
+                <span>Proximas acoes</span>
+                {(monitoring.executive_report.next_actions || []).slice(0, 3).map((item, index) => (
+                  <p key={`action-${index}`}>{item}</p>
+                ))}
+              </section>
+            </div>
+          </div>
+        )}
         <div className="vitor-monitoring-grid">
           <article>
             <h3><AlertTriangle size={17} /> Alertas do Vitor</h3>
@@ -1897,6 +1940,71 @@ export default function VitorTrafficManagerPage() {
           text-transform: uppercase;
         }
 
+        .vitor-executive-report {
+          display: grid;
+          gap: 12px;
+          margin: 0 0 14px;
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-left: 4px solid #047857;
+          border-radius: 10px;
+          background: rgba(255,255,255,.76);
+          padding: 14px;
+        }
+
+        .vitor-executive-report.attention {
+          border-left-color: #b45309;
+        }
+
+        .vitor-executive-report.blocked {
+          border-left-color: #b91c1c;
+        }
+
+        .vitor-executive-report > div:first-child span,
+        .vitor-executive-columns span {
+          display: block;
+          color: var(--text-muted);
+          font-size: .68rem;
+          font-weight: 900;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+
+        .vitor-executive-report > div:first-child strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .94rem;
+          line-height: 1.35;
+        }
+
+        .vitor-executive-lines,
+        .vitor-executive-columns {
+          display: grid;
+          gap: 10px;
+        }
+
+        .vitor-executive-lines {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .vitor-executive-lines p,
+        .vitor-executive-columns p {
+          margin: 0;
+          color: var(--text-muted);
+          font-size: .76rem;
+          line-height: 1.42;
+        }
+
+        .vitor-executive-columns {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .vitor-executive-columns section {
+          min-width: 0;
+          border-top: 1px solid rgba(17, 24, 39, .07);
+          padding-top: 10px;
+        }
+
         .vitor-monitoring-grid {
           grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
         }
@@ -2624,6 +2732,8 @@ export default function VitorTrafficManagerPage() {
           .vitor-readiness-grid,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
+          .vitor-executive-lines,
+          .vitor-executive-columns,
           .vitor-central-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid {
@@ -2656,6 +2766,8 @@ export default function VitorTrafficManagerPage() {
           .vitor-monitoring-head,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
+          .vitor-executive-lines,
+          .vitor-executive-columns,
           .vitor-central-grid,
           .vitor-analysis-grid,
           .vitor-bottom-grid,
