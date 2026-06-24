@@ -8,6 +8,7 @@ import {
 } from '@/lib/notifications/sector-recipients'
 import { sendMenuMessage, sendWhatsAppMessage } from '../uazapi'
 import type { AICampaignAlert, AlertType, AlertUrgency } from './types'
+import type { VitorMonitoringSnapshot } from './vitor-monitoring'
 
 type SupabaseAdmin = {
     from: (table: string) => any
@@ -80,6 +81,161 @@ function formatAlertMessage(
     msg += `\nPainel: ${siteUrl.replace(/\/$/, '')}/admin/ads`
 
     return msg
+}
+
+function vitorPanelUrl(origin?: string | null) {
+    const baseUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://guilhermepilger.ai')).replace(/\/$/, '')
+    return `${baseUrl}/admin/ads/vitor`
+}
+
+function getVitorMonitoringPriority(snapshot: VitorMonitoringSnapshot): AlertUrgency | null {
+    if (snapshot.alerts.some(alert => alert.severity === 'critical') || snapshot.health.score < 45) return 'critical'
+    if (snapshot.alerts.some(alert => alert.severity === 'high') || snapshot.health.score < 65) return 'high'
+    return null
+}
+
+function getVitorMonitoringSignature(snapshot: VitorMonitoringSnapshot) {
+    const topAlerts = snapshot.alerts
+        .filter(alert => ['critical', 'high'].includes(alert.severity))
+        .slice(0, 4)
+        .map(alert => `${alert.type}:${alert.title}`)
+        .join('|')
+    return `${snapshot.health.tone}:${Math.floor(snapshot.health.score / 10)}:${topAlerts || 'no_high_alert'}`
+}
+
+async function getRecentVitorMonitoringAlert(supabase: SupabaseAdmin) {
+    const { data } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'vitor_monitoring_whatsapp_last_alert')
+        .maybeSingle()
+
+    try {
+        return data?.value ? JSON.parse(String(data.value)) : null
+    } catch {
+        return null
+    }
+}
+
+async function saveVitorMonitoringAlertStamp(supabase: SupabaseAdmin, value: Record<string, unknown>) {
+    await supabase
+        .from('app_config')
+        .upsert({
+            key: 'vitor_monitoring_whatsapp_last_alert',
+            value: JSON.stringify(value),
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' })
+}
+
+function formatVitorMonitoringMessage(snapshot: VitorMonitoringSnapshot) {
+    const priority = getVitorMonitoringPriority(snapshot) || 'high'
+    const topAlerts = snapshot.alerts
+        .filter(alert => ['critical', 'high'].includes(alert.severity))
+        .slice(0, 3)
+    const learnings = snapshot.learnings.slice(0, 3)
+    const recommendations = snapshot.recommendations.slice(0, 3)
+
+    return [
+        '*Alerta Vitor Trafego Pago*',
+        '',
+        `Prioridade: ${URGENCY_EMOJI[priority]}`,
+        `Saude do trafego: ${snapshot.health.score}/100 (${snapshot.health.label})`,
+        `Gasto: R$ ${Math.round(Number(snapshot.metrics.spend || 0))}`,
+        `Leads Meta: ${Number(snapshot.metrics.leads || 0)} | Leads pagos CRM: ${Number(snapshot.metrics.crm_paid_leads || 0)}`,
+        `CPL medio: R$ ${Math.round(Number(snapshot.metrics.avg_cpl || 0))}`,
+        '',
+        topAlerts.length ? 'Alertas principais:' : 'Alerta principal:',
+        ...(topAlerts.length
+            ? topAlerts.map(alert => `- ${alert.title}: ${alert.message}`)
+            : [`- Saude abaixo do limite definido pelo Vitor.`]),
+        '',
+        recommendations.length ? 'Acao recomendada:' : '',
+        ...recommendations.map(item => `- ${item.action}`),
+        '',
+        learnings.length ? 'Aprendizados recentes:' : '',
+        ...learnings.map(item => `- ${item.title}: ${item.insight}`),
+        '',
+        'Nada foi publicado automaticamente. Revise no painel antes de agir.',
+    ].filter(Boolean).join('\n')
+}
+
+export async function sendVitorMonitoringAlert(
+    supabase: SupabaseAdmin,
+    snapshot: VitorMonitoringSnapshot,
+    options: { origin?: string | null; force?: boolean } = {},
+): Promise<{ sent: number; errors: number; skipped?: boolean; reason?: string; priority?: AlertUrgency }> {
+    const priority = getVitorMonitoringPriority(snapshot)
+    if (!priority && !options.force) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Monitoramento do Vitor sem alerta alto ou critico.' }
+    }
+
+    const signature = getVitorMonitoringSignature(snapshot)
+    const lastAlert = await getRecentVitorMonitoringAlert(supabase)
+    const lastSentAt = lastAlert?.sent_at ? new Date(lastAlert.sent_at).getTime() : 0
+    const sixHours = 6 * 60 * 60 * 1000
+    if (!options.force && lastSentAt && Date.now() - lastSentAt < sixHours && String(lastAlert?.signature || '') === signature) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Alerta do Vitor ja enviado nas ultimas 6 horas.', priority: priority || 'high' }
+    }
+
+    const deliveries = await getTrafficPaidRecipients(supabase, {
+        eventType: 'ads_alert',
+        critical: priority === 'critical',
+        includeDiretoria: priority === 'critical',
+    })
+
+    if (!deliveries.length) {
+        return { sent: 0, errors: 0, skipped: true, reason: 'Nenhum envolvido configurado para alertas do Vitor.', priority: priority || 'high' }
+    }
+
+    const instanceToken = await resolveSectorWhatsappInstance(supabase)
+    if (!instanceToken) {
+        return { sent: 0, errors: deliveries.length, skipped: true, reason: 'Nenhuma instancia WhatsApp conectada.', priority: priority || 'high' }
+    }
+
+    const message = formatVitorMonitoringMessage(snapshot)
+    const panelUrl = vitorPanelUrl(options.origin)
+    let sent = 0
+    let errors = 0
+
+    for (const delivery of deliveries) {
+        try {
+            await sendMenuMessage({
+                phone: delivery.phone,
+                text: message,
+                type: 'button',
+                choices: [`Abrir Vitor|url:${panelUrl}`],
+                footerText: 'Pilger Trafego',
+                instanceToken,
+            })
+            sent += 1
+        } catch (buttonError) {
+            console.warn('[Vitor Monitoring Alert] button send failed, falling back to text:', buttonError)
+            try {
+                await sendWhatsAppMessage({
+                    phone: delivery.phone,
+                    message: `${message}\n\nAbrir Vitor: ${panelUrl}`,
+                    instanceToken,
+                })
+                sent += 1
+            } catch (textError) {
+                errors += 1
+                console.error('[Vitor Monitoring Alert] text fallback failed:', textError)
+            }
+        }
+    }
+
+    if (sent > 0) {
+        await saveVitorMonitoringAlertStamp(supabase, {
+            sent_at: new Date().toISOString(),
+            signature,
+            priority: priority || 'high',
+            health: snapshot.health,
+            alerts: snapshot.alerts.slice(0, 4),
+            sent,
+        })
+    }
+
+    return { sent, errors, priority: priority || 'high' }
 }
 
 // Envia alertas de trafego para os envolvidos configurados no setor.

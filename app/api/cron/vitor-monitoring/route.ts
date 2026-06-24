@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveAppConfig } from '@/lib/admin/app-config'
+import { sendVitorMonitoringAlert } from '@/lib/ads/whatsapp-alerts'
 import { buildVitorMonitoringSnapshot, persistVitorMonitoringSnapshot } from '@/lib/ads/vitor-monitoring'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -38,6 +39,7 @@ export async function GET(request: NextRequest) {
   const supabase = createAdminClient()
   const checkedAt = new Date().toISOString()
   const force = request.nextUrl.searchParams.get('force') === 'true'
+  const forceAlert = request.nextUrl.searchParams.get('alert') === 'true'
 
   await saveCronState(supabase, {
     vitor_monitoring_cron_last_checked_at: checkedAt,
@@ -87,11 +89,26 @@ export async function GET(request: NextRequest) {
       report = await persistVitorMonitoringSnapshot({ supabase, snapshot })
     }
 
+    const whatsappAlert = important || forceAlert
+      ? await sendVitorMonitoringAlert(supabase, snapshot, {
+        force: forceAlert,
+        origin: request.headers.get('origin'),
+      }).catch((error: any) => ({
+        sent: 0,
+        errors: 1,
+        skipped: true,
+        reason: error?.message || String(error),
+      }))
+      : { sent: 0, errors: 0, skipped: true, reason: 'no_important_alert' }
+
     await saveCronState(supabase, {
       vitor_monitoring_cron_last_reason: reason,
       vitor_monitoring_cron_last_health: String(snapshot.health.score),
       vitor_monitoring_cron_last_alerts: String(snapshot.alerts.length),
       vitor_monitoring_cron_last_learnings: String(snapshot.learnings.length),
+      vitor_monitoring_cron_last_whatsapp_sent: String(whatsappAlert.sent || 0),
+      vitor_monitoring_cron_last_whatsapp_errors: String(whatsappAlert.errors || 0),
+      vitor_monitoring_cron_last_whatsapp_reason: String(whatsappAlert.reason || (whatsappAlert.skipped ? 'skipped' : 'sent')),
       vitor_monitoring_cron_last_result: JSON.stringify({
         generated_at: snapshot.generated_at,
         health: snapshot.health,
@@ -101,6 +118,7 @@ export async function GET(request: NextRequest) {
         diagnostics: snapshot.diagnostics.slice(0, 6),
         persisted: Boolean(report?.id),
         report_id: report?.id || null,
+        whatsapp_alert: whatsappAlert,
       }).slice(0, 3500),
       ...(report?.id ? {
         vitor_monitoring_cron_last_persisted_at: new Date().toISOString(),
@@ -114,6 +132,7 @@ export async function GET(request: NextRequest) {
       persisted: Boolean(report?.id),
       reason,
       report,
+      whatsapp_alert: whatsappAlert,
       monitoring: snapshot,
     })
   } catch (error: any) {
