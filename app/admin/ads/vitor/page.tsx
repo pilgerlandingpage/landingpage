@@ -11,10 +11,14 @@ import {
   Edit3,
   FileText,
   ImageIcon,
+  Loader2,
   Megaphone,
   RefreshCw,
+  Send,
   Sparkles,
   Target,
+  Trash2,
+  UploadCloud,
   XCircle,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
@@ -99,6 +103,13 @@ type VitorPayload = {
   latest_report: { id: string; title: string; summary: string | null; created_at: string } | null
 }
 
+type PanelMedia = {
+  url: string
+  mime: string
+  kind: string
+  filename: string | null
+}
+
 const statusLabels: Record<string, string> = {
   queued: 'Na fila',
   processing: 'Processando',
@@ -167,6 +178,15 @@ export default function VitorTrafficManagerPage() {
   const [filter, setFilter] = useState('all')
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [panelMedia, setPanelMedia] = useState<PanelMedia[]>([])
+  const [intakeForm, setIntakeForm] = useState({
+    title: '',
+    briefing: '',
+    asset_type: 'image',
+    content_type: 'ad',
+  })
 
   const loadData = async (nextFilter = filter, silent = false) => {
     if (silent) setRefreshing(true)
@@ -219,6 +239,77 @@ export default function VitorTrafficManagerPage() {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar decisao.')
     } finally {
       setUpdating('')
+    }
+  }
+
+  const uploadPanelFiles = async (files?: FileList | null) => {
+    const selected = Array.from(files || []).slice(0, 8)
+    if (selected.length === 0) return
+    setUploading(true)
+    setError('')
+    setToast('')
+    try {
+      const uploaded: PanelMedia[] = []
+      for (const file of selected) {
+        const kind = file.type.startsWith('video/')
+          ? 'video'
+          : file.type.startsWith('image/')
+            ? 'image'
+            : 'document'
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', 'vitor-creatives')
+        formData.append('kind', kind)
+        const response = await fetch('/api/upload', { method: 'POST', body: formData })
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok || !data.url) throw new Error(data.error || data.details || `Falha ao enviar ${file.name}.`)
+        uploaded.push({
+          url: data.url,
+          mime: file.type,
+          kind,
+          filename: file.name,
+        })
+      }
+      setPanelMedia(current => [...current, ...uploaded].slice(0, 10))
+      setIntakeForm(current => ({
+        ...current,
+        asset_type: uploaded.length + panelMedia.length > 1 ? 'carousel' : uploaded[0]?.kind || current.asset_type,
+      }))
+      setToast(`${uploaded.length} arquivo(s) enviados para o Vitor.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao enviar criativo.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const submitPanelCreative = async () => {
+    setCreating(true)
+    setError('')
+    setToast('')
+    try {
+      const response = await fetch('/api/admin/paid-traffic/vitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...intakeForm,
+          asset_type: panelMedia.length > 1 ? 'carousel' : intakeForm.asset_type,
+          media: panelMedia,
+          requested_by_label: 'Painel do Vitor',
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao analisar criativo.')
+      setToast(`Vitor analisou o criativo. Score: ${data.score}/100.`)
+      setIntakeForm({ title: '', briefing: '', asset_type: 'image', content_type: 'ad' })
+      setPanelMedia([])
+      setFilter('all')
+      await loadData('all', true)
+      if (data.reviewId) setActiveId(data.reviewId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao analisar criativo.')
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -286,6 +377,101 @@ export default function VitorTrafficManagerPage() {
             <small>{item.detail}</small>
           </article>
         ))}
+      </section>
+
+      <section className="chart-card vitor-intake">
+        <div className="vitor-section-title">
+          <span>Novo criativo para analise</span>
+          <strong>Nada sera publicado automaticamente</strong>
+        </div>
+        <div className="vitor-intake-grid">
+          <label>
+            <span>Titulo</span>
+            <input
+              value={intakeForm.title}
+              onChange={event => setIntakeForm(current => ({ ...current, title: event.target.value }))}
+              placeholder="Ex: Reel frente mar - teste Balneario"
+            />
+          </label>
+          <label>
+            <span>Formato</span>
+            <select
+              value={intakeForm.asset_type}
+              onChange={event => setIntakeForm(current => ({ ...current, asset_type: event.target.value }))}
+            >
+              <option value="image">Imagem</option>
+              <option value="video">Video</option>
+              <option value="carousel">Carrossel</option>
+              <option value="document">Documento</option>
+              <option value="other">Outro</option>
+            </select>
+          </label>
+          <label>
+            <span>Canal</span>
+            <select
+              value={intakeForm.content_type}
+              onChange={event => setIntakeForm(current => ({ ...current, content_type: event.target.value }))}
+            >
+              <option value="ad">Anuncio</option>
+              <option value="reel">Reel</option>
+              <option value="story">Story</option>
+              <option value="post">Post</option>
+              <option value="short">Short</option>
+              <option value="other">Outro</option>
+            </select>
+          </label>
+        </div>
+        <label className="vitor-briefing-field">
+          <span>Briefing para o Vitor</span>
+          <textarea
+            value={intakeForm.briefing}
+            onChange={event => setIntakeForm(current => ({ ...current, briefing: event.target.value }))}
+            placeholder="Descreva objetivo, imovel, regiao, verba desejada, publico e qualquer contexto comercial relevante."
+          />
+        </label>
+        <div className="vitor-upload-row">
+          <label className={`vitor-upload-button ${uploading ? 'disabled' : ''}`}>
+            {uploading ? <Loader2 size={18} className="spin" /> : <UploadCloud size={18} />}
+            {uploading ? 'Enviando...' : 'Enviar imagem, video ou PDF'}
+            <input
+              type="file"
+              accept="image/*,video/mp4,video/webm,application/pdf"
+              multiple
+              disabled={uploading || creating}
+              onChange={event => {
+                void uploadPanelFiles(event.target.files)
+                event.currentTarget.value = ''
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="btn btn-gold"
+            disabled={creating || uploading || (!intakeForm.title.trim() && !intakeForm.briefing.trim() && panelMedia.length === 0)}
+            onClick={submitPanelCreative}
+          >
+            {creating ? <Loader2 size={17} className="spin" /> : <Send size={17} />}
+            {creating ? 'Analisando...' : 'Analisar com Vitor'}
+          </button>
+        </div>
+        {panelMedia.length > 0 && (
+          <div className="vitor-media-chips">
+            {panelMedia.map((media, index) => (
+              <span key={`${media.url}-${index}`}>
+                {media.kind === 'video' ? <Megaphone size={14} /> : media.kind === 'image' ? <ImageIcon size={14} /> : <FileText size={14} />}
+                {media.filename || `Arquivo ${index + 1}`}
+                <button
+                  type="button"
+                  onClick={() => setPanelMedia(current => current.filter((_, itemIndex) => itemIndex !== index))}
+                  disabled={creating || uploading}
+                  aria-label="Remover arquivo"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </section>
 
       {payload?.latest_report && (
@@ -491,6 +677,131 @@ export default function VitorTrafficManagerPage() {
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 14px;
           margin-bottom: 16px;
+        }
+
+        .vitor-intake {
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .vitor-intake-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.5fr) minmax(160px, .45fr) minmax(160px, .45fr);
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .vitor-intake label,
+        .vitor-briefing-field {
+          display: grid;
+          gap: 6px;
+        }
+
+        .vitor-intake label > span,
+        .vitor-briefing-field > span {
+          color: var(--text-muted);
+          font-size: .68rem;
+          font-weight: 900;
+          letter-spacing: .07em;
+          text-transform: uppercase;
+        }
+
+        .vitor-intake input,
+        .vitor-intake select,
+        .vitor-intake textarea {
+          width: 100%;
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          background: #fff;
+          color: var(--text-primary);
+          font: inherit;
+          font-size: .86rem;
+          padding: 10px 12px;
+          outline: none;
+        }
+
+        .vitor-intake textarea {
+          min-height: 96px;
+          resize: vertical;
+        }
+
+        .vitor-intake input:focus,
+        .vitor-intake select:focus,
+        .vitor-intake textarea:focus {
+          border-color: rgba(201, 169, 110, .72);
+          box-shadow: 0 0 0 3px rgba(201, 169, 110, .14);
+        }
+
+        .vitor-upload-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-top: 12px;
+        }
+
+        .vitor-upload-button {
+          display: inline-flex !important;
+          align-items: center;
+          gap: 8px !important;
+          width: auto;
+          border: 1px dashed rgba(201, 169, 110, .6);
+          border-radius: 10px;
+          background: rgba(201, 169, 110, .08);
+          color: #92400e;
+          cursor: pointer;
+          font-size: .82rem;
+          font-weight: 900;
+          padding: 10px 13px;
+        }
+
+        .vitor-upload-button input {
+          display: none;
+        }
+
+        .vitor-upload-button.disabled {
+          cursor: wait;
+          opacity: .68;
+        }
+
+        .vitor-media-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .vitor-media-chips > span {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          max-width: 280px;
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 999px;
+          background: #fff;
+          color: var(--text-primary);
+          font-size: .75rem;
+          font-weight: 800;
+          padding: 7px 8px 7px 10px;
+        }
+
+        .vitor-media-chips > span svg {
+          color: var(--gold);
+          flex: 0 0 auto;
+        }
+
+        .vitor-media-chips button {
+          display: grid;
+          place-items: center;
+          width: 24px;
+          height: 24px;
+          border: 0;
+          border-radius: 999px;
+          background: rgba(185, 28, 28, .08);
+          color: #b91c1c;
+          cursor: pointer;
+          margin-left: 2px;
         }
 
         .vitor-metric-card {
@@ -958,6 +1269,7 @@ export default function VitorTrafficManagerPage() {
           .vitor-bottom-grid,
           .vitor-plan-lines,
           .vitor-intel-grid,
+          .vitor-intake-grid,
           .vitor-detail-hero,
           .vitor-report-strip {
             grid-template-columns: 1fr;

@@ -12,7 +12,7 @@ type SupabaseLike = {
   from: (table: string) => any
 }
 
-type MediaItem = {
+export type MediaItem = {
   url: string
   mime: string
   kind: string
@@ -65,6 +65,26 @@ type ProcessVitorPaidTrafficCommandParams = {
   instance?: any
   instanceToken?: string | null
   sendResponse?: boolean
+}
+
+type ProcessVitorPanelCreativeParams = {
+  supabase: SupabaseLike
+  title?: string | null
+  briefing?: string | null
+  mediaItems?: MediaItem[]
+  assetType?: string | null
+  contentType?: string | null
+  requestedByLabel?: string | null
+  createdBy?: string | null
+  propertySku?: string | null
+}
+
+export type ProcessVitorPanelCreativeResult = {
+  creativeId: string
+  reviewId: string
+  campaignPlanId: string
+  score: number
+  fallback?: boolean
 }
 
 const DEFAULT_COPY_VARIATIONS = [
@@ -241,6 +261,68 @@ async function ensureCreativeFromCommand(supabase: SupabaseLike, command: any) {
   return data
 }
 
+async function ensureCreativeFromPanel(params: {
+  supabase: SupabaseLike
+  title?: string | null
+  briefing?: string | null
+  mediaItems: MediaItem[]
+  assetType?: string | null
+  contentType?: string | null
+  requestedByLabel?: string | null
+  createdBy?: string | null
+  propertySku?: string | null
+}) {
+  const { supabase, mediaItems } = params
+  const briefing = cleanString(params.briefing, 3000)
+  const requestedAssetType = cleanString(params.assetType, 40)
+  const inferredAssetType = inferAssetType(mediaItems, { payload: { message_type: mediaItems[0]?.kind || '' } })
+  const assetType = ['image', 'video', 'carousel', 'document', 'other'].includes(requestedAssetType)
+    ? requestedAssetType
+    : inferredAssetType
+  const requestedContentType = cleanString(params.contentType, 40)
+  const contentType = ['post', 'reel', 'story', 'ad', 'short', 'email', 'other'].includes(requestedContentType)
+    ? requestedContentType
+    : inferContentType(assetType, briefing)
+  const now = new Date().toISOString()
+  const title = cleanString(params.title, 160)
+    || (briefing ? `Vitor - ${briefing.slice(0, 70)}` : `Vitor - upload painel ${new Date().toLocaleDateString('pt-BR')}`)
+
+  const { data, error } = await supabase
+    .from('marketing_creatives')
+    .insert({
+      title,
+      description: briefing || null,
+      asset_url: mediaItems[0]?.url || null,
+      thumbnail_url: mediaItems.find(item => item.kind === 'image' || item.mime.startsWith('image/'))?.url || null,
+      asset_type: assetType,
+      content_type: contentType,
+      campaign_type: 'paid',
+      platform_targets: ['meta_ads'],
+      property_sku: cleanString(params.propertySku, 80) || null,
+      ai_context: [
+        'Criativo enviado pelo painel para analise do Vitor Trafego Pago.',
+        briefing ? `Briefing: ${briefing}` : '',
+        mediaItems.length ? `Midias: ${summarizeMedia(mediaItems)}` : '',
+      ].filter(Boolean).join('\n').slice(0, 3000),
+      status: 'review',
+      created_by: isUuid(params.createdBy) ? params.createdBy : null,
+      raw: {
+        source: 'vitor_panel',
+        media: mediaItems,
+        requested_by_label: cleanString(params.requestedByLabel, 120) || null,
+      },
+      updated_at: now,
+    })
+    .select('*')
+    .single()
+
+  if (error || !data) {
+    throw new Error(error?.message || 'Nao foi possivel criar o criativo do painel do Vitor.')
+  }
+
+  return data
+}
+
 function extractJsonObject(text: string): Record<string, unknown> | null {
   const cleaned = String(text || '')
     .replace(/```json/gi, '```')
@@ -408,6 +490,7 @@ async function runVitorAnalysis(params: {
   mediaItems: MediaItem[]
 }) {
   const { supabase, command, creative, mediaItems } = params
+  const commandSource = cleanString(command?.payload?.source, 80)
   const [centralContext, latestPaidReport, systemPrompt] = await Promise.all([
     getAgentCentralContext({
       supabase,
@@ -434,7 +517,9 @@ async function runVitorAnalysis(params: {
       `Metricas: ${JSON.stringify(latestPaidReport.metrics || {}).slice(0, 1200)}`,
       `Recomendacoes: ${JSON.stringify(latestPaidReport.recommendations || []).slice(0, 1200)}`,
     ].join('\n') : '',
-    'COMANDO RECEBIDO PELO WHATSAPP GLOBAL',
+    commandSource === 'vitor_panel'
+      ? 'CRIATIVO ENVIADO PELO PAINEL DO VITOR'
+      : 'COMANDO RECEBIDO PELO WHATSAPP GLOBAL',
     `Solicitante: ${cleanString(command?.identity_label, 160)} (${cleanString(command?.identity_type, 80)})`,
     `Texto: ${cleanString(command?.command_text, 2400) || '[sem texto]'}`,
     '',
@@ -470,6 +555,7 @@ async function insertReview(params: {
   creative: any
   mediaItems: MediaItem[]
   analysis: VitorCreativeAnalysis
+  source?: string
 }) {
   const { supabase, command, creative, mediaItems, analysis } = params
   const now = new Date().toISOString()
@@ -480,7 +566,7 @@ async function insertReview(params: {
       creative_id: creative?.id || null,
       requested_by_phone: command?.phone || null,
       requested_by_label: command?.identity_label || null,
-      source: 'whatsapp_global',
+      source: params.source || 'whatsapp_global',
       asset_summary: summarizeMedia(mediaItems),
       briefing: cleanString(command?.command_text, 3000) || null,
       score: analysis.score,
@@ -606,6 +692,113 @@ async function sendVitorResponse(params: {
   } catch (error: any) {
     console.warn('[Vitor] WhatsApp response failed:', error?.message || error)
     return false
+  }
+}
+
+export async function processVitorPanelCreative(
+  params: ProcessVitorPanelCreativeParams,
+): Promise<ProcessVitorPanelCreativeResult> {
+  const { supabase } = params
+  const mediaItems = (params.mediaItems || [])
+    .map((item): MediaItem | null => {
+      const url = cleanString(item?.url, 1200)
+      if (!url) return null
+      return {
+        url,
+        mime: cleanString(item?.mime, 160),
+        kind: cleanString(item?.kind, 60) || 'media',
+        filename: cleanString(item?.filename, 180) || null,
+      }
+    })
+    .filter((item): item is MediaItem => Boolean(item))
+    .slice(0, 10)
+  const requestedByLabel = cleanString(params.requestedByLabel, 160) || 'Painel do Vitor'
+  const syntheticCommand = {
+    id: null,
+    phone: null,
+    identity_type: 'admin_user',
+    identity_label: requestedByLabel,
+    command_text: cleanString(params.briefing, 3000),
+    payload: {
+      source: 'vitor_panel',
+      media: mediaItems,
+    },
+  }
+
+  const creative = await ensureCreativeFromPanel({
+    supabase,
+    title: params.title,
+    briefing: params.briefing,
+    mediaItems,
+    assetType: params.assetType,
+    contentType: params.contentType,
+    requestedByLabel,
+    createdBy: params.createdBy,
+    propertySku: params.propertySku,
+  })
+  const analysis = await runVitorAnalysis({ supabase, command: syntheticCommand, creative, mediaItems })
+  const review = await insertReview({
+    supabase,
+    command: syntheticCommand,
+    creative,
+    mediaItems,
+    analysis,
+    source: 'panel_upload',
+  })
+  const campaignPlan = await insertCampaignPlan({ supabase, command: syntheticCommand, creative, review, analysis })
+
+  await recordAgentCentralSignal({
+    supabase,
+    agentId: 'ads-analyst',
+    eventType: 'paid_traffic_panel_creative_review_created',
+    entityType: 'paid_traffic_creative_review',
+    entityId: review.id,
+    source: 'vitor-panel',
+    label: `Vitor analisou criativo enviado pelo painel com score ${analysis.score}`,
+    importanceScore: analysis.score >= 70 ? 72 : analysis.score >= 50 ? 62 : 80,
+    metadata: {
+      creative_id: creative.id,
+      review_id: review.id,
+      campaign_plan_id: campaignPlan.id,
+      score: analysis.score,
+      score_label: analysis.score_label,
+      risks: analysis.risks,
+      improvements: analysis.improvements,
+      requested_by_label: requestedByLabel,
+      fallback: Boolean(analysis.fallback),
+    },
+    handoffTargets: ['whatsapp-global-agent', 'creative-strategy-agent', 'ceo-agent'],
+  }).catch((error: any) => {
+    console.warn('[Vitor] panel central signal failed:', error?.message || error)
+  })
+
+  await saveAgentCentralSnapshot({
+    supabase,
+    agentId: 'ads-analyst',
+    scope: 'panel_creative_review',
+    subjectId: review.id,
+    createdBy: 'vitor-panel',
+    summary: `Review de criativo enviado pelo painel: score ${analysis.score}/100; aguardando aprovacao humana.`,
+    context: {
+      creative,
+      review,
+      campaign_plan: campaignPlan,
+    },
+    signals: {
+      score: analysis.score,
+      status: review.status,
+      publication_guardrail: 'human_approval_required',
+    },
+  }).catch((error: any) => {
+    console.warn('[Vitor] panel central snapshot failed:', error?.message || error)
+  })
+
+  return {
+    creativeId: creative.id,
+    reviewId: review.id,
+    campaignPlanId: campaignPlan.id,
+    score: analysis.score,
+    fallback: Boolean(analysis.fallback),
   }
 }
 

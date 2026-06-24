@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
+import { processVitorPanelCreative, type MediaItem } from '@/lib/ads/vitor-traffic-manager'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,30 @@ function byId(rows: any[] = []) {
 
 function unique(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.map(value => String(value || '').trim()).filter(Boolean)))
+}
+
+function cleanString(value: unknown, max = 3000) {
+  const text = String(value || '').trim()
+  return text.length > max ? text.slice(0, max) : text
+}
+
+function normalizeMediaItems(value: unknown): MediaItem[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item): MediaItem | null => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      const url = cleanString(row.url, 1200)
+      if (!url) return null
+      return {
+        url,
+        mime: cleanString(row.mime || row.mimetype || row.type, 160),
+        kind: cleanString(row.kind || row.asset_type, 60) || 'media',
+        filename: cleanString(row.filename || row.name, 180) || null,
+      }
+    })
+    .filter((item): item is MediaItem => Boolean(item))
+    .slice(0, 10)
 }
 
 function averageScore(reviews: any[]) {
@@ -164,6 +189,45 @@ export async function GET(request: NextRequest) {
     console.error('[Vitor Traffic Manager] Error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Erro ao carregar area do Vitor.' },
+      { status: 500 },
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const supabase = createAdminClient()
+  try {
+    const body = await request.json()
+    const title = cleanString(body?.title, 160)
+    const briefing = cleanString(body?.briefing || body?.description, 3000)
+    const mediaItems = normalizeMediaItems(body?.media)
+
+    if (!title && !briefing && mediaItems.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Envie um titulo, briefing ou pelo menos um arquivo de criativo.' },
+        { status: 400 },
+      )
+    }
+
+    const result = await processVitorPanelCreative({
+      supabase,
+      title,
+      briefing,
+      mediaItems,
+      assetType: cleanString(body?.asset_type, 40),
+      contentType: cleanString(body?.content_type, 40),
+      requestedByLabel: cleanString(body?.requested_by_label, 160) || 'Painel do Vitor',
+      propertySku: cleanString(body?.property_sku, 80),
+    })
+
+    return NextResponse.json({
+      success: true,
+      ...result,
+    })
+  } catch (error) {
+    console.error('[Vitor Traffic Manager] Intake error:', error)
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Erro ao analisar criativo no painel do Vitor.' },
       { status: 500 },
     )
   }
