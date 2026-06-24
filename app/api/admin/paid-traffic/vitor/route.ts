@@ -302,6 +302,234 @@ async function fetchRowsByIds(supabase: any, table: string, ids: string[], selec
   return data || []
 }
 
+function parseJsonConfig(value: unknown) {
+  try {
+    return value ? JSON.parse(String(value)) : null
+  } catch {
+    return null
+  }
+}
+
+function configuredText(value: unknown) {
+  return cleanString(value, 20000).length > 40
+}
+
+function hasTrafficRecipient(value: unknown) {
+  const recipients = safeArray(parseJsonConfig(value))
+  const traffic = recipients.find((recipient: any) => {
+    const key = String(recipient?.key || recipient?.sector || recipient?.label || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+    return key.includes('trafego') || key.includes('ads')
+  })
+  if (!traffic || traffic.enabled === false || traffic.enabled === 'false') return false
+  const members = safeArray(traffic.members)
+  const hasMember = members.some((member: any) => {
+    if (member?.enabled === false || member?.enabled === 'false') return false
+    return cleanString(member?.phone || member?.whatsapp, 40).replace(/\D/g, '').length >= 10
+  })
+  const hasPrimary = cleanString(traffic.phone || traffic.whatsapp, 40).replace(/\D/g, '').length >= 10
+  return hasMember || hasPrimary
+}
+
+function readinessItem(
+  key: string,
+  label: string,
+  status: 'ok' | 'warn' | 'missing',
+  detail: string,
+) {
+  return { key, label, status, detail }
+}
+
+function buildUnavailableReadiness(error?: string | null) {
+  return {
+    score: 0,
+    status: 'missing',
+    blockers: 1,
+    warnings: 0,
+    items: [
+      readinessItem(
+        'database',
+        'Banco do Vitor',
+        'missing',
+        error || 'As tabelas do Vitor ainda nao responderam.',
+      ),
+    ],
+    test_commands: [],
+  }
+}
+
+async function buildVitorReadiness(params: {
+  supabase: any
+  reviews: any[]
+  plans: any[]
+  monitoring: any
+  latestReports: any[]
+}) {
+  const { supabase, reviews, plans, monitoring, latestReports } = params
+  const configKeys = [
+    'vitor_creative_review_system_prompt',
+    'whatsapp_global_system_prompt',
+    'sector_notification_recipients',
+    'vitor_monitoring_cron_last_checked_at',
+    'vitor_monitoring_cron_last_reason',
+    'vitor_monitoring_cron_last_whatsapp_sent',
+    'vitor_monitoring_cron_last_whatsapp_reason',
+  ]
+
+  const [configResult, instancesResult, commandsResult] = await Promise.all([
+    supabase
+      .from('app_config')
+      .select('key, value')
+      .in('key', configKeys)
+      .then((res: any) => res.error ? { data: [], error: res.error } : res)
+      .catch((error: any) => ({ data: [], error })),
+    supabase
+      .from('whatsapp_instances')
+      .select('id, instance_name, instance_type, status, phone_number, instance_token, updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(80)
+      .then((res: any) => res.error ? { data: [], error: res.error } : res)
+      .catch((error: any) => ({ data: [], error })),
+    supabase
+      .from('whatsapp_global_commands')
+      .select('id, phone, identity_label, command_type, target_agent, status, created_at, updated_at')
+      .eq('target_agent', 'ads-analyst')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then((res: any) => res.error ? { data: [], error: res.error } : res)
+      .catch((error: any) => ({ data: [], error })),
+  ])
+
+  const configMap = Object.fromEntries(safeArray(configResult.data).map((row: any) => [row.key, row.value]))
+  const instances = safeArray(instancesResult.data)
+  const globalInstance = instances.find((instance: any) => {
+    const type = String(instance?.instance_type || '').toLowerCase()
+    const name = String(instance?.instance_name || '').toLowerCase()
+    return type === 'global' || name === 'agente global' || name === 'whatsapp global'
+  })
+  const latestCommand = safeArray(commandsResult.data)[0] || null
+  const latestReview = reviews[0] || null
+  const latestPlan = plans[0] || null
+  const cronLastChecked = cleanString(configMap.vitor_monitoring_cron_last_checked_at, 80)
+  const cronReason = cleanString(configMap.vitor_monitoring_cron_last_reason, 120)
+  const whatsappAlertReason = cleanString(configMap.vitor_monitoring_cron_last_whatsapp_reason, 160)
+  const healthScore = Number(monitoring?.health?.score || 0)
+
+  const items = [
+    readinessItem(
+      'database',
+      'Banco do Vitor',
+      'ok',
+      `${reviews.length} analise(s) e ${plans.length} plano(s) encontrados.`,
+    ),
+    readinessItem(
+      'vitor_prompt',
+      'Prompt do Vitor',
+      configuredText(configMap.vitor_creative_review_system_prompt) ? 'ok' : 'missing',
+      configuredText(configMap.vitor_creative_review_system_prompt)
+        ? 'Prompt de analise de criativo carregado no app_config.'
+        : 'Configure vitor_creative_review_system_prompt na Sala de Manutencao.',
+    ),
+    readinessItem(
+      'global_prompt',
+      'Prompt WhatsApp Global',
+      configuredText(configMap.whatsapp_global_system_prompt) ? 'ok' : 'missing',
+      configuredText(configMap.whatsapp_global_system_prompt)
+        ? 'Prompt global carregado para roteamento de admins, corretores, proprietarios e leads.'
+        : 'Configure whatsapp_global_system_prompt antes do teste pelo WhatsApp.',
+    ),
+    readinessItem(
+      'global_instance',
+      'Instancia Global',
+      globalInstance?.id && globalInstance?.instance_token
+        ? String(globalInstance.status || '').toLowerCase() === 'connected' ? 'ok' : 'warn'
+        : 'missing',
+      globalInstance?.id
+        ? `${globalInstance.instance_name || 'WhatsApp Global'}: ${globalInstance.status || 'status pendente'}.`
+        : 'Nenhuma instancia marcada como WhatsApp Global foi localizada.',
+    ),
+    readinessItem(
+      'latest_command',
+      'Comando para o Vitor',
+      latestCommand?.id ? latestCommand.status === 'failed' ? 'warn' : 'ok' : 'warn',
+      latestCommand?.id
+        ? `${latestCommand.command_type} recebido em ${latestCommand.created_at}. Status: ${latestCommand.status}.`
+        : 'Ainda nao ha comando real do WhatsApp Global para o Vitor.',
+    ),
+    readinessItem(
+      'latest_review',
+      'Review e plano',
+      latestReview?.id && latestPlan?.id ? 'ok' : latestReview?.id ? 'warn' : 'missing',
+      latestReview?.id
+        ? `Ultimo review ${latestReview.status || '-'}; plano ${latestPlan?.status || 'nao localizado'}.`
+        : 'Envie um criativo pelo painel ou WhatsApp para gerar o primeiro review.',
+    ),
+    readinessItem(
+      'monitoring',
+      'Monitoramento',
+      healthScore >= 55 ? 'ok' : monitoring?.alerts?.length ? 'warn' : 'missing',
+      monitoring?.generated_at
+        ? `Saude ${healthScore || '-'}; ${safeArray(monitoring.alerts).length} alerta(s); ${safeArray(monitoring.learnings).length} aprendizado(s).`
+        : 'Monitoramento ainda nao gerou leitura.',
+    ),
+    readinessItem(
+      'cron',
+      'Cron do Vitor',
+      process.env.CRON_SECRET
+        ? cronLastChecked ? 'ok' : 'warn'
+        : 'missing',
+      process.env.CRON_SECRET
+        ? cronLastChecked
+          ? `Ultima checagem: ${cronLastChecked}. Motivo: ${cronReason || 'registrado'}.`
+          : 'CRON_SECRET existe, mas o cron ainda nao registrou execucao em app_config.'
+        : 'CRON_SECRET nao esta disponivel no runtime.',
+    ),
+    readinessItem(
+      'whatsapp_alerts',
+      'Alertas WhatsApp',
+      hasTrafficRecipient(configMap.sector_notification_recipients) ? 'ok' : 'warn',
+      hasTrafficRecipient(configMap.sector_notification_recipients)
+        ? `Setor Trafego Pago tem destinatario configurado. Ultimo alerta: ${whatsappAlertReason || 'sem envio recente'}.`
+        : 'Configure destinatarios do setor Trafego Pago para receber alertas automaticos.',
+    ),
+    readinessItem(
+      'reports',
+      'Relatorios e Central',
+      latestReports?.[0]?.id ? 'ok' : 'warn',
+      latestReports?.[0]?.id
+        ? `Ultimo relatorio pago: ${latestReports[0].title || latestReports[0].id}.`
+        : 'Ainda nao ha relatorio pago recente criado pelo Vitor/agente de trafego.',
+    ),
+  ]
+
+  const blockers = items.filter(item => item.status === 'missing').length
+  const warnings = items.filter(item => item.status === 'warn').length
+  const score = Math.max(0, Math.round((items.reduce((sum, item) => {
+    if (item.status === 'ok') return sum + 1
+    if (item.status === 'warn') return sum + 0.5
+    return sum
+  }, 0) / items.length) * 100))
+
+  return {
+    score,
+    status: blockers > 0 ? 'missing' : warnings > 0 ? 'warn' : 'ok',
+    blockers,
+    warnings,
+    items,
+    latest_command: latestCommand,
+    global_instance: globalInstance || null,
+    test_commands: [
+      'Sou o Magno Macedo. Voce me reconhece como administrador master da Pilger? Responda apenas qual perfil voce identificou para este numero.',
+      'Vitor, me diga o status do trafego pago hoje.',
+      'Vitor, analisar este criativo para subir trafego. Objetivo: gerar conversas qualificadas no WhatsApp.',
+      'Aprovar plano do Vitor.',
+      'Preparar execucao do Vitor.',
+    ],
+  }
+}
+
 export async function GET(request: NextRequest) {
   const supabase = createAdminClient()
   try {
@@ -325,6 +553,7 @@ export async function GET(request: NextRequest) {
           metrics: buildMetrics([], []),
           reviews: [],
           latest_report: null,
+          readiness: buildUnavailableReadiness(reviewsError.message),
           error: reviewsError.message,
         })
       }
@@ -398,6 +627,13 @@ export async function GET(request: NextRequest) {
       if (!key || plansByReview.has(key)) continue
       plansByReview.set(key, plan)
     }
+    const readiness = await buildVitorReadiness({
+      supabase,
+      reviews: reviewRows,
+      plans,
+      monitoring,
+      latestReports,
+    })
 
     return NextResponse.json({
       success: true,
@@ -411,6 +647,7 @@ export async function GET(request: NextRequest) {
       })),
       latest_report: latestReports?.[0] || null,
       monitoring,
+      readiness,
     })
   } catch (error) {
     console.error('[Vitor Traffic Manager] Error:', error)

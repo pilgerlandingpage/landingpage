@@ -106,6 +106,22 @@ type VitorMonitoring = {
   diagnostics: string[]
 }
 
+type VitorReadinessItem = {
+  key: string
+  label: string
+  status: 'ok' | 'warn' | 'missing'
+  detail: string
+}
+
+type VitorReadiness = {
+  score: number
+  status: 'ok' | 'warn' | 'missing'
+  blockers: number
+  warnings: number
+  items: VitorReadinessItem[]
+  test_commands: string[]
+}
+
 type VitorReview = {
   id: string
   requested_by_phone: string | null
@@ -157,6 +173,7 @@ type VitorPayload = {
   reviews: VitorReview[]
   latest_report: { id: string; title: string; summary: string | null; created_at: string } | null
   monitoring?: VitorMonitoring | null
+  readiness?: VitorReadiness | null
 }
 
 type PanelMedia = {
@@ -228,6 +245,19 @@ function severityLabel(value?: string | null) {
   if (value === 'high') return 'Alto'
   if (value === 'medium') return 'Medio'
   return 'Baixo'
+}
+
+function readinessStatusLabel(value?: string | null) {
+  if (value === 'ok') return 'Ok'
+  if (value === 'warn') return 'Atencao'
+  return 'Pendente'
+}
+
+function readinessSummary(readiness?: VitorReadiness | null) {
+  if (!readiness) return 'Sem diagnostico'
+  if (readiness.status === 'ok') return 'Pronto para teste'
+  if (readiness.blockers > 0) return `${readiness.blockers} pendencia(s)`
+  return `${readiness.warnings} atencao(oes)`
 }
 
 function stringField(value: Record<string, unknown> | null | undefined, key: string) {
@@ -350,6 +380,7 @@ export default function VitorTrafficManagerPage() {
   const reviews = payload?.reviews || []
   const metrics = payload?.metrics
   const monitoring = payload?.monitoring || null
+  const readiness = payload?.readiness || null
   const activeReview = useMemo(
     () => reviews.find(review => review.id === activeId) || reviews[0] || null,
     [activeId, reviews],
@@ -392,6 +423,17 @@ export default function VitorTrafficManagerPage() {
       setToast(activeExecutionPackage ? 'Pacote de execucao copiado.' : 'Rascunho de execucao copiado.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nao consegui copiar o pacote de execucao.')
+    }
+  }
+
+  const copyReadinessCommand = async (command: string) => {
+    setError('')
+    setToast('')
+    try {
+      await navigator.clipboard.writeText(command)
+      setToast('Mensagem de teste copiada.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nao consegui copiar a mensagem de teste.')
     }
   }
 
@@ -551,6 +593,44 @@ export default function VitorTrafficManagerPage() {
             <small>{item.detail}</small>
           </article>
         ))}
+      </section>
+
+      <section className="chart-card vitor-readiness-card">
+        <div className="vitor-section-title">
+          <span>Diagnostico de teste</span>
+          <strong>{readinessSummary(readiness)}</strong>
+        </div>
+        <div className="vitor-readiness-head">
+          <div className={`vitor-readiness-score ${readiness?.status || 'missing'}`}>
+            <span>Preparo</span>
+            <strong>{readiness?.score ?? '-'}</strong>
+            <small>{readinessStatusLabel(readiness?.status)}</small>
+          </div>
+          <div className="vitor-readiness-grid">
+            {(readiness?.items || []).map(item => (
+              <article key={item.key} className={`vitor-readiness-item ${item.status}`}>
+                <span>
+                  {item.status === 'ok' ? <CheckCircle2 size={15} /> : item.status === 'warn' ? <AlertTriangle size={15} /> : <XCircle size={15} />}
+                  {item.label}
+                </span>
+                <strong>{readinessStatusLabel(item.status)}</strong>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+        {readiness?.test_commands?.length ? (
+          <div className="vitor-test-commands">
+            {readiness.test_commands.map((command, index) => (
+              <div key={`${command}-${index}`}>
+                <span>{command}</span>
+                <button type="button" onClick={() => copyReadinessCommand(command)} aria-label="Copiar mensagem de teste">
+                  <Copy size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="chart-card vitor-monitoring-card">
@@ -1191,6 +1271,141 @@ export default function VitorTrafficManagerPage() {
           margin-bottom: 16px;
         }
 
+        .vitor-readiness-card {
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .vitor-readiness-head {
+          display: grid;
+          grid-template-columns: 118px minmax(0, 1fr);
+          gap: 12px;
+          align-items: stretch;
+        }
+
+        .vitor-readiness-score {
+          display: grid;
+          place-items: center;
+          align-content: center;
+          min-height: 118px;
+          border-radius: 10px;
+          color: #fff;
+          padding: 12px;
+        }
+
+        .vitor-readiness-score.ok {
+          background: #047857;
+        }
+
+        .vitor-readiness-score.warn {
+          background: #b45309;
+        }
+
+        .vitor-readiness-score.missing {
+          background: #b91c1c;
+        }
+
+        .vitor-readiness-score span,
+        .vitor-readiness-score small {
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .vitor-readiness-score strong {
+          font-size: 2.1rem;
+          line-height: 1;
+        }
+
+        .vitor-readiness-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+          gap: 9px;
+        }
+
+        .vitor-readiness-item {
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 10px;
+          min-width: 0;
+        }
+
+        .vitor-readiness-item span {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: var(--text-muted);
+          font-size: .66rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+
+        .vitor-readiness-item.ok span svg {
+          color: #047857;
+        }
+
+        .vitor-readiness-item.warn span svg {
+          color: #b45309;
+        }
+
+        .vitor-readiness-item.missing span svg {
+          color: #b91c1c;
+        }
+
+        .vitor-readiness-item strong {
+          display: block;
+          color: var(--text-primary);
+          font-size: .82rem;
+          margin-bottom: 4px;
+        }
+
+        .vitor-readiness-item p {
+          color: var(--text-muted);
+          font-size: .72rem;
+          line-height: 1.35;
+          margin: 0;
+        }
+
+        .vitor-test-commands {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .vitor-test-commands div {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 32px;
+          gap: 8px;
+          align-items: center;
+          border: 1px solid rgba(17, 24, 39, .08);
+          border-radius: 10px;
+          background: rgba(255,255,255,.72);
+          padding: 9px;
+          min-width: 0;
+        }
+
+        .vitor-test-commands span {
+          color: var(--text-primary);
+          font-size: .75rem;
+          line-height: 1.35;
+          overflow-wrap: anywhere;
+        }
+
+        .vitor-test-commands button {
+          width: 32px;
+          height: 32px;
+          border: 1px solid rgba(17, 24, 39, .1);
+          border-radius: 8px;
+          background: #fff;
+          color: var(--text-primary);
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+        }
+
         .vitor-monitoring-head {
           display: grid;
           grid-template-columns: 132px minmax(0, 1fr) auto;
@@ -1827,6 +2042,7 @@ export default function VitorTrafficManagerPage() {
 
         @media (max-width: 1180px) {
           .vitor-metrics-grid,
+          .vitor-readiness-grid,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
           .vitor-analysis-grid,
@@ -1854,6 +2070,9 @@ export default function VitorTrafficManagerPage() {
 
         @media (max-width: 760px) {
           .vitor-metrics-grid,
+          .vitor-readiness-head,
+          .vitor-readiness-grid,
+          .vitor-test-commands,
           .vitor-monitoring-head,
           .vitor-monitoring-kpis,
           .vitor-monitoring-grid,
