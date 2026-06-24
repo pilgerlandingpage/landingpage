@@ -3697,6 +3697,7 @@ export async function POST(request: NextRequest) {
                             creative_id: vitorResult.creativeId || null,
                             review_id: vitorResult.reviewId || null,
                             campaign_plan_id: vitorResult.campaignPlanId || null,
+                            decision_action: vitorResult.decisionAction || null,
                             score: vitorResult.score || null,
                             monitoring_health: vitorResult.monitoringHealth || null,
                             monitoring_alerts: vitorResult.monitoringAlerts || null,

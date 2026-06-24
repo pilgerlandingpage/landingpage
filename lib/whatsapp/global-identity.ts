@@ -58,6 +58,20 @@ const TRAFFIC_MONITOR_WORDS = [
     'resumo',
 ]
 
+const TRAFFIC_DECISION_WORDS = [
+    'aprovar',
+    'aprovado',
+    'preparar',
+    'exportar',
+    'executar',
+    'execucao',
+    'execução',
+    'melhorar',
+    'ajustar',
+    'cancelar',
+    'cancelado',
+]
+
 const BLOG_WORDS = ['blog', 'noticia', 'notícia', 'conteudo', 'conteúdo', 'post']
 const PROPERTY_WORDS = ['imovel', 'imóvel', 'apartamento', 'casa', 'disponivel', 'disponível', 'link']
 const REPORT_WORDS = ['relatorio', 'relatório', 'resultado', 'performance', 'metricas', 'métricas', 'resumo']
@@ -147,6 +161,18 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
+
+    if (
+        (includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')) &&
+        includesAny(normalized, TRAFFIC_DECISION_WORDS)
+    ) {
+        return {
+            commandType: 'paid_traffic_decision',
+            targetAgent: 'ads-analyst',
+            requiredPermission: 'ads',
+            label: 'Decisao humana do Vitor',
+        }
+    }
 
     if (
         (includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')) &&

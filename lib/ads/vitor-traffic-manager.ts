@@ -55,6 +55,7 @@ export type ProcessVitorPaidTrafficCommandResult = {
   creativeId?: string
   reviewId?: string
   campaignPlanId?: string
+  decisionAction?: string
   score?: number
   monitoringHealth?: number
   monitoringAlerts?: number
@@ -740,6 +741,195 @@ async function sendVitorResponse(params: {
   }
 }
 
+type VitorDecisionAction = 'approve' | 'improve' | 'cancel' | 'export'
+
+function detectVitorDecisionAction(text: unknown): VitorDecisionAction | null {
+  const normalized = cleanString(text, 1000)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (/\b(cancelar|cancela|cancelado|nao rodar|nao publicar|descartar)\b/.test(normalized)) return 'cancel'
+  if (/\b(melhorar|ajustar|refazer|corrigir|revisar criativo|melhoria)\b/.test(normalized)) return 'improve'
+  if (/\b(preparar|exportar|executar|execucao|pacote|subir mesmo assim|rodar mesmo assim)\b/.test(normalized)) return 'export'
+  if (/\b(aprovar|aprovado|autorizar|pode rodar|pode subir|liberar)\b/.test(normalized)) return 'approve'
+  return null
+}
+
+function vitorDecisionLabel(action: VitorDecisionAction) {
+  if (action === 'approve') return 'aprovou o plano do Vitor'
+  if (action === 'improve') return 'pediu melhoria no criativo do Vitor'
+  if (action === 'cancel') return 'cancelou o plano do Vitor'
+  return 'marcou o plano do Vitor como pronto para execucao humana'
+}
+
+function vitorDecisionStatuses(action: VitorDecisionAction) {
+  if (action === 'approve') return { reviewStatus: 'approved', planStatus: 'approved', creativeStatus: 'approved' }
+  if (action === 'improve') return { reviewStatus: 'needs_improvement', planStatus: 'draft', creativeStatus: 'review' }
+  if (action === 'cancel') return { reviewStatus: 'cancelled', planStatus: 'cancelled', creativeStatus: 'archived' }
+  return { reviewStatus: 'approved', planStatus: 'exported', creativeStatus: 'approved' }
+}
+
+async function findLatestDecisionReview(supabase: SupabaseLike, command: any) {
+  const phone = cleanString(command?.phone, 40)
+  let query = supabase
+    .from('paid_traffic_creative_reviews')
+    .select('*')
+    .in('status', ['reviewed', 'needs_improvement', 'approved'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+
+  if (phone) query = query.eq('requested_by_phone', phone)
+
+  const { data, error } = await query
+  if (error) throw error
+  return Array.isArray(data) ? data[0] || null : null
+}
+
+function buildVitorDecisionMessage(params: {
+  action: VitorDecisionAction
+  review: any
+  plan: any
+}) {
+  const { action, review, plan } = params
+  const planStatus = cleanString(plan?.status, 80) || 'sem plano localizado'
+  const score = Number.isFinite(Number(review?.score)) ? `${review.score}/100` : 'sem score'
+  const actionText = action === 'approve'
+    ? 'Plano aprovado para execucao humana.'
+    : action === 'improve'
+      ? 'Criativo marcado para melhoria antes de rodar.'
+      : action === 'cancel'
+        ? 'Plano cancelado. Nada sera publicado.'
+        : 'Plano marcado como pronto/exportado para execucao humana.'
+
+  return [
+    'Vitor Trafego Pago registrou sua decisao.',
+    '',
+    actionText,
+    `Score: ${score}${review?.score_label ? ` (${review.score_label})` : ''}`,
+    `Status do plano: ${planStatus}.`,
+    '',
+    action === 'export'
+      ? 'Use o painel do Vitor para copiar o pacote completo de execucao, UTMs, copy e regras de pausa/escala.'
+      : 'A decisao foi salva no painel e enviada para a Central de Inteligencia.',
+    'Nada foi publicado automaticamente.',
+  ].filter(Boolean).join('\n')
+}
+
+async function processVitorDecisionCommand(params: {
+  supabase: SupabaseLike
+  command: any
+}) {
+  const { supabase, command } = params
+  const action = detectVitorDecisionAction(command?.command_text)
+  if (!action) throw new Error('Nao entendi a decisao para o Vitor. Use aprovar, melhorar, cancelar ou preparar execucao.')
+
+  const review = await findLatestDecisionReview(supabase, command)
+  if (!review?.id) {
+    throw new Error('Nao encontrei analise pendente do Vitor para este numero. Envie o criativo primeiro ou aprove pelo painel.')
+  }
+
+  const statuses = vitorDecisionStatuses(action)
+  const now = new Date().toISOString()
+  const rawAnalysis = {
+    ...safeJsonObject(review.raw_analysis),
+    human_decision: {
+      action,
+      source: 'whatsapp_global',
+      command_id: command.id || null,
+      text: cleanString(command.command_text, 800) || null,
+      decided_at: now,
+    },
+  }
+
+  const { data: updatedReview, error: reviewError } = await supabase
+    .from('paid_traffic_creative_reviews')
+    .update({
+      status: statuses.reviewStatus,
+      raw_analysis: rawAnalysis,
+      updated_at: now,
+    })
+    .eq('id', review.id)
+    .select('*')
+    .single()
+
+  if (reviewError) throw reviewError
+
+  const { data: currentPlan, error: planReadError } = await supabase
+    .from('paid_traffic_campaign_plans')
+    .select('*')
+    .eq('review_id', review.id)
+    .maybeSingle()
+  if (planReadError) throw planReadError
+
+  let updatedPlan = currentPlan || null
+  if (currentPlan?.id) {
+    const { data: planData, error: planError } = await supabase
+      .from('paid_traffic_campaign_plans')
+      .update({
+        status: statuses.planStatus,
+        raw_plan: {
+          ...safeJsonObject(currentPlan.raw_plan),
+          human_decision: {
+            action,
+            source: 'whatsapp_global',
+            command_id: command.id || null,
+            decided_at: now,
+          },
+        },
+        updated_at: now,
+      })
+      .eq('id', currentPlan.id)
+      .select('*')
+      .maybeSingle()
+    if (planError) throw planError
+    updatedPlan = planData || currentPlan
+  }
+
+  if (statuses.creativeStatus && review.creative_id) {
+    await supabase
+      .from('marketing_creatives')
+      .update({
+        status: statuses.creativeStatus,
+        updated_at: now,
+      })
+      .eq('id', review.creative_id)
+  }
+
+  await recordAgentCentralSignal({
+    supabase,
+    agentId: 'ads-analyst',
+    eventType: 'paid_traffic_vitor_human_decision',
+    entityType: 'paid_traffic_creative_review',
+    entityId: review.id,
+    source: 'vitor-whatsapp-global',
+    label: `${command.identity_label || 'Humano'} ${vitorDecisionLabel(action)}`,
+    importanceScore: action === 'approve' || action === 'export' ? 78 : action === 'cancel' ? 70 : 64,
+    metadata: {
+      action,
+      source: 'whatsapp_global',
+      command_id: command.id || null,
+      phone: command.phone || null,
+      review_id: review.id,
+      creative_id: review.creative_id || null,
+      campaign_plan_id: updatedPlan?.id || null,
+      previous_status: review.status,
+      next_status: statuses.reviewStatus,
+      plan_status: updatedPlan?.status || null,
+    },
+    handoffTargets: ['whatsapp-global-agent', 'creative-strategy-agent', 'ceo-agent'],
+  }).catch((error: any) => {
+    console.warn('[Vitor] decision central signal failed:', error?.message || error)
+  })
+
+  return {
+    action,
+    review: updatedReview || review,
+    plan: updatedPlan,
+    message: buildVitorDecisionMessage({ action, review: updatedReview || review, plan: updatedPlan }),
+  }
+}
+
 export async function processVitorPanelCreative(
   params: ProcessVitorPanelCreativeParams,
 ): Promise<ProcessVitorPanelCreativeResult> {
@@ -853,7 +1043,8 @@ export async function processVitorPaidTrafficCommand(
   const { supabase, command } = params
   if (!command?.id) return { handled: false, whatsappSent: false, error: 'missing_command' }
   const isVitorMonitoringCommand = command.command_type === 'paid_traffic_monitoring'
-  if (!['paid_traffic', 'paid_traffic_monitoring'].includes(String(command.command_type || '')) || command.target_agent !== 'ads-analyst') {
+  const isVitorDecisionCommand = command.command_type === 'paid_traffic_decision'
+  if (!['paid_traffic', 'paid_traffic_monitoring', 'paid_traffic_decision'].includes(String(command.command_type || '')) || command.target_agent !== 'ads-analyst') {
     return { handled: false, whatsappSent: false }
   }
   if (command.status === 'blocked') return { handled: false, whatsappSent: false, error: 'blocked_command' }
@@ -895,6 +1086,35 @@ export async function processVitorPaidTrafficCommand(
         whatsappSent,
         monitoringHealth: snapshot.health.score,
         monitoringAlerts: snapshot.alerts.length,
+      }
+    }
+
+    if (isVitorDecisionCommand) {
+      const decision = await processVitorDecisionCommand({ supabase, command })
+      const result = {
+        stage: 'vitor_decision_completed',
+        action: decision.action,
+        review_id: decision.review?.id || null,
+        campaign_plan_id: decision.plan?.id || null,
+        completed_at: new Date().toISOString(),
+      }
+
+      await updateCommandStatus(supabase, command.id, 'completed', result)
+
+      const whatsappSent = shouldSendResponse
+        ? await sendVitorResponse({
+          phone: command.phone,
+          message: decision.message,
+          instanceToken,
+        })
+        : false
+
+      return {
+        handled: true,
+        whatsappSent,
+        reviewId: decision.review?.id || undefined,
+        campaignPlanId: decision.plan?.id || undefined,
+        decisionAction: decision.action,
       }
     }
 
@@ -986,19 +1206,33 @@ export async function processVitorPaidTrafficCommand(
     const message = error?.message || String(error)
     console.error('[Vitor] paid traffic command failed:', message)
     await updateCommandStatus(supabase, command.id, 'failed', {
-      stage: 'vitor_review_failed',
+      stage: isVitorDecisionCommand ? 'vitor_decision_failed' : isVitorMonitoringCommand ? 'vitor_monitoring_failed' : 'vitor_review_failed',
       error: message,
       failed_at: new Date().toISOString(),
     }).catch(() => null)
 
-    const whatsappSent = shouldSendResponse
-      ? await sendVitorResponse({
-        phone: command.phone,
-        message: [
+    const failureMessage = isVitorDecisionCommand
+      ? [
+        'Vitor recebeu sua decisao, mas nao conseguiu aplicar agora.',
+        message,
+        'Nada foi publicado automaticamente.',
+      ]
+      : isVitorMonitoringCommand
+        ? [
+          'Vitor recebeu seu pedido de monitoramento, mas nao conseguiu concluir a leitura agora.',
+          'O comando ficou registrado no WhatsApp Global para revisao interna.',
+          'Nada foi publicado automaticamente.',
+        ]
+        : [
           'Vitor recebeu seu pedido de trafego, mas nao conseguiu finalizar a analise automatica agora.',
           'O comando ficou registrado no WhatsApp Global para revisao interna.',
           'Nada foi publicado automaticamente.',
-        ].join('\n'),
+        ]
+
+    const whatsappSent = shouldSendResponse
+      ? await sendVitorResponse({
+        phone: command.phone,
+        message: failureMessage.join('\n'),
         instanceToken,
       })
       : false
