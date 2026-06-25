@@ -34,8 +34,10 @@ type SupabaseLike = {
 
 const TRAFFIC_WORDS = [
     'trafego',
+    'trfego',
     'tráfego',
     'campanha',
+    'campanhas',
     'anuncio',
     'anúncio',
     'ads',
@@ -56,6 +58,13 @@ const TRAFFIC_MONITOR_WORDS = [
     'metricas',
     'saude',
     'resumo',
+    'hoje',
+    'agora',
+    'rodando',
+    'veiculando',
+    'ativas',
+    'ativos',
+    'andamento',
 ]
 
 const TRAFFIC_DECISION_WORDS = [
@@ -207,14 +216,22 @@ function includesAny(text: string, words: string[]) {
     return words.some(word => text.includes(word))
 }
 
+const TRAFFIC_MONITOR_QUERY_RE = /\b(quais?|quantas?|listar|liste|mostra|mostre|rodando|veiculando|ativas?|ativos?|hoje|agora)\b|\bcomo\s+est(?:a|ao)\b|\bno\s+ar\b|\bem\s+andamento\b/
+const TRAFFIC_EXECUTION_ACTION_RE = /\b(subir|suba|rodar|rode|promover|promova|impulsionar|impulsione|lancar|lance|criar|crie|novo|nova|analisar|analise|revisar|revise|melhorar|melhore|ajustar|ajuste)\b/
+const TRAFFIC_CREATIVE_OBJECT_RE = /\b(criativo|imagem|video|carrossel)\b/
+
 export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = false): WhatsAppGlobalCommandIntent {
     const normalized = String(text || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
+    const trafficDomain = includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')
+    const trafficMonitoringQuery = includesAny(normalized, TRAFFIC_MONITOR_WORDS) || TRAFFIC_MONITOR_QUERY_RE.test(normalized)
+    const trafficExecutionRequest = TRAFFIC_EXECUTION_ACTION_RE.test(normalized)
+        || (!trafficMonitoringQuery && TRAFFIC_CREATIVE_OBJECT_RE.test(normalized))
 
     if (
-        (includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')) &&
+        trafficDomain &&
         includesAny(normalized, TRAFFIC_DECISION_WORDS)
     ) {
         return {
@@ -226,9 +243,9 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
     }
 
     if (
-        (includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')) &&
-        includesAny(normalized, TRAFFIC_MONITOR_WORDS) &&
-        !/(criativo|imagem|video|carrossel|subir|rodar|promover|impulsionar)/.test(normalized)
+        trafficDomain &&
+        trafficMonitoringQuery &&
+        !trafficExecutionRequest
     ) {
         return {
             commandType: 'paid_traffic_monitoring',
@@ -238,7 +255,7 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
         }
     }
 
-    if (includesAny(normalized, TRAFFIC_WORDS) || (hasMedia && /(rodar|subir|promover|impulsionar)/.test(normalized))) {
+    if (trafficDomain || (hasMedia && /(rodar|subir|promover|impulsionar)/.test(normalized))) {
         return {
             commandType: 'paid_traffic',
             targetAgent: 'ads-analyst',

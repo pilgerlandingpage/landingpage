@@ -6,6 +6,7 @@ import {
   recordAgentCentralSignal,
   saveAgentCentralSnapshot,
 } from '@/lib/intelligence/agent-runtime'
+import type { DatePreset } from '@/lib/ads/meta'
 import { buildVitorMonitoringSnapshot, persistVitorMonitoringSnapshot, type VitorMonitoringSnapshot } from '@/lib/ads/vitor-monitoring'
 import { sendWhatsAppMessage } from '@/lib/uazapi'
 
@@ -680,13 +681,74 @@ function percentLabel(value: unknown) {
   return `${number.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
 }
 
+function compactMonitoringLabel(value: unknown, fallback: string, max = 90) {
+  return cleanString(value, max) || fallback
+}
+
+function wholeNumberLabel(value: unknown) {
+  const number = Number(value || 0)
+  if (!Number.isFinite(number) || number <= 0) return '0'
+  return Math.round(number).toLocaleString('pt-BR')
+}
+
+function monitoringDatePresetLabel(value: unknown) {
+  const preset = String(value || '')
+  if (preset === 'today') return 'hoje'
+  if (preset === 'yesterday') return 'ontem'
+  if (preset === 'this_month') return 'este mes'
+  if (preset === 'last_month') return 'mes passado'
+  if (preset === 'last_30d') return 'ultimos 30 dias'
+  if (preset === 'maximum') return 'periodo maximo'
+  return 'ultimos 7 dias'
+}
+
+function resolveMonitoringDatePreset(commandText: unknown): DatePreset {
+  const normalized = cleanString(commandText, 500)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (/\b(hoje|agora)\b/.test(normalized)) return 'today'
+  if (/\bontem\b/.test(normalized)) return 'yesterday'
+  if (/\b(ultimos\s*30|30\s*dias|mensal)\b/.test(normalized)) return 'last_30d'
+  if (/\b(este\s*mes|mes\s*atual)\b/.test(normalized)) return 'this_month'
+  return 'last_7d'
+}
+
+function buildCampaignMonitoringLine(campaign: any, index: number) {
+  const name = compactMonitoringLabel(campaign?.name || campaign?.campaign_name || campaign?.id, 'Campanha sem nome')
+  const spend = Number(campaign?.spend || 0)
+  const leads = Number(campaign?.leads || 0)
+  const clicks = Number(campaign?.clicks || 0)
+  const cpl = Number(campaign?.cpl || campaign?.cost_per_lead || 0)
+  const parts = [
+    spend > 0 ? `gasto ${moneyLabel(spend)}` : '',
+    leads > 0 ? `${wholeNumberLabel(leads)} lead(s)` : '',
+    clicks > 0 ? `${wholeNumberLabel(clicks)} clique(s)` : '',
+    Number(campaign?.ctr || 0) > 0 ? `CTR ${percentLabel(campaign?.ctr)}` : '',
+    cpl > 0 ? `CPL ${moneyLabel(cpl)}` : '',
+  ].filter(Boolean)
+
+  return `- ${index + 1}. ${name}: ${parts.length ? parts.join(', ') : 'sem volume relevante na janela lida.'}`
+}
+
+function buildPendingPlanMonitoringLine(plan: Record<string, unknown>, index: number) {
+  const name = compactMonitoringLabel(plan.campaign_name || plan.id, 'Plano sem nome')
+  const status = compactMonitoringLabel(plan.status, 'status pendente', 40)
+  const objective = compactMonitoringLabel(plan.objective, 'objetivo nao informado', 120)
+  return `- ${index + 1}. ${name}: ${status}; ${objective}.`
+}
+
 function buildWhatsAppMonitoringMessage(snapshot: VitorMonitoringSnapshot) {
   const metrics = snapshot.metrics || {}
   const alerts = snapshot.alerts.slice(0, 4)
   const recommendations = snapshot.recommendations.slice(0, 4)
+  const campaigns = snapshot.top_campaigns.slice(0, 5)
+  const pendingPlans = snapshot.pending_execution_plans.slice(0, 4)
 
   return [
-    'Vitor Trafego Pago - monitoramento continuo',
+    'Monitoramento de trafego pago',
+    `Janela lida: ${monitoringDatePresetLabel(snapshot.date_preset)}.`,
     '',
     `Saude do trafego: ${snapshot.health.score}/100 (${snapshot.health.label})`,
     `Gasto lido: ${moneyLabel(metrics.spend)}`,
@@ -694,6 +756,16 @@ function buildWhatsAppMonitoringMessage(snapshot: VitorMonitoringSnapshot) {
     `Leads pagos no CRM: ${metrics.crm_paid_leads || 0}`,
     `CPL medio: ${moneyLabel(metrics.avg_cpl)}`,
     `Qualidade CRM: ${percentLabel(metrics.crm_quality_rate)}`,
+    '',
+    'Campanhas lidas na Meta:',
+    campaigns.length
+      ? campaigns.map(buildCampaignMonitoringLine).join('\n')
+      : '- Nao encontrei campanha com leitura da Meta nessa janela.',
+    '',
+    'Planos do Vitor ainda para reconciliar:',
+    pendingPlans.length
+      ? pendingPlans.map(buildPendingPlanMonitoringLine).join('\n')
+      : '- Nenhum plano preparado ficou pendente de reconciliar com campanha real.',
     '',
     'Alertas:',
     alerts.length
@@ -1070,10 +1142,12 @@ export async function processVitorPaidTrafficCommand(
     })
 
     if (isVitorMonitoringCommand) {
-      const snapshot = await buildVitorMonitoringSnapshot({ supabase, datePreset: 'last_7d' })
+      const datePreset = resolveMonitoringDatePreset(command.command_text || command.payload?.text || command.payload?.message || '')
+      const snapshot = await buildVitorMonitoringSnapshot({ supabase, datePreset })
       const report = await persistVitorMonitoringSnapshot({ supabase, snapshot })
       const result = {
         stage: 'vitor_monitoring_completed',
+        date_preset: datePreset,
         report_id: report?.id || null,
         health_score: snapshot.health.score,
         health_label: snapshot.health.label,
