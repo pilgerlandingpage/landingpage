@@ -542,13 +542,14 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .home-premium-hero .hero-bg-image {
             width: auto !important;
-            height: 103% !important;
+            height: 108% !important;
             max-height: none !important;
-            top: 0 !important;
+            top: auto !important;
+            bottom: -28px !important;
           }
           .home-premium-hero .hero-background-frame {
             object-fit: cover !important;
-            object-position: center !important;
+            object-position: center 28% !important;
             opacity: 0.9 !important;
             filter: contrast(1.04) saturate(0.96);
           }
@@ -718,13 +719,15 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         }
         .hero-bg-image {
           position: absolute;
-          top: 0;
+          top: auto;
+          bottom: -38px;
           left: 50%;
           transform: translateX(-50%);
-          height: 100%;
+          height: min(126%, 680px);
           width: auto;
           max-width: none;
           object-fit: contain;
+          object-position: center bottom;
           filter: none;
           z-index: 1;
         }
@@ -818,7 +821,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center;
+          object-position: center 28%;
           pointer-events: none;
           opacity: 0.9;
           filter: contrast(1.04) saturate(0.96);
@@ -841,15 +844,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           mix-blend-mode: multiply;
         }
         .home-premium-hero .hero-background-frame {
-          opacity: 0.72 !important;
-          filter: contrast(1.08) saturate(0.92);
-        }
-        .home-premium-hero .hero-bg-image {
-          width: auto !important;
-          height: 106% !important;
-          max-height: none !important;
-          top: 0 !important;
-          filter: drop-shadow(0 24px 42px rgba(0,0,0,0.28));
+          opacity: 0.9 !important;
+          filter: contrast(1.04) saturate(0.96);
         }
         .home-premium-hero .hero-overlay {
           background: linear-gradient(to top, rgba(247,247,245,0.96) 0%, rgba(247,247,245,0.65) 22%, rgba(247,247,245,0.15) 38%, transparent 52%);
@@ -1102,8 +1098,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(to top, rgba(8,8,8,0.82), rgba(8,8,8,0.42) 52%, rgba(8,8,8,0.16) 78%, rgba(8,8,8,0.04)),
-            linear-gradient(90deg, rgba(8,8,8,0.46), rgba(8,8,8,0.08));
+            linear-gradient(to top, rgba(8,8,8,0.66), rgba(8,8,8,0.42) 28%, rgba(8,8,8,0.14) 48%, rgba(8,8,8,0) 64%),
+            linear-gradient(90deg, rgba(8,8,8,0.12), rgba(8,8,8,0));
         }
         .premium-category-icon {
           position: absolute;
@@ -1761,7 +1757,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .home-premium-hero .hero-background-frame {
             object-fit: cover !important;
-            object-position: center !important;
+            object-position: center 28% !important;
             opacity: 0.9 !important;
             filter: contrast(1.04) saturate(0.96);
           }
@@ -1785,9 +1781,10 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .home-premium-hero .hero-bg-image {
             width: auto !important;
-            height: 85% !important;
+            height: 108% !important;
             max-height: none !important;
-            top: 22px !important;
+            top: auto !important;
+            bottom: -28px !important;
           }
           .premium-section-head {
             display: block !important;
@@ -1999,8 +1996,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(to top, rgba(8,8,8,0.82), rgba(8,8,8,0.42) 50%, rgba(8,8,8,0.16) 76%, rgba(8,8,8,0.04)),
-            linear-gradient(90deg, rgba(8,8,8,0.46), rgba(8,8,8,0.08));
+            linear-gradient(to top, rgba(8,8,8,0.66), rgba(8,8,8,0.42) 28%, rgba(8,8,8,0.14) 48%, rgba(8,8,8,0) 64%),
+            linear-gradient(90deg, rgba(8,8,8,0.12), rgba(8,8,8,0));
         }
         .gp-location-copy {
           position: absolute;
@@ -2073,8 +2070,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           }
           .premium-category-shade {
             background:
-              linear-gradient(to top, rgba(8,8,8,0.78), rgba(8,8,8,0.38) 54%, rgba(8,8,8,0.14) 78%, rgba(8,8,8,0.03)),
-              linear-gradient(90deg, rgba(8,8,8,0.38), rgba(8,8,8,0.06)) !important;
+              linear-gradient(to top, rgba(8,8,8,0.64), rgba(8,8,8,0.4) 30%, rgba(8,8,8,0.12) 50%, rgba(8,8,8,0) 66%),
+              linear-gradient(90deg, rgba(8,8,8,0.1), rgba(8,8,8,0)) !important;
           }
           .gp-authority-strip {
             align-items: stretch !important;

@@ -92,7 +92,7 @@ export default function MapSearch({
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
-    initialMapStyle = 'satellite',
+    initialMapStyle = 'luxury',
 }: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>

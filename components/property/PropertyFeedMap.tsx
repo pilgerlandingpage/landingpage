@@ -5,6 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { Map as MapIcon, Navigation, Satellite, Sparkles } from 'lucide-react'
+import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leaflet-style'
 import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -32,13 +33,14 @@ type Props = {
     property: PropertyFeedMapProperty
     latLng: [number, number]
     initialView?: PropertyFeedMapView
+    initialStreetInteractive?: boolean
     allowedViews?: PropertyFeedMapView[]
     showViewControl?: boolean
 }
 
 const PROPERTY_FEED_MAP_VIEWS: Array<{ value: PropertyFeedMapView; label: string; icon: 'sparkles' | 'map' | 'satellite' | 'street' }> = [
-    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
-    { value: 'map', label: 'Claro', icon: 'map' },
+    { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
+    { value: 'map', label: 'Ruas', icon: 'map' },
     { value: 'satellite', label: 'Satélite', icon: 'satellite' },
     { value: 'street', label: 'Street View', icon: 'street' },
 ]
@@ -247,11 +249,6 @@ function formatPrice(price?: number | null) {
         currency: 'BRL',
         maximumFractionDigits: 0,
     }).format(price)
-}
-
-function compactPrice(price?: number | null) {
-    if (!price) return 'Sob consulta'
-    return formatPrice(price)
 }
 
 function locationLabel(property: PropertyFeedMapProperty) {
@@ -576,7 +573,8 @@ function GoogleStreetViewPanorama({
 export default function PropertyFeedMap({
     property,
     latLng,
-    initialView = 'satellite',
+    initialView = 'luxury',
+    initialStreetInteractive = false,
     allowedViews,
     showViewControl = true,
 }: Props) {
@@ -591,7 +589,7 @@ export default function PropertyFeedMap({
             : viewOptions[0]?.value || 'luxury'
     }, [initialView, viewOptions])
     const [selectedMapView, setSelectedMapView] = useState<PropertyFeedMapView>(fallbackView)
-    const [isStreetInteractive, setIsStreetInteractive] = useState(false)
+    const [isStreetInteractive, setIsStreetInteractive] = useState(() => Boolean(initialStreetInteractive && fallbackView === 'street'))
     const [streetMiniMapState, setStreetMiniMapState] = useState<{ position: [number, number]; heading: number } | null>(null)
     const streetFrameRef = useRef<HTMLIFrameElement>(null)
     const streetScrollTouchYRef = useRef<number | null>(null)
@@ -611,12 +609,11 @@ export default function PropertyFeedMap({
         className: 'property-feed-map-marker',
         html: `<div class="property-feed-map-marker-wrap${property.exclusive ? ' is-exclusive' : ''}">
             <span class="property-feed-map-pin"><span></span></span>
-            <strong>${compactPrice(property.price)}</strong>
         </div>`,
-        iconSize: [132, 76],
-        iconAnchor: [66, 70],
-        popupAnchor: [0, -62],
-    }), [property.exclusive, property.price])
+        iconSize: [42, 50],
+        iconAnchor: [21, 44],
+        popupAnchor: [0, -42],
+    }), [property.exclusive])
     const handleMapViewChange = useCallback((view: PropertyFeedMapView) => {
         if (view === mapView) return
 
@@ -848,15 +845,15 @@ export default function PropertyFeedMap({
                 >
                     {mapView === 'luxury' && (
                         <TileLayer
-                            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                            attribution={LEAFLET_OSM_ATTRIBUTION}
+                            url={LEAFLET_OSM_TILE_URL}
                             maxZoom={20}
                         />
                     )}
                     {mapView === 'map' && (
                         <TileLayer
-                            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            attribution={LEAFLET_OSM_ATTRIBUTION}
+                            url={LEAFLET_OSM_TILE_URL}
                             maxZoom={20}
                         />
                     )}

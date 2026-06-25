@@ -1,22 +1,23 @@
 'use client'
 
-import { useCallback, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
 
 type PropertyMobileDetailSheetProps = {
     media: ReactNode
     children: ReactNode
 }
 
-const SNAP_MEDIA_FOCUS = 64
+const SNAP_MEDIA_FOCUS = 78
 const SNAP_BALANCED = 47
 const SNAP_DETAILS_FOCUS = 8
+const SNAP_ENTRY = SNAP_MEDIA_FOCUS
 
 export default function PropertyMobileDetailSheet({ media, children }: PropertyMobileDetailSheetProps) {
-    const [sheetTop, setSheetTop] = useState(SNAP_BALANCED)
+    const [sheetTop, setSheetTop] = useState(SNAP_ENTRY)
     const [isDragging, setIsDragging] = useState(false)
     const startY = useRef(0)
-    const startTop = useRef(SNAP_BALANCED)
-    const currentTop = useRef(SNAP_BALANCED)
+    const startTop = useRef(SNAP_ENTRY)
+    const currentTop = useRef(SNAP_ENTRY)
 
     const snapToNearest = useCallback(() => {
         const snapPoints = [SNAP_DETAILS_FOCUS, SNAP_BALANCED, SNAP_MEDIA_FOCUS]
@@ -56,7 +57,11 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
     }, [isDragging, snapToNearest])
 
     return (
-        <section className="pmds-wrap" aria-label="Experiência mobile do imóvel">
+        <section
+            className="pmds-wrap"
+            aria-label="Experiência mobile do imóvel"
+            style={{ '--pmds-sheet-top': `${sheetTop}dvh` } as CSSProperties}
+        >
             <div className="pmds-media">
                 {media}
             </div>

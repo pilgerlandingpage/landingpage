@@ -12,7 +12,9 @@ import {
     Camera,
     Car,
     CheckCircle2,
+    Clock3,
     Eye,
+    Heart,
     Home,
     MapPin,
     MessageCircle,
@@ -28,6 +30,7 @@ import PropertyLandingShareButton from '@/components/property/PropertyLandingSha
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import PropertyContinuationRail from '@/components/property/PropertyContinuationRail'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
+import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPreview'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
 import MobileNav from '@/components/marketplace/MobileNav'
@@ -43,6 +46,12 @@ import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
 import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 import { fetchPropertyPriceHistory, type PropertyPriceHistoryRow } from '@/lib/properties/price-history'
+import {
+    buildMarketRadarAnalysis,
+    fetchInternalMarketComparables,
+    formatMarketPercent,
+    type MarketComparable,
+} from '@/lib/market-analysis/radar'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,33 +85,6 @@ const PROPERTY_MAP_MODAL_SELECT = [
     'longitude',
     'updated_at',
 ].join(', ')
-const RELATED_PROPERTY_SELECT = [
-    'id',
-    'source_slug',
-    'title',
-    'seo_title',
-    'city',
-    'state',
-    'neighborhood',
-    'price',
-    'bedrooms',
-    'bathrooms',
-    'suites',
-    'parking_spaces',
-    'area_m2',
-    'area_private_m2',
-    'featured_image',
-    'images',
-    'property_type',
-    'exclusive',
-    'source_status',
-    'description',
-    'latitude',
-    'longitude',
-    'created_at',
-    'updated_at',
-].join(', ')
-
 type RelatedPropertyCandidate = {
     id: string
     source_slug?: string | null
@@ -301,6 +283,87 @@ function formatDescription(raw: string): string[] {
     return paragraphs.slice(0, 5)
 }
 
+function normalizeContentKey(value: unknown) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+}
+
+function splitDescriptionSentences(value: string) {
+    const protectedText = String(value || '').replace(/\b(Av|Dr|Dra|Ed|Ref|R|Sr|Sra)\./g, '$1<DOT>')
+
+    return protectedText
+        .replace(/\s+/g, ' ')
+        .split(/(?<=[.!?])\s+/)
+        .map(sentence => sentence.replace(/<DOT>/g, '.').trim().replace(/^[,;:\s]+/, ''))
+        .filter(sentence => sentence.length >= 28)
+}
+
+function isMobileDescriptionDuplicate(sentence: string, property: any, displayTitle: string, locationLabel: string) {
+    const normalized = normalizeContentKey(sentence)
+    if (!normalized) return true
+
+    const titleKey = normalizeContentKey(displayTitle)
+    const locationKey = normalizeContentKey(locationLabel)
+    const typeKey = normalizeContentKey(property.property_type)
+    const statMatches = sentence.match(/\b\d+[\d.,]*(?:\s*mil)?\s*(?:dormitórios?|dormitorios?|quartos?|suítes?|suites?|banheiros?|vagas?|m²|m2|metros?\s+quadrados?)\b/gi) || []
+    const hasCatalogPhrase = /\b(a venda|à venda|vende|o imovel reune|o imóvel reúne|area privativa|área privativa|area total|área total|garagem|condominio|condomínio|iptu)\b/i.test(sentence)
+    const repeatsLocation = Boolean(locationKey && normalized.includes(locationKey))
+    const repeatsTitle = Boolean(titleKey && normalized.includes(titleKey))
+    const startsAsCatalogLine = Boolean(typeKey && normalized.startsWith(`${typeKey} a venda`))
+
+    if (startsAsCatalogLine) return true
+    if (/(area total|área total|area privativa|área privativa)/i.test(sentence) && /\d/.test(sentence)) return true
+    if (statMatches.length >= 2) return true
+    if (hasCatalogPhrase && (statMatches.length > 0 || repeatsLocation || repeatsTitle)) return true
+    if (repeatsLocation && repeatsTitle) return true
+
+    return false
+}
+
+function buildMobileDescriptionParagraphs(
+    paragraphs: string[],
+    property: any,
+    displayTitle: string,
+    locationLabel: string,
+    fallback: string
+) {
+    const seen = new Set<string>()
+    const usefulSentences: string[] = []
+
+    for (const paragraph of paragraphs) {
+        for (const sentence of splitDescriptionSentences(paragraph)) {
+            const key = normalizeContentKey(sentence)
+            if (!key || seen.has(key)) continue
+            seen.add(key)
+            if (isMobileDescriptionDuplicate(sentence, property, displayTitle, locationLabel)) continue
+            usefulSentences.push(sentence)
+            if (usefulSentences.length >= 3) return usefulSentences
+        }
+    }
+
+    return usefulSentences.length ? usefulSentences : [fallback]
+}
+
+function buildMobileAmenityHighlights(items: string[]) {
+    const seen = new Set<string>()
+    const redundantPattern = /\b(tipo|localizacao|localização|area|área|condominio|condomínio|iptu|condicao|condição|dormitórios?|dormitorios?|quartos?|suítes?|suites?|banheiros?|vagas?|garagem|m²|m2)\b/i
+
+    return items
+        .map(item => String(item || '').trim())
+        .filter(item => {
+            if (!item || redundantPattern.test(item)) return false
+            const key = normalizeContentKey(item)
+            if (!key || seen.has(key)) return false
+            seen.add(key)
+            return true
+        })
+        .slice(0, 6)
+}
+
 function formatMoney(value?: number | null, fallback = 'Sob consulta') {
     return value
         ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value)
@@ -352,8 +415,52 @@ function referenceLabel(property: any) {
     return String(property.source_reference || property.source_slug || property.id || '').slice(0, 8).toUpperCase()
 }
 
-function formatViewCount(value: number) {
-    return `${value.toLocaleString('pt-BR')} ${value === 1 ? 'visualização' : 'visualizações'}`
+function listingAgeParts(days: number) {
+    if (days <= 0) {
+        return { value: 'Hoje', label: 'no site' }
+    }
+
+    return {
+        value: days.toLocaleString('pt-BR'),
+        label: days === 1 ? 'dia no site' : 'dias no site',
+    }
+}
+
+function statTextParts(value: number, singular: string, plural: string) {
+    return {
+        value: value.toLocaleString('pt-BR'),
+        label: value === 1 ? singular : plural,
+    }
+}
+
+function daysBetweenNow(dateValue?: string | null) {
+    if (!dateValue) return 0
+    const date = new Date(dateValue)
+    if (Number.isNaN(date.getTime())) return 0
+    return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000))
+}
+
+function propertyPublishedAt(property: any) {
+    return property.source_created_at
+        || property.imported_at
+        || property.created_at
+        || property.source_updated_at
+        || property.updated_at
+        || null
+}
+
+function countCurrentPropertySaves(events?: any[] | null) {
+    const latestByVisitor = new Map<string, any>()
+
+    for (const event of events || []) {
+        const visitorKey = String(event.visitor_id || event.id || '').trim()
+        if (!visitorKey || latestByVisitor.has(visitorKey)) continue
+        latestByVisitor.set(visitorKey, event)
+    }
+
+    return Array.from(latestByVisitor.values())
+        .filter(event => event.event_type === 'property_favorited')
+        .length
 }
 
 function hasUsableCoordinate(value: unknown) {
@@ -562,234 +669,23 @@ function selectRelatedProperties(current: any, candidates: RelatedPropertyCandid
     return selected.slice(0, 4).map(item => item.property)
 }
 
-function formatDateLabel(value?: string | null) {
-    if (!value) return 'Data sob curadoria'
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return 'Data sob curadoria'
-
-    return new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date)
-}
-
-function sameCalendarDay(first?: string | null, second?: string | null) {
-    if (!first || !second) return false
-    const firstDate = new Date(first)
-    const secondDate = new Date(second)
-    if (Number.isNaN(firstDate.getTime()) || Number.isNaN(secondDate.getTime())) return false
-
-    return firstDate.toISOString().slice(0, 10) === secondDate.toISOString().slice(0, 10)
-}
-
-function pricePerSquareMeter(item: { price?: number | string | null; area_private_m2?: number | string | null; area_m2?: number | string | null }) {
-    const price = numericValue(item.price)
-    const area = numericValue(item.area_private_m2 || item.area_m2)
-
-    if (!price || !area) return 0
-    return price / area
-}
-
-function medianValue(values: number[]) {
-    if (!values.length) return 0
-    const sorted = [...values].sort((a, b) => a - b)
-    const middle = Math.floor(sorted.length / 2)
-
-    if (sorted.length % 2) return sorted[middle]
-    return (sorted[middle - 1] + sorted[middle]) / 2
-}
-
-function quantileValue(sortedValues: number[], ratio: number) {
-    if (!sortedValues.length) return 0
-    const position = (sortedValues.length - 1) * ratio
-    const base = Math.floor(position)
-    const rest = position - base
-
-    if (sortedValues[base + 1] === undefined) return sortedValues[base]
-    return sortedValues[base] + rest * (sortedValues[base + 1] - sortedValues[base])
-}
-
-function clampPercent(value: number) {
-    return Math.max(0, Math.min(100, value))
-}
-
 function formatPercent(value: number | null) {
-    if (value === null || !Number.isFinite(value)) return 'Sem amostra'
-    const prefix = value > 0 ? '+' : ''
-    return `${prefix}${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
-}
-
-function priceHistoryTitle(eventType: string) {
-    if (eventType === 'listed') return 'Entrada no catálogo'
-    if (eventType === 'price_reduced') return 'Redução de preço'
-    if (eventType === 'price_increased') return 'Reajuste de preço'
-    if (eventType === 'price_updated') return 'Preço atualizado'
-    if (eventType === 'costs_updated') return 'Custos atualizados'
-    return 'Revisão comercial'
-}
-
-function priceHistoryValue(event: PropertyPriceHistoryRow) {
-    const price = numericValue(event.new_price)
-    const condoFee = numericValue(event.new_condo_fee)
-    const iptu = numericValue(event.new_iptu)
-
-    if (price) return formatMoney(price)
-    if (condoFee) return `Cond. ${formatMoney(condoFee)}`
-    if (iptu) return `IPTU ${formatMoney(iptu)}`
-    return 'Registro atualizado'
-}
-
-function priceHistoryNote(event: PropertyPriceHistoryRow, locationLabel: string) {
-    const previousPrice = numericValue(event.previous_price)
-    const currentPrice = numericValue(event.new_price)
-    const priceM2 = numericValue(event.new_price_per_m2)
-    const condoFee = numericValue(event.new_condo_fee)
-    const iptu = numericValue(event.new_iptu)
-    const notes = [
-        previousPrice && currentPrice && previousPrice !== currentPrice ? `antes ${formatMoney(previousPrice)}` : null,
-        priceM2 ? `${formatMoney(Math.round(priceM2))}/m²` : null,
-        condoFee ? `condomínio ${formatMoney(condoFee)}` : null,
-        iptu ? `IPTU ${formatMoney(iptu)}` : null,
-    ].filter(Boolean)
-
-    return notes.join(' • ') || locationLabel || 'Registro de valor do anúncio.'
-}
-
-function buildRecordedPriceTimeline(events: PropertyPriceHistoryRow[], locationLabel: string) {
-    return events
-        .filter(event => event?.created_at)
-        .map(event => ({
-            date: formatDateLabel(event.created_at),
-            title: priceHistoryTitle(event.event_type),
-            value: priceHistoryValue(event),
-            note: priceHistoryNote(event, locationLabel),
-        }))
+    return formatMarketPercent(value)
 }
 
 function buildMarketHistory(property: any, candidates: RelatedPropertyCandidate[], area: number, locationLabel: string, priceHistoryEvents: PropertyPriceHistoryRow[] = []) {
-    const currentPrice = numericValue(property.price)
-    const currentArea = area || numericValue(property.area_private_m2 || property.area_m2)
-    const currentPriceM2 = currentPrice && currentArea ? currentPrice / currentArea : 0
-    const comparableValues = candidates
-        .map(pricePerSquareMeter)
-        .filter(value => Number.isFinite(value) && value > 0)
-        .sort((a, b) => a - b)
-    const minM2 = comparableValues[0] || 0
-    const maxM2 = comparableValues[comparableValues.length - 1] || 0
-    const medianM2 = medianValue(comparableValues)
-    const deltaToMedian = currentPriceM2 && medianM2 ? ((currentPriceM2 - medianM2) / medianM2) * 100 : null
-    const position = currentPriceM2 && minM2 && maxM2 && maxM2 > minM2
-        ? clampPercent(((currentPriceM2 - minM2) / (maxM2 - minM2)) * 100)
-        : 50
-    const chartValuesRaw = comparableValues.length >= 3
-        ? [
-            quantileValue(comparableValues, 0),
-            quantileValue(comparableValues, 0.25),
-            quantileValue(comparableValues, 0.5),
-            quantileValue(comparableValues, 0.75),
-            quantileValue(comparableValues, 1),
-        ]
-        : [minM2 || currentPriceM2, medianM2 || currentPriceM2, maxM2 || currentPriceM2].filter(Boolean)
-    const chartValues = chartValuesRaw.length ? chartValuesRaw : [1]
-    const chartMin = Math.min(...chartValues, currentPriceM2 || Infinity)
-    const chartMax = Math.max(...chartValues, currentPriceM2 || 0)
-    const chartRange = chartMax > chartMin ? chartMax - chartMin : 1
-    const chartPoints = chartValues.map((value, index) => {
-        const x = chartValues.length === 1 ? 50 : (index / (chartValues.length - 1)) * 100
-        const y = 35 - ((value - chartMin) / chartRange) * 23
-        return `${x.toFixed(1)},${y.toFixed(1)}`
-    }).join(' ')
-    const createdAt = property.source_created_at || property.created_at
-    const updatedAt = property.source_updated_at || property.updated_at
-    const timeline = [
-        {
-            date: formatDateLabel(createdAt),
-            title: 'Entrada no catálogo',
-            value: formatMoney(currentPrice),
-            note: locationLabel || 'Localização sob curadoria',
+    return buildMarketRadarAnalysis({
+        property: {
+            ...property,
+            area_private_m2: property.area_private_m2 || area,
         },
-        ...(!sameCalendarDay(createdAt, updatedAt) ? [{
-            date: formatDateLabel(updatedAt),
-            title: 'Última revisão comercial',
-            value: formatMoney(currentPrice),
-            note: currentPriceM2 ? `${formatMoney(Math.round(currentPriceM2))}/m²` : 'Preço por m² sob consulta',
-        }] : []),
-        ...(property.condo_fee ? [{
-            date: 'Custo recorrente',
-            title: 'Condomínio informado',
-            value: formatMoney(Number(property.condo_fee)),
-            note: 'Valor sujeito a conferência documental.',
-        }] : []),
-        ...(property.iptu ? [{
-            date: 'Custo anual',
-            title: 'IPTU informado',
-            value: formatMoney(Number(property.iptu)),
-            note: 'Base pública do anúncio ou importação.',
-        }] : []),
-    ]
-
-    const recordedTimeline = buildRecordedPriceTimeline(priceHistoryEvents, locationLabel)
-
-    return {
-        currentPriceM2,
-        medianM2,
-        deltaToMedian,
-        comparableCount: comparableValues.length,
-        position,
-        chartPoints,
-        timeline: recordedTimeline.length ? recordedTimeline : timeline,
-    }
+        candidates: candidates as MarketComparable[],
+        locationLabel,
+        priceHistoryEvents,
+    })
 }
-
 async function getRelatedPropertyCandidates(supabase: any, property: any) {
-    const candidates = new Map<string, RelatedPropertyCandidate>()
-    const currentPrice = numericValue(property.price)
-    const addCandidates = (items?: RelatedPropertyCandidate[] | null) => {
-        for (const item of items || []) {
-            if (!item?.id || item.id === property.id) continue
-            candidates.set(item.id, item)
-        }
-    }
-    const baseQuery = (limit: number) => supabase
-        .from('properties')
-        .select(RELATED_PROPERTY_SELECT)
-        .eq('status', 'active')
-        .neq('id', property.id)
-        .order('updated_at', { ascending: false, nullsFirst: false })
-        .limit(limit)
-
-    const queries = []
-    if (property.city && property.neighborhood) {
-        queries.push(baseQuery(80).eq('city', property.city).eq('neighborhood', property.neighborhood))
-    }
-    if (property.city && property.property_type) {
-        queries.push(baseQuery(100).eq('city', property.city).eq('property_type', property.property_type))
-    }
-    if (property.city) {
-        queries.push(baseQuery(120).eq('city', property.city))
-    }
-    if (property.property_type) {
-        queries.push(baseQuery(100).eq('property_type', property.property_type))
-    }
-    if (currentPrice) {
-        queries.push(baseQuery(120).gte('price', Math.round(currentPrice * 0.5)).lte('price', Math.round(currentPrice * 1.75)))
-    }
-
-    if (queries.length === 0) {
-        queries.push(baseQuery(160))
-    }
-
-    const results = await Promise.all(queries)
-    for (const result of results) {
-        if (result?.error) {
-            console.warn('[Property Detail] related property query unavailable:', result.error.message)
-            continue
-        }
-        addCandidates(result?.data)
-    }
-
-    return Array.from(candidates.values())
+    return fetchInternalMarketComparables(supabase, property) as Promise<RelatedPropertyCandidate[]>
 }
 
 function buildDetailItems(property: any, locationLabel: string, area: number) {
@@ -842,6 +738,14 @@ export default async function PropertyDetailPage({
         .eq('event_type', 'property_details_landing_viewed')
         .contains('metadata', { property_id: property.id })
 
+    const { data: propertySaveEvents, error: propertySaveEventsError } = await adminSupabase
+        .from('funnel_events')
+        .select('id, visitor_id, event_type, created_at')
+        .in('event_type', ['property_favorited', 'property_unfavorited'])
+        .contains('metadata', { property_id: property.id })
+        .order('created_at', { ascending: false })
+        .limit(5000)
+
     const { data: propertyMapModalRows, error: propertyMapModalError } = await supabase
         .from('properties')
         .select(PROPERTY_MAP_MODAL_SELECT)
@@ -854,11 +758,19 @@ export default async function PropertyDetailPage({
         console.warn('[Property Detail] view count unavailable:', propertyViewCountError.message)
     }
 
+    if (propertySaveEventsError) {
+        console.warn('[Property Detail] save count unavailable:', propertySaveEventsError.message)
+    }
+
     if (propertyMapModalError) {
         console.warn('[Property Detail] map modal portfolio unavailable:', propertyMapModalError.message)
     }
 
     const propertyViewCount = propertyViewCountRaw || 0
+    const propertySaveCount = countCurrentPropertySaves(propertySaveEvents)
+    const listingAge = listingAgeParts(daysBetweenNow(propertyPublishedAt(property)))
+    const viewStat = statTextParts(propertyViewCount, 'visualização', 'visualizações')
+    const saveStat = statTextParts(propertySaveCount, 'salvo', 'salvos')
     const contactPhone = responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
     const brokerCardName = responsibleBroker.is_connected
         ? responsibleBroker.name
@@ -1024,7 +936,14 @@ export default async function PropertyDetailPage({
         mobileExploreMapPropertiesById.set(currentExploreMapProperty.id, currentExploreMapProperty)
     }
     const mobileExploreMapProperties = Array.from(mobileExploreMapPropertiesById.values())
-    const mobileNarrativePreview = narrativeParagraphs[0] || brokerInsight.text
+    const mobileDescriptionParagraphs = buildMobileDescriptionParagraphs(
+        narrativeParagraphs,
+        property,
+        displayTitle,
+        locationLabel,
+        brokerInsight.text
+    )
+    const mobileNarrativePreview = mobileDescriptionParagraphs[0]
     const mobileFactCards = [
         area > 0 ? { icon: <Ruler size={22} />, label: 'Área privativa', value: `${area.toLocaleString('pt-BR')} m²` } : null,
         suiteCount > 0 ? { icon: <BedDouble size={22} />, label: 'Configuração', value: `${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}` } : null,
@@ -1033,11 +952,10 @@ export default async function PropertyDetailPage({
         { icon: <MapPin size={22} />, label: 'Localização', value: locationLabel || displayCity || 'Litoral SC' },
         marketHistory.currentPriceM2 ? { icon: <BarChart3 size={22} />, label: 'Valor por m²', value: `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` } : null,
     ].filter(Boolean) as Array<{ icon: ReactNode; label: string; value: string }>
-    const mobileDetailPreviewItems = Array.from(new Set([
-        ...detailItems,
-        ...featureItems.slice(0, 8),
-        ...projectItems.slice(0, 6),
-    ].filter(Boolean))).slice(0, 12)
+    const mobileAmenityHighlights = buildMobileAmenityHighlights([
+        ...featureItems,
+        ...projectItems,
+    ])
     const propertyJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -1155,8 +1073,24 @@ export default async function PropertyDetailPage({
                             <div className="plp-rating-row" aria-label="Avaliação editorial">
                                 <span><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /></span>
                                 <strong>4,8</strong>
-                                <small className="plp-view-count"><Eye size={14} /> {formatViewCount(propertyViewCount)}</small>
                             </div>
+                        </div>
+                        <div className="plp-listing-stats" aria-label="Indicadores de interesse do imóvel">
+                            <span>
+                                <Clock3 size={15} />
+                                <strong>{listingAge.value}</strong>
+                                <small>{listingAge.label}</small>
+                            </span>
+                            <span>
+                                <Eye size={15} />
+                                <strong>{viewStat.value}</strong>
+                                <small>{viewStat.label}</small>
+                            </span>
+                            <span>
+                                <Heart size={15} />
+                                <strong>{saveStat.value}</strong>
+                                <small>{saveStat.label}</small>
+                            </span>
                         </div>
                     </div>
                 </section>
@@ -1169,18 +1103,12 @@ export default async function PropertyDetailPage({
                                     <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
                                         <ArrowLeft size={23} />
                                     </Link>
-                                    <div className="plp-mobile-action-group" aria-label="Ações do imóvel">
-                                        <PropertyLandingFavoriteButton
-                                            propertyId={property.id}
-                                            title={displayTitle}
-                                            className="plp-mobile-action-pill"
-                                            source="property_details_mobile_sheet"
-                                        />
+                                    <div className="plp-mobile-action-group" aria-label="Menu do imóvel">
                                         <PropertyLandingMobileMenu title={displayTitle} metadata={propertyTrackingMetadata} />
                                     </div>
                                 </div>
 
-                                {mobileMediaImages.slice(0, 1).map((image, index) => (
+                                {mobileMediaImages.slice(0, 2).map((image, index) => (
                                     <figure className="plp-mobile-media-item" key={`sheet-photo-${image}-${index}`}>
                                         <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                         {index === 0 && (
@@ -1193,44 +1121,15 @@ export default async function PropertyDetailPage({
                                 ))}
 
                                 {propertyMapLatLng && (
-                                    <figure className="plp-mobile-media-item plp-mobile-media-item--map">
-                                        <figcaption className="plp-mobile-map-label">
-                                            <MapPin size={14} />
-                                            Street View do entorno
-                                        </figcaption>
-                                        <PropertyLocationMap
-                                            property={propertyMapPreview}
-                                            latLng={propertyMapLatLng}
-                                            initialView="street"
-                                            allowedViews={['street']}
-                                            showViewControl={false}
-                                            showActions={false}
-                                        />
-                                    </figure>
+                                    <PropertyMobileMapPreview property={propertyMapPreview} latLng={propertyMapLatLng} />
                                 )}
 
-                                {mobileMediaImages.slice(1).map((image, index) => (
+                                {mobileMediaImages.slice(2).map((image, index) => (
                                     <figure className="plp-mobile-media-item" key={`sheet-photo-extra-${image}-${index}`}>
-                                        <img src={image} alt={`${displayTitle} - foto ${index + 2}`} loading="lazy" />
+                                        <img src={image} alt={`${displayTitle} - foto ${index + 3}`} loading="lazy" />
                                     </figure>
                                 ))}
 
-                                {propertyMapLatLng && (
-                                    <figure className="plp-mobile-media-item plp-mobile-media-item--map plp-mobile-media-item--location-map">
-                                        <figcaption className="plp-mobile-map-label">
-                                            <MapPin size={14} />
-                                            Mapa do entorno
-                                        </figcaption>
-                                        <PropertyLocationMap
-                                            property={propertyMapPreview}
-                                            latLng={propertyMapLatLng}
-                                            initialView="luxury"
-                                            allowedViews={['luxury']}
-                                            showViewControl={false}
-                                            showActions={false}
-                                        />
-                                    </figure>
-                                )}
                             </div>
                         )}
                     >
@@ -1244,24 +1143,22 @@ export default async function PropertyDetailPage({
                                 {parkingCount > 0 && <span><Car size={19} /> {parkingCount} {statLabel(parkingCount, 'vaga', 'vagas')}</span>}
                             </div>
                             <p>{locationLabel || displayTitle}</p>
-                            <div className="plp-mobile-sheet-actions plp-mobile-sheet-actions--single">
-                                <WhatsAppCaptureLink
-                                    phone={contactPhone}
-                                    message={`Olá, quero agendar uma visita privada neste imóvel ${propertyUrl}`}
-                                    slug="imovel"
-                                    template="property-mobile-sheet-visit"
-                                    metadata={{
-                                        ...propertyTrackingMetadata,
-                                        tracking_event_type: 'property_private_visit_requested',
-                                        premium_intent: 'private_visit',
-                                        requested_action: 'Agendar visita privada',
-                                        cta_context: 'mobile_property_sheet',
-                                        cta_label: 'Visita privada',
-                                    }}
-                                    className="plp-mobile-sheet-outline"
-                                >
-                                    Visita privada
-                                </WhatsAppCaptureLink>
+                            <div className="plp-mobile-listing-stats" aria-label="Indicadores de interesse do imóvel">
+                                <span>
+                                    <Clock3 size={15} />
+                                    <strong>{listingAge.value}</strong>
+                                    <small>{listingAge.label}</small>
+                                </span>
+                                <span>
+                                    <Eye size={15} />
+                                    <strong>{viewStat.value}</strong>
+                                    <small>{viewStat.label}</small>
+                                </span>
+                                <span>
+                                    <Heart size={15} />
+                                    <strong>{saveStat.value}</strong>
+                                    <small>{saveStat.label}</small>
+                                </span>
                             </div>
                         </section>
 
@@ -1271,11 +1168,11 @@ export default async function PropertyDetailPage({
                                 <h2>O que torna este imóvel especial.</h2>
                             </div>
                             <p>{mobileNarrativePreview}</p>
-                            {narrativeParagraphs.length > 1 && (
+                            {mobileDescriptionParagraphs.length > 1 && (
                                 <details className="plp-mobile-description-details">
-                                    <summary>Ver descrição completa</summary>
+                                    <summary>Ver mais destaques</summary>
                                     <div className="plp-mobile-description-full">
-                                        {narrativeParagraphs.slice(1).map((paragraph, index) => (
+                                        {mobileDescriptionParagraphs.slice(1).map((paragraph, index) => (
                                             <p key={`mobile-description-${index}`}>{paragraph}</p>
                                         ))}
                                     </div>
@@ -1299,13 +1196,16 @@ export default async function PropertyDetailPage({
                                     </div>
                                 ))}
                             </div>
-                            {mobileDetailPreviewItems.length > 0 && (
-                                <div className="plp-mobile-detail-list">
-                                    {mobileDetailPreviewItems.map((item, index) => (
-                                        <span key={`mobile-detail-${item}-${index}`}><CheckCircle2 size={15} /> {item}</span>
+                            {mobileAmenityHighlights.length > 0 && (
+                                <div className="plp-mobile-amenity-chips" aria-label="Destaques adicionais">
+                                    {mobileAmenityHighlights.map((item, index) => (
+                                        <span key={`mobile-amenity-${item}-${index}`}>{item}</span>
                                     ))}
                                 </div>
                             )}
+                        </section>
+
+                        <section className="plp-mobile-card plp-mobile-card--nearby">
                             <PropertyNearbyBenefits
                                 propertyId={property.id}
                                 title={displayTitle}
@@ -1370,6 +1270,30 @@ export default async function PropertyDetailPage({
                                     <strong>{marketHistory.deltaToMedian === null ? 'Sem amostra' : formatPercent(marketHistory.deltaToMedian)}</strong>
                                 </div>
                             </div>
+                            <div className="plp-mobile-market-chart" aria-label="Gráfico de posicionamento do preço por metro quadrado">
+                                <svg viewBox="0 0 100 44" preserveAspectRatio="none">
+                                    <path d="M0 36 H100" />
+                                    {marketHistory.chartPoints && <polyline points={marketHistory.chartPoints} />}
+                                    <line x1={marketHistory.position} x2={marketHistory.position} y1="6" y2="39" />
+                                    <circle cx={marketHistory.position} cy="12" r="2.6" />
+                                </svg>
+                                <div className="plp-mobile-market-axis">
+                                    <span>Entrada</span>
+                                    <span>Mediana</span>
+                                    <span>Topo</span>
+                                </div>
+                            </div>
+                            <div className="plp-mobile-market-positioning">
+                                <strong>{marketHistory.positioning.label}</strong>
+                                <span>{marketHistory.positioning.description}</span>
+                                {marketHistory.percentile !== null && (
+                                    <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
+                                )}
+                            </div>
+                            <p className="plp-mobile-market-reading">
+                                <TrendingUp size={15} />
+                                {marketHistory.reading}
+                            </p>
                             <div className="plp-mobile-timeline">
                                 {marketHistory.timeline.map((event, index) => (
                                     <div className="plp-mobile-timeline-item" key={`mobile-${event.title}-${index}`}>
@@ -1398,7 +1322,6 @@ export default async function PropertyDetailPage({
                                         initialView="luxury"
                                         allowedViews={['luxury']}
                                         showViewControl={false}
-                                        showActions={false}
                                     />
                                 </div>
                             ) : (
@@ -1470,18 +1393,12 @@ export default async function PropertyDetailPage({
                                 <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
                                     <ArrowLeft size={23} />
                                 </Link>
-                                <div className="plp-mobile-action-group" aria-label="Ações do imóvel">
-                                    <PropertyLandingFavoriteButton
-                                        propertyId={property.id}
-                                        title={displayTitle}
-                                        className="plp-mobile-action-pill"
-                                        source="property_details_mobile_media"
-                                    />
+                                <div className="plp-mobile-action-group" aria-label="Menu do imóvel">
                                     <PropertyLandingMobileMenu title={displayTitle} metadata={propertyTrackingMetadata} />
                                 </div>
                             </div>
 
-                            {mobileMediaImages.slice(0, 1).map((image, index) => (
+                            {mobileMediaImages.slice(0, 2).map((image, index) => (
                                 <figure className="plp-mobile-media-item" key={`mobile-photo-${image}-${index}`}>
                                     <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                     {index === 0 && (
@@ -1494,44 +1411,15 @@ export default async function PropertyDetailPage({
                             ))}
 
                             {propertyMapLatLng && (
-                                <figure className="plp-mobile-media-item plp-mobile-media-item--map">
-                                    <figcaption className="plp-mobile-map-label">
-                                        <MapPin size={14} />
-                                        Street View do entorno
-                                    </figcaption>
-                                    <PropertyLocationMap
-                                        property={propertyMapPreview}
-                                        latLng={propertyMapLatLng}
-                                        initialView="street"
-                                        allowedViews={['street']}
-                                        showViewControl={false}
-                                        showActions={false}
-                                    />
-                                </figure>
+                                <PropertyMobileMapPreview property={propertyMapPreview} latLng={propertyMapLatLng} />
                             )}
 
-                            {mobileMediaImages.slice(1).map((image, index) => (
+                            {mobileMediaImages.slice(2).map((image, index) => (
                                 <figure className="plp-mobile-media-item" key={`mobile-extra-photo-${image}-${index}`}>
-                                    <img src={image} alt={`${displayTitle} - foto ${index + 2}`} loading="lazy" />
+                                    <img src={image} alt={`${displayTitle} - foto ${index + 3}`} loading="lazy" />
                                 </figure>
                             ))}
 
-                            {propertyMapLatLng && (
-                                <figure className="plp-mobile-media-item plp-mobile-media-item--map plp-mobile-media-item--location-map">
-                                    <figcaption className="plp-mobile-map-label">
-                                        <MapPin size={14} />
-                                        Mapa do entorno
-                                    </figcaption>
-                                    <PropertyLocationMap
-                                        property={propertyMapPreview}
-                                        latLng={propertyMapLatLng}
-                                        initialView="luxury"
-                                        allowedViews={['luxury']}
-                                        showViewControl={false}
-                                        showActions={false}
-                                    />
-                                </figure>
-                            )}
                         </div>
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
                             <a href="#galeria" className="plp-main-photo" aria-label="Abrir galeria completa">
@@ -1595,13 +1483,17 @@ export default async function PropertyDetailPage({
                             <div className="plp-market-grid">
                                 <article className="plp-market-card plp-market-main">
                                     <div className="plp-market-card-head">
-                                        <span><BarChart3 size={16} /> Posicionamento por m²</span>
-                                        <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis` : 'Amostra em formação'}</strong>
+                                        <span><BarChart3 size={16} /> Radar de valor</span>
+                                        <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis | confiança ${marketHistory.confidenceLabel}` : 'Amostra em formação'}</strong>
                                     </div>
                                     <div className="plp-market-metrics">
                                         <div>
                                             <small>Valor anunciado</small>
                                             <strong>{formatCompactMoney(property.price)}</strong>
+                                        </div>
+                                        <div>
+                                            <small>Área usada</small>
+                                            <strong>{marketHistory.currentArea ? `${Math.round(marketHistory.currentArea).toLocaleString('pt-BR')} m²` : 'Sob consulta'}</strong>
                                         </div>
                                         <div>
                                             <small>Preço por m²</small>
@@ -1610,6 +1502,14 @@ export default async function PropertyDetailPage({
                                         <div>
                                             <small>Mediana regional</small>
                                             <strong>{marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'}</strong>
+                                        </div>
+                                        <div>
+                                            <small>Dif. vs mediana</small>
+                                            <strong>{formatPercent(marketHistory.deltaToMedian)}</strong>
+                                        </div>
+                                        <div>
+                                            <small>Amostra bruta</small>
+                                            <strong>{marketHistory.rawComparableCount ? `${marketHistory.rawComparableCount} ativos` : 'Em curadoria'}</strong>
                                         </div>
                                     </div>
                                     <div className="plp-market-chart" aria-label="Gráfico de posicionamento do preço por metro quadrado">
@@ -1625,30 +1525,26 @@ export default async function PropertyDetailPage({
                                             <span>Topo</span>
                                         </div>
                                     </div>
+                                    <div className="plp-market-positioning">
+                                        <strong>{marketHistory.positioning.label}</strong>
+                                        <span>{marketHistory.positioning.description}</span>
+                                        {marketHistory.percentile !== null && (
+                                            <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
+                                        )}
+                                    </div>
                                     <p className="plp-market-note">
                                         <TrendingUp size={15} />
-                                        {marketHistory.deltaToMedian === null
-                                            ? 'A leitura de valor será enriquecida conforme houver mais comparáveis ativos na região.'
-                                            : `${formatPercent(marketHistory.deltaToMedian)} em relação à mediana dos comparáveis ativos. Não é promessa de valorização.`}
+                                        {marketHistory.reading}
                                     </p>
-                                    <WhatsAppCaptureLink
-                                        phone={contactPhone}
-                                        message={`Olá, quero receber a leitura de valor deste imóvel ${propertyUrl}`}
-                                        slug="imovel"
-                                        template="property-market-value-cta"
-                                        metadata={{
-                                            ...marketTrackingMetadata,
-                                            tracking_event_type: 'property_value_reading_requested',
-                                            premium_intent: 'value_reading',
-                                            requested_action: 'Receber leitura de valor',
-                                            cta_context: 'market_value_card',
-                                            cta_label: 'Receber leitura de valor',
-                                        }}
-                                        className="plp-market-cta"
-                                    >
-                                        <BarChart3 size={15} />
-                                        Receber leitura de valor
-                                    </WhatsAppCaptureLink>
+                                    <details className="plp-market-method">
+                                        <summary>Como o sistema calcula</summary>
+                                        <ul>
+                                            {marketHistory.criteriaSummary.map(item => (
+                                                <li key={item}>{item}</li>
+                                            ))}
+                                            <li>{marketHistory.calculationSummary}</li>
+                                        </ul>
+                                    </details>
                                 </article>
 
                                 <article className="plp-market-card plp-price-history-card">
@@ -1685,7 +1581,8 @@ export default async function PropertyDetailPage({
                                     property={propertyMapPreview}
                                     latLng={propertyMapLatLng}
                                     initialView="luxury"
-                                    allowedViews={['luxury', 'satellite']}
+                                    allowedViews={['luxury']}
+                                    showViewControl={false}
                                 />
                             ) : (
                                 <div className="plp-map-empty">

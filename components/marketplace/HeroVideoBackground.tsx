@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 
-const HERO_BACKGROUND_IMAGE_SRC = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/unnamed.webp'
+const HERO_BACKGROUND_IMAGE_SRC = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/ARTE%20SITE%20PILGER.png'
 
 export default function HeroVideoBackground() {
   return (
@@ -18,7 +18,7 @@ export default function HeroVideoBackground() {
       sizes="(max-width: 768px) 100vw, 1360px"
       style={{
         objectFit: 'cover',
-        objectPosition: 'center',
+        objectPosition: 'center 28%',
         pointerEvents: 'none',
         opacity: 0.9,
       }}

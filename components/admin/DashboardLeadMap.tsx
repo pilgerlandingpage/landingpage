@@ -5,6 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { Building2, Layers, MapPin, Satellite, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leaflet-style'
 
 export interface DashboardMapLocation {
     id?: string
@@ -64,9 +65,9 @@ const QUICK_FILTERS: Array<{ value: LeadQuickFilter; label: string }> = [
 ]
 
 const MAP_STYLES: Array<{ value: LeadMapStyle; label: string; icon: 'sparkles' | 'satellite' | 'layers' }> = [
-    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
+    { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
     { value: 'satellite', label: 'Satelite', icon: 'satellite' },
-    { value: 'classic', label: 'Claro', icon: 'layers' },
+    { value: 'classic', label: 'Ruas', icon: 'layers' },
 ]
 
 function normalize(value: unknown) {
@@ -217,7 +218,7 @@ export default function DashboardLeadMap({
     locations: DashboardMapLocation[]
     title?: string
 }) {
-    const [mapStyle, setMapStyle] = useState<LeadMapStyle>('satellite')
+    const [mapStyle, setMapStyle] = useState<LeadMapStyle>('luxury')
     const [quickFilter, setQuickFilter] = useState<LeadQuickFilter>('all')
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
     const mapped = useMemo(() => locations.map((location, index) => ({
@@ -328,15 +329,15 @@ export default function DashboardLeadMap({
             >
                 {mapStyle === 'luxury' && (
                     <TileLayer
-                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        attribution={LEAFLET_OSM_ATTRIBUTION}
+                        url={LEAFLET_OSM_TILE_URL}
                         maxZoom={20}
                     />
                 )}
                 {mapStyle === 'classic' && (
                     <TileLayer
-                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        attribution={LEAFLET_OSM_ATTRIBUTION}
+                        url={LEAFLET_OSM_TILE_URL}
                         maxZoom={20}
                     />
                 )}

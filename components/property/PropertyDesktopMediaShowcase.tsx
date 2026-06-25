@@ -254,7 +254,6 @@ export default function PropertyDesktopMediaShowcase({
                         initialView="street"
                         allowedViews={['street']}
                         showViewControl={false}
-                        showActions={false}
                     />
                 </div>
             )
@@ -272,7 +271,6 @@ export default function PropertyDesktopMediaShowcase({
                     initialView="luxury"
                     allowedViews={['luxury']}
                     showViewControl={false}
-                    showActions={false}
                 />
             </div>
         )
@@ -368,7 +366,6 @@ export default function PropertyDesktopMediaShowcase({
                                             initialView="street"
                                             allowedViews={['street']}
                                             showViewControl={false}
-                                            showActions={false}
                                         />
                                     </figure>
                                 )

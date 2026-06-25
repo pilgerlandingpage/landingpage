@@ -311,6 +311,47 @@ export default function PropertyLandingStyles() {
                     stroke-width: 2.35;
                 }
 
+                .plp-listing-stats {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 18px;
+                    min-width: 320px;
+                    color: var(--plp-ink);
+                }
+
+                .plp-listing-stats span {
+                    display: grid;
+                    grid-template-columns: 16px max-content;
+                    column-gap: 6px;
+                    row-gap: 2px;
+                    align-items: center;
+                    min-width: max-content;
+                }
+
+                .plp-listing-stats svg {
+                    grid-row: 1 / span 2;
+                    color: var(--plp-gold-dark);
+                    stroke-width: 2.4;
+                }
+
+                .plp-listing-stats strong {
+                    width: fit-content;
+                    border-bottom: 2px dotted rgba(189, 149, 81, .66);
+                    color: var(--plp-ink);
+                    font-size: 13px;
+                    font-weight: 950;
+                    line-height: 1.05;
+                }
+
+                .plp-listing-stats small {
+                    color: var(--plp-muted);
+                    font-size: 11px;
+                    font-weight: 760;
+                    line-height: 1.05;
+                    white-space: nowrap;
+                }
+
                 .plp-detail-layout {
                     display: grid;
                     grid-template-columns: minmax(0, 920px) clamp(355px, 22vw, 400px);
@@ -1620,24 +1661,33 @@ export default function PropertyLandingStyles() {
 
                 .plp-market-grid {
                     align-items: start;
+                    border: 1px solid rgba(35, 31, 26, .1);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,246,241,.96)),
+                        radial-gradient(circle at 12% 18%, rgba(184,148,95,.16), transparent 30%);
+                    box-shadow: 0 14px 34px rgba(32, 27, 18, .08);
                     display: grid;
                     gap: 14px;
-                    grid-template-columns: minmax(0, 1.16fr) minmax(280px, .84fr);
+                    grid-template-columns: 1fr;
+                    padding: 18px;
+                    width: 100%;
                 }
 
                 .plp-market-card {
-                    border: 1px solid rgba(35, 31, 26, .1);
-                    border-radius: var(--plp-radius);
-                    background: linear-gradient(180deg, #ffffff 0%, #f8f6f1 100%);
-                    box-shadow: 0 14px 34px rgba(32, 27, 18, .08);
                     min-width: 0;
-                    padding: 18px;
                 }
 
                 .plp-market-main {
-                    background:
-                        linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,246,241,.96)),
-                        radial-gradient(circle at 12% 18%, rgba(184,148,95,.18), transparent 30%);
+                    align-items: start;
+                    display: grid;
+                    gap: 12px 14px;
+                    grid-template-columns: minmax(0, .96fr) minmax(240px, .74fr);
+                }
+
+                .plp-price-history-card {
+                    border-top: 1px solid rgba(35, 31, 26, .09);
+                    padding-top: 14px;
                 }
 
                 .plp-market-card-head {
@@ -1648,6 +1698,15 @@ export default function PropertyLandingStyles() {
                     justify-content: space-between;
                     margin-bottom: 16px;
                     padding-bottom: 12px;
+                }
+
+                .plp-market-main .plp-market-card-head {
+                    grid-column: 1 / -1;
+                    margin-bottom: 0;
+                }
+
+                .plp-price-history-card .plp-market-card-head {
+                    margin-bottom: 12px;
                 }
 
                 .plp-market-card-head span {
@@ -1678,8 +1737,9 @@ export default function PropertyLandingStyles() {
                 .plp-market-metrics {
                     display: grid;
                     gap: 10px;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    margin-bottom: 16px;
+                    grid-column: 1;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    margin-bottom: 0;
                 }
 
                 .plp-market-metrics div {
@@ -1687,7 +1747,7 @@ export default function PropertyLandingStyles() {
                     border-radius: var(--plp-radius);
                     background: rgba(255,255,255,.7);
                     min-width: 0;
-                    padding: 12px;
+                    padding: 10px 12px;
                 }
 
                 .plp-market-metrics small,
@@ -1716,12 +1776,13 @@ export default function PropertyLandingStyles() {
                         linear-gradient(90deg, rgba(184,148,95,.06) 1px, transparent 1px),
                         linear-gradient(180deg, #fff 0%, #f5f2ec 100%);
                     background-size: 25% 100%, auto;
-                    padding: 14px 14px 10px;
+                    grid-column: 2;
+                    padding: 12px 12px 9px;
                 }
 
                 .plp-market-chart svg {
                     display: block;
-                    height: 92px;
+                    height: 78px;
                     overflow: visible;
                     width: 100%;
                 }
@@ -1773,9 +1834,10 @@ export default function PropertyLandingStyles() {
                     font-size: 12px;
                     font-weight: 760;
                     gap: 8px;
+                    grid-column: 2;
                     grid-template-columns: 18px minmax(0, 1fr);
                     line-height: 1.35;
-                    margin: 12px 0 0;
+                    margin: 0;
                 }
 
                 .plp-market-note svg {
@@ -1783,43 +1845,86 @@ export default function PropertyLandingStyles() {
                     margin-top: 1px;
                 }
 
-                .plp-market-cta {
-                    width: max-content;
-                    max-width: 100%;
-                    margin-top: 13px;
-                    padding: 0 14px;
-                    border: 1px solid rgba(35, 31, 26, .12);
-                    background: #151515;
-                    color: #fff;
-                    box-shadow: 0 12px 24px rgba(20, 18, 15, .16);
+                .plp-market-positioning {
+                    align-items: start;
+                    border: 1px solid rgba(184, 148, 95, .18);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255, 255, 255, .62);
+                    display: grid;
+                    gap: 4px 12px;
+                    grid-column: 1;
+                    grid-template-columns: 1fr;
+                    margin-top: 0;
+                    padding: 11px 12px;
                 }
 
-                .plp-market-cta svg {
-                    color: #dfc18e;
-                    flex: 0 0 auto;
+                .plp-market-positioning strong {
+                    color: var(--plp-ink);
+                    font-size: 14px;
+                    font-weight: 950;
+                    line-height: 1.15;
+                }
+
+                .plp-market-positioning span,
+                .plp-market-positioning small {
+                    color: var(--plp-muted);
+                    font-size: 12px;
+                    font-weight: 760;
+                    line-height: 1.35;
+                }
+
+                .plp-market-method {
+                    border-top: 1px solid rgba(35, 31, 26, .08);
+                    grid-column: 1 / -1;
+                    margin-top: 0;
+                    padding-top: 10px;
+                }
+
+                .plp-market-method summary {
+                    color: var(--plp-gold-dark);
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 900;
+                    list-style-position: inside;
+                }
+
+                .plp-market-method ul {
+                    color: var(--plp-muted);
+                    display: grid;
+                    gap: 6px;
+                    margin: 10px 0 0;
+                    padding-left: 18px;
+                }
+
+                .plp-market-method li {
+                    font-size: 12px;
+                    font-weight: 720;
+                    line-height: 1.35;
                 }
 
                 .plp-price-history-list {
                     display: grid;
-                    gap: 0;
+                    gap: 12px;
+                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
                 }
 
                 .plp-price-history-item {
                     align-items: start;
-                    border-bottom: 1px solid rgba(35, 31, 26, .08);
+                    border: 1px solid rgba(35, 31, 26, .07);
+                    border-radius: 14px;
+                    background: rgba(255,255,255,.54);
                     display: grid;
-                    gap: 10px;
+                    gap: 6px 10px;
                     grid-template-columns: 86px minmax(0, 1fr) auto;
-                    padding: 12px 0;
+                    padding: 11px 12px;
                 }
 
                 .plp-price-history-item:first-child {
-                    padding-top: 0;
+                    padding-top: 11px;
                 }
 
                 .plp-price-history-item:last-child {
-                    border-bottom: 0;
-                    padding-bottom: 0;
+                    padding-bottom: 11px;
                 }
 
                 .plp-price-history-item > span {
@@ -2001,7 +2106,6 @@ export default function PropertyLandingStyles() {
                 .plp-primary-btn,
                 .plp-dark-button,
                 .plp-context-cta,
-                .plp-market-cta,
                 .plp-mobile-cta-button {
                     display: inline-flex;
                     align-items: center;
@@ -2026,7 +2130,6 @@ export default function PropertyLandingStyles() {
                 .plp-primary-btn:hover,
                 .plp-dark-button:hover,
                 .plp-context-cta:hover,
-                .plp-market-cta:hover,
                 .plp-mobile-cta-button:hover {
                     transform: translateY(-1px);
                 }
@@ -2398,7 +2501,7 @@ export default function PropertyLandingStyles() {
 
                 .plp-map-frame .property-feed-map-shell.map-view-luxury .leaflet-tile-pane,
                 .plp-map-frame .property-feed-map-shell.map-view-map .leaflet-tile-pane {
-                    filter: saturate(.86) contrast(1.06) sepia(.08) hue-rotate(352deg);
+                    filter: saturate(1.06) contrast(1.02) brightness(1.01);
                 }
 
                 .plp-map-frame .property-feed-map-shell.map-view-satellite .leaflet-tile-pane {
@@ -3253,6 +3356,7 @@ export default function PropertyLandingStyles() {
                     .plp-spec-grid,
                     .plp-info-list > div,
                     .plp-market-grid,
+                    .plp-market-main,
                     .plp-market-metrics,
                     .plp-thesis-grid,
                     .plp-related-grid,
@@ -3274,12 +3378,13 @@ export default function PropertyLandingStyles() {
                         padding-top: 22px;
                     }
 
-                    .plp-market-card {
+                    .plp-market-grid {
+                        gap: 15px;
                         padding: 15px;
                     }
 
-                    .plp-market-cta {
-                        width: 100%;
+                    .plp-market-card {
+                        padding: 0;
                     }
 
                     .plp-market-card-head {
@@ -3288,12 +3393,39 @@ export default function PropertyLandingStyles() {
                         gap: 6px;
                     }
 
+                    .plp-market-chart,
+                    .plp-market-positioning,
+                    .plp-market-metrics,
+                    .plp-market-note,
+                    .plp-market-method {
+                        grid-column: auto;
+                    }
+
+                    .plp-market-positioning {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-market-positioning strong,
+                    .plp-market-positioning span,
+                    .plp-market-positioning small {
+                        grid-column: auto;
+                        grid-row: auto;
+                    }
+
+                    .plp-price-history-card {
+                        border-left: 0;
+                        border-top: 1px solid rgba(35, 31, 26, .09);
+                        padding-left: 0;
+                        padding-top: 15px;
+                    }
+
                     .plp-price-history-item {
                         gap: 7px;
                         grid-template-columns: 1fr;
                     }
 
                     .plp-price-history-item b {
+                        grid-column: auto;
                         text-align: left;
                     }
 
@@ -4186,7 +4318,7 @@ export default function PropertyLandingStyles() {
                         margin: 0;
                         padding: 0;
                         overflow: hidden;
-                        background: #101113;
+                        background: #fff;
                     }
 
                     .plp-continuation-rail {
@@ -4200,7 +4332,7 @@ export default function PropertyLandingStyles() {
                         height: 100%;
                         min-height: 100dvh;
                         overflow: hidden;
-                        background: #101113;
+                        background: #fff;
                     }
 
                     .pmds-media {
@@ -4211,8 +4343,8 @@ export default function PropertyLandingStyles() {
                         max-width: none;
                         overflow-x: hidden;
                         overflow-y: auto;
-                        padding-bottom: 40vh;
-                        background: #101113;
+                        padding-bottom: max(16dvh, calc(100dvh - var(--pmds-sheet-top, 78dvh)));
+                        background: #fff;
                         overscroll-behavior: contain;
                         -webkit-overflow-scrolling: touch;
                         scrollbar-width: none;
@@ -4467,6 +4599,37 @@ export default function PropertyLandingStyles() {
                         color: var(--plp-gold-dark);
                     }
 
+                    .plp-mobile-amenity-chips {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin-top: 14px;
+                    }
+
+                    .plp-mobile-amenity-chips span {
+                        display: inline-flex;
+                        align-items: center;
+                        min-height: 30px;
+                        padding: 0 10px;
+                        border-radius: 999px;
+                        background: #eeece7;
+                        color: #2f3439;
+                        font-size: 0.72rem;
+                        font-weight: 760;
+                        line-height: 1;
+                    }
+
+                    .plp-mobile-card--nearby {
+                        padding: 0;
+                        border: 0;
+                        background: transparent;
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-card--nearby .plp-nearby-benefits--mobile {
+                        margin-top: 0;
+                    }
+
                     .plp-mobile-broker-head {
                         display: flex;
                         align-items: center;
@@ -4526,6 +4689,105 @@ export default function PropertyLandingStyles() {
                         font-size: 0.94rem;
                         font-weight: 720;
                         line-height: 1.15;
+                    }
+
+                    .plp-mobile-market-chart {
+                        margin-top: 12px;
+                        padding: 12px 12px 9px;
+                        border: 1px solid rgba(35,31,26,.08);
+                        border-radius: 16px;
+                        background:
+                            linear-gradient(90deg, rgba(184,148,95,.07) 1px, transparent 1px),
+                            linear-gradient(180deg, #fff 0%, #f5f2ec 100%);
+                        background-size: 25% 100%, auto;
+                    }
+
+                    .plp-mobile-market-chart svg {
+                        display: block;
+                        width: 100%;
+                        height: 72px;
+                        overflow: visible;
+                    }
+
+                    .plp-mobile-market-chart path {
+                        fill: none;
+                        stroke: rgba(35,31,26,.16);
+                        stroke-width: 1.2;
+                        vector-effect: non-scaling-stroke;
+                    }
+
+                    .plp-mobile-market-chart polyline {
+                        fill: none;
+                        stroke: var(--plp-gold);
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-width: 2.4;
+                        vector-effect: non-scaling-stroke;
+                    }
+
+                    .plp-mobile-market-chart line {
+                        stroke: #111;
+                        stroke-dasharray: 3 3;
+                        stroke-width: 1.2;
+                        vector-effect: non-scaling-stroke;
+                    }
+
+                    .plp-mobile-market-chart circle {
+                        fill: var(--plp-gold);
+                        stroke: #111;
+                        stroke-width: .9;
+                        vector-effect: non-scaling-stroke;
+                    }
+
+                    .plp-mobile-market-axis {
+                        display: flex;
+                        justify-content: space-between;
+                        color: #697069;
+                        font-size: 0.62rem;
+                        font-weight: 760;
+                        line-height: 1;
+                        text-transform: uppercase;
+                    }
+
+                    .plp-mobile-market-positioning {
+                        display: grid;
+                        gap: 4px;
+                        margin-top: 10px;
+                        padding: 11px 12px;
+                        border: 1px solid rgba(184,148,95,0.18);
+                        border-radius: 16px;
+                        background: #fffaf0;
+                    }
+
+                    .plp-mobile-market-positioning strong {
+                        color: #171a1d;
+                        font-size: 0.9rem;
+                        font-weight: 760;
+                        line-height: 1.16;
+                    }
+
+                    .plp-mobile-market-positioning span,
+                    .plp-mobile-market-positioning small {
+                        color: #5e665f;
+                        font-size: 0.76rem;
+                        font-weight: 540;
+                        line-height: 1.34;
+                    }
+
+                    .plp-mobile-card p.plp-mobile-market-reading {
+                        display: grid;
+                        grid-template-columns: 16px minmax(0, 1fr);
+                        gap: 8px;
+                        margin-top: 10px;
+                        color: #4a535b;
+                        font-size: 0.78rem;
+                        font-weight: 560;
+                        line-height: 1.36;
+                    }
+
+                    .plp-mobile-market-reading svg {
+                        color: #4f7a62;
+                        margin-top: 1px;
                     }
 
                     .plp-mobile-timeline {
@@ -4848,14 +5110,13 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-media-item img {
                         display: block;
                         width: 100%;
-                        height: min(62vh, 520px);
-                        min-height: 360px;
+                        height: min(31dvh, 286px);
                         object-fit: cover;
                         object-position: center;
                     }
 
                     .plp-mobile-media-item:first-of-type img {
-                        height: min(58vh, 500px);
+                        height: min(31dvh, 286px);
                     }
 
                     .plp-mobile-status-pill,
@@ -4927,6 +5188,375 @@ export default function PropertyLandingStyles() {
                         background: rgba(12,12,12,0.7);
                         color: #fff;
                         pointer-events: none;
+                    }
+
+                    body.plp-mobile-map-modal-open {
+                        overflow: hidden;
+                    }
+
+                    .plp-mobile-location-strip {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                        gap: 2px;
+                        height: min(18dvh, 168px);
+                        min-height: 136px;
+                        background: #fff;
+                    }
+
+                    .plp-mobile-location-preview {
+                        position: relative;
+                        height: 100%;
+                        min-height: 0;
+                        overflow: hidden;
+                        background: #e6ebee;
+                        cursor: pointer;
+                    }
+
+                    .plp-mobile-location-preview-media,
+                    .plp-mobile-location-preview-hit {
+                        position: absolute;
+                        inset: 0;
+                    }
+
+                    .plp-mobile-location-preview-media {
+                        z-index: 1;
+                        pointer-events: none;
+                    }
+
+                    .plp-mobile-location-preview-media * {
+                        pointer-events: none !important;
+                    }
+
+                    .plp-mobile-location-preview-media::after {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 8;
+                        content: "";
+                        background:
+                            linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.16)),
+                            linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0));
+                        pointer-events: none;
+                    }
+
+                    .plp-mobile-location-preview .plp-location-explorer {
+                        position: absolute;
+                        inset: 0;
+                        width: 100%;
+                        height: 100%;
+                        min-height: 0;
+                        border: 0;
+                        border-radius: 0;
+                        overflow: hidden;
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-location-preview .plp-location-context,
+                    .plp-mobile-location-preview .plp-location-actions,
+                    .plp-mobile-location-preview .property-feed-map-style-control,
+                    .plp-mobile-location-preview .property-feed-map-caption,
+                    .plp-mobile-location-preview .property-feed-map-street-toggle,
+                    .plp-mobile-location-preview .property-feed-map-street-guide,
+                    .plp-mobile-location-preview .property-feed-map-street-minimap {
+                        display: none !important;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-shell,
+                    .plp-mobile-location-preview .property-feed-map-canvas,
+                    .plp-mobile-location-preview .property-feed-map-street-view,
+                    .plp-mobile-location-preview .property-feed-map-street-frame,
+                    .plp-mobile-location-preview .property-feed-map-street-native,
+                    .plp-mobile-location-preview .property-feed-map-street-native-canvas,
+                    .plp-mobile-location-preview .leaflet-container {
+                        width: 100% !important;
+                        height: 100% !important;
+                        min-height: 0 !important;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-shell,
+                    .plp-mobile-location-preview .property-feed-map-street-view {
+                        position: absolute !important;
+                        inset: 0;
+                        overflow: hidden;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-street-native,
+                    .plp-mobile-location-preview .property-feed-map-street-native-canvas,
+                    .plp-mobile-location-preview .property-feed-map-street-frame {
+                        position: absolute !important;
+                        inset: 0;
+                        pointer-events: none !important;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-street-scroll-shield {
+                        display: none !important;
+                    }
+
+                    .plp-mobile-location-preview .plp-mobile-map-label {
+                        left: 7px;
+                        top: 7px;
+                        gap: 4px;
+                        min-height: 22px;
+                        max-width: calc(100% - 14px);
+                        padding: 0 7px;
+                        border-radius: 999px;
+                        background: rgba(17,17,17,0.54);
+                        color: rgba(255,255,255,0.94);
+                        font-size: 0.58rem;
+                        font-weight: 820;
+                        line-height: 1;
+                        box-shadow: 0 8px 16px rgba(0,0,0,0.16);
+                        backdrop-filter: blur(8px);
+                        -webkit-backdrop-filter: blur(8px);
+                    }
+
+                    .plp-mobile-location-preview .plp-mobile-map-label svg {
+                        width: 11px;
+                        height: 11px;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-marker-wrap strong {
+                        display: none;
+                    }
+
+                    .plp-mobile-location-preview .property-feed-map-pin {
+                        transform: scale(0.78);
+                        transform-origin: center bottom;
+                    }
+
+                    .plp-mobile-location-preview .leaflet-control-attribution {
+                        max-width: calc(100% - 4px);
+                        padding: 0 2px !important;
+                        background: rgba(255,255,255,0.54) !important;
+                        color: rgba(15,23,42,0.62) !important;
+                        font-size: 0.43rem !important;
+                        line-height: 1.05 !important;
+                        opacity: 0.62;
+                        white-space: nowrap;
+                        overflow: hidden;
+                    }
+
+                    .plp-mobile-location-preview .leaflet-control-attribution a {
+                        color: rgba(15,23,42,0.62) !important;
+                    }
+
+                    .plp-mobile-location-preview-hit {
+                        z-index: 16;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 10px;
+                        border: 0;
+                        background: transparent;
+                        color: #fff;
+                        font: inherit;
+                        text-align: center;
+                    }
+
+                    .plp-mobile-location-preview-hit span {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 4px;
+                        min-height: 26px;
+                        max-width: 100%;
+                        padding: 0 8px;
+                        border-radius: 999px;
+                        background: rgba(17,17,17,0.58);
+                        color: #fff;
+                        font-size: 0.58rem;
+                        font-weight: 820;
+                        line-height: 1;
+                        white-space: nowrap;
+                        box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                    }
+
+                    .plp-mobile-location-preview-hit span svg {
+                        width: 12px;
+                        height: 12px;
+                    }
+
+                    .plp-mobile-map-modal {
+                        position: fixed;
+                        inset: 0 0 calc(58px + env(safe-area-inset-bottom)) 0;
+                        z-index: 990;
+                        display: flex;
+                        flex-direction: column;
+                        width: 100vw;
+                        height: auto;
+                        background: #f8fafc;
+                        color: #111827;
+                    }
+
+                    .plp-mobile-map-modal-close {
+                        position: absolute;
+                        left: 12px;
+                        top: calc(12px + env(safe-area-inset-top));
+                        z-index: 5;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 42px;
+                        height: 42px;
+                        border: 1px solid rgba(15,23,42,0.1);
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.92);
+                        color: #111827;
+                        box-shadow: 0 12px 28px rgba(15,23,42,0.18);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                    }
+
+                    .plp-mobile-map-modal-body {
+                        position: relative;
+                        z-index: 1;
+                        flex: 1;
+                        min-height: 0;
+                        overflow: hidden;
+                        background: #e9eef3;
+                    }
+
+                    .plp-mobile-map-modal-body .plp-location-explorer {
+                        position: absolute;
+                        inset: 0;
+                        width: 100%;
+                        height: 100%;
+                        min-height: 0;
+                        border: 0;
+                        border-radius: 0;
+                        overflow: hidden;
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-map-modal-body .plp-location-context,
+                    .plp-mobile-map-modal-body .plp-location-actions,
+                    .plp-mobile-map-modal-body .property-feed-map-style-control,
+                    .plp-mobile-map-modal-body .property-feed-map-street-toggle,
+                    .plp-mobile-map-modal-body .property-feed-map-street-guide,
+                    .plp-mobile-map-modal-body .property-feed-map-caption {
+                        display: none !important;
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-shell,
+                    .plp-mobile-map-modal-body .property-feed-map-canvas,
+                    .plp-mobile-map-modal-body .property-feed-map-street-view,
+                    .plp-mobile-map-modal-body .property-feed-map-street-frame,
+                    .plp-mobile-map-modal-body .property-feed-map-street-native,
+                    .plp-mobile-map-modal-body .property-feed-map-street-native-canvas,
+                    .plp-mobile-map-modal-body .leaflet-container {
+                        width: 100% !important;
+                        height: 100% !important;
+                        min-height: 0 !important;
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-shell,
+                    .plp-mobile-map-modal-body .property-feed-map-street-view,
+                    .plp-mobile-map-modal-body .property-feed-map-street-native,
+                    .plp-mobile-map-modal-body .property-feed-map-street-native-canvas,
+                    .plp-mobile-map-modal-body .property-feed-map-street-frame {
+                        position: absolute !important;
+                        inset: 0;
+                    }
+
+                    .plp-mobile-map-modal-body .leaflet-marker-pane {
+                        z-index: 740 !important;
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-marker {
+                        z-index: 760 !important;
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-marker-wrap {
+                        filter: drop-shadow(0 12px 18px rgba(15,57,96,.42)) !important;
+                        transform: translateY(2px) scale(1.08);
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-style-control {
+                        left: 50%;
+                        top: 14px;
+                        right: auto;
+                        width: min(310px, calc(100vw - 32px));
+                        transform: translateX(-50%);
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-style-control button {
+                        height: 40px;
+                        border-radius: 0;
+                        background: rgba(255,255,255,0.9);
+                        color: #4b5563;
+                        font-size: 0.8rem;
+                    }
+
+                    .plp-mobile-map-modal-body .property-feed-map-style-control button.active {
+                        background: #fff;
+                        color: #0b74de;
+                        box-shadow: inset 0 -3px 0 #0b74de;
+                    }
+
+                    .plp-mobile-map-modal--street .property-feed-map-street-toggle {
+                        left: 50%;
+                        right: auto;
+                        top: auto;
+                        bottom: calc(28px + env(safe-area-inset-bottom));
+                        transform: translateX(-50%);
+                    }
+
+                    .plp-mobile-map-modal--street .property-feed-map-street-toggle.is-active {
+                        background: rgba(255,255,255,0.92);
+                        color: #111827;
+                    }
+
+                    .plp-mobile-map-modal--street .property-feed-map-street-guide {
+                        left: 50%;
+                        right: auto;
+                        top: auto;
+                        bottom: calc(80px + env(safe-area-inset-bottom));
+                        transform: translateX(-50%);
+                    }
+
+                    .plp-mobile-map-modal-pin {
+                        position: absolute;
+                        left: 50%;
+                        top: 50%;
+                        z-index: 4;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        min-height: 46px;
+                        padding: 0 14px;
+                        border-radius: 6px;
+                        background: #fff;
+                        color: #111827;
+                        font-size: 0.95rem;
+                        font-weight: 760;
+                        box-shadow: 0 16px 36px rgba(15,23,42,0.18);
+                        transform: translate(-50%, calc(-100% - 50px));
+                        pointer-events: none;
+                    }
+
+                    .plp-mobile-map-modal-pin::after {
+                        position: absolute;
+                        left: 50%;
+                        bottom: -9px;
+                        width: 16px;
+                        height: 16px;
+                        border-right: 1px solid rgba(15,23,42,0.08);
+                        border-bottom: 1px solid rgba(15,23,42,0.08);
+                        background: #fff;
+                        content: '';
+                        transform: translateX(-50%) rotate(45deg);
+                    }
+
+                    .plp-mobile-map-modal-pin svg {
+                        color: #18b77a;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .plp-mobile-map-modal-pin span {
+                        position: relative;
+                        z-index: 1;
                     }
 
                     .plp-mobile-street-minimap {
@@ -5421,7 +6051,7 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-sheet-summary {
                         display: grid;
-                        grid-template-columns: minmax(0, 1fr) minmax(118px, 136px);
+                        grid-template-columns: minmax(0, 1fr);
                         align-items: center;
                         gap: 8px 10px;
                         padding: 2px 0 4px;
@@ -5476,7 +6106,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-sheet-summary p {
-                        grid-column: 1;
+                        grid-column: 1 / -1;
                         min-width: 0;
                         margin: 0;
                         color: #343a40;
@@ -5489,11 +6119,45 @@ export default function PropertyLandingStyles() {
                         -webkit-line-clamp: 2;
                     }
 
-                    .plp-mobile-sheet-summary .plp-mobile-sheet-actions {
-                        grid-column: 2;
-                        width: 100%;
-                        align-self: center;
-                        justify-self: end;
+                    .plp-mobile-listing-stats {
+                        display: grid;
+                        grid-column: 1 / -1;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 8px;
+                        margin-top: 2px;
+                        padding-top: 10px;
+                        border-top: 1px solid rgba(35,31,26,0.08);
+                    }
+
+                    .plp-mobile-listing-stats span {
+                        display: grid;
+                        grid-template-columns: 15px minmax(0, 1fr);
+                        column-gap: 5px;
+                        row-gap: 1px;
+                        align-items: center;
+                        min-width: 0;
+                    }
+
+                    .plp-mobile-listing-stats svg {
+                        grid-row: 1 / span 2;
+                        color: var(--plp-gold-dark);
+                        stroke-width: 2.35;
+                    }
+
+                    .plp-mobile-listing-stats strong {
+                        width: fit-content;
+                        border-bottom: 2px dotted rgba(189,149,81,.58);
+                        color: #171a1d;
+                        font-size: 0.76rem;
+                        font-weight: 820;
+                        line-height: 1.04;
+                    }
+
+                    .plp-mobile-listing-stats small {
+                        color: #58616a;
+                        font-size: 0.64rem;
+                        font-weight: 640;
+                        line-height: 1.08;
                     }
 
                     .plp-mobile-sheet-actions {
@@ -5502,12 +6166,6 @@ export default function PropertyLandingStyles() {
                         gap: 10px;
                     }
 
-                    .plp-mobile-sheet-actions--single {
-                        grid-template-columns: minmax(0, 136px);
-                        justify-content: end;
-                    }
-
-                    .plp-mobile-sheet-outline,
                     .plp-mobile-sheet-primary {
                         display: inline-flex;
                         align-items: center;
@@ -5519,26 +6177,10 @@ export default function PropertyLandingStyles() {
                         text-decoration: none;
                     }
 
-                    .plp-mobile-sheet-outline {
-                        border: 2px solid var(--plp-gold-dark);
-                        background: #fff;
-                        color: var(--plp-gold-dark);
-                    }
-
                     @media (max-width: 360px) {
                         .plp-mobile-sheet-summary {
-                            grid-template-columns: minmax(0, 1fr) minmax(104px, 118px);
+                            grid-template-columns: minmax(0, 1fr);
                             gap: 7px 8px;
-                        }
-
-                        .plp-mobile-sheet-actions--single {
-                            grid-template-columns: minmax(0, 118px);
-                        }
-
-                        .plp-mobile-sheet-outline {
-                            min-height: 34px;
-                            padding: 0 8px;
-                            font-size: 0.68rem;
                         }
                     }
 
@@ -5556,8 +6198,12 @@ export default function PropertyLandingStyles() {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
 
-                    .pmds-scroll .plp-market-card {
+                    .pmds-scroll .plp-market-grid {
                         padding: 15px;
+                    }
+
+                    .pmds-scroll .plp-market-card {
+                        padding: 0;
                     }
 
                     .pmds-scroll .plp-price-history-item {
@@ -5575,6 +6221,62 @@ export default function PropertyLandingStyles() {
                     .plp-related-band {
                         border-radius: 18px;
                     }
+                }
+
+                .property-feed-map-marker {
+                    background: none !important;
+                    border: 0 !important;
+                }
+
+                .property-feed-map-marker-wrap {
+                    align-items: center !important;
+                    cursor: pointer !important;
+                    display: flex !important;
+                    filter: drop-shadow(0 8px 10px rgba(15, 57, 96, .34)) !important;
+                    gap: 0 !important;
+                    transform-origin: center bottom !important;
+                }
+
+                .property-feed-map-pin {
+                    align-items: center !important;
+                    background: linear-gradient(145deg, #4fb4ef 0%, #2287c8 54%, #166da7 100%) !important;
+                    border: 2px solid #fff !important;
+                    border-radius: 50% 50% 50% 0 !important;
+                    box-shadow:
+                        inset 0 1px 2px rgba(255,255,255,.42),
+                        0 5px 12px rgba(19,102,170,.28) !important;
+                    display: inline-flex !important;
+                    height: 30px !important;
+                    justify-content: center !important;
+                    position: relative !important;
+                    transform: rotate(-45deg) !important;
+                    width: 30px !important;
+                }
+
+                .property-feed-map-pin::before {
+                    background: rgba(34,135,200,.16) !important;
+                    border-radius: 999px !important;
+                    content: '' !important;
+                    inset: -7px !important;
+                    position: absolute !important;
+                    z-index: -1 !important;
+                }
+
+                .property-feed-map-pin span {
+                    background: #fff !important;
+                    border-radius: 999px !important;
+                    height: 10px !important;
+                    position: relative !important;
+                    transform: rotate(45deg) !important;
+                    width: 10px !important;
+                }
+
+                .property-feed-map-pin span::before,
+                .property-feed-map-pin span::after,
+                .property-feed-map-marker-wrap strong,
+                .property-feed-map-marker-wrap.is-exclusive strong::after {
+                    content: none !important;
+                    display: none !important;
                 }
             ` }} />
         </>

@@ -364,18 +364,6 @@ export default async function MarketplaceHome() {
           <HeroVideoBackground />
         </div>
         <div className="hero-photo-glow" />
-        <Image
-          className="hero-bg-image"
-          src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png"
-          alt="Guilherme Pilger"
-          width={1920}
-          height={1080}
-          priority
-          fetchPriority="high"
-          unoptimized
-          sizes="(max-width: 900px) 980px, 1180px"
-          style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%) scale(1.2)', transformOrigin: 'top center', height: '100%', width: 'auto', maxWidth: 'none', objectFit: 'contain' as const, zIndex: 1 }}
-        />
         <div className="hero-overlay" />
         <div className="home-hero-social-proof">
           <span><Camera size={14} /> Presença digital</span>

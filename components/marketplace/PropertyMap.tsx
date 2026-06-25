@@ -7,6 +7,7 @@ import L from 'leaflet'
 import Link from 'next/link'
 import { Anchor, Bath, Bed, Building2, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leaflet-style'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
 import { NEARBY_BENEFIT_LAYERS as MAP_AMENITY_LAYERS, getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
@@ -110,14 +111,14 @@ const QUICK_FILTERS: Array<{ value: QuickFilter; label: string }> = [
 ]
 
 const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'satellite' | 'layers' }> = [
-    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
+    { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
     { value: 'satellite', label: 'Satélite', icon: 'satellite' },
-    { value: 'classic', label: 'Claro', icon: 'layers' },
+    { value: 'classic', label: 'Ruas', icon: 'layers' },
 ]
 const MAP_OPTION_STYLES: Array<{ value: MapStyle; label: string; icon: 'map' | 'satellite' | 'sparkles' }> = [
     { value: 'classic', label: 'Ruas', icon: 'map' },
     { value: 'satellite', label: 'Satelite', icon: 'satellite' },
-    { value: 'luxury', label: 'Luxo', icon: 'sparkles' },
+    { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
 ]
 const MAP_CONTEXT_LAYERS: Array<{ value: MapContextLayer; label: string; icon: 'flood' | 'fire' | 'wind' | 'air' | 'heat' }> = [
     { value: 'flood', label: 'Alagamento', icon: 'flood' },
@@ -1455,7 +1456,7 @@ export default function PropertyMap({
     refitKey,
     interactionEnabled = true,
     officeMarker = null,
-    initialMapStyle = 'satellite',
+    initialMapStyle = 'luxury',
 }: PropertyMapProps) {
     const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
@@ -1948,10 +1949,10 @@ export default function PropertyMap({
                     mix-blend-mode: multiply;
                 }
                 .map-style-luxury .leaflet-tile-pane {
-                    filter: saturate(0.86) contrast(1.06) sepia(0.08) hue-rotate(352deg);
+                    filter: saturate(1.06) contrast(1.02) brightness(1.01);
                 }
                 .map-style-classic .leaflet-tile-pane {
-                    filter: saturate(0.9) contrast(1.02);
+                    filter: saturate(1.02) contrast(1.01);
                 }
                 .map-style-satellite .leaflet-tile-pane {
                     filter: saturate(1.08) contrast(1.04) brightness(0.94);
@@ -3294,15 +3295,15 @@ export default function PropertyMap({
             >
                 {mapStyle === 'luxury' && (
                     <TileLayer
-                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        attribution={LEAFLET_OSM_ATTRIBUTION}
+                        url={LEAFLET_OSM_TILE_URL}
                         maxZoom={20}
                     />
                 )}
                 {mapStyle === 'classic' && (
                     <TileLayer
-                        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap'
-                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        attribution={LEAFLET_OSM_ATTRIBUTION}
+                        url={LEAFLET_OSM_TILE_URL}
                         maxZoom={20}
                     />
                 )}

@@ -752,11 +752,11 @@ export default function PropertyFeedStyles() {
             .property-feed-map-shell.map-view-luxury .leaflet-tile-pane,
             .property-feed-map-shell.map-view-map .leaflet-tile-pane,
             .property-feed-map-shell.map-style-luxury .leaflet-tile-pane {
-                filter: saturate(.86) contrast(1.06) sepia(.08) hue-rotate(352deg);
+                filter: saturate(1.06) contrast(1.02) brightness(1.01);
             }
 
             .property-feed-map-shell.map-style-classic .leaflet-tile-pane {
-                filter: saturate(.9) contrast(1.02);
+                filter: saturate(1.02) contrast(1.01);
             }
 
             .property-feed-map-shell.map-view-satellite .leaflet-tile-pane,
@@ -1805,6 +1805,62 @@ export default function PropertyFeedStyles() {
                 .property-feed-stories span {
                     width: min(100%, 42px);
                 }
+            }
+
+            .property-feed-map-marker {
+                background: none !important;
+                border: 0 !important;
+            }
+
+            .property-feed-map-marker-wrap {
+                align-items: center !important;
+                cursor: pointer !important;
+                display: flex !important;
+                filter: drop-shadow(0 8px 10px rgba(15, 57, 96, .34)) !important;
+                gap: 0 !important;
+                transform-origin: center bottom !important;
+            }
+
+            .property-feed-map-pin {
+                align-items: center !important;
+                background: linear-gradient(145deg, #4fb4ef 0%, #2287c8 54%, #166da7 100%) !important;
+                border: 2px solid #fff !important;
+                border-radius: 50% 50% 50% 0 !important;
+                box-shadow:
+                    inset 0 1px 2px rgba(255,255,255,.42),
+                    0 5px 12px rgba(19,102,170,.28) !important;
+                display: inline-flex !important;
+                height: 30px !important;
+                justify-content: center !important;
+                position: relative !important;
+                transform: rotate(-45deg) !important;
+                width: 30px !important;
+            }
+
+            .property-feed-map-pin::before {
+                background: rgba(34,135,200,.16) !important;
+                border-radius: 999px !important;
+                content: '' !important;
+                inset: -7px !important;
+                position: absolute !important;
+                z-index: -1 !important;
+            }
+
+            .property-feed-map-pin span {
+                background: #fff !important;
+                border-radius: 999px !important;
+                height: 10px !important;
+                position: relative !important;
+                transform: rotate(45deg) !important;
+                width: 10px !important;
+            }
+
+            .property-feed-map-pin span::before,
+            .property-feed-map-pin span::after,
+            .property-feed-map-marker-wrap strong,
+            .property-feed-map-marker-wrap.is-exclusive strong::after {
+                content: none !important;
+                display: none !important;
             }
         `}</style>
     )
