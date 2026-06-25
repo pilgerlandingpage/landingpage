@@ -41,6 +41,7 @@ import {
     recordPilgerAgentRoute,
     resolvePilgerAgentRoute,
 } from '../whatsapp/pilger-agent-router'
+import { processPilgerEditorialCommand } from '../whatsapp/pilger-editorial-agent'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
@@ -88,6 +89,33 @@ function hasTrafficContextForMedia(history: { role: string; content: string }[],
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
     return /\b(vitor|trafego|campanha|criativo|ads|meta|google|impulsionar|promover)\b/.test(normalized)
+}
+
+const GLOBAL_INTERNAL_OTHER_DOMAIN_RE = /\b(blog|blogs|noticia|noticias|conteudo|conteudos|post|postagem|isadora|clara|financeiro|pagamento|comprovante|boleto|nota fiscal|cnpj|cpf|imovel|imoveis|proprietario|proprietaria|lead|leads|cliente|clientes|relatorio|resumo|operacao|arthur|bianca)\b/
+const GLOBAL_INTERNAL_QUESTION_RE = /\b(qual|quais|quanto|quantos|como|quando|onde|quem|preciso saber|me diga|veja|verifique|consulta|consultar)\b/
+
+function shouldApplyTrafficContextForGlobalMedia(params: {
+    history: { role: string; content: string }[]
+    inputText: string
+    isAudio: boolean
+    isMediaMessage: boolean
+    directCommandType: string
+}) {
+    const normalizedInput = String(params.inputText || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+
+    if (!hasTrafficContextForMedia(params.history, params.inputText)) return false
+    if (!['general', 'media_received'].includes(params.directCommandType)) return false
+    if (GLOBAL_INTERNAL_OTHER_DOMAIN_RE.test(normalizedInput)) return false
+    if (params.isAudio && GLOBAL_INTERNAL_QUESTION_RE.test(normalizedInput)) return false
+
+    const looksLikeFollowUpMedia = !normalizedInput.trim()
+        || normalizedInput.length < 28
+        || /\b(esse|essa|isso|isto|este|esta|aqui|anexo|anexei|foto|imagem|video|midia|criativo)\b/.test(normalizedInput)
+
+    return params.isMediaMessage || looksLikeFollowUpMedia
 }
 
 async function sendGlobalInternalTextChunks(params: {
@@ -5862,11 +5890,18 @@ export const processWhatsAppMessage = inngest.createFunction(
                     isMediaMessage,
                     mediaType,
                 }) || inputText
-                const trafficContext = hasMedia && hasTrafficContextForMedia(sessionHistory, internalInput)
-                const intentText = trafficContext && !/\b(vitor|trafego|tr[aá]fego|campanha|criativo|ads|meta|google)\b/i.test(internalInput)
+                const directIntent = detectWhatsAppGlobalCommandIntent(internalInput, hasMedia)
+                const trafficContext = hasMedia && shouldApplyTrafficContextForGlobalMedia({
+                    history: sessionHistory,
+                    inputText: internalInput,
+                    isAudio,
+                    isMediaMessage,
+                    directCommandType: directIntent.commandType,
+                })
+                const intentText = trafficContext
                     ? `Criativo ou midia para o Vitor Trafego Pago.\n${internalInput}`
                     : internalInput
-                const intent = detectWhatsAppGlobalCommandIntent(intentText, hasMedia)
+                const intent = trafficContext ? detectWhatsAppGlobalCommandIntent(intentText, hasMedia) : directIntent
                 const isActionable = !['general', 'media_received'].includes(intent.commandType)
 
                 let outgoingText = ''
@@ -5941,6 +5976,29 @@ export const processWhatsAppMessage = inngest.createFunction(
                             identity,
                             route: pilgerRoute,
                             agentReply: vitorResult.responseText,
+                        })
+                    } else if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && ['blog-intelligence', 'news-intelligence'].includes(pilgerRoute.targetAgentId)
+                    ) {
+                        const editorialResult = await processPilgerEditorialCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                command_text: intentText,
+                                target_agent: pilgerRoute.targetAgentId,
+                                required_permission: pilgerRoute.requiredPermission,
+                            },
+                            instance,
+                            instanceToken,
+                            origin: getPublicAppUrl(),
+                            sendResponse: false,
+                        })
+                        outgoingText = editorialResult.responseText || buildPilgerAgentRouterAcknowledgement({
+                            identity,
+                            route: pilgerRoute,
                         })
                     } else {
                         outgoingText = buildPilgerAgentRouterAcknowledgement({

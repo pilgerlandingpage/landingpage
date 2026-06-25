@@ -28,6 +28,7 @@ export type ProcessPilgerEditorialCommandResult = {
   postId?: string
   postTitle?: string
   status?: string
+  responseText?: string
   error?: string
 }
 
@@ -336,10 +337,11 @@ export async function processPilgerEditorialCommand(
       await updateCommandStatus(supabase, command.id, 'completed', result)
       await recordEditorialSignal({ supabase, command, kind, action, post: preferred, result })
 
+      const responseText = buildStatusMessage({ command, kind, posts, origin: params.origin })
       const whatsappSent = shouldSendResponse
         ? await sendEditorialResponse({
           phone: command.phone,
-          message: buildStatusMessage({ command, kind, posts, origin: params.origin }),
+          message: responseText,
           instanceToken,
         })
         : false
@@ -352,6 +354,7 @@ export async function processPilgerEditorialCommand(
         postId: preferred?.id,
         postTitle: preferred?.title,
         status: preferred?.status,
+        responseText,
       }
     }
 
@@ -381,10 +384,11 @@ export async function processPilgerEditorialCommand(
     await updateCommandStatus(supabase, command.id, 'completed', result)
     await recordEditorialSignal({ supabase, command, kind, action, post: resultPost, result })
 
+    const responseText = buildCreationMessage({ command, kind, post: resultPost || draftResult?.post, origin: params.origin })
     const whatsappSent = shouldSendResponse
       ? await sendEditorialResponse({
         phone: command.phone,
-        message: buildCreationMessage({ command, kind, post: resultPost || draftResult?.post, origin: params.origin }),
+        message: responseText,
         instanceToken,
       })
       : false
@@ -397,6 +401,7 @@ export async function processPilgerEditorialCommand(
       postId: resultPost?.id || draftResult?.post?.id,
       postTitle: resultPost?.title || draftResult?.post?.title,
       status: resultPost?.status || draftResult?.post?.status,
+      responseText,
     }
   } catch (error: any) {
     const message = error?.message || String(error)
@@ -410,13 +415,14 @@ export async function processPilgerEditorialCommand(
     }).catch(() => null)
 
     const agentName = kind === 'news' ? 'Clara Edicao Noticias' : 'Isadora Edicao Blog'
+    const responseText = [
+      `${agentName} recebeu seu pedido, mas nao conseguiu concluir agora.`,
+      'O comando ficou registrado no Pilger para revisao interna.',
+    ].join('\n')
     const whatsappSent = shouldSendResponse
       ? await sendEditorialResponse({
         phone: command.phone,
-        message: [
-          `${agentName} recebeu seu pedido, mas nao conseguiu concluir agora.`,
-          'O comando ficou registrado no Pilger para revisao interna.',
-        ].join('\n'),
+        message: responseText,
         instanceToken,
       })
       : false
@@ -426,6 +432,7 @@ export async function processPilgerEditorialCommand(
       whatsappSent,
       action,
       kind,
+      responseText,
       error: message,
     }
   }
