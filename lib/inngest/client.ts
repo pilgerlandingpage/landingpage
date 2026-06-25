@@ -141,6 +141,8 @@ export const inngest = new Inngest({
                 mediaFilename?: string | null
                 mediaType?: 'image' | 'video' | 'document' | null
                 queuedMessageKey?: string | null
+                globalIdentity?: Record<string, unknown> | null
+                globalMedia?: Array<Record<string, unknown>> | null
                 instanceId: string
                 instanceToken: string
                 instanceName: string

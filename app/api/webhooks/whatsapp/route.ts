@@ -29,6 +29,7 @@ import {
 } from '@/lib/whatsapp/global-identity'
 import {
     buildPilgerAgentRouterAcknowledgement,
+    buildPilgerAgentResultMessage,
     recordPilgerAgentRoute,
     resolvePilgerAgentRoute,
 } from '@/lib/whatsapp/pilger-agent-router'
@@ -3657,6 +3658,70 @@ export async function POST(request: NextRequest) {
                 const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
+                if (
+                    globalIdentity.type !== 'lead'
+                    && isGlobalEntrypoint
+                    && hasGlobalMedia
+                    && instance.broker_id
+                ) {
+                    await inngest.send({
+                        name: 'whatsapp/message-received',
+                        data: {
+                            cleanPhone: finalPhone,
+                            messageText: globalMessageText,
+                            messageType,
+                            isAudio,
+                            audioUrl,
+                            audioMediaKey,
+                            audioDirectPath,
+                            messageId,
+                            buttonResponseId: buttonResponseId || null,
+                            buttonResponseTitle: buttonResponseTitle || null,
+                            pollVotes: pollVotes || null,
+                            mediaUrl: mediaUrl || null,
+                            mediaMimetype: mediaMimetype || null,
+                            mediaFilename: mediaFilename || null,
+                            mediaType: mediaType || null,
+                            instanceId: instance.id,
+                            instanceToken: instance.instance_token,
+                            instanceName: instance.instance_name,
+                            brokerId: instance.broker_id || null,
+                            senderName,
+                            globalIdentity: {
+                                type: globalIdentity.type,
+                                phone: globalIdentity.phone,
+                                label: globalIdentity.label,
+                                identityId: globalIdentity.identityId || null,
+                                permissions: globalIdentity.permissions,
+                                source: globalIdentity.source,
+                                confidence: globalIdentity.confidence,
+                            },
+                            globalMedia: auditMedia,
+                        },
+                    })
+
+                    await getOrCreateWhatsAppGlobalSession({
+                        supabase,
+                        phone: finalPhone,
+                        identity: globalIdentity,
+                        message: {
+                            role: 'user',
+                            content: globalMessageText || (isAudio ? '[audio]' : `[${mediaType || 'midia'}]`),
+                            has_media: true,
+                            command_type: globalIntent.commandType,
+                            timestamp: new Date().toISOString(),
+                        },
+                    })
+
+                    await saveAudit({ action: 'whatsapp_global_internal_media_dispatched' })
+                    return NextResponse.json({
+                        success: true,
+                        action: 'whatsapp_global_internal_media_dispatched',
+                        identity_type: globalIdentity.type,
+                        command_type: globalIntent.commandType,
+                    })
+                }
+
                 if (globalIdentity.type !== 'lead' && isGlobalEntrypoint && !isActionableGlobalIntent) {
                     const inputForGlobalAgent = globalMessageText || (hasGlobalMedia ? 'Midia recebida sem texto.' : 'Mensagem recebida sem texto.')
                     const session = await getOrCreateWhatsAppGlobalSession({
@@ -3815,6 +3880,7 @@ export async function POST(request: NextRequest) {
                             command: commandResult.command,
                             instance,
                             instanceToken: instance.instance_token,
+                            sendResponse: false,
                         })
                     }
 
@@ -3900,7 +3966,13 @@ export async function POST(request: NextRequest) {
                         && !propertyResult?.whatsappSent
                         && !reportResult?.whatsappSent
                     ) {
-                        const acknowledgement = commandResult.intent.commandType === 'identity_check'
+                        const acknowledgement = vitorResult?.handled
+                            ? buildPilgerAgentResultMessage({
+                                identity: globalIdentity,
+                                route: pilgerRoute,
+                                agentReply: vitorResult.responseText,
+                            })
+                            : commandResult.intent.commandType === 'identity_check'
                             ? buildWhatsAppGlobalAcknowledgement({
                                 identity: globalIdentity,
                                 intent: commandResult.intent,

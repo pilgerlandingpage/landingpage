@@ -25,17 +25,92 @@ import {
 import { getPublicAppUrl } from '../app-url'
 import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
 import { recordGeminiUsage } from '../ai/gemini-costs'
+import { generateChatResponse } from '../ai/generation'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT, WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS } from '../whatsapp/agent-global-prompt'
+import {
+    buildWhatsAppGlobalConversationHistory,
+    buildWhatsAppGlobalInternalFallback,
+    buildWhatsAppGlobalInternalSystemPrompt,
+    detectWhatsAppGlobalCommandIntent,
+    getOrCreateWhatsAppGlobalSession,
+    recordWhatsAppGlobalCommand,
+} from '../whatsapp/global-identity'
+import {
+    buildPilgerAgentResultMessage,
+    buildPilgerAgentRouterAcknowledgement,
+    recordPilgerAgentRoute,
+    resolvePilgerAgentRoute,
+} from '../whatsapp/pilger-agent-router'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
 import { propertyDetailsPath } from '../properties/responsive-destination'
+import { processVitorPaidTrafficCommand } from '../ads/vitor-traffic-manager'
 
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+function sanitizeGlobalInternalReply(reply: unknown): string {
+    return String(reply || '')
+        .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+        .replace(/\[thought\][\s\S]*?\[\/thought\]/gi, '')
+        .replace(/Thought:[^\n]*\n?/gi, '')
+        .trim()
+}
+
+function buildGlobalInternalMediaText(params: {
+    inputText: string
+    isAudio: boolean
+    isMediaMessage: boolean
+    mediaType?: string | null
+}) {
+    const text = String(params.inputText || '').trim()
+    if (!text) return ''
+    const label = params.isAudio
+        ? 'Audio transcrito'
+        : params.isMediaMessage
+            ? `Midia analisada (${params.mediaType || 'midia'})`
+            : 'Mensagem'
+    return `[${label}]\n${text}`
+}
+
+function hasTrafficContextForMedia(history: { role: string; content: string }[], inputText: string): boolean {
+    const recent = history
+        .slice(-8)
+        .map(message => message.content)
+        .join(' ')
+    const normalized = `${recent} ${inputText}`
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+    return /\b(vitor|trafego|campanha|criativo|ads|meta|google|impulsionar|promover)\b/.test(normalized)
+}
+
+async function sendGlobalInternalTextChunks(params: {
+    phone: string
+    message: string
+    instanceToken: string
+    configs: Record<string, string>
+}) {
+    const textToSend = String(params.message || '').trim()
+    if (!textToSend) return
+    const chunks = params.configs['whatsapp_split_messages'] !== 'false' && textToSend.length > 120
+        ? splitIntoHumanChunks(textToSend)
+        : [textToSend]
+    for (let index = 0; index < chunks.length; index++) {
+        if (index > 0) {
+            await new Promise(resolve => setTimeout(resolve, Math.min(1800 + chunks[index].length * 18, 3500)))
+        }
+        await sendWhatsAppMessage({
+            phone: params.phone,
+            message: chunks[index],
+            instanceToken: params.instanceToken,
+        })
+    }
 }
 
 function getSaoPauloTimeContext() {
@@ -4465,9 +4540,13 @@ export const processWhatsAppMessage = inngest.createFunction(
             messageType, mediaUrl, mediaMimetype, mediaFilename, mediaType,
             buttonResponseId, buttonResponseTitle, pollVotes,
             queuedMessageKey,
+            globalIdentity, globalMedia,
             instanceId, instanceToken, instanceName, brokerId, senderName
         } = event.data
         const isMediaMessage = !isAudio && !!mediaType && ['image', 'video', 'document'].includes(String(mediaType))
+        const isGlobalInternalProcessing = !!globalIdentity
+            && typeof globalIdentity === 'object'
+            && String((globalIdentity as any).type || '') !== 'lead'
 
         const supabase = getSupabase()
 
@@ -4503,6 +4582,22 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 2: Find or create conversation ──
         const conversation = await step.run('find-or-create-conversation', async () => {
+            if (isGlobalInternalProcessing) {
+                const session = await getOrCreateWhatsAppGlobalSession({
+                    supabase,
+                    phone: cleanPhone,
+                    identity: globalIdentity as any,
+                })
+                return {
+                    ...(session || {}),
+                    id: session?.id || `global-${cleanPhone}`,
+                    messages: Array.isArray(session?.messages) ? session.messages : [],
+                    bot_message_ids: [],
+                    status: 'active',
+                    global_session: true,
+                }
+            }
+
             await ensureWhatsAppLead(supabase, {
                 phone: cleanPhone,
                 senderName,
@@ -4933,7 +5028,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         let botMessageIds: string[] = Array.isArray(conversation.bot_message_ids)
             ? conversation.bot_message_ids : []
 
-        const controlledIntent = detectControlledLeadIntent(allMessages || '', configs)
+        const controlledIntent = isGlobalInternalProcessing ? null : detectControlledLeadIntent(allMessages || '', configs)
         if (controlledIntent) {
             const handled = await step.run(`handle-controlled-intent-${controlledIntent}`, async () => {
                 const now = new Date().toISOString()
@@ -5060,7 +5155,7 @@ export const processWhatsAppMessage = inngest.createFunction(
             return handled
         }
 
-        if (fastResponseMode && !isAudio && !isMediaMessage) {
+        if (!isGlobalInternalProcessing && fastResponseMode && !isAudio && !isMediaMessage) {
             const inputText = allMessages?.trim()
             if (!inputText) {
                 return { action: 'skipped', reason: 'empty_fast_input' }
@@ -5754,6 +5849,173 @@ export const processWhatsAppMessage = inngest.createFunction(
                 })
             })
             return { action: 'skipped', reason: 'empty_input' }
+        }
+
+        if (isGlobalInternalProcessing) {
+            const handled = await step.run('handle-global-internal-input', async () => {
+                const identity = globalIdentity as any
+                const sessionHistory = buildWhatsAppGlobalConversationHistory(conversation)
+                const hasMedia = Boolean(isAudio || isMediaMessage || mediaBatchItems.length > 0)
+                const internalInput = buildGlobalInternalMediaText({
+                    inputText,
+                    isAudio,
+                    isMediaMessage,
+                    mediaType,
+                }) || inputText
+                const trafficContext = hasMedia && hasTrafficContextForMedia(sessionHistory, internalInput)
+                const intentText = trafficContext && !/\b(vitor|trafego|tr[aá]fego|campanha|criativo|ads|meta|google)\b/i.test(internalInput)
+                    ? `Criativo ou midia para o Vitor Trafego Pago.\n${internalInput}`
+                    : internalInput
+                const intent = detectWhatsAppGlobalCommandIntent(intentText, hasMedia)
+                const isActionable = !['general', 'media_received'].includes(intent.commandType)
+
+                let outgoingText = ''
+
+                if (isActionable) {
+                    const commandResult = await recordWhatsAppGlobalCommand({
+                        supabase,
+                        instance,
+                        phone: cleanPhone,
+                        identity,
+                        text: intentText,
+                        hasMedia,
+                        payload: {
+                            message_type: isAudio ? 'audio' : (mediaType || messageType || null),
+                            message_id: messageId || null,
+                            sender_name: senderName || null,
+                            entrypoint: 'whatsapp_global_async_media',
+                            media: Array.isArray(globalMedia) ? globalMedia : [],
+                            media_analysis: !isAudio && mediaAnalysis?.text
+                                ? String(mediaAnalysis.text).slice(0, 2400)
+                                : null,
+                        },
+                    })
+
+                    const pilgerRoute = resolvePilgerAgentRoute({
+                        identity,
+                        intent: commandResult.intent,
+                        allowed: commandResult.allowed,
+                    })
+
+                    await recordPilgerAgentRoute({
+                        supabase,
+                        route: pilgerRoute,
+                        identity,
+                        command: commandResult.command,
+                        instance,
+                        text: intentText,
+                        hasMedia,
+                        payload: {
+                            entrypoint: 'whatsapp_global_async_media',
+                            message_type: isAudio ? 'audio' : (mediaType || messageType || null),
+                            message_id: messageId || null,
+                        },
+                    }).catch(error => {
+                        console.warn('[WhatsApp Agent] Global internal async route record failed:', error?.message || error)
+                    })
+
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && pilgerRoute.targetAgentId === 'ads-analyst'
+                    ) {
+                        const vitorResult = await processVitorPaidTrafficCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                command_text: intentText,
+                                payload: {
+                                    ...(commandResult.command?.payload || {}),
+                                    media: Array.isArray(globalMedia) ? globalMedia : [],
+                                    media_analysis: !isAudio && mediaAnalysis?.text
+                                        ? String(mediaAnalysis.text).slice(0, 2400)
+                                        : null,
+                                },
+                            },
+                            instance,
+                            instanceToken,
+                            sendResponse: false,
+                        })
+                        outgoingText = buildPilgerAgentResultMessage({
+                            identity,
+                            route: pilgerRoute,
+                            agentReply: vitorResult.responseText,
+                        })
+                    } else {
+                        outgoingText = buildPilgerAgentRouterAcknowledgement({
+                            identity,
+                            route: pilgerRoute,
+                        })
+                    }
+                } else {
+                    let replyText = ''
+                    try {
+                        const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
+                        replyText = await generateChatResponse(
+                            sessionHistory,
+                            internalInput,
+                            buildWhatsAppGlobalInternalSystemPrompt(identity, {
+                                configuredPrompt: configs['whatsapp_global_system_prompt'] || null,
+                            }),
+                            {
+                                provider,
+                                geminiModel: configs['gemini_model'] || undefined,
+                                openaiModel: configs['openai_model'] || undefined,
+                            }
+                        )
+                    } catch (error) {
+                        console.warn('[WhatsApp Agent] Global internal async AI failed:', error)
+                    }
+                    outgoingText = sanitizeGlobalInternalReply(replyText) || buildWhatsAppGlobalInternalFallback(identity)
+
+                    await getOrCreateWhatsAppGlobalSession({
+                        supabase,
+                        phone: cleanPhone,
+                        identity,
+                        message: {
+                            role: 'user',
+                            content: internalInput,
+                            has_media: hasMedia,
+                            command_type: intent.commandType,
+                            timestamp: new Date().toISOString(),
+                        },
+                    })
+                }
+
+                if (configs['whatsapp_always_online'] !== 'false') {
+                    setPresenceAvailable(instanceToken, cleanPhone).catch(() => null)
+                }
+                if (configs['whatsapp_mark_as_read'] !== 'false') {
+                    await markAsRead(cleanPhone, instanceToken, messageId).catch(() => null)
+                }
+
+                await sendGlobalInternalTextChunks({
+                    phone: cleanPhone,
+                    message: outgoingText,
+                    instanceToken,
+                    configs,
+                })
+
+                await getOrCreateWhatsAppGlobalSession({
+                    supabase,
+                    phone: cleanPhone,
+                    identity,
+                    message: {
+                        role: 'assistant',
+                        content: outgoingText,
+                        timestamp: new Date().toISOString(),
+                    },
+                })
+
+                return {
+                    action: isActionable ? 'global_internal_command_processed' : 'global_internal_media_replied',
+                    commandType: intent.commandType,
+                    responseLength: outgoingText.length,
+                }
+            })
+
+            return handled
         }
 
         const quickSocialReplySource = buttonResponseTitle || buttonResponseId || (isMediaMessage ? (allMessages || messageText || '') : inputText) || null

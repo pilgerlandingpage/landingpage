@@ -59,6 +59,7 @@ export type ProcessVitorPaidTrafficCommandResult = {
   score?: number
   monitoringHealth?: number
   monitoringAlerts?: number
+  responseText?: string
   error?: string
   fallback?: boolean
 }
@@ -1083,10 +1084,11 @@ export async function processVitorPaidTrafficCommand(
 
       await updateCommandStatus(supabase, command.id, 'completed', result)
 
+      const responseText = buildWhatsAppMonitoringMessage(snapshot)
       const whatsappSent = shouldSendResponse
         ? await sendVitorResponse({
           phone: command.phone,
-          message: buildWhatsAppMonitoringMessage(snapshot),
+          message: responseText,
           instanceToken,
         })
         : false
@@ -1096,6 +1098,7 @@ export async function processVitorPaidTrafficCommand(
         whatsappSent,
         monitoringHealth: snapshot.health.score,
         monitoringAlerts: snapshot.alerts.length,
+        responseText,
       }
     }
 
@@ -1111,10 +1114,11 @@ export async function processVitorPaidTrafficCommand(
 
       await updateCommandStatus(supabase, command.id, 'completed', result)
 
+      const responseText = decision.message
       const whatsappSent = shouldSendResponse
         ? await sendVitorResponse({
           phone: command.phone,
-          message: decision.message,
+          message: responseText,
           instanceToken,
         })
         : false
@@ -1125,6 +1129,7 @@ export async function processVitorPaidTrafficCommand(
         reviewId: decision.review?.id || undefined,
         campaignPlanId: decision.plan?.id || undefined,
         decisionAction: decision.action,
+        responseText,
       }
     }
 
@@ -1195,10 +1200,11 @@ export async function processVitorPaidTrafficCommand(
       console.warn('[Vitor] central snapshot failed:', error?.message || error)
     })
 
+    const responseText = buildWhatsAppReviewMessage(analysis)
     const whatsappSent = shouldSendResponse
       ? await sendVitorResponse({
         phone: command.phone,
-        message: buildWhatsAppReviewMessage(analysis),
+        message: responseText,
         instanceToken,
       })
       : false
@@ -1210,6 +1216,7 @@ export async function processVitorPaidTrafficCommand(
       reviewId: review.id,
       campaignPlanId: campaignPlan.id,
       score: analysis.score,
+      responseText,
       fallback: Boolean(analysis.fallback),
     }
   } catch (error: any) {
@@ -1239,10 +1246,11 @@ export async function processVitorPaidTrafficCommand(
           'Nada foi publicado automaticamente.',
         ]
 
+    const responseText = failureMessage.join('\n')
     const whatsappSent = shouldSendResponse
       ? await sendVitorResponse({
         phone: command.phone,
-        message: failureMessage.join('\n'),
+        message: responseText,
         instanceToken,
       })
       : false
@@ -1250,6 +1258,7 @@ export async function processVitorPaidTrafficCommand(
     return {
       handled: true,
       whatsappSent,
+      responseText,
       error: message,
     }
   }

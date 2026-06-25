@@ -254,3 +254,26 @@ export function buildPilgerAgentRouterAcknowledgement(params: {
 
     return `${identity.label}, estou aqui. Me diga o que voce precisa que eu veja com a equipe.`
 }
+
+export function buildPilgerAgentResultMessage(params: {
+    identity: WhatsAppGlobalIdentity
+    route: PilgerAgentRoute
+    agentReply?: string | null
+}) {
+    const rawReply = String(params.agentReply || '').trim()
+    const cleanedReply = rawReply
+        .replace(/^Vitor Trafego Pago recebeu seu pedido\.\s*/i, '')
+        .replace(/^Vitor Trafego Pago\s*[-–—]\s*/i, '')
+        .trim()
+
+    const reply = cleanedReply || [
+        'O agente responsavel recebeu o pedido e registrou o parecer no painel.',
+        'Nada foi executado automaticamente sem aprovacao humana.',
+    ].join('\n')
+
+    return [
+        `${params.identity.label}, falei com ${params.route.targetAgent.name} e trouxe o retorno:`,
+        '',
+        reply,
+    ].join('\n')
+}
