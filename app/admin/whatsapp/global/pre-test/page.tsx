@@ -16,6 +16,7 @@ import {
     Route,
     ShieldCheck,
     Sparkles,
+    Wrench,
     XCircle,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
@@ -38,6 +39,79 @@ type CheckSection = {
     items: CheckItem[]
 }
 
+type PreTestGoLivePacket = {
+    ready: boolean
+    status: string
+    launch_state: string
+    score: number
+    blockers: number
+    warnings: number
+    checklist: Array<{
+        key: string
+        label: string
+        status: string
+        action: string
+    }>
+    final_test_runbook: Array<{
+        step: number
+        label: string
+        detail: string
+        evidence: string
+    }>
+    required_evidence: string[]
+    rollback_plan: Array<{
+        label: string
+        action: string
+    }>
+    handoff?: {
+        owner: string
+        mode: string
+        next_gate: string
+    }
+}
+
+type PreTestPostLaunchReport = {
+    ready: boolean
+    status: string
+    score: number
+    blockers: number
+    watchpoints: number
+    signals: Array<{
+        key: string
+        label: string
+        status: string
+        detail: string
+        next_action: string
+        critical?: boolean
+    }>
+    metrics: Record<string, number>
+    stabilization_checklist: string[]
+    executive_summary: string
+    next_operating_window?: {
+        label: string
+        duration: string
+        cadence: string
+    }
+}
+
+type PreTestFinalPhase = {
+    code_complete: boolean
+    status: string
+    label: string
+    detail: string
+    score?: number
+    remaining_actions: string[]
+    core_checks: Record<string, boolean>
+    checks?: Array<{
+        key: string
+        label: string
+        status: string
+        detail: string
+        action: string
+    }>
+    metrics?: Record<string, number>
+}
+
 type PreTestPayload = {
     success: boolean
     generated_at: string
@@ -45,6 +119,77 @@ type PreTestPayload = {
     score: number
     blockers: number
     warnings: number
+    phase_1?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+    }
+    phase_2?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+        totals?: Record<string, unknown>
+    }
+    phase_3?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+        automation?: Record<string, unknown>
+    }
+    phase_4?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+        governance?: Record<string, unknown>
+    }
+    phase_5?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+        go_live?: PreTestGoLivePacket
+    }
+    phase_6?: {
+        code_complete: boolean
+        status: string
+        label: string
+        detail: string
+        remaining_actions: string[]
+        core_checks: Record<string, boolean>
+        post_launch?: PreTestPostLaunchReport
+    }
+    phase_7?: PreTestFinalPhase
+    phase_8?: PreTestFinalPhase
+    phase_9?: PreTestFinalPhase & {
+        automated_results?: {
+            total_scenarios?: number
+            route_scenarios?: number
+            failed_routes?: number
+            blocked_permission_scenarios?: number
+            covered_agents?: string[]
+        }
+        practical_messages?: Array<{
+            key: string
+            label: string
+            text: string
+            expected: string
+        }>
+        evidence_required?: string[]
+    }
     summary: {
         public_url: string
         required_webhook_url: string
@@ -56,6 +201,8 @@ type PreTestPayload = {
             status: string | null
             phone_masked: string
             has_token: boolean
+            has_broker_link?: boolean
+            broker_id?: string | null
             connected_at: string | null
             updated_at: string | null
         } | null
@@ -68,6 +215,21 @@ type PreTestPayload = {
         ready: boolean
         permissions: string[]
         expected_behavior: string
+    }>
+    pilger_route_matrix?: Array<{
+        key: string
+        label: string
+        message: string
+        identity_label: string
+        permissions: string[]
+        command_type: string
+        required_permission: string | null
+        target_agent: string
+        target_agent_name: string
+        execution_mode: string
+        allowed: boolean
+        status: CheckStatus
+        detail: string
     }>
     sections: CheckSection[]
     test_plan?: Array<{
@@ -87,6 +249,11 @@ type PreTestPayload = {
         href: string
     }>
 }
+
+type ToastState = {
+    type: 'success' | 'error'
+    text: string
+} | null
 
 const statusCopy: Record<CheckStatus, { label: string; tone: string; icon: typeof CheckCircle2 }> = {
     ok: { label: 'Pronto', tone: 'ok', icon: CheckCircle2 },
@@ -111,6 +278,7 @@ function statusMeta(status: CheckStatus) {
 function SectionIcon({ keyName }: { keyName: string }) {
     if (keyName === 'webhook') return <Route size={18} />
     if (keyName === 'identity') return <ShieldCheck size={18} />
+    if (keyName === 'pilger') return <MessageSquareText size={18} />
     if (keyName === 'vitor') return <Sparkles size={18} />
     if (keyName === 'central') return <Database size={18} />
     if (keyName === 'automation') return <RefreshCw size={18} />
@@ -166,8 +334,9 @@ export default function WhatsAppGlobalPreTestPage() {
     const [data, setData] = useState<PreTestPayload | null>(null)
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
+    const [repairingWebhook, setRepairingWebhook] = useState(false)
     const [error, setError] = useState('')
-    const [toast, setToast] = useState('')
+    const [toast, setToast] = useState<ToastState>(null)
 
     const loadData = async (silent = false) => {
         if (silent) setRefreshing(true)
@@ -195,16 +364,60 @@ export default function WhatsAppGlobalPreTestPage() {
     const status = data?.status || 'warn'
     const meta = statusMeta(status)
     const HeaderIcon = meta.icon
+    const phase5GoLive = data?.phase_5?.go_live
+    const phase6PostLaunch = data?.phase_6?.post_launch
+    const finalPhases = [
+        {
+            key: 'phase_7',
+            phase: data?.phase_7,
+            completeTitle: 'Pilger esta fechado para a Fase 7 de identidade.',
+            pendingTitle: 'Ainda ha ajustes na separacao de identidades da Fase 7.',
+        },
+        {
+            key: 'phase_8',
+            phase: data?.phase_8,
+            completeTitle: 'Pilger esta fechado para a Fase 8 de painel.',
+            pendingTitle: 'Ainda ha ajustes no painel de acompanhamento da Fase 8.',
+        },
+        {
+            key: 'phase_9',
+            phase: data?.phase_9,
+            completeTitle: 'Pilger esta fechado para a Fase 9 de testes praticos.',
+            pendingTitle: 'Ainda ha ajustes na bateria pratica da Fase 9.',
+        },
+    ].filter(item => item.phase)
 
     const copyText = async (text: string) => {
         if (typeof navigator === 'undefined') return
         await navigator.clipboard.writeText(text)
-        setToast('Mensagem copiada.')
-        window.setTimeout(() => setToast(''), 2200)
+        setToast({ type: 'success', text: 'Mensagem copiada.' })
+        window.setTimeout(() => setToast(null), 2200)
+    }
+
+    const repairWebhook = async () => {
+        setRepairingWebhook(true)
+        try {
+            const response = await fetch('/api/admin/whatsapp/global/pre-test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            const payload = await response.json().catch(() => ({}))
+            if (!response.ok || !payload?.success) {
+                throw new Error(payload?.error || 'Nao foi possivel reparar o webhook.')
+            }
+            setToast({ type: 'success', text: payload?.message || 'Webhook global configurado.' })
+            window.setTimeout(() => setToast(null), 2600)
+            await loadData(true)
+        } catch (err) {
+            setToast({ type: 'error', text: err instanceof Error ? err.message : 'Erro desconhecido.' })
+            window.setTimeout(() => setToast(null), 3200)
+        } finally {
+            setRepairingWebhook(false)
+        }
     }
 
     if (loading) {
-        return <AdminLoadingState message="Validando WhatsApp Global, Vitor e Central..." />
+        return <AdminLoadingState message="Validando WhatsApp Global, Pilger e Central..." />
     }
 
     if (error) {
@@ -224,20 +437,29 @@ export default function WhatsAppGlobalPreTestPage() {
 
     return (
         <div className="admin-page pretest-page">
-            {toast && <div className="pretest-toast"><CheckCircle2 size={16} /> {toast}</div>}
+            {toast && (
+                <div className={`pretest-toast ${toast.type}`}>
+                    {toast.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+                    {toast.text}
+                </div>
+            )}
 
             <div className="admin-header pretest-header">
                 <div>
                     <Link href="/admin/whatsapp/global" className="back-link">
                         <ArrowLeft size={18} /> WhatsApp Global
                     </Link>
-                    <h1>Pre-teste Global + Vitor</h1>
-                    <p>Checklist operacional antes dos testes ponta a ponta pelo WhatsApp.</p>
+                    <h1>Pre-teste Global + Pilger</h1>
+                    <p>Checklist operacional do concierge, roteador de agentes e testes ponta a ponta pelo WhatsApp.</p>
                 </div>
                 <div className="pretest-header-actions">
                     <Link href="/admin/ads/vitor" className="btn btn-outline">
                         <Sparkles size={16} /> Vitor
                     </Link>
+                    <button type="button" className="btn btn-outline" disabled={repairingWebhook || refreshing} onClick={repairWebhook}>
+                        {repairingWebhook ? <Loader2 size={16} className="spin" /> : <Wrench size={16} />}
+                        Reparar webhook
+                    </button>
                     <button type="button" className="btn btn-gold" disabled={refreshing} onClick={() => loadData(true)}>
                         {refreshing ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
                         Atualizar
@@ -265,9 +487,225 @@ export default function WhatsAppGlobalPreTestPage() {
                         </div>
                     </section>
 
+                    {data.phase_1 && (
+                        <section className={`pretest-phase-card ${data.phase_1.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_1.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_1.label}
+                                </span>
+                                <h2>{data.phase_1.code_complete ? 'Pilger esta fechado para a Fase 1 de sistema.' : 'Ainda ha ajustes estruturais na Fase 1.'}</h2>
+                                <p>{data.phase_1.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_1.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_1.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_1.remaining_actions.map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {data.phase_2 && (
+                        <section className={`pretest-phase-card ${data.phase_2.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_2.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_2.label}
+                                </span>
+                                <h2>{data.phase_2.code_complete ? 'Pilger esta fechado para a Fase 2 operacional.' : 'Ainda ha ajustes estruturais na Fase 2.'}</h2>
+                                <p>{data.phase_2.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_2.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_2.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_2.remaining_actions.map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {data.phase_3 && (
+                        <section className={`pretest-phase-card ${data.phase_3.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_3.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_3.label}
+                                </span>
+                                <h2>{data.phase_3.code_complete ? 'Pilger esta fechado para a Fase 3 de producao.' : 'Ainda ha ajustes estruturais na Fase 3.'}</h2>
+                                <p>{data.phase_3.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_3.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_3.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_3.remaining_actions.map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {data.phase_4 && (
+                        <section className={`pretest-phase-card ${data.phase_4.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_4.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_4.label}
+                                </span>
+                                <h2>{data.phase_4.code_complete ? 'Pilger esta fechado para a Fase 4 de governanca.' : 'Ainda ha ajustes estruturais na Fase 4.'}</h2>
+                                <p>{data.phase_4.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_4.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_4.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_4.remaining_actions.map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {data.phase_5 && (
+                        <section className={`pretest-phase-card ${data.phase_5.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_5.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_5.label}
+                                </span>
+                                <h2>{data.phase_5.code_complete ? 'Pilger esta fechado para a Fase 5 de go-live.' : 'Ainda ha ajustes no go-live da Fase 5.'}</h2>
+                                <p>{data.phase_5.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_5.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_5.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_5.remaining_actions.slice(0, 6).map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {data.phase_6 && (
+                        <section className={`pretest-phase-card ${data.phase_6.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {data.phase_6.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {data.phase_6.label}
+                                </span>
+                                <h2>{data.phase_6.code_complete ? 'Pilger esta fechado para a Fase 6 pos-go-live.' : 'Ainda ha ajustes no pos-go-live da Fase 6.'}</h2>
+                                <p>{data.phase_6.detail}</p>
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(data.phase_6.core_checks || {}).map(([key, ready]) => (
+                                    <span key={key} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {key.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {data.phase_6.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {data.phase_6.remaining_actions.slice(0, 6).map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {finalPhases.map(({ key, phase, completeTitle, pendingTitle }) => phase && (
+                        <section key={key} className={`pretest-phase-card ${phase.code_complete ? 'ok' : 'warn'}`}>
+                            <div className="pretest-phase-copy">
+                                <span>
+                                    {phase.code_complete ? <CheckCircle2 size={17} /> : <AlertTriangle size={17} />}
+                                    {phase.label}
+                                </span>
+                                <h2>{phase.code_complete ? completeTitle : pendingTitle}</h2>
+                                <p>{phase.detail}</p>
+                                {typeof phase.score === 'number' && <small>Score: {phase.score}%</small>}
+                            </div>
+                            <div className="pretest-phase-checks">
+                                {Object.entries(phase.core_checks || {}).map(([checkKey, ready]) => (
+                                    <span key={checkKey} className={ready ? 'ready' : 'blocked'}>
+                                        {ready ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+                                        {checkKey.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                            {phase.remaining_actions?.length > 0 && (
+                                <div className="pretest-phase-actions">
+                                    <strong>Restante operacional</strong>
+                                    {phase.remaining_actions.slice(0, 6).map(action => (
+                                        <p key={action}>{action}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    ))}
+
                     <section className="pretest-metrics">
                         <SummaryMetric label="Global" value={counts.whatsapp_global_commands || 0} hint="comandos registrados" />
-                        <SummaryMetric label="Identidade" value={counts.admins_with_phone || 0} hint="admins com telefone" />
+                        <SummaryMetric label="Acessos" value={counts.pilger_access_sources || 0} hint="fontes de colegas" />
+                        <SummaryMetric label="Editorial" value={(counts.blog_commands || 0) + (counts.news_commands || 0)} hint="Isadora e Clara" />
+                        <SummaryMetric label="Financeiro" value={counts.finance_commands || 0} hint="triagens do Pilger" />
+                        <SummaryMetric label="Imoveis" value={counts.property_commands || 0} hint="Bianca" />
+                        <SummaryMetric label="Relatorios" value={counts.report_commands || 0} hint="Arthur" />
+                        <SummaryMetric label="Retornos" value={counts.pilger_return_pending || 0} hint="pendentes no Pilger" />
+                        <SummaryMetric label="SLA" value={counts.pilger_phase3_escalations || 0} hint="escalonamentos Fase 3" />
+                        <SummaryMetric label="Governanca" value={counts.pilger_phase4_reviews || 0} hint={`${counts.pilger_phase4_closed || 0} fechamento(s)`} />
+                        <SummaryMetric label="Go-live" value={counts.pilger_phase5_score || 0} hint={`${counts.pilger_phase5_blockers || 0} bloqueio(s)`} />
+                        <SummaryMetric label="Pos-live" value={counts.pilger_phase6_score || 0} hint={`${counts.pilger_phase6_watchpoints || 0} watchpoint(s)`} />
+                        <SummaryMetric label="Identidade" value={counts.pilger_phase7_score || 0} hint="Fase 7" />
+                        <SummaryMetric label="Painel" value={counts.pilger_phase8_score || 0} hint="Fase 8" />
+                        <SummaryMetric label="Bateria" value={counts.pilger_phase9_score || 0} hint={`${counts.pilger_phase9_failed_routes || 0} falha(s)`} />
                         <SummaryMetric label="Vitor" value={counts.vitor_reviews || 0} hint="reviews de criativo" />
                         <SummaryMetric label="Central" value={counts.ecosystem_events || 0} hint="eventos consolidados" />
                     </section>
@@ -291,6 +729,149 @@ export default function WhatsAppGlobalPreTestPage() {
                             ))}
                         </div>
                     </section>
+
+                    <section className="pretest-route-matrix">
+                        <div className="pretest-section-title">
+                            <MessageSquareText size={18} />
+                            <div>
+                                <h2>Simulacao do Pilger</h2>
+                                <p>Textos internos classificados antes de enviar para Vitor, Isadora, Clara, Financeiro ou outro agente.</p>
+                            </div>
+                        </div>
+                        <div className="pretest-route-grid">
+                            {(data.pilger_route_matrix || []).map(route => {
+                                const routeMeta = statusMeta(route.status)
+                                const RouteIcon = routeMeta.icon
+                                return (
+                                    <article key={route.key} className={routeMeta.tone}>
+                                        <span><RouteIcon size={15} /> {route.label}</span>
+                                        <strong>{route.target_agent_name}</strong>
+                                        <p>{route.message}</p>
+                                        <small>
+                                            {route.identity_label} | {route.allowed ? 'permitido' : 'bloqueado'} | {route.execution_mode}
+                                        </small>
+                                        <em>{route.detail}</em>
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    </section>
+
+                    {data.phase_9?.practical_messages?.length ? (
+                        <section className="pretest-route-matrix">
+                            <div className="pretest-section-title">
+                                <ClipboardList size={18} />
+                                <div>
+                                    <h2>Fase 9: bateria pratica</h2>
+                                    <p>Frases reais do plano original, com expectativa de resposta e evidencia para aprovacao.</p>
+                                </div>
+                            </div>
+                            <div className="pretest-route-grid">
+                                {data.phase_9.practical_messages.map(item => (
+                                    <article key={item.key} className="ok">
+                                        <span><CheckCircle2 size={15} /> {item.label}</span>
+                                        <strong>{item.text}</strong>
+                                        <p>{item.expected}</p>
+                                    </article>
+                                ))}
+                            </div>
+                            {data.phase_9.evidence_required?.length ? (
+                                <div className="pretest-post-launch-checklist">
+                                    {data.phase_9.evidence_required.map(item => (
+                                        <p key={item}>{item}</p>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </section>
+                    ) : null}
+
+                    {phase5GoLive && (
+                        <section className="pretest-go-live-panel">
+                            <div className="pretest-section-title">
+                                <ClipboardList size={18} />
+                                <div>
+                                    <h2>Pacote de go-live</h2>
+                                    <p>Portao final para operar o Pilger em producao assistida antes dos testes reais.</p>
+                                </div>
+                            </div>
+                            <div className="pretest-go-live-grid">
+                                <article>
+                                    <span>Score</span>
+                                    <strong>{phase5GoLive.score}%</strong>
+                                    <small>{phase5GoLive.handoff?.mode || phase5GoLive.launch_state}</small>
+                                </article>
+                                <article>
+                                    <span>Bloqueios</span>
+                                    <strong>{phase5GoLive.blockers}</strong>
+                                    <small>{phase5GoLive.warnings} watchpoint(s)</small>
+                                </article>
+                                <article>
+                                    <span>Evidencias</span>
+                                    <strong>{phase5GoLive.required_evidence.length}</strong>
+                                    <small>{phase5GoLive.rollback_plan.length} rollback(s)</small>
+                                </article>
+                            </div>
+                            <div className="pretest-go-live-checks">
+                                {phase5GoLive.checklist.map(item => (
+                                    <span key={item.key} className={item.status === 'ok' ? 'ready' : item.status === 'missing' ? 'blocked' : 'attention'}>
+                                        {item.status === 'ok' ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />}
+                                        {item.label}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="pretest-go-live-runbook">
+                                {phase5GoLive.final_test_runbook.map(step => (
+                                    <article key={step.step}>
+                                        <span>Passo {step.step}</span>
+                                        <strong>{step.label}</strong>
+                                        <p>{step.evidence}</p>
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {phase6PostLaunch && (
+                        <section className="pretest-post-launch-panel">
+                            <div className="pretest-section-title">
+                                <Database size={18} />
+                                <div>
+                                    <h2>Relatorio pos-go-live</h2>
+                                    <p>{phase6PostLaunch.executive_summary}</p>
+                                </div>
+                            </div>
+                            <div className="pretest-post-launch-grid">
+                                <article>
+                                    <span>Score</span>
+                                    <strong>{phase6PostLaunch.score}%</strong>
+                                    <small>{phase6PostLaunch.status}</small>
+                                </article>
+                                <article>
+                                    <span>Comandos</span>
+                                    <strong>{phase6PostLaunch.metrics.total_commands || 0}</strong>
+                                    <small>{phase6PostLaunch.metrics.command_resolution_rate || 0}% com resolucao.</small>
+                                </article>
+                                <article>
+                                    <span>Janela</span>
+                                    <strong>{phase6PostLaunch.next_operating_window?.label || 'assistida'}</strong>
+                                    <small>{phase6PostLaunch.next_operating_window?.duration || 'primeiras 24 horas'}</small>
+                                </article>
+                            </div>
+                            <div className="pretest-post-launch-signals">
+                                {phase6PostLaunch.signals.map(signal => (
+                                    <span key={signal.key} className={signal.status === 'ok' ? 'ready' : signal.status === 'missing' ? 'blocked' : 'attention'}>
+                                        {signal.status === 'ok' ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />}
+                                        {signal.label}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="pretest-post-launch-checklist">
+                                {phase6PostLaunch.stabilization_checklist.map(item => (
+                                    <p key={item}>{item}</p>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     <section className="pretest-links">
                         {(data.links || []).map(link => (
@@ -441,6 +1022,109 @@ export default function WhatsAppGlobalPreTestPage() {
                     word-break: break-word;
                 }
 
+                .pretest-phase-card {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.25fr) minmax(260px, .9fr);
+                    gap: 16px;
+                    margin: 0 0 18px;
+                    padding: 18px;
+                    border: 1px solid #dfe8e2;
+                    border-radius: 8px;
+                    background: #fff;
+                }
+
+                .pretest-phase-card.ok {
+                    border-color: #b8dec7;
+                    background: #f5fbf7;
+                }
+
+                .pretest-phase-card.warn {
+                    border-color: #f1d69b;
+                    background: #fffaf0;
+                }
+
+                .pretest-phase-copy {
+                    display: grid;
+                    align-content: start;
+                    gap: 7px;
+                    min-width: 0;
+                }
+
+                .pretest-phase-copy span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    width: fit-content;
+                    color: #1f7f58;
+                    font-size: .78rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-phase-card.warn .pretest-phase-copy span {
+                    color: #a86509;
+                }
+
+                .pretest-phase-copy h2,
+                .pretest-phase-copy p,
+                .pretest-phase-actions p {
+                    margin: 0;
+                }
+
+                .pretest-phase-copy h2 {
+                    font-size: 1.15rem;
+                    letter-spacing: 0;
+                }
+
+                .pretest-phase-copy p,
+                .pretest-phase-actions p {
+                    color: #66766f;
+                    font-size: .88rem;
+                    line-height: 1.45;
+                }
+
+                .pretest-phase-checks {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-content: flex-start;
+                    gap: 8px;
+                }
+
+                .pretest-phase-checks span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    border-radius: 999px;
+                    padding: 6px 9px;
+                    font-size: .72rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-phase-checks span.ready {
+                    background: #e7f5ed;
+                    color: #1f7f58;
+                }
+
+                .pretest-phase-checks span.blocked {
+                    background: #ffe2dc;
+                    color: #a83224;
+                }
+
+                .pretest-phase-actions {
+                    grid-column: 1 / -1;
+                    display: grid;
+                    gap: 7px;
+                    padding-top: 12px;
+                    border-top: 1px solid rgba(31, 47, 41, .08);
+                }
+
+                .pretest-phase-actions strong {
+                    color: #244238;
+                    font-size: .8rem;
+                    text-transform: uppercase;
+                }
+
                 .pretest-score-ring {
                     width: 96px;
                     height: 96px;
@@ -497,6 +1181,10 @@ export default function WhatsAppGlobalPreTestPage() {
 
                 .pretest-metrics,
                 .pretest-identity-grid,
+                .pretest-route-grid,
+                .pretest-go-live-grid,
+                .pretest-go-live-runbook,
+                .pretest-post-launch-grid,
                 .pretest-grid,
                 .pretest-message-grid {
                     display: grid;
@@ -504,11 +1192,14 @@ export default function WhatsAppGlobalPreTestPage() {
                 }
 
                 .pretest-metrics {
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
                     margin-bottom: 16px;
                 }
 
-                .pretest-identity-matrix {
+                .pretest-identity-matrix,
+                .pretest-route-matrix,
+                .pretest-go-live-panel,
+                .pretest-post-launch-panel {
                     margin-bottom: 18px;
                 }
 
@@ -517,8 +1208,30 @@ export default function WhatsAppGlobalPreTestPage() {
                     margin-top: 12px;
                 }
 
+                .pretest-route-grid {
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                }
+
+                .pretest-go-live-grid {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    margin-top: 12px;
+                }
+
+                .pretest-go-live-runbook {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                }
+
+                .pretest-post-launch-grid {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    margin-top: 12px;
+                }
+
                 .pretest-metric,
                 .pretest-identity-grid article,
+                .pretest-route-grid article,
+                .pretest-go-live-grid article,
+                .pretest-go-live-runbook article,
+                .pretest-post-launch-grid article,
                 .pretest-section,
                 .pretest-message {
                     border: 1px solid #dfe8e2;
@@ -562,6 +1275,193 @@ export default function WhatsAppGlobalPreTestPage() {
                     color: #66766f;
                     font-size: .78rem;
                     line-height: 1.35;
+                }
+
+                .pretest-route-grid article {
+                    display: grid;
+                    gap: 8px;
+                    padding: 14px;
+                    border-top: 4px solid #1f8f5f;
+                }
+
+                .pretest-route-grid article.warn {
+                    border-top-color: #b7791f;
+                }
+
+                .pretest-route-grid article.risk {
+                    border-top-color: #c2412f;
+                }
+
+                .pretest-route-grid article span {
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    color: #244238;
+                    font-size: .78rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                }
+
+                .pretest-route-grid article strong {
+                    font-size: 1rem;
+                    line-height: 1.25;
+                }
+
+                .pretest-route-grid article p,
+                .pretest-route-grid article small,
+                .pretest-route-grid article em {
+                    margin: 0;
+                    color: #66766f;
+                    font-size: .8rem;
+                    line-height: 1.35;
+                    font-style: normal;
+                }
+
+                .pretest-route-grid article em {
+                    color: #40554c;
+                    font-weight: 700;
+                }
+
+                .pretest-go-live-grid article,
+                .pretest-go-live-runbook article {
+                    display: grid;
+                    gap: 7px;
+                    padding: 14px;
+                }
+
+                .pretest-go-live-grid article {
+                    border-left: 4px solid #1f8f5f;
+                }
+
+                .pretest-go-live-grid article span,
+                .pretest-go-live-runbook article span {
+                    color: #66766f;
+                    font-size: .7rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-go-live-grid article strong,
+                .pretest-go-live-runbook article strong {
+                    color: #17231f;
+                    font-size: 1rem;
+                    line-height: 1.2;
+                }
+
+                .pretest-go-live-grid article small,
+                .pretest-go-live-runbook article p {
+                    color: #66766f;
+                    font-size: .78rem;
+                    line-height: 1.35;
+                    margin: 0;
+                }
+
+                .pretest-go-live-checks {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin: 12px 0;
+                }
+
+                .pretest-go-live-checks span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    border-radius: 999px;
+                    padding: 6px 9px;
+                    font-size: .7rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-go-live-checks span.ready {
+                    background: #e7f5ed;
+                    color: #1f7f58;
+                }
+
+                .pretest-go-live-checks span.attention {
+                    background: #fff2d6;
+                    color: #9b5d0b;
+                }
+
+                .pretest-go-live-checks span.blocked {
+                    background: #ffe2dc;
+                    color: #a83224;
+                }
+
+                .pretest-post-launch-grid article {
+                    display: grid;
+                    gap: 7px;
+                    padding: 14px;
+                    border-left: 4px solid #1f8f5f;
+                }
+
+                .pretest-post-launch-grid article span {
+                    color: #66766f;
+                    font-size: .7rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-post-launch-grid article strong {
+                    color: #17231f;
+                    font-size: 1rem;
+                    line-height: 1.2;
+                }
+
+                .pretest-post-launch-grid article small {
+                    color: #66766f;
+                    font-size: .78rem;
+                    line-height: 1.35;
+                }
+
+                .pretest-post-launch-signals {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin: 12px 0;
+                }
+
+                .pretest-post-launch-signals span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    border-radius: 999px;
+                    padding: 6px 9px;
+                    font-size: .7rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .pretest-post-launch-signals span.ready {
+                    background: #e7f5ed;
+                    color: #1f7f58;
+                }
+
+                .pretest-post-launch-signals span.attention {
+                    background: #fff2d6;
+                    color: #9b5d0b;
+                }
+
+                .pretest-post-launch-signals span.blocked {
+                    background: #ffe2dc;
+                    color: #a83224;
+                }
+
+                .pretest-post-launch-checklist {
+                    display: grid;
+                    gap: 7px;
+                }
+
+                .pretest-post-launch-checklist p {
+                    border: 1px solid #dfe8e2;
+                    border-radius: 8px;
+                    background: #fff;
+                    color: #5d6d66;
+                    font-size: .82rem;
+                    line-height: 1.4;
+                    margin: 0;
+                    padding: 10px 12px;
                 }
 
                 .pretest-metric span,
@@ -749,6 +1649,10 @@ export default function WhatsAppGlobalPreTestPage() {
                     box-shadow: 0 10px 28px rgba(0, 0, 0, .18);
                 }
 
+                .pretest-toast.error {
+                    background: #7f1d1d;
+                }
+
                 .pretest-error {
                     max-width: 620px;
                     margin: 90px auto;
@@ -777,6 +1681,10 @@ export default function WhatsAppGlobalPreTestPage() {
 
                 @media (max-width: 1180px) {
                     .pretest-identity-grid,
+                    .pretest-route-grid,
+                    .pretest-go-live-grid,
+                    .pretest-go-live-runbook,
+                    .pretest-post-launch-grid,
                     .pretest-message-grid {
                         grid-template-columns: repeat(3, minmax(0, 1fr));
                     }
@@ -797,6 +1705,11 @@ export default function WhatsAppGlobalPreTestPage() {
 
                     .pretest-metrics,
                     .pretest-identity-grid,
+                    .pretest-route-grid,
+                    .pretest-go-live-grid,
+                    .pretest-go-live-runbook,
+                    .pretest-post-launch-grid,
+                    .pretest-phase-card,
                     .pretest-grid {
                         grid-template-columns: 1fr;
                     }

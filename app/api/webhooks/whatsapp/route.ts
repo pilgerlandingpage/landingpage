@@ -11,6 +11,10 @@ import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/s
 import { recordAgentConversationEcosystemEvent, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
+import { processPilgerEditorialCommand } from '@/lib/whatsapp/pilger-editorial-agent'
+import { processPilgerFinanceCommand } from '@/lib/whatsapp/pilger-finance-agent'
+import { processPilgerPropertyCommand } from '@/lib/whatsapp/pilger-property-agent'
+import { processPilgerReportCommand } from '@/lib/whatsapp/pilger-report-agent'
 import {
     buildWhatsAppGlobalAcknowledgement,
     buildWhatsAppGlobalConversationHistory,
@@ -23,6 +27,11 @@ import {
     recordWhatsAppGlobalCommand,
     resolveWhatsAppGlobalIdentity,
 } from '@/lib/whatsapp/global-identity'
+import {
+    buildPilgerAgentRouterAcknowledgement,
+    recordPilgerAgentRoute,
+    resolvePilgerAgentRoute,
+} from '@/lib/whatsapp/pilger-agent-router'
 import {
     buildAppointmentConfirmationText,
     detectConfirmedAppointment,
@@ -3762,8 +3771,42 @@ export async function POST(request: NextRequest) {
                         },
                     })
 
+                    const pilgerRoute = resolvePilgerAgentRoute({
+                        identity: globalIdentity,
+                        intent: commandResult.intent,
+                        allowed: commandResult.allowed,
+                    })
+
+                    await recordPilgerAgentRoute({
+                        supabase,
+                        route: pilgerRoute,
+                        identity: globalIdentity,
+                        command: commandResult.command,
+                        instance,
+                        text: globalMessageText,
+                        hasMedia: hasGlobalMedia,
+                        payload: {
+                            entrypoint: isGlobalEntrypoint
+                                ? 'whatsapp_global'
+                                : 'recognized_operator_message',
+                            message_type: messageType || null,
+                            message_id: messageId || null,
+                        },
+                    }).catch(error => {
+                        console.warn('[Webhook] Pilger agent router handoff failed:', error?.message || error)
+                    })
+
                     let vitorResult: Awaited<ReturnType<typeof processVitorPaidTrafficCommand>> | null = null
-                    if (commandResult.allowed && commandResult.command?.id) {
+                    let editorialResult: Awaited<ReturnType<typeof processPilgerEditorialCommand>> | null = null
+                    let financeResult: Awaited<ReturnType<typeof processPilgerFinanceCommand>> | null = null
+                    let propertyResult: Awaited<ReturnType<typeof processPilgerPropertyCommand>> | null = null
+                    let reportResult: Awaited<ReturnType<typeof processPilgerReportCommand>> | null = null
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && pilgerRoute.targetAgentId === 'ads-analyst'
+                    ) {
                         vitorResult = await processVitorPaidTrafficCommand({
                             supabase,
                             command: commandResult.command,
@@ -3772,14 +3815,102 @@ export async function POST(request: NextRequest) {
                         })
                     }
 
-                    if (instance.instance_token && !vitorResult?.whatsappSent) {
-                        await sendWhatsAppMessage({
-                            phone: finalPhone,
-                            message: buildWhatsAppGlobalAcknowledgement({
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && ['blog-intelligence', 'news-intelligence'].includes(pilgerRoute.targetAgentId)
+                    ) {
+                        editorialResult = await processPilgerEditorialCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                target_agent: pilgerRoute.targetAgentId,
+                                required_permission: pilgerRoute.requiredPermission,
+                            },
+                            instance,
+                            instanceToken: instance.instance_token,
+                            origin: request.nextUrl.origin,
+                        })
+                    }
+
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && pilgerRoute.targetAgentId === 'finance-ops-agent'
+                    ) {
+                        financeResult = await processPilgerFinanceCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                target_agent: pilgerRoute.targetAgentId,
+                                required_permission: pilgerRoute.requiredPermission,
+                            },
+                            instance,
+                            instanceToken: instance.instance_token,
+                        })
+                    }
+
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && pilgerRoute.targetAgentId === 'property-register'
+                    ) {
+                        propertyResult = await processPilgerPropertyCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                target_agent: pilgerRoute.targetAgentId,
+                                required_permission: pilgerRoute.requiredPermission,
+                            },
+                            instance,
+                            instanceToken: instance.instance_token,
+                            origin: request.nextUrl.origin,
+                        })
+                    }
+
+                    if (
+                        commandResult.allowed
+                        && commandResult.command?.id
+                        && pilgerRoute.executionMode === 'sync_executor'
+                        && pilgerRoute.targetAgentId === 'ceo-agent'
+                    ) {
+                        reportResult = await processPilgerReportCommand({
+                            supabase,
+                            command: {
+                                ...commandResult.command,
+                                target_agent: pilgerRoute.targetAgentId,
+                                required_permission: pilgerRoute.requiredPermission,
+                            },
+                            instance,
+                            instanceToken: instance.instance_token,
+                        })
+                    }
+
+                    if (
+                        instance.instance_token
+                        && !vitorResult?.whatsappSent
+                        && !editorialResult?.whatsappSent
+                        && !financeResult?.whatsappSent
+                        && !propertyResult?.whatsappSent
+                        && !reportResult?.whatsappSent
+                    ) {
+                        const acknowledgement = commandResult.intent.commandType === 'identity_check'
+                            ? buildWhatsAppGlobalAcknowledgement({
                                 identity: globalIdentity,
                                 intent: commandResult.intent,
                                 allowed: commandResult.allowed,
-                            }),
+                            })
+                            : buildPilgerAgentRouterAcknowledgement({
+                                identity: globalIdentity,
+                                route: pilgerRoute,
+                            })
+
+                        await sendWhatsAppMessage({
+                            phone: finalPhone,
+                            message: acknowledgement,
                             instanceToken: instance.instance_token,
                         })
                     }
@@ -3793,9 +3924,19 @@ export async function POST(request: NextRequest) {
                         success: true,
                         action: vitorResult?.handled
                             ? 'whatsapp_global_paid_traffic_processed'
+                            : editorialResult?.handled
+                                ? 'whatsapp_global_editorial_processed'
+                                : financeResult?.handled
+                                    ? 'whatsapp_global_finance_processed'
+                                    : propertyResult?.handled
+                                        ? 'whatsapp_global_property_processed'
+                                        : reportResult?.handled
+                                            ? 'whatsapp_global_report_processed'
                             : 'whatsapp_global_command_recorded',
                         identity_type: globalIdentity.type,
-                        target_agent: commandResult.intent.targetAgent,
+                        target_agent: pilgerRoute.targetAgentId,
+                        target_agent_name: pilgerRoute.targetAgent.name,
+                        execution_mode: pilgerRoute.executionMode,
                         allowed: commandResult.allowed,
                         vitor: vitorResult ? {
                             handled: vitorResult.handled,
@@ -3809,6 +3950,39 @@ export async function POST(request: NextRequest) {
                             monitoring_alerts: vitorResult.monitoringAlerts || null,
                             fallback: Boolean(vitorResult.fallback),
                             error: vitorResult.error || null,
+                        } : null,
+                        editorial: editorialResult ? {
+                            handled: editorialResult.handled,
+                            whatsapp_sent: editorialResult.whatsappSent,
+                            action: editorialResult.action || null,
+                            kind: editorialResult.kind || null,
+                            post_id: editorialResult.postId || null,
+                            post_title: editorialResult.postTitle || null,
+                            status: editorialResult.status || null,
+                            error: editorialResult.error || null,
+                        } : null,
+                        finance: financeResult ? {
+                            handled: financeResult.handled,
+                            whatsapp_sent: financeResult.whatsappSent,
+                            action: financeResult.action || null,
+                            counterparty_type: financeResult.counterpartyType || null,
+                            pending_command_id: financeResult.pendingCommandId || null,
+                            finance_action_id: financeResult.financeActionId || null,
+                            error: financeResult.error || null,
+                        } : null,
+                        property: propertyResult ? {
+                            handled: propertyResult.handled,
+                            whatsapp_sent: propertyResult.whatsappSent,
+                            matched_count: propertyResult.matchedCount || null,
+                            selected_count: propertyResult.selectedCount || null,
+                            error: propertyResult.error || null,
+                        } : null,
+                        report: reportResult ? {
+                            handled: reportResult.handled,
+                            whatsapp_sent: reportResult.whatsappSent,
+                            snapshot_count: reportResult.snapshotCount || null,
+                            event_count: reportResult.eventCount || null,
+                            error: reportResult.error || null,
                         } : null,
                     })
                 }

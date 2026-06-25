@@ -44,7 +44,7 @@ import {
     type PushEditorialTemplateDefinition,
 } from '@/lib/push/editorial-templates'
 
-const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
+const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Financeiro', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
 const MAX_AVATAR_SIZE = 20 * 1024 * 1024
 const DATA_ROLE_OPTIONS = [
     { value: 'all', label: 'Todos', description: 'Todos os colaboradores digitais' },
@@ -67,6 +67,7 @@ const DATA_ROLE_HYBRID_IDS = new Set([
     'whatsapp-attendance-coach',
     'whatsapp-global-agent',
     'ads-analyst',
+    'finance-ops-agent',
     'social-attendance-agent',
     'organic-report-agent',
     'event-agent',

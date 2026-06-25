@@ -216,7 +216,7 @@ export default function FinanceManualPage() {
                     Use quando o dinheiro <strong>ja entrou ou saiu</strong>: pagamento efetuado, receita recebida, despesa quitada.
                     Se o dinheiro ainda vai entrar ou sair, use Contas a Pagar ou Contas a Receber.
                 </p>
-                <Step n={1}><strong>Descricao:</strong> escreva algo que identifique o lancamento meses depois. Ex: "Aluguel escritorio junho" e nao apenas "Aluguel".</Step>
+                <Step n={1}><strong>Descricao:</strong> escreva algo que identifique o lancamento meses depois. Ex: &quot;Aluguel escritorio junho&quot; e nao apenas &quot;Aluguel&quot;.</Step>
                 <Step n={2}><strong>Tipo:</strong> Despesa (saida) ou Receita (entrada).</Step>
                 <Step n={3}><strong>Entidade PF/PJ:</strong> selecione a qual entidade pertence este lancamento. Campo obrigatorio para relatorios separados.</Step>
                 <Step n={4}><strong>Data:</strong> data em que o evento ocorreu (nao a data do lancar no sistema).</Step>
@@ -499,7 +499,7 @@ export default function FinanceManualPage() {
                 </Card>
                 <Card title="Comissao recebida de venda (receita PJ)">
                     <Step n={1}>Novo Lancamento → Tipo receita → Categoria Comissao → Entidade PJ.</Step>
-                    <Step n={2}>Descricao: "Comissao venda Rua X, Apto Y" → valor → data de recebimento → Salvar.</Step>
+                    <Step n={2}>Descricao: &quot;Comissao venda Rua X, Apto Y&quot; → valor → data de recebimento → Salvar.</Step>
                     <Step n={3}>Aparece no DRE da PJ como receita de Comissao.</Step>
                 </Card>
                 <Card title="Pagamento de corretor (despesa PJ)">

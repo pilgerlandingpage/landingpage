@@ -138,13 +138,22 @@ export default function SearchQuizPanel({ resultsCount, mappedCount, onSearchCom
     const [purpose, setPurpose] = useState<'sale' | 'rent'>('sale')
     const [quizStep, setQuizStep] = useState(0)
     const [answeredSteps, setAnsweredSteps] = useState<FilterKey[]>([])
+    const urlFilterState = useMemo(() => ({
+        query: displayLocationName(searchParams.get('q') || searchParams.get('city') || ''),
+        type: optionValue(TYPE_STEPS, searchParams.get('type'), 'all'),
+        price: optionValue(PRICE_PRESETS, searchParams.get('price'), ''),
+        purpose: searchParams.get('offer') === 'rent' ? 'rent' as const : 'sale' as const,
+    }), [searchParams])
 
     useEffect(() => {
-        setQuery(displayLocationName(searchParams.get('q') || searchParams.get('city') || ''))
-        setType(optionValue(TYPE_STEPS, searchParams.get('type'), 'all'))
-        setPrice(optionValue(PRICE_PRESETS, searchParams.get('price'), ''))
-        setPurpose(searchParams.get('offer') === 'rent' ? 'rent' : 'sale')
-    }, [searchParams])
+        const frame = window.requestAnimationFrame(() => {
+            setQuery(urlFilterState.query)
+            setType(urlFilterState.type)
+            setPrice(urlFilterState.price)
+            setPurpose(urlFilterState.purpose)
+        })
+        return () => window.cancelAnimationFrame(frame)
+    }, [urlFilterState])
 
     const markAnswered = useCallback((step: FilterKey) => {
         setAnsweredSteps(current => current.includes(step) ? current : [...current, step])

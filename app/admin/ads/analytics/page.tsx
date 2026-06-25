@@ -118,7 +118,6 @@ export default function GoogleAnalyticsPage() {
 
   useEffect(() => {
     void loadData(days)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days])
 
   const topChannel = useMemo(() => {

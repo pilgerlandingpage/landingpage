@@ -165,23 +165,38 @@ export default function GeoCapturePrompt({ visitorId }: GeoCapturePromptProps) {
     }
 
     useEffect(() => {
+        let cancelled = false
+        let timer: number | null = null
+
+        const setStateLater = (nextState: PromptState) => {
+            timer = window.setTimeout(() => {
+                if (!cancelled) setState(nextState)
+            }, 0)
+        }
+
         if (!context) {
-            setState('hidden')
-            return
+            setStateLater('hidden')
+            return () => {
+                cancelled = true
+                if (timer) window.clearTimeout(timer)
+            }
         }
 
         const stored = readStoredState(context.storageKey)
         if (stored?.status === 'dismissed' && Number(stored.updated_at) > daysAgo(DISMISS_DAYS)) {
-            setState('hidden')
-            return
+            setStateLater('hidden')
+            return () => {
+                cancelled = true
+                if (timer) window.clearTimeout(timer)
+            }
         }
         if (stored?.status === 'granted' && Number(stored.updated_at) > hoursAgo(GRANTED_HOURS)) {
-            setState('hidden')
-            return
+            setStateLater('hidden')
+            return () => {
+                cancelled = true
+                if (timer) window.clearTimeout(timer)
+            }
         }
-
-        let cancelled = false
-        let timer: number | null = null
 
         const prepare = async () => {
             const permissionsApi = navigator.permissions
@@ -200,7 +215,7 @@ export default function GeoCapturePrompt({ visitorId }: GeoCapturePromptProps) {
                             // The lead may not exist yet; keep the prompt quiet.
                         }
                         writeStoredState(context.storageKey, { status: 'denied' })
-                        setState('hidden')
+                        setStateLater('hidden')
                         return
                     }
                 } catch {

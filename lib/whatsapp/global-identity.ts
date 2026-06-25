@@ -88,9 +88,44 @@ const TRAFFIC_DECISION_WORDS = [
     'cancelado',
 ]
 
-const BLOG_WORDS = ['blog', 'noticia', 'notícia', 'conteudo', 'conteúdo', 'post']
-const PROPERTY_WORDS = ['imovel', 'imóvel', 'apartamento', 'casa', 'disponivel', 'disponível', 'link']
+const BLOG_WORDS = ['blog', 'noticia', 'notícia', 'conteudo', 'conteúdo', 'postagem']
+const BLOG_WORD_RE = /\b(blog|blogs|noticia|noticias|conteudo|conteudos|post|posts|postagem|postagens)\b/
+const PROPERTY_WORDS = [
+    'imovel',
+    'imóveis',
+    'imoveis',
+    'apartamento',
+    'apartamentos',
+    'casa',
+    'casas',
+    'disponivel',
+    'disponíveis',
+    'disponiveis',
+    'link',
+    'estoque',
+    'frente mar',
+]
 const REPORT_WORDS = ['relatorio', 'relatório', 'resultado', 'performance', 'metricas', 'métricas', 'resumo']
+const FINANCE_WORDS = [
+    'financeiro',
+    'comprovante',
+    'recibo',
+    'nota fiscal',
+    'cupom',
+    'pagamento',
+    'despesa',
+    'lancamento',
+    'abastec',
+    'combustivel',
+    'gasolina',
+    'etanol',
+    'diesel',
+    'posto',
+    'cpf',
+    'cnpj',
+    'pf',
+    'pj',
+]
 
 const IDENTITY_CHECK_RE = /\b(me reconhec|qual perfil|perfil.*numero|permiss|administrador|admin|master)\b/
 
@@ -212,12 +247,22 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
         }
     }
 
-    if (includesAny(normalized, BLOG_WORDS)) {
+    if (includesAny(normalized, FINANCE_WORDS)) {
+        return {
+            commandType: 'finance_request',
+            targetAgent: 'finance-ops-agent',
+            requiredPermission: 'finance',
+            label: 'Financeiro',
+        }
+    }
+
+    if (BLOG_WORD_RE.test(normalized) || includesAny(normalized, BLOG_WORDS)) {
+        const isNewsRequest = normalized.includes('noticia')
         return {
             commandType: 'content_request',
-            targetAgent: 'blog-intelligence',
-            requiredPermission: normalized.includes('noticia') ? 'news' : 'blog',
-            label: 'Conteudo editorial',
+            targetAgent: isNewsRequest ? 'news-intelligence' : 'blog-intelligence',
+            requiredPermission: isNewsRequest ? 'news' : 'blog',
+            label: isNewsRequest ? 'Noticia editorial' : 'Conteudo editorial',
         }
     }
 

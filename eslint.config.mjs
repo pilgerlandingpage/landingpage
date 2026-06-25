@@ -1,6 +1,11 @@
 import nextVitals from 'eslint-config-next/core-web-vitals'
 
 const config = [
+    {
+        ignores: [
+            'open-design/**',
+        ],
+    },
     ...nextVitals,
     {
         rules: {

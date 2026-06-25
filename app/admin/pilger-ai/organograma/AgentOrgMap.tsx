@@ -113,6 +113,7 @@ const SECTOR_ORDER = [
     'Comercial',
     'WhatsApp',
     'Marketing',
+    'Financeiro',
     'Imoveis',
     'Operacoes',
     'Recrutamento',
@@ -125,6 +126,7 @@ const CENTRAL_DATA_NODES = [
     'Tracking',
     'Campanhas',
     'Mercado',
+    'Financeiro',
     'Imoveis',
 ]
 
@@ -200,6 +202,9 @@ function inferAgentFlow(agent: AgentOfficeItem): AgentFlow {
     } else if (sector === 'Marketing') {
         receives.push('CRM', 'campanhas', 'sinais comerciais')
         sends.push('conteudo', 'criativos', 'performance')
+    } else if (sector === 'Financeiro') {
+        receives.push('comprovantes', 'CPF/CNPJ', 'pedidos do Pilger')
+        sends.push('rascunhos financeiros', 'pendencias', 'classificacao')
     } else if (sector === 'Imoveis') {
         receives.push('briefings', 'fotos e videos', 'dados do proprietario')
         sends.push('cadastro', 'SEO', 'pendencias')

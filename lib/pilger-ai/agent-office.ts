@@ -207,6 +207,19 @@ const NEWS_AGENT_SCHEDULE_CONTROLS = buildWeeklyScheduleControls('news_agent', [
     { day: 'off', time: '10:00' },
 ])
 
+const DEFAULT_FINANCE_OPS_AGENT_PROMPT = [
+    'Voce e o Agente Financeiro da Pilger.',
+    '',
+    'Sua funcao e receber pedidos financeiros encaminhados pelo Pilger WhatsApp Global, organizar o contexto e preparar o lancamento para conferencia humana.',
+    '',
+    'Regras:',
+    '- Antes de encaminhar comprovante, confirme se o lancamento pertence a CPF/PF ou CNPJ/PJ quando isso nao estiver claro.',
+    '- Nunca crie, edite ou confirme lancamento financeiro sem permissao e sem os dados minimos.',
+    '- Preserve comprovantes, origem da conversa, solicitante, valor, data, forma de pagamento e contraparte quando existirem.',
+    '- Quando faltar informacao, devolva uma pendencia objetiva para o Pilger perguntar ao usuario.',
+    '- Responda como colega de trabalho: direto, educado e sem inventar dados.',
+].join('\n')
+
 const AGENT_PERSONAS: Record<string, AgentPersona> = {
     'pilger-ai-core': {
         personaName: 'Helena Gestao Painel',
@@ -279,6 +292,12 @@ const AGENT_PERSONAS: Record<string, AgentPersona> = {
         jobTitle: 'Gestor de Trafego IA',
         bio: 'Monitora campanhas, gasto, CPA e sinais de oportunidade para orientar decisoes de midia paga.',
         avatarTone: 'magenta',
+    },
+    'finance-ops-agent': {
+        personaName: 'Agente Financeiro',
+        jobTitle: 'Operacoes Financeiras',
+        bio: 'Recebe comprovantes e pedidos financeiros pelo Pilger, pede CPF/CNPJ quando falta classificacao e prepara rascunhos para conferencia.',
+        avatarTone: 'steel',
     },
     'social-attendance-agent': {
         personaName: 'Livia Atendimento Social',
@@ -739,6 +758,18 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 help: 'Executa a leitura de gastos de trafego pago e atualiza os dados financeiros.',
             },
         ],
+    },
+    {
+        id: 'finance-ops-agent',
+        name: 'Agente Financeiro',
+        role: 'Triagem financeira e comprovantes',
+        sector: 'Financeiro',
+        promptKey: 'finance_ops_agent_system_prompt',
+        fallback: DEFAULT_FINANCE_OPS_AGENT_PROMPT,
+        detail: 'Recebe comprovantes e solicitacoes financeiras encaminhadas pelo Pilger, valida permissao e organiza CPF/CNPJ, valor, data, categoria e contraparte para conferencia.',
+        tools: ['WhatsApp Global', 'financeiro', 'comprovantes', 'CPF/CNPJ', 'pendencias'],
+        autonomy: 'Pode classificar pedidos e pedir dados faltantes; lancamentos finais continuam dependentes de permissao e conferencia humana.',
+        editHref: '/admin/finance',
     },
     {
         id: 'social-attendance-agent',

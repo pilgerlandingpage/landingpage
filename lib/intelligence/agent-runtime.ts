@@ -117,12 +117,12 @@ const AGENT_CENTRAL_PROFILES: Record<string, AgentCentralProfile> = {
   'whatsapp-global-agent': {
     agentId: 'whatsapp-global-agent',
     ecosystemAgent: 'whatsapp',
-    name: 'Rafael WhatsApp Global',
+    name: 'Pilger WhatsApp Global',
     sector: 'WhatsApp',
     status: 'full',
-    consumes: COMMON_COMMERCIAL_CONSUMES,
-    produces: ['atendimento', 'qualificacao', 'necessidades do lead', 'transferencias humanas'],
-    defaultHandoffTargets: ['whatsapp-lead-extraction', 'ads-analyst', 'property-register', 'ceo-agent'],
+    consumes: ['identidade interna', 'permissoes', 'comandos operacionais', ...COMMON_COMMERCIAL_CONSUMES],
+    produces: ['roteamento para agentes', 'respostas internas', 'atendimento de leads', 'qualificacao', 'transferencias humanas'],
+    defaultHandoffTargets: ['ads-analyst', 'blog-intelligence', 'news-intelligence', 'finance-ops-agent', 'property-register', 'ceo-agent'],
   },
   'whatsapp-rescue-agent': {
     agentId: 'whatsapp-rescue-agent',
@@ -333,6 +333,16 @@ const AGENT_CENTRAL_PROFILES: Record<string, AgentCentralProfile> = {
     consumes: ['todos os sinais da Central', 'relatorios', 'eventos', 'mercado'],
     produces: ['decisoes recomendadas', 'alertas executivos', 'prioridades estrategicas'],
     defaultHandoffTargets: ['pilger-ai-core', 'internal-notifier'],
+  },
+  'finance-ops-agent': {
+    agentId: 'finance-ops-agent',
+    ecosystemAgent: 'global',
+    name: 'Agente Financeiro',
+    sector: 'Financeiro',
+    status: 'contracted',
+    consumes: ['comprovantes', 'lancamentos financeiros', 'centros de custo', 'contas a pagar', 'contas a receber'],
+    produces: ['rascunhos financeiros', 'pendencias de aprovacao', 'classificacao PF/PJ', 'alertas financeiros'],
+    defaultHandoffTargets: ['whatsapp-global-agent', 'ceo-agent', 'internal-notifier'],
   },
   'market-radar': {
     agentId: 'market-radar',

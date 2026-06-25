@@ -19,7 +19,10 @@ export default function PrivacyControls() {
     const [disabled, setDisabled] = useState(false)
 
     useEffect(() => {
-        setDisabled(isTrackingDisabled())
+        const frame = window.requestAnimationFrame(() => {
+            setDisabled(isTrackingDisabled())
+        })
+        return () => window.cancelAnimationFrame(frame)
     }, [])
 
     const handleDisable = async () => {

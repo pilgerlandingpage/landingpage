@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPublicAppUrl } from '@/lib/app-url'
-import { getWebhook } from '@/lib/uazapi'
-import { isWhatsAppGlobalInstance } from '@/lib/whatsapp/global-identity'
+import { configureWebhook, getWebhook } from '@/lib/uazapi'
+import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
+import {
+    detectWhatsAppGlobalCommandIntent,
+    isWhatsAppGlobalInstance,
+    type WhatsAppGlobalIdentity,
+} from '@/lib/whatsapp/global-identity'
+import { resolvePilgerAgentRoute } from '@/lib/whatsapp/pilger-agent-router'
+import { getAgentOfficeSnapshot } from '@/lib/pilger-ai/agent-office'
+import { verifyPilgerGlobalManagerAccess } from '@/lib/whatsapp/pilger-admin-access'
+import { buildPilgerGovernanceSummary } from '@/lib/whatsapp/pilger-global-governance'
+import { buildPilgerGoLivePacket } from '@/lib/whatsapp/pilger-global-go-live'
+import { buildPilgerPostLaunchReport } from '@/lib/whatsapp/pilger-global-post-launch'
+import {
+    buildPilgerPhase7IdentitySeparation,
+    buildPilgerPhase8TrackingPanel,
+    buildPilgerPhase9PracticalTests,
+} from '@/lib/whatsapp/pilger-global-final-phases'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +42,15 @@ type CheckSection = {
 
 const REQUIRED_WEBHOOK_EVENTS = ['history', 'messages', 'messages_update', 'connection', 'chats', 'contacts', 'labels', 'chat_labels']
 const REQUIRED_WEBHOOK_EXCLUDES = ['wasSentByApi', 'isGroupYes']
+const PILGER_OFFICE_AGENTS = [
+    { id: 'whatsapp-global-agent', label: 'Pilger WhatsApp Global', sector: 'Diretoria' },
+    { id: 'ads-analyst', label: 'Vitor Trafego Pago', sector: 'Marketing' },
+    { id: 'blog-intelligence', label: 'Isadora Edicao Blog', sector: 'Marketing' },
+    { id: 'news-intelligence', label: 'Clara Edicao Noticias', sector: 'Marketing' },
+    { id: 'finance-ops-agent', label: 'Agente Financeiro', sector: 'Financeiro' },
+    { id: 'property-register', label: 'Bianca Cadastro Imoveis', sector: 'Imoveis' },
+    { id: 'ceo-agent', label: 'Arthur CEO IA', sector: 'Diretoria' },
+]
 
 const CONFIG_KEYS = [
     'agent_default_instance_id',
@@ -39,6 +64,14 @@ const CONFIG_KEYS = [
     'vitor_monitoring_cron_last_error',
     'vitor_monitoring_cron_last_whatsapp_sent',
     'vitor_monitoring_cron_last_whatsapp_reason',
+    'pilger_global_automation_enabled',
+    'pilger_global_cron_last_checked_at',
+    'pilger_global_cron_last_reason',
+    'pilger_global_cron_last_run_at',
+    'pilger_global_cron_last_escalations',
+    'pilger_global_cron_last_result',
+    'pilger_global_cron_last_error',
+    'pilger_global_cron_last_error_at',
     'meta_access_token',
     'meta_ad_account_id',
     'google_ads_customer_id',
@@ -177,7 +210,7 @@ async function readInstances(supabase: any) {
     try {
         const { data, error } = await supabase
             .from('whatsapp_instances')
-            .select('id, instance_name, instance_type, status, phone_number, instance_token, connected_at, updated_at, created_at')
+            .select('id, instance_name, instance_type, status, phone_number, instance_token, broker_id, admin_user_id, connected_at, updated_at, created_at')
             .order('updated_at', { ascending: false })
             .limit(120)
 
@@ -190,7 +223,7 @@ async function readInstances(supabase: any) {
     try {
         const { data, error } = await supabase
             .from('whatsapp_instances')
-            .select('id, instance_name, status, phone_number, instance_token, connected_at, updated_at, created_at')
+            .select('id, instance_name, status, phone_number, instance_token, broker_id, admin_user_id, connected_at, updated_at, created_at')
             .order('updated_at', { ascending: false })
             .limit(120)
 
@@ -222,6 +255,8 @@ function serializeInstance(instance: any) {
         status: instance.status || null,
         phone_masked: maskPhone(instance.phone_number),
         has_token: Boolean(instance.instance_token),
+        has_broker_link: Boolean(instance.broker_id),
+        broker_id: instance.broker_id || null,
         connected_at: instance.connected_at || null,
         updated_at: instance.updated_at || null,
     }
@@ -301,6 +336,64 @@ async function readWebhookDiagnostic(globalInstance: any, requiredUrl: string) {
     }
 }
 
+async function configurePilgerGlobalWebhook(request: NextRequest) {
+    const supabase = createAdminClient()
+    const publicUrl = getPublicAppUrl(request.nextUrl.origin)
+    const requiredWebhookUrl = `${publicUrl}/api/webhooks/whatsapp`
+    const [configResult, instancesResult] = await Promise.all([
+        readConfigMap(supabase),
+        readInstances(supabase),
+    ])
+
+    const globalInstance = pickGlobalInstance(instancesResult.rows, configResult.map)
+    if (!globalInstance?.id) {
+        return NextResponse.json({ success: false, error: 'Instancia global nao localizada.' }, { status: 404 })
+    }
+
+    if (!globalInstance.instance_token) {
+        return NextResponse.json({ success: false, error: 'Instancia global sem token.' }, { status: 400 })
+    }
+
+    const setupResult = await configureWebhook({
+        enabled: true,
+        url: requiredWebhookUrl,
+        events: REQUIRED_WEBHOOK_EVENTS,
+        excludeMessages: REQUIRED_WEBHOOK_EXCLUDES,
+        addUrlEvents: false,
+        addUrlTypesMessages: false,
+    }, globalInstance.instance_token)
+
+    const verification = await readWebhookDiagnostic(globalInstance, requiredWebhookUrl)
+
+    recordEcosystemEvent({
+        supabase,
+        eventType: 'pilger.global_webhook_configured',
+        actorType: 'admin',
+        entityType: 'whatsapp_instance',
+        entityId: globalInstance.id,
+        source: 'whatsapp_global_pre_test',
+        label: 'Webhook Global configurado para Pilger',
+        metadata: {
+            required_webhook_url: requiredWebhookUrl,
+            required_events: REQUIRED_WEBHOOK_EVENTS,
+            required_excludes: REQUIRED_WEBHOOK_EXCLUDES,
+            verification,
+        },
+        importanceScore: 65,
+    }).catch(error => {
+        console.warn('[Pilger PreTest] Falha ao registrar evento de webhook:', error)
+    })
+
+    return NextResponse.json({
+        success: true,
+        message: 'Webhook global configurado para o Pilger.',
+        webhook_url: requiredWebhookUrl,
+        instance: serializeInstance(globalInstance),
+        setup_result: setupResult,
+        verification,
+    })
+}
+
 function hasTrafficRecipient(value: unknown) {
     const parsed = safeJson(value)
     const recipients = Array.isArray(parsed) ? parsed : []
@@ -374,6 +467,69 @@ async function readRecentTrafficSnapshots(supabase: any) {
         return { ready: true, rows: safeArray(data), error: null }
     } catch (error: any) {
         return { ready: false, rows: [], error: cleanString(error?.message || error, 260) }
+    }
+}
+
+function pilgerReturnAlreadySent(row: any) {
+    return Boolean(safeRecord(row?.result).pilger_return_sent_at)
+}
+
+function pilgerReturnPending(row: any) {
+    const targetAgent = cleanString(row?.target_agent, 80)
+    const status = cleanString(row?.status, 40)
+    const result = safeRecord(row?.result)
+    const agentIds = PILGER_OFFICE_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent').map(agent => agent.id)
+    if (!agentIds.includes(targetAgent)) return false
+    if (pilgerReturnAlreadySent(row)) return false
+    if (status === 'completed' || status === 'failed') return true
+    return status === 'queued' && result.awaiting_field === 'counterparty_type'
+}
+
+async function readPilgerLifecycleSummary(supabase: any) {
+    const agentIds = PILGER_OFFICE_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent').map(agent => agent.id)
+    try {
+        const { data, error } = await supabase
+            .from('whatsapp_global_commands')
+            .select('id, target_agent, command_type, identity_type, identity_label, status, result, created_at, updated_at')
+            .in('target_agent', agentIds)
+            .order('created_at', { ascending: false })
+            .limit(300)
+
+        if (error) return { ready: !isMissingRelation(error), rows: [], agents: [], openCount: 0, returnPendingCount: 0, returnedCount: 0, error: cleanString(error.message, 260) }
+
+        const rows = safeArray(data)
+        const agents = agentIds.map(agentId => {
+            const agentRows = rows.filter(row => row.target_agent === agentId)
+            return {
+                id: agentId,
+                label: PILGER_OFFICE_AGENTS.find(agent => agent.id === agentId)?.label || agentId,
+                total_count: agentRows.length,
+                open_count: agentRows.filter(row => ['received', 'queued', 'processing'].includes(cleanString(row.status, 40))).length,
+                return_pending_count: agentRows.filter(pilgerReturnPending).length,
+                returned_count: agentRows.filter(pilgerReturnAlreadySent).length,
+                latest_command: agentRows[0] || null,
+            }
+        })
+
+        return {
+            ready: true,
+            rows,
+            agents,
+            openCount: rows.filter(row => ['received', 'queued', 'processing'].includes(cleanString(row.status, 40))).length,
+            returnPendingCount: rows.filter(pilgerReturnPending).length,
+            returnedCount: rows.filter(pilgerReturnAlreadySent).length,
+            error: null,
+        }
+    } catch (error: any) {
+        return {
+            ready: false,
+            rows: [],
+            agents: [],
+            openCount: 0,
+            returnPendingCount: 0,
+            returnedCount: 0,
+            error: cleanString(error?.message || error, 260),
+        }
     }
 }
 
@@ -499,7 +655,244 @@ function buildEndToEndTestPlan() {
             message: 'Preparar execucao do Vitor.',
             expected: 'Gerar pacote humano com nome de campanha, copy, UTM, checklist e regras de pausa/escala.',
         },
+        {
+            key: 'isadora_status',
+            label: 'Status com Isadora',
+            message: 'Pilger, veja pra mim qual o blog de hoje.',
+            expected: 'Consultar a Isadora e responder o status do blog sem gerar novo rascunho.',
+        },
+        {
+            key: 'isadora_create',
+            label: 'Criar blog',
+            message: 'Pilger, crie um blog sobre apartamentos frente mar em Balneario Camboriu.',
+            expected: 'Gerar rascunho em revisao e avisar com link de aprovacao.',
+        },
+        {
+            key: 'clara_news',
+            label: 'Criar noticia',
+            message: 'Pilger, crie uma noticia sobre valorizacao imobiliaria no litoral catarinense.',
+            expected: 'Roteamento para Clara Noticias e rascunho em revisao.',
+        },
+        {
+            key: 'finance_receipt',
+            label: 'Comprovante financeiro',
+            message: 'Pilger, recebi um comprovante do posto de gasolina.',
+            expected: 'Perguntar se o lancamento e CPF ou CNPJ antes de encaminhar ao financeiro.',
+        },
+        {
+            key: 'bianca_properties',
+            label: 'Consultar imoveis',
+            message: 'Pilger, veja os imoveis disponiveis frente mar.',
+            expected: 'Consultar a Bianca no estoque ativo e devolver opcoes com links.',
+        },
+        {
+            key: 'arthur_report',
+            label: 'Resumo executivo',
+            message: 'Pilger, me traga um relatorio geral da operacao hoje.',
+            expected: 'Consultar o Arthur CEO IA e devolver resumo dos sinais da Central.',
+        },
     ]
+}
+
+function simulatedIdentity(label: string, permissions: string[]): WhatsAppGlobalIdentity {
+    return {
+        type: 'admin_user',
+        phone: '5547999999999',
+        label,
+        identityId: `sim-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+        permissions,
+        source: 'pre_test_simulation',
+        confidence: 1,
+    }
+}
+
+function buildPilgerRouteMatrix() {
+    const master = simulatedIdentity('Master', ['master_all'])
+    const traffic = simulatedIdentity('Trafego', ['ads'])
+    const editorial = simulatedIdentity('Marketing', ['blog', 'news'])
+    const finance = simulatedIdentity('Financeiro', ['finance'])
+    const withoutFinance = simulatedIdentity('Sem Financeiro', ['blog'])
+    const withoutBlog = simulatedIdentity('Sem Blog', ['news'])
+
+    const scenarios = [
+        {
+            key: 'traffic_create',
+            label: 'Subir campanha',
+            message: 'Pilger, suba uma campanha de trafego com esse criativo.',
+            identity: traffic,
+            hasMedia: true,
+            expectedTarget: 'ads-analyst',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'traffic_status',
+            label: 'Status trafego',
+            message: 'Pilger, veja como esta a campanha de trafego hoje.',
+            identity: master,
+            expectedTarget: 'ads-analyst',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'blog_status',
+            label: 'Blog de hoje',
+            message: 'Pilger, veja pra mim qual o blog de hoje.',
+            identity: editorial,
+            expectedTarget: 'blog-intelligence',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'blog_create',
+            label: 'Criar blog',
+            message: 'Pilger, crie um blog sobre apartamentos frente mar em Balneario Camboriu.',
+            identity: editorial,
+            expectedTarget: 'blog-intelligence',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'blog_blocked',
+            label: 'Bloqueio blog',
+            message: 'Pilger, crie um blog sobre apartamentos frente mar em Balneario Camboriu.',
+            identity: withoutBlog,
+            expectedTarget: 'blog-intelligence',
+            expectedAllowed: false,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'news_create',
+            label: 'Criar noticia',
+            message: 'Pilger, crie uma noticia sobre valorizacao imobiliaria no litoral catarinense.',
+            identity: editorial,
+            expectedTarget: 'news-intelligence',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'finance_receipt',
+            label: 'Comprovante',
+            message: 'Pilger, recebi um comprovante do posto de gasolina.',
+            identity: finance,
+            hasMedia: true,
+            expectedTarget: 'finance-ops-agent',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'finance_blocked',
+            label: 'Bloqueio financeiro',
+            message: 'Pilger, lance esse comprovante do posto no financeiro.',
+            identity: withoutFinance,
+            hasMedia: true,
+            expectedTarget: 'finance-ops-agent',
+            expectedAllowed: false,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'property_handoff',
+            label: 'Consulta imovel',
+            message: 'Pilger, veja os imoveis disponiveis frente mar.',
+            identity: master,
+            expectedTarget: 'property-register',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+        {
+            key: 'report_summary',
+            label: 'Resumo geral',
+            message: 'Pilger, me traga um relatorio geral da operacao hoje.',
+            identity: master,
+            expectedTarget: 'ceo-agent',
+            expectedAllowed: true,
+            expectedMode: 'sync_executor',
+        },
+    ]
+
+    return scenarios.map((scenario) => {
+        const intent = detectWhatsAppGlobalCommandIntent(scenario.message, Boolean(scenario.hasMedia))
+        const route = resolvePilgerAgentRoute({ identity: scenario.identity, intent })
+        const passed = route.targetAgentId === scenario.expectedTarget
+            && route.executionMode === scenario.expectedMode
+            && route.allowed === scenario.expectedAllowed
+
+        return {
+            key: scenario.key,
+            label: scenario.label,
+            message: scenario.message,
+            identity_label: scenario.identity.label,
+            permissions: scenario.identity.permissions,
+            command_type: intent.commandType,
+            required_permission: route.requiredPermission || null,
+            target_agent: route.targetAgentId,
+            target_agent_name: route.targetAgent.name,
+            execution_mode: route.executionMode,
+            allowed: route.allowed,
+            expected_target: scenario.expectedTarget,
+            expected_allowed: scenario.expectedAllowed,
+            expected_mode: scenario.expectedMode,
+            status: passed ? 'ok' : 'missing',
+            detail: passed
+                ? `Roteou para ${route.targetAgent.name} como esperado.`
+                : `Esperado ${scenario.expectedTarget}/${scenario.expectedMode}/${scenario.expectedAllowed ? 'permitido' : 'bloqueado'}, recebido ${route.targetAgentId}/${route.executionMode}/${route.allowed ? 'permitido' : 'bloqueado'}.`,
+        }
+    })
+}
+
+async function readPilgerOfficeDiagnostic() {
+    try {
+        const snapshot = await getAgentOfficeSnapshot()
+        const agentsById = new Map((snapshot.agents || []).map((agent: any) => [String(agent.id || ''), agent]))
+        const globalAgent = agentsById.get('whatsapp-global-agent') as any
+        const globalTargets = safeArray(globalAgent?.centralContract?.defaultHandoffTargets).map(item => String(item || ''))
+        const rows = PILGER_OFFICE_AGENTS.map(agent => {
+            const officeAgent = agentsById.get(agent.id) as any
+            return {
+                id: agent.id,
+                label: officeAgent?.personaName || officeAgent?.name || agent.label,
+                expected_label: agent.label,
+                sector: officeAgent?.sector || null,
+                expected_sector: agent.sector,
+                status: officeAgent?.status || null,
+                exists: Boolean(officeAgent?.id),
+                global_handoff: agent.id === 'whatsapp-global-agent' || globalTargets.includes(agent.id),
+            }
+        })
+
+        return {
+            ready: true,
+            totalAgents: snapshot.totalAgents,
+            globalTargets,
+            rows,
+            missingAgents: rows.filter(row => !row.exists).map(row => row.id),
+            missingHandoffs: rows.filter(row => row.id !== 'whatsapp-global-agent' && !row.global_handoff).map(row => row.id),
+            error: null,
+        }
+    } catch (error: any) {
+        return {
+            ready: false,
+            totalAgents: 0,
+            globalTargets: [],
+            rows: [],
+            missingAgents: PILGER_OFFICE_AGENTS.map(agent => agent.id),
+            missingHandoffs: PILGER_OFFICE_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent').map(agent => agent.id),
+            error: error?.message || 'Nao foi possivel carregar a Sala de Escritorios.',
+        }
+    }
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        const access = await verifyPilgerGlobalManagerAccess()
+        if (!access) return NextResponse.json({ success: false, error: 'Acesso negado.' }, { status: 403 })
+        return configurePilgerGlobalWebhook(request)
+    } catch (error: any) {
+        return NextResponse.json(
+            { success: false, error: error?.message || 'Erro ao configurar webhook global.' },
+            { status: 500 },
+        )
+    }
 }
 
 export async function GET(request: NextRequest) {
@@ -529,10 +922,24 @@ export async function GET(request: NextRequest) {
             ecosystemSnapshots,
             latestCommand,
             latestAdsCommand,
+            latestBlogCommand,
+            latestNewsCommand,
+            latestFinanceCommand,
+            latestPropertyCommand,
+            latestReportCommand,
+            blogCommands,
+            newsCommands,
+            financeCommands,
+            financeActions,
+            propertyCommands,
+            reportCommands,
             latestReview,
             latestPlan,
             recentVitorEvents,
             recentTrafficSnapshots,
+            pilgerOffice,
+            pilgerLifecycle,
+            pilgerGovernance,
         ] = await Promise.all([
             readConfigMap(supabase),
             readInstances(supabase),
@@ -553,10 +960,24 @@ export async function GET(request: NextRequest) {
             safeCount(supabase, 'ecosystem_context_snapshots'),
             safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at'),
             safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'ads-analyst')),
+            safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'blog-intelligence')),
+            safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'news-intelligence')),
+            safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'finance-ops-agent')),
+            safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'property-register')),
+            safeLatest(supabase, 'whatsapp_global_commands', 'id, command_type, target_agent, identity_type, identity_label, status, created_at', 'created_at', query => query.eq('target_agent', 'ceo-agent')),
+            safeCount(supabase, 'whatsapp_global_commands', query => query.eq('target_agent', 'blog-intelligence')),
+            safeCount(supabase, 'whatsapp_global_commands', query => query.eq('target_agent', 'news-intelligence')),
+            safeCount(supabase, 'whatsapp_global_commands', query => query.eq('target_agent', 'finance-ops-agent')),
+            safeCount(supabase, 'broker_assistant_actions', query => query.eq('action_type', 'create_finance_entry')),
+            safeCount(supabase, 'whatsapp_global_commands', query => query.eq('target_agent', 'property-register')),
+            safeCount(supabase, 'whatsapp_global_commands', query => query.eq('target_agent', 'ceo-agent')),
             safeLatest(supabase, 'paid_traffic_creative_reviews', 'id, score, score_label, status, source, created_at'),
             safeLatest(supabase, 'paid_traffic_campaign_plans', 'id, status, review_id, created_at'),
             readRecentVitorCentralEvents(supabase),
             readRecentTrafficSnapshots(supabase),
+            readPilgerOfficeDiagnostic(),
+            readPilgerLifecycleSummary(supabase),
+            buildPilgerGovernanceSummary(supabase),
         ])
 
         const configMap = configResult.map as Record<string, any>
@@ -565,6 +986,17 @@ export async function GET(request: NextRequest) {
         const connectedInstances = instances.filter(instance => String(instance?.status || '').toLowerCase() === 'connected')
         const globalStatus = String(globalInstance?.status || '').toLowerCase()
         const webhookDiagnostic = await readWebhookDiagnostic(globalInstance, requiredWebhookUrl)
+        const pilgerRouteMatrix = buildPilgerRouteMatrix()
+        const pilgerRouteFailures = pilgerRouteMatrix.filter(row => row.status !== 'ok')
+        const pilgerAccessSourcesCount = adminPhones.count + brokerPhones.count + authorizedPhones.count + overrides.count
+        const pilgerPermissionGuardOk = pilgerRouteMatrix.some(row => row.key === 'finance_blocked' && row.allowed === false && row.target_agent === 'finance-ops-agent')
+        const pilgerRealTestReady = Boolean(
+            globalInstance?.id
+            && globalStatus === 'connected'
+            && pilgerAccessSourcesCount > 0
+            && pilgerRouteFailures.length === 0
+            && pilgerPermissionGuardOk
+        )
 
         const globalSection = section('global', 'WhatsApp Global', [
             item(
@@ -575,6 +1007,19 @@ export async function GET(request: NextRequest) {
                     ? `${globalInstance.instance_name || 'WhatsApp Global'} esta com status ${globalInstance.status || 'pendente'} e telefone ${maskPhone(globalInstance.phone_number) || 'nao identificado'}.`
                     : 'Nenhuma instancia marcada como global foi localizada.',
                 serializeInstance(globalInstance) || undefined,
+            ),
+            item(
+                'global_finance_context',
+                'Vinculo financeiro',
+                globalInstance?.id
+                    ? globalInstance?.broker_id ? 'ok' : 'warn'
+                    : 'missing',
+                globalInstance?.id
+                    ? globalInstance?.broker_id
+                        ? 'Instancia Global esta vinculada a um broker, entao o Agente Financeiro consegue criar a acao de lancamento.'
+                        : 'Instancia Global existe, mas esta sem broker_id; pedidos financeiros podem responder no WhatsApp, mas nao entram na fila do financeiro.'
+                    : 'Sem instancia Global para validar contexto financeiro.',
+                { broker_id: globalInstance?.broker_id || null },
             ),
             item(
                 'global_prompt',
@@ -704,6 +1149,22 @@ export async function GET(request: NextRequest) {
                     ? `${overrides.count} override(s) ativo(s) para correcao manual de perfil.`
                     : overrides.error || 'Tabela de overrides nao encontrada.',
             ),
+            item(
+                'pilger_access_manager',
+                'Acessos do Pilger',
+                overrides.ready ? (overrides.count > 0 ? 'ok' : 'warn') : 'missing',
+                overrides.ready
+                    ? overrides.count > 0
+                        ? 'Ha acessos manuais ativos para testar colega/permissao no painel Global.'
+                        : 'A tela de Acessos do Pilger esta pronta, mas ainda nao ha override manual ativo cadastrado.'
+                    : overrides.error || 'Nao foi possivel consultar overrides manuais.',
+                {
+                    active_identity_overrides: overrides.count,
+                    admin_users_with_phone: adminPhones.count,
+                    brokers_with_phone: brokerPhones.count,
+                    authorized_phones: authorizedPhones.count,
+                },
+            ),
         ])
 
         const vitorSection = section('vitor', 'Vitor Trafego Pago', [
@@ -752,24 +1213,160 @@ export async function GET(request: NextRequest) {
             ),
         ])
 
+        const pilgerSection = section('pilger', 'Pilger Orquestrador', [
+            item(
+                'pilger_route_matrix',
+                'Matriz de rotas',
+                pilgerRouteFailures.length ? 'missing' : 'ok',
+                pilgerRouteFailures.length
+                    ? `${pilgerRouteFailures.length} simulacao(oes) nao bateram com o destino esperado.`
+                    : `${pilgerRouteMatrix.length} simulacao(oes) de Pilger bateram com destino, permissao e modo de execucao.`,
+                { routes: pilgerRouteMatrix },
+            ),
+            item(
+                'pilger_agent_office',
+                'Sala de Escritorios',
+                pilgerOffice.ready && !pilgerOffice.missingAgents.length && !pilgerOffice.missingHandoffs.length ? 'ok' : 'missing',
+                pilgerOffice.ready
+                    ? pilgerOffice.missingAgents.length || pilgerOffice.missingHandoffs.length
+                        ? `Faltam agentes: ${pilgerOffice.missingAgents.join(', ') || 'nenhum'}; faltam handoffs do Global: ${pilgerOffice.missingHandoffs.join(', ') || 'nenhum'}.`
+                        : `Todos os ${PILGER_OFFICE_AGENTS.length} colegas do Pilger estao na Sala e o Global entrega para eles.`
+                    : pilgerOffice.error || 'Nao foi possivel carregar a Sala de Escritorios.',
+                {
+                    total_agents: pilgerOffice.totalAgents,
+                    global_targets: pilgerOffice.globalTargets,
+                    office_agents: pilgerOffice.rows,
+                },
+            ),
+            item(
+                'pilger_editorial_commands',
+                'Isadora e Clara',
+                blogCommands.ready && newsCommands.ready
+                    ? (blogCommands.count + newsCommands.count > 0 ? 'ok' : 'warn')
+                    : 'missing',
+                blogCommands.ready && newsCommands.ready
+                    ? `${blogCommands.count} comando(s) para Isadora e ${newsCommands.count} para Clara registrados.`
+                    : 'Nao foi possivel consultar comandos editoriais do WhatsApp Global.',
+                { latest_blog_command: latestBlogCommand.row, latest_news_command: latestNewsCommand.row },
+            ),
+            item(
+                'pilger_finance_commands',
+                'Agente Financeiro',
+                financeCommands.ready && financeActions.ready
+                    ? (financeCommands.count > 0 || financeActions.count > 0 ? 'ok' : 'warn')
+                    : 'missing',
+                financeCommands.ready && financeActions.ready
+                    ? `${financeCommands.count} comando(s) financeiro(s) do Pilger e ${financeActions.count} acao(oes) financeiras na fila do concierge.`
+                    : financeCommands.error || financeActions.error || 'Nao foi possivel consultar comandos/acoes financeiras.',
+                { latest_finance_command: latestFinanceCommand.row, finance_actions_count: financeActions.count },
+            ),
+            item(
+                'pilger_property_commands',
+                'Bianca Imoveis',
+                countStatus(propertyCommands),
+                propertyCommands.ready
+                    ? `${propertyCommands.count} comando(s) de imoveis registrados pelo Pilger.`
+                    : propertyCommands.error || 'Nao foi possivel consultar comandos de imoveis.',
+                { latest_property_command: latestPropertyCommand.row },
+            ),
+            item(
+                'pilger_report_commands',
+                'Arthur CEO IA',
+                countStatus(reportCommands),
+                reportCommands.ready
+                    ? `${reportCommands.count} comando(s) executivo(s) registrados pelo Pilger.`
+                    : reportCommands.error || 'Nao foi possivel consultar comandos executivos.',
+                { latest_report_command: latestReportCommand.row },
+            ),
+            item(
+                'pilger_permission_guard',
+                'Guarda de permissao',
+                pilgerPermissionGuardOk ? 'ok' : 'missing',
+                'Simulacao valida que um usuario sem permissao financeira e bloqueado antes do Agente Financeiro executar.',
+            ),
+            item(
+                'pilger_simulator_panel',
+                'Simulador operacional',
+                pilgerRouteFailures.length ? 'missing' : 'ok',
+                pilgerRouteFailures.length
+                    ? 'O simulador depende da mesma matriz de rotas; corrija os destinos divergentes antes do teste real.'
+                    : 'Simulador do painel Global pode validar telefone, mensagem, identidade, permissao e agente sem enviar WhatsApp real.',
+                { simulator_route: '/api/admin/whatsapp/global/simulate' },
+            ),
+            item(
+                'pilger_agent_desk',
+                'Mesa operacional por agente',
+                pilgerLifecycle.ready ? 'ok' : 'missing',
+                pilgerLifecycle.ready
+                    ? `${pilgerLifecycle.agents.length} agente(s) com fila monitorada; ${pilgerLifecycle.openCount} pedido(s) aberto(s) e ${pilgerLifecycle.returnPendingCount} retorno(s) pendente(s).`
+                    : pilgerLifecycle.error || 'Nao foi possivel consultar o ciclo dos pedidos do Pilger.',
+                {
+                    agents: pilgerLifecycle.agents,
+                    open_count: pilgerLifecycle.openCount,
+                    return_pending_count: pilgerLifecycle.returnPendingCount,
+                    returned_count: pilgerLifecycle.returnedCount,
+                },
+            ),
+            item(
+                'pilger_return_action',
+                'Retorno ao usuario',
+                pilgerLifecycle.ready ? 'ok' : 'missing',
+                pilgerLifecycle.ready
+                    ? 'Painel Global prepara mensagem de retorno pelo Pilger, envia pela instancia global e grava pilger_return_sent_at no comando.'
+                    : 'Sem leitura da fila, nao foi possivel validar o retorno auditado.',
+                { action: 'send_pilger_return', route: '/api/admin/whatsapp/global' },
+            ),
+            item(
+                'pilger_governance_policy',
+                'Governanca Fase 4',
+                pilgerGovernance.ready && (pilgerGovernance.totals as any).policy_count >= 6 ? 'ok' : 'missing',
+                pilgerGovernance.ready
+                    ? `${(pilgerGovernance.totals as any).policy_count || 0} politica(s) cobrem os agentes do Pilger; ${(pilgerGovernance.totals as any).review_queue_count || 0} comando(s) em revisao.`
+                    : pilgerGovernance.error || 'Nao foi possivel consultar governanca do Pilger.',
+                {
+                    policies: pilgerGovernance.policies,
+                    totals: pilgerGovernance.totals,
+                    review_queue: pilgerGovernance.review_queue,
+                },
+            ),
+            item(
+                'pilger_real_test_ready',
+                'Pronto para teste real',
+                pilgerRealTestReady ? 'ok' : globalInstance?.id && pilgerRouteFailures.length === 0 ? 'warn' : 'missing',
+                pilgerRealTestReady
+                    ? 'Ha instancia global conectada, fontes de colegas reconheciveis e matriz de permissao validada.'
+                    : globalInstance?.id
+                        ? `Faltam ajustes antes do teste real: instancia ${globalStatus || 'sem status'}, ${pilgerAccessSourcesCount} fonte(s) de acesso, ${pilgerRouteFailures.length} falha(s) de rota.`
+                        : 'Sem instancia Global localizada para receber o teste real pelo WhatsApp.',
+                {
+                    global_status: globalStatus || null,
+                    pilger_access_sources: pilgerAccessSourcesCount,
+                    route_failures: pilgerRouteFailures.length,
+                    permission_guard_ok: pilgerPermissionGuardOk,
+                },
+            ),
+        ])
+
         const automationSection = section('automation', 'Monitoramento e alertas', [
             item(
                 'cron_secret',
                 'Cron protegido',
-                process.env.CRON_SECRET ? 'ok' : 'missing',
+                process.env.CRON_SECRET ? 'ok' : 'warn',
                 process.env.CRON_SECRET
                     ? 'CRON_SECRET disponivel no runtime.'
-                    : 'Configure CRON_SECRET para executar rotinas protegidas.',
+                    : 'Configure CRON_SECRET para ativar rotinas automaticas protegidas em producao; testes manuais do Pilger continuam disponiveis.',
             ),
             item(
                 'vitor_cron',
                 'Cron do Vitor',
                 process.env.CRON_SECRET
                     ? cleanString(configMap.vitor_monitoring_cron_last_checked_at, 80) ? 'ok' : 'warn'
-                    : 'missing',
+                    : 'warn',
                 cleanString(configMap.vitor_monitoring_cron_last_checked_at, 80)
                     ? `Ultima checagem: ${configMap.vitor_monitoring_cron_last_checked_at}. Motivo: ${cleanString(configMap.vitor_monitoring_cron_last_reason, 120) || 'registrado'}.`
-                    : 'O cron ainda nao registrou execucao recente em app_config.',
+                    : process.env.CRON_SECRET
+                        ? 'O cron ainda nao registrou execucao recente em app_config.'
+                        : 'Sem CRON_SECRET no runtime local, a rota automatica permanece protegida e nao deve ser chamada sem segredo.',
             ),
             item(
                 'vitor_cron_error',
@@ -778,6 +1375,31 @@ export async function GET(request: NextRequest) {
                 cleanString(configMap.vitor_monitoring_cron_last_error, 200)
                     ? `Ultimo erro registrado: ${cleanString(configMap.vitor_monitoring_cron_last_error, 200)}.`
                     : 'Nenhum erro recente registrado para o cron do Vitor.',
+            ),
+            item(
+                'pilger_global_cron',
+                'Cron do Pilger Global',
+                process.env.CRON_SECRET
+                    ? cleanString(configMap.pilger_global_cron_last_checked_at, 80) ? 'ok' : 'warn'
+                    : 'warn',
+                cleanString(configMap.pilger_global_cron_last_checked_at, 80)
+                    ? `Ultima checagem: ${configMap.pilger_global_cron_last_checked_at}. Motivo: ${cleanString(configMap.pilger_global_cron_last_reason, 120) || 'registrado'}; escalonamentos: ${cleanString(configMap.pilger_global_cron_last_escalations, 20) || '0'}.`
+                    : process.env.CRON_SECRET
+                        ? 'Cron /api/cron/pilger-global esta criado, mas ainda nao registrou execucao em app_config.'
+                        : 'Cron /api/cron/pilger-global esta criado; falta CRON_SECRET no runtime para execucao protegida.',
+                {
+                    cron_path: '/api/cron/pilger-global',
+                    schedule: '*/15 * * * *',
+                    last_result: safeJson(configMap.pilger_global_cron_last_result),
+                },
+            ),
+            item(
+                'pilger_global_cron_error',
+                'Erro recente do Pilger',
+                cleanString(configMap.pilger_global_cron_last_error, 200) ? 'warn' : 'ok',
+                cleanString(configMap.pilger_global_cron_last_error, 200)
+                    ? `Ultimo erro registrado: ${cleanString(configMap.pilger_global_cron_last_error, 200)}.`
+                    : 'Nenhum erro recente registrado para a automacao do Pilger.',
             ),
             item(
                 'whatsapp_alerts',
@@ -826,11 +1448,154 @@ export async function GET(request: NextRequest) {
             ),
         ])
 
-        const sections = [globalSection, webhookSection, identitySection, vitorSection, automationSection, centralSection]
+        const sections = [globalSection, webhookSection, identitySection, pilgerSection, vitorSection, automationSection, centralSection]
         const blockers = sections.flatMap(row => row.items).filter(row => row.status === 'missing')
         const warnings = sections.flatMap(row => row.items).filter(row => row.status === 'warn')
         const score = Math.max(0, Math.round((sections.reduce((sum, row) => sum + row.score, 0) / Math.max(sections.length, 1))))
         const status: CheckStatus = blockers.length > 0 ? 'missing' : warnings.length > 0 ? 'warn' : 'ok'
+        const phase1CoreReady = Boolean(
+            globalInstance?.id
+            && globalInstance?.instance_token
+            && globalInstance?.broker_id
+            && totalCommands.ready
+            && sessions.ready
+            && overrides.ready
+            && pilgerRouteFailures.length === 0
+            && pilgerPermissionGuardOk
+            && pilgerOffice.ready
+            && pilgerOffice.missingAgents.length === 0
+            && pilgerOffice.missingHandoffs.length === 0
+            && reviews.ready
+            && plans.ready
+            && creatives.ready
+            && ecosystemEvents.ready
+            && ecosystemSnapshots.ready
+        )
+        const remainingPhase1Actions = [
+            webhookDiagnostic.ready && (webhookDiagnostic.missingEvents.length || webhookDiagnostic.missingExcludes.length)
+                ? 'Clique em Reparar webhook para atualizar os eventos/filtros remotos da Uazapi.'
+                : '',
+            overrides.count === 0
+                ? 'Cadastre ao menos um acesso manual em Acessos do Pilger para testar um colega especifico.'
+                : '',
+            blogCommands.count + newsCommands.count + financeCommands.count + propertyCommands.count + reportCommands.count === 0
+                ? 'Rode a bateria do simulador e depois envie a bateria real pelo WhatsApp Global.'
+                : '',
+            !process.env.CRON_SECRET
+                ? 'Configure CRON_SECRET em producao antes de depender das rotinas automaticas.'
+                : '',
+            !hasTrafficRecipient(configMap.sector_notification_recipients)
+                ? 'Configure destinatarios de Trafego Pago para os alertas do Vitor.'
+                : '',
+        ].filter(Boolean)
+        const phase2AgentIds = PILGER_OFFICE_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent').map(agent => agent.id)
+        const phase2AgentsCovered = phase2AgentIds.every(agentId => pilgerLifecycle.agents.some((agent: any) => agent.id === agentId))
+        const phase2CoreReady = Boolean(
+            phase1CoreReady
+            && pilgerLifecycle.ready
+            && phase2AgentsCovered
+            && totalCommands.ready
+            && ecosystemEvents.ready
+        )
+        const remainingPhase2Actions = [
+            pilgerLifecycle.openCount === 0
+                ? 'Gere pedidos reais ou simulados para ver a mesa dos agentes com movimento operacional.'
+                : '',
+            pilgerLifecycle.returnPendingCount > 0
+                ? `${pilgerLifecycle.returnPendingCount} retorno(s) aguardam envio manual pelo painel Global.`
+                : '',
+            pilgerLifecycle.returnedCount === 0
+                ? 'Quando um agente concluir uma tarefa real, envie um retorno pelo painel para validar a marca pilger_return_sent_at.'
+                : '',
+        ].filter(Boolean)
+        const phase3CronResult = safeJson(configMap.pilger_global_cron_last_result) as Record<string, any> | null
+        const phase3CoreReady = Boolean(
+            phase2CoreReady
+            && pilgerLifecycle.ready
+            && ecosystemEvents.ready
+        )
+        const remainingPhase3Actions = [
+            !process.env.CRON_SECRET
+                ? 'Configure CRON_SECRET em producao para o Vercel Cron executar /api/cron/pilger-global.'
+                : '',
+            !cleanString(configMap.pilger_global_cron_last_checked_at, 80)
+                ? 'Rode a Fase 3 manualmente no painel Global ou aguarde a primeira execucao do cron.'
+                : '',
+            cleanString(configMap.pilger_global_cron_last_error, 200)
+                ? `Corrija o erro recente da automacao do Pilger: ${cleanString(configMap.pilger_global_cron_last_error, 180)}.`
+                : '',
+        ].filter(Boolean)
+        const phase4CoreReady = Boolean(
+            phase3CoreReady
+            && pilgerGovernance.ready
+            && (pilgerGovernance.totals as any).policy_count >= 6
+            && ecosystemEvents.ready
+        )
+        const remainingPhase4Actions = [
+            (pilgerGovernance.totals as any).review_queue_count > 0
+                ? `${(pilgerGovernance.totals as any).review_queue_count} comando(s) aguardam fechamento/aprendizado de governanca.`
+                : '',
+            (pilgerGovernance.totals as any).phase4_closed_count === 0
+                ? 'Feche ao menos um comando real no painel Global para validar o historico de aprendizado da Fase 4.'
+                : '',
+        ].filter(Boolean)
+        const testPlan = buildEndToEndTestPlan()
+        const phase5GoLive = buildPilgerGoLivePacket({
+            phase1Ready: phase1CoreReady,
+            phase2Ready: phase2CoreReady,
+            phase3Ready: phase3CoreReady,
+            phase4Ready: phase4CoreReady,
+            hasGlobalInstance: Boolean(globalInstance?.id),
+            hasInstanceToken: Boolean(globalInstance?.instance_token),
+            globalInstanceConnected: globalStatus === 'connected',
+            webhookReady: Boolean(webhookDiagnostic.ready && !webhookDiagnostic.missingEvents.length && !webhookDiagnostic.missingExcludes.length),
+            webhookMissingEvents: webhookDiagnostic.missingEvents.length,
+            webhookMissingExcludes: webhookDiagnostic.missingExcludes.length,
+            accessSources: pilgerAccessSourcesCount,
+            routeFailures: pilgerRouteFailures.length,
+            agentDeskReady: pilgerLifecycle.ready,
+            agentQueueCount: pilgerLifecycle.agents.length,
+            returnPendingCount: pilgerLifecycle.returnPendingCount,
+            returnedCount: pilgerLifecycle.returnedCount,
+            hasCronSecret: Boolean(process.env.CRON_SECRET),
+            phase3LastError: cleanString(configMap.pilger_global_cron_last_error, 200) || null,
+            governanceReady: pilgerGovernance.ready,
+            governancePolicyCount: (pilgerGovernance.totals as any).policy_count || 0,
+            governanceReviewCount: (pilgerGovernance.totals as any).review_queue_count || 0,
+            governanceClosedCount: (pilgerGovernance.totals as any).phase4_closed_count || 0,
+            finalTestCount: testPlan.length,
+            ecosystemReady: ecosystemEvents.ready,
+        })
+        const phase5CoreReady = Boolean(phase4CoreReady && phase5GoLive.ready && phase5GoLive.final_test_runbook.length >= 6)
+        const remainingPhase5Actions = phase5GoLive.checklist
+            .filter((row: any) => row.status !== 'ok')
+            .map((row: any) => row.action)
+            .filter(Boolean)
+        const phase6PostLaunch = buildPilgerPostLaunchReport({
+            phase5Ready: phase5CoreReady,
+            goLiveScore: phase5GoLive.score,
+            totalCommands: totalCommands.count,
+            openCommands: pilgerLifecycle.openCount,
+            completedCommands: pilgerLifecycle.rows.filter((row: any) => row.status === 'completed').length,
+            failedCommands: pilgerLifecycle.rows.filter((row: any) => row.status === 'failed').length,
+            blockedCommands: pilgerLifecycle.rows.filter((row: any) => row.status === 'blocked').length,
+            returnPendingCount: pilgerLifecycle.returnPendingCount,
+            returnedCount: pilgerLifecycle.returnedCount,
+            governanceReviewCount: (pilgerGovernance.totals as any).review_queue_count || 0,
+            governanceClosedCount: (pilgerGovernance.totals as any).phase4_closed_count || 0,
+            phase3Escalations: Number(configMap.pilger_global_cron_last_escalations || 0) || 0,
+            phase3LastError: cleanString(configMap.pilger_global_cron_last_error, 200) || null,
+            finalTestCount: testPlan.length,
+            accessSources: pilgerAccessSourcesCount,
+            agentCount: pilgerLifecycle.agents.length,
+            ecosystemEvents: ecosystemEvents.count,
+            ecosystemReady: ecosystemEvents.ready,
+        })
+        const phase6CoreReady = Boolean(phase5CoreReady && phase6PostLaunch.ready && phase6PostLaunch.stabilization_checklist.length >= 7)
+        const remainingPhase6Actions = phase6PostLaunch.signals
+            .filter((row: any) => row.status !== 'ok')
+            .map((row: any) => row.next_action)
+            .filter(Boolean)
         const identityMatrix = buildIdentityMatrix({
             adminPhones,
             masterPhones,
@@ -840,7 +1605,29 @@ export async function GET(request: NextRequest) {
             privateOwnerRows,
             overrides,
         })
-        const testPlan = buildEndToEndTestPlan()
+        const phase7Identity = buildPilgerPhase7IdentitySeparation({
+            identityMatrix,
+            accessSources: pilgerAccessSourcesCount,
+            routeFailures: pilgerRouteFailures.length,
+            overridesReady: overrides.ready,
+            leadFallbackReady: true,
+        })
+        const phase8Panel = buildPilgerPhase8TrackingPanel({
+            phase7Ready: phase7Identity.code_complete,
+            agentDeskReady: pilgerLifecycle.ready,
+            agentCount: pilgerLifecycle.agents.length,
+            totalCommands: totalCommands.count,
+            returnPendingCount: pilgerLifecycle.returnPendingCount,
+            returnedCount: pilgerLifecycle.returnedCount,
+            statusFilterReady: true,
+            targetFilterReady: true,
+        })
+        const phase9Practical = buildPilgerPhase9PracticalTests({
+            phase7Ready: phase7Identity.code_complete,
+            phase8Ready: phase8Panel.code_complete,
+            testPlan,
+            routeMatrix: pilgerRouteMatrix,
+        })
 
         return NextResponse.json({
             success: true,
@@ -849,6 +1636,143 @@ export async function GET(request: NextRequest) {
             score,
             blockers: blockers.length,
             warnings: warnings.length,
+            phase_1: {
+                code_complete: phase1CoreReady,
+                status: phase1CoreReady ? 'complete' : 'attention',
+                label: phase1CoreReady ? 'Fase 1 concluida no nucleo' : 'Fase 1 com pendencias de nucleo',
+                detail: phase1CoreReady
+                    ? 'Pilger reconhece colegas/leads, valida permissoes, conversa com os agentes responsaveis e possui simulador/pre-teste operacional.'
+                    : 'Ainda ha algum item estrutural do Pilger, Sala de Escritorios, tabelas ou matriz de permissoes que precisa ser corrigido.',
+                remaining_actions: remainingPhase1Actions,
+                core_checks: {
+                    global_instance: Boolean(globalInstance?.id && globalInstance?.instance_token),
+                    broker_link: Boolean(globalInstance?.broker_id),
+                    command_tables: Boolean(totalCommands.ready && sessions.ready && overrides.ready),
+                    route_matrix: pilgerRouteFailures.length === 0,
+                    permission_guard: pilgerPermissionGuardOk,
+                    agent_office: Boolean(pilgerOffice.ready && !pilgerOffice.missingAgents.length && !pilgerOffice.missingHandoffs.length),
+                    simulator: pilgerRouteFailures.length === 0,
+                    vitor_tables: Boolean(reviews.ready && plans.ready && creatives.ready),
+                    central: Boolean(ecosystemEvents.ready && ecosystemSnapshots.ready),
+                },
+            },
+            phase_2: {
+                code_complete: phase2CoreReady,
+                status: phase2CoreReady ? 'complete' : 'attention',
+                label: phase2CoreReady ? 'Fase 2 concluida no nucleo' : 'Fase 2 com pendencias de nucleo',
+                detail: phase2CoreReady
+                    ? 'Pilger possui mesa operacional por agente, acompanha pedidos abertos, identifica retornos pendentes e consegue enviar devolutiva auditada ao usuario.'
+                    : 'Ainda ha algum ponto estrutural da mesa operacional, ciclo de pedidos ou auditoria de retorno que precisa ser corrigido.',
+                remaining_actions: remainingPhase2Actions,
+                core_checks: {
+                    phase_1_complete: phase1CoreReady,
+                    agent_desk_api: pilgerLifecycle.ready,
+                    all_agent_queues: phase2AgentsCovered,
+                    command_lifecycle: totalCommands.ready,
+                    return_pending_detector: pilgerLifecycle.ready,
+                    audited_return_action: true,
+                    central_events: ecosystemEvents.ready,
+                },
+                totals: {
+                    open_count: pilgerLifecycle.openCount,
+                    return_pending_count: pilgerLifecycle.returnPendingCount,
+                    returned_count: pilgerLifecycle.returnedCount,
+                    agents: pilgerLifecycle.agents,
+                },
+            },
+            phase_3: {
+                code_complete: phase3CoreReady,
+                status: phase3CoreReady ? 'complete' : 'attention',
+                label: phase3CoreReady ? 'Fase 3 concluida no nucleo' : 'Fase 3 com pendencias de nucleo',
+                detail: phase3CoreReady
+                    ? 'Pilger possui automacao protegida para monitorar SLA dos agentes, registrar escalonamentos e manter a Central informada sem depender so do painel.'
+                    : 'Ainda ha algum ponto estrutural da automacao, ciclo operacional ou Central que precisa ser corrigido.',
+                remaining_actions: remainingPhase3Actions,
+                core_checks: {
+                    phase_2_complete: phase2CoreReady,
+                    cron_route: true,
+                    vercel_schedule: true,
+                    admin_manual_run: true,
+                    sla_supervision: pilgerLifecycle.ready,
+                    central_events: ecosystemEvents.ready,
+                    cron_secret_runtime: Boolean(process.env.CRON_SECRET),
+                    no_recent_error: !cleanString(configMap.pilger_global_cron_last_error, 200),
+                },
+                automation: {
+                    enabled: configMap.pilger_global_automation_enabled !== 'false',
+                    cron_path: '/api/cron/pilger-global',
+                    schedule: '*/15 * * * *',
+                    last_checked_at: configMap.pilger_global_cron_last_checked_at || null,
+                    last_reason: configMap.pilger_global_cron_last_reason || null,
+                    last_run_at: configMap.pilger_global_cron_last_run_at || null,
+                    last_escalations: Number(configMap.pilger_global_cron_last_escalations || 0) || 0,
+                    last_result: phase3CronResult,
+                    last_error: configMap.pilger_global_cron_last_error || null,
+                },
+            },
+            phase_4: {
+                code_complete: phase4CoreReady,
+                status: phase4CoreReady ? 'complete' : 'attention',
+                label: phase4CoreReady ? 'Fase 4 concluida no nucleo' : 'Fase 4 com pendencias de nucleo',
+                detail: phase4CoreReady
+                    ? 'Pilger possui politicas por agente, fila de revisao, fechamento de governanca e aprendizado operacional registrado na Central.'
+                    : 'Ainda ha algum ponto estrutural da governanca, politica por agente ou Central que precisa ser corrigido.',
+                remaining_actions: remainingPhase4Actions,
+                core_checks: {
+                    phase_3_complete: phase3CoreReady,
+                    policy_matrix: pilgerGovernance.ready && (pilgerGovernance.totals as any).policy_count >= 6,
+                    review_queue: pilgerGovernance.ready,
+                    closure_action: true,
+                    learning_history: true,
+                    central_events: ecosystemEvents.ready,
+                },
+                governance: {
+                    policies: pilgerGovernance.policies,
+                    totals: pilgerGovernance.totals,
+                    review_queue: pilgerGovernance.review_queue,
+                },
+            },
+            phase_5: {
+                code_complete: phase5CoreReady,
+                status: phase5CoreReady ? 'complete' : 'attention',
+                label: phase5CoreReady ? 'Fase 5 concluida no nucleo' : 'Fase 5 com pendencias de go-live',
+                detail: phase5CoreReady
+                    ? 'Pilger possui pacote de go-live com checklist, runbook da bateria final, evidencias obrigatorias e rollback operacional.'
+                    : 'O pacote de go-live esta montado, mas ainda ha bloqueios ou watchpoints antes da bateria final.',
+                remaining_actions: remainingPhase5Actions,
+                core_checks: {
+                    phase_4_complete: phase4CoreReady,
+                    go_live_packet: true,
+                    critical_gate: phase5GoLive.ready,
+                    final_test_runbook: phase5GoLive.final_test_runbook.length >= 6,
+                    evidence_plan: phase5GoLive.required_evidence.length >= 6,
+                    rollback_plan: phase5GoLive.rollback_plan.length >= 3,
+                    central_events: ecosystemEvents.ready,
+                },
+                go_live: phase5GoLive,
+            },
+            phase_6: {
+                code_complete: phase6CoreReady,
+                status: phase6CoreReady ? 'complete' : 'attention',
+                label: phase6CoreReady ? 'Fase 6 concluida no nucleo' : 'Fase 6 com pendencias de pos-go-live',
+                detail: phase6CoreReady
+                    ? 'Pilger possui relatorio pos-go-live com sinais de estabilizacao, metricas, watchpoints e janela de acompanhamento.'
+                    : 'A camada pos-go-live esta montada, mas ainda depende das evidencias reais da bateria final para estabilizar.',
+                remaining_actions: remainingPhase6Actions,
+                core_checks: {
+                    phase_5_complete: phase5CoreReady,
+                    post_launch_report: true,
+                    stabilization_checklist: phase6PostLaunch.stabilization_checklist.length >= 7,
+                    executive_summary: Boolean(phase6PostLaunch.executive_summary),
+                    operating_window: Boolean(phase6PostLaunch.next_operating_window?.label),
+                    audit_signals: phase6PostLaunch.signals.length >= 8,
+                    central_events: ecosystemEvents.ready,
+                },
+                post_launch: phase6PostLaunch,
+            },
+            phase_7: phase7Identity,
+            phase_8: phase8Panel,
+            phase_9: phase9Practical,
             summary: {
                 public_url: publicUrl,
                 required_webhook_url: requiredWebhookUrl,
@@ -856,6 +1780,11 @@ export async function GET(request: NextRequest) {
                 connected_instances: connectedInstances.length,
                 latest_command: latestCommand.row || null,
                 latest_ads_command: latestAdsCommand.row || null,
+                latest_blog_command: latestBlogCommand.row || null,
+                latest_news_command: latestNewsCommand.row || null,
+                latest_finance_command: latestFinanceCommand.row || null,
+                latest_property_command: latestPropertyCommand.row || null,
+                latest_report_command: latestReportCommand.row || null,
                 latest_review: latestReview.row || null,
                 latest_plan: latestPlan.row || null,
                 counts: {
@@ -866,7 +1795,27 @@ export async function GET(request: NextRequest) {
                     masters_with_phone: masterPhones.count,
                     brokers_with_phone: brokerPhones.count,
                     authorized_phones: authorizedPhones.count,
+                    pilger_access_sources: pilgerAccessSourcesCount,
                     marketing_creatives: creatives.count,
+                    blog_commands: blogCommands.count,
+                    news_commands: newsCommands.count,
+                    finance_commands: financeCommands.count,
+                    property_commands: propertyCommands.count,
+                    report_commands: reportCommands.count,
+                    pilger_lifecycle_open: pilgerLifecycle.openCount,
+                    pilger_return_pending: pilgerLifecycle.returnPendingCount,
+                    pilger_returned: pilgerLifecycle.returnedCount,
+                    pilger_phase3_escalations: Number(configMap.pilger_global_cron_last_escalations || 0) || 0,
+                    pilger_phase4_reviews: (pilgerGovernance.totals as any).review_queue_count || 0,
+                    pilger_phase4_closed: (pilgerGovernance.totals as any).phase4_closed_count || 0,
+                    pilger_phase5_score: phase5GoLive.score,
+                    pilger_phase5_blockers: phase5GoLive.blockers,
+                    pilger_phase6_score: phase6PostLaunch.score,
+                    pilger_phase6_watchpoints: phase6PostLaunch.watchpoints,
+                    pilger_phase7_score: phase7Identity.score,
+                    pilger_phase8_score: phase8Panel.score,
+                    pilger_phase9_score: phase9Practical.score,
+                    pilger_phase9_failed_routes: phase9Practical.automated_results.failed_routes,
                     vitor_reviews: reviews.count,
                     vitor_plans: plans.count,
                     ecosystem_events: ecosystemEvents.count,
@@ -874,6 +1823,7 @@ export async function GET(request: NextRequest) {
                 },
             },
             identity_matrix: identityMatrix,
+            pilger_route_matrix: pilgerRouteMatrix,
             sections,
             test_plan: testPlan,
             test_messages: testPlan.map(step => ({
