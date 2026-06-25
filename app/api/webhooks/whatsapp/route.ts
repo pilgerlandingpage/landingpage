@@ -2319,15 +2319,16 @@ async function tryFastTextBrokerResponse(params: {
     messageId?: string | null
     messageType?: string | null
     senderName?: string | null
+    bypassTimingGuards?: boolean
 }): Promise<{ handled: boolean; reason: string; responseLength?: number }> {
-    const { supabase, instance, phone, text, messageId, messageType, senderName } = params
+    const { supabase, instance, phone, text, messageId, messageType, senderName, bypassTimingGuards } = params
     const inputText = String(text || '').trim()
     if (!instance?.broker_id || !inputText) return { handled: false, reason: 'not_fast_candidate' }
 
     const configs = await loadAIConfigs(supabase, instance.id)
-    if (configs['whatsapp_smart_timing_enabled'] !== 'false') return { handled: false, reason: 'smart_timing_enabled' }
+    if (!bypassTimingGuards && configs['whatsapp_smart_timing_enabled'] !== 'false') return { handled: false, reason: 'smart_timing_enabled' }
     const debounceSeconds = Math.max(1, parseInt(configs['whatsapp_debounce_seconds'] || '15', 10) || 15)
-    if (debounceSeconds > 5) return { handled: false, reason: 'debounce_above_fast_threshold' }
+    if (!bypassTimingGuards && debounceSeconds > 5) return { handled: false, reason: 'debounce_above_fast_threshold' }
     if (configs['whatsapp_agent_enabled'] === 'false') return { handled: false, reason: 'agent_disabled' }
     if (configs['whatsapp_ai_schedule_enabled'] === 'true') return { handled: false, reason: 'schedule_requires_inngest' }
 
@@ -3671,7 +3672,9 @@ export async function POST(request: NextRequest) {
                         replyText = await generateChatResponse(
                             buildWhatsAppGlobalConversationHistory(session),
                             inputForGlobalAgent,
-                            buildWhatsAppGlobalInternalSystemPrompt(globalIdentity),
+                            buildWhatsAppGlobalInternalSystemPrompt(globalIdentity, {
+                                configuredPrompt: configs['whatsapp_global_system_prompt'] || null,
+                            }),
                             {
                                 provider,
                                 geminiModel: configs['gemini_model'] || undefined,
@@ -4180,6 +4183,10 @@ export async function POST(request: NextRequest) {
             && !isDocument
             && !isReaction
 
+        const shouldAnswerGlobalLeadRealtime = isWhatsAppGlobalInstance(instance)
+            && registeredWhatsappIdentity?.type === 'lead'
+            && Boolean(storedMessageContent?.trim())
+
         if (instance.broker_id && isSimpleTextForFastPath) {
             try {
                 const fastResult = await tryFastTextBrokerResponse({
@@ -4190,11 +4197,15 @@ export async function POST(request: NextRequest) {
                     messageId,
                     messageType,
                     senderName,
+                    bypassTimingGuards: shouldAnswerGlobalLeadRealtime,
                 })
                 if (fastResult.handled) {
-                    console.log(`[Webhook] ⚡ Fast text response sent for ${finalPhone} (${fastResult.responseLength || 0} chars)`)
-                    await saveAudit({ action: 'responded_fast_webhook' })
-                    return NextResponse.json({ success: true, action: 'responded_fast_webhook' })
+                    const action = shouldAnswerGlobalLeadRealtime
+                        ? 'responded_global_lead_webhook'
+                        : 'responded_fast_webhook'
+                    console.log(`[Webhook] ⚡ Fast text response sent for ${finalPhone} (${fastResult.responseLength || 0} chars, action=${action})`)
+                    await saveAudit({ action })
+                    return NextResponse.json({ success: true, action })
                 }
                 console.log(`[Webhook] Fast path skipped for ${finalPhone}: ${fastResult.reason}`)
             } catch (e) {

@@ -759,12 +759,27 @@ function globalIdentityCapabilityLines(identity: WhatsAppGlobalIdentity): string
     return ['Contato sem perfil interno confirmado.']
 }
 
-export function buildWhatsAppGlobalInternalSystemPrompt(identity: WhatsAppGlobalIdentity) {
+export function buildWhatsAppGlobalInternalSystemPrompt(
+    identity: WhatsAppGlobalIdentity,
+    options?: { configuredPrompt?: string | null }
+) {
     const profileLabel = globalIdentityProfileLabel(identity)
     const permissions = identity.permissions.length ? identity.permissions.join(', ') : 'nenhuma'
+    const configuredPrompt = safeText(options?.configuredPrompt, 12000)
     return [
         'Voce e o WhatsApp Global da Pilger.',
         'Sua funcao e ser o porteiro inteligente da empresa para pessoas cadastradas no sistema.',
+        configuredPrompt
+            ? [
+                '',
+                'Comportamento configurado no painel do agente:',
+                configuredPrompt,
+                '',
+                'Aplicacao do comportamento do painel para esta conversa interna:',
+                '- Respeite o tom, a postura, os limites e as regras operacionais configuradas no painel.',
+                '- Se houver conflito, a identidade resolvida e as permissoes abaixo vencem qualquer trecho generico de atendimento a lead.',
+            ].join('\n')
+            : '',
         '',
         'Identidade resolvida:',
         `- Nome/rotulo: ${identity.label}`,
