@@ -120,6 +120,13 @@ function normalizeComparable(value: unknown) {
         .trim()
 }
 
+function normalizeComparableKey(value: unknown) {
+    return normalizeComparable(value)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
 function normalizeText(value: unknown) {
     return String(value || '').trim()
 }
@@ -1334,6 +1341,60 @@ function propertyText(property: Record<string, any>) {
     ].filter(Boolean).join(' '))
 }
 
+function canonicalPropertyTypeFamily(value: unknown) {
+    const text = normalizeComparableKey(value)
+    if (!text) return ''
+
+    if (/\b(apartamento|apto|cobertura|duplex|triplex|garden|loft)\b/.test(text)) return 'apartamento'
+    if (/\b(casa|sobrado|mansao|residencia)\b/.test(text)) return 'casa'
+    if (/\bterreno\b/.test(text)) return 'terreno'
+    if (/\b(comercial|galpao|deposito|sala|predio)\b/.test(text)) return 'comercial'
+
+    return text
+}
+
+function canonicalLocationKey(value: unknown) {
+    const text = normalizeComparableKey(value)
+    if (!text) return ''
+    if (text === 'bc') return 'balneario camboriu'
+    if (text.includes('praia brava')) return 'praia brava'
+    if (text.includes('balneario camboriu')) return 'balneario camboriu'
+    if (text === 'itajai' || text.includes('itajai sc')) return 'itajai'
+    if (text.includes('itapema')) return 'itapema'
+    if (text.includes('porto belo')) return 'porto belo'
+    if (text.includes('bombinhas')) return 'bombinhas'
+    if (text.includes('camboriu')) return 'camboriu'
+    return text
+}
+
+function propertyLocationKeys(property: Record<string, any>) {
+    const keys = new Set<string>()
+    const fieldValues = [
+        property.neighborhood,
+        property.city,
+        property.state,
+        property.address,
+        property.street,
+    ]
+
+    for (const value of fieldValues) {
+        const key = canonicalLocationKey(value)
+        if (key) keys.add(key)
+    }
+
+    const locationText = normalizeComparableKey(fieldValues.filter(Boolean).join(' '))
+    if (locationText.includes('praia brava')) keys.add('praia brava')
+
+    return keys
+}
+
+function setHasAny<T>(source: Set<T>, candidates: Iterable<T>) {
+    for (const candidate of candidates) {
+        if (source.has(candidate)) return true
+    }
+    return false
+}
+
 type LeadPropertyProfile = {
     sourceIds: string[]
     likedIds: Set<string>
@@ -1392,9 +1453,12 @@ function buildLeadPropertyProfile(lead: Record<string, any>, referenceProperties
         detailIds: new Set(signals.details),
         dislikedIds: new Set(signals.disliked),
         recommendedIds: leadRecommendedPropertyIds(lead),
-        cities: new Set(referenceProperties.map(property => normalizeComparable(property.city)).filter(Boolean)),
-        neighborhoods: new Set(referenceProperties.map(property => normalizeComparable(property.neighborhood)).filter(Boolean)),
-        propertyTypes: new Set(referenceProperties.map(property => normalizeComparable(property.property_type)).filter(Boolean)),
+        cities: new Set(referenceProperties.map(property => canonicalLocationKey(property.city)).filter(Boolean)),
+        neighborhoods: new Set(referenceProperties.flatMap(property => {
+            const neighborhood = canonicalLocationKey(property.neighborhood)
+            return neighborhood ? [neighborhood] : []
+        })),
+        propertyTypes: new Set(referenceProperties.map(property => canonicalPropertyTypeFamily(property.property_type)).filter(Boolean)),
         tags,
         targetPrice: prices.length ? Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length) : null,
         minBedrooms: numberMax('bedrooms'),
@@ -1415,11 +1479,15 @@ function scoreRecommendedProperty(property: Record<string, any>, profile: LeadPr
     if (profile.likedIds.has(propertyId)) score += 35
     if (profile.detailIds.has(propertyId)) score += 22
 
-    const city = normalizeComparable(property.city)
-    const neighborhood = normalizeComparable(property.neighborhood)
-    const propertyType = normalizeComparable(property.property_type)
-    if (city && profile.cities.has(city)) score += 26
-    if (neighborhood && profile.neighborhoods.has(neighborhood)) score += 34
+    const locationKeys = propertyLocationKeys(property)
+    const propertyType = canonicalPropertyTypeFamily(property.property_type)
+
+    if (profile.propertyTypes.size > 0 && (!propertyType || !profile.propertyTypes.has(propertyType))) return -10000
+    if (profile.neighborhoods.size > 0 && !setHasAny(profile.neighborhoods, locationKeys)) return -10000
+    if (profile.neighborhoods.size === 0 && profile.cities.size > 0 && !setHasAny(profile.cities, locationKeys)) return -10000
+
+    if (setHasAny(profile.cities, locationKeys)) score += 26
+    if (setHasAny(profile.neighborhoods, locationKeys)) score += 34
     if (propertyType && profile.propertyTypes.has(propertyType)) score += 18
 
     const price = Number(property.price || 0)

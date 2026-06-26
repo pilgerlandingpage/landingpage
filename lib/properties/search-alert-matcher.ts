@@ -248,9 +248,10 @@ function getNumericParam(params: SearchParamRecord, key: string) {
 function buildLocationTerms(value: string): string[] {
     const normalized = normalize(value)
     if (!normalized) return []
+    if (normalized === 'praia brava') return ['praia brava']
+    if (normalized === 'itajai') return ['itajai', 'praia brava']
     if (normalized === 'bc') return ['balneario camboriu', 'balneário camboriú']
     if (normalized === 'balneario camboriu') return ['balneario camboriu', 'balneário camboriú', 'camboriu', 'camboriú']
-    if (normalized === 'praia brava' || normalized === 'itajai') return ['praia brava', 'itajai', 'itajaí']
     if (normalized === 'camboriu') return ['camboriu', 'camboriú']
     return [value]
 }
