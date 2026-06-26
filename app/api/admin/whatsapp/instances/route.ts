@@ -9,6 +9,14 @@ import {
     listAllInstances,
 } from '@/lib/uazapi'
 import {
+    extractProviderInstanceName,
+    extractProviderInstanceToken,
+    extractPhoneFromWhatsAppStatus,
+    normalizeProviderInstances,
+    normalizeWhatsAppAddress,
+    normalizeWhatsAppConnectionStatus,
+} from '@/lib/whatsapp/connection-status'
+import {
     DEFAULT_NEW_WHATSAPP_INSTANCE_CONFIG,
     DEFAULT_WHATSAPP_INSTANCE_CONFIG,
     normalizeWhatsAppInstanceConfig,
@@ -19,89 +27,6 @@ function getSupabase() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-}
-
-function normalizeInstanceStatus(result: any): 'disconnected' | 'connecting' | 'connected' {
-    const statusValue = result?.status
-    const statusText = String(
-        result?.instance?.status ||
-        result?.status?.status ||
-        (typeof statusValue === 'string' ? statusValue : '') ||
-        result?.state ||
-        ''
-    ).toLowerCase()
-    const loggedInExplicitFalse =
-        result?.status?.loggedIn === false ||
-        result?.loggedIn === false
-    const isConnected =
-        result?.status?.connected === true ||
-        result?.connected === true ||
-        statusText === 'connected'
-    const isLoggedIn =
-        result?.status?.loggedIn === true ||
-        result?.loggedIn === true ||
-        statusText === 'connected'
-    const isConnecting =
-        statusText === 'connecting' ||
-        result?.response?.includes?.('Connecting') ||
-        Boolean(result?.instance?.qrcode || result?.instance?.qr || result?.qrcode || result?.qr)
-    if (isConnected && isLoggedIn && !loggedInExplicitFalse) return 'connected'
-    if (isConnected || isConnecting) return 'connecting'
-    return 'disconnected'
-}
-
-function normalizeWhatsAppAddress(raw: unknown): string {
-    if (raw && typeof raw === 'object') {
-        const value = raw as Record<string, unknown>
-        return normalizeWhatsAppAddress(
-            value.user ||
-            value.id ||
-            value.phone ||
-            value.number ||
-            value.jid ||
-            value.owner ||
-            value.ownerJid ||
-            ''
-        )
-    }
-
-    const text = String(raw || '').trim()
-    if (!text) return ''
-    const beforeAt = text.split('@')[0] || ''
-    const beforeDevice = beforeAt.split(':')[0] || ''
-    return beforeDevice.replace(/\D/g, '')
-}
-
-function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
-    const candidates = [
-        result?.status?.jid?.user,
-        result?.status?.jid?.id,
-        result?.status?.jid,
-        result?.instance?.jid?.user,
-        result?.instance?.jid?.id,
-        result?.instance?.jid,
-        result?.jid?.user,
-        result?.jid?.id,
-        result?.jid,
-        result?.me?.id,
-        result?.me?.user,
-        result?.instance?.me?.id,
-        result?.instance?.me?.user,
-        result?.instance?.owner,
-        result?.instance?.ownerJid,
-        result?.instance?.phone,
-        result?.phone,
-        result?.number,
-        fallback,
-    ]
-
-    for (const raw of candidates) {
-        if (!raw) continue
-        const digits = normalizeWhatsAppAddress(raw)
-        if (digits) return digits
-    }
-
-    return null
 }
 
 function extractPhoneLoose(raw: any): string | null {
@@ -187,26 +112,30 @@ export async function GET(request: NextRequest) {
             }
         } catch { /* admin_users table may not exist */ }
 
-        // Fallback map from admin endpoint /instance/all (some providers expose phone only there)
-        const providerPhoneByName: Record<string, string> = {}
+        // Fallback map from admin endpoint /instance/all. It is often more reliable than
+        // per-token /instance/status during provider reconnect windows.
+        const providerByName: Record<string, { phone?: string | null; status?: 'connected' | 'connecting' | 'disconnected' | null; token?: string | null }> = {}
         try {
             const allRaw = await listAllInstances()
-            const list = Array.isArray(allRaw)
-                ? allRaw
-                : (Array.isArray(allRaw?.instances) ? allRaw.instances
-                    : (Array.isArray(allRaw?.data) ? allRaw.data : []))
+            const list = normalizeProviderInstances(allRaw)
 
             for (const row of list) {
-                const name = row?.name || row?.instance_name || row?.instanceName || row?.instance?.name
+                const name = extractProviderInstanceName(row)
                 const phone = extractPhoneLoose(
                     row?.phone ||
                     row?.number ||
                     row?.jid ||
                     row?.me?.id ||
                     row?.instance?.phone ||
-                    row?.instance?.me?.id
+                        row?.instance?.me?.id
                 )
-                if (name && phone) providerPhoneByName[String(name)] = phone
+                if (name) {
+                    providerByName[String(name)] = {
+                        phone,
+                        status: normalizeWhatsAppConnectionStatus(row),
+                        token: extractProviderInstanceToken(row) || null,
+                    }
+                }
             }
         } catch {
             // ignore provider-all failures
@@ -215,22 +144,38 @@ export async function GET(request: NextRequest) {
         // Reconcile real-time status from UAZAPI to avoid stale "connected" states.
         const reconciledInstances = await Promise.all(
             instances.map(async (inst: any) => {
-                if (!inst.instance_token) return inst
+                const providerSnapshot = providerByName[inst.instance_name] || null
+                if (!inst.instance_token && !providerSnapshot?.token) return inst
                 try {
-                    const statusResult = await getInstanceStatus(inst.instance_token)
-                    const realtimeStatus = normalizeInstanceStatus(statusResult)
-                    const phone = extractPhoneFromStatus(statusResult, inst.phone_number)
+                    const effectiveToken = providerSnapshot?.token || inst.instance_token
+                    const statusResult = await getInstanceStatus(effectiveToken)
+                    const endpointStatus = normalizeWhatsAppConnectionStatus(statusResult)
+                    const providerStatus = providerSnapshot?.status || null
+                    const realtimeStatus = endpointStatus === 'connected' || providerStatus === 'connected'
+                        ? 'connected'
+                        : (endpointStatus || providerStatus)
+                    const resolvedStatus = realtimeStatus || inst.status
+                    const phone = extractPhoneFromWhatsAppStatus(statusResult, inst.phone_number)
                     const brokerPhone = inst.broker_id ? brokersMap[inst.broker_id]?.phone || null : null
-                    const providerPhone = providerPhoneByName[inst.instance_name] || null
+                    const providerPhone = providerSnapshot?.phone || null
                     const resolvedPhone = phone || providerPhone || brokerPhone
 
-                    if (realtimeStatus !== inst.status || resolvedPhone !== inst.phone_number) {
+                    if (
+                        (realtimeStatus && realtimeStatus !== inst.status) ||
+                        resolvedPhone !== inst.phone_number ||
+                        (providerSnapshot?.token && providerSnapshot.token !== inst.instance_token)
+                    ) {
                         await supabase
                             .from('whatsapp_instances')
                             .update({
-                                status: realtimeStatus,
+                                ...(realtimeStatus ? { status: realtimeStatus } : {}),
+                                ...(providerSnapshot?.token ? { instance_token: providerSnapshot.token } : {}),
                                 phone_number: resolvedPhone,
-                                connected_at: realtimeStatus === 'connected' ? (inst.connected_at || new Date().toISOString()) : null,
+                                connected_at: resolvedStatus === 'connected'
+                                    ? (inst.connected_at || new Date().toISOString())
+                                    : resolvedStatus === 'disconnected'
+                                        ? null
+                                        : inst.connected_at,
                                 updated_at: new Date().toISOString(),
                             })
                             .eq('id', inst.id)
@@ -238,9 +183,10 @@ export async function GET(request: NextRequest) {
 
                     return {
                         ...inst,
-                        status: realtimeStatus,
+                        instance_token: providerSnapshot?.token || inst.instance_token,
+                        status: resolvedStatus,
                         phone_number: resolvedPhone,
-                        connected_at: realtimeStatus === 'connected' ? (inst.connected_at || new Date().toISOString()) : null,
+                        connected_at: resolvedStatus === 'connected' ? (inst.connected_at || new Date().toISOString()) : inst.connected_at,
                     }
                 } catch {
                     return inst
@@ -264,7 +210,7 @@ export async function GET(request: NextRequest) {
                     try {
                         // Fetch live status from ConnectyHub
                         const liveStatus = await getInstanceStatus(inst.instance_token)
-                        const livePhone = extractPhoneFromStatus(
+                        const livePhone = extractPhoneFromWhatsAppStatus(
                             liveStatus,
                             inst.phone_number || (inst.broker_id ? brokersMap[inst.broker_id]?.phone || null : null)
                         )

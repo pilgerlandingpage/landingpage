@@ -10,6 +10,7 @@ import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-trac
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
 import { recordAgentConversationEcosystemEvent, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
+import { normalizeWhatsAppConnectionStatus } from '@/lib/whatsapp/connection-status'
 import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import { processPilgerEditorialCommand } from '@/lib/whatsapp/pilger-editorial-agent'
 import { processPilgerFinanceCommand } from '@/lib/whatsapp/pilger-finance-agent'
@@ -2947,27 +2948,6 @@ function extractWebhookInstanceName(body: any, eventPayload: any): string {
     return ''
 }
 
-function normalizeConnectionWebhookStatus(body: any): 'connected' | 'connecting' | 'disconnected' {
-    const statusText = String(
-        body?.instance?.status ||
-        body?.status?.status ||
-        (typeof body?.status === 'string' ? body.status : '') ||
-        body?.state ||
-        body?.type ||
-        ''
-    ).toLowerCase()
-    const connected = body?.status?.connected === true || body?.connected === true
-    const loggedIn = body?.status?.loggedIn === true || body?.loggedIn === true
-    const loggedOut = /loggedout|logout|disconnected|logged out/.test(statusText)
-        || body?.status?.loggedIn === false
-        || body?.status?.connected === false
-
-    if ((connected && loggedIn) || statusText === 'connected') return 'connected'
-    if (statusText === 'connecting') return 'connecting'
-    if (loggedOut || statusText === 'disconnected') return 'disconnected'
-    return 'disconnected'
-}
-
 async function syncConnectionWebhookStatus(params: {
     supabase: ReturnType<typeof getSupabase>
     instanceName: string
@@ -2975,10 +2955,14 @@ async function syncConnectionWebhookStatus(params: {
 }) {
     const { supabase, instanceName, body } = params
     const token = webhookText(body?.token)
-    const status = normalizeConnectionWebhookStatus(body)
+    const status = normalizeWhatsAppConnectionStatus(body)
     const ownerPhone = String(body?.owner || body?.instance?.owner || '').replace(/\D/g, '') || null
     const lastDisconnect = webhookText(body?.instance?.lastDisconnect)
     const lastDisconnectReason = webhookText(body?.instance?.lastDisconnectReason)
+
+    if (!status) {
+        return { synced: false, reason: 'unknown_connection_status', status: null }
+    }
 
     let query = supabase
         .from('whatsapp_instances')

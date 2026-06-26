@@ -1,25 +1,19 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook } from '@/lib/uazapi'
+import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook, listAllInstances } from '@/lib/uazapi'
 import { getPublicAppUrl } from '@/lib/app-url'
+import {
+    extractProviderInstanceName,
+    extractProviderInstanceToken,
+    extractPhoneFromWhatsAppStatus,
+    normalizeProviderInstances,
+    normalizeWhatsAppConnectionStatus,
+    REQUIRED_WHATSAPP_WEBHOOK_EVENTS,
+    REQUIRED_WHATSAPP_WEBHOOK_EXCLUDES,
+    webhookNeedsUpdate,
+} from '@/lib/whatsapp/connection-status'
 
 const NULL_ADMIN_USER_ID = '00000000-0000-0000-0000-000000000000'
-const REQUIRED_WEBHOOK_EVENTS = ['history', 'messages', 'messages_update', 'connection', 'chats', 'contacts', 'labels', 'chat_labels']
-const REQUIRED_WEBHOOK_EXCLUDES = ['wasSentByApi', 'isGroupYes']
-
-function normalizeStringList(value: unknown): string[] {
-    if (!Array.isArray(value)) return []
-    return value.map((item) => String(item || '').trim()).filter(Boolean)
-}
-
-function webhookNeedsUpdate(currentWebhook: any, webhookUrl: string) {
-    const currentUrl = String(currentWebhook?.url || currentWebhook?.webhook || '').trim()
-    const events = normalizeStringList(currentWebhook?.events)
-    const excludes = normalizeStringList(currentWebhook?.excludeMessages)
-    return currentUrl !== webhookUrl ||
-        REQUIRED_WEBHOOK_EVENTS.some((event) => !events.includes(event)) ||
-        REQUIRED_WEBHOOK_EXCLUDES.some((exclude) => !excludes.includes(exclude))
-}
 
 function isGlobalInstanceRecord(instance: any): boolean {
     const type = String(instance?.instance_type || '').trim().toLowerCase()
@@ -36,32 +30,6 @@ function getSupabase() {
 
 function normalizeDigits(value: unknown): string {
     return String(value || '').replace(/\D/g, '')
-}
-
-function normalizeWhatsAppAddress(raw: unknown): string {
-    if (raw && typeof raw === 'object') {
-        const value = raw as Record<string, unknown>
-        return normalizeWhatsAppAddress(
-            value.user ||
-            value.id ||
-            value.phone ||
-            value.number ||
-            value.jid ||
-            value.owner ||
-            value.ownerJid ||
-            ''
-        )
-    }
-
-    const text = String(raw || '').trim()
-    if (!text) return ''
-
-    // Exemplos de payload que queremos normalizar:
-    // 5547999999999@s.whatsapp.net
-    // 5547999999999:79@s.whatsapp.net (sufixo do dispositivo/companion)
-    const beforeAt = text.split('@')[0] || ''
-    const beforeDevice = beforeAt.split(':')[0] || ''
-    return normalizeDigits(beforeDevice)
 }
 
 function phoneCandidates(value: unknown): string[] {
@@ -125,68 +93,6 @@ function maskPhone(value: unknown): string {
     const digits = normalizeDigits(value)
     if (!digits) return 'empty'
     return `${digits.slice(0, 4)}...${digits.slice(-4)}`
-}
-
-function normalizeProviderStatus(result: any): 'disconnected' | 'connecting' | 'connected' {
-    const statusValue = result?.status
-    const statusText = String(
-        result?.instance?.status ||
-        result?.status?.status ||
-        (typeof statusValue === 'string' ? statusValue : '') ||
-        result?.state ||
-        ''
-    ).toLowerCase()
-    const loggedInExplicitFalse =
-        result?.status?.loggedIn === false ||
-        result?.loggedIn === false
-    const isConnected =
-        result?.status?.connected === true ||
-        result?.connected === true ||
-        statusText === 'connected'
-    const isLoggedIn =
-        result?.status?.loggedIn === true ||
-        result?.loggedIn === true ||
-        statusText === 'connected'
-    const isConnecting =
-        statusText === 'connecting' ||
-        result?.response?.includes?.('Connecting') ||
-        Boolean(result?.instance?.qrcode || result?.instance?.qr || result?.qrcode || result?.qr)
-
-    if (isConnected && isLoggedIn && !loggedInExplicitFalse) return 'connected'
-    if (isConnected || isConnecting) return 'connecting'
-    return 'disconnected'
-}
-
-function extractPhoneFromStatus(result: any, fallback?: string | null): string | null {
-    const candidates = [
-        result?.status?.jid?.user,
-        result?.status?.jid?.id,
-        result?.status?.jid,
-        result?.instance?.jid?.user,
-        result?.instance?.jid?.id,
-        result?.instance?.jid,
-        result?.jid?.user,
-        result?.jid?.id,
-        result?.jid,
-        result?.me?.id,
-        result?.me?.user,
-        result?.instance?.me?.id,
-        result?.instance?.me?.user,
-        result?.instance?.owner,
-        result?.instance?.ownerJid,
-        result?.instance?.phone,
-        result?.phone,
-        result?.number,
-        fallback,
-    ]
-
-    for (const raw of candidates) {
-        if (!raw) continue
-        const digits = normalizeWhatsAppAddress(raw)
-        if (digits) return digits
-    }
-
-    return null
 }
 
 async function ensureAiBrokerForAdminUser(params: {
@@ -339,12 +245,27 @@ export async function GET(request: NextRequest) {
             })
         }
 
+        let providerSnapshot: any = null
+        try {
+            const providerInstances = normalizeProviderInstances(await listAllInstances())
+            providerSnapshot = providerInstances.find((row) => extractProviderInstanceName(row) === instance.instance_name) || null
+        } catch {
+            // admin snapshot is a fallback only
+        }
+
+        const effectiveToken = extractProviderInstanceToken(providerSnapshot) || instance.instance_token
+
         // Consultar status na uazapi
-        const result = await getInstanceStatus(instance.instance_token)
+        const result = await getInstanceStatus(effectiveToken)
         console.log('[Status] Resultado uazapi:', JSON.stringify(result).substring(0, 300))
 
-        let newStatus = normalizeProviderStatus(result)
-        const phone = extractPhoneFromStatus(result, instance.phone_number)
+        const endpointStatus = normalizeWhatsAppConnectionStatus(result)
+        const providerStatus = normalizeWhatsAppConnectionStatus(providerSnapshot)
+        const newStatus = endpointStatus === 'connected' || providerStatus === 'connected'
+            ? 'connected'
+            : (endpointStatus || providerStatus || instance.status || 'disconnected')
+        const phone = extractPhoneFromWhatsAppStatus(result, instance.phone_number)
+            || extractPhoneFromWhatsAppStatus(providerSnapshot, instance.phone_number)
 
         let syncedBrokerId = instance.broker_id ? String(instance.broker_id) : null
         let brokerCreated = false
@@ -414,21 +335,26 @@ export async function GET(request: NextRequest) {
                 .from('whatsapp_instances')
                 .update({
                     status: newStatus,
+                    instance_token: effectiveToken,
                     phone_number: resolvedPhoneNumber,
-                    connected_at: newStatus === 'connected' ? (instance.connected_at || new Date().toISOString()) : instance.connected_at,
+                    connected_at: newStatus === 'connected'
+                        ? (instance.connected_at || new Date().toISOString())
+                        : newStatus === 'disconnected'
+                            ? null
+                            : instance.connected_at,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', instance.id)
         }
 
         // Auto-configure webhook whenever connected
-        if (newStatus === 'connected' && instance.instance_token) {
+        if (newStatus === 'connected' && effectiveToken) {
             try {
                 const webhookUrl = `${getPublicAppUrl(request.nextUrl.origin)}/api/webhooks/whatsapp`
 
                 let currentWebhook: any = null
                 try {
-                    currentWebhook = await getWebhook(instance.instance_token)
+                    currentWebhook = await getWebhook(effectiveToken)
                 } catch {
                     // ignore webhook read failures
                 }
@@ -437,11 +363,11 @@ export async function GET(request: NextRequest) {
                     await configureWebhook({
                         enabled: true,
                         url: webhookUrl,
-                        events: REQUIRED_WEBHOOK_EVENTS,
-                        excludeMessages: REQUIRED_WEBHOOK_EXCLUDES,
+                        events: REQUIRED_WHATSAPP_WEBHOOK_EVENTS,
+                        excludeMessages: REQUIRED_WHATSAPP_WEBHOOK_EXCLUDES,
                         addUrlEvents: false,
                         addUrlTypesMessages: false,
-                    }, instance.instance_token)
+                    }, effectiveToken)
                     console.log(`[Status] Webhook configurado: ${webhookUrl}`)
                 }
             } catch (e) {

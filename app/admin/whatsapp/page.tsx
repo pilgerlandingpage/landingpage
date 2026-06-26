@@ -135,6 +135,8 @@ export default function WhatsAppInstancesPage() {
     const [savingSettings, setSavingSettings] = useState<string | null>(null)
     const [runningAttendance, setRunningAttendance] = useState<string | null>(null)
     const [attendanceMessage, setAttendanceMessage] = useState<Record<string, { type: 'success' | 'error'; text: string }>>({})
+    const [forcingReconnect, setForcingReconnect] = useState(false)
+    const [forceReconnectMessage, setForceReconnectMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [createBrokerName, setCreateBrokerName] = useState('')
     const [createInstanceName, setCreateInstanceName] = useState('')
     const [creatingInstance, setCreatingInstance] = useState(false)
@@ -201,6 +203,38 @@ export default function WhatsAppInstancesPage() {
 
     const refreshAll = async () => {
         setRefreshing(true); await loadInstances(true); setRefreshing(false)
+    }
+
+    const forceReconnectAll = async () => {
+        setForcingReconnect(true)
+        setForceReconnectMessage(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/reconnect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ all: true }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok && !data?.message) throw new Error('Falha ao forcar reconexao.')
+            const connected = Array.isArray(data?.results)
+                ? data.results.filter((item: any) => item?.status === 'connected').length
+                : 0
+            const disconnected = Array.isArray(data?.results)
+                ? data.results.filter((item: any) => item?.status === 'disconnected').length
+                : 0
+            const failed = Array.isArray(data?.results)
+                ? data.results.filter((item: any) => item?.success === false).length
+                : 0
+            setForceReconnectMessage({
+                type: failed ? 'error' : 'success',
+                text: data?.message || `Reconexao verificada: ${connected} conectada(s), ${disconnected} desconectada(s), ${failed} falha(s).`,
+            })
+            await loadInstances(true)
+        } catch (err) {
+            setForceReconnectMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao forcar reconexao.' })
+        } finally {
+            setForcingReconnect(false)
+        }
     }
 
     const createInstanceAndGetQr = async () => {
@@ -355,12 +389,33 @@ export default function WhatsAppInstancesPage() {
                         {instances.length} instância{instances.length !== 1 ? 's' : ''} operacional{instances.length !== 1 ? 'is' : ''} • {connectedCount} conectada{connectedCount !== 1 ? 's' : ''}
                     </p>
                 </div>
-                <button onClick={refreshAll} disabled={refreshing}
-                    style={{ padding: '10px 20px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
-                    <RefreshCw size={16} className={refreshing ? 'spin' : ''} />
-                    {refreshing ? 'Atualizando...' : 'Atualizar'}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <button onClick={forceReconnectAll} disabled={forcingReconnect}
+                        style={{ padding: '10px 16px', borderRadius: '10px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', cursor: forcingReconnect ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}>
+                        {forcingReconnect ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
+                        {forcingReconnect ? 'Reparando...' : 'Forçar reconexão'}
+                    </button>
+                    <button onClick={refreshAll} disabled={refreshing}
+                        style={{ padding: '10px 20px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
+                        <RefreshCw size={16} className={refreshing ? 'spin' : ''} />
+                        {refreshing ? 'Atualizando...' : 'Atualizar'}
+                    </button>
+                </div>
             </div>
+
+            {forceReconnectMessage && (
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    fontSize: '0.82rem',
+                    background: forceReconnectMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                    color: forceReconnectMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                    border: `1px solid ${forceReconnectMessage.type === 'success' ? 'rgba(34,197,94,0.22)' : 'rgba(239,68,68,0.22)'}`,
+                }}>
+                    {forceReconnectMessage.text}
+                </div>
+            )}
 
             <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(201,169,110,0.06)', border: '1px solid rgba(201,169,110,0.2)' }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>
@@ -612,6 +667,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const [privacyMessage, setPrivacyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [qrLoading, setQrLoading] = useState(false)
     const [checkingStatus, setCheckingStatus] = useState(false)
+    const [reconnectLoading, setReconnectLoading] = useState(false)
     const [autoCheckingConnection, setAutoCheckingConnection] = useState(false)
     const [deletingInstance, setDeletingInstance] = useState(false)
     const [clearingCache, setClearingCache] = useState(false)
@@ -731,6 +787,34 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao verificar status.' })
         } finally {
             setCheckingStatus(false)
+        }
+    }
+
+    const forceReconnectInstance = async () => {
+        setReconnectLoading(true)
+        setQrMessage(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/reconnect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instanceId: inst.id }),
+            })
+            const data = await res.json().catch(() => ({}))
+            const result = Array.isArray(data?.results) ? data.results[0] : null
+            if (!res.ok || !result?.success) {
+                throw new Error(result?.error || data?.message || 'Falha ao forcar reconexao.')
+            }
+            setQrMessage({
+                type: result.status === 'connected' ? 'success' : 'error',
+                text: result.status === 'connected'
+                    ? 'Conexao sincronizada e webhook reparado.'
+                    : `Status atual no provedor: ${result.status || 'desconhecido'}.`,
+            })
+            await onRefresh()
+        } catch (err) {
+            setQrMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao forcar reconexao.' })
+        } finally {
+            setReconnectLoading(false)
         }
     }
 
@@ -945,6 +1029,23 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     >
                                         {checkingStatus ? 'Verificando...' : 'Verificar Status'}
                                     </button>
+                                    <button
+                                        onClick={forceReconnectInstance}
+                                        disabled={reconnectLoading}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            background: 'rgba(34,197,94,0.1)',
+                                            color: '#22c55e',
+                                            border: '1px solid rgba(34,197,94,0.25)',
+                                            cursor: reconnectLoading ? 'wait' : 'pointer',
+                                            fontWeight: 700,
+                                            fontSize: '0.82rem',
+                                            opacity: reconnectLoading ? 0.7 : 1
+                                        }}
+                                    >
+                                        {reconnectLoading ? 'Reparando...' : 'Forçar reconexão'}
+                                    </button>
                                 </div>
 
                                 {!!qrCode && (
@@ -987,6 +1088,23 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                             <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'flex-end' }}>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                     <button
+                                        onClick={forceReconnectInstance}
+                                        disabled={reconnectLoading}
+                                        style={{
+                                            padding: '8px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(34,197,94,0.3)',
+                                            background: 'rgba(34,197,94,0.1)',
+                                            color: '#22c55e',
+                                            fontWeight: 700,
+                                            fontSize: '0.8rem',
+                                            cursor: reconnectLoading ? 'wait' : 'pointer',
+                                            opacity: reconnectLoading ? 0.7 : 1,
+                                        }}
+                                    >
+                                        {reconnectLoading ? 'Reparando...' : 'Forçar reconexão'}
+                                    </button>
+                                    <button
                                         onClick={clearConversationCache}
                                         disabled={clearingCache}
                                         style={{
@@ -1022,6 +1140,19 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
                                     </button>
                                 </div>
                             </div>
+                            {qrMessage && (
+                                <div style={{
+                                    marginBottom: '10px',
+                                    padding: '8px 10px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.78rem',
+                                    background: qrMessage.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                                    color: qrMessage.type === 'success' ? '#22c55e' : '#ef4444',
+                                    border: `1px solid ${qrMessage.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                                }}>
+                                    {qrMessage.text}
+                                </div>
+                            )}
                             <div style={{
                                 padding: '12px 16px', borderRadius: '10px',
                                 background: inst.live_data?.webhookUrl ? 'rgba(34,197,94,0.06)' : 'rgba(245,158,11,0.06)',
