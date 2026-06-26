@@ -115,24 +115,74 @@ function mapOverlayTypeToMapFilter(value: string) {
     const subtypeLabels: Record<string, string> = {
         cobertura: 'Cobertura',
         condominio: 'Casa em Condomínio',
-        duplex: 'Duplex',
-        galpao: 'Galpão',
+        duplex: 'Duplex / Triplex',
+        galpao: 'Galpão / Depósito',
         garden: 'Garden',
         'predio-residencial': 'Prédio',
         'sala-comercial': 'Sala Comercial',
         'terreno-comercial': 'Terreno Comercial',
-        'terreno-condominio': 'Terreno',
+        'terreno-condominio': 'Terreno em Condomínio',
     }
 
     return subtypeLabels[rawValue] || rawValue
 }
 
+function getOverlaySearchLocation(values: HomeSearchValues) {
+    return (values.locationType === 'office'
+        ? values.locationLabel
+        : values.locationValue || values.locationLabel
+    ).trim()
+}
+
+function normalizeTypeMatchText(value: unknown) {
+    return normalize(value)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function hasTypeToken(text: string, token: string) {
+    return text.split(' ').includes(token)
+}
+
+function hasTypeTokenPrefix(text: string, prefix: string) {
+    return text.split(' ').some(token => token.startsWith(prefix))
+}
+
 function matchesType(property: Property, type: string) {
     if (!type || type === 'all') return true
-    const text = normalize(`${property.property_type || ''} ${property.title || ''}`)
-    if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => text.includes(term))
-    if (type === 'Casa em Condomínio') return text.includes('casa') && text.includes('condom')
-    return text.includes(normalize(type))
+    const propertyTypeText = normalizeTypeMatchText(property.property_type)
+    const titleText = normalizeTypeMatchText(property.title)
+    const text = `${propertyTypeText} ${titleText}`.trim()
+
+    if (type === 'Apartamento') return hasTypeToken(propertyTypeText, 'apartamento')
+    if (type === 'Casa') return hasTypeToken(propertyTypeText, 'casa')
+    if (type === 'Terreno') return hasTypeToken(propertyTypeText, 'terreno')
+    if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => hasTypeTokenPrefix(text, term))
+    if (type === 'Casa em Condomínio') return (
+        hasTypeToken(propertyTypeText, 'casa') && hasTypeTokenPrefix(propertyTypeText, 'cond')
+    ) || (
+        hasTypeToken(titleText, 'casa') && hasTypeTokenPrefix(titleText, 'cond')
+    )
+    if (type === 'Duplex / Triplex') return hasTypeToken(text, 'duplex') || hasTypeToken(text, 'triplex')
+    if (type === 'Galpão / Depósito') return hasTypeTokenPrefix(text, 'galpao') || hasTypeTokenPrefix(text, 'deposito')
+    if (type === 'Terreno em Condomínio') return (
+        hasTypeToken(propertyTypeText, 'terreno') && hasTypeTokenPrefix(propertyTypeText, 'cond')
+    ) || (
+        hasTypeToken(titleText, 'terreno') && hasTypeTokenPrefix(titleText, 'cond')
+    )
+    if (type === 'Terreno Comercial') return (
+        hasTypeToken(propertyTypeText, 'terreno') && hasTypeToken(propertyTypeText, 'comercial')
+    ) || (
+        hasTypeToken(titleText, 'terreno') && hasTypeToken(titleText, 'comercial')
+    )
+    if (type === 'Sala Comercial') return (
+        hasTypeToken(propertyTypeText, 'sala') && hasTypeToken(propertyTypeText, 'comercial')
+    ) || (
+        hasTypeToken(titleText, 'sala') && hasTypeToken(titleText, 'comercial')
+    )
+
+    return text.includes(normalizeTypeMatchText(type))
 }
 
 function matchesPrice(property: Property, range: string) {
@@ -207,6 +257,7 @@ export default function MobileMapSearchModal({
     )
     const isMapLocked = !isMapUnlocked
     const visibleProperties = isMapLocked || isOfficeLocationSelected ? [] : boundedProperties
+    const mapDisplayProperties = isMapLocked || isOfficeLocationSelected ? filteredProperties : visibleProperties
     const officeMarker = isMapLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
     const statLabel = isMapLocked || isOfficeLocationSelected
         ? 'Imobiliária Guilherme Pilger'
@@ -224,12 +275,8 @@ export default function MobileMapSearchModal({
             : `property-modal-${query}-${selectedRegionArea?.id || 'no-region'}-${type}-${price}-${visibleProperties.length}-${appliedAreaBounds ? 'area' : 'all'}`
     const shouldShowSearchThisArea = Boolean(pendingAreaBounds && !isMapLocked && !isOfficeLocationSelected)
 
-    const syncSearchWithMap = useCallback((values: HomeSearchValues) => {
-        const nextLocation = (values.locationType === 'office'
-            ? values.locationLabel
-            : values.locationValue || values.locationLabel
-        ).trim()
-
+    const applySearchToMap = useCallback((values: HomeSearchValues, unlockMap = false) => {
+        const nextLocation = getOverlaySearchLocation(values)
         setQuery(nextLocation)
         setType(mapOverlayTypeToMapFilter(values.typeValue))
         setPrice(values.priceValue || 'all')
@@ -245,11 +292,31 @@ export default function MobileMapSearchModal({
 
         setIsOfficeLocationSelected(false)
 
-        if (nextLocation && (values.locationType === 'city' || values.locationType === 'neighborhood')) {
+        if (unlockMap || (nextLocation && (values.locationType === 'city' || values.locationType === 'neighborhood'))) {
             setShowMapLockedHint(false)
             setIsMapUnlocked(true)
         }
     }, [])
+
+    const syncSearchWithMap = useCallback((values: HomeSearchValues) => {
+        applySearchToMap(values)
+    }, [applySearchToMap])
+
+    const submitSearchInMap = useCallback((values: HomeSearchValues) => {
+        const nextLocation = getOverlaySearchLocation(values)
+        const nextType = mapOverlayTypeToMapFilter(values.typeValue)
+
+        applySearchToMap(values, true)
+
+        void trackEvent('property_map_modal_inline_search_submitted', {
+            source: defaultSource,
+            destination: 'property_map_modal',
+            query: searchLocationName(nextLocation),
+            location_type: values.locationType || 'free_text',
+            type_value: nextType,
+            price_value: values.priceValue || 'all',
+        })
+    }, [applySearchToMap, defaultSource])
 
     const openModal = useCallback((source = defaultSource) => {
         setIsOpen(true)
@@ -366,12 +433,13 @@ export default function MobileMapSearchModal({
                 <div className="mobile-map-modal-body">
                     <div className={`mobile-map-preview-panel ${isMapLocked ? 'is-map-locked' : ''}`}>
                         <MapSearch
-                            properties={visibleProperties}
+                            properties={mapDisplayProperties}
                             regionArea={selectedRegionArea}
                             refitKey={refitKey}
                             interactionEnabled={!isMapLocked}
                             officeMarker={officeMarker}
                             initialMapStyle="luxury"
+                            overviewMode={isMapLocked || isOfficeLocationSelected}
                             onUserBoundsChange={handleUserBoundsChange}
                         />
 
@@ -413,7 +481,11 @@ export default function MobileMapSearchModal({
                         )}
 
                         <div className="mobile-map-search-panel">
-                            <HomeSearchBar onValuesChange={syncSearchWithMap} variant="map" />
+                            <HomeSearchBar
+                                onSubmitValues={submitSearchInMap}
+                                onValuesChange={syncSearchWithMap}
+                                variant="map"
+                            />
                         </div>
                     </div>
                 </div>

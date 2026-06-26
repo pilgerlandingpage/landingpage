@@ -30,7 +30,10 @@ export type HomeSearchValues = {
 
 type HomeSearchBarProps = {
     initialSearchParams?: string
+    onSubmitValues?: (values: HomeSearchValues) => void
     onValuesChange?: (values: HomeSearchValues) => void
+    showTitle?: boolean
+    suggestionsPlacement?: 'up' | 'down'
     variant?: 'home' | 'map' | 'results'
 }
 
@@ -75,7 +78,7 @@ const PROPERTY_TYPE_OPTIONS = [
 ]
 
 const PRICE_OPTIONS = [
-    { value: 'all', label: 'Acima de R$4 mi' },
+    { value: 'all', label: 'Todos os Valores' },
     { value: '4000000-6000000', label: 'R$4.000.000 a R$6.000.000' },
     { value: '6000000-8000000', label: 'R$6.000.000 a R$8.000.000' },
     { value: '8000000-10000000', label: 'R$8.000.000 a R$10.000.000' },
@@ -110,7 +113,7 @@ function normalize(value: unknown) {
 }
 
 function priceLabel(value: string) {
-    return PRICE_OPTIONS.find(option => option.value === value)?.label || 'Acima de R$4 mi'
+    return PRICE_OPTIONS.find(option => option.value === value)?.label || 'Todos os Valores'
 }
 
 function typeLabel(value: string) {
@@ -175,8 +178,17 @@ function formatPrice(price: number) {
     }).format(price)
 }
 
-export default function HomeSearchBar({ initialSearchParams, onValuesChange, variant = 'home' }: HomeSearchBarProps) {
+export default function HomeSearchBar({
+    initialSearchParams,
+    onSubmitValues,
+    onValuesChange,
+    showTitle,
+    suggestionsPlacement,
+    variant = 'home',
+}: HomeSearchBarProps) {
     const router = useRouter()
+    const shouldShowTitle = showTitle ?? variant === 'home'
+    const suggestionsDirection = suggestionsPlacement ?? (variant === 'map' ? 'up' : 'down')
     const initialValues = useMemo(() => valuesFromParams(initialSearchParams), [initialSearchParams])
     const suggestionsNeedTyping = variant === 'map'
     const [locationLabel, setLocationLabel] = useState(initialValues.locationLabel)
@@ -192,6 +204,13 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
     const wrapperRef = useRef<HTMLDivElement>(null)
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const hasReportedInitialValuesRef = useRef(false)
+    const currentValues = useMemo<HomeSearchValues>(() => ({
+        locationLabel,
+        locationType,
+        locationValue,
+        priceValue,
+        typeValue,
+    }), [locationLabel, locationType, locationValue, priceValue, typeValue])
 
     useEffect(() => {
         setLocationLabel(initialValues.locationLabel)
@@ -226,14 +245,8 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
             return
         }
 
-        onValuesChange({
-            locationLabel,
-            locationType,
-            locationValue,
-            priceValue,
-            typeValue,
-        })
-    }, [locationLabel, locationType, locationValue, onValuesChange, priceValue, typeValue])
+        onValuesChange(currentValues)
+    }, [currentValues, onValuesChange])
 
     const fetchSuggestions = useCallback(async (term: string) => {
         setIsLoading(true)
@@ -344,11 +357,27 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
         return queryString ? `/busca?${queryString}` : '/busca'
     }
 
-    function submitSearch(event?: FormEvent) {
+    function submitSearch(event?: FormEvent | KeyboardEvent<HTMLInputElement>) {
         event?.preventDefault()
-        const destination = buildSearchHref()
         setShowSuggestions(false)
 
+        if (onSubmitValues) {
+            void trackEvent('property_search_submitted', {
+                destination: 'home_map',
+                location_label: locationLabel.trim(),
+                location_type: locationType || 'free_text',
+                property_type: typeValue,
+                property_type_label: typeLabel(typeValue),
+                price: priceValue,
+                price_label: priceLabel(priceValue),
+                source: variant,
+            })
+
+            onSubmitValues(currentValues)
+            return
+        }
+
+        const destination = buildSearchHref()
         void trackEvent('property_search_submitted', {
             destination,
             location_label: locationLabel.trim(),
@@ -431,9 +460,9 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
     let suggestionIndex = -1
 
     return (
-        <section className={`home-search-box home-search-box-${variant}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
+        <section className={`home-search-box home-search-box-${variant} home-search-suggestions-${suggestionsDirection} ${shouldShowTitle ? 'home-search-title-enabled' : ''}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
             <form className="home-search-panel" onSubmit={submitSearch}>
-                {variant === 'home' && (
+                {shouldShowTitle && (
                     <div className="home-search-title">
                         <span>Busca inteligente</span>
                         <h2>Encontre seu Imóvel!</h2>
@@ -476,7 +505,7 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                             onChange={event => updateLocation(event.target.value)}
                             onFocus={focusLocation}
                             onKeyDown={handleKeyDown}
-                            placeholder="ex: cobertura 4 suítes Praia Brava frente mar"
+                            placeholder={variant === 'map' ? 'digite a cidade ou bairro...' : 'ex: cobertura 4 suítes Praia Brava frente mar'}
                             type="text"
                             value={locationLabel}
                         />
@@ -914,6 +943,22 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                     padding: 6px 14px;
                     text-shadow: none;
                 }
+                .home-search-box-map.home-search-title-enabled .home-search-title {
+                    margin: 0 0 2px;
+                }
+                .home-search-box-map.home-search-title-enabled .home-search-title h2 {
+                    background: transparent;
+                    border: 0;
+                    border-radius: 0;
+                    box-shadow: none;
+                    color: #fff8ea;
+                    display: block;
+                    font-family: 'Inter', sans-serif;
+                    font-size: clamp(1.35rem, 2.2vw, 2rem);
+                    font-weight: 900;
+                    padding: 0;
+                    text-shadow: 0 2px 14px rgba(0,0,0,0.42);
+                }
                 .home-search-box-map label > span {
                     clip: rect(0 0 0 0);
                     clip-path: inset(50%);
@@ -993,6 +1038,10 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                     top: auto;
                     z-index: 1500;
                 }
+                .home-search-box-map.home-search-suggestions-down .home-search-suggestions {
+                    bottom: auto;
+                    top: calc(100% + 6px);
+                }
                 @media (min-width: 701px) {
                     .home-search-box-map {
                         width: 100%;
@@ -1039,6 +1088,10 @@ export default function HomeSearchBar({ initialSearchParams, onValuesChange, var
                         right: 54px;
                         top: auto;
                         width: calc(100vw - 48px);
+                    }
+                    .home-search-box-map.home-search-suggestions-down .home-search-suggestions {
+                        bottom: auto;
+                        top: calc(100% + 6px);
                     }
                 }
             `}</style>

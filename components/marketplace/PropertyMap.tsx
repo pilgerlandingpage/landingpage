@@ -65,6 +65,8 @@ interface PropertyMapProps {
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
     initialMapStyle?: MapStyle
+    overviewMode?: boolean
+    fixedOverviewView?: MapFixedView | null
 }
 
 type MappedProperty = {
@@ -73,6 +75,12 @@ type MappedProperty = {
 }
 
 export type MapDrawArea = [number, number][]
+export type MapFixedView = {
+    center: [number, number]
+    zoom: number
+    mobileCenter?: [number, number]
+    mobileZoom?: number
+}
 
 type OfficeMarker = {
     latLng: [number, number]
@@ -550,17 +558,26 @@ function MapUpdater({
     points,
     refitKey = '',
     hasFocusArea = false,
+    overviewMode = false,
+    fixedOverviewView = null,
 }: {
     points: [number, number][]
     refitKey?: string
     hasFocusArea?: boolean
+    overviewMode?: boolean
+    fixedOverviewView?: MapFixedView | null
 }) {
     const map = useMap()
     const lastPointsKey = useRef('')
 
     const pointsKey = useMemo(
-        () => `${refitKey}::${hasFocusArea ? 'focus' : 'default'}::${points.map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`).join('|')}`,
-        [hasFocusArea, points, refitKey]
+        () => {
+            const fixedViewKey = fixedOverviewView
+                ? `${fixedOverviewView.center.join(',')}::${fixedOverviewView.zoom}::${fixedOverviewView.mobileCenter?.join(',') || ''}::${fixedOverviewView.mobileZoom || ''}`
+                : 'auto'
+            return `${refitKey}::${overviewMode ? 'overview' : hasFocusArea ? 'focus' : 'default'}::${fixedViewKey}::${points.map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`).join('|')}`
+        },
+        [fixedOverviewView, hasFocusArea, overviewMode, points, refitKey]
     )
 
     useEffect(() => {
@@ -569,6 +586,21 @@ function MapUpdater({
         }
 
         lastPointsKey.current = pointsKey
+
+        const isMobile = window.matchMedia('(max-width: 767px)').matches
+
+        if (overviewMode && fixedOverviewView && !hasFocusArea) {
+            const center = isMobile && fixedOverviewView.mobileCenter
+                ? fixedOverviewView.mobileCenter
+                : fixedOverviewView.center
+            const zoom = isMobile && typeof fixedOverviewView.mobileZoom === 'number'
+                ? fixedOverviewView.mobileZoom
+                : fixedOverviewView.zoom
+
+            map.invalidateSize({ animate: false })
+            map.setView(center, zoom, { animate: false })
+            return
+        }
 
         if (points.length > 0) {
             const container = map.getContainer()
@@ -584,12 +616,23 @@ function MapUpdater({
             }
 
             const bounds = L.latLngBounds(points.map(([lat, lng]) => L.latLng(lat, lng)))
-            const isMobile = window.matchMedia('(max-width: 767px)').matches
             const focusBottomPadding = Math.min(
                 340,
                 Math.max(isMobile ? 126 : 210, Math.round(mapHeight * (isMobile ? 0.3 : 0.34)))
             )
-            const fitOptions: L.FitBoundsOptions = hasFocusArea
+            const fitOptions: L.FitBoundsOptions = overviewMode
+                ? isMobile
+                    ? {
+                        paddingTopLeft: [34, 128],
+                        paddingBottomRight: [34, 64],
+                        maxZoom: 11,
+                    }
+                    : {
+                        paddingTopLeft: [72, 108],
+                        paddingBottomRight: [72, 72],
+                        maxZoom: 11,
+                    }
+                : hasFocusArea
                 ? isMobile
                     ? {
                         paddingTopLeft: [26, 72],
@@ -607,7 +650,7 @@ function MapUpdater({
 
             map.flyToBounds(bounds, { ...fitOptions, duration: 0.75 })
         }
-    }, [hasFocusArea, map, points, pointsKey])
+    }, [fixedOverviewView, hasFocusArea, map, overviewMode, points, pointsKey])
 
     useEffect(() => {
         let frame: number | null = null
@@ -1217,8 +1260,8 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
     )
 }
 
-function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): ClusterItem[] {
-    if (zoom >= 14 || (zoom < 13 && items.length <= 220)) {
+function buildClusters(items: MappedProperty[], map: L.Map, zoom: number, overviewMode = false): ClusterItem[] {
+    if (zoom >= 14 || (overviewMode && items.length <= 450) || (zoom < 13 && items.length <= 220)) {
         return items.map(item => ({ kind: 'single', item }))
     }
 
@@ -1253,8 +1296,19 @@ function buildClusters(items: MappedProperty[], map: L.Map, zoom: number): Clust
     })
 }
 
-function createClusterIcon(count: number, minPrice: number | null, zoom: number) {
+function createClusterIcon(count: number, minPrice: number | null, zoom: number, overviewMode = false) {
     const priceText = formatMapPrice(minPrice)
+
+    if (overviewMode) {
+        return L.divIcon({
+            className: 'premium-cluster-marker',
+            html: `<div class="cluster-dot-wrap cluster-dot-wrap--overview">
+                <span class="cluster-dot cluster-dot--overview" aria-hidden="true"></span>
+            </div>`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+        })
+    }
 
     if (zoom < 13) {
         return L.divIcon({
@@ -1291,6 +1345,7 @@ function ClusterLayer({
     createIcon,
     onMarkerHover,
     onPropertySelect,
+    overviewMode = false,
 }: {
     items: MappedProperty[]
     hoveredPropertyId?: string | null
@@ -1298,6 +1353,7 @@ function ClusterLayer({
     createIcon: (property: Property, markerState: MarkerVisualState) => L.DivIcon
     onMarkerHover?: (id: string | null) => void
     onPropertySelect?: (property: Property) => void
+    overviewMode?: boolean
 }) {
     const map = useMap()
     const [zoom, setZoom] = useState(map.getZoom())
@@ -1310,7 +1366,7 @@ function ClusterLayer({
         }
     }, [map])
 
-    const clusters = useMemo(() => buildClusters(items, map, zoom), [items, map, zoom])
+    const clusters = useMemo(() => buildClusters(items, map, zoom, overviewMode), [items, map, overviewMode, zoom])
 
     return (
         <>
@@ -1320,7 +1376,7 @@ function ClusterLayer({
                         <Marker
                             key={`cluster-${cluster.id}`}
                             position={cluster.latLng}
-                            icon={createClusterIcon(cluster.items.length, cluster.minPrice, zoom)}
+                            icon={createClusterIcon(cluster.items.length, cluster.minPrice, zoom, overviewMode)}
                             zIndexOffset={400}
                             eventHandlers={{
                                 click: () => {
@@ -1457,6 +1513,8 @@ export default function PropertyMap({
     interactionEnabled = true,
     officeMarker = null,
     initialMapStyle = 'luxury',
+    overviewMode = false,
+    fixedOverviewView = null,
 }: PropertyMapProps) {
     const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
@@ -1470,6 +1528,7 @@ export default function PropertyMap({
     const [userMapLocation, setUserMapLocation] = useState<UserMapLocation | null>(null)
     const [showControlHints, setShowControlHints] = useState(false)
     const controlHintTimerRef = useRef<number | null>(null)
+    const [quickFilterMenuOpen, setQuickFilterMenuOpen] = useState(false)
 
     const validProperties = useMemo<MappedProperty[]>(
         () => properties
@@ -1493,6 +1552,8 @@ export default function PropertyMap({
         return officeMarker ? [officeMarker.latLng, ...points] : points
     }, [filteredProperties, focusAreaPoints, officeMarker])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
+    const initialMapCenter = overviewMode && fixedOverviewView ? fixedOverviewView.center : defaultCenter
+    const initialMapZoom = overviewMode && fixedOverviewView ? fixedOverviewView.zoom : 14
     const mapWatermarkLabel = filteredProperties.length > 0
         ? `${filteredProperties.length} no mapa`
         : officeMarker
@@ -1510,6 +1571,12 @@ export default function PropertyMap({
             results_count: validProperties.filter(item => matchesQuickFilter(item, filter)).length,
             total_count: validProperties.length,
         })
+    }
+
+    const handleQuickFilterSelect = (filter: QuickFilter) => {
+        handleQuickFilterChange(filter)
+        setQuickFilterMenuOpen(false)
+        setMobileControlsOpen(false)
     }
 
     const handleMapStyleChange = (style: MapStyle) => {
@@ -1618,19 +1685,20 @@ export default function PropertyMap({
         const priceText = escapeHtml(formatMapPrice(property.price))
         const badgeClass = property.exclusive ? ' marker-wrap--exclusive' : ''
         const stateClass = isSelected ? ' marker-wrap--selected' : isHovered ? ' marker-wrap--active' : ''
-        const shouldUseDot = zoom < 13 && !isHovered
+        const overviewClass = overviewMode ? ' marker-wrap--overview' : ''
+        const shouldUseDot = overviewMode || (zoom < 13 && !isHovered)
 
         return L.divIcon({
             className: 'custom-price-marker',
-            html: `<div class="marker-wrap ${shouldUseDot ? 'marker-wrap--dot' : 'marker-wrap--bubble'}${stateClass}${badgeClass}">
+            html: `<div class="marker-wrap ${shouldUseDot ? 'marker-wrap--dot' : 'marker-wrap--bubble'}${stateClass}${badgeClass}${overviewClass}">
                 ${shouldUseDot
                     ? '<span class="marker-dot" aria-hidden="true"></span>'
                     : `<span class="marker-price">${priceText}</span>`}
             </div>`,
-            iconSize: shouldUseDot ? [34, 34] : [88, 48],
-            iconAnchor: shouldUseDot ? [17, 17] : [44, 42],
+            iconSize: overviewMode ? [24, 24] : shouldUseDot ? [34, 34] : [88, 48],
+            iconAnchor: overviewMode ? [12, 12] : shouldUseDot ? [17, 17] : [44, 42],
         })
-    }, [])
+    }, [overviewMode])
 
     const officeIcon = useMemo(() => {
         if (!officeMarker) return null
@@ -1702,17 +1770,33 @@ export default function PropertyMap({
         <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}${activeAmenityLayers.length ? ' map-shell--has-amenities' : ''}${shouldShowControlHints ? ' map-shell--control-hints' : ''}`}>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
-            <div className="map-topbar" role="group" aria-label="Filtros rápidos do mapa">
-                {QUICK_FILTERS.map(filter => (
-                    <button
-                        key={filter.value}
-                        type="button"
-                        className={quickFilter === filter.value ? 'active' : ''}
-                        onClick={() => handleQuickFilterChange(filter.value)}
-                    >
-                        {filter.label}
-                    </button>
-                ))}
+            <div className={`map-topbar${quickFilterMenuOpen ? ' is-open' : ''}`}>
+                <button
+                    type="button"
+                    className={`map-quick-filter-trigger${quickFilter !== 'all' ? ' active' : ''}`}
+                    aria-expanded={quickFilterMenuOpen}
+                    aria-haspopup="menu"
+                    onClick={() => setQuickFilterMenuOpen(isOpen => !isOpen)}
+                >
+                    <SlidersHorizontal size={15} />
+                    <span>Mais filtros</span>
+                </button>
+                {quickFilterMenuOpen && (
+                    <div className="map-quick-filter-menu" role="menu" aria-label="Filtros rápidos do mapa">
+                        {QUICK_FILTERS.map(filter => (
+                            <button
+                                key={filter.value}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={quickFilter === filter.value}
+                                className={quickFilter === filter.value ? 'active' : ''}
+                                onClick={() => handleQuickFilterSelect(filter.value)}
+                            >
+                                {filter.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="map-mobile-style-stack" role="group" aria-label="Estilo do mapa">
@@ -1733,12 +1817,12 @@ export default function PropertyMap({
                 <button
                     type="button"
                     className={`map-mobile-more-filter-button${mobileControlsOpen ? ' active' : ''}`}
-                    aria-label="Mais filtro"
+                    aria-label="Mais filtros"
                     aria-expanded={mobileControlsOpen}
                     onClick={() => setMobileControlsOpen(isOpen => !isOpen)}
                 >
                     <SlidersHorizontal size={14} />
-                    <span>Mais filtro</span>
+                    <span>Mais filtros</span>
                 </button>
             </div>
 
@@ -1749,7 +1833,7 @@ export default function PropertyMap({
                             key={filter.value}
                             type="button"
                             className={quickFilter === filter.value ? 'active' : ''}
-                            onClick={() => handleQuickFilterChange(filter.value)}
+                            onClick={() => handleQuickFilterSelect(filter.value)}
                         >
                             {filter.label}
                         </button>
@@ -1989,35 +2073,74 @@ export default function PropertyMap({
                     position: absolute;
                     top: 14px;
                     left: 58px;
-                    right: 74px;
-                    z-index: 600;
-                    display: flex;
+                    z-index: 920;
+                    display: grid;
                     gap: 8px;
-                    overflow-x: auto;
-                    padding-bottom: 4px;
-                    scrollbar-width: none;
+                    justify-items: start;
                 }
-                .map-topbar::-webkit-scrollbar { display: none; }
-                .map-topbar button {
+                .map-quick-filter-trigger {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 7px;
+                    height: 34px;
+                    padding: 0 13px;
                     border: 1px solid rgba(232,220,199,0.14);
                     background: rgba(18, 18, 18, 0.76);
                     color: #e8dcc7;
                     border-radius: 999px;
                     cursor: pointer;
-                    font: 800 0.72rem/1 'Inter', sans-serif;
+                    font: 900 0.72rem/1 'Inter', sans-serif;
                     white-space: nowrap;
                     backdrop-filter: blur(16px);
                     box-shadow: 0 10px 24px rgba(0,0,0,0.18);
                     transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
                 }
-                .map-topbar button {
-                    height: 34px;
-                    padding: 0 13px;
-                }
-                .map-topbar button:hover {
+                .map-quick-filter-trigger:hover {
                     transform: translateY(-1px);
                 }
-                .map-topbar button.active {
+                .map-quick-filter-trigger.active,
+                .map-topbar.is-open .map-quick-filter-trigger {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    border-color: rgba(255,255,255,0.28);
+                }
+                .map-quick-filter-trigger svg {
+                    width: 14px;
+                    height: 14px;
+                }
+                .map-quick-filter-menu {
+                    display: grid;
+                    gap: 5px;
+                    min-width: 172px;
+                    padding: 7px;
+                    border: 1px solid rgba(184,148,95,0.26);
+                    border-radius: 12px;
+                    background: rgba(247,244,239,0.94);
+                    box-shadow: 0 18px 38px rgba(0,0,0,0.22);
+                    backdrop-filter: blur(18px);
+                }
+                .map-quick-filter-menu button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    min-height: 31px;
+                    padding: 0 9px;
+                    border: 1px solid rgba(184,148,95,0.18);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.74);
+                    color: #3c362e;
+                    cursor: pointer;
+                    font: 900 0.67rem/1 'Inter', sans-serif;
+                    text-align: left;
+                    white-space: nowrap;
+                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                }
+                .map-quick-filter-menu button:hover {
+                    transform: translateX(1px);
+                    background: rgba(255,255,255,0.92);
+                }
+                .map-quick-filter-menu button.active {
                     background: linear-gradient(135deg, #dfc18e, #b8945f);
                     color: #101010;
                     border-color: rgba(255,255,255,0.28);
@@ -2848,6 +2971,21 @@ export default function PropertyMap({
                         0 0 0 8px rgba(15,143,90,0.2),
                         0 0 28px rgba(15,143,90,0.32);
                 }
+                .marker-wrap--overview {
+                    width: 24px;
+                    height: 24px;
+                    animation: none;
+                    filter: drop-shadow(0 5px 10px rgba(9,48,110,0.24));
+                }
+                .marker-wrap--overview .marker-dot {
+                    width: 9px;
+                    height: 9px;
+                    border-width: 1.5px;
+                    background: #1286ff;
+                    box-shadow:
+                        0 5px 12px rgba(6,51,116,0.26),
+                        0 0 0 5px rgba(18,134,255,0.16);
+                }
                 .marker-wrap--bubble {
                     align-items: center;
                     animation: markerRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -2928,6 +3066,22 @@ export default function PropertyMap({
                     color: #fff;
                     font: 950 0.56rem/1 'Inter', sans-serif;
                     box-shadow: 0 0 0 8px rgba(20,99,255,0.15);
+                }
+                .cluster-dot-wrap--overview {
+                    width: 26px;
+                    height: 26px;
+                    filter: drop-shadow(0 5px 11px rgba(9,48,110,0.24));
+                }
+                .cluster-dot--overview {
+                    min-width: 10px;
+                    width: 10px;
+                    height: 10px;
+                    padding: 0;
+                    border-width: 1.5px;
+                    background: #1286ff;
+                    box-shadow:
+                        0 5px 12px rgba(6,51,116,0.26),
+                        0 0 0 5px rgba(18,134,255,0.16);
                 }
                 .cluster-orbit--price {
                     min-width: 86px;
@@ -3282,8 +3436,8 @@ export default function PropertyMap({
             `}</style>
 
             <MapContainer
-                center={defaultCenter}
-                zoom={14}
+                center={initialMapCenter}
+                zoom={initialMapZoom}
                 zoomControl={false}
                 dragging={interactionEnabled}
                 touchZoom={interactionEnabled}
@@ -3315,7 +3469,13 @@ export default function PropertyMap({
                     />
                 )}
 
-                <MapUpdater points={mapPoints} refitKey={refitKey} hasFocusArea={hasDrawArea || hasRegionArea} />
+                <MapUpdater
+                    points={mapPoints}
+                    refitKey={refitKey}
+                    hasFocusArea={hasDrawArea || hasRegionArea}
+                    overviewMode={overviewMode}
+                    fixedOverviewView={fixedOverviewView}
+                />
                 <SelectedPropertyFocusController
                     items={validProperties}
                     selectedPropertyId={selectedPropertyId}
@@ -3364,6 +3524,7 @@ export default function PropertyMap({
                     createIcon={createIcon}
                     onMarkerHover={onMarkerHover}
                     onPropertySelect={onPropertySelect}
+                    overviewMode={overviewMode}
                 />
             </MapContainer>
         </div>

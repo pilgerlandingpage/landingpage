@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps,
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import MapPropertyPreviewCard from './MapPropertyPreviewCard'
-import type { MapDrawArea } from './PropertyMap'
+import type { MapDrawArea, MapFixedView } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { trackEvent } from '@/lib/tracking/client'
@@ -121,12 +121,17 @@ const LOCATION_STEPS: StepOption[] = [
     { value: 'Porto Belo', label: 'Porto Belo', shortLabel: 'Porto Belo' },
 ]
 const DEFAULT_LOCATION = LOCATION_STEPS[0]?.value || ''
-const HOME_MAP_REGION_CHIPS = LOCATION_STEPS.slice(0, 4)
 const OFFICE_LOCATION_MARKER = {
     latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
     title: 'Imobiliária Guilherme Pilger',
     subtitle: 'Praia Brava',
     address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajaí - SC, 88306-800',
+}
+const HOME_LOCKED_MAP_VIEW: MapFixedView = {
+    center: [-26.945, -48.585],
+    zoom: 12,
+    mobileCenter: [-26.9567, -48.62],
+    mobileZoom: 12,
 }
 const TYPE_STEPS: StepOption[] = [
     { value: 'all', label: 'Todos', shortLabel: 'Todos' },
@@ -143,7 +148,6 @@ const PRICE_PRESETS = [
     { value: '8000000-10000000', label: 'R$ 8 mi a R$ 10 mi', shortLabel: '8-10 mi' },
     { value: '10000000-', label: 'Acima de R$ 10 mi', shortLabel: '10 mi+' },
 ]
-const HOME_MAP_PRICE_CHIPS = PRICE_PRESETS
 
 const PURPOSE_STEPS: StepOption[] = [
     { value: 'sale', label: 'Venda', shortLabel: 'Venda' },
@@ -319,12 +323,55 @@ function matchesMinimumFirstContactPrice(property: Property) {
     return Number(property.price || property.rent || 0) >= MINIMUM_FIRST_CONTACT_PRICE
 }
 
+function normalizeTypeMatchText(value: unknown) {
+    return normalize(value)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function hasTypeToken(text: string, token: string) {
+    return text.split(' ').includes(token)
+}
+
+function hasTypeTokenPrefix(text: string, prefix: string) {
+    return text.split(' ').some(token => token.startsWith(prefix))
+}
+
 function matchesType(property: Property, type: string) {
     if (type === 'all') return true
-    const text = normalize(`${property.property_type || ''} ${property.title || ''}`)
-    if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => text.includes(term))
-    if (type === 'Casa em Condomínio') return text.includes('casa') && text.includes('condom')
-    return text.includes(normalize(type))
+    const propertyTypeText = normalizeTypeMatchText(property.property_type)
+    const titleText = normalizeTypeMatchText(property.title)
+    const text = `${propertyTypeText} ${titleText}`.trim()
+
+    if (type === 'Apartamento') return hasTypeToken(propertyTypeText, 'apartamento')
+    if (type === 'Casa') return hasTypeToken(propertyTypeText, 'casa')
+    if (type === 'Terreno') return hasTypeToken(propertyTypeText, 'terreno')
+    if (type === 'Comercial') return ['comercial', 'galpao', 'sala', 'predio'].some(term => hasTypeTokenPrefix(text, term))
+    if (type === 'Casa em Condomínio') return (
+        hasTypeToken(propertyTypeText, 'casa') && hasTypeTokenPrefix(propertyTypeText, 'cond')
+    ) || (
+        hasTypeToken(titleText, 'casa') && hasTypeTokenPrefix(titleText, 'cond')
+    )
+    if (type === 'Duplex / Triplex') return hasTypeToken(text, 'duplex') || hasTypeToken(text, 'triplex')
+    if (type === 'Galpão / Depósito') return hasTypeTokenPrefix(text, 'galpao') || hasTypeTokenPrefix(text, 'deposito')
+    if (type === 'Terreno em Condomínio') return (
+        hasTypeToken(propertyTypeText, 'terreno') && hasTypeTokenPrefix(propertyTypeText, 'cond')
+    ) || (
+        hasTypeToken(titleText, 'terreno') && hasTypeTokenPrefix(titleText, 'cond')
+    )
+    if (type === 'Terreno Comercial') return (
+        hasTypeToken(propertyTypeText, 'terreno') && hasTypeToken(propertyTypeText, 'comercial')
+    ) || (
+        hasTypeToken(titleText, 'terreno') && hasTypeToken(titleText, 'comercial')
+    )
+    if (type === 'Sala Comercial') return (
+        hasTypeToken(propertyTypeText, 'sala') && hasTypeToken(propertyTypeText, 'comercial')
+    ) || (
+        hasTypeToken(titleText, 'sala') && hasTypeToken(titleText, 'comercial')
+    )
+
+    return text.includes(normalizeTypeMatchText(type))
 }
 
 function mapOverlayTypeToMapFilter(value: string) {
@@ -337,16 +384,23 @@ function mapOverlayTypeToMapFilter(value: string) {
     const subtypeLabels: Record<string, string> = {
         cobertura: 'Cobertura',
         condominio: 'Casa em Condomínio',
-        duplex: 'Duplex',
-        galpao: 'Galpão',
+        duplex: 'Duplex / Triplex',
+        galpao: 'Galpão / Depósito',
         garden: 'Garden',
         'predio-residencial': 'Prédio',
         'sala-comercial': 'Sala Comercial',
         'terreno-comercial': 'Terreno Comercial',
-        'terreno-condominio': 'Terreno',
+        'terreno-condominio': 'Terreno em Condomínio',
     }
 
     return subtypeLabels[rawValue] || rawValue
+}
+
+function getOverlaySearchLocation(values: HomeSearchValues) {
+    return (values.locationType === 'office'
+        ? values.locationLabel
+        : values.locationValue || values.locationLabel
+    ).trim()
 }
 
 function matchesPrice(property: Property, range: string) {
@@ -518,11 +572,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         [applied]
     )
 
-    const syncOverlaySearchWithMap = useCallback((values: HomeSearchValues) => {
-        const nextLocation = (values.locationType === 'office'
-            ? values.locationLabel
-            : values.locationValue || values.locationLabel
-        ).trim()
+    const applyOverlaySearchToMap = useCallback((values: HomeSearchValues, unlockMap = false) => {
+        const nextLocation = getOverlaySearchLocation(values)
         setQuery(nextLocation)
         setType(mapOverlayTypeToMapFilter(values.typeValue))
         setPrice(values.priceValue === 'all' ? '' : values.priceValue)
@@ -538,11 +589,32 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
         setIsOfficeLocationSelected(false)
 
-        if (nextLocation && (values.locationType === 'city' || values.locationType === 'neighborhood')) {
+        if (unlockMap || (nextLocation && (values.locationType === 'city' || values.locationType === 'neighborhood'))) {
             setShowMapLockedHint(false)
             setIsHomeMapInteractionUnlocked(true)
         }
     }, [])
+
+    const syncOverlaySearchWithMap = useCallback((values: HomeSearchValues) => {
+        applyOverlaySearchToMap(values)
+    }, [applyOverlaySearchToMap])
+
+    const submitOverlaySearchInMap = useCallback((values: HomeSearchValues) => {
+        const nextLocation = getOverlaySearchLocation(values)
+        const nextType = mapOverlayTypeToMapFilter(values.typeValue)
+        const nextPrice = values.priceValue === 'all' ? '' : values.priceValue
+
+        applyOverlaySearchToMap(values, true)
+
+        void trackEvent('home_map_inline_search_submitted', {
+            source: isMapModalOpen ? 'home_map_modal' : 'home_map',
+            destination: 'home_map',
+            query: searchLocationName(nextLocation),
+            location_type: values.locationType || 'free_text',
+            type_value: nextType,
+            price_value: nextPrice || 'all',
+        })
+    }, [applyOverlaySearchToMap, isMapModalOpen])
 
     const markQuizStepAnswered = useCallback((step: MobileFilterKey) => {
         setAnsweredQuizSteps(current => current.includes(step) ? current : [...current, step])
@@ -665,6 +737,20 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         () => selectedRegionArea ? visibleHomeMapProperties : visibleHomeMapProperties.slice(0, HOME_MAP_PREVIEW_LIMIT),
         [selectedRegionArea, visibleHomeMapProperties]
     )
+    const overviewHomeMapProperties = useMemo(
+        () => eligibleProperties
+            .filter(property => {
+                if (!matchesType(property, type)) return false
+                if (!matchesPrice(property, price)) return false
+                if (!matchesPurpose(property, purpose)) return false
+                if (activeChips.some(chipId => !matchesFeature(property, chipId))) return false
+                return hasCoordinates(property)
+            }),
+        [activeChips, eligibleProperties, price, purpose, type]
+    )
+    const homeMapDisplayProperties = isMapInteractionLocked || isOfficeLocationSelected
+        ? overviewHomeMapProperties
+        : homePreviewMapProperties
     const selectedHomeMapProperty = useMemo(() => {
         if (!selectedHomeMapPropertyId || isMapInteractionLocked || isOfficeLocationSelected) return null
         return visibleHomeMapProperties.find(property => property.id === selectedHomeMapPropertyId) || null
@@ -674,9 +760,9 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const areaFilteredMappedTotal = visibleHomeMapProperties.length
     const homeOfficeMarker = isMapInteractionLocked || isOfficeLocationSelected ? OFFICE_LOCATION_MARKER : null
     const homeMapRefitKey = isOfficeLocationSelected
-        ? 'home-office-location-selected'
+        ? `home-office-location-selected-${overviewHomeMapProperties.length}`
         : isMapInteractionLocked
-            ? 'home-office-location'
+            ? `home-office-location-overview-${overviewHomeMapProperties.length}-${mapRefitKey}`
             : `${mapRefitKey}::home-region-${selectedRegionArea?.id || 'none'}::${selectedRegionArea?.area?.length || 0}`
     const mapPreviewStatLabel = isMapInteractionLocked || isOfficeLocationSelected
         ? 'Imobiliária Guilherme Pilger'
@@ -756,30 +842,6 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             mapped_count: areaFilteredMappedTotal,
         })
     }, [areaFilteredHomeMapProperties.length, areaFilteredMappedTotal, isMapModalOpen])
-
-    const selectHomeMapRegion = useCallback((value: string) => {
-        setQuery(value)
-        setSelectedDrawArea(null)
-        setSelectedHomeMapPropertyId(null)
-        setIsOfficeLocationSelected(false)
-        setIsHomeMapInteractionUnlocked(true)
-        setShowMapLockedHint(false)
-
-        void trackEvent('home_map_region_chip_selected', {
-            ...getSearchSnapshot(),
-            region: value,
-        })
-    }, [getSearchSnapshot])
-
-    const selectHomeMapPrice = useCallback((value: string) => {
-        if (value !== price) trackFilterChanged('price', 'Valor', value, PRICE_PRESETS, 'desktop')
-        setPrice(value)
-        setSelectedDrawArea(null)
-        setSelectedHomeMapPropertyId(null)
-        setIsOfficeLocationSelected(false)
-        setIsHomeMapInteractionUnlocked(true)
-        setShowMapLockedHint(false)
-    }, [price, trackFilterChanged])
 
     const handleHomeMapPreviewPropertySelect = useCallback((property: MapPreviewProperty, source: string) => {
         if (!property?.id) return
@@ -1094,7 +1156,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 <div className={`map-preview-panel home-preview-map-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
                     {shouldRenderMap ? (
                         <MapSearch
-                            properties={homePreviewMapProperties}
+                            properties={homeMapDisplayProperties}
                             selectedPropertyId={selectedHomeMapPropertyId}
                             drawArea={selectedDrawArea}
                             regionArea={selectedRegionArea}
@@ -1102,6 +1164,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             interactionEnabled={!isMapInteractionLocked}
                             officeMarker={homeOfficeMarker}
                             initialMapStyle="luxury"
+                            overviewMode={isMapInteractionLocked || isOfficeLocationSelected}
+                            fixedOverviewView={isMapInteractionLocked ? HOME_LOCKED_MAP_VIEW : null}
                             onPropertySelect={handleHomeMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
                         />
@@ -1129,40 +1193,13 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             />
                         </>
                     )}
-                    <div className="home-map-invite">
-                        <div className="home-map-invite-copy">
-                            <span>Explore por localização</span>
-                            <strong>{isMapInteractionLocked || isOfficeLocationSelected ? 'Praia Brava e litoral premium' : activeMapPreviewStatLabel}</strong>
-                        </div>
-                        <div className="home-map-region-chips" aria-label="Regiões em destaque">
-                            {HOME_MAP_REGION_CHIPS.map(option => (
-                                <button
-                                    key={option.value}
-                                    type="button"
-                                    className={searchLocationName(query) === searchLocationName(option.value) && !isMapInteractionLocked ? 'active' : ''}
-                                    onClick={() => selectHomeMapRegion(option.value)}
-                                >
-                                    {option.shortLabel || option.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="home-map-price-row">
-                            <div className="home-map-price-chips" aria-label="Faixas de valor">
-                                {HOME_MAP_PRICE_CHIPS.map(option => (
-                                    <button
-                                        key={option.label}
-                                        type="button"
-                                        className={price === option.value ? 'active' : ''}
-                                        onClick={() => selectHomeMapPrice(option.value)}
-                                    >
-                                        {option.shortLabel || option.label}
-                                    </button>
-                                ))}
-                            </div>
-                            <button type="button" className="home-map-open-button" onClick={() => navigateToSearchResults('home_map_preview_cta')}>
-                                Pesquisa avançada
-                            </button>
-                        </div>
+                    <div className="map-search-panel map-search-panel-new home-map-search-panel">
+                        <HomeSearchBar
+                            onSubmitValues={submitOverlaySearchInMap}
+                            onValuesChange={syncOverlaySearchWithMap}
+                            suggestionsPlacement="down"
+                            variant="map"
+                        />
                     </div>
                     {selectedHomeMapProperty && !isMapModalOpen && (
                         <div className="home-map-property-preview home-map-property-preview--compact">
@@ -1381,7 +1418,11 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                     </>
                                 )}
                                 <div className="map-search-panel map-search-panel-new mobile-map-search-panel">
-                                    <HomeSearchBar onValuesChange={syncOverlaySearchWithMap} variant="map" />
+                                    <HomeSearchBar
+                                        onSubmitValues={submitOverlaySearchInMap}
+                                        onValuesChange={syncOverlaySearchWithMap}
+                                        variant="map"
+                                    />
                                 </div>
                                 {selectedHomeMapProperty && (
                                     <div className="home-map-property-preview">
@@ -1695,6 +1736,49 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .map-search-panel-new :global(.home-search-box-map) {
                     pointer-events: auto;
                     width: 100%;
+                }
+                .home-map-search-panel {
+                    bottom: auto;
+                    max-width: 820px;
+                    top: clamp(18px, 3vw, 34px);
+                    width: min(820px, calc(100% - 40px));
+                }
+                .home-map-search-panel :global(.home-search-box-map .home-search-panel) {
+                    backdrop-filter: none;
+                    -webkit-backdrop-filter: none;
+                    background: transparent;
+                    border: 0;
+                    border-radius: 0;
+                    box-shadow: none;
+                    display: grid;
+                    gap: 6px;
+                    grid-template-areas:
+                        "selects location";
+                    grid-template-columns: minmax(280px, 0.92fr) minmax(360px, 1.08fr);
+                    max-width: none;
+                    padding: 0;
+                }
+                .home-map-search-panel :global(.home-search-box-map .home-search-select-row) {
+                    grid-area: selects;
+                }
+                .home-map-search-panel :global(.home-search-box-map .home-search-location-row) {
+                    grid-area: location;
+                    margin-top: 0;
+                }
+                .home-map-search-panel :global(.home-search-box-map select),
+                .home-map-search-panel :global(.home-search-box-map input) {
+                    background: rgba(255, 255, 255, 0.96);
+                    border-color: rgba(184, 148, 95, 0.38);
+                    border-radius: 5px;
+                    box-shadow: 0 12px 24px rgba(17, 13, 8, 0.18);
+                    height: 38px;
+                }
+                .home-map-search-panel :global(.home-search-box-map .home-search-location-row > button) {
+                    border-radius: 5px;
+                    height: 38px;
+                }
+                .home-preview-map-panel .map-lock-hint {
+                    top: clamp(72px, 9vw, 94px);
                 }
                 .map-preview-panel.is-preview-open .map-search-panel-new,
                 .map-preview-panel.is-preview-open .home-map-invite,
@@ -2476,7 +2560,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         height: clamp(390px, 68svh, 460px);
                     }
                     .home-preview-map-panel {
-                        height: clamp(340px, 58svh, 430px);
+                        height: clamp(430px, 70svh, 540px);
                     }
                     .home-map-invite {
                         border-radius: 14px;
@@ -2558,6 +2642,28 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         transform: none;
                         width: auto;
                         z-index: 760;
+                    }
+                    .home-map-search-panel {
+                        inset: 12px 12px auto;
+                        max-width: none;
+                        transform: none;
+                        width: auto;
+                    }
+                    .home-map-search-panel :global(.home-search-box-map .home-search-panel) {
+                        gap: 7px;
+                        grid-template-areas:
+                            "selects selects"
+                            "location location";
+                        grid-template-columns: minmax(0, 1fr);
+                        padding: 0;
+                    }
+                    .home-map-search-panel :global(.home-search-box-map select),
+                    .home-map-search-panel :global(.home-search-box-map input),
+                    .home-map-search-panel :global(.home-search-box-map .home-search-location-row > button) {
+                        height: 36px;
+                    }
+                    .home-preview-map-panel .map-lock-hint {
+                        top: 112px;
                     }
                     .mobile-map-search-panel {
                         bottom: calc(12px + env(safe-area-inset-bottom));

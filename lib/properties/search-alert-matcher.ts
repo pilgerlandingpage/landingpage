@@ -137,11 +137,11 @@ const SUBTYPE_TERMS: Record<string, string[]> = {
     loft: ['loft'],
     sobrado: ['sobrado'],
     'predio-residencial': ['predio residencial', 'prédio residencial', 'predio', 'prédio'],
-    condominio: ['condominio', 'condomínio'],
+    condominio: ['casa em condominio', 'casa em condomínio'],
     'terreno-condominio': ['terreno em condominio', 'terreno em condomínio'],
     'terreno-comercial': ['terreno comercial'],
     galpao: ['galpao', 'galpão', 'deposito', 'depósito'],
-    'sala-comercial': ['sala comercial', 'comercial'],
+    'sala-comercial': ['sala comercial'],
 }
 
 function asRecord(value: unknown): JsonRecord {
@@ -175,6 +175,15 @@ function includesAll(haystack: string, terms: string[]) {
 
 function includesAny(haystack: string, terms: string[]) {
     return terms.some(term => haystack.includes(normalize(term)))
+}
+
+function hasToken(haystack: string, token: string) {
+    return haystack.split(' ').includes(normalize(token))
+}
+
+function hasTokenPrefix(haystack: string, prefix: string) {
+    const normalizedPrefix = normalize(prefix)
+    return haystack.split(' ').some(token => token.startsWith(normalizedPrefix))
 }
 
 function propertyText(property: SearchAlertProperty): string {
@@ -268,21 +277,34 @@ function matchesType(property: SearchAlertProperty, value: string) {
     const normalizedType = normalize(value)
     if (!normalizedType || normalizedType === 'todos os imoveis') return true
     const haystack = propertyText(property)
+    const propertyTypeText = normalize(property.property_type)
+    const titleText = normalize(property.title)
 
+    if (normalizedType === 'apartamento') return hasToken(propertyTypeText, 'apartamento')
+    if (normalizedType === 'casa') return hasToken(propertyTypeText, 'casa')
+    if (normalizedType === 'terreno') return hasToken(propertyTypeText, 'terreno')
     if (normalizedType === 'comercial') {
-        return includesAny(haystack, ['comercial', 'galpao', 'galpão', 'predio', 'prédio', 'sala comercial'])
+        return ['comercial', 'galpao', 'galpão', 'predio', 'prédio', 'sala'].some(term => hasTokenPrefix(haystack, term))
     }
 
     if (normalizedType === 'duplex triplex') return includesAny(haystack, ['duplex', 'triplex'])
-    if (normalizedType === 'casa em condominio') return includesAny(haystack, ['casa em condominio', 'casa em condomínio'])
+    if (normalizedType === 'casa em condominio') return (
+        hasToken(propertyTypeText, 'casa') && hasTokenPrefix(propertyTypeText, 'cond')
+    ) || (
+        hasToken(titleText, 'casa') && hasTokenPrefix(titleText, 'cond')
+    )
 
     return haystack.includes(normalizedType)
 }
 
 function matchesSubtype(property: SearchAlertProperty, value: string) {
     if (!value) return true
+    const haystack = propertyText(property)
+    if (value === 'condominio') return includesAll(haystack, ['casa', 'cond'])
+    if (value === 'terreno-condominio') return includesAll(haystack, ['terreno', 'cond'])
+    if (value === 'sala-comercial') return includesAll(haystack, ['sala', 'comercial'])
     const terms = SUBTYPE_TERMS[value] || [value]
-    return includesAny(propertyText(property), terms)
+    return includesAny(haystack, terms)
 }
 
 function matchesTag(property: SearchAlertProperty, value: string) {

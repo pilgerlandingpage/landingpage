@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Building2, Camera, Crown, Home, Palmtree, Sparkles } from 'lucide-react'
+import { Building2, Home, Palmtree, Sparkles } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
@@ -365,10 +365,6 @@ export default async function MarketplaceHome() {
         </div>
         <div className="hero-photo-glow" />
         <div className="hero-overlay" />
-        <div className="home-hero-social-proof">
-          <span><Camera size={14} /> Presença digital</span>
-          <span><Crown size={14} /> Curadoria de luxo</span>
-        </div>
         <div className="hero-content home-hero-content">
           <Image src="https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/LOGO%20PILGER.png" alt="Guilherme Pilger" width={420} height={60} style={{ objectFit: 'contain', objectPosition: 'center bottom', width: 'min(650px, 92vw)', height: '220px', display: 'block', margin: '0 auto -72px' }} />
           <h1 className="hero-subtitle-top hero-title-imoveis" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(2rem, 9vw, 3.2rem)', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.1, marginBottom: '2px' }}>Imóveis de alto padrão</h1>

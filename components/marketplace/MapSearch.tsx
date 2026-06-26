@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { MapDrawArea, MapStyle } from './PropertyMap'
+import type { MapDrawArea, MapFixedView, MapStyle } from './PropertyMap'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
 
 const PropertyMap = dynamic(
@@ -76,6 +76,8 @@ interface MapSearchProps {
     interactionEnabled?: boolean
     officeMarker?: OfficeMarker | null
     initialMapStyle?: MapStyle
+    overviewMode?: boolean
+    fixedOverviewView?: MapFixedView | null
 }
 
 export default function MapSearch({
@@ -93,6 +95,8 @@ export default function MapSearch({
     interactionEnabled = true,
     officeMarker = null,
     initialMapStyle = 'luxury',
+    overviewMode = false,
+    fixedOverviewView = null,
 }: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>
@@ -111,6 +115,8 @@ export default function MapSearch({
                 interactionEnabled={interactionEnabled}
                 officeMarker={officeMarker}
                 initialMapStyle={initialMapStyle}
+                overviewMode={overviewMode}
+                fixedOverviewView={fixedOverviewView}
             />
         </div>
     )

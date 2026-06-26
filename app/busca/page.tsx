@@ -304,11 +304,11 @@ export default async function SearchPage({
     if (subtype === 'loft') query = query.ilike('property_type', '%Loft%')
     if (subtype === 'sobrado') query = query.ilike('property_type', '%Sobrado%')
     if (subtype === 'predio-residencial') query = query.or('property_type.ilike.%Predio Residencial%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Predio Residencial%,title.ilike.%Predio%,title.ilike.%Prédio%')
-    if (subtype === 'condominio') query = query.or('property_type.ilike.%Condominio%,property_type.ilike.%Condomínio%')
-    if (subtype === 'terreno-condominio') query = query.or('property_type.ilike.%Terreno em Condominio%,property_type.ilike.%Terreno em Condomínio%')
+    if (subtype === 'condominio') query = query.or('property_type.ilike.%Casa em Cond%,title.ilike.%Casa%Cond%')
+    if (subtype === 'terreno-condominio') query = query.or('property_type.ilike.%Terreno em Cond%,title.ilike.%Terreno%Cond%,title.ilike.%Cond%Terreno%')
     if (subtype === 'terreno-comercial') query = query.ilike('property_type', '%Terreno Comercial%')
     if (subtype === 'galpao') query = query.or('property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Deposito%,property_type.ilike.%Depósito%,title.ilike.%Galpao%,title.ilike.%Galpão%,title.ilike.%Deposito%,title.ilike.%Depósito%')
-    if (subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,property_type.ilike.%Comercial%,title.ilike.%Sala Comercial%')
+    if (subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,title.ilike.%Sala Comercial%')
 
     let selectedPriceMin = MIN_SEARCH_PRICE
     let selectedPriceMax = 0
