@@ -130,7 +130,7 @@ const OFFICE_LOCATION_MARKER = {
 const HOME_LOCKED_MAP_VIEW: MapFixedView = {
     center: [-26.945, -48.585],
     zoom: 12,
-    mobileCenter: [-26.9567, -48.62],
+    mobileCenter: [-26.9567, -48.655],
     mobileZoom: 12,
 }
 const TYPE_STEPS: StepOption[] = [

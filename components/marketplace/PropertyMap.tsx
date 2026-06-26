@@ -1552,8 +1552,17 @@ export default function PropertyMap({
         return officeMarker ? [officeMarker.latLng, ...points] : points
     }, [filteredProperties, focusAreaPoints, officeMarker])
     const defaultCenter: [number, number] = [-26.9446, -48.6292]
-    const initialMapCenter = overviewMode && fixedOverviewView ? fixedOverviewView.center : defaultCenter
-    const initialMapZoom = overviewMode && fixedOverviewView ? fixedOverviewView.zoom : 14
+    const initialMapIsMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+    const initialMapCenter = overviewMode && fixedOverviewView
+        ? initialMapIsMobile && fixedOverviewView.mobileCenter
+            ? fixedOverviewView.mobileCenter
+            : fixedOverviewView.center
+        : defaultCenter
+    const initialMapZoom = overviewMode && fixedOverviewView
+        ? initialMapIsMobile && typeof fixedOverviewView.mobileZoom === 'number'
+            ? fixedOverviewView.mobileZoom
+            : fixedOverviewView.zoom
+        : 14
     const mapWatermarkLabel = filteredProperties.length > 0
         ? `${filteredProperties.length} no mapa`
         : officeMarker
