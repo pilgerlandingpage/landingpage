@@ -8,6 +8,7 @@ import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
 import MapPropertyPreviewCard from './MapPropertyPreviewCard'
+import { orderPropertiesBySmoothGeoPath } from './mapRecommendationOrder'
 import SearchAlertsPanel from './SearchAlertsPanel'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import type { MapDrawArea } from './PropertyMap'
@@ -331,6 +332,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
     const [showRefineSearch, setShowRefineSearch] = useState(false)
     const [selectedMapPropertyOverride, setSelectedMapPropertyOverride] = useState<{ key: string; id: string | null; property?: any | null } | null>(null)
+    const [mapPreviewAnchorOverride, setMapPreviewAnchorOverride] = useState<{ key: string; id: string | null; property?: any | null } | null>(null)
     const [drawAreaOverride, setDrawAreaOverride] = useState<{ key: string; area: MapDrawArea | null } | null>(null)
     const [refineOfficeSelection, setRefineOfficeSelection] = useState<{ key: string; selected: boolean }>({ key: '', selected: false })
     const [saveAlertState, setSaveAlertState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -500,11 +502,24 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
             || overrideProperty
             || null
     }, [mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
+    const mapPreviewAnchorProperty = useMemo(() => {
+        const anchor = mapPreviewAnchorOverride?.key === mapSelectionKey ? mapPreviewAnchorOverride : null
+        if (!anchor?.id) return selectedMapProperty
+        const anchorProperty = anchor.property && String(anchor.property.id) === String(anchor.id)
+            ? anchor.property
+            : null
+
+        return anchorProperty
+            || propertiesWithCoords.find(item => String(item.id) === String(anchor.id))
+            || visibleMapProperties.find(item => String(item.id) === String(anchor.id))
+            || selectedMapProperty
+    }, [mapPreviewAnchorOverride, mapSelectionKey, propertiesWithCoords, selectedMapProperty, visibleMapProperties])
     const mapPreviewProperties = useMemo(() => {
-        if (!selectedMapProperty) return visibleMapProperties
+        if (!selectedMapProperty) return orderPropertiesBySmoothGeoPath(visibleMapProperties, mapPreviewAnchorProperty)
         const hasSelectedProperty = visibleMapProperties.some(item => String(item.id) === String(selectedMapProperty.id))
-        return hasSelectedProperty ? visibleMapProperties : [selectedMapProperty, ...visibleMapProperties]
-    }, [selectedMapProperty, visibleMapProperties])
+        const previewProperties = hasSelectedProperty ? visibleMapProperties : [selectedMapProperty, ...visibleMapProperties]
+        return orderPropertiesBySmoothGeoPath(previewProperties, mapPreviewAnchorProperty || selectedMapProperty)
+    }, [mapPreviewAnchorProperty, selectedMapProperty, visibleMapProperties])
     const visibleCount = visibleProperties.length
     const totalCount = properties.length
     const brokerResultName = String(brokerSearchName || '').trim()
@@ -622,6 +637,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
     const handleDrawAreaChange = useCallback((area: MapDrawArea | null) => {
         setDrawAreaOverride({ key: searchKey, area })
         setSelectedMapPropertyOverride({ key: searchKey, id: null })
+        setMapPreviewAnchorOverride({ key: searchKey, id: null })
         replaceSpatialSearchParams({ drawArea: area, mapPropertyId: null })
 
         if (area) {
@@ -651,6 +667,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
 
     const handleMapPropertySelect = useCallback((property: any) => {
         setSelectedMapPropertyOverride({ key: mapSelectionKey, id: property.id, property })
+        setMapPreviewAnchorOverride({ key: mapSelectionKey, id: property.id, property })
         replaceMapPropertyParam(property.id)
 
         void trackEvent('property_map_pin_selected', {
@@ -667,6 +684,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
     const handleMapPropertyPreviewClose = useCallback(() => {
         const property = selectedMapProperty
         setSelectedMapPropertyOverride({ key: mapSelectionKey, id: null })
+        setMapPreviewAnchorOverride({ key: mapSelectionKey, id: null })
         replaceMapPropertyParam(null)
 
         if (property) {
@@ -683,7 +701,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
 
         setSelectedMapPropertyOverride({ key: mapSelectionKey, id: property.id, property })
         replaceMapPropertyParam(property.id)
-        const nextIndex = visibleMapProperties.findIndex(item => item.id === property.id)
+        const nextIndex = mapPreviewProperties.findIndex(item => item.id === property.id)
 
         void trackEvent('property_map_preview_similar_selected', {
             property_id: property.id,
@@ -697,7 +715,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap,
             selected_region: selectedRegionArea?.id || null,
             selected_region_label: selectedRegionArea?.label || null,
         })
-    }, [activeFilters, mapSelectionKey, selectedMapPropertyId, selectedRegionArea, totalCount, visibleMapProperties])
+    }, [activeFilters, mapPreviewProperties, mapSelectionKey, selectedMapPropertyId, selectedRegionArea, totalCount, visibleMapProperties])
 
     const handleMemoryPropertyClick = useCallback((property: any, source: 'favorite' | 'history') => {
         void trackEvent('search_results_memory_property_clicked', {

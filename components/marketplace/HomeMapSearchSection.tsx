@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps,
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import MapPropertyPreviewCard from './MapPropertyPreviewCard'
+import { orderPropertiesBySmoothGeoPath } from './mapRecommendationOrder'
 import type { MapDrawArea, MapFixedView } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
@@ -510,6 +511,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const [isMapModalOpen, setIsMapModalOpen] = useState(false)
     const [selectedDrawArea, setSelectedDrawArea] = useState<MapDrawArea | null>(null)
     const [selectedHomeMapPropertyId, setSelectedHomeMapPropertyId] = useState<string | null>(null)
+    const [homeMapPreviewAnchorId, setHomeMapPreviewAnchorId] = useState<string | null>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const guidedSearchStartedRef = useRef(false)
     const trackedGuideStepRef = useRef<number | null>(null)
@@ -579,6 +581,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setPrice(values.priceValue === 'all' ? '' : values.priceValue)
         setSelectedDrawArea(null)
         setSelectedHomeMapPropertyId(null)
+        setHomeMapPreviewAnchorId(null)
 
         if (values.locationType === 'office') {
             setShowMapLockedHint(false)
@@ -755,6 +758,18 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         if (!selectedHomeMapPropertyId || isMapInteractionLocked || isOfficeLocationSelected) return null
         return visibleHomeMapProperties.find(property => property.id === selectedHomeMapPropertyId) || null
     }, [isMapInteractionLocked, isOfficeLocationSelected, selectedHomeMapPropertyId, visibleHomeMapProperties])
+    const homeMapPreviewAnchorProperty = useMemo(() => {
+        if (!homeMapPreviewAnchorId) return selectedHomeMapProperty
+        return visibleHomeMapProperties.find(property => property.id === homeMapPreviewAnchorId) || selectedHomeMapProperty
+    }, [homeMapPreviewAnchorId, selectedHomeMapProperty, visibleHomeMapProperties])
+    const smoothHomePreviewMapProperties = useMemo(
+        () => orderPropertiesBySmoothGeoPath(homePreviewMapProperties, homeMapPreviewAnchorProperty),
+        [homeMapPreviewAnchorProperty, homePreviewMapProperties]
+    )
+    const smoothVisibleHomeMapProperties = useMemo(
+        () => orderPropertiesBySmoothGeoPath(visibleHomeMapProperties, homeMapPreviewAnchorProperty),
+        [homeMapPreviewAnchorProperty, visibleHomeMapProperties]
+    )
     const isHomeMapPreviewOpen = !isMapModalOpen && Boolean(selectedHomeMapProperty)
     const isMapModalPreviewOpen = isMapModalOpen && Boolean(selectedHomeMapProperty)
     const areaFilteredMappedTotal = visibleHomeMapProperties.length
@@ -810,6 +825,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const handleDrawAreaChange = useCallback((area: MapDrawArea | null) => {
         setSelectedDrawArea(area)
         setSelectedHomeMapPropertyId(null)
+        setHomeMapPreviewAnchorId(null)
 
         if (area) {
             setIsHomeMapInteractionUnlocked(true)
@@ -829,6 +845,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         if (!property?.id) return
 
         setSelectedHomeMapPropertyId(property.id)
+        setHomeMapPreviewAnchorId(property.id)
         setIsHomeMapInteractionUnlocked(true)
         setIsOfficeLocationSelected(false)
         setShowMapLockedHint(false)
@@ -862,6 +879,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
     const closeHomeMapPropertyPreview = useCallback(() => {
         const property = selectedHomeMapProperty
         setSelectedHomeMapPropertyId(null)
+        setHomeMapPreviewAnchorId(null)
 
         if (property) {
             void trackEvent('home_map_preview_closed', {
@@ -876,6 +894,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setShowMapLockedHint(false)
         setSelectedDrawArea(null)
         setSelectedHomeMapPropertyId(null)
+        setHomeMapPreviewAnchorId(null)
         setIsOfficeLocationSelected(false)
         setIsHomeMapInteractionUnlocked(true)
         setIsMapModalOpen(true)
@@ -888,6 +907,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
     const closeMapModal = useCallback(() => {
         setSelectedHomeMapPropertyId(null)
+        setHomeMapPreviewAnchorId(null)
         setIsMapModalOpen(false)
     }, [])
 
@@ -1205,10 +1225,10 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         <div className="home-map-property-preview home-map-property-preview--compact">
                             <MapPropertyPreviewCard
                                 property={selectedHomeMapProperty}
-                                properties={homePreviewMapProperties}
+                                properties={smoothHomePreviewMapProperties}
                                 selectedPropertyId={selectedHomeMapPropertyId}
                                 onClose={closeHomeMapPropertyPreview}
-                                onPropertySelect={homePreviewMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
+                                onPropertySelect={smoothHomePreviewMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
                             />
                         </div>
                     )}
@@ -1428,10 +1448,10 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                     <div className="home-map-property-preview">
                                         <MapPropertyPreviewCard
                                             property={selectedHomeMapProperty}
-                                            properties={visibleHomeMapProperties}
+                                            properties={smoothVisibleHomeMapProperties}
                                             selectedPropertyId={selectedHomeMapPropertyId}
                                             onClose={closeHomeMapPropertyPreview}
-                                            onPropertySelect={visibleHomeMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
+                                            onPropertySelect={smoothVisibleHomeMapProperties.length > 1 ? handleHomeMapPreviewPropertySelect : undefined}
                                         />
                                     </div>
                                 )}
