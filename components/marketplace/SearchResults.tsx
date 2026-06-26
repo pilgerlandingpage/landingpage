@@ -234,6 +234,7 @@ function getFilterLabel(key: string, value: string) {
         areaMax: `Até ${value} m²`,
         priceMin: `Min. R$ ${Number(value).toLocaleString('pt-BR')}`,
         priceMax: `Max. R$ ${Number(value).toLocaleString('pt-BR')}`,
+        broker: `Corretor: ${value}`,
         office: 'Imobiliária Guilherme Pilger',
         subtype: value.replace(/-/g, ' '),
         tag: tagLabels[value] || value.replace(/-/g, ' '),
@@ -313,9 +314,10 @@ interface SearchResultsProps {
     properties: any[]
     propertiesWithCoords: any[]
     lpMap: Record<string, string>
+    brokerSearchName?: string | null
 }
 
-export default function SearchResults({ properties, propertiesWithCoords, lpMap }: SearchResultsProps) {
+export default function SearchResults({ properties, propertiesWithCoords, lpMap, brokerSearchName }: SearchResultsProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
@@ -418,7 +420,7 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     }, [memoryIds, memoryIdsKey])
 
     const activeFilters = useMemo(() => {
-        const ignored = new Set(['page', MAP_PROPERTY_PARAM, DRAW_AREA_PARAM, MAP_BOUNDS_PARAM])
+        const ignored = new Set(['page', MAP_PROPERTY_PARAM, DRAW_AREA_PARAM, MAP_BOUNDS_PARAM, 'brokerLogin'])
 
         return Array.from(searchParams.entries())
             .filter(([key, value]) => value && !ignored.has(key))
@@ -505,6 +507,8 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
     }, [selectedMapProperty, visibleMapProperties])
     const visibleCount = visibleProperties.length
     const totalCount = properties.length
+    const brokerResultName = String(brokerSearchName || '').trim()
+    const isBrokerSearch = brokerResultName.length > 0
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
     const isSpatiallyFiltered = Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
@@ -516,11 +520,15 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
         () => visibleProperties.slice(0, 18).map(property => String(property.id || '')).filter(Boolean),
         [visibleProperties]
     )
-    const countLabel = selectedDrawArea
+    const baseCountLabel = selectedDrawArea
         ? 'imóveis na área desenhada'
         : mapBounds && visibleCount < totalCount
             ? 'imóveis nesta área'
             : 'imóveis encontrados'
+    const countLabel = isBrokerSearch ? 'imóveis deste corretor' : baseCountLabel
+    const resultTitle = isBrokerSearch ? 'Mais imóveis deste corretor' : 'Imóveis selecionados'
+    const resultSubtitle = isBrokerSearch ? `Curadoria de ${brokerResultName}` : ''
+
     const handleSearchButtonClick = useCallback(() => {
         const nextOpen = !showRefineSearch
         setShowRefineSearch(nextOpen)
@@ -762,6 +770,11 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     font-weight: 700;
                     line-height: 1.05;
                     letter-spacing: 0;
+                }
+                .result-subtitle {
+                    margin: 5px 0 0;
+                    color: #8f6930;
+                    font: 800 0.76rem/1.22 'Inter', sans-serif;
                 }
                 .result-count {
                     margin-top: 6px;
@@ -1046,6 +1059,10 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     .result-title {
                         font-size: 1rem;
                     }
+                    .result-subtitle {
+                        margin-top: 3px;
+                        font-size: 0.68rem;
+                    }
                     .result-count {
                         margin-top: 2px;
                         font-size: 0.78rem;
@@ -1159,7 +1176,10 @@ export default function SearchResults({ properties, propertiesWithCoords, lpMap 
                     </div>
                     <div className="result-main-row">
                         <div>
-                            <h1 className="result-title">Imóveis selecionados</h1>
+                            <h1 className="result-title">{resultTitle}</h1>
+                            {resultSubtitle && (
+                                <p className="result-subtitle">{resultSubtitle}</p>
+                            )}
                             <p className="result-count">
                                 <strong>{isSpatiallyFiltered ? visibleCount : totalCount}</strong> {countLabel}
                                 {isSpatiallyFiltered && visibleCount < totalCount && (

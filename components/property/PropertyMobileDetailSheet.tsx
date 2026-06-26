@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 
 type PropertyMobileDetailSheetProps = {
     media: ReactNode
@@ -18,6 +18,9 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
     const startY = useRef(0)
     const startTop = useRef(SNAP_ENTRY)
     const currentTop = useRef(SNAP_ENTRY)
+    const hasDragged = useRef(false)
+    const ignoreNextClick = useRef(false)
+    const isExpanded = sheetTop <= SNAP_BALANCED
 
     const snapToNearest = useCallback(() => {
         const snapPoints = [SNAP_DETAILS_FOCUS, SNAP_BALANCED, SNAP_MEDIA_FOCUS]
@@ -29,18 +32,27 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
         setSheetTop(next)
     }, [])
 
-    const handlePointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const toggleSheet = useCallback(() => {
+        const next = currentTop.current <= SNAP_BALANCED ? SNAP_MEDIA_FOCUS : SNAP_DETAILS_FOCUS
+        currentTop.current = next
+        setSheetTop(next)
+    }, [])
+
+    const handlePointerDown = useCallback((event: PointerEvent<HTMLButtonElement>) => {
         startY.current = event.clientY
         startTop.current = sheetTop
         currentTop.current = sheetTop
+        hasDragged.current = false
+        ignoreNextClick.current = false
         setIsDragging(true)
         event.currentTarget.setPointerCapture?.(event.pointerId)
     }, [sheetTop])
 
-    const handlePointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const handlePointerMove = useCallback((event: PointerEvent<HTMLButtonElement>) => {
         if (!isDragging) return
 
         const deltaY = event.clientY - startY.current
+        if (Math.abs(deltaY) > 6) hasDragged.current = true
         const deltaPercent = (deltaY / Math.max(window.innerHeight, 1)) * 100
         const next = Math.max(SNAP_DETAILS_FOCUS, Math.min(SNAP_MEDIA_FOCUS, startTop.current + deltaPercent))
 
@@ -48,13 +60,34 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
         setSheetTop(next)
     }, [isDragging])
 
-    const handlePointerEnd = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const handlePointerEnd = useCallback((event: PointerEvent<HTMLButtonElement>) => {
         if (!isDragging) return
 
         setIsDragging(false)
         event.currentTarget.releasePointerCapture?.(event.pointerId)
-        snapToNearest()
+        if (hasDragged.current) {
+            ignoreNextClick.current = true
+            snapToNearest()
+        }
     }, [isDragging, snapToNearest])
+
+    const handleHandleClick = useCallback(() => {
+        if (ignoreNextClick.current) {
+            ignoreNextClick.current = false
+            return
+        }
+
+        toggleSheet()
+    }, [toggleSheet])
+
+    const handleHandleKeyDown = useCallback((event: KeyboardEvent<HTMLButtonElement>) => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+
+        event.preventDefault()
+        const next = event.key === 'ArrowUp' ? SNAP_DETAILS_FOCUS : SNAP_MEDIA_FOCUS
+        currentTop.current = next
+        setSheetTop(next)
+    }, [])
 
     return (
         <section
@@ -72,21 +105,20 @@ export default function PropertyMobileDetailSheet({ media, children }: PropertyM
                     transition: isDragging ? 'none' : 'top 0.34s cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
             >
-                <div
+                <button
+                    type="button"
                     className="pmds-handle"
-                    role="slider"
                     aria-label="Arrastar ficha do imóvel"
-                    aria-valuemin={SNAP_DETAILS_FOCUS}
-                    aria-valuemax={SNAP_MEDIA_FOCUS}
-                    aria-valuenow={Math.round(sheetTop)}
-                    tabIndex={0}
+                    aria-expanded={isExpanded}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerEnd}
                     onPointerCancel={handlePointerEnd}
+                    onClick={handleHandleClick}
+                    onKeyDown={handleHandleKeyDown}
                 >
-                    <span />
-                </div>
+                    <span className="pmds-handle-track" aria-hidden="true" />
+                </button>
                 <div className="pmds-scroll">
                     {children}
                 </div>

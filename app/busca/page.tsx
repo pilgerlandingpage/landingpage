@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
 import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
@@ -37,6 +37,40 @@ function firstParam(value: string | string[] | undefined) {
 
 function safeSearch(value: string) {
     return value.replace(/[(),{}]/g, ' ').trim()
+}
+
+function safeBrokerSearch(value?: string) {
+    return safeSearch(value || '')
+        .replace(/[%_*;:.]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 80)
+}
+
+async function resolveBrokerPropertyIds(supabase: any, brokerName?: string, brokerLogin?: string) {
+    const nameTerm = safeBrokerSearch(brokerName)
+    const loginTerm = safeBrokerSearch(brokerLogin)
+    const terms = Array.from(new Set([nameTerm, loginTerm].filter(Boolean)))
+
+    if (terms.length === 0) return null
+
+    const filters = terms.flatMap(term => [
+        `broker_name.ilike.%${term}%`,
+        `broker_login.ilike.%${term}%`,
+    ])
+
+    const { data, error } = await supabase
+        .from('property_private_details')
+        .select('property_id')
+        .or(filters.join(','))
+        .limit(2000)
+
+    if (error) {
+        console.warn('[Busca] Broker property filter unavailable:', error.message)
+        return []
+    }
+
+    return Array.from(new Set((data || []).map((item: any) => String(item?.property_id || '')).filter(Boolean)))
 }
 
 function asNumber(value: string | string[] | undefined) {
@@ -241,6 +275,7 @@ export default async function SearchPage({
         },
     ]
     const supabase = await createServerSupabase()
+    const adminSupabase = createAdminClient()
     const resolvedParams = await searchParams
 
     const rawQ = firstParam(resolvedParams.q)
@@ -250,6 +285,8 @@ export default async function SearchPage({
     const subtype = firstParam(resolvedParams.subtype) || naturalSearch.subtype
     const city = firstParam(resolvedParams.city) || naturalSearch.city
     const tag = firstParam(resolvedParams.tag) || naturalSearch.tag
+    const brokerName = firstParam(resolvedParams.broker)
+    const brokerLogin = firstParam(resolvedParams.brokerLogin)
     const offer = firstParam(resolvedParams.offer)
     const price = firstParam(resolvedParams.price)
     const bedrooms = asNumber(resolvedParams.bedrooms)
@@ -265,6 +302,7 @@ export default async function SearchPage({
     const drawArea = parseDrawAreaParam(resolvedParams.drawArea)
     const mapBounds = parseMapBoundsParam(resolvedParams.mapBounds)
     const hasServerSpatialFilter = Boolean(drawArea || mapBounds)
+    const brokerPropertyIds = await resolveBrokerPropertyIds(adminSupabase, brokerName, brokerLogin)
 
     const createPropertyQuery = (useSpatialFilter: boolean) => (
         useSpatialFilter && hasServerSpatialFilter
@@ -336,6 +374,11 @@ export default async function SearchPage({
     if (areaMax > 0) query = query.lte('area_m2', areaMax)
     if (offer === 'rent') query = query.not('rent', 'is', null)
     if (offer === 'sale') query = query.not('price', 'is', null)
+    if (brokerPropertyIds) {
+        query = brokerPropertyIds.length > 0
+            ? query.in('id', brokerPropertyIds)
+            : query.eq('id', '00000000-0000-0000-0000-000000000000')
+    }
 
         query = applyTextFilter(query, tag)
 
@@ -375,6 +418,7 @@ export default async function SearchPage({
                     properties={properties || []}
                     propertiesWithCoords={propertiesWithCoords}
                     lpMap={lpMap}
+                    brokerSearchName={brokerName || null}
                 />
             </div>
         </div>

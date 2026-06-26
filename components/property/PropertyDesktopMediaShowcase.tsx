@@ -1,8 +1,9 @@
 'use client'
 
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
-import { Images, MapPinned, Navigation, X } from 'lucide-react'
+import { Images, MapPinned, Navigation, PlayCircle, X } from 'lucide-react'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
+import PropertyVideoEmbed, { getPropertyVideoSource } from '@/components/property/PropertyVideoEmbed'
 import { trackEvent } from '@/lib/tracking/client'
 
 const GOOGLE_STATIC_PREVIEW_SIZE = '320x190'
@@ -33,6 +34,12 @@ type MediaItem =
         photoIndex: number
     }
     | {
+        type: 'video'
+        label: string
+        videoUrl: string
+        thumbnailUrl?: string
+    }
+    | {
         type: 'street'
         label: string
     }
@@ -43,6 +50,7 @@ type MediaItem =
 
 type PropertyDesktopMediaShowcaseProps = {
     images: string[]
+    videoUrl?: string | null
     title: string
     property: PropertyMediaMapProperty
     latLng?: [number, number] | null
@@ -123,8 +131,32 @@ function StaticMediaThumbnail({
     )
 }
 
+function VideoMediaThumbnail({
+    thumbnailUrl,
+    title,
+}: {
+    thumbnailUrl?: string
+    title: string
+}) {
+    return (
+        <span className={`plp-desktop-media-thumb-preview plp-desktop-media-thumb-preview--video ${thumbnailUrl ? '' : 'is-fallback'}`.trim()}>
+            {thumbnailUrl && (
+                <img src={thumbnailUrl} alt={`${title} - vídeo`} loading="lazy" />
+            )}
+            <span className="plp-desktop-media-thumb-preview-fallback" aria-hidden="true">
+                <PlayCircle size={24} />
+            </span>
+            <span className="plp-desktop-media-thumb-preview-label">
+                <PlayCircle size={13} />
+                Vídeo
+            </span>
+        </span>
+    )
+}
+
 export default function PropertyDesktopMediaShowcase({
     images,
+    videoUrl,
     title,
     property,
     latLng,
@@ -132,43 +164,40 @@ export default function PropertyDesktopMediaShowcase({
     shareSlot,
 }: PropertyDesktopMediaShowcaseProps) {
     const gallery = useMemo(() => Array.from(new Set((images || []).filter(Boolean))), [images])
+    const videoSource = useMemo(() => getPropertyVideoSource(videoUrl), [videoUrl])
     const mediaItems = useMemo<MediaItem[]>(() => {
+        const photoItems: MediaItem[] = gallery.map((src, index) => ({
+            type: 'photo',
+            src,
+            label: index === 0 ? 'Foto principal' : `Foto ${index + 1}`,
+            photoIndex: index,
+        }))
+        const videoItem: MediaItem | null = videoSource ? {
+            type: 'video',
+            label: 'Vídeo do imóvel',
+            videoUrl: videoSource.url,
+            thumbnailUrl: videoSource.thumbnailUrl,
+        } : null
         const items: MediaItem[] = []
 
-        if (gallery[0]) {
-            items.push({
-                type: 'photo',
-                src: gallery[0],
-                label: 'Foto principal',
-                photoIndex: 0,
-            })
-        }
+        if (photoItems[0]) items.push(photoItems[0])
 
         if (latLng) {
             items.push({
                 type: 'street',
                 label: 'Street View',
             })
-        }
-
-        gallery.slice(1).forEach((src, index) => {
-            items.push({
-                type: 'photo',
-                src,
-                label: `Foto ${index + 2}`,
-                photoIndex: index + 1,
-            })
-        })
-
-        if (latLng) {
             items.push({
                 type: 'map',
                 label: 'Mapa',
             })
         }
 
+        if (videoItem) items.push(videoItem)
+        items.push(...photoItems.slice(1))
+
         return items
-    }, [gallery, latLng])
+    }, [gallery, latLng, videoSource])
     const modalMediaItems = useMemo(() => mediaItems.filter(item => item.type !== 'map'), [mediaItems])
 
     const [activeMediaIndex, setActiveMediaIndex] = useState(0)
@@ -239,6 +268,22 @@ export default function PropertyDesktopMediaShowcase({
             )
         }
 
+        if (activeMedia.type === 'video') {
+            return (
+                <div className="plp-desktop-media-video">
+                    <span className="plp-desktop-media-chip">
+                        <PlayCircle size={15} />
+                        Vídeo do imóvel
+                    </span>
+                    <PropertyVideoEmbed
+                        videoUrl={activeMedia.videoUrl}
+                        title={title}
+                        poster={gallery[0]}
+                    />
+                </div>
+            )
+        }
+
         if (!latLng) return null
 
         if (activeMedia.type === 'street') {
@@ -304,6 +349,8 @@ export default function PropertyDesktopMediaShowcase({
                             >
                                 {item.type === 'photo' ? (
                                     <img src={item.src} alt={`${title} - ${item.label}`} loading={index < 4 ? 'eager' : 'lazy'} />
+                                ) : item.type === 'video' ? (
+                                    <VideoMediaThumbnail thumbnailUrl={item.thumbnailUrl} title={title} />
                                 ) : (
                                     <StaticMediaThumbnail type={item.type} latLng={latLng} title={title} />
                                 )}
@@ -344,6 +391,25 @@ export default function PropertyDesktopMediaShowcase({
                                                 src={item.src}
                                                 alt={`${title} - foto ${item.photoIndex + 1}`}
                                                 loading={index < 2 ? 'eager' : 'lazy'}
+                                            />
+                                        </figure>
+                                    )
+                                }
+
+                                if (item.type === 'video') {
+                                    return (
+                                        <figure
+                                            key={`modal-video-${item.videoUrl}`}
+                                            className="plp-gallery-modal-item plp-gallery-modal-item--video"
+                                        >
+                                            <span className="plp-gallery-modal-video-chip">
+                                                <PlayCircle size={15} />
+                                                Vídeo do imóvel
+                                            </span>
+                                            <PropertyVideoEmbed
+                                                videoUrl={item.videoUrl}
+                                                title={title}
+                                                poster={gallery[0]}
                                             />
                                         </figure>
                                     )

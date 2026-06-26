@@ -506,7 +506,8 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-desktop-media-photo,
-                .plp-desktop-media-map {
+                .plp-desktop-media-map,
+                .plp-desktop-media-video {
                     position: absolute;
                     inset: 0;
                     display: block;
@@ -523,6 +524,71 @@ export default function PropertyLandingStyles() {
 
                 .plp-desktop-media-photo {
                     cursor: zoom-in;
+                }
+
+                .plp-property-video-embed {
+                    position: relative;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    min-height: inherit;
+                    overflow: hidden;
+                    border-radius: inherit;
+                    background:
+                        radial-gradient(circle at 50% 40%, rgba(189,149,81,0.18), transparent 42%),
+                        #0f1113;
+                    color: #fff;
+                }
+
+                .plp-property-video-embed iframe,
+                .plp-property-video-embed video {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    min-height: inherit;
+                    border: 0;
+                    background: #0f1113;
+                }
+
+                .plp-property-video-embed video {
+                    object-fit: contain;
+                }
+
+                .plp-property-video-embed--external {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 14px;
+                    padding: 24px;
+                    text-decoration: none;
+                }
+
+                .plp-property-video-embed--external > svg {
+                    flex: 0 0 auto;
+                    color: #dfc18e;
+                }
+
+                .plp-property-video-embed--external span {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 0;
+                }
+
+                .plp-property-video-embed--external strong {
+                    color: #fff;
+                    font-size: 1rem;
+                    font-weight: 900;
+                }
+
+                .plp-property-video-embed--external em {
+                    color: rgba(255,255,255,0.72);
+                    font-size: .78rem;
+                    font-style: normal;
+                    font-weight: 650;
+                }
+
+                .plp-desktop-media-video .plp-property-video-embed {
+                    border-radius: inherit;
                 }
 
                 .plp-desktop-media-photo img {
@@ -559,6 +625,12 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-desktop-media-map .plp-desktop-media-chip {
+                    top: 16px;
+                    bottom: auto;
+                    left: 16px;
+                }
+
+                .plp-desktop-media-video .plp-desktop-media-chip {
                     top: 16px;
                     bottom: auto;
                     left: 16px;
@@ -813,6 +885,28 @@ export default function PropertyLandingStyles() {
                     background: linear-gradient(135deg, rgba(189, 149, 81, 0.12), rgba(255, 255, 255, 0.28));
                 }
 
+                .plp-desktop-media-thumb-preview--video {
+                    background:
+                        linear-gradient(135deg, rgba(16,16,18,0.94), rgba(88,67,36,0.86)),
+                        #111;
+                }
+
+                .plp-desktop-media-thumb-preview--video::after {
+                    background:
+                        linear-gradient(180deg, rgba(11, 12, 13, 0.1) 25%, rgba(11, 12, 13, 0.72) 100%),
+                        radial-gradient(circle at 50% 46%, rgba(255,255,255,0.16), transparent 28%);
+                }
+
+                .plp-desktop-media-thumb-preview--video .plp-desktop-media-thumb-preview-fallback {
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    z-index: 2;
+                    background: rgba(255,255,255,0.9);
+                    color: var(--plp-gold-dark);
+                    transform: translate(-50%, -50%);
+                }
+
                 .plp-desktop-media-thumb small {
                     display: none;
                 }
@@ -944,6 +1038,38 @@ export default function PropertyLandingStyles() {
                     object-position: center;
                 }
 
+                .plp-gallery-modal-item--video {
+                    position: relative;
+                    aspect-ratio: 16 / 9;
+                }
+
+                .plp-gallery-modal-item--video .plp-property-video-embed {
+                    width: 100%;
+                    height: 100%;
+                    min-height: 100%;
+                    border-radius: inherit;
+                }
+
+                .plp-gallery-modal-video-chip {
+                    position: absolute;
+                    left: 16px;
+                    top: 16px;
+                    z-index: 5;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    min-height: 32px;
+                    padding: 0 12px;
+                    border-radius: 999px;
+                    background: rgba(17,17,17,0.78);
+                    color: #fff;
+                    font-size: 12px;
+                    font-weight: 850;
+                    box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                }
+
                 .plp-gallery-modal-item--map {
                     position: relative;
                 }
@@ -1046,23 +1172,6 @@ export default function PropertyLandingStyles() {
                         opacity: 1;
                         transform: translateY(0);
                     }
-                }
-
-                .plp-video-card {
-                    margin-top: 18px;
-                    padding: 18px;
-                    border: 1px solid var(--plp-line);
-                    border-radius: var(--plp-radius);
-                    background: #fff;
-                }
-
-                .plp-video-card iframe {
-                    display: block;
-                    width: 100%;
-                    aspect-ratio: 16 / 9;
-                    border: 0;
-                    border-radius: var(--plp-radius);
-                    background: #111;
                 }
 
                 .plp-instagram-strip {
@@ -1302,14 +1411,6 @@ export default function PropertyLandingStyles() {
                     margin-bottom: 8px;
                 }
 
-                .plp-intro-line {
-                    margin: 0 0 16px;
-                    color: #4d565d;
-                    font-size: 17px;
-                    font-weight: 700;
-                    line-height: 1.55;
-                }
-
                 .plp-highlight-list {
                     display: grid;
                     gap: 8px;
@@ -1336,6 +1437,7 @@ export default function PropertyLandingStyles() {
                     display: grid;
                     gap: 13px;
                     max-width: 850px;
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 }
 
                 .plp-narrative p,
@@ -1345,6 +1447,10 @@ export default function PropertyLandingStyles() {
                     color: var(--plp-muted);
                     font-size: 14px;
                     line-height: 1.7;
+                }
+
+                .plp-narrative p {
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 }
 
                 .plp-spec-grid {
@@ -1426,6 +1532,628 @@ export default function PropertyLandingStyles() {
                     font-size: 13px;
                     font-weight: 450;
                     line-height: 1.55;
+                }
+
+                .plp-nearby-map-layout {
+                    display: grid;
+                    gap: 10px;
+                }
+
+                .plp-nearby-summary-row {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 7px;
+                }
+
+                .plp-nearby-summary-item {
+                    display: grid;
+                    grid-template-columns: 28px minmax(0, 1fr);
+                    align-items: center;
+                    gap: 7px;
+                    min-width: 0;
+                    min-height: 45px;
+                    padding: 7px 8px;
+                    border: 1px solid rgba(184,148,95,0.18);
+                    border-radius: 13px;
+                    background: rgba(255,255,255,0.78);
+                    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+                }
+
+                .plp-nearby-summary-item > span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 999px;
+                    background: color-mix(in srgb, var(--benefit-color, var(--plp-gold-dark)) 12%, #fff);
+                    color: var(--benefit-color, var(--plp-gold-dark));
+                }
+
+                .plp-nearby-summary-item svg {
+                    width: 15px;
+                    height: 15px;
+                    stroke-width: 2.25;
+                }
+
+                .plp-nearby-summary-item div {
+                    display: grid;
+                    gap: 2px;
+                    min-width: 0;
+                }
+
+                .plp-nearby-summary-item strong {
+                    color: #252a2f;
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-size: 10px;
+                    font-weight: 650;
+                    line-height: 1.08;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-summary-item small {
+                    color: #6d5a3a;
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-size: 9px;
+                    font-weight: 560;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-map-shell {
+                    position: relative;
+                    min-height: 370px;
+                    overflow: hidden;
+                    border: 1px solid rgba(184,148,95,0.24);
+                    border-radius: 20px;
+                    background: #dfece5;
+                    box-shadow:
+                        inset 0 1px 0 rgba(255,255,255,0.7),
+                        0 16px 34px rgba(31,25,16,0.1);
+                    isolation: isolate;
+                }
+
+                .plp-nearby-map-shell::after {
+                    display: none;
+                }
+
+                .plp-nearby-map-shell .leaflet-container {
+                    width: 100%;
+                    height: 100%;
+                    min-height: 370px;
+                    background: #dfece5;
+                    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                }
+
+                .plp-nearby-real-map {
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .plp-nearby-map-shell .leaflet-tile-pane {
+                    filter: saturate(0.84) contrast(0.98) brightness(1.03);
+                }
+
+                .plp-nearby-map-shell .plp-nearby-schematic-map,
+                .plp-nearby-map-shell .plp-nearby-schematic-property,
+                .plp-nearby-map-shell .plp-nearby-schematic-point {
+                    display: none;
+                }
+
+                .plp-nearby-map-shell.plp-nearby-schematic {
+                    background: #dfe8e4;
+                }
+
+                .plp-nearby-map-shell.plp-nearby-schematic::after {
+                    display: none;
+                }
+
+                .plp-nearby-schematic-map {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                .plp-nearby-schematic-zones path {
+                    fill: #b9dbb7;
+                    opacity: 0.82;
+                }
+
+                .plp-nearby-schematic-water path {
+                    fill: #bad4e7;
+                    opacity: 0.86;
+                }
+
+                .plp-nearby-schematic-blocks path {
+                    fill: #f1edb7;
+                    opacity: 0.78;
+                }
+
+                .plp-nearby-schematic-roads path {
+                    fill: none;
+                    stroke: rgba(255,255,255,0.96);
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    stroke-width: 2.9;
+                    vector-effect: non-scaling-stroke;
+                }
+
+                .plp-nearby-schematic-route-halo,
+                .plp-nearby-schematic-route {
+                    fill: none;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    vector-effect: non-scaling-stroke;
+                }
+
+                .plp-nearby-schematic-route-halo {
+                    stroke: rgba(255,255,255,0.92);
+                    stroke-width: 5.2;
+                }
+
+                .plp-nearby-schematic-route {
+                    stroke-width: 2.1;
+                    stroke-dasharray: 1.8 2.7;
+                    filter: drop-shadow(0 1px 2px rgba(31,25,16,0.15));
+                    animation: plpNearbyRouteFlow 1.6s linear infinite;
+                }
+
+                .plp-nearby-schematic-node {
+                    fill: #fff;
+                    stroke-width: 1.6;
+                    vector-effect: non-scaling-stroke;
+                }
+
+                .plp-nearby-schematic-node.is-home {
+                    fill: #1f2428;
+                    stroke: #f0c85e;
+                    stroke-width: 1.5;
+                }
+
+                .plp-nearby-schematic-property {
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    z-index: 9;
+                    display: grid;
+                    justify-items: center;
+                    gap: 4px;
+                    transform: translate(-50%, -58%);
+                    filter: drop-shadow(0 18px 22px rgba(31,25,16,0.32));
+                }
+
+                .plp-nearby-schematic-property > span {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 46px;
+                    height: 46px;
+                    border: 3px solid rgba(255,255,255,0.94);
+                    border-radius: 50% 50% 50% 9px;
+                    background: linear-gradient(145deg, #f3cc5f, #d19716 58%, #9f6e05);
+                    box-shadow: 0 0 0 7px rgba(226,183,71,0.2);
+                    transform: rotate(-45deg);
+                }
+
+                .plp-nearby-schematic-property > span::after {
+                    content: '';
+                    position: absolute;
+                    inset: -8px;
+                    border-radius: inherit;
+                    border: 1px solid rgba(255,255,255,0.72);
+                }
+
+                .plp-nearby-schematic-property i {
+                    display: block;
+                    width: 13px;
+                    height: 13px;
+                    border: 2px solid #fff;
+                    border-top-width: 6px;
+                    border-radius: 2px;
+                    transform: rotate(45deg);
+                }
+
+                .plp-nearby-schematic-property strong {
+                    display: inline-flex;
+                    align-items: center;
+                    min-height: 22px;
+                    padding: 4px 11px;
+                    border-radius: 999px;
+                    background: rgba(31,25,16,0.9);
+                    color: #f4d586;
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-schematic-point {
+                    position: absolute;
+                    z-index: 8;
+                    display: grid;
+                    justify-items: center;
+                    gap: 3px;
+                    width: 76px;
+                    pointer-events: none;
+                    text-align: center;
+                    transform: translate(-50%, -54%);
+                }
+
+                .plp-nearby-schematic-point > span {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 34px;
+                    height: 34px;
+                    border: 2px solid rgba(255,255,255,0.95);
+                    border-radius: 50% 50% 50% 8px;
+                    background: color-mix(in srgb, var(--benefit-color, #d86a33) 86%, #fff);
+                    box-shadow: 0 10px 18px rgba(31,25,16,0.18);
+                    transform: rotate(-45deg);
+                }
+
+                .plp-nearby-schematic-point > span::after {
+                    content: '';
+                    position: absolute;
+                    left: 50%;
+                    bottom: -7px;
+                    width: 17px;
+                    height: 6px;
+                    border-radius: 999px;
+                    background: color-mix(in srgb, var(--benefit-color, #d86a33) 34%, transparent);
+                    filter: blur(1px);
+                    transform: translateX(-50%) rotate(45deg);
+                }
+
+                .plp-nearby-schematic-point i {
+                    color: #fff;
+                    font-size: 9px;
+                    font-style: normal;
+                    font-weight: 900;
+                    line-height: 1;
+                    transform: rotate(45deg);
+                }
+
+                .plp-nearby-schematic-point strong,
+                .plp-nearby-schematic-point em {
+                    display: inline-flex;
+                    width: fit-content;
+                    max-width: 76px;
+                    padding: 3px 6px;
+                    border-radius: 999px;
+                    box-shadow: 0 8px 16px rgba(31,25,16,0.12);
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-schematic-point strong {
+                    background: rgba(255,255,255,0.94);
+                    color: #1f2428;
+                    font-size: 8px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .plp-nearby-schematic-point em {
+                    background: rgba(31,25,16,0.82);
+                    color: #fff8ed;
+                    font-size: 8px;
+                    font-style: normal;
+                    font-weight: 780;
+                }
+
+                .plp-nearby-map-shell .plp-nearby-gps-route {
+                    filter: drop-shadow(0 2px 4px rgba(31,25,16,0.22));
+                    stroke-linecap: round;
+                    animation: plpNearbyRouteFlow 1.6s linear infinite;
+                }
+
+                @keyframes plpNearbyRouteFlow {
+                    from {
+                        stroke-dashoffset: 0;
+                    }
+
+                    to {
+                        stroke-dashoffset: -24;
+                    }
+                }
+
+                .plp-nearby-map-shell .leaflet-control-attribution {
+                    border-radius: 999px 0 0 0;
+                    background: rgba(255,255,255,0.72);
+                    color: rgba(31,36,40,0.62);
+                    font-size: 8px;
+                    line-height: 1.2;
+                }
+
+                .plp-nearby-map-shell .leaflet-control-zoom {
+                    overflow: hidden;
+                    border: 1px solid rgba(184,148,95,0.28);
+                    border-radius: 12px;
+                    box-shadow: 0 10px 24px rgba(31,25,16,0.16);
+                }
+
+                .plp-nearby-map-shell .leaflet-control-zoom a {
+                    width: 31px;
+                    height: 31px;
+                    border: 0;
+                    background: rgba(255,255,255,0.94);
+                    color: #1f2428;
+                    font-size: 18px;
+                    font-weight: 800;
+                    line-height: 31px;
+                }
+
+                .plp-nearby-map-shell .leaflet-control-zoom a:hover {
+                    background: #f7efe1;
+                    color: var(--plp-gold-dark);
+                }
+
+                .plp-nearby-property-marker,
+                .plp-nearby-benefit-marker {
+                    border: 0 !important;
+                    background: transparent !important;
+                }
+
+                .plp-nearby-property-marker-wrap {
+                    display: grid;
+                    justify-items: center;
+                    gap: 4px;
+                    filter: drop-shadow(0 16px 20px rgba(31,25,16,0.34));
+                    transform: translateY(-4px);
+                }
+
+                .plp-nearby-property-pin {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 42px;
+                    height: 42px;
+                    border: 3px solid rgba(255,255,255,0.92);
+                    border-radius: 50% 50% 50% 8px;
+                    background: linear-gradient(145deg, #f0c85e, #d19716 58%, #9f6e05);
+                    box-shadow: 0 0 0 6px rgba(226,183,71,0.24);
+                    transform: rotate(-45deg);
+                }
+
+                .plp-nearby-property-pin::after {
+                    content: '';
+                    position: absolute;
+                    inset: -7px;
+                    border-radius: inherit;
+                    border: 1px solid rgba(255,255,255,0.7);
+                }
+
+                .plp-nearby-property-pin i {
+                    display: block;
+                    width: 12px;
+                    height: 12px;
+                    border: 2px solid #fff;
+                    border-top-width: 6px;
+                    border-radius: 2px;
+                    transform: rotate(45deg);
+                }
+
+                .plp-nearby-property-marker-wrap strong {
+                    display: inline-flex;
+                    align-items: center;
+                    min-height: 22px;
+                    padding: 4px 10px;
+                    border-radius: 999px;
+                    background: rgba(31,25,16,0.9);
+                    color: #f4d586;
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-benefit-marker-wrap {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 34px;
+                    height: 34px;
+                    border: 2px solid rgba(255,255,255,0.92);
+                    border-radius: 999px;
+                    background: color-mix(in srgb, var(--benefit-color, #1478d4) 86%, #fff);
+                    color: #fff;
+                    box-shadow: 0 10px 22px rgba(20,34,44,0.22);
+                }
+
+                .plp-nearby-benefit-marker-wrap span {
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                }
+
+                .plp-nearby-benefit-tooltip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 7px !important;
+                    border: 0 !important;
+                    border-radius: 999px !important;
+                    background: rgba(255,255,255,0.94) !important;
+                    box-shadow: 0 8px 18px rgba(31,25,16,0.16) !important;
+                    color: #1f2428 !important;
+                    font-size: 9px;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-property-tooltip {
+                    padding: 5px 9px !important;
+                    border: 0 !important;
+                    border-radius: 999px !important;
+                    background: rgba(31,25,16,0.88) !important;
+                    box-shadow: 0 10px 22px rgba(31,25,16,0.2) !important;
+                    color: #f4d586 !important;
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-nearby-property-tooltip::before {
+                    display: none;
+                }
+
+                .plp-nearby-benefit-tooltip::before {
+                    display: none;
+                }
+
+                .plp-nearby-benefit-tooltip span {
+                    color: var(--plp-muted);
+                    font-weight: 850;
+                    text-transform: uppercase;
+                }
+
+                .plp-nearby-benefit-tooltip strong {
+                    color: var(--plp-gold-dark);
+                    font-weight: 900;
+                }
+
+                .plp-nearby-benefit-popup .leaflet-popup-content-wrapper {
+                    border-radius: 14px;
+                    background: rgba(255,255,255,0.98);
+                    box-shadow: 0 16px 34px rgba(31,25,16,0.18);
+                }
+
+                .plp-nearby-benefit-popup .leaflet-popup-content {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 150px;
+                    margin: 10px 12px;
+                    color: var(--plp-ink);
+                    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                }
+
+                .plp-nearby-benefit-popup strong {
+                    font-size: 12px;
+                    line-height: 1.2;
+                }
+
+                .plp-nearby-benefit-popup span,
+                .plp-nearby-benefit-popup em {
+                    color: var(--plp-muted);
+                    font-size: 11px;
+                    font-style: normal;
+                    line-height: 1.3;
+                }
+
+                .plp-nearby-map-status {
+                    position: absolute;
+                    left: 12px;
+                    top: 12px;
+                    z-index: 700;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    min-height: 30px;
+                    padding: 0 10px;
+                    border-radius: 999px;
+                    background: rgba(31,25,16,0.86);
+                    color: #f4d586;
+                    font-size: 11px;
+                    font-weight: 850;
+                    box-shadow: 0 12px 26px rgba(31,25,16,0.22);
+                }
+
+                .plp-nearby-map-legend {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 8px;
+                }
+
+                .plp-nearby-map-legend article,
+                .plp-nearby-map-empty {
+                    display: grid;
+                    grid-template-columns: 32px minmax(0, 1fr);
+                    gap: 9px;
+                    min-width: 0;
+                    padding: 10px;
+                    border: 1px solid rgba(35,31,26,0.08);
+                    border-radius: 14px;
+                    background: rgba(255,255,255,0.88);
+                }
+
+                .plp-nearby-map-legend article > span,
+                .plp-nearby-map-empty > span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 12px;
+                    background: color-mix(in srgb, var(--benefit-color, var(--plp-gold-dark)) 12%, #fff);
+                    color: var(--benefit-color, var(--plp-gold-dark));
+                }
+
+                .plp-nearby-map-legend div,
+                .plp-nearby-map-empty div {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 0;
+                }
+
+                .plp-nearby-map-legend small,
+                .plp-nearby-map-empty small {
+                    color: var(--plp-muted);
+                    font-size: 9px;
+                    font-weight: 800;
+                    letter-spacing: .04em;
+                    line-height: 1;
+                    text-transform: uppercase;
+                }
+
+                .plp-nearby-map-legend strong,
+                .plp-nearby-map-empty strong {
+                    color: var(--plp-ink);
+                    font-size: 12px;
+                    font-weight: 780;
+                    line-height: 1.18;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-nearby-map-legend em,
+                .plp-nearby-map-empty em {
+                    color: #596068;
+                    font-size: 10px;
+                    font-style: normal;
+                    font-weight: 450;
+                    line-height: 1.25;
+                }
+
+                .plp-nearby-map-legend b {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    width: fit-content;
+                    margin-top: 1px;
+                    padding: 4px 7px;
+                    border-radius: 999px;
+                    background: #eee7d9;
+                    color: #6f4e1f;
+                    font-size: 10px;
+                    font-weight: 760;
+                    line-height: 1;
+                }
+
+                .plp-nearby-map-legend.is-loading article strong {
+                    color: transparent;
+                    border-radius: 999px;
+                    background: linear-gradient(90deg, #f4efe5 0%, #ffffff 48%, #f4efe5 100%);
+                    background-size: 220% 100%;
+                    animation: plpNearbyPulse 1.2s ease-in-out infinite;
                 }
 
                 .plp-nearby-benefits-grid {
@@ -1570,6 +2298,142 @@ export default function PropertyLandingStyles() {
                         font-size: 0.74rem;
                         font-weight: 430;
                         line-height: 1.45;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-row {
+                        display: grid;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        align-items: center;
+                        gap: 9px 8px;
+                        margin-right: 0;
+                        padding: 2px 0 1px;
+                        overflow: visible;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item {
+                        display: inline-flex;
+                        grid-template-columns: none;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 5px;
+                        min-height: 0;
+                        padding: 0;
+                        border: 0;
+                        border-radius: 0;
+                        background: transparent;
+                        box-shadow: none;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item > span {
+                        width: auto;
+                        height: auto;
+                        border-radius: 0;
+                        background: transparent;
+                        color: #252a2f;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item svg {
+                        width: 14px;
+                        height: 14px;
+                        stroke-width: 2.1;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item div {
+                        gap: 1px;
+                        min-width: 0;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item strong {
+                        color: #252a2f;
+                        font-size: 9px;
+                        font-weight: 600;
+                        text-align: left;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-summary-item small {
+                        color: #4d565d;
+                        font-size: 8px;
+                        font-weight: 500;
+                        text-align: left;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-shell {
+                        min-height: 390px;
+                        border-radius: 16px;
+                        box-shadow: 0 12px 26px rgba(31,25,16,0.08);
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-shell .leaflet-container {
+                        min-height: 390px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-property-pin {
+                        width: 38px;
+                        height: 38px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-property-marker-wrap strong {
+                        min-height: 20px;
+                        padding: 4px 8px;
+                        font-size: 9px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-benefit-tooltip {
+                        padding: 4px 6px !important;
+                        font-size: 8px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend {
+                        display: flex;
+                        gap: 7px;
+                        margin-right: -13px;
+                        padding: 0 13px 2px 0;
+                        overflow-x: auto;
+                        overscroll-behavior-x: contain;
+                        scrollbar-width: none;
+                        scroll-snap-type: x mandatory;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend::-webkit-scrollbar {
+                        display: none;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend article,
+                    .plp-nearby-benefits--mobile .plp-nearby-map-empty {
+                        grid-template-columns: 28px minmax(0, 1fr);
+                        flex: 0 0 168px;
+                        gap: 7px;
+                        min-height: 66px;
+                        padding: 8px;
+                        border-radius: 12px;
+                        scroll-snap-align: start;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-empty {
+                        flex-basis: auto;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend article > span,
+                    .plp-nearby-benefits--mobile .plp-nearby-map-empty > span {
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 10px;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend strong,
+                    .plp-nearby-benefits--mobile .plp-nearby-map-empty strong {
+                        font-size: 0.68rem;
+                        font-weight: 750;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend em,
+                    .plp-nearby-benefits--mobile .plp-nearby-map-empty em {
+                        display: none;
+                    }
+
+                    .plp-nearby-benefits--mobile .plp-nearby-map-legend b {
+                        padding: 4px 6px;
+                        font-size: 0.6rem;
                     }
 
                     .plp-nearby-benefits--mobile .plp-nearby-benefit-card {
@@ -2030,7 +2894,26 @@ export default function PropertyLandingStyles() {
                     white-space: nowrap;
                 }
 
-                .plp-loc-price > span {
+                .plp-side-benefit-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    max-width: 100%;
+                    margin-top: 4px;
+                    padding: 3px 7px;
+                    border: 1px solid rgba(184, 132, 54, 0.22);
+                    border-radius: 999px;
+                    background: rgba(189, 149, 81, 0.12);
+                    color: var(--plp-gold-dark);
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-size: 8px;
+                    font-weight: 600;
+                    line-height: 1.1;
+                    text-align: center;
+                    white-space: nowrap;
+                }
+
+                .plp-side-price-note {
                     font-size: 8px;
                     color: var(--plp-muted);
                     line-height: 1.2;
@@ -3735,12 +4618,6 @@ export default function PropertyLandingStyles() {
                     margin-bottom: 6px;
                 }
 
-                .plp-intro-line {
-                    margin-bottom: 10px;
-                    font-size: 14px;
-                    line-height: 1.38;
-                }
-
                 .plp-highlight-list {
                     gap: 5px;
                     margin: 10px 0 12px;
@@ -4153,10 +5030,6 @@ export default function PropertyLandingStyles() {
                         font-size: 18px;
                     }
 
-                    .plp-intro-line {
-                        font-size: 13px;
-                    }
-
                     .plp-spec-grid {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
@@ -4385,11 +5258,17 @@ export default function PropertyLandingStyles() {
                     }
 
                     .pmds-handle {
-                        display: flex;
+                        appearance: none;
+                        display: grid;
                         align-items: center;
-                        justify-content: center;
-                        min-height: 34px;
-                        padding: 9px 0 7px;
+                        justify-items: center;
+                        gap: 4px;
+                        width: 100%;
+                        min-height: 44px;
+                        padding: 8px 0 6px;
+                        border: 0;
+                        background: transparent;
+                        color: #8f6930;
                         cursor: grab;
                         touch-action: none;
                         user-select: none;
@@ -4400,7 +5279,12 @@ export default function PropertyLandingStyles() {
                         cursor: grabbing;
                     }
 
-                    .pmds-handle span {
+                    .pmds-handle:focus-visible {
+                        outline: 2px solid rgba(184,148,95,0.42);
+                        outline-offset: -6px;
+                    }
+
+                    .pmds-handle-track {
                         width: 48px;
                         height: 5px;
                         border-radius: 999px;
@@ -4454,15 +5338,15 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-card-head {
                         display: grid;
                         gap: 5px;
-                        margin-bottom: 13px;
+                        margin-bottom: 10px;
                     }
 
                     .plp-mobile-card-head h2 {
                         margin: 0;
                         color: #171a1d;
                         font-family: 'Playfair Display', Georgia, serif;
-                        font-size: 1.23rem;
-                        line-height: 1.16;
+                        font-size: 1.02rem;
+                        line-height: 1.18;
                         font-weight: 700;
                         letter-spacing: 0;
                     }
@@ -4475,104 +5359,31 @@ export default function PropertyLandingStyles() {
                         font-weight: 440;
                     }
 
-                    .plp-mobile-text-link {
-                        display: inline-flex;
-                        width: fit-content;
-                        margin-top: 13px;
-                        color: var(--plp-gold-dark);
-                        font-size: 0.88rem;
-                        font-weight: 720;
-                        text-decoration: underline;
-                        text-underline-offset: 4px;
-                    }
-
-                    .plp-mobile-description-details {
+                    .plp-mobile-description-body {
                         display: grid;
                         gap: 12px;
-                        margin-top: 13px;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                     }
 
-                    .plp-mobile-description-details summary {
-                        display: inline-flex;
-                        width: fit-content;
-                        cursor: pointer;
-                        list-style: none;
-                        color: var(--plp-gold-dark);
-                        font-size: 0.88rem;
-                        font-weight: 720;
-                        text-decoration: underline;
-                        text-underline-offset: 4px;
-                    }
-
-                    .plp-mobile-description-details summary::-webkit-details-marker {
-                        display: none;
-                    }
-
-                    .plp-mobile-description-details summary::after {
-                        content: '+';
-                        margin-left: 7px;
-                        text-decoration: none;
-                    }
-
-                    .plp-mobile-description-details[open] summary::after {
-                        content: '-';
-                    }
-
-                    .plp-mobile-description-full {
-                        display: grid;
-                        gap: 10px;
-                    }
-
-                    .plp-mobile-description-full p {
+                    .plp-mobile-description-body p {
                         color: #343a40;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                         font-size: 0.92rem;
-                        line-height: 1.54;
-                        font-weight: 420;
+                        line-height: 1.56;
+                        font-weight: 430;
                     }
 
-                    .plp-mobile-facts-grid {
-                        display: grid;
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 10px;
+                    .plp-mobile-description-body p:first-child {
+                        color: #202428;
+                        font-weight: 560;
                     }
 
-                    .plp-mobile-fact-tile {
-                        display: flex;
-                        gap: 10px;
-                        min-width: 0;
-                        min-height: 86px;
-                        padding: 13px;
-                        border: 1px solid rgba(184,148,95,0.16);
-                        border-radius: 16px;
-                        background: linear-gradient(180deg, #fff, #faf7ef);
-                    }
-
-                    .plp-mobile-fact-tile > span {
-                        flex: 0 0 auto;
-                        color: var(--plp-gold-dark);
-                    }
-
-                    .plp-mobile-fact-tile div {
-                        min-width: 0;
-                        display: grid;
-                        gap: 4px;
-                        align-content: start;
-                    }
-
-                    .plp-mobile-fact-tile small,
                     .plp-mobile-market-grid small,
                     .plp-mobile-timeline-item small {
                         color: #6f756f;
                         font-size: 0.68rem;
                         font-weight: 650;
                         line-height: 1.25;
-                    }
-
-                    .plp-mobile-fact-tile strong {
-                        color: #171a1d;
-                        font-size: 0.9rem;
-                        font-weight: 720;
-                        line-height: 1.2;
                     }
 
                     .plp-mobile-detail-list {
@@ -4599,26 +5410,6 @@ export default function PropertyLandingStyles() {
                         color: var(--plp-gold-dark);
                     }
 
-                    .plp-mobile-amenity-chips {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
-                        margin-top: 14px;
-                    }
-
-                    .plp-mobile-amenity-chips span {
-                        display: inline-flex;
-                        align-items: center;
-                        min-height: 30px;
-                        padding: 0 10px;
-                        border-radius: 999px;
-                        background: #eeece7;
-                        color: #2f3439;
-                        font-size: 0.72rem;
-                        font-weight: 760;
-                        line-height: 1;
-                    }
-
                     .plp-mobile-card--nearby {
                         padding: 0;
                         border: 0;
@@ -4634,7 +5425,7 @@ export default function PropertyLandingStyles() {
                         display: flex;
                         align-items: center;
                         gap: 13px;
-                        margin-bottom: 13px;
+                        margin-bottom: 0;
                     }
 
                     .plp-mobile-broker-head img {
@@ -4649,8 +5440,8 @@ export default function PropertyLandingStyles() {
                         margin: 2px 0 3px;
                         color: #171a1d;
                         font-family: 'Playfair Display', Georgia, serif;
-                        font-size: 1.1rem;
-                        line-height: 1.1;
+                        font-size: 0.98rem;
+                        line-height: 1.16;
                         font-weight: 700;
                     }
 
@@ -4660,13 +5451,29 @@ export default function PropertyLandingStyles() {
                         font-weight: 500;
                     }
 
-                    .plp-mobile-broker-card .plp-mobile-sheet-actions {
-                        grid-template-columns: 1fr;
-                        margin-top: 14px;
+                    .plp-mobile-broker-head > div {
+                        display: grid;
+                        gap: 3px;
+                        min-width: 0;
+                        flex: 1;
                     }
 
-                    .plp-mobile-broker-card .plp-mobile-sheet-primary {
-                        gap: 8px;
+                    .plp-mobile-broker-properties-link {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 7px;
+                        width: 100%;
+                        margin-top: 8px;
+                        min-height: 38px;
+                        padding: 0 13px;
+                        border-radius: 14px;
+                        border: 2px solid var(--plp-gold-dark);
+                        background: linear-gradient(135deg, #dfc18e, #b8945f);
+                        color: #111;
+                        font-size: 0.78rem;
+                        font-weight: 800;
+                        text-decoration: none;
                     }
 
                     .plp-mobile-market-grid {
@@ -4989,7 +5796,38 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-transparency-card {
+                        margin-top: 10px;
                         margin-bottom: 18px;
+                        padding: 10px 12px;
+                        border-radius: 14px;
+                        border-color: rgba(184,148,95,0.1);
+                        background: rgba(255,252,246,0.72);
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-transparency-card .plp-mobile-card-head {
+                        gap: 2px;
+                        margin-bottom: 4px;
+                    }
+
+                    .plp-mobile-transparency-card .plp-kicker {
+                        margin-bottom: 0;
+                        font-size: 0.52rem;
+                        letter-spacing: 0.1em;
+                    }
+
+                    .plp-mobile-transparency-card .plp-mobile-card-head h2 {
+                        font-family: Inter, "Segoe UI", Arial, sans-serif;
+                        font-size: 0.78rem;
+                        line-height: 1.18;
+                        font-weight: 760;
+                    }
+
+                    .plp-mobile-transparency-card p {
+                        color: #6a6258;
+                        font-size: 0.72rem;
+                        line-height: 1.32;
+                        font-weight: 500;
                     }
 
                     .plp-mobile-media-feed {
@@ -5117,6 +5955,39 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-media-item:first-of-type img {
                         height: min(31dvh, 286px);
+                    }
+
+                    .plp-mobile-media-item--video {
+                        height: min(34dvh, 310px);
+                        min-height: 220px;
+                        background: #0f1113;
+                    }
+
+                    .plp-mobile-media-item--video .plp-property-video-embed {
+                        width: 100%;
+                        height: 100%;
+                        min-height: 100%;
+                        border-radius: 0;
+                    }
+
+                    .plp-mobile-video-badge {
+                        position: absolute;
+                        left: 14px;
+                        top: 14px;
+                        z-index: 8;
+                        display: inline-flex;
+                        align-items: center;
+                        min-height: 30px;
+                        padding: 0 10px;
+                        border-radius: 999px;
+                        background: rgba(17,17,17,0.72);
+                        color: #fff;
+                        font-size: 0.7rem;
+                        font-weight: 840;
+                        line-height: 1;
+                        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
                     }
 
                     .plp-mobile-status-pill,
@@ -6058,7 +6929,9 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-price-badge,
+                    .plp-mobile-sheet-title,
                     .plp-mobile-sheet-price,
+                    .plp-mobile-main-benefit-tag,
                     .plp-mobile-sheet-facts {
                         grid-column: 1 / -1;
                     }
@@ -6073,46 +6946,114 @@ export default function PropertyLandingStyles() {
                         font-weight: 720;
                     }
 
+                    .plp-mobile-sheet-title {
+                        justify-self: center;
+                        width: 100%;
+                        max-width: 320px;
+                        margin: 0;
+                        color: #262b2f;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: clamp(0.82rem, 3.2vw, 0.98rem);
+                        font-weight: 500;
+                        line-height: 1.24;
+                        text-align: center;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        overflow: hidden;
+                    }
+
                     .plp-mobile-sheet-price {
                         display: block;
+                        justify-self: center;
                         max-width: 100%;
                         color: #171a1d;
-                        font-size: clamp(1.44rem, 6.2vw, 1.86rem);
-                        font-weight: 820;
-                        line-height: 1.04;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: clamp(1.16rem, 4.9vw, 1.44rem);
+                        font-weight: 400;
+                        line-height: 1.12;
                         letter-spacing: 0;
+                        text-align: center;
                         overflow-wrap: anywhere;
                     }
 
-                    .plp-mobile-sheet-facts {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 7px 13px;
-                        color: #2f3439;
-                        font-size: 0.74rem;
-                        font-weight: 660;
-                    }
-
-                    .plp-mobile-sheet-facts span {
+                    .plp-mobile-main-benefit-tag {
                         display: inline-flex;
                         align-items: center;
-                        gap: 5px;
+                        justify-content: center;
+                        justify-self: center;
+                        max-width: min(100%, 300px);
+                        min-height: 22px;
+                        padding: 4px 11px;
+                        border: 1px solid rgba(184, 132, 54, 0.24);
+                        border-radius: 999px;
+                        background: rgba(189, 149, 81, 0.13);
+                        color: var(--plp-gold-dark);
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: clamp(0.62rem, 2.7vw, 0.72rem);
+                        font-weight: 600;
+                        line-height: 1.1;
+                        text-align: center;
                         white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    .plp-mobile-sheet-facts {
+                        display: grid;
+                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        align-items: center;
+                        justify-items: stretch;
+                        width: 100%;
+                        gap: 5px;
+                        color: #2f3439;
+                        text-align: center;
+                    }
+
+                    .plp-mobile-sheet-fact {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 0;
+                        gap: 5px;
+                        padding: 2px 1px;
+                        color: #2f3439;
+                        text-align: center;
                     }
 
                     .plp-mobile-sheet-facts svg {
+                        display: block;
+                        flex: 0 0 auto;
                         width: 15px;
                         height: 15px;
+                        color: #252a2f;
+                        stroke-width: 2;
+                    }
+
+                    .plp-mobile-sheet-fact-text {
+                        display: block;
+                        max-width: 100%;
+                        color: #252a2f;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: clamp(0.59rem, 2.55vw, 0.7rem);
+                        font-weight: 500;
+                        line-height: 1.1;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     .plp-mobile-sheet-summary p {
                         grid-column: 1 / -1;
+                        justify-self: center;
+                        width: 100%;
                         min-width: 0;
                         margin: 0;
                         color: #343a40;
                         font-size: 0.8rem;
                         font-weight: 500;
                         line-height: 1.35;
+                        text-align: center;
                         overflow: hidden;
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
@@ -6123,7 +7064,10 @@ export default function PropertyLandingStyles() {
                         display: grid;
                         grid-column: 1 / -1;
                         grid-template-columns: repeat(3, minmax(0, 1fr));
-                        gap: 8px;
+                        justify-content: center;
+                        width: 100%;
+                        column-gap: clamp(8px, 4vw, 22px);
+                        row-gap: 8px;
                         margin-top: 2px;
                         padding-top: 10px;
                         border-top: 1px solid rgba(35,31,26,0.08);
@@ -6131,20 +7075,27 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-listing-stats span {
                         display: grid;
-                        grid-template-columns: 15px minmax(0, 1fr);
+                        grid-template-columns: auto auto;
+                        grid-template-areas:
+                            "icon value"
+                            "label label";
+                        justify-content: center;
+                        justify-items: center;
                         column-gap: 5px;
                         row-gap: 1px;
                         align-items: center;
                         min-width: 0;
+                        text-align: center;
                     }
 
                     .plp-mobile-listing-stats svg {
-                        grid-row: 1 / span 2;
+                        grid-area: icon;
                         color: var(--plp-gold-dark);
                         stroke-width: 2.35;
                     }
 
                     .plp-mobile-listing-stats strong {
+                        grid-area: value;
                         width: fit-content;
                         border-bottom: 2px dotted rgba(189,149,81,.58);
                         color: #171a1d;
@@ -6154,10 +7105,13 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-listing-stats small {
+                        grid-area: label;
                         color: #58616a;
                         font-size: 0.64rem;
                         font-weight: 640;
                         line-height: 1.08;
+                        text-align: center;
+                        white-space: nowrap;
                     }
 
                     .plp-mobile-sheet-actions {
@@ -6181,6 +7135,11 @@ export default function PropertyLandingStyles() {
                         .plp-mobile-sheet-summary {
                             grid-template-columns: minmax(0, 1fr);
                             gap: 7px 8px;
+                        }
+
+                        .plp-mobile-sheet-facts {
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 7px 12px;
                         }
                     }
 

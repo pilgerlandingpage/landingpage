@@ -1,8 +1,9 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { Anchor, Coffee, Cross, GraduationCap, Landmark, MapPin, Navigation, ShoppingBag, Sparkles, TreePalm, Utensils } from 'lucide-react'
-import { NEARBY_BENEFIT_LAYERS, getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
+import { Anchor, Building2, GraduationCap, Landmark, Stethoscope, Utensils, Waves } from 'lucide-react'
+import { getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
 import { trackEvent } from '@/lib/tracking/client'
 
 type LatLngTuple = [number, number]
@@ -13,6 +14,7 @@ type NearbyBenefitResult = {
     searchLabel: string
     name: string
     vicinity?: string
+    latLng: LatLngTuple
     distanceMeters: number
     color: string
 }
@@ -33,6 +35,16 @@ type Props = {
     className?: string
 }
 
+const PropertyNearbyRealMap = dynamic(() => import('@/components/property/PropertyNearbyRealMap'), {
+    ssr: false,
+    loading: () => (
+        <div
+            className="plp-nearby-map-shell is-loading"
+            aria-label="Carregando mapa do entorno"
+        />
+    ),
+})
+
 const PROPERTY_BENEFIT_LAYERS: NearbyBenefitLayer[] = [
     'beach',
     'school',
@@ -41,27 +53,6 @@ const PROPERTY_BENEFIT_LAYERS: NearbyBenefitLayer[] = [
     'health',
     'marina',
 ]
-
-const PROPERTY_BENEFIT_ICONS: Record<NearbyBenefitLayer, typeof MapPin> = {
-    beach: TreePalm,
-    school: GraduationCap,
-    bank: Landmark,
-    dining: Utensils,
-    coffee: Coffee,
-    health: Cross,
-    shopping: ShoppingBag,
-    marina: Anchor,
-    park: TreePalm,
-}
-
-const BENEFIT_COPY: Partial<Record<NearbyBenefitLayer, string>> = {
-    beach: 'Acesso a orla e rotina de praia.',
-    school: 'Referencia para familias e permanencia.',
-    dining: 'Restaurantes e conveniencias de alto giro.',
-    bank: 'Servicos financeiros por perto.',
-    health: 'Apoio médico e farmácia na região.',
-    marina: 'Lifestyle nautico e acesso ao litoral.',
-}
 
 function getGooglePlacesWindow() {
     if (typeof window === 'undefined') return null
@@ -238,6 +229,7 @@ function buildResultFromPlace(layer: NearbyBenefitLayer, result: any, origin: La
         searchLabel: option.searchLabel,
         name: getPlaceDisplayName(result, option.searchLabel),
         vicinity: getPlaceVicinity(result),
+        latLng: target,
         distanceMeters: distanceMetersBetween(origin, target),
         color: option.color,
     }
@@ -247,6 +239,30 @@ function getSearchRadius(layer: NearbyBenefitLayer) {
     if (layer === 'beach' || layer === 'marina') return 6200
     if (layer === 'health' || layer === 'shopping') return 4300
     return 3500
+}
+
+function BenefitLayerIcon({ layer }: { layer: NearbyBenefitLayer }) {
+    if (layer === 'beach') return <Waves size={15} />
+    if (layer === 'school') return <GraduationCap size={15} />
+    if (layer === 'dining') return <Utensils size={15} />
+    if (layer === 'bank') return <Landmark size={15} />
+    if (layer === 'health') return <Stethoscope size={15} />
+    if (layer === 'marina') return <Anchor size={15} />
+    return <Building2 size={15} />
+}
+
+function NearbyBenefitSummaryItem({ item }: { item: NearbyBenefitResult }) {
+    return (
+        <article className="plp-nearby-summary-item" style={{ '--benefit-color': item.color } as CSSProperties}>
+            <span>
+                <BenefitLayerIcon layer={item.layer} />
+            </span>
+            <div>
+                <strong>{item.label}</strong>
+                <small>{formatDistance(item.distanceMeters)}</small>
+            </div>
+        </article>
+    )
 }
 
 export default function PropertyNearbyBenefits({
@@ -351,9 +367,7 @@ export default function PropertyNearbyBenefits({
     if (!safeLatLng) return null
 
     const loading = status === 'idle' || status === 'loading'
-    const fallbackBenefits = NEARBY_BENEFIT_LAYERS
-        .filter(option => PROPERTY_BENEFIT_LAYERS.includes(option.value))
-        .slice(0, 6)
+    const visibleResults = results.slice(0, 6)
 
     return (
         <div
@@ -364,55 +378,17 @@ export default function PropertyNearbyBenefits({
             <div className="plp-nearby-benefits-head">
                 <span className="plp-kicker">Entorno premium</span>
                 <h3>Benefícios ao redor do imóvel.</h3>
-                <p>{locationLabel ? `${locationLabel} com pontos de interesse próximos para qualificar rotina, liquidez e desejo.` : 'Pontos de interesse próximos para qualificar rotina, liquidez e desejo.'}</p>
             </div>
 
-            <div className="plp-nearby-benefits-grid">
-                {loading && fallbackBenefits.map(option => {
-                    const Icon = PROPERTY_BENEFIT_ICONS[option.value] || MapPin
-                    return (
-                        <article className="plp-nearby-benefit-card is-loading" key={option.value}>
-                            <span style={{ '--benefit-color': option.color } as CSSProperties}>
-                                <Icon size={18} />
-                            </span>
-                            <div>
-                                <small>{option.label}</small>
-                                <strong>Buscando no entorno</strong>
-                                <em>Google Places</em>
-                            </div>
-                        </article>
-                    )
-                })}
-
-                {!loading && results.map(item => {
-                    const Icon = PROPERTY_BENEFIT_ICONS[item.layer] || MapPin
-                    return (
-                        <article className="plp-nearby-benefit-card" key={`${item.layer}-${item.name}`}>
-                            <span style={{ '--benefit-color': item.color } as CSSProperties}>
-                                <Icon size={18} />
-                            </span>
-                            <div>
-                                <small>{item.label}</small>
-                                <strong>{item.name}</strong>
-                                <em>{BENEFIT_COPY[item.layer] || 'Ponto relevante no entorno.'}</em>
-                                <b><Navigation size={13} /> {formatDistance(item.distanceMeters)}</b>
-                            </div>
-                        </article>
-                    )
-                })}
-
-                {!loading && (status === 'empty' || status === 'error') && (
-                    <article className="plp-nearby-benefit-card plp-nearby-benefit-card--wide">
-                        <span>
-                            <Sparkles size={18} />
-                        </span>
-                        <div>
-                            <small>Curadoria</small>
-                            <strong>Entorno em validacao</strong>
-                            <em>O especialista confirma pontos de interesse, acesso e conveniencias antes da visita privada.</em>
-                        </div>
-                    </article>
+            <div className="plp-nearby-map-layout">
+                {visibleResults.length > 0 && (
+                    <div className="plp-nearby-summary-row" aria-label="Benefícios próximos ao imóvel">
+                        {visibleResults.map(item => (
+                            <NearbyBenefitSummaryItem item={item} key={`summary-${item.layer}-${item.name}`} />
+                        ))}
+                    </div>
                 )}
+                <PropertyNearbyRealMap origin={safeLatLng} results={visibleResults} loading={loading} />
             </div>
         </div>
     )

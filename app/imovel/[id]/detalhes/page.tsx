@@ -33,6 +33,7 @@ import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPreview'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
+import PropertyVideoEmbed, { hasPropertyVideo } from '@/components/property/PropertyVideoEmbed'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MobileMapSearchModal from '@/components/marketplace/MobileMapSearchModal'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
@@ -214,6 +215,13 @@ function formatBrokerCreci(value?: string | null) {
     return `CRECI/SC ${withoutPrefix}`
 }
 
+function joinPortugueseList(items: string[]) {
+    const values = items.map(item => String(item || '').trim()).filter(Boolean)
+    if (values.length <= 1) return values[0] || ''
+    if (values.length === 2) return `${values[0]} e ${values[1]}`
+    return `${values.slice(0, -1).join(', ')} e ${values[values.length - 1]}`
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
     const property = await getPropertyForSeo(id)
@@ -292,6 +300,47 @@ function normalizeContentKey(value: unknown) {
         .trim()
 }
 
+const PROPERTY_MAIN_BENEFIT_RULES = [
+    { label: 'Frente mar', patterns: [/\bfrente\s+(ao\s+)?mar\b/, /\bbeira\s+mar\b/, /\bpe\s+na\s+areia\b/] },
+    { label: 'Vista mar', patterns: [/\bvista\s+(para\s+o\s+)?mar\b/, /\bvista\s+oceanica\b/] },
+    { label: 'Quadra mar', patterns: [/\bquadra\s+(do\s+)?mar\b/, /\ba\s+uma\s+quadra\s+do\s+mar\b/] },
+    { label: 'Lançamento', patterns: [/\blancamento\b/, /\bpre\s+lancamento\b/, /\bna\s+planta\b/, /\bem\s+construcao\b/, /\bentrega\s+prevista\b/] },
+    { label: 'Decorado', patterns: [/\bdecorad[oa]s?\b/] },
+    { label: 'Pronto para morar', patterns: [/\bpront[oa]\s+para\s+morar\b/, /\bpront[oa]\s+para\s+ocupar\b/] },
+    { label: 'Novo', patterns: [/\bnov[oa]s?\b/, /\brecem\s+entregue\b/, /\bnunca\s+habitad[oa]\b/, /\bprimeira\s+locacao\b/] },
+    { label: 'Churrasqueira a carvão', patterns: [/\bchurrasqueira\s+(a\s+)?carvao\b/] },
+    { label: 'Sem mobília', patterns: [/\bsem\s+mobilia\b/, /\bsem\s+moveis\b/, /\bsem\s+mobiliacao\b/, /\bnao\s+mobiliad[oa]\b/] },
+    { label: 'Mobiliado', patterns: [/\bmobiliad[oa]s?\b/, /\bcom\s+moveis\b/, /\bporteira\s+fechada\b/] },
+]
+
+function buildPropertyMainBenefitTag(property: any) {
+    const amenities = Array.isArray(property?.amenities) ? property.amenities : []
+    const searchableText = normalizeContentKey([
+        property?.title,
+        property?.seo_title,
+        property?.description,
+        property?.seo_description,
+        property?.property_type,
+        property?.source_status,
+        ...amenities,
+    ].filter(Boolean).join(' '))
+
+    if (!searchableText) return ''
+
+    const matchedRule = PROPERTY_MAIN_BENEFIT_RULES.find(rule => (
+        rule.patterns.some(pattern => pattern.test(searchableText))
+    ))
+
+    if (matchedRule) return matchedRule.label
+
+    const propertyType = normalizeContentKey(property?.property_type)
+    if (/\b(terreno|comercial|sala|galpao|predio|deposito)\b/.test(propertyType)) {
+        return 'Novo'
+    }
+
+    return 'Pronto para morar'
+}
+
 function splitDescriptionSentences(value: string) {
     const protectedText = String(value || '').replace(/\b(Av|Dr|Dra|Ed|Ref|R|Sr|Sra)\./g, '$1<DOT>')
 
@@ -300,6 +349,15 @@ function splitDescriptionSentences(value: string) {
         .split(/(?<=[.!?])\s+/)
         .map(sentence => sentence.replace(/<DOT>/g, '.').trim().replace(/^[,;:\s]+/, ''))
         .filter(sentence => sentence.length >= 28)
+}
+
+function normalizeSentence(value: string) {
+    const clean = cleanRepeatedPraiaBravaText(value)
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    if (!clean) return ''
+    return /[.!?]$/.test(clean) ? clean : `${clean}.`
 }
 
 function isMobileDescriptionDuplicate(sentence: string, property: any, displayTitle: string, locationLabel: string) {
@@ -324,44 +382,67 @@ function isMobileDescriptionDuplicate(sentence: string, property: any, displayTi
     return false
 }
 
-function buildMobileDescriptionParagraphs(
-    paragraphs: string[],
+function buildPropertyDescriptionParagraphs(
+    sourceParagraphs: string[],
     property: any,
     displayTitle: string,
     locationLabel: string,
-    fallback: string
+    fallback: string,
+    details: {
+        area: number
+        suiteCount: number
+        bedroomCount: number
+        bathroomsCount: number
+        parkingCount: number
+    }
 ) {
     const seen = new Set<string>()
-    const usefulSentences: string[] = []
+    const description: string[] = []
+    const title = normalizeSentence(displayTitle).replace(/[.!?]$/, '')
+    const type = String(property.property_type || 'imóvel').trim()
+    const typeLabel = normalizeContentKey(type) === 'imovel' ? 'imóvel' : `imóvel do tipo ${type}`
+    const location = locationLabel || displayLocationName(property.city) || 'litoral catarinense'
+    const opening = normalizeSentence(`${title} é um ${typeLabel} em ${location}, selecionado para quem busca alto padrão com leitura clara de localização, produto e potencial de uso`)
+    const statItems = [
+        details.area > 0 ? `${details.area.toLocaleString('pt-BR')} m² privativos` : null,
+        details.suiteCount > 0 ? `${details.suiteCount} ${statLabel(details.suiteCount, 'suíte', 'suítes')}` : null,
+        details.bedroomCount > 0 && details.bedroomCount !== details.suiteCount ? `${details.bedroomCount} ${statLabel(details.bedroomCount, 'dormitório', 'dormitórios')}` : null,
+        details.bathroomsCount > 0 ? `${details.bathroomsCount} ${statLabel(details.bathroomsCount, 'banheiro', 'banheiros')}` : null,
+        details.parkingCount > 0 ? `${details.parkingCount} ${statLabel(details.parkingCount, 'vaga de garagem', 'vagas de garagem')}` : null,
+    ].filter(Boolean) as string[]
 
-    for (const paragraph of paragraphs) {
+    const addParagraph = (value: string) => {
+        const sentence = normalizeSentence(value)
+        const key = normalizeContentKey(sentence)
+        if (!sentence || !key || seen.has(key)) return
+        seen.add(key)
+        description.push(sentence)
+    }
+
+    addParagraph(opening)
+
+    if (statItems.length > 0) {
+        addParagraph(`A configuração reúne ${joinPortugueseList(statItems)}, ajudando a avaliar conforto, privacidade e funcionalidade antes da visita`)
+    }
+
+    if (location) {
+        addParagraph(`A localização em ${location} fortalece a análise de conveniência, liquidez e desejo, pontos decisivos para moradia, investimento ou proteção patrimonial`)
+    }
+
+    for (const paragraph of sourceParagraphs) {
         for (const sentence of splitDescriptionSentences(paragraph)) {
             const key = normalizeContentKey(sentence)
             if (!key || seen.has(key)) continue
             seen.add(key)
             if (isMobileDescriptionDuplicate(sentence, property, displayTitle, locationLabel)) continue
-            usefulSentences.push(sentence)
-            if (usefulSentences.length >= 3) return usefulSentences
+            description.push(normalizeSentence(sentence))
+            if (description.length >= 5) return description
         }
     }
 
-    return usefulSentences.length ? usefulSentences : [fallback]
-}
+    if (description.length < 3 && fallback) addParagraph(fallback)
 
-function buildMobileAmenityHighlights(items: string[]) {
-    const seen = new Set<string>()
-    const redundantPattern = /\b(tipo|localizacao|localização|area|área|condominio|condomínio|iptu|condicao|condição|dormitórios?|dormitorios?|quartos?|suítes?|suites?|banheiros?|vagas?|garagem|m²|m2)\b/i
-
-    return items
-        .map(item => String(item || '').trim())
-        .filter(item => {
-            if (!item || redundantPattern.test(item)) return false
-            const key = normalizeContentKey(item)
-            if (!key || seen.has(key)) return false
-            seen.add(key)
-            return true
-        })
-        .slice(0, 6)
+    return description.slice(0, 5)
 }
 
 function formatMoney(value?: number | null, fallback = 'Sob consulta') {
@@ -389,17 +470,29 @@ function getGallery(property: any) {
     return Array.from(new Set([property.featured_image, ...(property.images || [])].filter(Boolean) as string[]))
 }
 
-function extractYouTubeId(url?: string | null) {
-    const raw = String(url || '')
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-        /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-    ]
-    for (const pattern of patterns) {
-        const match = raw.match(pattern)
-        if (match) return match[1]
+type MobilePropertyMediaItem =
+    | {
+        type: 'photo'
+        src: string
+        photoIndex: number
     }
-    return null
+    | {
+        type: 'video'
+        videoUrl: string
+    }
+
+function buildMobilePhotoItems(images: string[]): MobilePropertyMediaItem[] {
+    return images.map((src, photoIndex) => ({
+        type: 'photo',
+        src,
+        photoIndex,
+    }))
+}
+
+function buildMobileVideoItem(videoUrl?: string | null): MobilePropertyMediaItem | null {
+    return hasPropertyVideo(videoUrl)
+        ? { type: 'video', videoUrl: String(videoUrl).trim() }
+        : null
 }
 
 function chunkList<T>(items: T[], columns = 2) {
@@ -417,12 +510,12 @@ function referenceLabel(property: any) {
 
 function listingAgeParts(days: number) {
     if (days <= 0) {
-        return { value: 'Hoje', label: 'no site' }
+        return { value: 'Hoje', label: 'No site' }
     }
 
     return {
         value: days.toLocaleString('pt-BR'),
-        label: days === 1 ? 'dia no site' : 'dias no site',
+        label: days === 1 ? 'Dia no site' : 'Dias no site',
     }
 }
 
@@ -769,7 +862,7 @@ export default async function PropertyDetailPage({
     const propertyViewCount = propertyViewCountRaw || 0
     const propertySaveCount = countCurrentPropertySaves(propertySaveEvents)
     const listingAge = listingAgeParts(daysBetweenNow(propertyPublishedAt(property)))
-    const viewStat = statTextParts(propertyViewCount, 'visualização', 'visualizações')
+    const viewStat = statTextParts(propertyViewCount, 'view', 'views')
     const saveStat = statTextParts(propertySaveCount, 'salvo', 'salvos')
     const contactPhone = responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
     const brokerCardName = responsibleBroker.is_connected
@@ -784,6 +877,7 @@ export default async function PropertyDetailPage({
         : 'Corretor de imóveis'
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
+    const mainBenefitTag = buildPropertyMainBenefitTag(property)
     const displayTitle = cleanRepeatedPraiaBravaText(property.title)
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
@@ -794,6 +888,12 @@ export default async function PropertyDetailPage({
     const locationSecondary = locationParts.length > 1
         ? [...locationParts.slice(1), property.state].filter(Boolean).join(' - ')
         : property.state || ''
+    const brokerPropertiesParams = new URLSearchParams()
+    const brokerFilterName = responsibleBroker.legacy_name || brokerCardName
+    if (brokerFilterName) brokerPropertiesParams.set('broker', brokerFilterName)
+    if (responsibleBroker.legacy_login) brokerPropertiesParams.set('brokerLogin', responsibleBroker.legacy_login)
+    const brokerPropertiesQuery = brokerPropertiesParams.toString()
+    const brokerPropertiesHref = brokerPropertiesQuery ? `/busca?${brokerPropertiesQuery}` : '/busca'
     const brokerInsight = buildBrokerInsight(property)
     const primaryImage = gallery[0] || DEFAULT_OG_IMAGE
     const area = Number(property.area_private_m2 || property.area_m2 || 0)
@@ -801,9 +901,22 @@ export default async function PropertyDetailPage({
     const parkingCount = Number(property.parking_spaces || 0)
     const bathroomsCount = Number(property.bathrooms || 0)
     const bedroomCount = Number(property.bedrooms || 0)
-    const narrativeParagraphs = property.description ? formatDescription(property.description) : []
     const locationLabel = [...locationParts, property.state].filter(Boolean).join(' - ')
-    const youtubeId = extractYouTubeId(property.video_url)
+    const sourceDescriptionParagraphs = property.description ? formatDescription(property.description) : []
+    const narrativeParagraphs = buildPropertyDescriptionParagraphs(
+        sourceDescriptionParagraphs,
+        property,
+        displayTitle,
+        locationLabel,
+        brokerInsight.text,
+        {
+            area,
+            suiteCount,
+            bedroomCount,
+            bathroomsCount,
+            parkingCount,
+        }
+    )
     const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
     const projectItems = amenities.slice(24, 48)
@@ -936,26 +1049,6 @@ export default async function PropertyDetailPage({
         mobileExploreMapPropertiesById.set(currentExploreMapProperty.id, currentExploreMapProperty)
     }
     const mobileExploreMapProperties = Array.from(mobileExploreMapPropertiesById.values())
-    const mobileDescriptionParagraphs = buildMobileDescriptionParagraphs(
-        narrativeParagraphs,
-        property,
-        displayTitle,
-        locationLabel,
-        brokerInsight.text
-    )
-    const mobileNarrativePreview = mobileDescriptionParagraphs[0]
-    const mobileFactCards = [
-        area > 0 ? { icon: <Ruler size={22} />, label: 'Área privativa', value: `${area.toLocaleString('pt-BR')} m²` } : null,
-        suiteCount > 0 ? { icon: <BedDouble size={22} />, label: 'Configuração', value: `${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}` } : null,
-        bathroomsCount > 0 ? { icon: <Bath size={22} />, label: 'Banheiros', value: String(bathroomsCount) } : null,
-        parkingCount > 0 ? { icon: <Car size={22} />, label: 'Garagem', value: `${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}` } : null,
-        { icon: <MapPin size={22} />, label: 'Localização', value: locationLabel || displayCity || 'Litoral SC' },
-        marketHistory.currentPriceM2 ? { icon: <BarChart3 size={22} />, label: 'Valor por m²', value: `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` } : null,
-    ].filter(Boolean) as Array<{ icon: ReactNode; label: string; value: string }>
-    const mobileAmenityHighlights = buildMobileAmenityHighlights([
-        ...featureItems,
-        ...projectItems,
-    ])
     const propertyJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -1035,6 +1128,40 @@ export default async function PropertyDetailPage({
         },
     ]
     const mobileMediaImages = gallery.length ? gallery : [primaryImage]
+    const mobilePhotoItems = buildMobilePhotoItems(mobileMediaImages)
+    const mobileVideoItem = buildMobileVideoItem(property.video_url)
+    const mobileMediaBeforeMap = mobilePhotoItems.slice(0, 2)
+    const mobileMediaAfterMap = [
+        ...(mobileVideoItem ? [mobileVideoItem] : []),
+        ...mobilePhotoItems.slice(2),
+    ]
+
+    const renderMobileMediaItem = (item: MobilePropertyMediaItem, index: number, keyPrefix: string) => {
+        if (item.type === 'video') {
+            return (
+                <figure className="plp-mobile-media-item plp-mobile-media-item--video" key={`${keyPrefix}-video-${index}`}>
+                    <span className="plp-mobile-video-badge">Vídeo do imóvel</span>
+                    <PropertyVideoEmbed
+                        videoUrl={item.videoUrl}
+                        title={displayTitle}
+                        poster={primaryImage}
+                    />
+                </figure>
+            )
+        }
+
+        return (
+            <figure className="plp-mobile-media-item" key={`${keyPrefix}-photo-${item.src}-${item.photoIndex}`}>
+                <img src={item.src} alt={`${displayTitle} - foto ${item.photoIndex + 1}`} loading={item.photoIndex === 0 ? 'eager' : 'lazy'} />
+                {item.photoIndex === 0 && (
+                    <figcaption className="plp-mobile-status-pill">
+                        <span />
+                        {property.property_type || 'Imóvel à venda'}
+                    </figcaption>
+                )}
+            </figure>
+        )
+    }
 
     return (
         <>
@@ -1108,39 +1235,47 @@ export default async function PropertyDetailPage({
                                     </div>
                                 </div>
 
-                                {mobileMediaImages.slice(0, 2).map((image, index) => (
-                                    <figure className="plp-mobile-media-item" key={`sheet-photo-${image}-${index}`}>
-                                        <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
-                                        {index === 0 && (
-                                            <figcaption className="plp-mobile-status-pill">
-                                                <span />
-                                                {property.property_type || 'Imóvel à venda'}
-                                            </figcaption>
-                                        )}
-                                    </figure>
-                                ))}
+                                {mobileMediaBeforeMap.map((item, index) => renderMobileMediaItem(item, index, 'sheet'))}
 
                                 {propertyMapLatLng && (
                                     <PropertyMobileMapPreview property={propertyMapPreview} latLng={propertyMapLatLng} />
                                 )}
 
-                                {mobileMediaImages.slice(2).map((image, index) => (
-                                    <figure className="plp-mobile-media-item" key={`sheet-photo-extra-${image}-${index}`}>
-                                        <img src={image} alt={`${displayTitle} - foto ${index + 3}`} loading="lazy" />
-                                    </figure>
-                                ))}
+                                {mobileMediaAfterMap.map((item, index) => renderMobileMediaItem(item, index, 'sheet-extra'))}
 
                             </div>
                         )}
                     >
                         <section className="plp-mobile-sheet-summary plp-mobile-card plp-mobile-card--summary">
                             {property.exclusive && <span className="plp-mobile-price-badge">Exclusivo Pilger</span>}
-                            <strong className="plp-mobile-sheet-price">{formatMoney(property.price)}</strong>
+                            <h2 className="plp-mobile-sheet-title">{displayTitle}</h2>
+                            <span className="plp-mobile-sheet-price">{formatMoney(property.price)}</span>
+                            {mainBenefitTag && <span className="plp-mobile-main-benefit-tag">{mainBenefitTag}</span>}
                             <div className="plp-mobile-sheet-facts">
-                                {bedroomCount > 0 && <span><BedDouble size={19} /> {bedroomCount} {statLabel(bedroomCount, 'dorm.', 'dorms.')}</span>}
-                                {bathroomsCount > 0 && <span><Bath size={19} /> {bathroomsCount} {statLabel(bathroomsCount, 'banho', 'banhos')}</span>}
-                                {area > 0 && <span><Ruler size={19} /> {area.toLocaleString('pt-BR')} m²</span>}
-                                {parkingCount > 0 && <span><Car size={19} /> {parkingCount} {statLabel(parkingCount, 'vaga', 'vagas')}</span>}
+                                {bedroomCount > 0 && (
+                                    <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--beds">
+                                        <BedDouble size={19} />
+                                        <span className="plp-mobile-sheet-fact-text">{bedroomCount} {statLabel(bedroomCount, 'dorm.', 'dorms.')}</span>
+                                    </span>
+                                )}
+                                {bathroomsCount > 0 && (
+                                    <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--baths">
+                                        <Bath size={19} />
+                                        <span className="plp-mobile-sheet-fact-text">{bathroomsCount} {statLabel(bathroomsCount, 'banho', 'banhos')}</span>
+                                    </span>
+                                )}
+                                {area > 0 && (
+                                    <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--area">
+                                        <Ruler size={19} />
+                                        <span className="plp-mobile-sheet-fact-text">{area.toLocaleString('pt-BR')} m²</span>
+                                    </span>
+                                )}
+                                {parkingCount > 0 && (
+                                    <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--parking">
+                                        <Car size={19} />
+                                        <span className="plp-mobile-sheet-fact-text">{parkingCount} {statLabel(parkingCount, 'vaga', 'vagas')}</span>
+                                    </span>
+                                )}
                             </div>
                             <p>{locationLabel || displayTitle}</p>
                             <div className="plp-mobile-listing-stats" aria-label="Indicadores de interesse do imóvel">
@@ -1162,47 +1297,12 @@ export default async function PropertyDetailPage({
                             </div>
                         </section>
 
-                        <section id="mobile-detalhes" className="plp-mobile-card plp-mobile-card--special">
-                            <div className="plp-mobile-card-head">
-                                <span className="plp-kicker">Destaques</span>
-                                <h2>O que torna este imóvel especial.</h2>
-                            </div>
-                            <p>{mobileNarrativePreview}</p>
-                            {mobileDescriptionParagraphs.length > 1 && (
-                                <details className="plp-mobile-description-details">
-                                    <summary>Ver mais destaques</summary>
-                                    <div className="plp-mobile-description-full">
-                                        {mobileDescriptionParagraphs.slice(1).map((paragraph, index) => (
-                                            <p key={`mobile-description-${index}`}>{paragraph}</p>
-                                        ))}
-                                    </div>
-                                </details>
-                            )}
-                        </section>
-
-                        <section className="plp-mobile-card plp-mobile-card--facts">
-                            <div className="plp-mobile-card-head">
-                                <span className="plp-kicker">Ficha</span>
-                                <h2>Fatos e características.</h2>
-                            </div>
-                            <div className="plp-mobile-facts-grid">
-                                {mobileFactCards.map((item) => (
-                                    <div className="plp-mobile-fact-tile" key={item.label}>
-                                        <span>{item.icon}</span>
-                                        <div>
-                                            <small>{item.label}</small>
-                                            <strong>{item.value}</strong>
-                                        </div>
-                                    </div>
+                        <section id="mobile-detalhes" className="plp-mobile-card plp-mobile-card--description">
+                            <div className="plp-mobile-description-body">
+                                {narrativeParagraphs.map((paragraph, index) => (
+                                    <p key={`mobile-description-${index}`}>{paragraph}</p>
                                 ))}
                             </div>
-                            {mobileAmenityHighlights.length > 0 && (
-                                <div className="plp-mobile-amenity-chips" aria-label="Destaques adicionais">
-                                    {mobileAmenityHighlights.map((item, index) => (
-                                        <span key={`mobile-amenity-${item}-${index}`}>{item}</span>
-                                    ))}
-                                </div>
-                            )}
                         </section>
 
                         <section className="plp-mobile-card plp-mobile-card--nearby">
@@ -1222,28 +1322,11 @@ export default async function PropertyDetailPage({
                                     <span className="plp-kicker">Especialista</span>
                                     <h2>{brokerCardName}</h2>
                                     <p>{brokerCredentialLine}</p>
+                                    <Link href={brokerPropertiesHref} className="plp-mobile-broker-properties-link">
+                                        <Home size={15} />
+                                        Mais imóveis deste corretor
+                                    </Link>
                                 </div>
-                            </div>
-                            <p>Converse para confirmar disponibilidade, condições de visita e leitura de oportunidade antes de avançar.</p>
-                            <div className="plp-mobile-sheet-actions">
-                                <WhatsAppCaptureLink
-                                    phone={contactPhone}
-                                    message={`Olá, quero falar com o especialista responsável por este imóvel ${propertyUrl}`}
-                                    slug="imovel"
-                                    template="property-mobile-sheet-specialist"
-                                    metadata={{
-                                        ...propertyTrackingMetadata,
-                                        tracking_event_type: 'property_specialist_contact_requested',
-                                        premium_intent: 'specialist_contact',
-                                        requested_action: 'Falar com especialista',
-                                        cta_context: 'mobile_property_specialist_card',
-                                        cta_label: 'Especialista',
-                                    }}
-                                    className="plp-mobile-sheet-primary"
-                                >
-                                    <MessageCircle size={18} />
-                                    Falar agora
-                                </WhatsAppCaptureLink>
                             </div>
                         </section>
 
@@ -1376,6 +1459,7 @@ export default async function PropertyDetailPage({
                         <div className="plp-desktop-photo-showcase">
                             <PropertyDesktopMediaShowcase
                                 images={gallery.length ? gallery : [primaryImage]}
+                                videoUrl={property.video_url}
                                 title={displayTitle}
                                 property={propertyMapPreview}
                                 latLng={propertyMapLatLng}
@@ -1398,27 +1482,13 @@ export default async function PropertyDetailPage({
                                 </div>
                             </div>
 
-                            {mobileMediaImages.slice(0, 2).map((image, index) => (
-                                <figure className="plp-mobile-media-item" key={`mobile-photo-${image}-${index}`}>
-                                    <img src={image} alt={`${displayTitle} - foto ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
-                                    {index === 0 && (
-                                        <figcaption className="plp-mobile-status-pill">
-                                            <span />
-                                            {property.property_type || 'Imóvel à venda'}
-                                        </figcaption>
-                                    )}
-                                </figure>
-                            ))}
+                            {mobileMediaBeforeMap.map((item, index) => renderMobileMediaItem(item, index, 'mobile'))}
 
                             {propertyMapLatLng && (
                                 <PropertyMobileMapPreview property={propertyMapPreview} latLng={propertyMapLatLng} />
                             )}
 
-                            {mobileMediaImages.slice(2).map((image, index) => (
-                                <figure className="plp-mobile-media-item" key={`mobile-extra-photo-${image}-${index}`}>
-                                    <img src={image} alt={`${displayTitle} - foto ${index + 3}`} loading="lazy" />
-                                </figure>
-                            ))}
+                            {mobileMediaAfterMap.map((item, index) => renderMobileMediaItem(item, index, 'mobile-extra'))}
 
                         </div>
                         {false && <div className={`plp-gallery-composer ${gallery.length <= 1 ? 'single' : ''}`}>
@@ -1441,9 +1511,8 @@ export default async function PropertyDetailPage({
                         <section id="experiencia" className="plp-section plp-copy-section">
                             <span className="plp-kicker">Visão geral</span>
                             <h2>{displayTitle}</h2>
-                            <p className="plp-intro-line">Viva no topo do luxo e sofisticação com uma leitura clara de localização, produto e momento de mercado.</p>
                             <div className="plp-narrative">
-                                {(narrativeParagraphs.length ? narrativeParagraphs : [brokerInsight.text]).map((paragraph, index) => (
+                                {narrativeParagraphs.map((paragraph, index) => (
                                     <p key={index}>{paragraph}</p>
                                 ))}
                             </div>
@@ -1604,7 +1673,8 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-loc-price">
                                     <strong>{formatMoney(property.price)}</strong>
-                                    <span>valor anunciado</span>
+                                    {mainBenefitTag && <span className="plp-side-benefit-tag">{mainBenefitTag}</span>}
+                                    <span className="plp-side-price-note">valor anunciado</span>
                                 </div>
                             </div>
 
@@ -1679,21 +1749,6 @@ export default async function PropertyDetailPage({
                         </div>
                     </aside>
                 </section>
-
-                {youtubeId && (
-                    <section className="plp-video-card">
-                        <div className="plp-section-head compact">
-                            <span className="plp-kicker">Vídeo do imóvel</span>
-                            <h2>Assista antes de avançar para a visita.</h2>
-                        </div>
-                        <iframe
-                            src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-                            title={`${displayTitle} - vídeo`}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
-                    </section>
-                )}
 
                 {related.length > 0 && (
                     <section className="plp-related-band">
