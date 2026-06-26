@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { Home, MapPin, Radar } from 'lucide-react'
 import type { PropertyFeedMapView } from '@/components/property/PropertyFeedMap'
+import PropertyNearbyMapEmbed from '@/components/property/PropertyNearbyMapEmbed'
 
 export type PropertyLocationMapProperty = {
     id: string
@@ -29,6 +30,7 @@ type Props = {
     initialStreetInteractive?: boolean
     allowedViews?: PropertyFeedMapView[]
     showViewControl?: boolean
+    showNearbyBenefits?: boolean
 }
 
 const PropertyFeedMap = dynamic(() => import('@/components/property/PropertyFeedMap'), {
@@ -52,10 +54,11 @@ export default function PropertyLocationMap(props: Props) {
         initialStreetInteractive,
         allowedViews = ['luxury'],
         showViewControl = false,
+        showNearbyBenefits = false,
     } = props
 
     return (
-        <div className="plp-location-explorer">
+        <div className={`plp-location-explorer${showNearbyBenefits ? ' plp-location-explorer--nearby' : ''}`}>
             <div className="plp-location-context" aria-label="Contexto da localização">
                 <div>
                     <MapPin size={15} />
@@ -74,14 +77,23 @@ export default function PropertyLocationMap(props: Props) {
                 </div>
             </div>
 
-            <PropertyFeedMap
-                property={property}
-                latLng={latLng}
-                initialView={initialView}
-                initialStreetInteractive={initialStreetInteractive}
-                allowedViews={allowedViews}
-                showViewControl={showViewControl}
-            />
+            {showNearbyBenefits ? (
+                <PropertyNearbyMapEmbed
+                    propertyId={property.id}
+                    title={property.title}
+                    latLng={latLng}
+                    locationLabel={locationLabel(property)}
+                />
+            ) : (
+                <PropertyFeedMap
+                    property={property}
+                    latLng={latLng}
+                    initialView={initialView}
+                    initialStreetInteractive={initialStreetInteractive}
+                    allowedViews={allowedViews}
+                    showViewControl={showViewControl}
+                />
+            )}
         </div>
     )
 }

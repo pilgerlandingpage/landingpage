@@ -316,6 +316,7 @@ export default function PropertyDesktopMediaShowcase({
                     initialView="luxury"
                     allowedViews={['luxury']}
                     showViewControl={false}
+                    showNearbyBenefits
                 />
             </div>
         )

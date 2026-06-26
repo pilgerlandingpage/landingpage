@@ -639,6 +639,8 @@ export default function PropertyLandingStyles() {
                 .plp-desktop-media-map .plp-location-explorer,
                 .plp-desktop-media-map .property-feed-map-shell,
                 .plp-desktop-media-map .property-feed-map-canvas,
+                .plp-desktop-media-map .plp-nearby-map-shell,
+                .plp-desktop-media-map .plp-nearby-real-map,
                 .plp-desktop-media-map .property-feed-map-street-view,
                 .plp-desktop-media-map .property-feed-map-street-frame,
                 .plp-desktop-media-map .property-feed-map-street-native,
@@ -660,6 +662,13 @@ export default function PropertyLandingStyles() {
 
                 .plp-desktop-media-map .property-feed-map-shell {
                     border-radius: inherit;
+                    overflow: hidden;
+                }
+
+                .plp-desktop-media-map .plp-nearby-map-shell {
+                    border: 0;
+                    border-radius: inherit;
+                    box-shadow: none;
                     overflow: hidden;
                 }
 
@@ -5216,7 +5225,7 @@ export default function PropertyLandingStyles() {
                         max-width: none;
                         overflow-x: hidden;
                         overflow-y: auto;
-                        padding-bottom: max(16dvh, calc(100dvh - var(--pmds-sheet-top, 65dvh)));
+                        padding-bottom: max(16dvh, calc(100dvh - var(--pmds-sheet-top, 55dvh)));
                         background: #fff;
                         overscroll-behavior: contain;
                         -webkit-overflow-scrolling: touch;
@@ -6133,6 +6142,8 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-location-preview .property-feed-map-shell,
                     .plp-mobile-location-preview .property-feed-map-canvas,
+                    .plp-mobile-location-preview .plp-nearby-map-shell,
+                    .plp-mobile-location-preview .plp-nearby-real-map,
                     .plp-mobile-location-preview .property-feed-map-street-view,
                     .plp-mobile-location-preview .property-feed-map-street-frame,
                     .plp-mobile-location-preview .property-feed-map-street-native,
@@ -6144,10 +6155,23 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-location-preview .property-feed-map-shell,
+                    .plp-mobile-location-preview .plp-nearby-map-shell,
                     .plp-mobile-location-preview .property-feed-map-street-view {
                         position: absolute !important;
                         inset: 0;
                         overflow: hidden;
+                    }
+
+                    .plp-mobile-location-preview .plp-nearby-map-shell {
+                        border: 0;
+                        border-radius: 0;
+                        box-shadow: none;
+                    }
+
+                    .plp-mobile-location-preview .plp-nearby-map-status,
+                    .plp-mobile-location-preview .plp-nearby-property-tooltip,
+                    .plp-mobile-location-preview .plp-nearby-benefit-tooltip {
+                        display: none !important;
                     }
 
                     .plp-mobile-location-preview .property-feed-map-street-native,
@@ -6311,6 +6335,8 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-map-modal-body .property-feed-map-shell,
                     .plp-mobile-map-modal-body .property-feed-map-canvas,
+                    .plp-mobile-map-modal-body .plp-nearby-map-shell,
+                    .plp-mobile-map-modal-body .plp-nearby-real-map,
                     .plp-mobile-map-modal-body .property-feed-map-street-view,
                     .plp-mobile-map-modal-body .property-feed-map-street-frame,
                     .plp-mobile-map-modal-body .property-feed-map-street-native,
@@ -6322,12 +6348,19 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-mobile-map-modal-body .property-feed-map-shell,
+                    .plp-mobile-map-modal-body .plp-nearby-map-shell,
                     .plp-mobile-map-modal-body .property-feed-map-street-view,
                     .plp-mobile-map-modal-body .property-feed-map-street-native,
                     .plp-mobile-map-modal-body .property-feed-map-street-native-canvas,
                     .plp-mobile-map-modal-body .property-feed-map-street-frame {
                         position: absolute !important;
                         inset: 0;
+                    }
+
+                    .plp-mobile-map-modal-body .plp-nearby-map-shell {
+                        border: 0;
+                        border-radius: 0;
+                        box-shadow: none;
                     }
 
                     .plp-mobile-map-modal-body .leaflet-marker-pane {

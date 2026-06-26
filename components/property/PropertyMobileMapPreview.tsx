@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Layers, MapPin, Navigation, X } from 'lucide-react'
+import { Layers, Navigation, X } from 'lucide-react'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
 
 type MobileLocationMode = 'map' | 'street'
@@ -62,14 +62,9 @@ export default function PropertyMobileMapPreview({ property, latLng }: Props) {
                     initialStreetInteractive={activeMode === 'street'}
                     allowedViews={activeMode === 'street' ? ['street'] : ['map']}
                     showViewControl={false}
+                    showNearbyBenefits={activeMode === 'map'}
                 />
             </div>
-            {activeMode === 'map' && (
-                <div className="plp-mobile-map-modal-pin">
-                    <MapPin size={18} />
-                    <span>Este imóvel</span>
-                </div>
-            )}
         </div>
     ) : null
 
@@ -92,6 +87,7 @@ export default function PropertyMobileMapPreview({ property, latLng }: Props) {
                                 initialView={item.mode === 'street' ? 'street' : 'map'}
                                 allowedViews={item.mode === 'street' ? ['street'] : ['map']}
                                 showViewControl={false}
+                                showNearbyBenefits={item.mode === 'map'}
                             />
                         </div>
                         <button
