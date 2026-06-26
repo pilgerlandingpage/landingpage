@@ -5216,7 +5216,7 @@ export default function PropertyLandingStyles() {
                         max-width: none;
                         overflow-x: hidden;
                         overflow-y: auto;
-                        padding-bottom: max(16dvh, calc(100dvh - var(--pmds-sheet-top, 78dvh)));
+                        padding-bottom: max(16dvh, calc(100dvh - var(--pmds-sheet-top, 65dvh)));
                         background: #fff;
                         overscroll-behavior: contain;
                         -webkit-overflow-scrolling: touch;

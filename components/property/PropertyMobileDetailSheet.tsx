@@ -10,7 +10,7 @@ type PropertyMobileDetailSheetProps = {
 const SNAP_MEDIA_FOCUS = 78
 const SNAP_BALANCED = 47
 const SNAP_DETAILS_FOCUS = 8
-const SNAP_ENTRY = SNAP_MEDIA_FOCUS
+const SNAP_ENTRY = 65
 
 export default function PropertyMobileDetailSheet({ media, children }: PropertyMobileDetailSheetProps) {
     const [sheetTop, setSheetTop] = useState(SNAP_ENTRY)
