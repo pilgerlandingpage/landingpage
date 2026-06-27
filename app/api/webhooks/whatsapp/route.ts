@@ -2933,6 +2933,9 @@ function extractWebhookInstanceName(body: any, eventPayload: any): string {
     const direct = webhookText(body?.instanceName)
         || webhookText(body?.instance_name)
         || webhookText(body?.server_url)
+        || webhookText(body?.data?.instanceName)
+        || webhookText(body?.data?.instance_name)
+        || webhookText(body?.data?.server_url)
         || webhookText(eventPayload?.Instance)
         || webhookText(eventPayload?.instanceName)
         || webhookText(eventPayload?.instance_name)
@@ -2948,12 +2951,72 @@ function extractWebhookInstanceName(body: any, eventPayload: any): string {
     return ''
 }
 
+function extractConnectyHubInstanceId(headers: Headers, body: any, eventPayload: any): string {
+    const headerValue = webhookText(headers.get('x-connectyhub-instance-id'))
+    if (headerValue) return headerValue
+
+    return webhookText(body?.instanceId)
+        || webhookText(body?.connectyhubInstanceId)
+        || webhookText(body?.connectyhub_instance_id)
+        || webhookText(body?.data?.instanceId)
+        || webhookText(body?.data?.connectyhubInstanceId)
+        || webhookText(body?.data?.connectyhub_instance_id)
+        || webhookText(eventPayload?.instanceId)
+        || webhookText(eventPayload?.connectyhubInstanceId)
+        || webhookText(eventPayload?.connectyhub_instance_id)
+}
+
+async function rememberConnectyHubInstanceId(params: {
+    supabase: ReturnType<typeof getSupabase>
+    instance: any
+    connectyHubInstanceId: string
+    event: string
+    webhookEventId: string
+}) {
+    const { supabase, instance, connectyHubInstanceId, event, webhookEventId } = params
+    if (!instance?.id || !connectyHubInstanceId) return instance
+
+    const now = new Date().toISOString()
+    const currentConfig = instance.config && typeof instance.config === 'object' && !Array.isArray(instance.config)
+        ? instance.config
+        : {}
+    const nextConfig = {
+        ...currentConfig,
+        connectyhub_instance_id: connectyHubInstanceId,
+        connectyhub_last_event: event || null,
+        connectyhub_last_webhook_event_id: webhookEventId || null,
+        connectyhub_last_webhook_at: now,
+    }
+    const updates: Record<string, any> = {
+        config: nextConfig,
+        updated_at: now,
+    }
+    if (!instance.instance_token) {
+        updates.instance_token = connectyHubInstanceId
+    }
+
+    const { error } = await supabase
+        .from('whatsapp_instances')
+        .update(updates)
+        .eq('id', instance.id)
+    if (error) {
+        console.warn('[Webhook] Failed to persist ConnectyHub instance id:', error.message)
+    }
+
+    return {
+        ...instance,
+        config: nextConfig,
+        instance_token: connectyHubInstanceId || instance.instance_token,
+    }
+}
+
 async function syncConnectionWebhookStatus(params: {
     supabase: ReturnType<typeof getSupabase>
     instanceName: string
+    connectyHubInstanceId?: string
     body: any
 }) {
-    const { supabase, instanceName, body } = params
+    const { supabase, instanceName, connectyHubInstanceId, body } = params
     const token = webhookText(body?.token)
     const status = normalizeWhatsAppConnectionStatus(body)
     const ownerPhone = String(body?.owner || body?.instance?.owner || '').replace(/\D/g, '') || null
@@ -2971,25 +3034,41 @@ async function syncConnectionWebhookStatus(params: {
 
     if (instanceName) {
         query = query.eq('instance_name', instanceName)
+    } else if (connectyHubInstanceId) {
+        query = query.eq('instance_token', connectyHubInstanceId)
     } else if (token) {
         query = query.eq('instance_token', token)
     } else {
         return { synced: false, reason: 'missing_instance_identifier', status }
     }
 
-    const { data: rows, error: findError } = await query
+    let { data: rows, error: findError } = await query
+    if (!findError && connectyHubInstanceId && !instanceName && (!rows || rows.length === 0)) {
+        const fallback = await supabase
+            .from('whatsapp_instances')
+            .select('id, connected_at, config')
+            .contains('config', { connectyhub_instance_id: connectyHubInstanceId })
+            .limit(1)
+        rows = fallback.data
+        findError = fallback.error
+    }
     if (findError) throw findError
     const instance = Array.isArray(rows) ? rows[0] : rows
     if (!instance?.id) return { synced: false, reason: 'instance_not_found', status }
 
     const config = instance.config && typeof instance.config === 'object' ? instance.config : {}
-    const nextConfig = lastDisconnect || lastDisconnectReason
+    const nextConfig: Record<string, any> = lastDisconnect || lastDisconnectReason
         ? {
             ...config,
             last_disconnect_at: lastDisconnect || config.last_disconnect_at || null,
             last_disconnect_reason: lastDisconnectReason || config.last_disconnect_reason || null,
         }
         : config
+    if (connectyHubInstanceId) {
+        nextConfig.connectyhub_instance_id = connectyHubInstanceId
+        nextConfig.connectyhub_last_event = 'connection'
+        nextConfig.connectyhub_last_webhook_at = new Date().toISOString()
+    }
 
     const updates: Record<string, any> = {
         status,
@@ -3033,11 +3112,15 @@ export async function POST(request: NextRequest) {
         const eventPayload = body.event && typeof body.event === 'object' && !Array.isArray(body.event)
             ? body.event
             : null
-        const event = typeof body.event === 'string'
-            ? body.event
-            : (body.EventType || body.action || '')
-        const instanceName = extractWebhookInstanceName(body, eventPayload)
         const messageData = body.data || body.message || eventPayload || body
+        const event = request.headers.get('x-connectyhub-event') || (typeof body.event === 'string'
+            ? body.event
+            : (body.EventType || body.action || ''))
+        const connectyHubInstanceId = extractConnectyHubInstanceId(request.headers, body, eventPayload)
+        const connectyHubWebhookEventId = webhookText(request.headers.get('x-connectyhub-webhook-event-id'))
+            || webhookText(body?.webhookEventId)
+            || webhookText(body?.webhook_event_id)
+        const instanceName = extractWebhookInstanceName(body, messageData)
         let auditPhone: string | null = null
         let auditSenderName: string | null = null
         let auditLeadId: string | null = null
@@ -3092,7 +3175,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (String(event).toLowerCase() === 'connection') {
-            const synced = await syncConnectionWebhookStatus({ supabase, instanceName, body })
+            const synced = await syncConnectionWebhookStatus({ supabase, instanceName, connectyHubInstanceId, body })
             await saveAudit({ action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored' })
             return NextResponse.json({ success: true, action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored', synced })
         }
@@ -3552,6 +3635,24 @@ export async function POST(request: NextRequest) {
             instance = data
         }
 
+        if (!instance && connectyHubInstanceId) {
+            const { data } = await supabase
+                .from('whatsapp_instances')
+                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config, instance_type')
+                .eq('instance_token', connectyHubInstanceId)
+                .maybeSingle()
+            instance = data
+        }
+
+        if (!instance && connectyHubInstanceId) {
+            const { data } = await supabase
+                .from('whatsapp_instances')
+                .select('id, instance_name, instance_token, phone_number, broker_id, admin_user_id, status, config, instance_type')
+                .contains('config', { connectyhub_instance_id: connectyHubInstanceId })
+                .maybeSingle()
+            instance = data
+        }
+
         if (!instance) {
             const { data } = await supabase
                 .from('whatsapp_instances')
@@ -3566,6 +3667,16 @@ export async function POST(request: NextRequest) {
             console.error(`[Webhook] âŒ No instance found. instanceName: ${instanceName}`)
             await saveAudit({ action: 'instance_not_found', statusCode: 404 })
             return NextResponse.json({ success: false, message: 'Instância não encontrada' }, { status: 404 })
+        }
+
+        if (connectyHubInstanceId) {
+            instance = await rememberConnectyHubInstanceId({
+                supabase,
+                instance,
+                connectyHubInstanceId,
+                event,
+                webhookEventId: connectyHubWebhookEventId,
+            })
         }
 
         console.log(`[Webhook] âœ… Instance: ${instance.instance_name} (broker: ${instance.broker_id || 'none'})`)

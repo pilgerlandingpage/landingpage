@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { configureWebhook, getWebhook, getWebhookErrors } from '@/lib/uazapi'
+import { configureWebhook, getWebhook, getWebhookErrors, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
 import { getPublicAppUrl } from '@/lib/app-url'
 
 function getSupabase() {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         }
 
         const baseUrl = getPublicAppUrl(request.nextUrl.origin)
-        const webhookUrl = `${baseUrl}/api/webhooks/whatsapp`
+        const webhookUrl = await resolveConnectyHubWebhookUrl(baseUrl)
 
         // Configure webhook with optimal settings for Pilger
         const result = await configureWebhook({
@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
                 'chat_labels',
             ],
             excludeMessages: [
-                'wasSentByApi',         // 🔒 CRÍTICO: Previne loops infinitos
-                'isGroupYes',           // Ignora mensagens de grupos (foco em leads 1:1)
+                'wasSentByApi',
+                'isGroupYes',
             ],
             addUrlEvents: false,        // Todos os eventos vão para a mesma URL
             addUrlTypesMessages: false,

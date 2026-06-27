@@ -163,6 +163,8 @@ export function normalizeProviderInstances(raw: any): any[] {
 
 export function extractProviderInstanceName(instance: any): string {
     return String(
+        instance?.displayName ||
+        instance?.display_name ||
         instance?.name ||
         instance?.instanceName ||
         instance?.instance_name ||
@@ -173,6 +175,10 @@ export function extractProviderInstanceName(instance: any): string {
 
 export function extractProviderInstanceToken(instance: any): string {
     return String(
+        instance?.id ||
+        instance?.instanceId ||
+        instance?.connectyhubInstanceId ||
+        instance?.publicInstanceId ||
         instance?.token ||
         instance?.instanceToken ||
         instance?.instance_token ||

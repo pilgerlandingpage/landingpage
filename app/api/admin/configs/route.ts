@@ -70,8 +70,10 @@ async function loadAppConfigRows(supabase: ReturnType<typeof getSupabase>) {
 }
 
 const ENV_FALLBACKS: Record<string, string> = {
-    uazapi_base_url: 'UAZAPI_BASE_URL',
-    uazapi_admin_token: 'UAZAPI_ADMIN_TOKEN',
+    connectyhub_api_url: 'CONNECTYHUB_API_URL',
+    connectyhub_api_token: 'CONNECTYHUB_API_TOKEN',
+    connectyhub_webhook_secret: 'CONNECTYHUB_WEBHOOK_SECRET',
+    connectyhub_webhook_url: 'CONNECTYHUB_WEBHOOK_URL',
     gemini_api_key: 'GEMINI_API_KEY',
     gemini_model: '',
     openai_model: '',

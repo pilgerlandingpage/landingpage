@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPublicAppUrl } from '@/lib/app-url'
-import { configureWebhook, getWebhook } from '@/lib/uazapi'
+import { configureWebhook, getWebhook, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
 import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import {
     detectWhatsAppGlobalCommandIntent,
@@ -54,8 +54,10 @@ const PILGER_OFFICE_AGENTS = [
 
 const CONFIG_KEYS = [
     'agent_default_instance_id',
-    'uazapi_base_url',
-    'uazapi_admin_token',
+    'connectyhub_api_url',
+    'connectyhub_api_token',
+    'connectyhub_webhook_secret',
+    'connectyhub_webhook_url',
     'whatsapp_global_system_prompt',
     'vitor_creative_review_system_prompt',
     'sector_notification_recipients',
@@ -339,7 +341,7 @@ async function readWebhookDiagnostic(globalInstance: any, requiredUrl: string) {
 async function configurePilgerGlobalWebhook(request: NextRequest) {
     const supabase = createAdminClient()
     const publicUrl = getPublicAppUrl(request.nextUrl.origin)
-    const requiredWebhookUrl = `${publicUrl}/api/webhooks/whatsapp`
+    const requiredWebhookUrl = await resolveConnectyHubWebhookUrl(publicUrl)
     const [configResult, instancesResult] = await Promise.all([
         readConfigMap(supabase),
         readInstances(supabase),
@@ -899,7 +901,7 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     const generatedAt = new Date().toISOString()
     const publicUrl = getPublicAppUrl(request.nextUrl.origin)
-    const requiredWebhookUrl = `${publicUrl}/api/webhooks/whatsapp`
+    const requiredWebhookUrl = await resolveConnectyHubWebhookUrl(publicUrl)
 
     try {
         const [
@@ -1058,18 +1060,18 @@ export async function GET(request: NextRequest) {
             ),
             item(
                 'uazapi_config',
-                'Credenciais Uazapi',
-                configuredText(configMap.uazapi_base_url, 8) && configuredText(configMap.uazapi_admin_token, 8) ? 'ok' : 'missing',
-                configuredText(configMap.uazapi_base_url, 8) && configuredText(configMap.uazapi_admin_token, 8)
-                    ? 'Base URL e token administrativo da Uazapi encontrados no app_config.'
-                    : 'Configure uazapi_base_url e uazapi_admin_token no app_config.',
+                'Credenciais ConnectyHub',
+                configuredText(configMap.connectyhub_api_url, 8) && configuredText(configMap.connectyhub_api_token, 8) && configuredText(configMap.connectyhub_webhook_secret, 8) ? 'ok' : 'missing',
+                configuredText(configMap.connectyhub_api_url, 8) && configuredText(configMap.connectyhub_api_token, 8) && configuredText(configMap.connectyhub_webhook_secret, 8)
+                    ? 'URL, token e segredo de webhook da ConnectyHub encontrados no app_config.'
+                    : 'Configure connectyhub_api_url, connectyhub_api_token e connectyhub_webhook_secret no app_config.',
             ),
             item(
                 'webhook_read',
                 'Leitura do webhook',
                 webhookDiagnostic.ready ? 'ok' : 'warn',
                 webhookDiagnostic.ready
-                    ? 'Webhook lido diretamente da Uazapi.'
+                    ? 'Webhook lido pela API da ConnectyHub.'
                     : `Nao foi possivel ler o webhook agora: ${webhookDiagnostic.error || 'sem detalhe'}.`,
                 {
                     webhook: webhookDiagnostic.webhook,
@@ -1083,8 +1085,8 @@ export async function GET(request: NextRequest) {
                 webhookDiagnostic.ready
                     ? webhookDiagnostic.urlOk
                         ? 'Webhook aponta para a rota publica correta.'
-                        : 'Webhook nao aponta para /api/webhooks/whatsapp na URL publica atual.'
-                    : 'Sem leitura da Uazapi para comparar o destino.',
+                        : 'Webhook nao aponta para /api/webhooks/connectyhub na URL publica atual.'
+                    : 'Sem leitura da ConnectyHub para comparar o destino.',
             ),
             item(
                 'webhook_filters',

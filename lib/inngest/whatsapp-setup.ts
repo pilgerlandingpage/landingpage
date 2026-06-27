@@ -6,6 +6,7 @@ import {
     updateDelaySettings,
     editLabel,
     editQuickReply,
+    resolveConnectyHubWebhookUrl,
 } from '../uazapi'
 import { getPublicAppUrl } from '../app-url'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
@@ -41,7 +42,7 @@ export const whatsappInstanceSetup = inngest.createFunction(
         // ── Step 1: Configurar Webhook ──
         const webhookResult = await step.run('setup-webhook', async () => {
             try {
-                const webhookUrl = `${getPublicAppUrl(webhookBaseUrl)}/api/webhooks/whatsapp`
+                const webhookUrl = await resolveConnectyHubWebhookUrl(getPublicAppUrl(webhookBaseUrl))
                 await configureWebhook({
                     enabled: true,
                     url: webhookUrl,

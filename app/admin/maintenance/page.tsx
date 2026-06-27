@@ -22,13 +22,15 @@ interface IntegrationCard {
 
 const INTEGRATIONS: IntegrationCard[] = [
     {
-        id: 'uazapi',
+        id: 'connectyhub',
         title: 'ConnectyHub - WhatsApp API',
-        description: 'API premium para WhatsApp via ConnectyHub: instâncias, mensagens, botões, menus e automações. Cada usuário terá sua própria instância gerenciada no painel.',
+        description: 'API oficial da ConnectyHub para WhatsApp: instancias, mensagens, webhooks, botoes, menus e automacoes. As credenciais ficam na sala de manutencao ou nas variaveis de ambiente.',
         icon: 'whatsapp',
         fields: [
-            { key: 'uazapi_base_url', label: 'URL do Servidor', placeholder: 'https://connectyhub.uazapi.com', isSecret: false },
-            { key: 'uazapi_admin_token', label: 'Admin Token', placeholder: 'Seu admin token', isSecret: true },
+            { key: 'connectyhub_api_url', label: 'CONNECTYHUB_API_URL', placeholder: 'https://seu-connectyhub/api/v1', isSecret: false },
+            { key: 'connectyhub_api_token', label: 'CONNECTYHUB_API_TOKEN', placeholder: 'Bearer token do cliente API', isSecret: true },
+            { key: 'connectyhub_webhook_secret', label: 'CONNECTYHUB_WEBHOOK_SECRET', placeholder: 'Segredo HMAC do webhook', isSecret: true },
+            { key: 'connectyhub_webhook_url', label: 'CONNECTYHUB_WEBHOOK_URL', placeholder: 'https://seu-dominio/api/webhooks/connectyhub', isSecret: false },
         ],
     },
 

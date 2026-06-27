@@ -81,7 +81,7 @@ export function buildPilgerGoLivePacket(input: GoLiveInput) {
     ),
     check(
       'webhook_gate',
-      'Webhook Uazapi',
+      'Webhook ConnectyHub',
       webhookKnown
         ? input.webhookReady && !input.webhookMissingEvents && !input.webhookMissingExcludes ? 'ok' : 'warn'
         : 'warn',

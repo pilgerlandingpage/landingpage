@@ -1,6 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook, listAllInstances } from '@/lib/uazapi'
+import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
 import { getPublicAppUrl } from '@/lib/app-url'
 import {
     extractProviderInstanceName,
@@ -350,7 +350,7 @@ export async function GET(request: NextRequest) {
         // Auto-configure webhook whenever connected
         if (newStatus === 'connected' && effectiveToken) {
             try {
-                const webhookUrl = `${getPublicAppUrl(request.nextUrl.origin)}/api/webhooks/whatsapp`
+                const webhookUrl = await resolveConnectyHubWebhookUrl(getPublicAppUrl(request.nextUrl.origin))
 
                 let currentWebhook: any = null
                 try {

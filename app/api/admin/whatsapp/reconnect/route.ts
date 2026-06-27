@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { configureWebhook, getInstanceStatus, getWebhook, listAllInstances } from '@/lib/uazapi'
+import { configureWebhook, getInstanceStatus, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
 import { getPublicAppUrl } from '@/lib/app-url'
 import {
     extractProviderInstanceName,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         }
 
         const providerByName: Record<string, any> = await readProviderSnapshotByName().catch(() => ({}))
-        const webhookUrl = `${getPublicAppUrl(request.nextUrl.origin)}/api/webhooks/whatsapp`
+        const webhookUrl = await resolveConnectyHubWebhookUrl(getPublicAppUrl(request.nextUrl.origin))
         const now = new Date().toISOString()
 
         const results = await Promise.all(rows.map(async (instance: any) => {

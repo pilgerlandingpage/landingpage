@@ -47,21 +47,22 @@ export async function POST(request: NextRequest) {
         const { service, config } = await request.json()
 
         switch (service) {
+            case 'connectyhub':
             case 'uazapi': {
-                const baseUrl = config.uazapi_base_url
-                const adminToken = config.uazapi_admin_token
+                const baseUrl = String(config.connectyhub_api_url || '').replace(/\/+$/, '')
+                const apiToken = config.connectyhub_api_token
 
-                if (!baseUrl || !adminToken) {
+                if (!baseUrl || !apiToken) {
                     return NextResponse.json({
                         success: false,
-                        message: 'Preencha URL do Servidor e Admin Token',
+                        message: 'Preencha CONNECTYHUB_API_URL e CONNECTYHUB_API_TOKEN',
                     })
                 }
 
                 try {
-                    const res = await fetch(`${baseUrl}/instance/all`, {
+                    const res = await fetch(`${baseUrl}/instances`, {
                         headers: {
-                            'admintoken': adminToken,
+                            'Authorization': `Bearer ${apiToken}`,
                             'Content-Type': 'application/json',
                         },
                     })
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
                     const instances = Array.isArray(data) ? data : (data?.instances || [])
                     return NextResponse.json({
                         success: true,
-                        message: `Conectado à uazapi! ${instances.length} instância(s) encontrada(s).`,
+                        message: `ConnectyHub conectada. ${instances.length} instancia(s) encontrada(s).`,
                     })
                 } catch (e) {
                     return NextResponse.json({

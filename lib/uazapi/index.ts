@@ -1,12 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
-// uazapi — WhatsApp API Integration
-// Lib centralizada para todas as operações com a uazapi
-// Docs: https://docs.uazapi.com
+// ConnectyHub WhatsApp API compatibility layer.
+// Mantem a API interna legada, mas envia tudo pela ConnectyHub.
 // ═══════════════════════════════════════════════════════════════
+
+import { getConnectyHubConfig, resolveConnectyHubWebhookUrl, saveConnectyHubWebhookSecretIfMissing } from '@/lib/connectyhub/config'
 
 interface UazapiConfig {
     baseUrl: string
     adminToken: string
+    webhookSecret?: string
+    webhookUrl?: string
 }
 
 interface SendTextOptions {
@@ -101,25 +104,13 @@ interface SendPollOptions {
 // ── Config ──────────────────────────────────────────────────────
 
 export async function getUazapiConfig(): Promise<UazapiConfig> {
-    const { createClient } = await import('@supabase/supabase-js')
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    const { data } = await supabase
-        .from('app_config')
-        .select('key, value')
-        .in('key', ['uazapi_base_url', 'uazapi_admin_token'])
-
-    const config: Record<string, string> = {}
-    data?.forEach((row: { key: string; value: string }) => {
-        config[row.key] = row.value
-    })
+    const config = await getConnectyHubConfig()
 
     return {
-        baseUrl: config.uazapi_base_url || '',
-        adminToken: config.uazapi_admin_token || '',
+        baseUrl: config.apiUrl,
+        adminToken: config.apiToken,
+        webhookSecret: config.webhookSecret,
+        webhookUrl: config.webhookUrl,
     }
 }
 
@@ -164,7 +155,7 @@ async function readUazapiPayload(response: Response, path: string) {
     if (!looksLikeJson) {
         const preview = compactResponseText(trimmed)
         if (response.ok) {
-            throw new Error(`uazapi invalid response (${response.status}) em ${path}: ${preview}`)
+            throw new Error(`connectyhub invalid response (${response.status}) em ${path}: ${preview}`)
         }
         return preview
     }
@@ -173,8 +164,111 @@ async function readUazapiPayload(response: Response, path: string) {
         return JSON.parse(trimmed)
     } catch {
         const preview = compactResponseText(trimmed)
-        throw new Error(`uazapi invalid json (${response.status}) em ${path}: ${preview}`)
+        throw new Error(`connectyhub invalid json (${response.status}) em ${path}: ${preview}`)
     }
+}
+
+function requireConnectyHubConfig(config: UazapiConfig) {
+    if (!config.baseUrl || !config.adminToken) {
+        throw new Error('ConnectyHub API nao configurada. Preencha CONNECTYHUB_API_URL e CONNECTYHUB_API_TOKEN na sala de manutencao.')
+    }
+}
+
+function encodePathPart(value: string) {
+    return encodeURIComponent(value).replace(/%2F/gi, '/')
+}
+
+async function resolveConnectyHubInstanceId(instanceToken?: string) {
+    const candidate = String(instanceToken || '').trim()
+    if (!candidate) return ''
+
+    try {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        const { data } = await supabase
+            .from('whatsapp_instances')
+            .select('config')
+            .eq('instance_token', candidate)
+            .maybeSingle()
+
+        const configuredId = data?.config && typeof data.config === 'object'
+            ? String((data.config as any).connectyhub_instance_id || '').trim()
+            : ''
+        if (configuredId) return configuredId
+    } catch {
+        // Mantem compatibilidade: se nao conseguir resolver no banco, usa o valor recebido.
+    }
+
+    return candidate
+}
+
+async function connectyHubFetch(
+    path: string,
+    options: {
+        method?: string
+        body?: unknown
+        query?: URLSearchParams
+    } = {}
+) {
+    const config = await getUazapiConfig()
+    requireConnectyHubConfig(config)
+
+    const url = new URL(`${config.baseUrl}${path}`)
+    options.query?.forEach((value, key) => {
+        url.searchParams.set(key, value)
+    })
+
+    const response = await fetch(url, {
+        method: options.method || 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.adminToken}`,
+        },
+        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        cache: 'no-store',
+    })
+
+    const payload = await readUazapiPayload(response, path)
+
+    if (!response.ok) {
+        throw new Error(`connectyhub error (${response.status}) em ${path}: ${getUazapiErrorMessage(payload)}`)
+    }
+
+    return payload ?? {}
+}
+
+async function connectyHubProviderProxy(
+    path: string,
+    options: {
+        method?: string
+        body?: unknown
+        token?: string
+    }
+) {
+    const instanceId = await resolveConnectyHubInstanceId(options.token)
+    if (!instanceId) {
+        throw new Error(`ConnectyHub instanceId obrigatorio para ${path}`)
+    }
+
+    const method = options.method || 'GET'
+    const proxyPath = `/provider${path}`
+
+    if (method === 'GET') {
+        const query = new URLSearchParams({ instanceId })
+        return connectyHubFetch(proxyPath, { method, query })
+    }
+
+    return connectyHubFetch(proxyPath, {
+        method,
+        body: {
+            instanceId,
+            payload: options.body ?? {},
+        },
+    })
 }
 
 async function uazapiFetch(
@@ -186,33 +280,21 @@ async function uazapiFetch(
         adminToken?: string  // admin token (para operações admin)
     } = {}
 ) {
-    const config = await getUazapiConfig()
-    const url = `${config.baseUrl}${path}`
-
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+    if (path === '/instance/all') {
+        return connectyHubFetch('/instances', { method: 'GET' })
     }
 
-    // Admin token para operações administrativas
-    if (options.adminToken) {
-        headers['admintoken'] = options.adminToken
-    } else if (options.token) {
-        headers['token'] = options.token
+    if (path === '/instance/connect') {
+        const instanceId = await resolveConnectyHubInstanceId(options.token)
+        return connectyHubFetch(`/instances/${encodePathPart(instanceId)}/connect`, { method: 'POST' })
     }
 
-    const response = await fetch(url, {
-        method: options.method || 'GET',
-        headers,
-        body: options.body ? JSON.stringify(options.body) : undefined,
-    })
-
-    const payload = await readUazapiPayload(response, path)
-
-    if (!response.ok) {
-        throw new Error(`uazapi error (${response.status}) em ${path}: ${getUazapiErrorMessage(payload)}`)
+    if (path === '/instance/status') {
+        const instanceId = await resolveConnectyHubInstanceId(options.token)
+        return connectyHubFetch(`/instances/${encodePathPart(instanceId)}/status`, { method: 'GET' })
     }
 
-    return payload ?? {}
+    return connectyHubProviderProxy(path, options)
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -295,11 +377,24 @@ function formatRestrictionUntil(value: string) {
 /** Criar nova instancia (requer admin token) */
 export async function createInstance(instanceName: string) {
     const config = await getUazapiConfig()
-    return uazapiFetch('/instance/init', {
+    const webhookUrl = config.webhookUrl || await resolveConnectyHubWebhookUrl()
+    const result = await connectyHubFetch('/instances', {
         method: 'POST',
-        adminToken: config.adminToken,
-        body: { name: instanceName, instanceName },
+        body: {
+            name: instanceName,
+            webhookUrl: webhookUrl || undefined,
+            metadata: { created_from: 'pilger_legacy_whatsapp_admin' },
+        },
     })
+    const publicId = String((result as any)?.instance?.id || (result as any)?.id || '').trim()
+    return {
+        ...(result as any),
+        token: publicId,
+        instance: {
+            ...((result as any)?.instance || {}),
+            token: publicId,
+        },
+    }
 }
 
 /** Conectar instância — retorna QR Code base64 */
@@ -379,6 +474,10 @@ function normalizeProviderStatus(instance: any): string {
 
 function providerInstanceToken(instance: any): string {
     return String(
+        instance?.id ||
+        instance?.instanceId ||
+        instance?.connectyhubInstanceId ||
+        instance?.publicInstanceId ||
         instance?.token ||
         instance?.instanceToken ||
         instance?.instance_token ||
@@ -389,6 +488,8 @@ function providerInstanceToken(instance: any): string {
 
 function providerInstanceName(instance: any): string {
     return String(
+        instance?.displayName ||
+        instance?.display_name ||
         instance?.name ||
         instance?.instanceName ||
         instance?.instance_name ||
@@ -421,12 +522,15 @@ export async function resolveDefaultWhatsAppInstanceToken(): Promise<string | nu
     if (configuredInstanceId) {
         const { data } = await supabase
             .from('whatsapp_instances')
-            .select('instance_token, status')
+            .select('instance_token, status, config')
             .eq('id', configuredInstanceId)
             .maybeSingle()
 
         if (data?.status === 'connected' && data.instance_token) {
-            return data.instance_token
+            const connectyHubInstanceId = data.config && typeof data.config === 'object'
+                ? String((data.config as any).connectyhub_instance_id || '').trim()
+                : ''
+            return connectyHubInstanceId || data.instance_token
         }
     }
 
@@ -464,17 +568,20 @@ export async function sendWhatsAppMessage({ phone, message, instanceToken, delay
             .eq('key', 'agent_default_instance_id')
             .maybeSingle()
         const configuredInstanceId = String(config?.value || '').trim()
-        let data: { instance_token?: string | null } | null = null
+        let data: { instance_token?: string | null; config?: any; status?: string | null } | null = null
         if (configuredInstanceId) {
             const result = await supabase
                 .from('whatsapp_instances')
-                .select('instance_token, status')
+                .select('instance_token, status, config')
                 .eq('id', configuredInstanceId)
                 .maybeSingle()
             if (result.data?.status === 'connected') data = result.data
         }
         if (data && data.instance_token) {
-            instanceToken = data.instance_token
+            const connectyHubInstanceId = data.config && typeof data.config === 'object'
+                ? String((data.config as any).connectyhub_instance_id || '').trim()
+                : ''
+            instanceToken = connectyHubInstanceId || data.instance_token
         } else {
             throw new Error('Token da instância é obrigatório e a instância global do agente não está conectada')
         }
@@ -777,11 +884,7 @@ export async function getGroupInfo(groupId: string, instanceToken: string) {
 
 /** Configurar webhook de uma instância */
 export async function setWebhook(webhookUrl: string, instanceToken: string) {
-    return uazapiFetch('/webhook/set', {
-        method: 'POST',
-        token: instanceToken,
-        body: { url: webhookUrl },
-    })
+    return configureWebhook({ enabled: true, url: webhookUrl }, instanceToken)
 }
 
 function normalizeWebhookResponse(result: any) {
@@ -794,15 +897,19 @@ function normalizeWebhookResponse(result: any) {
 
 /** Obter webhook configurado */
 export async function getWebhook(instanceToken: string) {
-    try {
-        return normalizeWebhookResponse(await uazapiFetch('/webhook', {
-            token: instanceToken,
-        }))
-    } catch (error) {
-        return normalizeWebhookResponse(await uazapiFetch('/webhook/get', {
-            token: instanceToken,
-        }))
-    }
+    const configuredUrl = (await getUazapiConfig()).webhookUrl
+    const result = await connectyHubFetch('/webhooks', { method: 'GET' })
+    const webhooks = Array.isArray((result as any)?.webhooks) ? (result as any).webhooks : []
+    const webhook = webhooks.find((webhook: any) => configuredUrl && webhook?.url === configuredUrl)
+        || webhooks.find((webhook: any) => webhook?.status === 'active')
+        || webhooks[0]
+        || null
+    return webhook
+        ? {
+            ...webhook,
+            excludeMessages: webhook.excludeMessages || ['wasSentByApi', 'isGroupYes'],
+        }
+        : null
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1220,19 +1327,48 @@ interface WebhookConfig {
 
 /** Configurar webhook de uma instância — POST /webhook */
 export async function configureWebhook(config: WebhookConfig, instanceToken: string) {
-    return uazapiFetch('/webhook', {
+    const webhookUrl = config.url || await resolveConnectyHubWebhookUrl()
+    if (!webhookUrl) {
+        throw new Error('CONNECTYHUB_WEBHOOK_URL nao configurado e nao foi possivel inferir a URL publica do webhook.')
+    }
+
+    const existing = await getWebhook(instanceToken).catch(() => null)
+    const body = {
+        url: webhookUrl,
+        description: 'Pilger WhatsApp webhook',
+        events: config.events || ['messages', 'messages_update', 'connection', 'history', 'presence', 'chats', 'contacts', 'labels', 'chat_labels'],
+    }
+
+    if (existing?.id) {
+        return connectyHubFetch(`/webhooks/${existing.id}`, {
+            method: 'PATCH',
+            body: { ...body, status: config.enabled === false ? 'paused' : 'active' },
+        })
+    }
+
+    const created = await connectyHubFetch('/webhooks', {
         method: 'POST',
-        token: instanceToken,
-        body: config,
+        body,
     })
+    const generatedSecret = String((created as any)?.secret || '').trim()
+    if (generatedSecret) {
+        await saveConnectyHubWebhookSecretIfMissing(generatedSecret)
+    }
+    return created
 }
 
 /** Obter erros de webhook — GET /webhook/errors */
 export async function getWebhookErrors(instanceToken: string) {
-    return uazapiFetch('/webhook/errors', {
-        token: instanceToken,
+    const webhook = await getWebhook(instanceToken).catch(() => null)
+    const query = new URLSearchParams({ limit: '50' })
+    if (webhook?.id) query.set('endpointId', webhook.id)
+    return connectyHubFetch('/webhooks/deliveries', {
+        method: 'GET',
+        query,
     })
 }
+
+export { resolveConnectyHubWebhookUrl }
 
 // ═══════════════════════════════════════════════════════════════
 //  ETIQUETAS (Labels)
