@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getPrivacy } from '@/lib/uazapi'
+import { getPrivacy } from '@/lib/connectyhub/whatsapp'
 
 function getSupabase() {
     return createClient(

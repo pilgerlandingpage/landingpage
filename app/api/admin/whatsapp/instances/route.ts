@@ -7,7 +7,7 @@ import {
     getWebhook,
     getContactAvatar,
     listAllInstances,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 import {
     extractProviderInstanceName,
     extractProviderInstanceToken,
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
             // ignore provider-all failures
         }
 
-        // Reconcile real-time status from UAZAPI to avoid stale "connected" states.
+        // Reconcile real-time status from ConnectyHub to avoid stale "connected" states.
         const reconciledInstances = await Promise.all(
             instances.map(async (inst: any) => {
                 const providerSnapshot = providerByName[inst.instance_name] || null
@@ -316,8 +316,8 @@ export async function POST(request: NextRequest) {
 
         let instanceToken = ''
         try {
-            const uazapiResult = await createInstance(instanceName)
-            instanceToken = uazapiResult?.token || uazapiResult?.instance?.token || ''
+            const createResult = await createInstance(instanceName)
+            instanceToken = createResult?.token || createResult?.instance?.token || ''
         } catch (apiErr) {
             console.warn('[WhatsApp] API creation failed, saving to DB anyway:', apiErr)
         }
@@ -388,7 +388,7 @@ export async function DELETE(request: NextRequest) {
         try {
             await deleteInstance(instance.instance_token, instance.instance_name)
         } catch (e) {
-            console.warn('Falha ao deletar na uazapi:', e)
+            console.warn('Falha ao deletar na ConnectyHub:', e)
             return NextResponse.json({
                 success: false,
                 message: 'Nao foi possivel excluir no servidor da API. A instancia nao foi removida localmente.',

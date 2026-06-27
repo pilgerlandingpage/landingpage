@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getPublicAppUrl } from '@/lib/app-url'
-import { configureWebhook, getWebhook, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
+import { configureWebhook, getWebhook, resolveConnectyHubWebhookUrl } from '@/lib/connectyhub/whatsapp'
 import { recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import {
     detectWhatsAppGlobalCommandIntent,
@@ -1059,7 +1059,7 @@ export async function GET(request: NextRequest) {
                 { public_url: publicUrl, required_webhook_url: requiredWebhookUrl },
             ),
             item(
-                'uazapi_config',
+                'connectyhub_config',
                 'Credenciais ConnectyHub',
                 configuredText(configMap.connectyhub_api_url, 8) && configuredText(configMap.connectyhub_api_token, 8) && configuredText(configMap.connectyhub_webhook_secret, 8) ? 'ok' : 'missing',
                 configuredText(configMap.connectyhub_api_url, 8) && configuredText(configMap.connectyhub_api_token, 8) && configuredText(configMap.connectyhub_webhook_secret, 8)
@@ -1098,7 +1098,7 @@ export async function GET(request: NextRequest) {
                     ? webhookDiagnostic.missingEvents.length || webhookDiagnostic.missingExcludes.length
                         ? `Faltam eventos: ${webhookDiagnostic.missingEvents.join(', ') || 'nenhum'}; faltam exclusoes: ${webhookDiagnostic.missingExcludes.join(', ') || 'nenhuma'}.`
                         : 'Eventos necessarios e exclusoes de mensagens enviadas pela API/grupos estao configurados.'
-                    : 'Sem leitura da Uazapi para validar eventos e filtros.',
+                    : 'Sem leitura da ConnectyHub para validar eventos e filtros.',
                 {
                     required_events: REQUIRED_WEBHOOK_EVENTS,
                     required_excludes: REQUIRED_WEBHOOK_EXCLUDES,
@@ -1475,7 +1475,7 @@ export async function GET(request: NextRequest) {
         )
         const remainingPhase1Actions = [
             webhookDiagnostic.ready && (webhookDiagnostic.missingEvents.length || webhookDiagnostic.missingExcludes.length)
-                ? 'Clique em Reparar webhook para atualizar os eventos/filtros remotos da Uazapi.'
+                ? 'Clique em Reparar webhook para atualizar os eventos/filtros remotos da ConnectyHub.'
                 : '',
             overrides.count === 0
                 ? 'Cadastre ao menos um acesso manual em Acessos do Pilger para testar um colega especifico.'

@@ -925,8 +925,8 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         sector: 'Tecnologia',
         promptKey: 'otto_integrations_system_prompt',
         fallback: OTTO_INTEGRATIONS_SYSTEM_PROMPT,
-        detail: 'Converte diagnosticos de OpenAI, Gemini, DataForSEO, Brevo, ElevenLabs, Inngest, Supabase, UAZAPI, Google e Meta em inteligencia operacional.',
-        tools: ['Diagnosticos', 'provedores IA', 'UAZAPI', 'Brevo', 'ElevenLabs', 'DataForSEO', 'Central de Inteligencia'],
+        detail: 'Converte diagnosticos de OpenAI, Gemini, DataForSEO, Brevo, ElevenLabs, Inngest, Supabase, ConnectyHub, Google e Meta em inteligencia operacional.',
+        tools: ['Diagnosticos', 'provedores IA', 'ConnectyHub', 'Brevo', 'ElevenLabs', 'DataForSEO', 'Central de Inteligencia'],
         autonomy: 'Pode registrar falhas, impactos e proximas acoes; nao corrige credenciais automaticamente.',
         editHref: '/admin/maintenance',
         behaviorControls: [

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { configurePrivacy, setPresenceAvailable, setPresenceUnavailable } from '@/lib/uazapi'
+import { configurePrivacy, setPresenceAvailable, setPresenceUnavailable } from '@/lib/connectyhub/whatsapp'
 import { DEFAULT_WHATSAPP_INSTANCE_CONFIG, normalizeWhatsAppInstanceConfig } from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {

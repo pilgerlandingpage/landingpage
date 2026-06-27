@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
-import { markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/uazapi'
+import { markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/connectyhub/whatsapp'
 import { uploadImageToR2 } from '@/lib/storage/r2'
 import { appendLeadConversationLog, ensureWhatsAppLead, isGenericWhatsAppLeadName, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
 import { generateChatResponse } from '@/lib/ai/generation'
@@ -2841,7 +2841,7 @@ async function saveInboundMediaArtifact(params: {
         url: storedUrl,
         r2_url: storedUrl,
         original_url: fileUrl,
-        storage: storedUrl === fileUrl ? 'uazapi' : 'r2',
+        storage: storedUrl === fileUrl ? 'connectyhub' : 'r2',
         message_ids: messageIds,
         received_at: now,
         instance_id: instance?.id || null,
@@ -2955,15 +2955,70 @@ function extractConnectyHubInstanceId(headers: Headers, body: any, eventPayload:
     const headerValue = webhookText(headers.get('x-connectyhub-instance-id'))
     if (headerValue) return headerValue
 
+    const instanceObject = body?.instance && typeof body.instance === 'object' && !Array.isArray(body.instance)
+        ? body.instance
+        : eventPayload?.instance && typeof eventPayload.instance === 'object' && !Array.isArray(eventPayload.instance)
+            ? eventPayload.instance
+            : null
+
     return webhookText(body?.instanceId)
         || webhookText(body?.connectyhubInstanceId)
         || webhookText(body?.connectyhub_instance_id)
+        || webhookText(body?.instance)
         || webhookText(body?.data?.instanceId)
         || webhookText(body?.data?.connectyhubInstanceId)
         || webhookText(body?.data?.connectyhub_instance_id)
         || webhookText(eventPayload?.instanceId)
         || webhookText(eventPayload?.connectyhubInstanceId)
         || webhookText(eventPayload?.connectyhub_instance_id)
+        || webhookText(eventPayload?.instance)
+        || webhookText(instanceObject?.id)
+        || webhookText(instanceObject?.instanceId)
+        || webhookText(instanceObject?.connectyhubInstanceId)
+}
+
+function isPlainWebhookObject(value: unknown): value is Record<string, any> {
+    return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function looksLikeWhatsAppMessage(value: unknown): boolean {
+    if (!isPlainWebhookObject(value)) return false
+    return Boolean(
+        value.messageid ||
+        value.chatid ||
+        value.sender ||
+        value.sender_pn ||
+        value.fromMe !== undefined ||
+        value.wasSentByApi !== undefined ||
+        value.text !== undefined ||
+        value.messageType ||
+        value.content !== undefined
+    )
+}
+
+function extractWebhookMessageData(body: any, eventPayload: any, event: string): any {
+    const eventKey = String(event || '').toLowerCase()
+    const messageEvents = new Set(['message', 'messages', 'messages.upsert', 'messages_update', 'history'])
+    const data = isPlainWebhookObject(body?.data) ? body.data : null
+    const dataMessage = data?.message
+
+    if (
+        dataMessage &&
+        isPlainWebhookObject(dataMessage) &&
+        (messageEvents.has(eventKey) || looksLikeWhatsAppMessage(dataMessage))
+    ) {
+        return dataMessage
+    }
+
+    if (isPlainWebhookObject(body?.message) && looksLikeWhatsAppMessage(body.message)) {
+        return body.message
+    }
+
+    if (isPlainWebhookObject(eventPayload) && looksLikeWhatsAppMessage(eventPayload)) {
+        return eventPayload
+    }
+
+    return data || body?.message || eventPayload || body
 }
 
 async function rememberConnectyHubInstanceId(params: {
@@ -3112,10 +3167,10 @@ export async function POST(request: NextRequest) {
         const eventPayload = body.event && typeof body.event === 'object' && !Array.isArray(body.event)
             ? body.event
             : null
-        const messageData = body.data || body.message || eventPayload || body
         const event = request.headers.get('x-connectyhub-event') || (typeof body.event === 'string'
             ? body.event
             : (body.EventType || body.action || ''))
+        const messageData = extractWebhookMessageData(body, eventPayload, event)
         const connectyHubInstanceId = extractConnectyHubInstanceId(request.headers, body, eventPayload)
         const connectyHubWebhookEventId = webhookText(request.headers.get('x-connectyhub-webhook-event-id'))
             || webhookText(body?.webhookEventId)
@@ -3167,27 +3222,32 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (String(event).toLowerCase() === 'presence') {
+        const eventKey = String(event).toLowerCase()
+
+        if (eventKey === 'presence') {
             const tracked = await savePresenceEvent({ supabase, instanceName, body, messageData })
             auditPhone = (tracked as any)?.phone || null
             await saveAudit({ action: (tracked as any)?.tracked ? 'presence_tracked' : 'presence_ignored' })
             return NextResponse.json({ success: true, action: (tracked as any)?.tracked ? 'presence_tracked' : 'presence_ignored', tracked })
         }
 
-        if (String(event).toLowerCase() === 'connection') {
-            const synced = await syncConnectionWebhookStatus({ supabase, instanceName, connectyHubInstanceId, body })
+        if (eventKey === 'connection' || eventKey === 'status') {
+            const connectionBody = messageData && typeof messageData === 'object' && !Array.isArray(messageData)
+                ? { ...body, ...messageData }
+                : body
+            const synced = await syncConnectionWebhookStatus({ supabase, instanceName, connectyHubInstanceId, body: connectionBody })
             await saveAudit({ action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored' })
             return NextResponse.json({ success: true, action: synced.synced ? 'connection_status_synced' : 'connection_status_ignored', synced })
         }
 
-        if (String(event).toLowerCase() === 'history') {
+        if (eventKey === 'history') {
             const history = await saveHistoryWebhookMessages({ supabase, instanceName, payload: body })
             await saveAudit({ action: 'history_messages_saved' })
             return NextResponse.json({ success: true, action: 'history_messages_saved', history })
         }
 
         const updateKind = String(messageData?.Type || messageData?.type || '').toLowerCase()
-        if (String(event).toLowerCase() === 'messages_update' && updateKind === 'filedownloaded') {
+        if (eventKey === 'messages_update' && updateKind === 'filedownloaded') {
             const fileUrl = messageData.FileURL
                 || messageData.fileURL
                 || messageData.fileUrl
@@ -3249,7 +3309,7 @@ export async function POST(request: NextRequest) {
                     phone: mediaPhone || null,
                     instanceName: instanceName || null,
                     filename: artifact?.filename || null,
-                    storage: storedUrl === fileUrl ? 'uazapi' : 'r2',
+                    storage: storedUrl === fileUrl ? 'connectyhub' : 'r2',
                     receivedAt: new Date().toISOString(),
                 }),
                 updated_at: new Date().toISOString(),
@@ -3483,7 +3543,7 @@ export async function POST(request: NextRequest) {
         const audioMediaKey = messageData.content?.mediaKey || messageData.message?.audioMessage?.mediaKey || null
         const audioDirectPath = messageData.content?.directPath || messageData.message?.audioMessage?.directPath || null
 
-        // â”€â”€ Extract message ID (needed for UAZAPI /message/download fallback) â”€â”€
+        // Extract message ID for ConnectyHub media download fallback.
         // ConnectyHub uses 'messageid' (lowercase), other providers use 'id' or 'key.id'
         const messageId = messageData.messageid       // ConnectyHub: 'messageid' field
             || messageData.id?.id                      // nested {id: {id: 'xxx'}}
@@ -3498,7 +3558,7 @@ export async function POST(request: NextRequest) {
         if (isAudio) {
             console.log(`[Webhook] ðŸŽ¤ AUDIO DETECTED | audioUrl=${audioUrl ? audioUrl.substring(0, 100) : 'NULL'} | messageId=${messageId || 'NULL'} | type=${msgType} | messageType=${msgMessageType}`)
             if (!audioUrl) {
-                console.log('[Webhook] ðŸŽ¤ No direct audioUrl â€” agent will use UAZAPI /message/download with messageId')
+                console.log('[Webhook] No direct audioUrl; agent will use ConnectyHub media download with messageId')
             }
             // Save full payload to DB for debugging (we can query this!)
             try {

@@ -7,7 +7,7 @@ import {
     editLabel,
     editQuickReply,
     resolveConnectyHubWebhookUrl,
-} from '../uazapi'
+} from '../connectyhub/whatsapp'
 import { getPublicAppUrl } from '../app-url'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 

@@ -5,7 +5,7 @@ import {
     formatUazapiWhatsAppRestrictionMessage,
     sendMenuMessage,
     sendWhatsAppMessage,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 import { buildAuthActionBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import { buildPasswordResetWhatsAppMessage, type UserAccessWhatsAppPayload } from '@/lib/user-whatsapp-messages'
 import { extractTrackingData } from '@/lib/tracking'

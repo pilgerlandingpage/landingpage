@@ -1,5 +1,5 @@
 import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
-import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 
 type SupabaseLike = {
   from: (table: string) => any

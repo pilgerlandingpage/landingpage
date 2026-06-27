@@ -928,7 +928,7 @@ export default function AttendanceReportsPage() {
                     </div>
                     {lastRunSummary.historySyncRequested > 0 && (
                         <div style={runSummaryNoteStyle}>
-                            A Uazapi pode entregar parte do historico alguns instantes depois da solicitacao. Se as mensagens crescerem depois, clique em Atualizar ou rode Gerar agora novamente para recalcular o relatorio com o que acabou de chegar.
+                            A ConnectyHub pode entregar parte do historico alguns instantes depois da solicitacao. Se as mensagens crescerem depois, clique em Atualizar ou rode Gerar agora novamente para recalcular o relatorio com o que acabou de chegar.
                         </div>
                     )}
                 </div>
@@ -1523,7 +1523,7 @@ export default function AttendanceReportsPage() {
                                                 Esta instancia tem {totalImportedMessages} mensagem(ns) no banco
                                                 {last7ImportedMessages > 0 ? `, ${last7ImportedMessages} nos ultimos 7 dias` : ''}
                                                 {crmImportedMessages > 0 ? `, alem de ${crmImportedMessages} mensagem(ns) no CRM` : ''}
-                                                {messageActivity.latest_message_at ? `, ultima Uazapi em ${formatDateTimeLabel(messageActivity.latest_message_at)}` : ''}
+                                                {messageActivity.latest_message_at ? `, ultima ConnectyHub em ${formatDateTimeLabel(messageActivity.latest_message_at)}` : ''}
                                                 {messageActivity.latest_crm_message_at ? `, ultima CRM em ${formatDateTimeLabel(messageActivity.latest_crm_message_at)}` : ''}.
                                                 O periodo selecionado nao encontrou mensagens para analisar.
                                             </span>
@@ -1545,7 +1545,7 @@ export default function AttendanceReportsPage() {
                                         <>
                                             <strong>Contatos nao significam conversas importadas.</strong>
                                             <span>
-                                                A agenda da instancia foi lida, mas ainda nao encontramos mensagens salvas para analisar. O historico da Uazapi depende de mensagens recentes, webhook de history e, em alguns casos, do WhatsApp aberto/ativo no celular.
+                                                A agenda da instancia foi lida, mas ainda nao encontramos mensagens salvas para analisar. O historico da ConnectyHub depende de mensagens recentes, webhook de history e, em alguns casos, do WhatsApp aberto/ativo no celular.
                                             </span>
                                         </>
                                     )}
@@ -1565,7 +1565,7 @@ export default function AttendanceReportsPage() {
                                 <MiniStat label="Perdidas" value={breakdown.lost} />
                                 <MiniStat label="Recuperaveis" value={breakdown.recoverable} />
                                 <MiniStat label="Mensagens" value={breakdown.messages} />
-                                <MiniStat label="Analisadas Uazapi" value={uazapiMessagesAnalyzed || 0} />
+                                <MiniStat label="Analisadas ConnectyHub" value={uazapiMessagesAnalyzed || 0} />
                                 <MiniStat label="Analisadas CRM" value={crmMessagesAnalyzed || 0} />
                                 <MiniStat label="Msgs lead" value={breakdown.inbound} />
                                 <MiniStat label="Resp. corretor" value={breakdown.outbound} />

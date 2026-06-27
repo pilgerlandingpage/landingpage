@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { listQuickReplies, editQuickReply } from '@/lib/uazapi'
+import { listQuickReplies, editQuickReply } from '@/lib/connectyhub/whatsapp'
 
 function getSupabase() {
     return createClient(

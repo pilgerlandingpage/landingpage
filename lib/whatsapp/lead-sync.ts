@@ -1,4 +1,4 @@
-import { getChatDetails, getContactAvatar } from '../uazapi'
+import { getChatDetails, getContactAvatar } from '../connectyhub/whatsapp'
 import { recordEcosystemEvent } from '../intelligence/ecosystem'
 import { normalizeLeadPipelineStageKey } from '../leads/pipeline'
 

@@ -856,7 +856,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
             let data = await res.json()
 
             if (!res.ok || !data?.success) {
-                throw new Error(data?.message || 'Falha ao excluir a instância no servidor da UAZAPI.')
+                throw new Error(data?.message || 'Falha ao excluir a instancia no servidor da ConnectyHub.')
             }
 
             setQrMessage({ type: 'success', text: data?.message || 'Instância excluída com sucesso.' })

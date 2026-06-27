@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 
 function getSupabase() {
     return createClient(

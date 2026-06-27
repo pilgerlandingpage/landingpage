@@ -205,6 +205,19 @@ async function resolveConnectyHubInstanceId(instanceToken?: string) {
     return candidate
 }
 
+async function requireConnectyHubInstanceId(instanceToken: string | undefined, operation: string) {
+    const instanceId = await resolveConnectyHubInstanceId(instanceToken)
+    if (!instanceId) {
+        throw new Error(`ConnectyHub instanceId obrigatorio para ${operation}`)
+    }
+    return instanceId
+}
+
+function setQueryParam(query: URLSearchParams, key: string, value: unknown) {
+    if (value === undefined || value === null || value === '') return
+    query.set(key, String(value))
+}
+
 async function connectyHubFetch(
     path: string,
     options: {
@@ -249,10 +262,7 @@ async function connectyHubProviderProxy(
         token?: string
     }
 ) {
-    const instanceId = await resolveConnectyHubInstanceId(options.token)
-    if (!instanceId) {
-        throw new Error(`ConnectyHub instanceId obrigatorio para ${path}`)
-    }
+    const instanceId = await requireConnectyHubInstanceId(options.token, path)
 
     const method = options.method || 'GET'
     const proxyPath = `/provider${path}`
@@ -285,12 +295,12 @@ async function uazapiFetch(
     }
 
     if (path === '/instance/connect') {
-        const instanceId = await resolveConnectyHubInstanceId(options.token)
+        const instanceId = await requireConnectyHubInstanceId(options.token, path)
         return connectyHubFetch(`/instances/${encodePathPart(instanceId)}/connect`, { method: 'POST' })
     }
 
     if (path === '/instance/status') {
-        const instanceId = await resolveConnectyHubInstanceId(options.token)
+        const instanceId = await requireConnectyHubInstanceId(options.token, path)
         return connectyHubFetch(`/instances/${encodePathPart(instanceId)}/status`, { method: 'GET' })
     }
 
@@ -587,15 +597,27 @@ export async function sendWhatsAppMessage({ phone, message, instanceToken, delay
         }
     }
 
-    return uazapiFetch('/send/text', {
+    if (delay) {
+        return uazapiFetch('/send/text', {
+            method: 'POST',
+            token: instanceToken,
+            body: {
+                number: cleanPhone(phone),
+                text: message,
+                delay,
+                readchat: true,
+                readmessages: true,
+            },
+        })
+    }
+
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages/text')
+    return connectyHubFetch('/messages/text', {
         method: 'POST',
-        token: instanceToken,
         body: {
+            instanceId,
             number: cleanPhone(phone),
             text: message,
-            ...(delay ? { delay } : {}),
-            readchat: true,
-            readmessages: true,
         },
     })
 }
@@ -695,13 +717,15 @@ async function sendMenuLegacy(opts: SendMenuOptionsLegacy): Promise<any> {
 export async function sendImageMessage({ phone, imageUrl, caption, instanceToken }: SendImageOptions) {
     if (!instanceToken) throw new Error('Token da instância é obrigatório')
 
-    return uazapiFetch('/send/image', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages/media')
+    return connectyHubFetch('/messages/media', {
         method: 'POST',
-        token: instanceToken,
         body: {
+            instanceId,
             number: cleanPhone(phone),
-            url: imageUrl,
-            ...(caption ? { caption } : {}),
+            type: 'image',
+            file: imageUrl,
+            ...(caption ? { text: caption } : {}),
         },
     })
 }
@@ -710,13 +734,14 @@ export async function sendImageMessage({ phone, imageUrl, caption, instanceToken
 export async function sendAudioMessage({ phone, audioUrl, ptt, instanceToken }: SendAudioOptions) {
     if (!instanceToken) throw new Error('Token da instância é obrigatório')
 
-    return uazapiFetch('/send/media', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages/media')
+    return connectyHubFetch('/messages/media', {
         method: 'POST',
-        token: instanceToken,
         body: {
+            instanceId,
             number: cleanPhone(phone),
-            file: audioUrl,           // UAZAPI uses 'file' not 'url'
-            type: ptt ? 'ptt' : 'audio',  // 'ptt' for voice note, 'audio' for regular
+            file: audioUrl,
+            type: ptt ? 'ptt' : 'audio',
         },
     })
 }
@@ -725,10 +750,11 @@ export async function sendAudioMessage({ phone, audioUrl, ptt, instanceToken }: 
 export async function sendVideoMessage({ phone, videoUrl, caption, thumbnail, instanceToken }: SendVideoOptions) {
     if (!instanceToken) throw new Error('Token da instÃ¢ncia Ã© obrigatÃ³rio')
 
-    return uazapiFetch('/send/media', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages/media')
+    return connectyHubFetch('/messages/media', {
         method: 'POST',
-        token: instanceToken,
         body: {
+            instanceId,
             number: cleanPhone(phone),
             file: videoUrl,
             type: 'video',
@@ -742,14 +768,16 @@ export async function sendVideoMessage({ phone, videoUrl, caption, thumbnail, in
 export async function sendDocumentMessage({ phone, documentUrl, fileName, caption, instanceToken }: SendDocumentOptions) {
     if (!instanceToken) throw new Error('Token da instância é obrigatório')
 
-    return uazapiFetch('/send/document', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages/media')
+    return connectyHubFetch('/messages/media', {
         method: 'POST',
-        token: instanceToken,
         body: {
+            instanceId,
             number: cleanPhone(phone),
-            url: documentUrl,
-            ...(fileName ? { fileName } : {}),
-            ...(caption ? { caption } : {}),
+            type: 'document',
+            file: documentUrl,
+            ...(fileName ? { docName: fileName } : {}),
+            ...(caption ? { text: caption } : {}),
         },
     })
 }
@@ -823,21 +851,27 @@ interface ListContactsOptions {
 
 /** Listar contatos sem paginacao */
 export async function listContacts(instanceToken: string) {
-    return uazapiFetch('/contacts?contactScope=all', {
-        token: instanceToken,
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/contacts')
+    const query = new URLSearchParams()
+    setQueryParam(query, 'instanceId', instanceId)
+    setQueryParam(query, 'contactScope', 'all')
+    return connectyHubFetch('/contacts', {
+        method: 'GET',
+        query,
     })
 }
 
 /** Listar contatos com paginacao */
 export async function listContactsPage(opts: ListContactsOptions, instanceToken: string) {
-    return uazapiFetch('/contacts/list', {
-        method: 'POST',
-        token: instanceToken,
-        body: {
-            limit: opts.limit ?? 1000,
-            offset: opts.offset ?? 0,
-            contactScope: opts.contactScope ?? 'all',
-        },
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/contacts')
+    const query = new URLSearchParams()
+    setQueryParam(query, 'instanceId', instanceId)
+    setQueryParam(query, 'limit', opts.limit ?? 1000)
+    setQueryParam(query, 'offset', opts.offset ?? 0)
+    setQueryParam(query, 'contactScope', opts.contactScope ?? 'all')
+    return connectyHubFetch('/contacts', {
+        method: 'GET',
+        query,
     })
 }
 
@@ -851,10 +885,14 @@ export async function getContactAvatar(phone: string, instanceToken: string) {
 }
 
 export async function getChatDetails(phone: string, instanceToken: string, preview = true) {
-    return uazapiFetch('/chat/details', {
-        method: 'POST',
-        token: instanceToken,
-        body: { number: cleanPhone(phone), preview },
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/chats/details')
+    const query = new URLSearchParams()
+    setQueryParam(query, 'instanceId', instanceId)
+    setQueryParam(query, 'number', cleanPhone(phone))
+    setQueryParam(query, 'preview', preview)
+    return connectyHubFetch('/chats/details', {
+        method: 'GET',
+        query,
     })
 }
 
@@ -994,80 +1032,47 @@ export async function setPresenceUnavailable(instanceToken: string) {
 /** Download media (audio, image, etc.) from a received message using message ID */
 export async function downloadMedia(messageId: string, instanceToken: string): Promise<Buffer | null> {
     try {
-        const config = await getUazapiConfig()
-        
-        console.log(`[UAZAPI] downloadMedia: id=${messageId}, baseUrl=${config.baseUrl}`)
-        
-        const response = await fetch(`${config.baseUrl}/message/download`, {
+        console.log(`[ConnectyHub] downloadMedia: id=${messageId}`)
+
+        const data = await connectyHubProviderProxy('/message/download', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'token': instanceToken,
+            token: instanceToken,
+            body: {
+                id: messageId,
+                return_base64: true,
+                generate_mp3: true,
+                return_link: false,
             },
-            body: JSON.stringify({
-                id: messageId,           // UAZAPI uses 'id' NOT 'messageId'
-                return_base64: true,     // Return as base64 string
-                generate_mp3: true,      // Convert to MP3 for better compatibility
-                return_link: false,      // We don't need a link, we have base64
-            }),
         })
 
-        console.log(`[UAZAPI] /message/download → status=${response.status}`)
+        const keys = data && typeof data === 'object' ? Object.keys(data as Record<string, unknown>) : []
+        console.log('[ConnectyHub] /provider/message/download JSON keys:', keys.join(', '))
 
-        if (!response.ok) {
-            const errorText = await response.text().catch(() => 'could not read')
-            console.error(`[UAZAPI] Download failed (${response.status}):`, errorText.substring(0, 300))
-            return null
-        }
-
-        const contentType = response.headers.get('content-type') || ''
-
-        if (contentType.includes('application/json')) {
-            const data = await response.json()
-            const keys = Object.keys(data)
-            console.log(`[UAZAPI] Response JSON keys:`, keys.join(', '))
-
-            // UAZAPI returns 'base64Data' field
-            const b64 = data.base64Data || data.base64 || data.data
-            if (b64 && typeof b64 === 'string') {
-                const cleanB64 = b64.replace(/^data:[^;]+;base64,/, '')
-                const buf = Buffer.from(cleanB64, 'base64')
-                console.log(`[UAZAPI] ✅ Got base64 audio: ${buf.length} bytes`)
-                return buf
-            }
-
-            // Handle URL response as fallback
-            const mediaUrl = data.url || data.link || data.mediaUrl
-            if (mediaUrl && typeof mediaUrl === 'string' && mediaUrl.startsWith('http')) {
-                console.log(`[UAZAPI] Got media URL: ${mediaUrl.substring(0, 100)}...`)
-                const mediaRes = await fetch(mediaUrl)
-                if (mediaRes.ok) {
-                    const buf = Buffer.from(await mediaRes.arrayBuffer())
-                    console.log(`[UAZAPI] ✅ Downloaded ${buf.length} bytes from URL`)
-                    return buf
-                }
-            }
-
-            console.error('[UAZAPI] Unexpected response:', JSON.stringify(data).substring(0, 500))
-            return null
-        }
-
-        // Binary response
-        const buf = Buffer.from(await response.arrayBuffer())
-        if (buf.length > 100) {
-            console.log(`[UAZAPI] ✅ Got binary (${contentType}): ${buf.length} bytes`)
+        const b64 = (data as any)?.base64Data || (data as any)?.base64 || (data as any)?.data
+        if (b64 && typeof b64 === 'string') {
+            const cleanB64 = b64.replace(/^data:[^;]+;base64,/, '')
+            const buf = Buffer.from(cleanB64, 'base64')
+            console.log(`[ConnectyHub] Got base64 media: ${buf.length} bytes`)
             return buf
         }
-        
-        console.error(`[UAZAPI] Response too small (${buf.length} bytes)`)
+
+        const mediaUrl = (data as any)?.fileURL || (data as any)?.fileUrl || (data as any)?.url || (data as any)?.link || (data as any)?.mediaUrl
+        if (mediaUrl && typeof mediaUrl === 'string' && mediaUrl.startsWith('http')) {
+            const mediaRes = await fetch(mediaUrl)
+            if (mediaRes.ok) {
+                const buf = Buffer.from(await mediaRes.arrayBuffer())
+                console.log(`[ConnectyHub] Downloaded ${buf.length} bytes from provider URL`)
+                return buf
+            }
+        }
+
+        console.error('[ConnectyHub] Unexpected media download response:', JSON.stringify(data).substring(0, 500))
         return null
     } catch (e) {
-        console.error('[UAZAPI] downloadMedia error:', e)
+        console.error('[ConnectyHub] downloadMedia error:', e)
         return null
     }
 }
-
-// ═══════════════════════════════════════════════════════════════
 //  UTILITÁRIOS
 // ═══════════════════════════════════════════════════════════════
 
@@ -1248,10 +1253,13 @@ interface FindChatsOptions {
 
 /** Buscar chats com filtros avançados — /chat/find */
 export async function findChats(opts: FindChatsOptions, instanceToken: string) {
-    return uazapiFetch('/chat/find', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/chats')
+    return connectyHubFetch('/chats', {
         method: 'POST',
-        token: instanceToken,
-        body: opts,
+        body: {
+            instanceId,
+            ...opts,
+        },
     })
 }
 
@@ -1267,10 +1275,18 @@ interface FindMessagesOptions {
 
 /** Buscar mensagens com filtros */
 export async function findMessages(opts: FindMessagesOptions, instanceToken: string) {
-    return uazapiFetch('/message/find', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/messages')
+    const body: Record<string, unknown> = {
+        instanceId,
+        ...opts,
+    }
+    if (opts.chatid && !body.chatId) {
+        body.chatId = opts.chatid
+    }
+
+    return connectyHubFetch('/messages', {
         method: 'POST',
-        token: instanceToken,
-        body: opts,
+        body,
     })
 }
 

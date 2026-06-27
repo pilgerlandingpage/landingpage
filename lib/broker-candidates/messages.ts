@@ -1,7 +1,7 @@
 import { getPublicAppUrl } from '@/lib/app-url'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
-import { resolveDefaultWhatsAppInstanceToken, sendLocationRequest, sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { resolveDefaultWhatsAppInstanceToken, sendLocationRequest, sendMenuMessage, sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import {
     DEFAULT_CANDIDATE_WELCOME_TEMPLATE,
     appendCandidateInteractionLinks,

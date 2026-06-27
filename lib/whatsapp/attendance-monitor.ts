@@ -5,7 +5,7 @@ import {
     listContacts,
     listContactsPage,
     requestHistorySync,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 import {
     loadAttendanceCoachSettings,
     runAttendanceCoachAnalysis,
@@ -777,7 +777,7 @@ export async function syncAttendanceForConnectedInstances(options: SyncOptions =
                             message_type: msg.messageType,
                             body: msg.body,
                             message_timestamp: msg.messageTimestamp,
-                            source: 'uazapi_message_find',
+                            source: 'connectyhub_message_find',
                             raw: msg.raw,
                             updated_at: new Date().toISOString(),
                         })
@@ -855,7 +855,7 @@ export async function saveHistoryWebhookMessages(input: {
             message_type: msg.messageType,
             body: msg.body,
             message_timestamp: msg.messageTimestamp,
-            source: 'uazapi_history_webhook',
+            source: 'connectyhub_history_webhook',
             raw: msg.raw,
             updated_at: new Date().toISOString(),
         }))

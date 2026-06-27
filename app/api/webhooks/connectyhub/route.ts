@@ -27,11 +27,52 @@ function isValidSignature(rawBody: string, signatureHeader: string | null, secre
         && timingSafeEqual(providedBuffer, expectedBuffer)
 }
 
+function stringValue(value: unknown) {
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return String(value).trim()
+    }
+    return ''
+}
+
+function extractEvent(body: any, headers: Headers) {
+    return stringValue(headers.get('x-connectyhub-event'))
+        || stringValue(body?.event)
+        || stringValue(body?.EventType)
+        || stringValue(body?.type)
+        || stringValue(body?.action)
+}
+
+function extractInstanceId(body: any, headers: Headers) {
+    const instance = body?.instance
+    const instanceObject = instance && typeof instance === 'object' && !Array.isArray(instance)
+        ? instance
+        : null
+
+    return stringValue(headers.get('x-connectyhub-instance-id'))
+        || stringValue(body?.instanceId)
+        || stringValue(body?.connectyhubInstanceId)
+        || stringValue(body?.connectyhub_instance_id)
+        || stringValue(body?.data?.instanceId)
+        || stringValue(body?.data?.connectyhubInstanceId)
+        || stringValue(body?.data?.connectyhub_instance_id)
+        || stringValue(instance)
+        || stringValue(instanceObject?.id)
+        || stringValue(instanceObject?.instanceId)
+        || stringValue(instanceObject?.connectyhubInstanceId)
+}
+
+function extractWebhookEventId(body: any, headers: Headers) {
+    return stringValue(headers.get('x-connectyhub-webhook-event-id'))
+        || stringValue(body?.webhookEventId)
+        || stringValue(body?.webhook_event_id)
+        || stringValue(body?.id)
+}
+
 function normalizePayload(rawBody: string, headers: Headers) {
     const body = JSON.parse(rawBody)
-    const event = headers.get('x-connectyhub-event') || body?.event || body?.type || ''
-    const instanceId = headers.get('x-connectyhub-instance-id') || body?.instanceId || ''
-    const webhookEventId = headers.get('x-connectyhub-webhook-event-id') || body?.webhookEventId || ''
+    const event = extractEvent(body, headers)
+    const instanceId = extractInstanceId(body, headers)
+    const webhookEventId = extractWebhookEventId(body, headers)
 
     return {
         ...body,

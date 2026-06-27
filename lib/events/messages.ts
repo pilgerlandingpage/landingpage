@@ -1,4 +1,4 @@
-import { resolveDefaultWhatsAppInstanceToken, sendLocationRequest, sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { resolveDefaultWhatsAppInstanceToken, sendLocationRequest, sendMenuMessage, sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
 import {
     DEFAULT_CONFIRMATION_TEMPLATE,

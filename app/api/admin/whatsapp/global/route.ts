@@ -7,7 +7,7 @@ import { processPilgerEditorialCommand } from '@/lib/whatsapp/pilger-editorial-a
 import { processPilgerFinanceCommand } from '@/lib/whatsapp/pilger-finance-agent'
 import { processPilgerPropertyCommand } from '@/lib/whatsapp/pilger-property-agent'
 import { processPilgerReportCommand } from '@/lib/whatsapp/pilger-report-agent'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import { buildPilgerGovernanceSummary, closePilgerGovernanceCommand } from '@/lib/whatsapp/pilger-global-governance'
 import { buildPilgerGoLivePacket } from '@/lib/whatsapp/pilger-global-go-live'
 import { buildPilgerPostLaunchReport } from '@/lib/whatsapp/pilger-global-post-launch'

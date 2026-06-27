@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
+import { getInstanceStatus, disconnectInstance, configureWebhook, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/connectyhub/whatsapp'
 import { getPublicAppUrl } from '@/lib/app-url'
 import {
     extractProviderInstanceName,
@@ -255,9 +255,9 @@ export async function GET(request: NextRequest) {
 
         const effectiveToken = extractProviderInstanceToken(providerSnapshot) || instance.instance_token
 
-        // Consultar status na uazapi
+        // Consultar status na ConnectyHub
         const result = await getInstanceStatus(effectiveToken)
-        console.log('[Status] Resultado uazapi:', JSON.stringify(result).substring(0, 300))
+        console.log('[Status] Resultado ConnectyHub:', JSON.stringify(result).substring(0, 300))
 
         const endpointStatus = normalizeWhatsAppConnectionStatus(result)
         const providerStatus = normalizeWhatsAppConnectionStatus(providerSnapshot)
@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
 
             if (!phone) {
                 phoneValidationWarning = 'WhatsApp conectou, mas a API ainda nao retornou o numero. Se persistir, verifique o telefone em Minha Conta.'
-                console.warn('[Status] Instancia conectada sem telefone retornado pela UAZAPI:', {
+                console.warn('[Status] Instancia conectada sem telefone retornado pela ConnectyHub:', {
                     instanceId: instance.id,
                     adminUserId: instance.admin_user_id,
                 })

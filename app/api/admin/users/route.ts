@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminClient } from '@/lib/supabase/server'
 import {
-    deleteInstance as deleteUazapiInstance,
+    deleteInstance as deleteConnectyHubInstance,
     extractUazapiWhatsAppRestriction,
     formatUazapiWhatsAppRestrictionMessage,
     sendMenuMessage,
     sendWhatsAppMessage,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 import { buildAuthActionBridgeLink, buildMaintenanceLoginBridgeLink, getLoginRedirectUrl } from '@/lib/app-url'
 import {
     buildFirstAccessWhatsAppMessage,
@@ -1234,10 +1234,10 @@ export async function DELETE(request: NextRequest) {
             }
 
             try {
-                await deleteUazapiInstance(token, instance.instance_name || undefined)
+                await deleteConnectyHubInstance(token, instance.instance_name || undefined)
             } catch (deleteErr) {
                 return NextResponse.json({
-                    error: `Nao foi possivel excluir a instancia "${instance.instance_name || instance.id}" no servidor da UAZAPI. O usuario nao foi removido.`,
+                    error: `Nao foi possivel excluir a instancia "${instance.instance_name || instance.id}" no servidor da ConnectyHub. O usuario nao foi removido.`,
                     details: deleteErr instanceof Error ? deleteErr.message : String(deleteErr),
                 }, { status: 502 })
             }

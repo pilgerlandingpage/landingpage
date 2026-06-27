@@ -8,7 +8,7 @@ import {
 } from '@/lib/intelligence/agent-runtime'
 import type { DatePreset } from '@/lib/ads/meta'
 import { buildVitorMonitoringSnapshot, persistVitorMonitoringSnapshot, type VitorMonitoringSnapshot } from '@/lib/ads/vitor-monitoring'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 
 type SupabaseLike = {
   from: (table: string) => any

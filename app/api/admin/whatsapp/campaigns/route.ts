@@ -5,7 +5,7 @@ import {
     sendAdvancedCampaign,
     manageCampaign,
     listCampaigns,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 
 function getSupabase() {
     return createClient(

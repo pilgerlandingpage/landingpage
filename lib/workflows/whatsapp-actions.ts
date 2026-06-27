@@ -9,7 +9,7 @@ import {
     sendMenuMessage,
     sendVideoMessage,
     sendWhatsAppMessage,
-} from '@/lib/uazapi'
+} from '@/lib/connectyhub/whatsapp'
 import { generateWorkflowElevenLabsAudioUrl } from '@/lib/workflows/tts-audio'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
 

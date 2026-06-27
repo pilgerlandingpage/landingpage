@@ -6,7 +6,7 @@ import {
     getSectorNotificationDeliveries,
     resolveSectorWhatsappInstance,
 } from '@/lib/notifications/sector-recipients'
-import { sendMenuMessage, sendWhatsAppMessage } from '../uazapi'
+import { sendMenuMessage, sendWhatsAppMessage } from '../connectyhub/whatsapp'
 import type { AICampaignAlert, AlertType, AlertUrgency } from './types'
 import type { VitorMonitoringSnapshot } from './vitor-monitoring'
 

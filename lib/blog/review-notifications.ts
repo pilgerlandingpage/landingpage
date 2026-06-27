@@ -3,7 +3,7 @@ import {
     getSectorNotificationDeliveries,
     resolveSectorWhatsappInstance,
 } from '@/lib/notifications/sector-recipients'
-import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import { recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
 
 type SupabaseAdmin = {

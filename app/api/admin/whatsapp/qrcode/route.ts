@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createInstance, connectInstance } from '@/lib/uazapi'
+import { createInstance, connectInstance } from '@/lib/connectyhub/whatsapp'
 import { DEFAULT_WHATSAPP_INSTANCE_CONFIG } from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {
@@ -280,7 +280,7 @@ export async function POST(request: NextRequest) {
                     instance = { ...instance, instance_type: 'global' }
                 }
             } else {
-                // Create at uazapi
+                // Create at ConnectyHub
                 console.log(`[QR Code] Criando instancia: ${instance_name}`)
                 const createResult = await createInstance(instance_name)
                 console.log('[QR Code] Resultado createInstance:', JSON.stringify(createResult).substring(0, 200))
@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
                 if (!token) {
                     return NextResponse.json({
                         success: false,
-                        message: 'Falha ao obter token da instancia. Verifique as configuracoes da uazapi.',
+                        message: 'Falha ao obter instanceId da ConnectyHub. Verifique as configuracoes da ConnectyHub.',
                         debug: createResult,
                     }, { status: 500 })
                 }
@@ -405,7 +405,7 @@ export async function POST(request: NextRequest) {
         // If connect didn't return QR, poll status endpoint
         if (!qrcode) {
             console.log('[QR Code] QR nao veio no connect, buscando via /instance/status...')
-            const { getInstanceStatus } = await import('@/lib/uazapi')
+            const { getInstanceStatus } = await import('@/lib/connectyhub/whatsapp')
 
             await new Promise(resolve => setTimeout(resolve, 2000))
             const statusResult = await getInstanceStatus(instance.instance_token)

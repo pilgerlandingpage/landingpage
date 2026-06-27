@@ -5,7 +5,7 @@ import {
     syncAndGenerateAttendanceReports,
     syncAttendanceForConnectedInstances,
 } from '@/lib/whatsapp/attendance-monitor'
-import { getContactAvatar } from '@/lib/uazapi'
+import { getContactAvatar } from '@/lib/connectyhub/whatsapp'
 
 function extractAvatarUrl(payload: any): string | null {
     return payload?.url ||

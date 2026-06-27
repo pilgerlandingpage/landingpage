@@ -13,7 +13,7 @@ import {
     setPresenceAvailable,
     markAsRead,
     downloadMedia
-} from '../uazapi'
+} from '../connectyhub/whatsapp'
 import {
     appendLeadConversationLog,
     buildRecentLeadOutboundContextPrompt,
@@ -3307,7 +3307,7 @@ async function analyzeIncomingMediaItem(params: {
             mediaBuffer = null
         }
     } else if (mediaUrl) {
-        console.log('[WhatsApp Agent] Skipping encrypted WhatsApp media URL; waiting for decoded media or UAZAPI download')
+        console.log('[WhatsApp Agent] Skipping encrypted WhatsApp media URL; waiting for decoded media or ConnectyHub download')
     }
 
     if (!mediaBuffer && messageId) {
@@ -5369,7 +5369,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // ── Step 3: Download audio to R2 if needed ──
         // This step runs in Inngest (no Vercel timeout!) so we can take the time to:
-        // 1) Download audio from UAZAPI
+        // 1) Download audio from ConnectyHub
         // 2) Upload to R2 (Cloudflare)
         // 3) Get a stable public URL for transcription
         const audioR2Url = isAudio ? await step.run('download-audio-to-r2', async () => {
@@ -5378,14 +5378,14 @@ export const processWhatsAppMessage = inngest.createFunction(
 
             let audioBuffer: Buffer | null = null
 
-            // Strategy 1: UAZAPI /message/download (PREFERRED — decrypts and returns base64)
+            // Strategy 1: ConnectyHub media download (PREFERRED — decrypts and returns base64)
             if (!audioBuffer && messageId) {
-                console.log(`[WhatsApp Agent] 🎤 Attempting UAZAPI /message/download with id=${messageId}...`)
+                console.log(`[WhatsApp Agent] 🎤 Attempting ConnectyHub media download with id=${messageId}...`)
                 audioBuffer = await downloadMedia(messageId, instanceToken)
                 if (audioBuffer) {
-                    console.log(`[WhatsApp Agent] 🎤 UAZAPI download success! Size: ${audioBuffer.length} bytes`)
+                    console.log(`[WhatsApp Agent] 🎤 ConnectyHub download success. Size: ${audioBuffer.length} bytes`)
                 } else {
-                    console.warn(`[WhatsApp Agent] 🎤 UAZAPI download failed, trying E2EE decryption...`)
+                    console.warn(`[WhatsApp Agent] 🎤 ConnectyHub download failed, trying E2EE decryption...`)
                 }
             }
 
@@ -5558,7 +5558,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                         mediaBuffer = null
                     }
                 } else if (mediaUrl) {
-                    console.log(`[WhatsApp Agent] Skipping encrypted WhatsApp media URL; waiting for decoded media or UAZAPI download`)
+                    console.log(`[WhatsApp Agent] Skipping encrypted WhatsApp media URL; waiting for decoded media or ConnectyHub download`)
                 }
 
                 if (!mediaBuffer && messageId) {
@@ -6474,7 +6474,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                     if (cleanText) {
                         await sendWhatsAppMessage({ phone: cleanPhone, message: cleanText, instanceToken })
                     }
-                    const { sendLocationRequest } = await import('../uazapi')
+                    const { sendLocationRequest } = await import('../connectyhub/whatsapp')
                     const sendResult = await sendLocationRequest(
                         cleanPhone,
                         cleanText || 'Pode compartilhar sua localização? Isso nos ajuda a encontrar os melhores imóveis perto de você! 📍',
@@ -6722,7 +6722,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
                         brokerMsg += `\n\n?? *Ultimas mensagens:*\n${lastMessages}`
 
-                        const { sendWhatsAppMessage } = await import('../uazapi')
+                        const { sendWhatsAppMessage } = await import('../connectyhub/whatsapp')
                         const systemInstanceToken = await resolveSystemNotificationWhatsappInstance(supabase)
                         if (!systemInstanceToken) {
                             console.warn('[Transfer] Specialist summary skipped: global agent instance unavailable')
@@ -6787,7 +6787,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         // ── Step 8: Sync CRM (fire-and-forget) ──
         await step.run('sync-crm', async () => {
             try {
-                const { updateLead } = await import('../uazapi')
+                const { updateLead } = await import('../connectyhub/whatsapp')
                 const leadData: Record<string, unknown> = {
                     id: cleanPhone,
                     lead_field12: new Date().toISOString(),  // Último contato

@@ -1,7 +1,7 @@
 import { getPublicAppUrl } from '@/lib/app-url'
 import { recordAgentCentralSignal, saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
-import { sendWhatsAppMessage } from '@/lib/uazapi'
+import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 
 type SupabaseLike = {
   from: (table: string) => any

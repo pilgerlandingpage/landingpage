@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { listLabels, editLabel, refreshLabels } from '@/lib/uazapi'
+import { listLabels, editLabel, refreshLabels } from '@/lib/connectyhub/whatsapp'
 
 function getSupabase() {
     return createClient(

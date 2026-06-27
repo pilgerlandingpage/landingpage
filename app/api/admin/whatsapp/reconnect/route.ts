@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { configureWebhook, getInstanceStatus, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/uazapi'
+import { configureWebhook, getInstanceStatus, getWebhook, listAllInstances, resolveConnectyHubWebhookUrl } from '@/lib/connectyhub/whatsapp'
 import { getPublicAppUrl } from '@/lib/app-url'
 import {
     extractProviderInstanceName,

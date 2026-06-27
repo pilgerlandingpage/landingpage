@@ -1,6 +1,6 @@
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
-import { sendWhatsAppMessage, interpolateTemplate } from '../uazapi'
+import { sendWhatsAppMessage, interpolateTemplate } from '../connectyhub/whatsapp'
 import { sendWorkflowWhatsAppAction, workflowStepHasSendableContent, type WorkflowActionType } from '../workflows/whatsapp-actions'
 import { scrapePage } from '../scraper'
 import { uploadImageToR2 } from '../storage/r2'

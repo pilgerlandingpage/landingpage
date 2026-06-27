@@ -1291,7 +1291,7 @@ export default function AutomationPage() {
                                                 })}
                                                 placeholder={'Ver imovel=>https://site.com/imovel\nFalar com corretor=>https://wa.me/5547999999999'}
                                             />
-                                            <span>A UAZAPI envia o botao como uma mensagem logo apos a midia.</span>
+                                            <span>A ConnectyHub envia o botao como uma mensagem logo apos a midia.</span>
                                         </label>
                                     </>
                                 ) : null}
