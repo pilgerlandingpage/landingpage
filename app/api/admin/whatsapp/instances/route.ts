@@ -59,6 +59,49 @@ function firstString(...values: unknown[]): string | null {
     return null
 }
 
+function getStoredConnectyHubInstanceId(instance: any): string | null {
+    const config = instance?.config && typeof instance.config === 'object' ? instance.config : null
+    return firstString(
+        config?.connectyhub_instance_id,
+        config?.instanceId,
+        config?.instance_id,
+        instance?.connectyhub_instance_id,
+        instance?.instance_token
+    )
+}
+
+function isRemoteInstanceAlreadyMissing(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || '')
+    const normalized = message.toLowerCase()
+    return normalized.includes('(404)') ||
+        (normalized.includes('404') && normalized.includes('instancia')) ||
+        normalized.includes('instance not found') ||
+        normalized.includes('instancia nao encontrada') ||
+        normalized.includes('instância não encontrada')
+}
+
+function summarizeRemoteDeleteError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || 'Erro desconhecido')
+    return message
+        .replace(/\{[\s\S]*\}$/, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300) || 'Erro desconhecido'
+}
+
+async function isConnectyHubInstanceStillListed(instanceId: string, instanceName?: string | null) {
+    const providerRows = normalizeProviderInstances(await listAllInstances())
+    const expectedId = String(instanceId || '').trim()
+    const expectedName = String(instanceName || '').trim()
+
+    return providerRows.some((row: any) => {
+        const remoteId = extractProviderInstanceToken(row)
+        const remoteName = extractProviderInstanceName(row)
+        return (expectedId && remoteId === expectedId) ||
+            (expectedName && remoteName === expectedName)
+    })
+}
+
 function extractConnectyHubProfileImage(payload: any): string | null {
     const instance = payload?.instance || payload?.data?.instance || null
     const data = payload?.data || null
@@ -464,22 +507,50 @@ export async function DELETE(request: NextRequest) {
             }, { status: 400 })
         }
 
-        if (!instance.instance_token) {
+        const connectyHubInstanceId = getStoredConnectyHubInstanceId(instance)
+        if (!connectyHubInstanceId) {
             return NextResponse.json({
                 success: false,
-                message: 'Instancia sem token na base local. Nao foi possivel excluir no servidor da API.',
+                message: 'Instancia sem ID publico da ConnectyHub na base local. Nao foi possivel excluir no painel da ConnectyHub.',
             }, { status: 400 })
         }
 
+        let remoteDeleteSkipped = false
         try {
-            await deleteInstance(instance.instance_token, instance.instance_name)
+            await deleteInstance(connectyHubInstanceId, instance.instance_name)
         } catch (e) {
-            console.warn('Falha ao deletar na ConnectyHub:', e)
-            return NextResponse.json({
-                success: false,
-                message: 'Nao foi possivel excluir no servidor da API. A instancia nao foi removida localmente.',
-                details: e instanceof Error ? e.message : String(e),
-            }, { status: 502 })
+            if (isRemoteInstanceAlreadyMissing(e)) {
+                remoteDeleteSkipped = true
+                console.warn('Instancia ja nao existe na ConnectyHub; removendo cadastro local:', summarizeRemoteDeleteError(e))
+            } else {
+                console.warn('Falha ao deletar na ConnectyHub:', e)
+                return NextResponse.json({
+                    success: false,
+                    message: 'Nao foi possivel excluir no painel da ConnectyHub. A instancia nao foi removida localmente.',
+                    details: summarizeRemoteDeleteError(e),
+                }, { status: 502 })
+            }
+        }
+
+        if (!remoteDeleteSkipped) {
+            let stillListed = true
+            try {
+                stillListed = await isConnectyHubInstanceStillListed(connectyHubInstanceId, instance.instance_name)
+            } catch (verifyError) {
+                console.warn('Falha ao verificar se instancia ainda existe na ConnectyHub:', verifyError)
+                return NextResponse.json({
+                    success: false,
+                    message: 'A ConnectyHub recebeu o pedido de exclusao, mas nao foi possivel confirmar que a instancia saiu do painel. A instancia nao foi removida localmente.',
+                    details: summarizeRemoteDeleteError(verifyError),
+                }, { status: 502 })
+            }
+
+            if (stillListed) {
+                return NextResponse.json({
+                    success: false,
+                    message: 'A API atual da ConnectyHub removeu a sessao do provider, mas a instancia ainda aparece no painel/lista da ConnectyHub. A instancia nao foi removida localmente para evitar inconsistencia.',
+                }, { status: 502 })
+            }
         }
 
         // Delete linked AI broker as requested (best-effort for schema differences)
@@ -509,7 +580,9 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'Instancia removida no servidor da API e no banco local.',
+            message: remoteDeleteSkipped
+                ? 'Instancia nao existia mais na ConnectyHub e foi removida do banco local.'
+                : 'Instancia removida na ConnectyHub e no banco local.',
         })
     } catch (error) {
         console.error('Error deleting instance:', error)

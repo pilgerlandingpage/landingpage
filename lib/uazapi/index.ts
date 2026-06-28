@@ -439,23 +439,12 @@ export async function disconnectInstance(instanceToken: string) {
 }
 
 /** Deletar instância (requer admin token) */
-export async function deleteInstance(instanceToken: string, instanceName?: string) {
-    try {
-        return await uazapiFetch('/instance', {
-            method: 'DELETE',
-            token: instanceToken,
-        })
-    } catch (primaryError) {
-        if (instanceName) {
-            const config = await getUazapiConfig()
-            return uazapiFetch('/instance/delete', {
-                method: 'DELETE',
-                adminToken: config.adminToken,
-                body: { name: instanceName },
-            })
-        }
-        throw primaryError
-    }
+export async function deleteInstance(instanceToken: string, _instanceName?: string) {
+    void _instanceName
+    return uazapiFetch('/instance', {
+        method: 'DELETE',
+        token: instanceToken,
+    })
 }
 
 // ═══════════════════════════════════════════════════════════════
