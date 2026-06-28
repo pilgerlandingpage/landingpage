@@ -92,6 +92,24 @@ function extractPairingCode(payload: any): string | null {
     )
 }
 
+function summarizeConnectyHubQrPayload(payload: any) {
+    const instanceId = cleanString(
+        payload?.instanceId ||
+        payload?.id ||
+        payload?.instance?.id ||
+        payload?.data?.id
+    )
+
+    return {
+        ok: payload?.ok ?? null,
+        status: payload?.status || payload?.instance?.status || payload?.data?.status || null,
+        instanceId: instanceId ? `${instanceId.slice(0, 8)}...${instanceId.slice(-4)}` : null,
+        hasQrCode: Boolean(extractQrCode(payload)),
+        hasPairingCode: Boolean(extractPairingCode(payload)),
+        keys: payload && typeof payload === 'object' ? Object.keys(payload).slice(0, 12) : [],
+    }
+}
+
 function compactLookupText(value: unknown): string {
     return String(value || '')
         .trim()
@@ -111,6 +129,41 @@ function withConnectyHubInstanceId(config: Record<string, any> | null | undefine
 
 function localStatusFromProvider(row: any): 'disconnected' | 'connecting' | 'connected' {
     return normalizeWhatsAppConnectionStatus(row) || 'disconnected'
+}
+
+function extractCreatedConnectyHubInstanceId(payload: any): string {
+    return cleanString(
+        payload?.token ||
+        payload?.instanceId ||
+        payload?.connectyhubInstanceId ||
+        payload?.publicInstanceId ||
+        payload?.id ||
+        payload?.instance?.token ||
+        payload?.instance?.id ||
+        payload?.data?.token ||
+        payload?.data?.id
+    ) || ''
+}
+
+function isRecoverableConnectyHubTokenError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || '')
+    const normalized = message.toLowerCase()
+
+    return normalized.includes('invalid token') &&
+        (normalized.includes('provider_connect_failed') || normalized.includes('/connect') || normalized.includes('401'))
+}
+
+function getQrCodeErrorMessage(error: unknown) {
+    if (isRecoverableConnectyHubTokenError(error)) {
+        return 'A instancia remota da ConnectyHub estava com credencial invalida. Tente gerar o QR novamente para recriar o vinculo.'
+    }
+
+    const message = error instanceof Error ? error.message : String(error || 'Erro desconhecido')
+    return message
+        .replace(/\{[\s\S]*\}$/, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 360) || 'Erro desconhecido'
 }
 
 async function findReusableConnectyHubInstance(params: {
@@ -199,6 +252,41 @@ async function saveGlobalInstanceConfig(supabase: any, instanceId: string) {
         .upsert([
             { key: 'agent_default_instance_id', value: instanceId },
         ], { onConflict: 'key' })
+}
+
+async function replaceConnectyHubInstanceForQr(params: {
+    supabase: any
+    instance: any
+    requestedInstanceType: 'global' | 'broker' | 'sector' | 'admin'
+}) {
+    const { supabase, instance, requestedInstanceType } = params
+    const instanceName = String(instance?.instance_name || '').trim()
+    if (!instance?.id || !instanceName) {
+        throw new Error('Nao foi possivel recriar a instancia ConnectyHub sem nome local.')
+    }
+
+    console.warn('[QR Code] Credencial remota invalida; recriando instancia ConnectyHub para o mesmo cadastro local.')
+
+    const createResult = await createInstance(instanceName)
+    const replacementInstanceId = extractCreatedConnectyHubInstanceId(createResult)
+
+    if (!replacementInstanceId) {
+        throw new Error('A ConnectyHub recriou a instancia, mas nao retornou o instanceId publico.')
+    }
+
+    const existingConfig = instance?.config && typeof instance.config === 'object' ? instance.config : null
+    const updates: Record<string, any> = {
+        instance_token: replacementInstanceId,
+        status: 'disconnected',
+        instance_type: requestedInstanceType,
+        config: withConnectyHubInstanceId(existingConfig, replacementInstanceId),
+        updated_at: new Date().toISOString(),
+    }
+
+    const { error } = await updateInstanceWithCompatibility(supabase, instance.id, updates)
+    if (error) throw error
+
+    return { ...instance, ...updates }
 }
 
 async function ensureAiBrokerForAdminUser(params: {
@@ -424,7 +512,7 @@ export async function POST(request: NextRequest) {
                     console.log(`[QR Code] Criando instancia: ${instance_name}`)
                     const createResult = await createInstance(instance_name)
                     console.log('[QR Code] Resultado createInstance:', JSON.stringify(createResult).substring(0, 200))
-                    token = createResult.token || createResult.instance?.token || createResult.apikey || ''
+                    token = extractCreatedConnectyHubInstanceId(createResult)
                 }
 
                 if (!token) {
@@ -514,8 +602,20 @@ export async function POST(request: NextRequest) {
 
         // Connect (generate QR code)
         console.log(`[QR Code] Conectando instancia: ${instance.instance_name}`)
-        const result = await connectInstance(instance.instance_token)
-        console.log('[QR Code] Resultado connectInstance:', JSON.stringify(result).substring(0, 300))
+        let result: any
+        try {
+            result = await connectInstance(instance.instance_token)
+        } catch (connectError) {
+            if (!isRecoverableConnectyHubTokenError(connectError)) throw connectError
+
+            instance = await replaceConnectyHubInstanceForQr({
+                supabase,
+                instance,
+                requestedInstanceType: isGlobalInstance ? 'global' : requestedInstanceType,
+            })
+            result = await connectInstance(instance.instance_token)
+        }
+        console.log('[QR Code] Resultado connectInstance:', summarizeConnectyHubQrPayload(result))
 
         // Update status in DB
         await supabase
@@ -537,7 +637,7 @@ export async function POST(request: NextRequest) {
 
             await new Promise(resolve => setTimeout(resolve, 2000))
             const statusResult = await getInstanceStatus(instance.instance_token)
-            console.log('[QR Code] Resultado status:', JSON.stringify(statusResult).substring(0, 300))
+            console.log('[QR Code] Resultado status:', summarizeConnectyHubQrPayload(statusResult))
 
             qrcode = extractQrCode(statusResult)
             pairingCode = pairingCode || extractPairingCode(statusResult)
@@ -548,7 +648,7 @@ export async function POST(request: NextRequest) {
             qrcode = `data:image/png;base64,${qrcode}`
         }
 
-        console.log('[QR Code] QR extraido:', qrcode ? `${String(qrcode).substring(0, 80)}...` : 'null')
+        console.log('[QR Code] QR extraido:', qrcode ? 'presente' : 'ausente')
 
         return NextResponse.json({
             success: true,
@@ -563,7 +663,7 @@ export async function POST(request: NextRequest) {
         console.error('[QR Code Error]', error)
         return NextResponse.json({
             success: false,
-            message: `Erro ao gerar QR Code: ${error instanceof Error ? error.message : String(error)}`,
+            message: `Erro ao gerar QR Code: ${getQrCodeErrorMessage(error)}`,
         }, { status: 500 })
     }
 }
