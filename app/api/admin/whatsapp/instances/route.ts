@@ -51,6 +51,84 @@ function isGlobalInstanceRecord(inst: any): boolean {
     return inferInstanceType(inst) === 'global'
 }
 
+function firstString(...values: unknown[]): string | null {
+    for (const value of values) {
+        const text = String(value || '').trim()
+        if (text) return text
+    }
+    return null
+}
+
+function extractConnectyHubProfileImage(payload: any): string | null {
+    const instance = payload?.instance || payload?.data?.instance || null
+    const data = payload?.data || null
+    const me = payload?.me || instance?.me || null
+
+    return firstString(
+        payload?.profileImageUrl,
+        payload?.profile_image_url,
+        payload?.profilePicUrl,
+        payload?.profilePictureUrl,
+        payload?.picture,
+        payload?.avatar,
+        data?.profileImageUrl,
+        data?.profile_image_url,
+        data?.profilePicUrl,
+        data?.profilePictureUrl,
+        data?.picture,
+        data?.avatar,
+        instance?.profileImageUrl,
+        instance?.profile_image_url,
+        instance?.profilePicUrl,
+        instance?.profilePictureUrl,
+        instance?.picture,
+        instance?.avatar,
+        me?.profileImageUrl,
+        me?.profilePicUrl,
+        me?.profilePictureUrl,
+        me?.picture,
+        me?.avatar
+    )
+}
+
+function extractConnectyHubDisplayName(payload: any): string | null {
+    const instance = payload?.instance || payload?.data?.instance || null
+    const data = payload?.data || null
+    const me = payload?.me || instance?.me || null
+
+    return firstString(
+        payload?.displayName,
+        payload?.profileName,
+        payload?.pushName,
+        payload?.name,
+        data?.displayName,
+        data?.profileName,
+        data?.pushName,
+        data?.name,
+        instance?.displayName,
+        instance?.profileName,
+        instance?.pushName,
+        instance?.name,
+        me?.name,
+        me?.pushName
+    )
+}
+
+function extractConnectyHubPlatform(payload: any): string | null {
+    const instance = payload?.instance || payload?.data?.instance || null
+
+    return firstString(
+        payload?.platform,
+        payload?.plataform,
+        payload?.device,
+        payload?.systemName,
+        instance?.platform,
+        instance?.plataform,
+        instance?.device,
+        instance?.systemName
+    )
+}
+
 // GET — Lista instâncias (filtra por broker_id ou admin_user_id se fornecido)
 export async function GET(request: NextRequest) {
     try {
@@ -114,7 +192,13 @@ export async function GET(request: NextRequest) {
 
         // Fallback map from admin endpoint /instance/all. It is often more reliable than
         // per-token /instance/status during provider reconnect windows.
-        const providerByName: Record<string, { phone?: string | null; status?: 'connected' | 'connecting' | 'disconnected' | null; token?: string | null }> = {}
+        const providerByName: Record<string, {
+            phone?: string | null
+            status?: 'connected' | 'connecting' | 'disconnected' | null
+            token?: string | null
+            displayName?: string | null
+            profileImageUrl?: string | null
+        }> = {}
         try {
             const allRaw = await listAllInstances()
             const list = normalizeProviderInstances(allRaw)
@@ -122,6 +206,8 @@ export async function GET(request: NextRequest) {
             for (const row of list) {
                 const name = extractProviderInstanceName(row)
                 const phone = extractPhoneLoose(
+                    row?.phoneNumber ||
+                    row?.phone_number ||
                     row?.phone ||
                     row?.number ||
                     row?.jid ||
@@ -134,6 +220,8 @@ export async function GET(request: NextRequest) {
                         phone,
                         status: normalizeWhatsAppConnectionStatus(row),
                         token: extractProviderInstanceToken(row) || null,
+                        displayName: extractConnectyHubDisplayName(row),
+                        profileImageUrl: extractConnectyHubProfileImage(row),
                     }
                 }
             }
@@ -198,6 +286,7 @@ export async function GET(request: NextRequest) {
         const enrichedInstances = await Promise.all(
             reconciledInstances.map(async (inst: any) => {
                 const instanceType = inferInstanceType(inst)
+                const providerSnapshot = providerByName[inst.instance_name] || null
                 const enriched: any = {
                     ...inst,
                     instance_type: instanceType,
@@ -214,20 +303,11 @@ export async function GET(request: NextRequest) {
                             liveStatus,
                             inst.phone_number || (inst.broker_id ? brokersMap[inst.broker_id]?.phone || null : null)
                         )
-                        const statusPhotoUrl =
-                            liveStatus?.profilePicUrl ||
-                            liveStatus?.profilePictureUrl ||
-                            liveStatus?.picture ||
-                            liveStatus?.avatar ||
-                            liveStatus?.instance?.profilePicUrl ||
-                            liveStatus?.instance?.profilePictureUrl ||
-                            liveStatus?.me?.profilePicUrl ||
-                            liveStatus?.me?.picture ||
-                            null
+                        const statusPhotoUrl = extractConnectyHubProfileImage(liveStatus) || providerSnapshot?.profileImageUrl || null
                         enriched.live_data = {
                             phone: livePhone,
-                            pushName: liveStatus?.pushName || liveStatus?.me?.name || liveStatus?.profileName || null,
-                            platform: liveStatus?.platform || liveStatus?.device || null,
+                            pushName: extractConnectyHubDisplayName(liveStatus) || providerSnapshot?.displayName || null,
+                            platform: extractConnectyHubPlatform(liveStatus),
                             battery: liveStatus?.battery ?? null,
                             plugged: liveStatus?.plugged ?? null,
                             isOnline: liveStatus?.isOnline ?? null,
@@ -244,9 +324,15 @@ export async function GET(request: NextRequest) {
                                     avatarData?.profilePictureUrl ||
                                     avatarData?.profilePicUrl ||
                                     avatarData?.imgUrl ||
+                                    avatarData?.profileImageUrl ||
+                                    avatarData?.imagePreview ||
+                                    avatarData?.image ||
                                     avatarData?.avatar ||
                                     avatarData?.data?.url ||
+                                    avatarData?.data?.profileImageUrl ||
                                     avatarData?.data?.profilePictureUrl ||
+                                    avatarData?.data?.imagePreview ||
+                                    avatarData?.data?.image ||
                                     null
                             } catch { /* avatar not critical */ }
                         }

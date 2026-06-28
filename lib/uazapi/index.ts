@@ -877,11 +877,39 @@ export async function listContactsPage(opts: ListContactsOptions, instanceToken:
 
 /** Pegar foto/avatar de um contato */
 export async function getContactAvatar(phone: string, instanceToken: string) {
-    return uazapiFetch('/contact/avatar', {
-        method: 'POST',
-        token: instanceToken,
-        body: { number: cleanPhone(phone) },
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, '/chats/details')
+    const query = new URLSearchParams()
+    setQueryParam(query, 'instanceId', instanceId)
+    setQueryParam(query, 'number', cleanPhone(phone))
+    setQueryParam(query, 'preview', true)
+
+    const details = await connectyHubFetch('/chats/details', {
+        method: 'GET',
+        query,
     })
+
+    const imageUrl =
+        details?.imagePreview ||
+        details?.image ||
+        details?.profileImageUrl ||
+        details?.profilePicUrl ||
+        details?.profilePictureUrl ||
+        details?.picture ||
+        details?.avatar ||
+        details?.data?.imagePreview ||
+        details?.data?.image ||
+        details?.data?.profileImageUrl ||
+        details?.data?.profilePicUrl ||
+        details?.data?.profilePictureUrl ||
+        null
+
+    return {
+        ...(details || {}),
+        url: imageUrl,
+        profileImageUrl: imageUrl,
+        profilePicUrl: imageUrl,
+        profilePictureUrl: imageUrl,
+    }
 }
 
 export async function getChatDetails(phone: string, instanceToken: string, preview = true) {
