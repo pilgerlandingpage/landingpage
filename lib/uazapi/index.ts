@@ -254,6 +254,45 @@ async function connectyHubFetch(
     return payload ?? {}
 }
 
+async function connectyHubFetchWithStatus(
+    path: string,
+    options: {
+        method?: string
+        body?: unknown
+        query?: URLSearchParams
+    } = {}
+) {
+    const config = await getUazapiConfig()
+    requireConnectyHubConfig(config)
+
+    const url = new URL(`${config.baseUrl}${path}`)
+    options.query?.forEach((value, key) => {
+        url.searchParams.set(key, value)
+    })
+
+    const response = await fetch(url, {
+        method: options.method || 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.adminToken}`,
+        },
+        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        cache: 'no-store',
+    })
+
+    const payload = await readUazapiPayload(response, path)
+
+    if (!response.ok) {
+        throw new Error(`connectyhub error (${response.status}) em ${path}: ${getUazapiErrorMessage(payload)}`)
+    }
+
+    return {
+        status: response.status,
+        payload: payload ?? {},
+    }
+}
+
 async function connectyHubProviderProxy(
     path: string,
     options: {
@@ -441,10 +480,16 @@ export async function disconnectInstance(instanceToken: string) {
 /** Deletar instância (requer admin token) */
 export async function deleteInstance(instanceToken: string, _instanceName?: string) {
     void _instanceName
-    return uazapiFetch('/instance', {
+    const instanceId = await requireConnectyHubInstanceId(instanceToken, 'DELETE /instances/{instanceId}')
+    const result = await connectyHubFetchWithStatus(`/instances/${encodePathPart(instanceId)}`, {
         method: 'DELETE',
-        token: instanceToken,
     })
+
+    return {
+        ...(typeof result.payload === 'object' && result.payload !== null ? result.payload : { response: result.payload }),
+        httpStatus: result.status,
+        connectyhubInstanceId: instanceId,
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
