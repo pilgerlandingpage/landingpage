@@ -59,6 +59,23 @@ function firstString(...values: unknown[]): string | null {
     return null
 }
 
+function isTechnicalWhatsAppName(value: unknown): boolean {
+    const text = String(value || '').trim().toLowerCase()
+    if (!text) return true
+
+    return (
+        /^user_[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^ch-api-user-[a-z0-9-]{8,}(?:-\d+)?$/i.test(text) ||
+        /^instance[_-]?[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text)
+    )
+}
+
+function cleanDisplayName(value: unknown): string | null {
+    const text = String(value || '').trim()
+    return text && !isTechnicalWhatsAppName(text) ? text : null
+}
+
 function getStoredConnectyHubInstanceId(instance: any): string | null {
     const config = instance?.config && typeof instance.config === 'object' ? instance.config : null
     return firstString(
@@ -340,12 +357,30 @@ export async function GET(request: NextRequest) {
             reconciledInstances.map(async (inst: any) => {
                 const instanceType = inferInstanceType(inst)
                 const providerSnapshot = providerByName[inst.instance_name] || null
+                const adminUser = inst.admin_user_id ? adminsMap[inst.admin_user_id] || null : null
+                const broker = inst.broker_id && instanceType !== 'global' ? brokersMap[inst.broker_id] || null : null
+                const adminDisplayName = cleanDisplayName(adminUser?.name)
+                const brokerNeedsHumanName = broker && adminDisplayName && isTechnicalWhatsAppName(broker.name)
                 const enriched: any = {
                     ...inst,
                     instance_type: instanceType,
                     config: normalizeWhatsAppInstanceConfig(inst.config || {}),
-                    virtual_brokers: inst.broker_id && instanceType !== 'global' ? brokersMap[inst.broker_id] || null : null,
-                    admin_users: inst.admin_user_id ? adminsMap[inst.admin_user_id] || null : null,
+                    virtual_brokers: brokerNeedsHumanName
+                        ? { ...broker, name: adminDisplayName }
+                        : broker,
+                    admin_users: adminUser,
+                }
+
+                if (brokerNeedsHumanName) {
+                    try {
+                        await supabase
+                            .from('virtual_brokers')
+                            .update({ name: adminDisplayName, updated_at: new Date().toISOString() })
+                            .eq('id', inst.broker_id)
+                        brokersMap[inst.broker_id] = { ...broker, name: adminDisplayName }
+                    } catch {
+                        // keeping response display name is enough if persistence fails
+                    }
                 }
 
                 if (inst.status === 'connected' && inst.instance_token) {
@@ -409,8 +444,9 @@ export async function GET(request: NextRequest) {
                                 if (enriched.live_data.phone) {
                                     brokerUpdates.phone = String(enriched.live_data.phone).replace(/\D/g, '')
                                 }
-                                if (enriched.live_data.pushName) {
-                                    brokerUpdates.name = enriched.live_data.pushName
+                                const liveDisplayName = cleanDisplayName(enriched.live_data.pushName)
+                                if (liveDisplayName && !adminDisplayName) {
+                                    brokerUpdates.name = liveDisplayName
                                 }
 
                                 await supabase

@@ -36,6 +36,34 @@ function formatBrPhone(phone?: string | null): string {
     return `+${digits}`
 }
 
+function isTechnicalWhatsAppName(value?: string | null): boolean {
+    const text = String(value || '').trim().toLowerCase()
+    if (!text) return true
+
+    return (
+        /^user_[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^ch-api-user-[a-z0-9-]{8,}(?:-\d+)?$/i.test(text) ||
+        /^instance[_-]?[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text)
+    )
+}
+
+function cleanDisplayName(value?: string | null): string {
+    const text = String(value || '').trim()
+    return text && !isTechnicalWhatsAppName(text) ? text : ''
+}
+
+function resolveInstanceDisplayName(inst: Instance, type: 'agent' | 'user' | 'global') {
+    if (type === 'global' || inst.instance_type === 'global') return 'WhatsApp Global'
+
+    return cleanDisplayName(inst.admin_users?.name) ||
+        cleanDisplayName(inst.virtual_brokers?.name) ||
+        cleanDisplayName(inst.live_data?.pushName) ||
+        cleanDisplayName(inst.instance_name) ||
+        inst.admin_users?.email ||
+        inst.instance_name
+}
+
 interface InstanceConfig {
     agent_enabled: boolean; always_online: boolean; mark_as_read: boolean
     response_mode: 'text' | 'audio' | 'mirror'
@@ -676,7 +704,7 @@ function InstanceCard({ inst, type, expanded, onToggleExpand, settingsExpanded, 
     const isConnected = inst.status === 'connected'
     const isGlobal = inst.instance_type === 'global' || type === 'global'
     const accentColor = isGlobal ? '#0284c7' : type === 'agent' ? 'var(--gold)' : '#6366f1'
-    const name = isGlobal ? 'WhatsApp Global' : type === 'agent' ? inst.virtual_brokers?.name : inst.admin_users?.name
+    const name = resolveInstanceDisplayName(inst, type)
     const subtitle = isGlobal ? 'Porta central da empresa' : type === 'agent' ? `CRECI: ${inst.virtual_brokers?.creci || '—'}` : inst.admin_users?.email
     const photoUrl = type === 'agent'
         ? (inst.live_data?.profilePicUrl || inst.virtual_brokers?.photo_url)
