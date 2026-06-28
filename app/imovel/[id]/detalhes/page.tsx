@@ -29,7 +29,6 @@ import PropertyLandingFavoriteButton from '@/components/property/PropertyLanding
 import PropertyLandingShareButton from '@/components/property/PropertyLandingShareButton'
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import PropertyContinuationRail from '@/components/property/PropertyContinuationRail'
-import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPreview'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
@@ -883,7 +882,6 @@ export default async function PropertyDetailPage({
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
     const mapLocation = [property.neighborhood, property.city, property.state].filter(Boolean).join(', ')
     const locationParts = buildDisplayLocationParts(property.neighborhood, property.city)
-    const locationHeadline = locationParts.join(' — ')
     const locationPrimary = locationParts[0] || 'Litoral catarinense'
     const locationSecondary = locationParts.length > 1
         ? [...locationParts.slice(1), property.state].filter(Boolean).join(' - ')
@@ -1391,30 +1389,6 @@ export default async function PropertyDetailPage({
                             </div>
                         </section>
 
-                        <section className="plp-mobile-card plp-mobile-location-card">
-                            <div className="plp-mobile-card-head">
-                                <span className="plp-kicker">Entorno</span>
-                                <h2>Localização e contexto.</h2>
-                            </div>
-                            <p>{locationLabel || mapLocation || 'Endereço sob curadoria para visitas qualificadas.'}</p>
-                            {propertyMapLatLng ? (
-                                <div className="plp-map-frame plp-mobile-location-map">
-                                    <PropertyLocationMap
-                                        property={propertyMapPreview}
-                                        latLng={propertyMapLatLng}
-                                        initialView="luxury"
-                                        allowedViews={['luxury']}
-                                        showViewControl={false}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="plp-mobile-location-grid">
-                                    <span><MapPin size={17} /> Endereço confirmado pelo especialista antes da visita.</span>
-                                    <span><Eye size={17} /> Contexto visual em curadoria.</span>
-                                </div>
-                            )}
-                        </section>
-
                         {related.length > 0 && (
                             <section className="plp-mobile-card plp-mobile-related-section">
                                 <div className="plp-mobile-card-head">
@@ -1638,30 +1612,6 @@ export default async function PropertyDetailPage({
                         </section>
 
                     </div>
-
-                    <section id="localizacao" className="plp-location-band">
-                        <div className="plp-location-head">
-                            <span>Localização</span>
-                            <strong>{locationHeadline || 'Localização estratégica'}</strong>
-                        </div>
-                        <div className="plp-map-frame">
-                            {propertyMapLatLng ? (
-                                <PropertyLocationMap
-                                    property={propertyMapPreview}
-                                    latLng={propertyMapLatLng}
-                                    initialView="luxury"
-                                    allowedViews={['luxury']}
-                                    showViewControl={false}
-                                />
-                            ) : (
-                                <div className="plp-map-empty">
-                                    <MapPin size={22} />
-                                    <strong>{locationLabel || mapLocation || 'Localização sob curadoria'}</strong>
-                                    <span>Endereço exato apresentado pelo agente durante o atendimento.</span>
-                                </div>
-                            )}
-                        </div>
-                    </section>
 
                     <aside className="plp-sidebar" aria-label="Atendimento e resumo comercial">
                         <div className="plp-side-card plp-price-card">

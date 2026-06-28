@@ -1773,6 +1773,7 @@ export default function PropertyMap({
         }
     }, [])
 
+    const activeLayerCount = activeContextLayers.length + activeAmenityLayers.length
     const shouldShowControlHints = showControlHints && !officeMarker
 
     return (
@@ -1878,13 +1879,18 @@ export default function PropertyMap({
             <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa" onPointerDown={showControlHintsTemporarily}>
                 <button
                     type="button"
-                    className={mapOptionsOpen ? 'active' : ''}
+                    className={`${mapOptionsOpen ? 'active' : ''}${activeLayerCount > 0 ? ' has-active-layers' : ''}`}
                     aria-label="Abrir opções do mapa"
                     aria-expanded={mapOptionsOpen}
                     title="Opções do mapa"
                     onClick={() => setMapOptionsOpen(open => !open)}
                 >
                     <Globe2 size={24} />
+                    {activeLayerCount > 0 && (
+                        <strong className="map-mobile-action-count" aria-label={`${activeLayerCount} filtros ativos`}>
+                            {activeLayerCount}
+                        </strong>
+                    )}
                     <span>Mapa</span>
                 </button>
                 {onDrawAreaChange && !officeMarker && (
@@ -1913,37 +1919,6 @@ export default function PropertyMap({
                     </button>
                 )}
             </div>
-
-            {activeContextLayers.length > 0 && (
-                <div className="map-context-layer-strip" aria-label="Camadas de contexto ativas">
-                    {activeContextLayers.map(layer => {
-                        const option = MAP_CONTEXT_LAYERS.find(item => item.value === layer)
-                        if (!option) return null
-                        return (
-                            <span key={layer}>
-                                {getContextLayerIcon(option.icon)}
-                                {option.label}
-                            </span>
-                        )
-                    })}
-                </div>
-            )}
-
-            {activeAmenityLayers.length > 0 && (
-                <div className="map-amenity-layer-strip" aria-label="Benefícios próximos ativos">
-                    {activeAmenityLayers.map(layer => {
-                        const option = getAmenityOption(layer)
-                        if (!option) return null
-                        const Icon = MAP_AMENITY_ICONS[option.value] || MapPin
-                        return (
-                            <span key={layer}>
-                                <Icon size={15} />
-                                {option.label}
-                            </span>
-                        )
-                    })}
-                </div>
-            )}
 
             {mapOptionsOpen && (
                 <div className="map-options-scrim" role="presentation" onClick={() => setMapOptionsOpen(false)}>
@@ -2431,13 +2406,35 @@ export default function PropertyMap({
                     opacity: 1;
                     transform: translate(-50%, 0);
                 }
+                .map-mobile-action-dock button.has-active-layers {
+                    border-color: rgba(184,148,95,0.48);
+                    box-shadow:
+                        0 12px 26px rgba(18,24,30,0.18),
+                        0 0 0 3px rgba(184,148,95,0.16);
+                }
                 .map-mobile-action-dock button.active {
-                    background: #e8f4ff;
-                    color: #0b73d9;
-                    box-shadow: 0 12px 26px rgba(20,120,212,0.24);
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    box-shadow: 0 14px 28px rgba(184,148,95,0.28);
                 }
                 .map-mobile-action-dock button.loading svg {
                     animation: mapLocateSpin 1s linear infinite;
+                }
+                .map-mobile-action-count {
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    display: grid;
+                    min-width: 19px;
+                    height: 19px;
+                    place-items: center;
+                    padding: 0 5px;
+                    border: 1px solid rgba(255,253,248,0.92);
+                    border-radius: 999px;
+                    background: #171410;
+                    color: #dfc18e;
+                    font: 950 0.58rem/1 'Inter', sans-serif;
+                    box-shadow: 0 8px 16px rgba(18,24,30,0.24);
                 }
                 .map-context-layer-strip,
                 .map-amenity-layer-strip {
@@ -2516,10 +2513,12 @@ export default function PropertyMap({
                     cursor: pointer;
                 }
                 .map-options-style-row button.active {
-                    border-color: #1478d4;
-                    background: #e8f4ff;
-                    color: #0b73d9;
-                    box-shadow: 0 0 0 1px rgba(20,120,212,0.2) inset;
+                    border-color: #b8945f;
+                    background: linear-gradient(180deg, #fff8ea, #f4ead7);
+                    color: #5d3e16;
+                    box-shadow:
+                        0 0 0 1px rgba(184,148,95,0.22) inset,
+                        0 12px 24px rgba(184,148,95,0.16);
                 }
                 .map-options-divider {
                     height: 1px;
@@ -2555,9 +2554,10 @@ export default function PropertyMap({
                 .map-context-grid button.active,
                 .map-amenity-grid button.active,
                 .map-options-filter-grid button.active {
-                    border-color: #1478d4;
-                    background: #e8f4ff;
-                    color: #0b73d9;
+                    border-color: #b8945f;
+                    background: linear-gradient(180deg, #fff8ea, #f4ead7);
+                    color: #5d3e16;
+                    box-shadow: 0 8px 18px rgba(184,148,95,0.14);
                 }
                 @keyframes mapOptionsRise {
                     from { transform: translateY(24px); opacity: 0; }
@@ -3336,9 +3336,9 @@ export default function PropertyMap({
                         transform: translate(-50%, 0);
                     }
                     .map-mobile-action-dock button.active {
-                        background: #e8f4ff;
-                        color: #0b73d9;
-                        box-shadow: 0 12px 26px rgba(20,120,212,0.24);
+                        background: linear-gradient(135deg, #dfc18e, #b8945f);
+                        color: #101010;
+                        box-shadow: 0 14px 28px rgba(184,148,95,0.28);
                     }
                     .map-mobile-action-dock button.loading svg {
                         animation: mapLocateSpin 1s linear infinite;
