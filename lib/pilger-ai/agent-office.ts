@@ -129,6 +129,14 @@ type AgentOfficeBrokerRow = {
     created_at?: string | null
 }
 
+type AgentOfficeAdminUserRow = {
+    id?: string | number | null
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+    whatsapp_instance_id?: string | number | null
+}
+
 type AgentPersona = {
     personaName: string
     jobTitle: string
@@ -1924,6 +1932,37 @@ function pickGlobalWhatsAppInstance(instances: any[]) {
     return instances.find((instance: any) => instance?.status === 'connected') || instances[0] || null
 }
 
+function isPlaceholderId(value: unknown) {
+    const text = String(value || '').trim()
+    return !text || text === '00000000-0000-0000-0000-000000000000'
+}
+
+function isGeneratedTechnicalName(value: unknown) {
+    const text = String(value || '').trim().toLowerCase()
+    if (!text) return true
+
+    return (
+        /^user_[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^instance[_-]?[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^whatsapp[_-]?instance[_-]?[a-z0-9-]{8,}(?:[_-]\d+)?$/i.test(text) ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text)
+    )
+}
+
+function cleanHumanDisplayName(value: unknown) {
+    const text = String(value || '').trim()
+    if (!text || isGeneratedTechnicalName(text)) return ''
+    return text
+}
+
+function resolveAdminUserDisplayName(adminUser?: AgentOfficeAdminUserRow | null) {
+    const explicitName = cleanHumanDisplayName(adminUser?.name)
+    if (explicitName) return explicitName
+
+    const emailLocalPart = String(adminUser?.email || '').split('@')[0]?.replace(/[._-]+/g, ' ').trim()
+    return cleanHumanDisplayName(emailLocalPart)
+}
+
 function findLinkedInstanceForBroker(broker: any, instances: any[]) {
     if (!broker) return null
     const brokerId = String(broker?.id || '')
@@ -1951,15 +1990,24 @@ function findGlobalWhatsAppBroker(brokers: any[], globalInstances: any[]) {
         || null
 }
 
-function normalizeBrokerAgent(broker: any, globalProvider: string, globalModel: string, instance?: any): AgentOfficeItem {
+function normalizeBrokerAgent(
+    broker: any,
+    globalProvider: string,
+    globalModel: string,
+    instance?: any,
+    adminUser?: AgentOfficeAdminUserRow | null
+): AgentOfficeItem {
     const active = broker?.is_active !== false
     const connected = instance?.status === 'connected'
     const whatsappName = connected
-        ? (instance?.live_data?.pushName || instance?.live_data?.profileName || instance?.live_data?.me?.name || '')
+        ? cleanHumanDisplayName(instance?.live_data?.pushName || instance?.live_data?.profileName || instance?.live_data?.me?.name || '')
         : ''
-    const personaName = whatsappName || broker?.name || instance?.instance_name || 'Corretor IA sem nome'
     const avatarUrl = broker?.photo_url || (connected ? (instance?.live_data?.profilePicUrl || null) : null)
     const phone = instance?.live_data?.phone || instance?.phone_number || broker?.phone || ''
+    const adminUserName = resolveAdminUserDisplayName(adminUser)
+    const brokerName = cleanHumanDisplayName(broker?.name)
+    const instanceName = cleanHumanDisplayName(instance?.instance_name)
+    const personaName = adminUserName || brokerName || whatsappName || phone || instanceName || 'Corretor IA sem nome'
     const role = broker?.creci ? `Corretor IA - CRECI ${broker.creci}` : 'Corretor IA'
     const detail = connected
         ? `Instancia WhatsApp conectada${phone ? ` - ${phone}` : ''}.`
@@ -1974,8 +2022,8 @@ function normalizeBrokerAgent(broker: any, globalProvider: string, globalModel: 
         avatarUrl,
         jobTitle: role,
         bio: connected
-            ? 'Corretor IA conectado ao WhatsApp. Nome vem da instancia e a foto pode ser ajustada pelo admin.'
-            : 'Corretor IA aguardando dados reais da instancia ou ajuste manual do cadastro.',
+            ? 'Corretor IA conectado ao WhatsApp. Nome vem do usuario vinculado e a foto pode ser ajustada pelo admin.'
+            : 'Corretor IA aguardando usuario vinculado, dados reais da instancia ou ajuste manual do cadastro.',
         role,
         sector: 'Comercial',
         status: active ? 'Ativo' : 'Inativo',
@@ -2065,6 +2113,12 @@ async function loadAgentOfficeBrokers(supabase: ReturnType<typeof createAdminCli
 }
 
 async function loadAgentOfficeWhatsappInstances(supabase: ReturnType<typeof createAdminClient>) {
+    const withAdminAndLiveData = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, admin_user_id, instance_name, instance_type, phone_number, status, live_data')
+
+    if (!withAdminAndLiveData.error) return withAdminAndLiveData.data || []
+
     const withTypeAndLiveData = await supabase
         .from('whatsapp_instances')
         .select('id, broker_id, instance_name, instance_type, phone_number, status, live_data')
@@ -2082,6 +2136,62 @@ async function loadAgentOfficeWhatsappInstances(supabase: ReturnType<typeof crea
         .select('id, broker_id, instance_name, phone_number, status')
 
     return fallback.data || []
+}
+
+async function loadAgentOfficeAdminUsers(
+    supabase: ReturnType<typeof createAdminClient>,
+    instances: any[]
+): Promise<AgentOfficeAdminUserRow[]> {
+    const rows = new Map<string, AgentOfficeAdminUserRow>()
+    const addRows = (users?: AgentOfficeAdminUserRow[] | null) => {
+        for (const user of users || []) {
+            const id = String(user?.id || '')
+            if (!id || isPlaceholderId(id)) continue
+            rows.set(id, { ...(rows.get(id) || {}), ...user })
+        }
+    }
+
+    const adminIds = [...new Set(
+        instances
+            .map((instance: any) => String(instance?.admin_user_id || ''))
+            .filter(id => id && !isPlaceholderId(id))
+    )]
+
+    if (adminIds.length > 0) {
+        const withInstanceId = await supabase
+            .from('admin_users')
+            .select('id,name,email,phone,whatsapp_instance_id')
+            .in('id', adminIds)
+
+        if (!withInstanceId.error) {
+            addRows((withInstanceId.data || []) as AgentOfficeAdminUserRow[])
+        } else {
+            const fallback = await supabase
+                .from('admin_users')
+                .select('id,name,email,phone')
+                .in('id', adminIds)
+            addRows((fallback.data || []) as AgentOfficeAdminUserRow[])
+        }
+    }
+
+    const instanceIds = [...new Set(
+        instances
+            .map((instance: any) => String(instance?.id || ''))
+            .filter(Boolean)
+    )]
+
+    if (instanceIds.length > 0) {
+        const bySelectedInstance = await supabase
+            .from('admin_users')
+            .select('id,name,email,phone,whatsapp_instance_id')
+            .in('whatsapp_instance_id', instanceIds)
+
+        if (!bySelectedInstance.error) {
+            addRows((bySelectedInstance.data || []) as AgentOfficeAdminUserRow[])
+        }
+    }
+
+    return [...rows.values()]
 }
 
 async function loadAgentOfficeConfigRows(supabase: ReturnType<typeof createAdminClient>) {
@@ -2111,11 +2221,34 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
         loadAgentOfficeBrokers(supabase).then(data => ({ data })),
         loadAgentOfficeWhatsappInstances(supabase).then(data => ({ data })),
     ])
+    const adminUsers = await loadAgentOfficeAdminUsers(supabase, instances || [])
 
     const configs: ConfigMap = Object.fromEntries((configRows || []).map((row: any) => [row.key, String(row.value || '')]))
     const globalProvider = configs.ai_provider || 'gemini'
     const globalModel = resolveGlobalModel(configs)
     const llmPolicy = `Herda ${globalProvider} / ${globalModel} da Sala de Manutencao`
+    const adminUserById = new Map(
+        (adminUsers || [])
+            .map((adminUser: AgentOfficeAdminUserRow) => [String(adminUser.id || ''), adminUser] as const)
+            .filter(([id]) => id && !isPlaceholderId(id))
+    )
+    const adminUserByInstanceId = new Map(
+        (adminUsers || [])
+            .map((adminUser: AgentOfficeAdminUserRow) => [String(adminUser.whatsapp_instance_id || ''), adminUser] as const)
+            .filter(([instanceId]) => Boolean(instanceId))
+    )
+    const resolveAdminUserForInstance = (instance?: any | null) => {
+        if (!instance) return null
+
+        const adminId = String(instance?.admin_user_id || '')
+        if (adminId && !isPlaceholderId(adminId)) {
+            const userByAdminId = adminUserById.get(adminId)
+            if (userByAdminId) return userByAdminId
+        }
+
+        const instanceId = String(instance?.id || '')
+        return instanceId ? (adminUserByInstanceId.get(instanceId) || null) : null
+    }
     const globalInstances = (instances || []).filter((instance: any) => isGlobalWhatsAppInstance(instance))
     const globalBroker = findGlobalWhatsAppBroker(brokers || [], globalInstances)
     const globalInstance = findLinkedInstanceForBroker(globalBroker, instances || []) || pickGlobalWhatsAppInstance(globalInstances)
@@ -2214,7 +2347,6 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
             (!globalBrokerId || brokerId !== globalBrokerId) &&
             !isGlobalWhatsAppInstance(instance)
     })
-    const instancesByBrokerId = new Map(brokerInstances.map((instance: any) => [String(instance.broker_id), instance]))
     const brokerAgents = (brokers || [])
         .filter((broker: any) => {
             const brokerId = String(broker.id || '')
@@ -2223,9 +2355,16 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
                 !globalInstanceIds.has(brokerInstanceId) &&
                 !isGlobalWhatsAppBroker(broker)
         })
-        .map((broker: any) =>
-            normalizeBrokerAgent(broker, globalProvider, globalModel, instancesByBrokerId.get(String(broker.id)))
-        )
+        .map((broker: any) => {
+            const linkedInstance = findLinkedInstanceForBroker(broker, brokerInstances)
+            return normalizeBrokerAgent(
+                broker,
+                globalProvider,
+                globalModel,
+                linkedInstance,
+                resolveAdminUserForInstance(linkedInstance)
+            )
+        })
     const agents = [...promptAgents, ...(globalAgent ? [globalAgent] : []), ...brokerAgents]
 
     return {

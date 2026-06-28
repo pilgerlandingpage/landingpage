@@ -62,7 +62,7 @@ export function normalizeWhatsAppConnectionStatus(payload: any): WhatsAppConnect
         ['connected', 'open', 'online', 'loggedin', 'logged_in', 'ready'].includes(token)
     )
     const connectingText = tokens.some((token) =>
-        ['connecting', 'pairing', 'qr', 'qrcode', 'loading', 'initializing'].includes(token)
+        ['connecting', 'pairing', 'qr', 'qrcode', 'qr_pending', 'loading', 'initializing'].includes(token)
     )
     const disconnectedText = tokens.some((token) =>
         ['disconnected', 'loggedout', 'logged_out', 'logout', 'offline', 'close', 'closed'].includes(token)

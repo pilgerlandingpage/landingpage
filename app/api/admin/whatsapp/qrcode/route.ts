@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createInstance, connectInstance } from '@/lib/connectyhub/whatsapp'
+import { createInstance, connectInstance, listAllInstances } from '@/lib/connectyhub/whatsapp'
+import {
+    extractProviderInstanceName,
+    extractProviderInstanceToken,
+    normalizeProviderInstances,
+    normalizeWhatsAppConnectionStatus,
+} from '@/lib/whatsapp/connection-status'
 import { DEFAULT_WHATSAPP_INSTANCE_CONFIG } from '@/lib/whatsapp/instance-config'
 
 function getSupabase() {
@@ -13,6 +19,127 @@ function getSupabase() {
 function normalizePhone(value: unknown): string | null {
     const digits = String(value || '').replace(/\D/g, '')
     return digits || null
+}
+
+function cleanString(value: unknown): string | null {
+    const text = String(value || '').trim()
+    return text || null
+}
+
+function isUsableQrCode(value: unknown): value is string {
+    const text = cleanString(value)
+    if (!text) return false
+    if (text.startsWith('data:image/') || text.startsWith('http')) return true
+    return text.length > 100
+}
+
+function extractQrCode(payload: any): string | null {
+    const candidates = [
+        payload?.qrCode,
+        payload?.qr_code,
+        payload?.qrcode,
+        payload?.qr,
+        payload?.base64,
+        payload?.data?.qrCode,
+        payload?.data?.qr_code,
+        payload?.data?.qrcode,
+        payload?.data?.qr,
+        payload?.data?.base64,
+        payload?.instance?.qrCode,
+        payload?.instance?.qr_code,
+        payload?.instance?.qrcode,
+        payload?.instance?.qr,
+        payload?.instance?.base64,
+        payload?.provider?.qrCode,
+        payload?.provider?.qr_code,
+        payload?.provider?.qrcode,
+        payload?.provider?.qr,
+        payload?.provider?.instance?.qrCode,
+        payload?.provider?.instance?.qr_code,
+        payload?.provider?.instance?.qrcode,
+        payload?.provider?.instance?.qr,
+    ]
+
+    for (const candidate of candidates) {
+        if (isUsableQrCode(candidate)) return cleanString(candidate)
+    }
+
+    return null
+}
+
+function extractPairingCode(payload: any): string | null {
+    return cleanString(
+        payload?.pairingCode ||
+        payload?.pairing_code ||
+        payload?.paircode ||
+        payload?.code ||
+        payload?.data?.pairingCode ||
+        payload?.data?.pairing_code ||
+        payload?.data?.paircode ||
+        payload?.data?.code ||
+        payload?.instance?.pairingCode ||
+        payload?.instance?.pairing_code ||
+        payload?.instance?.paircode ||
+        payload?.instance?.code ||
+        payload?.provider?.pairingCode ||
+        payload?.provider?.pairing_code ||
+        payload?.provider?.paircode ||
+        payload?.provider?.code ||
+        payload?.provider?.instance?.pairingCode ||
+        payload?.provider?.instance?.pairing_code ||
+        payload?.provider?.instance?.paircode ||
+        payload?.provider?.instance?.code
+    )
+}
+
+function compactLookupText(value: unknown): string {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '')
+}
+
+function withConnectyHubInstanceId(config: Record<string, any> | null | undefined, instanceId: string) {
+    return {
+        ...DEFAULT_WHATSAPP_INSTANCE_CONFIG,
+        ...(config || {}),
+        connectyhub_instance_id: instanceId,
+    }
+}
+
+function localStatusFromProvider(row: any): 'disconnected' | 'connecting' | 'connected' {
+    return normalizeWhatsAppConnectionStatus(row) || 'disconnected'
+}
+
+async function findReusableConnectyHubInstance(params: {
+    instanceName?: string | null
+    adminUserId?: string | null
+}) {
+    const adminKey = compactLookupText(params.adminUserId)
+    const requestedNameKey = compactLookupText(params.instanceName)
+    if (!adminKey && !requestedNameKey) return null
+
+    try {
+        const providerRows = normalizeProviderInstances(await listAllInstances())
+        return providerRows.find((row: any) => {
+            const providerId = extractProviderInstanceToken(row)
+            if (!providerId) return false
+
+            const providerName = extractProviderInstanceName(row)
+            const providerNameKey = compactLookupText(providerName)
+            const status = localStatusFromProvider(row)
+
+            if (status === 'connected') return false
+            if (requestedNameKey && providerNameKey === requestedNameKey) return true
+            if (adminKey && providerNameKey.includes(adminKey)) return true
+            return false
+        }) || null
+    } catch (error) {
+        console.warn('[QR Code] Falha ao buscar instancias reutilizaveis na ConnectyHub:', error)
+        return null
+    }
 }
 
 function normalizeInstanceType(value: unknown): 'global' | 'broker' | 'sector' | 'admin' {
@@ -280,18 +407,30 @@ export async function POST(request: NextRequest) {
                     instance = { ...instance, instance_type: 'global' }
                 }
             } else {
-                // Create at ConnectyHub
-                console.log(`[QR Code] Criando instancia: ${instance_name}`)
-                const createResult = await createInstance(instance_name)
-                console.log('[QR Code] Resultado createInstance:', JSON.stringify(createResult).substring(0, 200))
+                const reusableProviderInstance = await findReusableConnectyHubInstance({
+                    instanceName: instance_name,
+                    adminUserId: admin_user_id,
+                })
 
-                const token = createResult.token || createResult.instance?.token || createResult.apikey || ''
+                let token = ''
+                let providerStatus: 'disconnected' | 'connecting' | 'connected' = 'disconnected'
+
+                if (reusableProviderInstance) {
+                    token = extractProviderInstanceToken(reusableProviderInstance)
+                    providerStatus = localStatusFromProvider(reusableProviderInstance)
+                    console.log('[QR Code] Reutilizando instancia pendente da ConnectyHub')
+                } else {
+                    // Create at ConnectyHub
+                    console.log(`[QR Code] Criando instancia: ${instance_name}`)
+                    const createResult = await createInstance(instance_name)
+                    console.log('[QR Code] Resultado createInstance:', JSON.stringify(createResult).substring(0, 200))
+                    token = createResult.token || createResult.instance?.token || createResult.apikey || ''
+                }
 
                 if (!token) {
                     return NextResponse.json({
                         success: false,
                         message: 'Falha ao obter instanceId da ConnectyHub. Verifique as configuracoes da ConnectyHub.',
-                        debug: createResult,
                     }, { status: 500 })
                 }
 
@@ -302,10 +441,8 @@ export async function POST(request: NextRequest) {
                         instance_token: token,
                         instance_name,
                         instance_type: requestedInstanceType,
+                        config: withConnectyHubInstanceId(existingConfig, token),
                         updated_at: new Date().toISOString(),
-                    }
-                    if (!existingConfig || Object.keys(existingConfig).length === 0) {
-                        updates.config = DEFAULT_WHATSAPP_INSTANCE_CONFIG
                     }
                     await updateInstanceWithCompatibility(supabase, existing.id, updates)
                     instance = { ...existing, ...updates }
@@ -313,9 +450,9 @@ export async function POST(request: NextRequest) {
                     const insertData: any = {
                         instance_name,
                         instance_token: token,
-                        status: 'disconnected',
+                        status: providerStatus,
                         instance_type: requestedInstanceType,
-                        config: DEFAULT_WHATSAPP_INSTANCE_CONFIG,
+                        config: withConnectyHubInstanceId(null, token),
                     }
                     if (broker_id) insertData.broker_id = broker_id
                     if (admin_user_id) insertData.admin_user_id = admin_user_id
@@ -389,18 +526,9 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', instance.id)
 
-        // Extract QR code
-        let qrcode = result?.instance?.qrcode
-            || result?.instance?.qr
-            || result?.qrcode
-            || result?.qr
-            || result?.base64
-            || null
-
-        let pairingCode = result?.instance?.paircode
-            || result?.pairingCode
-            || result?.code
-            || null
+        // Extract QR code from ConnectyHub response variants.
+        let qrcode = extractQrCode(result)
+        let pairingCode = extractPairingCode(result)
 
         // If connect didn't return QR, poll status endpoint
         if (!qrcode) {
@@ -411,13 +539,8 @@ export async function POST(request: NextRequest) {
             const statusResult = await getInstanceStatus(instance.instance_token)
             console.log('[QR Code] Resultado status:', JSON.stringify(statusResult).substring(0, 300))
 
-            qrcode = statusResult?.instance?.qrcode
-                || statusResult?.qrcode
-                || null
-            pairingCode = pairingCode
-                || statusResult?.instance?.paircode
-                || statusResult?.pairingCode
-                || null
+            qrcode = extractQrCode(statusResult)
+            pairingCode = pairingCode || extractPairingCode(statusResult)
         }
 
         // Normalize: add data URI prefix if pure base64
