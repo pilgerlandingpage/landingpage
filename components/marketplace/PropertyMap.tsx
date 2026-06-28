@@ -2447,7 +2447,7 @@ export default function PropertyMap({
                     display: block;
                     position: absolute;
                     inset: 0;
-                    z-index: 1400;
+                    z-index: 2200;
                     background: transparent;
                     backdrop-filter: blur(1px);
                 }
@@ -3346,7 +3346,7 @@ export default function PropertyMap({
                     .map-options-scrim {
                         display: block;
                         position: absolute;
-                        z-index: 1400;
+                        z-index: 2200;
                         background: rgba(15,18,22,0.42);
                     }
                     .map-options-sheet {

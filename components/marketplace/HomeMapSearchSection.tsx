@@ -48,9 +48,12 @@ type Property = {
     suites?: number | null
     parking_spaces?: number | null
     area_m2?: number | null
+    area_private_m2?: number | null
     description?: string | null
     source_status?: string | null
     exclusive?: boolean | null
+    images?: string[] | null
+    video_url?: string | null
 }
 
 type AppliedFilters = {
