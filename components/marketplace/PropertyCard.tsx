@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import type { MouseEvent, ReactNode } from 'react'
-import { BedDouble, Camera, Car, Heart, MapPin, Ruler } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent, ReactNode, TouchEvent, WheelEvent } from 'react'
+import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyIntelligenceLabels, getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
@@ -43,6 +43,8 @@ interface PropertyCardProps {
 }
 
 const FAVORITES_KEY = 'pilger_property_favorites'
+const FALLBACK_IMAGE = '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
+const PHOTO_SWIPE_THRESHOLD = 34
 
 function readFavoriteIds() {
     if (typeof window === 'undefined') return []
@@ -102,10 +104,27 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const isHomeCompact = variant === 'homeCompact'
     const showFavoriteToggle = !isHomeCompact
     const [isFavorite, setIsFavorite] = useState(false)
+    const [activeImageState, setActiveImageState] = useState({ propertyId: property.id, imageCount: 0, index: 0 })
+    const touchStartXRef = useRef<number | null>(null)
+    const suppressImageClickRef = useRef(false)
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
     const detailsHref = propertyDetailsPath(property)
     const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
-    const imageSrc = property.featured_image || '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
+    const galleryImages = useMemo(() => {
+        const images = [property.featured_image, ...(property.images || [])]
+            .map(item => typeof item === 'string' ? item.trim() : '')
+            .filter(Boolean)
+
+        return Array.from(new Set(images))
+    }, [property.featured_image, property.images])
+    const displayGalleryImages = galleryImages.length ? galleryImages : [FALLBACK_IMAGE]
+    const imageCount = galleryImages.length
+    const canBrowseImages = imageCount > 1
+    const activeImageIndex = activeImageState.propertyId === property.id && activeImageState.imageCount === imageCount
+        ? activeImageState.index
+        : 0
+    const safeActiveImageIndex = Math.min(activeImageIndex, Math.max(displayGalleryImages.length - 1, 0))
+    const imageSrc = displayGalleryImages[safeActiveImageIndex] || FALLBACK_IMAGE
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
@@ -114,7 +133,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         : [displayNeighborhood, displayCity]
     const location = locationParts.filter(Boolean).join(' - ')
     const locationLabel = `${location || 'Balneário Camboriú'}${property.state ? ` / ${property.state}` : ''}`
-    const imageCount = Array.isArray(property.images) ? property.images.filter(Boolean).length : 0
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
     const primaryQualityLabel = getPropertyPrimaryQualityLabel(property)
@@ -155,6 +173,70 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         })
     }
 
+    const changeGalleryImage = (direction: 1 | -1, interaction: 'button' | 'swipe' | 'wheel') => {
+        if (!canBrowseImages) return
+
+        const nextIndex = (safeActiveImageIndex + direction + imageCount) % imageCount
+        setActiveImageState({ propertyId: property.id, imageCount, index: nextIndex })
+
+        void trackEvent('property_thumbnail_photo_changed', {
+            property_id: property.id,
+            title: displayTitle,
+            direction,
+            image_index: nextIndex + 1,
+            gallery_count: imageCount,
+            interaction,
+            source: isHomeCompact ? 'compact_property_card' : 'property_card',
+        })
+    }
+
+    const handleImageLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+        if (suppressImageClickRef.current) {
+            event.preventDefault()
+            event.stopPropagation()
+            suppressImageClickRef.current = false
+            return
+        }
+
+        handlePropertyClick()
+    }
+
+    const handleImageTouchStart = (event: TouchEvent<HTMLAnchorElement>) => {
+        if (!canBrowseImages) return
+        touchStartXRef.current = event.touches[0]?.clientX ?? null
+    }
+
+    const handleImageTouchEnd = (event: TouchEvent<HTMLAnchorElement>) => {
+        if (!canBrowseImages || touchStartXRef.current === null) return
+
+        const deltaX = (event.changedTouches[0]?.clientX ?? 0) - touchStartXRef.current
+        touchStartXRef.current = null
+
+        if (Math.abs(deltaX) < PHOTO_SWIPE_THRESHOLD) return
+
+        event.preventDefault()
+        event.stopPropagation()
+        suppressImageClickRef.current = true
+        window.setTimeout(() => {
+            suppressImageClickRef.current = false
+        }, 160)
+
+        changeGalleryImage(deltaX < 0 ? 1 : -1, 'swipe')
+    }
+
+    const handleImageWheel = (event: WheelEvent<HTMLAnchorElement>) => {
+        if (!canBrowseImages) return
+
+        const isHorizontalGesture = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        if (!isHorizontalGesture && !event.shiftKey) return
+
+        const delta = isHorizontalGesture ? event.deltaX : event.deltaY
+        if (Math.abs(delta) < 2) return
+
+        event.preventDefault()
+        changeGalleryImage(delta > 0 ? 1 : -1, 'wheel')
+    }
+
     useEffect(() => {
         if (!showFavoriteToggle) return
 
@@ -171,6 +253,11 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             window.removeEventListener('pilger:favorites-changed', syncFavoriteState)
         }
     }, [property.id, showFavoriteToggle])
+
+    useEffect(() => {
+        touchStartXRef.current = null
+        suppressImageClickRef.current = false
+    }, [property.id, imageCount])
 
     const handleFavoriteToggle = (event: MouseEvent<HTMLButtonElement>) => {
         event.preventDefault()
@@ -197,9 +284,12 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             <div className="card-image-container">
                 <Link
                     href={href}
-                    className="image-link"
+                    className={`image-link${canBrowseImages ? ' image-link-gallery' : ''}`}
                     tabIndex={-1}
-                    onClick={handlePropertyClick}
+                    onClick={handleImageLinkClick}
+                    onTouchStart={handleImageTouchStart}
+                    onTouchEnd={handleImageTouchEnd}
+                    onWheel={handleImageWheel}
                     style={{ display: 'block', height: '100%', overflow: 'hidden', position: 'relative', width: '100%' }}
                 >
                     {isHomeCompact ? (
@@ -242,6 +332,42 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         </>
                     )}
                 </Link>
+                {canBrowseImages && (
+                    <>
+                        <button
+                            type="button"
+                            className="thumbnail-gallery-nav thumbnail-gallery-nav-prev"
+                            aria-label="Foto anterior"
+                            onClick={event => {
+                                event.preventDefault()
+                                event.stopPropagation()
+                                changeGalleryImage(-1, 'button')
+                            }}
+                        >
+                            <ChevronLeft size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                            type="button"
+                            className="thumbnail-gallery-nav thumbnail-gallery-nav-next"
+                            aria-label="Proxima foto"
+                            onClick={event => {
+                                event.preventDefault()
+                                event.stopPropagation()
+                                changeGalleryImage(1, 'button')
+                            }}
+                        >
+                            <ChevronRight size={16} aria-hidden="true" />
+                        </button>
+                        <div className="thumbnail-gallery-dots" aria-hidden="true">
+                            {Array.from({ length: Math.min(imageCount, 6) }).map((_, dotIndex) => (
+                                <span
+                                    className={`thumbnail-gallery-dot${dotIndex === Math.min(safeActiveImageIndex, 5) ? ' thumbnail-gallery-dot-active' : ''}`}
+                                    key={`${property.id}-thumbnail-dot-${dotIndex}`}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
                 {showFavoriteToggle && (
                     <button
                         type="button"
@@ -343,6 +469,9 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     border: none;
                     outline: none;
                     overflow: hidden;
+                }
+                .image-link-gallery {
+                    touch-action: pan-y;
                 }
                 .property-image {
                     display: block;
@@ -727,6 +856,111 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         min-height: 19px;
                         padding: 0 6px;
                         font-size: 0.49rem;
+                    }
+                }
+                .thumbnail-gallery-nav {
+                    position: absolute;
+                    top: 50%;
+                    z-index: 4;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 26px;
+                    height: 46px;
+                    border: 1px solid rgba(255,253,247,0.42);
+                    background: linear-gradient(180deg, rgba(255,253,247,0.44), rgba(31,27,21,0.24));
+                    color: #fffdf7;
+                    cursor: pointer;
+                    opacity: 0;
+                    transform: translateY(-50%) scale(0.98);
+                    box-shadow: 0 9px 18px rgba(24,21,17,0.18), inset 0 0 0 1px rgba(255,255,255,0.14);
+                    transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
+                    backdrop-filter: blur(7px);
+                }
+                .thumbnail-gallery-nav:hover,
+                .thumbnail-gallery-nav:focus-visible {
+                    background: linear-gradient(180deg, rgba(255,253,247,0.6), rgba(31,27,21,0.32));
+                    opacity: 1;
+                    transform: translateY(-50%) scale(1);
+                }
+                .thumbnail-gallery-nav:active {
+                    transform: translateY(-50%) scale(0.96);
+                }
+                .card-image-container:hover .thumbnail-gallery-nav,
+                .card-image-container:focus-within .thumbnail-gallery-nav {
+                    opacity: 0.92;
+                    transform: translateY(-50%) scale(1);
+                }
+                .thumbnail-gallery-nav-prev {
+                    left: 0;
+                    border-left: 0;
+                    border-radius: 0 999px 999px 0;
+                }
+                .thumbnail-gallery-nav-next {
+                    right: 0;
+                    border-right: 0;
+                    border-radius: 999px 0 0 999px;
+                }
+                .thumbnail-gallery-nav svg {
+                    width: 15px;
+                    height: 15px;
+                    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45));
+                    stroke-width: 2.75;
+                }
+                .thumbnail-gallery-dots {
+                    position: absolute;
+                    left: 50%;
+                    bottom: 11px;
+                    z-index: 3;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    min-height: 18px;
+                    padding: 5px 8px;
+                    border-radius: 999px;
+                    background: rgba(31,27,21,0.5);
+                    transform: translateX(-50%);
+                    pointer-events: none;
+                    backdrop-filter: blur(8px);
+                }
+                .thumbnail-gallery-dot {
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: rgba(255,253,247,0.62);
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+                }
+                .thumbnail-gallery-dot-active {
+                    width: 7px;
+                    height: 7px;
+                    background: #fffdf7;
+                }
+                @media (max-width: 649px) {
+                    .thumbnail-gallery-nav {
+                        display: inline-flex;
+                        width: 22px;
+                        height: 38px;
+                        border-color: rgba(255,253,247,0.46);
+                        opacity: 0.9;
+                        transform: translateY(-50%) scale(1);
+                    }
+                    .thumbnail-gallery-nav svg {
+                        width: 13px;
+                        height: 13px;
+                        stroke-width: 2.8;
+                    }
+                    .thumbnail-gallery-dots {
+                        bottom: 8px;
+                        gap: 4px;
+                        padding: 4px 6px;
+                    }
+                    .thumbnail-gallery-dot {
+                        width: 4px;
+                        height: 4px;
+                    }
+                    .thumbnail-gallery-dot-active {
+                        width: 6px;
+                        height: 6px;
                     }
                 }
                 .property-quality-badge {

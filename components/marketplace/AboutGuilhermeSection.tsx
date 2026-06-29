@@ -88,10 +88,11 @@ export default function AboutGuilhermeSection() {
                     width: 100%;
                     max-width: 1820px;
                     margin: 0 auto;
-                    padding: clamp(30px, 3.6vw, 52px) clamp(20px, 4vw, 44px);
+                    padding: clamp(30px, 3.6vw, 52px) clamp(20px, 4vw, 44px) 0;
                 }
                 .about-media {
                     position: relative;
+                    align-self: end;
                     min-height: 0;
                     display: flex;
                     align-items: center;
@@ -111,9 +112,9 @@ export default function AboutGuilhermeSection() {
                     position: relative;
                     z-index: 1;
                     display: block;
-                    width: min(100%, 1144px);
+                    width: min(104%, 1190px);
                     height: auto;
-                    max-width: 100%;
+                    max-width: 104%;
                     max-height: clamp(845px, 72vw, 1294px);
                     object-fit: contain;
                     object-position: center bottom;
