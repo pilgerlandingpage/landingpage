@@ -78,6 +78,11 @@ function asNumber(value: string | string[] | undefined) {
     return Number.isFinite(number) ? number : 0
 }
 
+function asBooleanParam(value: string | string[] | undefined) {
+    const normalized = normalizeLocationName(firstParam(value) || '')
+    return ['1', 'true', 'sim', 'yes'].includes(normalized)
+}
+
 type MapDrawArea = Array<[number, number]>
 
 type MapBounds = {
@@ -154,9 +159,9 @@ function applyTextFilter(query: any, tag: string | undefined) {
     if (!tag) return query
 
     const filters: Record<string, string[]> = {
-        'frente-mar': ['frente', 'mar'],
-        'vista-mar': ['vista', 'mar'],
-        'quadra-mar': ['quadra', 'mar'],
+        'frente-mar': ['frente mar', 'frente ao mar', 'frente para o mar', 'beira mar', 'pe na areia', 'pé na areia'],
+        'vista-mar': ['vista mar', 'vista para o mar', 'vista oceanica', 'vista panoramica'],
+        'quadra-mar': ['quadra mar', 'quadra do mar', 'uma quadra do mar'],
         lancamento: ['lancamento', 'lançamento'],
         'em-construcao': ['construcao', 'construção', 'na planta'],
         pronto: ['pronto'],
@@ -170,6 +175,7 @@ function applyTextFilter(query: any, tag: string | undefined) {
             `title.ilike.%${term}%`,
             `description.ilike.%${term}%`,
             `property_type.ilike.%${term}%`,
+            `source_status.ilike.%${term}%`,
         ])
         .join(',')
 
@@ -285,6 +291,7 @@ export default async function SearchPage({
     const subtype = firstParam(resolvedParams.subtype) || naturalSearch.subtype
     const city = firstParam(resolvedParams.city) || naturalSearch.city
     const tag = firstParam(resolvedParams.tag) || naturalSearch.tag
+    const exclusiveOnly = asBooleanParam(resolvedParams.exclusive)
     const brokerName = firstParam(resolvedParams.broker)
     const brokerLogin = firstParam(resolvedParams.brokerLogin)
     const offer = firstParam(resolvedParams.offer)
@@ -374,6 +381,7 @@ export default async function SearchPage({
     if (areaMax > 0) query = query.lte('area_m2', areaMax)
     if (offer === 'rent') query = query.not('rent', 'is', null)
     if (offer === 'sale') query = query.not('price', 'is', null)
+    if (exclusiveOnly) query = query.eq('exclusive', true)
     if (brokerPropertyIds) {
         query = brokerPropertyIds.length > 0
             ? query.in('id', brokerPropertyIds)

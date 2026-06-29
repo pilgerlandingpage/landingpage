@@ -10,6 +10,7 @@ import type {
 import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
 type PreviewProperty = {
@@ -34,6 +35,7 @@ type PreviewProperty = {
     source_status?: string | null
     exclusive?: boolean | null
     video_url?: string | null
+    amenities?: string[] | null
 }
 
 type MapPropertyPreviewCardProps = {
@@ -59,13 +61,6 @@ function formatPrice(price?: number | null) {
     }).format(price)
 }
 
-function normalizeText(value: unknown) {
-    return String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-}
-
 function compactNumber(value?: number | null) {
     if (!value) return ''
     return value.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
@@ -79,22 +74,7 @@ function galleryFor(property: PreviewProperty) {
 }
 
 function getBadges(property: PreviewProperty) {
-    const text = normalizeText([
-        property.title,
-        property.description,
-        property.property_type,
-        property.neighborhood,
-        property.source_status,
-    ].filter(Boolean).join(' '))
-
-    const badges: string[] = []
-    if (property.exclusive) badges.push('Exclusivo')
-    if (/frente.?mar|vista.?mar|beira.?mar|quadra.?mar/.test(text)) badges.push('Frente mar')
-    if (/lancamento|construcao|na planta|pre lancamento/.test(text)) badges.push('Lancamento')
-    if (/reducao|baixou|oportunidade|preco/.test(text) && /reducao|baixou|oportunidade/.test(text)) badges.push('Redução')
-    if (property.video_url) badges.push('Video')
-
-    return badges.slice(0, 3)
+    return [getPropertyPrimaryQualityLabel(property).label]
 }
 
 function uniqueProperties(properties: PreviewProperty[] | undefined, fallback: PreviewProperty) {

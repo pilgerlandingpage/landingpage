@@ -32,6 +32,20 @@ function normalizeText(value: unknown) {
         .replace(/[\u0300-\u036f]/g, '')
 }
 
+function getPropertySearchText(property: PropertyIntelligenceInput) {
+    const amenities = Array.isArray(property.amenities) ? property.amenities.join(' ') : ''
+
+    return [
+        property.title,
+        property.description,
+        property.property_type,
+        property.source_status,
+        property.neighborhood,
+        property.city,
+        amenities,
+    ].map(normalizeText).join(' ')
+}
+
 export function toPropertyNumber(value: unknown) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : 0
     const normalized = String(value || '')
@@ -63,18 +77,44 @@ function wasUpdatedRecently(property: PropertyIntelligenceInput) {
 }
 
 function hasText(property: PropertyIntelligenceInput, pattern: RegExp) {
-    const amenities = Array.isArray(property.amenities) ? property.amenities.join(' ') : ''
-    const haystack = [
-        property.title,
-        property.description,
-        property.property_type,
-        property.source_status,
-        property.neighborhood,
-        property.city,
-        amenities,
-    ].map(normalizeText).join(' ')
+    return pattern.test(getPropertySearchText(property))
+}
 
-    return pattern.test(haystack)
+export function isPropertyFrontSea(property: PropertyIntelligenceInput) {
+    return hasText(property, /frente\s*(ao\s*)?mar|beira\s*mar|pe\s*na\s*areia/)
+}
+
+export function isPropertyLaunch(property: PropertyIntelligenceInput) {
+    return /lancamento|pre\s*lancamento|na planta|em construcao|entrega prevista/.test(getPropertySearchText(property))
+}
+
+export function getPropertyPrimaryQualityLabel(property: PropertyIntelligenceInput): PropertyIntelligenceLabel {
+    const area = getPropertyArea(property)
+    const price = toPropertyNumber(property.price)
+    const suites = toPropertyNumber(property.suites)
+    const parking = toPropertyNumber(property.parking_spaces)
+    const text = getPropertySearchText(property)
+    const exclusive = Boolean(property.exclusive)
+    const frontSea = isPropertyFrontSea(property)
+    const launch = isPropertyLaunch(property)
+
+    if (exclusive && frontSea) return { key: 'exclusive-front-sea', label: 'Frente mar exclusivo', tone: 'blue' }
+    if (exclusive && launch) return { key: 'exclusive-launch', label: 'Lançamento exclusivo', tone: 'gold' }
+    if (exclusive) return { key: 'exclusive', label: 'Exclusivo', tone: 'dark' }
+    if (launch && frontSea) return { key: 'launch-front-sea', label: 'Lançamento frente mar', tone: 'gold' }
+    if (launch) return { key: 'launch', label: 'Lançamento', tone: 'gold' }
+    if (frontSea) return { key: 'front-sea', label: 'Frente mar', tone: 'blue' }
+    if (/vista\s*(para\s*o\s*)?mar|vista oceanica|vista panoramica/.test(text)) return { key: 'sea-view', label: 'Vista mar', tone: 'blue' }
+    if (/cobertura/.test(text)) return { key: 'penthouse', label: 'Cobertura', tone: 'gold' }
+    if (/garden|duplex|triplex|penthouse/.test(text)) return { key: 'rare-profile', label: 'Perfil raro', tone: 'gold' }
+    if (price >= 10000000) return { key: 'high-ticket', label: 'Ultra luxo', tone: 'gold' }
+    if (area >= 350) return { key: 'large-plan', label: 'Planta ampla', tone: 'green' }
+    if (suites >= 4) return { key: 'family-premium', label: '4+ suítes', tone: 'dark' }
+    if (parking >= 4) return { key: 'parking', label: 'Garagem ampla', tone: 'dark' }
+    if (/decorad/.test(text)) return { key: 'decorated', label: 'Decorado', tone: 'green' }
+    if (/mobiliad|porteira fechada|com moveis/.test(text)) return { key: 'furnished', label: 'Mobiliado', tone: 'green' }
+
+    return { key: 'high-standard', label: 'Alto padrão', tone: 'dark' }
 }
 
 export function getPropertyIntelligenceLabels(

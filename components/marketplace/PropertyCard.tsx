@@ -7,7 +7,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { BedDouble, Camera, Car, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
-import { getPropertyIntelligenceLabels } from '@/lib/properties/intelligence'
+import { getPropertyIntelligenceLabels, getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
 interface PropertyCardProps {
@@ -117,6 +117,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageCount = Array.isArray(property.images) ? property.images.filter(Boolean).length : 0
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
+    const primaryQualityLabel = getPropertyPrimaryQualityLabel(property)
     const intelligenceLabels = isHomeCompact
         ? []
         : getPropertyIntelligenceLabels(property, {
@@ -124,7 +125,6 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             max: 3,
         })
     const cardTitle = displayTitle
-    const isFrenteMar = /frente.?mar|frente ao mar/i.test(displayTitle) || amenities.some(a => /frente.?mar/i.test(a))
     /*
         ? [property.property_type || 'Imóvel', compactPlace].filter(Boolean).join(' · ')
         : displayTitle
@@ -220,7 +220,9 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                     {imageCount}
                                 </span>
                             )}
-                            {isFrenteMar && <span className="frente-mar-badge">🌊 Frente Mar</span>}
+                            <span className={`property-quality-badge property-quality-badge-${primaryQualityLabel.tone}`}>
+                                {primaryQualityLabel.label}
+                            </span>
                         </>
                     ) : (
                         <>
@@ -234,7 +236,9 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                 loading={imagePriority ? undefined : 'lazy'}
                                 decoding="async"
                             />
-                            {isFrenteMar && <span className="frente-mar-badge">🌊 Frente Mar</span>}
+                            <span className={`property-quality-badge property-quality-badge-${primaryQualityLabel.tone}`}>
+                                {primaryQualityLabel.label}
+                            </span>
                         </>
                     )}
                 </Link>
@@ -725,22 +729,48 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         font-size: 0.49rem;
                     }
                 }
-                .frente-mar-badge {
+                .property-quality-badge {
                     position: absolute;
-                    bottom: 9px;
+                    top: 9px;
                     left: 9px;
                     z-index: 2;
                     display: inline-flex;
                     align-items: center;
-                    gap: 4px;
-                    padding: 5px 10px;
+                    max-width: calc(100% - 58px);
+                    min-height: 24px;
+                    padding: 0 9px;
                     border-radius: 999px;
-                    background: linear-gradient(135deg, #1a6fa8cc, #0d4f7ecc);
-                    color: #fff;
+                    color: #fff8ea;
                     font: 700 0.66rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.04em;
+                    letter-spacing: 0.05em;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                     backdrop-filter: blur(8px);
                     text-transform: uppercase;
+                    white-space: nowrap;
+                }
+                .property-quality-badge-blue {
+                    background: linear-gradient(135deg, rgba(26,111,168,0.92), rgba(13,79,126,0.92));
+                }
+                .property-quality-badge-gold {
+                    background: linear-gradient(135deg, rgba(184,148,95,0.95), rgba(143,103,38,0.95));
+                    color: #fffdf7;
+                }
+                .property-quality-badge-dark {
+                    background: rgba(31,27,21,0.86);
+                }
+                .property-quality-badge-green {
+                    background: linear-gradient(135deg, rgba(31,125,83,0.92), rgba(22,92,67,0.92));
+                }
+                @media (max-width: 649px) {
+                    .property-quality-badge {
+                        top: 7px;
+                        left: 7px;
+                        max-width: calc(100% - 48px);
+                        min-height: 20px;
+                        padding: 0 7px;
+                        font-size: 0.49rem;
+                    }
                 }
                 @media (min-width: 1024px) {
                     .card-image-container {

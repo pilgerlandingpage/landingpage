@@ -44,6 +44,7 @@ import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_I
 import { cleanPublicPropertyText, compactPublicPropertyText } from '@/lib/properties/text'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
+import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 import { fetchPropertyPriceHistory, type PropertyPriceHistoryRow } from '@/lib/properties/price-history'
 import {
@@ -297,47 +298,6 @@ function normalizeContentKey(value: unknown) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, ' ')
         .trim()
-}
-
-const PROPERTY_MAIN_BENEFIT_RULES = [
-    { label: 'Frente mar', patterns: [/\bfrente\s+(ao\s+)?mar\b/, /\bbeira\s+mar\b/, /\bpe\s+na\s+areia\b/] },
-    { label: 'Vista mar', patterns: [/\bvista\s+(para\s+o\s+)?mar\b/, /\bvista\s+oceanica\b/] },
-    { label: 'Quadra mar', patterns: [/\bquadra\s+(do\s+)?mar\b/, /\ba\s+uma\s+quadra\s+do\s+mar\b/] },
-    { label: 'Lançamento', patterns: [/\blancamento\b/, /\bpre\s+lancamento\b/, /\bna\s+planta\b/, /\bem\s+construcao\b/, /\bentrega\s+prevista\b/] },
-    { label: 'Decorado', patterns: [/\bdecorad[oa]s?\b/] },
-    { label: 'Pronto para morar', patterns: [/\bpront[oa]\s+para\s+morar\b/, /\bpront[oa]\s+para\s+ocupar\b/] },
-    { label: 'Novo', patterns: [/\bnov[oa]s?\b/, /\brecem\s+entregue\b/, /\bnunca\s+habitad[oa]\b/, /\bprimeira\s+locacao\b/] },
-    { label: 'Churrasqueira a carvão', patterns: [/\bchurrasqueira\s+(a\s+)?carvao\b/] },
-    { label: 'Sem mobília', patterns: [/\bsem\s+mobilia\b/, /\bsem\s+moveis\b/, /\bsem\s+mobiliacao\b/, /\bnao\s+mobiliad[oa]\b/] },
-    { label: 'Mobiliado', patterns: [/\bmobiliad[oa]s?\b/, /\bcom\s+moveis\b/, /\bporteira\s+fechada\b/] },
-]
-
-function buildPropertyMainBenefitTag(property: any) {
-    const amenities = Array.isArray(property?.amenities) ? property.amenities : []
-    const searchableText = normalizeContentKey([
-        property?.title,
-        property?.seo_title,
-        property?.description,
-        property?.seo_description,
-        property?.property_type,
-        property?.source_status,
-        ...amenities,
-    ].filter(Boolean).join(' '))
-
-    if (!searchableText) return ''
-
-    const matchedRule = PROPERTY_MAIN_BENEFIT_RULES.find(rule => (
-        rule.patterns.some(pattern => pattern.test(searchableText))
-    ))
-
-    if (matchedRule) return matchedRule.label
-
-    const propertyType = normalizeContentKey(property?.property_type)
-    if (/\b(terreno|comercial|sala|galpao|predio|deposito)\b/.test(propertyType)) {
-        return 'Novo'
-    }
-
-    return 'Pronto para morar'
 }
 
 function splitDescriptionSentences(value: string) {
@@ -876,7 +836,8 @@ export default async function PropertyDetailPage({
         : 'Corretor de imóveis'
     const gallery = getGallery(property)
     const amenities: string[] = property.amenities || []
-    const mainBenefitTag = buildPropertyMainBenefitTag(property)
+    const primaryQualityLabel = getPropertyPrimaryQualityLabel(property)
+    const mainBenefitTag = primaryQualityLabel.label
     const displayTitle = cleanRepeatedPraiaBravaText(property.title)
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
@@ -1193,7 +1154,9 @@ export default async function PropertyDetailPage({
 
                     <div className="plp-title-row">
                         <div>
-                            <span className="plp-kicker">{property.exclusive ? 'Exclusivo Guilherme Pilger' : property.property_type || 'Imóvel à venda'}</span>
+                            <span className={`plp-kicker plp-property-quality-kicker plp-property-quality-kicker-${primaryQualityLabel.tone}`}>
+                                {mainBenefitTag}
+                            </span>
                             <h1>{displayTitle}</h1>
                             <div className="plp-rating-row" aria-label="Avaliação editorial">
                                 <span><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /></span>
@@ -1245,10 +1208,11 @@ export default async function PropertyDetailPage({
                         )}
                     >
                         <section className="plp-mobile-sheet-summary plp-mobile-card plp-mobile-card--summary">
-                            {property.exclusive && <span className="plp-mobile-price-badge">Exclusivo Pilger</span>}
+                            <span className={`plp-mobile-price-badge plp-mobile-price-badge-${primaryQualityLabel.tone}`}>
+                                {mainBenefitTag}
+                            </span>
                             <h2 className="plp-mobile-sheet-title">{displayTitle}</h2>
                             <span className="plp-mobile-sheet-price">{formatMoney(property.price)}</span>
-                            {mainBenefitTag && <span className="plp-mobile-main-benefit-tag">{mainBenefitTag}</span>}
                             <div className="plp-mobile-sheet-facts">
                                 {bedroomCount > 0 && (
                                     <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--beds">
@@ -1402,10 +1366,13 @@ export default async function PropertyDetailPage({
                                         const itemSuites = Number(item.suites || item.bedrooms || 0)
                                         const relatedLocation = buildDisplayLocationParts(item.neighborhood, item.city).join(' - ')
                                         const relatedTitle = cleanRepeatedPraiaBravaText(item.title)
+                                        const itemQualityLabel = getPropertyPrimaryQualityLabel(item)
                                         return (
                                             <Link key={item.id} href={propertyDetailsPath(item)} className="plp-mobile-related-card">
                                                 <img src={image} alt={relatedTitle} loading="lazy" />
-                                                {item.exclusive && <span>Exclusivo</span>}
+                                                <span className={`plp-mobile-related-badge plp-mobile-related-badge-${itemQualityLabel.tone}`}>
+                                                    {itemQualityLabel.label}
+                                                </span>
                                                 <div>
                                                     <strong>{formatMoney(item.price)}</strong>
                                                     <small>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m²` : 'Área sob consulta'} | {itemSuites ? `${itemSuites} suítes` : item.property_type || 'Imóvel'}</small>
@@ -1623,7 +1590,9 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-loc-price">
                                     <strong>{formatMoney(property.price)}</strong>
-                                    {mainBenefitTag && <span className="plp-side-benefit-tag">{mainBenefitTag}</span>}
+                                    <span className={`plp-side-benefit-tag plp-side-benefit-tag-${primaryQualityLabel.tone}`}>
+                                        {mainBenefitTag}
+                                    </span>
                                     <span className="plp-side-price-note">valor anunciado</span>
                                 </div>
                             </div>
@@ -1716,10 +1685,13 @@ export default async function PropertyDetailPage({
                                 const itemSuites = Number(item.suites || item.bedrooms || 0)
                                 const relatedLocation = buildDisplayLocationParts(item.neighborhood, item.city).join(' - ')
                                 const relatedTitle = cleanRepeatedPraiaBravaText(item.title)
+                                const itemQualityLabel = getPropertyPrimaryQualityLabel(item)
                                 return (
                                     <Link key={item.id} href={propertyDetailsPath(item)} className="plp-related-card">
                                         <img src={image} alt={relatedTitle} loading="lazy" />
-                                        {item.exclusive && <span className="plp-card-ribbon">Exclusivo</span>}
+                                        <span className={`plp-card-ribbon plp-card-ribbon-${itemQualityLabel.tone}`}>
+                                            {itemQualityLabel.label}
+                                        </span>
                                         <div>
                                             <small><MapPin size={13} /> {relatedLocation || 'Litoral catarinense'}</small>
                                             <h3>{relatedTitle}</h3>

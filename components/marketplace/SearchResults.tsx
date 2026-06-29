@@ -237,6 +237,7 @@ function getFilterLabel(key: string, value: string) {
         priceMax: `Max. R$ ${Number(value).toLocaleString('pt-BR')}`,
         broker: `Corretor: ${value}`,
         office: 'Imobiliária Guilherme Pilger',
+        exclusive: 'Exclusivos',
         subtype: value.replace(/-/g, ' '),
         tag: tagLabels[value] || value.replace(/-/g, ' '),
     }

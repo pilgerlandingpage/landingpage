@@ -17,6 +17,7 @@ import YoutubeFeedSection from '@/components/marketplace/YoutubeFeedSection'
 import PremiumCategoryAutoRail from '@/components/marketplace/PremiumCategoryAutoRail'
 import HeroVideoBackground from '@/components/marketplace/HeroVideoBackground'
 import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
+import { isPropertyFrontSea, isPropertyLaunch } from '@/lib/properties/intelligence'
 import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
@@ -215,10 +216,7 @@ export default async function MarketplaceHome() {
       return city.aliases.includes(cityName) || city.aliases.includes(displayName)
     }).length,
   }))
-  const launchCount = homeProperties.filter(p => {
-    const text = `${p.title || ''} ${p.description || ''} ${p.source_status || ''}`.toLowerCase()
-    return text.includes('lancamento') || text.includes('lançamento') || text.includes('construcao') || text.includes('construção') || text.includes('na planta')
-  }).length
+  const launchCount = homeProperties.filter(isPropertyLaunch).length
   const premiumCategories = [
     {
       title: 'Frente mar',
@@ -340,15 +338,17 @@ export default async function MarketplaceHome() {
   const allowedFeaturedCities = featuredCities.filter(city => !HOME_EXCLUDED_CITIES.has(normalizeCityName(city)))
   const citySections = buildCitySections(homeProperties, allowedFeaturedCities, itemsPerSection)
 
-  // 4. Launches
+  // 4. Premium tag sections
+  const exclusiveProperties = homeProperties
+    .filter(p => Boolean(p.exclusive))
+    .slice(0, itemsPerSection)
+
   const launches = homeProperties
-    .filter(p => {
-      const desc = (p.description || '').toLowerCase()
-      const title = (p.title || '').toLowerCase()
-      return desc.includes('lançamento') || desc.includes('lancamento') ||
-             title.includes('lançamento') || title.includes('lancamento') ||
-             desc.includes('em construção') || desc.includes('na planta')
-    })
+    .filter(isPropertyLaunch)
+    .slice(0, itemsPerSection)
+
+  const frontSeaProperties = homeProperties
+    .filter(isPropertyFrontSea)
     .slice(0, itemsPerSection)
 
   // Categories are now managed directly by CategoriesCarousel
@@ -433,6 +433,33 @@ export default async function MarketplaceHome() {
       {/* === HOMEPAGE SECTIONS (admin controlled) === */}
       <div className="listings-section">
 
+        <HomepageSection
+          title="Exclusivos"
+          subtitle="Gestão exclusiva Guilherme Pilger"
+          properties={exclusiveProperties}
+          lpMap={lpMap}
+          viewAllHref="/busca?exclusive=1"
+          viewAllLabel="Ver exclusivos"
+        />
+
+        <HomepageSection
+          title="Lançamentos"
+          subtitle="Na planta, em construção e oportunidades de entrada"
+          properties={launches}
+          lpMap={lpMap}
+          viewAllHref="/busca?tag=lancamento"
+          viewAllLabel="Ver lançamentos"
+        />
+
+        <HomepageSection
+          title="Frente mar"
+          subtitle="Imóveis com leitura direta de mar e localização premium"
+          properties={frontSeaProperties}
+          lpMap={lpMap}
+          viewAllHref="/busca?tag=frente-mar"
+          viewAllLabel="Ver frente mar"
+        />
+
         {sectionsEnabled.includes('featured') && (
           <HomepageSection
             title={featuredTitle}
@@ -474,16 +501,6 @@ export default async function MarketplaceHome() {
             viewAllHref={`/busca?city=${encodeURIComponent(searchCity)}`}
           />
         ))}
-
-        {sectionsEnabled.includes('launches') && launches.length > 0 && (
-          <HomepageSection
-            title="Lançamentos"
-            subtitle="Em construção e na planta"
-            properties={launches}
-            lpMap={lpMap}
-            viewAllHref="/busca?tag=lancamento"
-          />
-        )}
 
       </div>
       

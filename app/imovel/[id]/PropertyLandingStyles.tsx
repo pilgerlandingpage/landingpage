@@ -264,6 +264,52 @@ export default function PropertyLandingStyles() {
                     text-transform: uppercase;
                 }
 
+                .plp-property-quality-kicker {
+                    display: inline-flex;
+                    align-items: center;
+                    width: fit-content;
+                    min-height: 24px;
+                    padding: 0 10px;
+                    border-radius: 999px;
+                    letter-spacing: 0.1em;
+                }
+
+                .plp-property-quality-kicker-blue,
+                .plp-side-benefit-tag-blue,
+                .plp-card-ribbon-blue,
+                .plp-mobile-price-badge-blue,
+                .plp-mobile-related-badge-blue {
+                    background: rgba(26, 111, 168, 0.12) !important;
+                    color: #1a6fa8 !important;
+                }
+
+                .plp-property-quality-kicker-gold,
+                .plp-side-benefit-tag-gold,
+                .plp-card-ribbon-gold,
+                .plp-mobile-price-badge-gold,
+                .plp-mobile-related-badge-gold {
+                    background: rgba(189, 149, 81, 0.15) !important;
+                    color: var(--plp-gold-dark) !important;
+                }
+
+                .plp-property-quality-kicker-dark,
+                .plp-side-benefit-tag-dark,
+                .plp-card-ribbon-dark,
+                .plp-mobile-price-badge-dark,
+                .plp-mobile-related-badge-dark {
+                    background: rgba(23, 26, 29, 0.86) !important;
+                    color: #fff !important;
+                }
+
+                .plp-property-quality-kicker-green,
+                .plp-side-benefit-tag-green,
+                .plp-card-ribbon-green,
+                .plp-mobile-price-badge-green,
+                .plp-mobile-related-badge-green {
+                    background: rgba(15, 159, 122, 0.14) !important;
+                    color: #0a7f63 !important;
+                }
+
                 .plp-title-row h1 {
                     margin: 0;
                     color: var(--plp-ink);
