@@ -44,6 +44,7 @@ interface PropertyCardProps {
 
 const FAVORITES_KEY = 'pilger_property_favorites'
 const FALLBACK_IMAGE = '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
+const PHOTO_SWIPE_INTENT_THRESHOLD = 8
 const PHOTO_SWIPE_THRESHOLD = 34
 
 function readFavoriteIds() {
@@ -106,6 +107,11 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const [isFavorite, setIsFavorite] = useState(false)
     const [activeImageState, setActiveImageState] = useState({ propertyId: property.id, imageCount: 0, index: 0 })
     const touchStartXRef = useRef<number | null>(null)
+    const touchStartYRef = useRef<number | null>(null)
+    const touchLastXRef = useRef<number | null>(null)
+    const touchLastYRef = useRef<number | null>(null)
+    const imageSwipeIntentRef = useRef<'horizontal' | 'vertical' | null>(null)
+    const imageLinkRef = useRef<HTMLAnchorElement | null>(null)
     const suppressImageClickRef = useRef(false)
     const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
     const detailsHref = propertyDetailsPath(property)
@@ -203,16 +209,53 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
 
     const handleImageTouchStart = (event: TouchEvent<HTMLAnchorElement>) => {
         if (!canBrowseImages) return
-        touchStartXRef.current = event.touches[0]?.clientX ?? null
+        const touch = event.touches[0]
+        touchStartXRef.current = touch?.clientX ?? null
+        touchStartYRef.current = touch?.clientY ?? null
+        touchLastXRef.current = touch?.clientX ?? null
+        touchLastYRef.current = touch?.clientY ?? null
+        imageSwipeIntentRef.current = null
+    }
+
+    const handleImageTouchMove = (event: TouchEvent<HTMLAnchorElement>) => {
+        if (!canBrowseImages || touchStartXRef.current === null || touchStartYRef.current === null) return
+
+        const touch = event.touches[0]
+        const currentX = touch?.clientX ?? touchLastXRef.current ?? touchStartXRef.current
+        const currentY = touch?.clientY ?? touchLastYRef.current ?? touchStartYRef.current
+        touchLastXRef.current = currentX
+        touchLastYRef.current = currentY
+
+        const deltaX = currentX - touchStartXRef.current
+        const deltaY = currentY - touchStartYRef.current
+        const absX = Math.abs(deltaX)
+        const absY = Math.abs(deltaY)
+
+        if (!imageSwipeIntentRef.current && Math.max(absX, absY) >= PHOTO_SWIPE_INTENT_THRESHOLD) {
+            imageSwipeIntentRef.current = absX > absY * 1.15 ? 'horizontal' : 'vertical'
+        }
+
+        if (imageSwipeIntentRef.current === 'horizontal') {
+            event.preventDefault()
+            event.stopPropagation()
+        }
     }
 
     const handleImageTouchEnd = (event: TouchEvent<HTMLAnchorElement>) => {
-        if (!canBrowseImages || touchStartXRef.current === null) return
+        if (!canBrowseImages || touchStartXRef.current === null || touchStartYRef.current === null) return
 
-        const deltaX = (event.changedTouches[0]?.clientX ?? 0) - touchStartXRef.current
+        const endX = event.changedTouches[0]?.clientX ?? touchLastXRef.current ?? touchStartXRef.current
+        const endY = event.changedTouches[0]?.clientY ?? touchLastYRef.current ?? touchStartYRef.current
+        const deltaX = endX - touchStartXRef.current
+        const deltaY = endY - touchStartYRef.current
+        const isHorizontalSwipe = imageSwipeIntentRef.current === 'horizontal' || Math.abs(deltaX) > Math.abs(deltaY) * 1.15
         touchStartXRef.current = null
+        touchStartYRef.current = null
+        touchLastXRef.current = null
+        touchLastYRef.current = null
+        imageSwipeIntentRef.current = null
 
-        if (Math.abs(deltaX) < PHOTO_SWIPE_THRESHOLD) return
+        if (!isHorizontalSwipe || Math.abs(deltaX) < PHOTO_SWIPE_THRESHOLD) return
 
         event.preventDefault()
         event.stopPropagation()
@@ -222,6 +265,14 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         }, 160)
 
         changeGalleryImage(deltaX < 0 ? 1 : -1, 'swipe')
+    }
+
+    const handleImageTouchCancel = () => {
+        touchStartXRef.current = null
+        touchStartYRef.current = null
+        touchLastXRef.current = null
+        touchLastYRef.current = null
+        imageSwipeIntentRef.current = null
     }
 
     const handleImageWheel = (event: WheelEvent<HTMLAnchorElement>) => {
@@ -236,6 +287,41 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         event.preventDefault()
         changeGalleryImage(delta > 0 ? 1 : -1, 'wheel')
     }
+
+    useEffect(() => {
+        const node = imageLinkRef.current
+        if (!node || !canBrowseImages) return
+
+        const handleNativeTouchMove = (event: globalThis.TouchEvent) => {
+            if (touchStartXRef.current === null || touchStartYRef.current === null) return
+
+            const touch = event.touches[0]
+            const currentX = touch?.clientX ?? touchLastXRef.current ?? touchStartXRef.current
+            const currentY = touch?.clientY ?? touchLastYRef.current ?? touchStartYRef.current
+            touchLastXRef.current = currentX
+            touchLastYRef.current = currentY
+
+            const deltaX = currentX - touchStartXRef.current
+            const deltaY = currentY - touchStartYRef.current
+            const absX = Math.abs(deltaX)
+            const absY = Math.abs(deltaY)
+
+            if (!imageSwipeIntentRef.current && Math.max(absX, absY) >= PHOTO_SWIPE_INTENT_THRESHOLD) {
+                imageSwipeIntentRef.current = absX > absY * 1.15 ? 'horizontal' : 'vertical'
+            }
+
+            if (imageSwipeIntentRef.current === 'horizontal') {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+        }
+
+        node.addEventListener('touchmove', handleNativeTouchMove, { passive: false })
+
+        return () => {
+            node.removeEventListener('touchmove', handleNativeTouchMove)
+        }
+    }, [canBrowseImages])
 
     useEffect(() => {
         if (!showFavoriteToggle) return
@@ -256,6 +342,10 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
 
     useEffect(() => {
         touchStartXRef.current = null
+        touchStartYRef.current = null
+        touchLastXRef.current = null
+        touchLastYRef.current = null
+        imageSwipeIntentRef.current = null
         suppressImageClickRef.current = false
     }, [property.id, imageCount])
 
@@ -283,12 +373,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         <div className={`property-card ${isHomeCompact ? 'property-card-compact' : ''}`}>
             <div className="card-image-container">
                 <Link
+                    ref={imageLinkRef}
                     href={href}
                     className={`image-link${canBrowseImages ? ' image-link-gallery' : ''}`}
                     tabIndex={-1}
                     onClick={handleImageLinkClick}
                     onTouchStart={handleImageTouchStart}
+                    onTouchMove={handleImageTouchMove}
                     onTouchEnd={handleImageTouchEnd}
+                    onTouchCancel={handleImageTouchCancel}
                     onWheel={handleImageWheel}
                     style={{ display: 'block', height: '100%', overflow: 'hidden', position: 'relative', width: '100%' }}
                 >
