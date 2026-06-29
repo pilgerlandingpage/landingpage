@@ -403,9 +403,24 @@ export default function HomepageSection({
                         line-height: 1.02;
                     }
                     .section-header-right {
-                        display: none;
-                        justify-content: space-between;
-                        margin-top: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-end;
+                        flex: 0 0 auto;
+                        margin-top: 0;
+                    }
+                    .carousel-arrows {
+                        gap: 5px;
+                    }
+                    .arrow-btn {
+                        width: 30px;
+                        height: 30px;
+                        background: rgba(255, 255, 255, 0.86);
+                        box-shadow: 0 8px 18px rgba(31, 27, 21, 0.08);
+                    }
+                    .arrow-btn :global(svg) {
+                        width: 16px;
+                        height: 16px;
                     }
                     .homepage-section :global(.section-view-all-mobile) {
                         display: inline-flex;

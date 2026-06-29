@@ -937,17 +937,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 }
                 @media (max-width: 649px) {
                     .thumbnail-gallery-nav {
-                        display: inline-flex;
-                        width: 22px;
-                        height: 38px;
-                        border-color: rgba(255,253,247,0.46);
-                        opacity: 0.9;
-                        transform: translateY(-50%) scale(1);
-                    }
-                    .thumbnail-gallery-nav svg {
-                        width: 13px;
-                        height: 13px;
-                        stroke-width: 2.8;
+                        display: none;
                     }
                     .thumbnail-gallery-dots {
                         bottom: 8px;
