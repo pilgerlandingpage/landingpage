@@ -69,6 +69,7 @@ function sourceLabel(key: string) {
         organic_social_media: 'Organico',
         marketing_creatives: 'Criativos',
         broker_candidates: 'Candidatos corretores',
+        broker_attendance_daily_history: 'Historico dos corretores',
         ecosystem_events: 'Eventos da Central',
     }
     return map[key] || key
@@ -136,6 +137,7 @@ export default function AdminIntelligencePage() {
         { label: 'WhatsApp', value: overview.whatsapp_events },
         { label: 'Pesquisas', value: overview.completed_research },
         { label: 'Corretores', value: overview.broker_candidates },
+        { label: 'Relatorios corretor', value: overview.broker_attendance_reports },
         { label: 'Eventos IA', value: overview.ecosystem_events },
     ], [overview])
 

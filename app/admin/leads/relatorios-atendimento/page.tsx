@@ -859,7 +859,7 @@ export default function AttendanceReportsPage() {
                         <BarChart3 size={24} color="var(--gold)" /> Relatórios de Atendimento
                     </h1>
                     <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                        Conversas importadas das instâncias conectadas, com leitura diária por corretor.
+                        Relatorio diario por corretor, com historico salvo e enviado para a Central de Inteligencia.
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -922,6 +922,7 @@ export default function AttendanceReportsPage() {
                         <MiniStat label="Chats lidos" value={lastRunSummary.chats} />
                         <MiniStat label="Mensagens novas" value={lastRunSummary.messages} />
                         <MiniStat label="Relatorios atualizados" value={lastRunSummary.reports} />
+                        <MiniStat label="Historicos salvos" value={lastRunSummary.reports} />
                         <MiniStat label="Historicos solicitados" value={lastRunSummary.historySyncRequested} />
                         <MiniStat label="Solicitados sem ancora" value={lastRunSummary.historySyncRequestedWithoutAnchor} />
                         <MiniStat label="Falhas sem ancora" value={lastRunSummary.historySyncSkippedNoAnchor} />
@@ -936,6 +937,7 @@ export default function AttendanceReportsPage() {
 
             <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 12 }}>
                 <Metric icon={<Users size={18} />} label="Instâncias monitoradas" value={`${monitoredInstances}/${instances.length}`} />
+                <Metric icon={<Clock size={18} />} label="Historicos diarios" value={String(reports.length)} />
                 <Metric icon={<MessageSquare size={18} />} label="Conversas analisadas" value={String(totals.conversations)} />
                 <Metric icon={<Database size={18} />} label="Mensagens analisadas" value={String(totals.messages)} />
                 <Metric icon={<Flame size={18} />} label="Leads quentes" value={String(totals.hot)} />

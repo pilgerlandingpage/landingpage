@@ -14,6 +14,7 @@ import {
     type AttendanceCoachConversationInput,
 } from './attendance-coach-agent'
 import { normalizeWhatsAppInstanceConfig } from './instance-config'
+import { recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
@@ -68,6 +69,14 @@ type NormalizedMessage = {
     body: string | null
     messageTimestamp: string | null
     raw: any
+}
+
+type AttendanceOwner = {
+    brokerKey: string
+    ownerType: 'broker' | 'admin_user' | 'instance'
+    ownerName: string
+    ownerPhone: string | null
+    ownerSubtitle: string | null
 }
 
 const SAO_PAULO_TZ = 'America/Sao_Paulo'
@@ -1098,6 +1107,307 @@ function uniqueTextList(...lists: unknown[]) {
     return items.slice(0, 8)
 }
 
+function isMissingTableError(error: any, tableName: string) {
+    const message = String(error?.message || error || '').toLowerCase()
+    return message.includes(tableName.toLowerCase()) ||
+        message.includes('relation') ||
+        message.includes('schema cache') ||
+        message.includes('does not exist')
+}
+
+function compactHistoryText(value: unknown, max = 900) {
+    const text = String(value || '').replace(/\s+/g, ' ').trim()
+    return text.length > max ? `${text.slice(0, max - 3)}...` : text
+}
+
+function buildBrokerKey(instance: AttendanceInstance) {
+    if (instance.broker_id) return `broker:${instance.broker_id}`
+    if (instance.admin_user_id) return `admin_user:${instance.admin_user_id}`
+    return `instance:${instance.id}`
+}
+
+async function loadAttendanceOwner(supabase: any, instance: AttendanceInstance): Promise<AttendanceOwner> {
+    const fallback: AttendanceOwner = {
+        brokerKey: buildBrokerKey(instance),
+        ownerType: instance.broker_id ? 'broker' : instance.admin_user_id ? 'admin_user' : 'instance',
+        ownerName: instance.instance_name || instance.phone_number || instance.id,
+        ownerPhone: instance.phone_number || null,
+        ownerSubtitle: null,
+    }
+
+    try {
+        if (instance.broker_id) {
+            const { data, error } = await supabase
+                .from('virtual_brokers')
+                .select('id, name, creci, phone')
+                .eq('id', instance.broker_id)
+                .maybeSingle()
+            if (error) throw error
+            return {
+                ...fallback,
+                ownerType: 'broker',
+                ownerName: data?.name || fallback.ownerName,
+                ownerPhone: instance.phone_number || data?.phone || fallback.ownerPhone,
+                ownerSubtitle: data?.creci ? `CRECI: ${data.creci}` : null,
+            }
+        }
+
+        if (instance.admin_user_id) {
+            const { data, error } = await supabase
+                .from('admin_users')
+                .select('id, name, email, phone')
+                .eq('id', instance.admin_user_id)
+                .maybeSingle()
+            if (error) throw error
+            return {
+                ...fallback,
+                ownerType: 'admin_user',
+                ownerName: data?.name || data?.email || fallback.ownerName,
+                ownerPhone: instance.phone_number || data?.phone || fallback.ownerPhone,
+                ownerSubtitle: data?.email || null,
+            }
+        }
+    } catch (error) {
+        console.warn('[attendance-monitor] owner lookup unavailable:', error instanceof Error ? error.message : error)
+    }
+
+    return fallback
+}
+
+function centralImportanceScore(metrics: Record<string, any>, score: number) {
+    const unanswered = Number(metrics.unanswered_conversations || 0)
+    const lost = Number(metrics.lost_opportunities || 0)
+    const hot = Number(metrics.hot_leads || 0)
+    if (score < 60 || lost > 0 || unanswered > 0) return 86
+    if (hot > 0 || score < 75) return 72
+    return 58
+}
+
+async function persistBrokerAttendanceHistory(params: {
+    supabase: any
+    instance: AttendanceInstance
+    report: any
+    range: { date: string; start: string; end: string }
+    summary: string
+    coverage: Record<string, any>
+    metrics: Record<string, any>
+    recommendations: unknown[]
+    conversationScores: ConversationScoreDraft[]
+}) {
+    const {
+        supabase,
+        instance,
+        report,
+        range,
+        summary,
+        coverage,
+        metrics,
+        recommendations,
+        conversationScores,
+    } = params
+    const owner = await loadAttendanceOwner(supabase, instance)
+    const generatedAt = report.generated_at || new Date().toISOString()
+    const brokerName = owner.ownerName || instance.instance_name || instance.id
+    const score = Number(report.score ?? metrics.score ?? 0)
+    const historyKey = {
+        broker_key: owner.brokerKey,
+        instance_id: instance.id,
+        report_date: range.date,
+    }
+
+    const conversationStats = {
+        conversations_analyzed: conversationScores.length,
+        messages_analyzed: Number(coverage.messages_analyzed || 0),
+        inbound_messages: Number(metrics.inbound_messages || 0),
+        outbound_messages: Number(metrics.outbound_messages || 0),
+        avg_response_seconds: metrics.avg_response_seconds ?? null,
+        llm_conversations_analyzed: Number(metrics.attendance_coach_conversations_analyzed || 0),
+    }
+    const riskStats = {
+        unanswered_conversations: Number(metrics.unanswered_conversations || 0),
+        hot_leads: Number(metrics.hot_leads || 0),
+        hot_unanswered_leads: Number(metrics.hot_unanswered_leads || 0),
+        lost_opportunities: Number(metrics.lost_opportunities || 0),
+        recoverable_opportunities: Number(metrics.recoverable_opportunities || 0),
+        poor_conversations: Number(metrics.poor_conversations || 0),
+        needs_attention: Number(metrics.needs_attention || 0),
+    }
+    const historyPayload = {
+        report_id: report.id,
+        instance_id: instance.id,
+        broker_id: instance.broker_id || null,
+        admin_user_id: instance.admin_user_id || null,
+        broker_key: owner.brokerKey,
+        broker_name: brokerName,
+        owner_type: owner.ownerType,
+        owner_phone: owner.ownerPhone,
+        report_date: range.date,
+        period_start: range.start,
+        period_end: range.end,
+        score,
+        professional_status: metrics.professional_status || null,
+        summary,
+        coaching_report: metrics.coaching_report || summary || null,
+        strengths: metrics.strengths || [],
+        attention_points: metrics.attention_points || [],
+        improvement_points: metrics.improvement_points || [],
+        training_focus: metrics.training_focus || [],
+        recovery_actions: metrics.recovery_actions || [],
+        recommendations: recommendations.filter(Boolean),
+        coverage,
+        metrics,
+        conversation_stats: conversationStats,
+        risk_stats: riskStats,
+        generated_at: generatedAt,
+        updated_at: new Date().toISOString(),
+    }
+
+    let existing: any = null
+    const existingRes = await supabase
+        .from('broker_attendance_daily_history')
+        .select('id, central_event_id, central_snapshot_id')
+        .match(historyKey)
+        .maybeSingle()
+
+    if (existingRes.error) {
+        if (isMissingTableError(existingRes.error, 'broker_attendance_daily_history')) {
+            console.warn('[attendance-monitor] broker_attendance_daily_history unavailable; skipping daily history.')
+            return { skipped: true, reason: 'missing_history_table', history: null }
+        }
+        throw existingRes.error
+    }
+    existing = existingRes.data || null
+
+    const { data: history, error: historyError } = await supabase
+        .from('broker_attendance_daily_history')
+        .upsert(historyPayload, { onConflict: 'broker_key,instance_id,report_date' })
+        .select('*')
+        .single()
+
+    if (historyError) {
+        if (isMissingTableError(historyError, 'broker_attendance_daily_history')) {
+            console.warn('[attendance-monitor] broker_attendance_daily_history unavailable; skipping daily history.')
+            return { skipped: true, reason: 'missing_history_table', history: null }
+        }
+        throw historyError
+    }
+
+    let centralEventId = existing?.central_event_id || history?.central_event_id || null
+    let centralSnapshotId = existing?.central_snapshot_id || history?.central_snapshot_id || null
+
+    if (!centralEventId) {
+        const eventResult = await recordEcosystemEvent({
+            supabase,
+            eventType: 'broker_attendance_daily_report',
+            actorType: 'agent',
+            entityType: 'broker_attendance_daily_history',
+            entityId: history.id,
+            source: WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+            label: `${brokerName} recebeu relatorio diario de atendimento (${range.date})`,
+            importanceScore: centralImportanceScore(metrics, score),
+            occurredAt: generatedAt,
+            metadata: {
+                history_id: history.id,
+                report_id: report.id,
+                broker_key: owner.brokerKey,
+                broker_id: instance.broker_id || null,
+                admin_user_id: instance.admin_user_id || null,
+                broker_name: brokerName,
+                instance_id: instance.id,
+                instance_name: instance.instance_name || null,
+                owner_phone: owner.ownerPhone,
+                owner_subtitle: owner.ownerSubtitle,
+                report_date: range.date,
+                score,
+                professional_status: metrics.professional_status || null,
+                summary: compactHistoryText(summary, 900),
+                coaching_report: compactHistoryText(metrics.coaching_report || summary, 1200),
+                conversation_stats: conversationStats,
+                risk_stats: riskStats,
+                recommendations: recommendations.filter(Boolean).slice(0, 10),
+            },
+        })
+        centralEventId = eventResult.event?.id || null
+    }
+
+    if (!centralSnapshotId) {
+        const snapshotResult = await saveEcosystemSnapshot({
+            supabase,
+            agent: 'whatsapp',
+            scope: 'broker_attendance',
+            subjectId: owner.brokerKey,
+            createdBy: WHATSAPP_ATTENDANCE_COACH_AGENT_ID,
+            context: {
+                agent: 'whatsapp',
+                generated_at: generatedAt,
+                period: {
+                    label: `atendimento diario ${range.date}`,
+                    start: range.start,
+                    end: range.end,
+                },
+                collected_sources: [
+                    'broker_attendance_reports',
+                    'broker_attendance_conversation_scores',
+                    'whatsapp_message_history',
+                    'whatsapp_ai_conversations',
+                ],
+                unavailable_sources: [],
+                source_counts: {
+                    broker_attendance_reports: 1,
+                    broker_attendance_conversation_scores: conversationScores.length,
+                    whatsapp_messages: Number(coverage.messages_analyzed || 0),
+                    internal_messages: Number(coverage.internal_messages_analyzed || 0),
+                },
+                executive_summary: `${brokerName}: ${compactHistoryText(metrics.coaching_report || summary, 1200)}`,
+                signals: {
+                    broker_attendance_daily_history: {
+                        history_id: history.id,
+                        report_id: report.id,
+                        broker_key: owner.brokerKey,
+                        broker_name: brokerName,
+                        owner_type: owner.ownerType,
+                        instance_id: instance.id,
+                        report_date: range.date,
+                        score,
+                        professional_status: metrics.professional_status || null,
+                        professional_status_label: metrics.professional_status_label || null,
+                        conversation_stats: conversationStats,
+                        risk_stats: riskStats,
+                        strengths: metrics.strengths || [],
+                        attention_points: metrics.attention_points || [],
+                        improvement_points: metrics.improvement_points || [],
+                        training_focus: metrics.training_focus || [],
+                        recovery_actions: metrics.recovery_actions || [],
+                        recommendations: recommendations.filter(Boolean).slice(0, 10),
+                    },
+                },
+            },
+        })
+        centralSnapshotId = snapshotResult.snapshot?.id || null
+    }
+
+    if (centralEventId || centralSnapshotId) {
+        const { data: linkedHistory, error: linkError } = await supabase
+            .from('broker_attendance_daily_history')
+            .update({
+                central_event_id: centralEventId,
+                central_snapshot_id: centralSnapshotId,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', history.id)
+            .select('*')
+            .single()
+
+        if (linkError) {
+            console.warn('[attendance-monitor] failed to link central intelligence ids:', linkError.message)
+        } else {
+            return { skipped: false, history: linkedHistory }
+        }
+    }
+
+    return { skipped: false, history }
+}
+
 function coachCandidateWeight(score: ConversationScoreDraft, messages: NormalizedMessage[]) {
     const lastMessageAt = messages.at(-1)?.messageTimestamp
     const ageHours = lastMessageAt
@@ -1589,7 +1899,19 @@ export async function generateAttendanceReports(options: ReportOptions = {}) {
             'report_id,chat_id'
         )
 
-        reports.push({ ...report, conversation_scores: conversationScores })
+        const historyResult = await persistBrokerAttendanceHistory({
+            supabase,
+            instance,
+            report,
+            range,
+            summary,
+            coverage,
+            metrics,
+            recommendations,
+            conversationScores,
+        })
+
+        reports.push({ ...report, conversation_scores: conversationScores, daily_history: historyResult.history || null })
     }
 
     return { success: true, date: range.date, reports }

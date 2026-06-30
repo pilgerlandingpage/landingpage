@@ -424,6 +424,80 @@ function buildCentralIntelligenceContext(snapshots: any[], ecosystemEvents: any[
   }
 }
 
+function buildBrokerAttendanceHistorySignals(history: any[]) {
+  const rows = history
+    .slice(0, 80)
+    .map(row => {
+      const metrics = parseMetadata(row?.metrics)
+      const riskStats = parseMetadata(row?.risk_stats)
+      const conversationStats = parseMetadata(row?.conversation_stats)
+      const brokerKey = safeText(row?.broker_key || row?.broker_id || row?.admin_user_id || row?.instance_id)
+      return {
+        id: row?.id,
+        report_id: row?.report_id,
+        broker_key: brokerKey,
+        broker_name: safeText(row?.broker_name) || 'Corretor',
+        owner_type: row?.owner_type || null,
+        instance_id: row?.instance_id || null,
+        report_date: row?.report_date,
+        score: numberValue(row?.score),
+        professional_status: row?.professional_status || metrics.professional_status || null,
+        summary: truncateText(row?.coaching_report || row?.summary, 700),
+        conversations: numberValue(conversationStats.conversations_analyzed || metrics.conversations_analyzed),
+        messages: numberValue(conversationStats.messages_analyzed),
+        hot_leads: numberValue(riskStats.hot_leads || metrics.hot_leads),
+        unanswered: numberValue(riskStats.unanswered_conversations || metrics.unanswered_conversations),
+        lost: numberValue(riskStats.lost_opportunities || metrics.lost_opportunities),
+        recoverable: numberValue(riskStats.recoverable_opportunities || metrics.recoverable_opportunities),
+        poor: numberValue(riskStats.poor_conversations || metrics.poor_conversations),
+        needs_attention: numberValue(riskStats.needs_attention || metrics.needs_attention),
+        generated_at: row?.generated_at,
+      }
+    })
+    .filter(row => row.broker_key)
+
+  const brokerKeys = new Set(rows.map(row => row.broker_key).filter(Boolean))
+  const scoreRows = rows.filter(row => Number.isFinite(row.score) && row.score > 0)
+  const avgScore = scoreRows.length
+    ? Math.round(scoreRows.reduce((total, row) => total + row.score, 0) / scoreRows.length)
+    : 0
+  const totals = rows.reduce((acc, row) => ({
+    conversations: acc.conversations + row.conversations,
+    messages: acc.messages + row.messages,
+    hot_leads: acc.hot_leads + row.hot_leads,
+    unanswered: acc.unanswered + row.unanswered,
+    lost: acc.lost + row.lost,
+    recoverable: acc.recoverable + row.recoverable,
+    poor: acc.poor + row.poor,
+    needs_attention: acc.needs_attention + row.needs_attention,
+  }), {
+    conversations: 0,
+    messages: 0,
+    hot_leads: 0,
+    unanswered: 0,
+    lost: 0,
+    recoverable: 0,
+    poor: 0,
+    needs_attention: 0,
+  })
+
+  const riskBrokers = rows
+    .filter(row => row.unanswered > 0 || row.lost > 0 || row.poor > 0 || row.score < 60)
+    .sort((a, b) => (b.needs_attention + b.lost + b.unanswered) - (a.needs_attention + a.lost + a.unanswered) || a.score - b.score)
+    .slice(0, 12)
+
+  return {
+    summary: {
+      reports: rows.length,
+      brokers: brokerKeys.size,
+      avg_score: avgScore,
+      ...totals,
+    },
+    recent_reports: rows.slice(0, 18),
+    risk_brokers: riskBrokers,
+  }
+}
+
 function summarizeSignals(params: {
   leads: any[]
   visitors: any[]
@@ -440,6 +514,7 @@ function summarizeSignals(params: {
   socialSuggestions: any[]
   brokerCandidates: any[]
   virtualBrokers: any[]
+  brokerAttendanceHistory: any[]
 }) {
   const {
     leads,
@@ -457,6 +532,7 @@ function summarizeSignals(params: {
     socialSuggestions,
     brokerCandidates,
     virtualBrokers,
+    brokerAttendanceHistory,
   } = params
 
   const searchEvents = events.filter(event =>
@@ -514,6 +590,7 @@ function summarizeSignals(params: {
   const brokerCandidateCities = countBy(brokerCandidates, item => [item?.city, item?.state].filter(Boolean).join(', ') || null, 10)
   const brokerCandidateSources = countBy(brokerCandidates, item => item?.source || item?.utm_source || 'Direto', 10)
   const highPotentialBrokerCandidates = brokerCandidates.filter(candidate => String(candidate?.potential_level || '') === 'hot' || Number(candidate?.potential_score || 0) >= 80)
+  const brokerAttendance = buildBrokerAttendanceHistorySignals(brokerAttendanceHistory)
   const activeCampaigns = adCampaigns.filter(campaign => String(campaign?.status || '').toLowerCase() === 'active')
   const publishedPosts = blogPosts.filter(post => String(post?.status || '').toLowerCase() === 'published')
   const recentEcosystemEvents = ecosystemEvents
@@ -585,6 +662,11 @@ function summarizeSignals(params: {
       lead_conversation_threads: leadConversationLogSignals.lead_conversation_threads.length,
       human_attended_leads: leadConversationLogSignals.human_conversation_threads.length,
       human_whatsapp_messages: leadConversationLogSignals.human_whatsapp_messages,
+      broker_attendance_reports: brokerAttendance.summary.reports,
+      broker_attendance_brokers: brokerAttendance.summary.brokers,
+      broker_attendance_avg_score: brokerAttendance.summary.avg_score,
+      broker_attendance_unanswered: brokerAttendance.summary.unanswered,
+      broker_attendance_lost: brokerAttendance.summary.lost,
     },
     top_lead_cities: topLeadCities,
     traffic_sources: trafficSources,
@@ -603,6 +685,9 @@ function summarizeSignals(params: {
     social_lead_signals: socialLeadSignals,
     broker_candidate_cities: brokerCandidateCities,
     broker_candidate_sources: brokerCandidateSources,
+    broker_attendance_summary: brokerAttendance.summary,
+    broker_attendance_history: brokerAttendance.recent_reports,
+    broker_attendance_risk_brokers: brokerAttendance.risk_brokers,
     recent_ecosystem_events: recentEcosystemEvents,
     news_content_signals: newsContentSignals,
     high_potential_broker_candidates: highPotentialBrokerCandidates.slice(0, 12).map(candidate => ({
@@ -628,11 +713,17 @@ function buildExecutiveSummary(signals: any, agent: EcosystemAgent) {
   const brokerCandidateCity = signals.broker_candidate_cities?.[0]?.label
   const humanAttendedLeads = Number(overview.human_attended_leads || 0)
   const humanBroker = signals.human_conversation_brokers?.[0]?.label
+  const attendanceReports = Number(overview.broker_attendance_reports || 0)
+  const attendanceBrokers = Number(overview.broker_attendance_brokers || 0)
+  const attendanceAvgScore = Number(overview.broker_attendance_avg_score || 0)
+  const riskBroker = signals.broker_attendance_risk_brokers?.[0]?.broker_name
 
   const parts = [
     `Contexto ${agent}: ${overview.leads || 0} leads, ${overview.visitors || 0} visitantes, ${overview.events || 0} eventos e ${overview.broker_candidates || 0} candidatos corretores recentes analisados.`,
     humanAttendedLeads ? `${humanAttendedLeads} leads tiveram atendimento humano registrado no WhatsApp.` : '',
     humanBroker ? `Corretor humano com mais interacoes registradas: ${humanBroker}.` : '',
+    attendanceReports ? `${attendanceReports} relatorios diarios de atendimento cobrem ${attendanceBrokers} corretor(es), com score medio ${attendanceAvgScore || 0}.` : '',
+    riskBroker ? `Corretor com maior risco recente no atendimento: ${riskBroker}.` : '',
     topCity ? `Cidade com mais sinal: ${topCity}.` : '',
     topSearch ? `Busca/filtro mais forte: ${topSearch}.` : '',
     hotProperty ? `Imovel com maior interesse comportamental: ${hotProperty}.` : '',
@@ -671,6 +762,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     safeQuery('marketing_ai_reports', supabase.from('marketing_ai_reports').select('id, report_type, title, summary, insights, recommendations, metrics, generated_by, status, created_at').order('created_at', { ascending: false }).limit(40)),
     safeQuery('meta_social_ai_suggestions', supabase.from('meta_social_ai_suggestions').select('id, platform, intent, sentiment, priority, lead_score, summary, recommended_action, status, updated_at').order('updated_at', { ascending: false }).limit(60)),
     safeQuery('broker_candidates', supabase.from('broker_candidates').select('id, full_name, email, phone, city, state, creci, creci_state, broker_type, current_company, experience_years, market_focus, regions, specialties, social_links, source, utm_source, utm_medium, utm_campaign, status, potential_score, potential_level, ai_summary, ai_recommendation, visitor_id, metadata, created_at, updated_at, last_activity_at').gte('created_at', since).order('created_at', { ascending: false }).limit(limit)),
+    safeQuery('broker_attendance_daily_history', supabase.from('broker_attendance_daily_history').select('id, report_id, instance_id, broker_id, admin_user_id, broker_key, broker_name, owner_type, report_date, score, professional_status, summary, coaching_report, conversation_stats, risk_stats, metrics, generated_at, created_at').gte('report_date', since.slice(0, 10)).order('report_date', { ascending: false }).order('generated_at', { ascending: false }).limit(160)),
     safeQuery('ecosystem_events', supabase.from('ecosystem_events').select('id, event_type, actor_type, entity_type, entity_id, source, label, metadata, importance_score, occurred_at').gte('occurred_at', since).order('occurred_at', { ascending: false }).limit(120)),
     safeQuery('ecosystem_context_snapshots', supabase.from('ecosystem_context_snapshots').select('id, agent, scope, summary, signals, source_counts, source_summary, created_by, generated_at, created_at').order('generated_at', { ascending: false }).limit(50)),
     safeQuery('virtual_brokers', supabase.from('virtual_brokers').select('id, name, is_active, whatsapp_instance_id, created_at').order('created_at', { ascending: false }).limit(80)),
@@ -693,6 +785,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
   const marketingReports = safeArray(byLabel.marketing_ai_reports?.data, 40)
   const socialSuggestions = safeArray(byLabel.meta_social_ai_suggestions?.data, 60)
   const brokerCandidates = safeArray(byLabel.broker_candidates?.data, limit)
+  const brokerAttendanceHistory = safeArray(byLabel.broker_attendance_daily_history?.data, 160)
   const ecosystemEvents = safeArray(byLabel.ecosystem_events?.data, 120)
   const ecosystemSnapshots = safeArray(byLabel.ecosystem_context_snapshots?.data, 50)
   const virtualBrokers = safeArray(byLabel.virtual_brokers?.data, 80)
@@ -726,6 +819,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     socialSuggestions,
     brokerCandidates,
     virtualBrokers,
+    brokerAttendanceHistory,
   })
   const centralIntelligence = buildCentralIntelligenceContext(ecosystemSnapshots, ecosystemEvents, agent)
 
@@ -773,6 +867,7 @@ export async function getAgentEcosystemContext(options: EcosystemContextOptions 
     marketing_ai_reports: marketingReports,
     meta_social_ai_suggestions: socialSuggestions,
     broker_candidates: brokerCandidates,
+    broker_attendance_daily_history: brokerAttendanceHistory,
     virtual_brokers: virtualBrokers,
     ecosystem_events: ecosystemEvents,
     ecosystem_context_snapshots: centralIntelligence.snapshots,
@@ -795,6 +890,8 @@ export function buildAgentContextBrief(context: any) {
     ...(signals.hot_properties || []).slice(0, 5).map((item: any) => `- Imovel quente: ${item.title} | score ${item.score}`),
     ...(signals.conversation_agents || []).slice(0, 5).map((item: any) => `- Corretor IA em conversas: ${item.label} (${item.count})`),
     ...(signals.human_conversation_brokers || []).slice(0, 5).map((item: any) => `- Atendimento humano WhatsApp: ${item.label} (${item.count})`),
+    ...(signals.broker_attendance_history || []).slice(0, 5).map((item: any) => `- Relatorio corretor: ${item.broker_name} | score ${item.score || 0} | ${safeText(item.summary).slice(0, 160)}`),
+    ...(signals.broker_attendance_risk_brokers || []).slice(0, 4).map((item: any) => `- Risco atendimento: ${item.broker_name} | sem resposta ${item.unanswered || 0} | perdidas ${item.lost || 0}`),
     ...(signals.human_conversation_threads || []).slice(0, 5).map((item: any) => `- Lead atendido por humano: ${item.lead_name || item.lead_phone || item.lead_id} | lead: ${safeText(item.last_lead_message).slice(0, 140)} | humano: ${safeText(item.last_human_message).slice(0, 140)}`),
     ...(signals.radar_opportunities || []).slice(0, 5).map((item: any) => `- Radar: ${item.keyword} | score ${item.score || 'n/a'}`),
     ...(signals.latest_marketing_reports || []).slice(0, 3).map((item: any) => `- Relatorio ${item.type || 'marketing'}: ${item.title || safeText(item.summary).slice(0, 90)}`),
