@@ -959,17 +959,15 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
             event.currentTarget.closest('.map-preview-panel, .mobile-map-preview-panel') as HTMLElement | null ||
             wrapperRef.current?.querySelector<HTMLElement>('.home-preview-map-panel') ||
             null
-        const isCompactMap = window.matchMedia('(max-width: 1023px)').matches
         const mapOptionsButton = mapPanel?.querySelector<HTMLButtonElement>('.map-mobile-action-dock button[aria-label="Abrir opções do mapa"]')
         const quickFilterButton = mapPanel?.querySelector<HTMLButtonElement>('.map-quick-filter-trigger')
-        const filterControl = isCompactMap
-            ? mapOptionsButton || quickFilterButton
-            : quickFilterButton || mapOptionsButton
+        const filterControl = mapOptionsButton || quickFilterButton
 
+        mapPanel?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
         filterControl?.click()
 
         void trackEvent('home_map_more_filters_clicked', {
-            mode: isCompactMap ? 'map_options' : 'quick_filters',
+            mode: filterControl === mapOptionsButton ? 'map_options' : 'quick_filters',
             source: isMapModalOpen ? 'mobile_map_modal' : 'home_map',
         })
     }, [isMapModalOpen])

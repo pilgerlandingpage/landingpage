@@ -7590,15 +7590,66 @@ export default function PropertyLandingStyles() {
 
                         .plp-mobile-sheet-summary .plp-mobile-sheet-facts,
                         .plp-mobile-summary-highlights {
-                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            grid-template-columns: repeat(4, minmax(0, 1fr));
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-facts {
+                            gap: 0;
+                            padding-right: 12px;
+                            padding-left: 12px;
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-fact {
+                            gap: 5px;
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-facts svg {
+                            width: 20px;
+                            height: 20px;
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-fact-text strong {
+                            font-size: 0.82rem;
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-fact-text {
+                            font-size: 0.72rem;
+                        }
+
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-fact-text small,
+                        .plp-mobile-sheet-summary .plp-mobile-sheet-fact--area .plp-mobile-sheet-fact-text::after {
+                            font-size: 0.56rem;
+                        }
+
+                        .plp-mobile-summary-highlights {
+                            margin-right: 14px;
+                            margin-left: 14px;
                         }
 
                         .plp-mobile-summary-highlights span:nth-child(odd) {
+                            border-left: 1px solid rgba(25,32,43,0.08);
+                        }
+
+                        .plp-mobile-summary-highlights span:first-child {
                             border-left: 0;
                         }
 
                         .plp-mobile-summary-highlights span:nth-child(n + 3) {
-                            border-top: 1px solid rgba(25,32,43,0.08);
+                            border-top: 0;
+                        }
+
+                        .plp-mobile-summary-highlights span {
+                            padding-right: 4px;
+                            padding-left: 4px;
+                        }
+
+                        .plp-mobile-summary-highlights svg {
+                            width: 19px;
+                            height: 19px;
+                        }
+
+                        .plp-mobile-summary-highlights strong {
+                            font-size: 0.58rem;
                         }
                     }
 

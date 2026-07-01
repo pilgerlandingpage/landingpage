@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Circle, MapContainer, TileLayer, Marker, Polygon, Polyline, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -1529,6 +1530,7 @@ export default function PropertyMap({
     const [showControlHints, setShowControlHints] = useState(false)
     const controlHintTimerRef = useRef<number | null>(null)
     const [quickFilterMenuOpen, setQuickFilterMenuOpen] = useState(false)
+    const mapOptionsPortalRoot = typeof document === 'undefined' ? null : document.body
 
     const validProperties = useMemo<MappedProperty[]>(
         () => properties
@@ -1787,7 +1789,10 @@ export default function PropertyMap({
                     aria-label="Abrir filtros"
                     aria-expanded={quickFilterMenuOpen}
                     aria-haspopup="menu"
-                    onClick={() => setQuickFilterMenuOpen(isOpen => !isOpen)}
+                    onClick={() => {
+                        setMapOptionsOpen(false)
+                        setQuickFilterMenuOpen(isOpen => !isOpen)
+                    }}
                 >
                     <SlidersHorizontal size={15} />
                 </button>
@@ -1882,7 +1887,11 @@ export default function PropertyMap({
                     aria-label="Abrir opções do mapa"
                     aria-expanded={mapOptionsOpen}
                     title="Opções do mapa"
-                    onClick={() => setMapOptionsOpen(open => !open)}
+                    onClick={() => {
+                        setQuickFilterMenuOpen(false)
+                        setMobileControlsOpen(false)
+                        setMapOptionsOpen(open => !open)
+                    }}
                 >
                     <Globe2 size={24} />
                     {activeLayerCount > 0 && (
@@ -1919,12 +1928,31 @@ export default function PropertyMap({
                 )}
             </div>
 
-            {mapOptionsOpen && (
+            {mapOptionsOpen && mapOptionsPortalRoot && createPortal((
                 <div className="map-options-scrim" role="presentation" onClick={() => setMapOptionsOpen(false)}>
-                    <section className="map-options-sheet" role="dialog" aria-modal="true" aria-label="Opções do mapa" onClick={event => event.stopPropagation()}>
+                    <section
+                        className="map-options-sheet"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Opções do mapa"
+                        onClick={event => event.stopPropagation()}
+                        onPointerDown={event => event.stopPropagation()}
+                        onPointerUp={event => event.stopPropagation()}
+                    >
                         <header>
                             <h2>Opções do mapa</h2>
-                            <button type="button" aria-label="Fechar opções do mapa" onClick={() => setMapOptionsOpen(false)}>
+                            <button
+                                type="button"
+                                aria-label="Fechar opções do mapa"
+                                onClick={event => {
+                                    event.stopPropagation()
+                                    setMapOptionsOpen(false)
+                                }}
+                                onPointerDown={event => event.stopPropagation()}
+                                onPointerUp={event => {
+                                    event.stopPropagation()
+                                }}
+                            >
                                 <X size={25} />
                             </button>
                         </header>
@@ -1997,7 +2025,7 @@ export default function PropertyMap({
                         </div>
                     </section>
                 </div>
-            )}
+            ), mapOptionsPortalRoot)}
 
             <style>{`
                 .map-shell {
@@ -2443,11 +2471,12 @@ export default function PropertyMap({
                 }
                 .map-options-scrim {
                     display: block;
-                    position: absolute;
+                    position: fixed;
                     inset: 0;
-                    z-index: 2200;
+                    z-index: 7000;
                     background: transparent;
                     backdrop-filter: blur(1px);
+                    pointer-events: auto;
                 }
                 .map-options-sheet {
                     position: absolute;
@@ -2465,6 +2494,7 @@ export default function PropertyMap({
                     color: #202326;
                     box-shadow: 0 22px 54px rgba(15,18,22,0.24);
                     animation: mapOptionsRise 0.22s ease both;
+                    pointer-events: auto;
                 }
                 .map-options-sheet header {
                     display: flex;
@@ -3346,21 +3376,73 @@ export default function PropertyMap({
                     }
                     .map-options-scrim {
                         display: block;
-                        position: absolute;
-                        z-index: 2200;
+                        position: fixed;
+                        inset: 0;
+                        z-index: 7000;
                         background: rgba(15,18,22,0.42);
+                        padding: 10px;
+                        pointer-events: auto;
                     }
                     .map-options-sheet {
-                        left: 0;
-                        right: 0;
-                        top: auto;
-                        bottom: 0;
+                        left: 10px;
+                        right: 10px;
+                        top: 10px;
+                        bottom: 10px;
                         width: auto;
-                        gap: 18px;
-                        padding: 24px 18px calc(22px + env(safe-area-inset-bottom));
-                        border-radius: 28px 28px 0 0;
+                        max-height: none;
+                        gap: 14px;
+                        padding: 0 14px calc(14px + env(safe-area-inset-bottom));
+                        border-radius: 18px;
                         border: 0;
                         box-shadow: 0 -22px 54px rgba(15,18,22,0.28);
+                        pointer-events: auto;
+                    }
+                    .map-options-sheet header {
+                        position: sticky;
+                        top: 0;
+                        z-index: 2;
+                        margin: 0 -14px;
+                        padding: 14px 14px 10px;
+                        border-bottom: 1px solid rgba(18,24,30,0.08);
+                        border-radius: 18px 18px 0 0;
+                        background: rgba(255,255,255,0.96);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                    }
+                    .map-options-sheet h2 {
+                        font-size: 1.1rem;
+                    }
+                    .map-options-sheet header button {
+                        width: 40px;
+                        height: 40px;
+                        background: #171410;
+                        color: #dfc18e;
+                    }
+                    .map-options-style-row {
+                        gap: 8px;
+                    }
+                    .map-options-style-row button {
+                        min-height: 86px;
+                        gap: 6px;
+                        font-size: 0.74rem;
+                    }
+                    .map-options-section {
+                        gap: 9px;
+                    }
+                    .map-options-sheet h3 {
+                        font-size: 0.94rem;
+                    }
+                    .map-context-grid,
+                    .map-amenity-grid,
+                    .map-options-filter-grid {
+                        gap: 8px;
+                    }
+                    .map-context-grid button,
+                    .map-amenity-grid button,
+                    .map-options-filter-grid button {
+                        min-height: 38px;
+                        padding: 0 11px;
+                        font-size: 0.74rem;
                     }
                     .map-context-layer-strip {
                         position: absolute;
@@ -3412,7 +3494,6 @@ export default function PropertyMap({
                         color: #28221a;
                     }
                     .map-options-sheet {
-                        max-height: min(72vh, 620px);
                         overflow-y: auto;
                     }
                     .map-shell--drawing .map-mobile-action-dock button:not(.active),
