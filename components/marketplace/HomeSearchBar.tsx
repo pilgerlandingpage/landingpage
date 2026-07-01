@@ -3,7 +3,7 @@
 import { Building2, ChevronDown, MapPin, Search, SlidersHorizontal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent, KeyboardEvent, MouseEvent } from 'react'
+import type { FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
@@ -30,7 +30,7 @@ export type HomeSearchValues = {
 
 type HomeSearchBarProps = {
     initialSearchParams?: string
-    onMoreFiltersClick?: (event: MouseEvent<HTMLButtonElement>) => void
+    onMoreFiltersClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void
     onSubmitValues?: (values: HomeSearchValues) => void
     onValuesChange?: (values: HomeSearchValues) => void
     showTitle?: boolean
@@ -225,7 +225,7 @@ export default function HomeSearchBar({
     }, [initialValues])
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside = (event: globalThis.MouseEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setShowSuggestions(false)
             }
