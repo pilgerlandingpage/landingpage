@@ -10,7 +10,7 @@ function getSupabase() {
 
 // Keys used for homepage configuration
 const HOMEPAGE_CONFIG_KEYS = [
-    'homepage_featured_ids',        // JSON array of property IDs for "Seleção Exclusiva"
+    'homepage_featured_ids',        // JSON array of property IDs for "Destaques"
     'homepage_featured_title',      // Custom title for featured section
     'homepage_sections_enabled',    // JSON array of enabled section keys
     'homepage_featured_cities',     // JSON array of city names
@@ -22,7 +22,7 @@ const HOMEPAGE_CONFIG_KEYS = [
 
 const DEFAULTS: Record<string, string> = {
     homepage_featured_ids: '[]',
-    homepage_featured_title: 'Seleção Exclusiva',
+    homepage_featured_title: 'Destaques',
     homepage_sections_enabled: '["featured","newest","cta","by_city"]',
     homepage_featured_cities: '["Balneário Camboriú","Itajaí","Itapema","Porto Belo"]',
     homepage_items_per_section: '8',

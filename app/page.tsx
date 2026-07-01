@@ -47,6 +47,8 @@ const HOME_EXCLUDED_CITIES = new Set(['camboriu', 'navegantes', 'blumenau'])
 const HOME_PROPERTY_DESCRIPTION_LIMIT = 320
 const HOME_PROPERTY_IMAGE_LIMIT = 4
 const HOME_MAP_MIN_PRICE = 4000000
+const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
+const FEATURED_SECTION_LEGACY_TITLES = new Set(['selecao exclusiva', 'selecao em destaque'])
 const HOME_PROPERTY_FIELDS = [
   'id',
   'source_slug',
@@ -82,6 +84,14 @@ function normalizeCityName(value: unknown) {
 
 function isAllowedOnHome(property: any) {
   return !HOME_EXCLUDED_CITIES.has(normalizeCityName(property?.city))
+}
+
+function normalizeFeaturedSectionTitle(value: unknown) {
+  const title = String(value || '').trim()
+  if (!title || FEATURED_SECTION_LEGACY_TITLES.has(normalizeLocationName(title))) {
+    return FEATURED_SECTION_DEFAULT_TITLE
+  }
+  return title
 }
 
 function compactHomeProperty(property: any) {
@@ -161,7 +171,7 @@ export default async function MarketplaceHome() {
   const configRows = configResult.data || []
   configRows?.forEach((row: any) => { configMap[row.key] = row.value })
 
-  const featuredTitle = configMap.homepage_featured_title || 'Seleção Exclusiva'
+  const featuredTitle = normalizeFeaturedSectionTitle(configMap.homepage_featured_title)
   const featuredSort = configMap.homepage_featured_sort || 'price-desc'
   const featuredMinPrice = parseInt(configMap.homepage_featured_min_price) || 0
   const featuredMaxPrice = parseInt(configMap.homepage_featured_max_price) || 0
@@ -296,7 +306,7 @@ export default async function MarketplaceHome() {
 
   // === BUILD SECTIONS ===
 
-  // 1. Featured / Seleção Exclusiva
+  // 1. Featured / Destaques
   let featured: any[] = []
   if (featuredSort === 'manual' && manualFeaturedIds.length > 0) {
     // Manual selection
@@ -434,11 +444,11 @@ export default async function MarketplaceHome() {
 
         <HomepageSection
           title="Exclusivos"
-          subtitle="Gestão exclusiva Guilherme Pilger"
+          subtitle="Gestão exclusiva confirmada no cadastro"
           properties={exclusiveProperties}
           lpMap={lpMap}
           viewAllHref="/busca?exclusive=1"
-          viewAllLabel="Ver exclusivos"
+          viewAllLabel="Ver todos"
         />
 
         <HomepageSection
@@ -447,7 +457,7 @@ export default async function MarketplaceHome() {
           properties={launches}
           lpMap={lpMap}
           viewAllHref="/busca?tag=lancamento"
-          viewAllLabel="Ver lançamentos"
+          viewAllLabel="Ver todos"
         />
 
         <HomepageSection
@@ -456,7 +466,7 @@ export default async function MarketplaceHome() {
           properties={frontSeaProperties}
           lpMap={lpMap}
           viewAllHref="/busca?tag=frente-mar"
-          viewAllLabel="Ver frente mar"
+          viewAllLabel="Ver todos"
         />
 
         {sectionsEnabled.includes('featured') && (
@@ -466,6 +476,7 @@ export default async function MarketplaceHome() {
             properties={featured}
             lpMap={lpMap}
             viewAllHref="/busca?sort=price-desc"
+            viewAllLabel="Ver todos"
           />
         )}
 
@@ -476,7 +487,7 @@ export default async function MarketplaceHome() {
             properties={mostViewed}
             lpMap={lpMap}
             viewAllHref="/busca"
-            viewAllLabel="Ver ranking"
+            viewAllLabel="Ver todos"
           />
         )}
 
@@ -487,7 +498,7 @@ export default async function MarketplaceHome() {
             properties={newest}
             lpMap={lpMap}
             viewAllHref="/busca?sort=newest"
-            viewAllLabel="Ver mais"
+            viewAllLabel="Ver todos"
           />
         )}
 

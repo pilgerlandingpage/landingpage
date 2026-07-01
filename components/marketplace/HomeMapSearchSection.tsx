@@ -25,6 +25,7 @@ import { orderPropertiesBySmoothGeoPath } from './mapRecommendationOrder'
 import type { MapDrawArea, MapFixedView } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
+import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
 import { trackEvent } from '@/lib/tracking/client'
 
 type MapPreviewProperty = Parameters<NonNullable<ComponentProps<typeof MapPropertyPreviewCard>['onPropertySelect']>>[0]
@@ -94,6 +95,7 @@ type FeatureFilter = {
 const MINIMUM_FIRST_CONTACT_PRICE = 4000000
 const HOME_MAP_PREVIEW_LIMIT = 8
 const GUIDED_SEARCH_STORAGE_KEY = 'pilger_guided_search_seen_v1'
+const OFFICE_SEARCH_PARAM_VALUE = '1'
 
 const GUIDED_SEARCH_MESSAGES: Record<MobileFilterKey, { title: string; choose: string; next: string }> = {
     location: {
@@ -407,6 +409,40 @@ function getOverlaySearchLocation(values: HomeSearchValues) {
     ).trim()
 }
 
+function buildOverlaySearchDestination(values: HomeSearchValues, offer: AppliedFilters['purpose'], chips: string[]) {
+    const params = new URLSearchParams()
+    const nextLocation = getOverlaySearchLocation(values)
+
+    if (values.locationType === 'office') {
+        params.set('office', OFFICE_SEARCH_PARAM_VALUE)
+    } else if (nextLocation) {
+        appendNaturalSearchParams(params, nextLocation)
+    }
+
+    if (values.typeValue && values.typeValue !== 'all') {
+        const [kind, rawValue] = values.typeValue.split(':')
+        if (kind && rawValue) params.set(kind, rawValue)
+        else params.set('type', mapOverlayTypeToMapFilter(values.typeValue))
+    }
+
+    if (values.priceValue && values.priceValue !== 'all') params.set('price', values.priceValue)
+    if (offer) params.set('offer', offer)
+
+    chips.forEach(chipId => {
+        const option = FEATURE_FILTERS.find(item => item.id === chipId)
+        if (!option) return
+        if (option.param === 'priceMin') {
+            const current = Number(params.get('priceMin') || 0)
+            if (Number(option.value) > current) params.set(option.param, option.value)
+            return
+        }
+        if (!params.has(option.param)) params.set(option.param, option.value)
+    })
+
+    const queryString = params.toString()
+    return queryString ? `/busca?${queryString}` : '/busca'
+}
+
 function matchesPrice(property: Property, range: string) {
     const price = Number(property.price || property.rent || 0)
     if (!price || price < MINIMUM_FIRST_CONTACT_PRICE) return false
@@ -609,18 +645,20 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         const nextLocation = getOverlaySearchLocation(values)
         const nextType = mapOverlayTypeToMapFilter(values.typeValue)
         const nextPrice = values.priceValue === 'all' ? '' : values.priceValue
+        const destination = buildOverlaySearchDestination(values, purpose, activeChips)
 
         applyOverlaySearchToMap(values, true)
 
         void trackEvent('home_map_inline_search_submitted', {
             source: isMapModalOpen ? 'home_map_modal' : 'home_map',
-            destination: 'home_map',
+            destination,
             query: searchLocationName(nextLocation),
             location_type: values.locationType || 'free_text',
             type_value: nextType,
             price_value: nextPrice || 'all',
         })
-    }, [applyOverlaySearchToMap, isMapModalOpen])
+        router.push(destination)
+    }, [activeChips, applyOverlaySearchToMap, isMapModalOpen, purpose, router])
 
     const markQuizStepAnswered = useCallback((step: MobileFilterKey) => {
         setAnsweredQuizSteps(current => current.includes(step) ? current : [...current, step])
@@ -2450,23 +2488,40 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     }
                     .home-map-property-preview--compact :global(.map-property-preview) {
                         bottom: 24px;
-                        right: 24px;
-                        width: min(760px, calc(100% - 48px));
+                        left: 50%;
+                        right: auto;
+                        width: min(430px, calc(100% - 48px));
+                        transform: translateX(-50%);
                     }
                     .home-map-property-preview--compact :global(.map-preview-track) {
                         gap: 12px;
-                        padding-inline: clamp(32px, 4vw, 64px);
-                        scroll-padding-inline: clamp(32px, 4vw, 64px);
+                        padding-inline: 10px;
+                        scroll-padding-inline: 10px;
                     }
                     .home-map-property-preview--compact :global(.map-preview-card) {
-                        flex-basis: clamp(420px, 30vw, 520px);
-                        max-width: calc(100% - clamp(92px, 10vw, 136px));
-                        grid-template-columns: 190px minmax(0, 1fr);
-                        min-height: 178px;
+                        flex-basis: min(410px, 100%);
+                        max-width: 100%;
+                        grid-template-columns: 1fr;
+                        min-height: 0;
                     }
                     .home-map-property-preview--compact :global(.map-preview-media),
                     .home-map-property-preview--compact :global(.map-preview-media img) {
-                        min-height: 178px;
+                        height: 210px;
+                        min-height: 210px;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-body) {
+                        padding: 8px 12px 10px;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-body-link) {
+                        gap: 5px;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-title) {
+                        font-size: 0.86rem;
+                        line-height: 1.08;
+                        -webkit-line-clamp: 2;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-price) {
+                        font-size: 0.86rem;
                     }
                     .mobile-map-modal-backdrop {
                         padding: clamp(20px, 4vw, 44px);

@@ -139,8 +139,6 @@ export default function HomepageSection({
                 <span className={`rail-fade rail-fade-right ${canScrollRight ? 'visible' : ''}`} />
             </div>
 
-            <div className="section-mobile-hint">Arraste para comparar lado a lado</div>
-
             <style jsx>{`
                 .homepage-section {
                     position: relative;
@@ -171,10 +169,10 @@ export default function HomepageSection({
                 }
                 .section-title {
                     color: #1f1b16;
-                    font-family: 'Playfair Display', Georgia, serif;
+                    font-family: 'Montserrat', 'Inter', sans-serif;
                     font-size: clamp(1.2rem, 1.72vw, 1.88rem);
-                    font-weight: 760;
-                    line-height: 0.98;
+                    font-weight: 700;
+                    line-height: 1;
                     letter-spacing: 0;
                     margin: 0;
                 }
@@ -188,7 +186,7 @@ export default function HomepageSection({
                     border: 1px solid rgba(31, 27, 21, 0.12);
                     border-radius: 999px;
                     background: #171410;
-                    color: #fff8ea !important;
+                    color: var(--gold) !important;
                     font: 900 0.72rem/1 'Inter', sans-serif;
                     letter-spacing: 0.08em;
                     text-transform: uppercase;
@@ -204,7 +202,7 @@ export default function HomepageSection({
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
-                    color: #171410 !important;
+                    color: var(--gold) !important;
                     font: 900 clamp(0.58rem, 0.8vw, 0.68rem)/1 'Inter', sans-serif;
                     letter-spacing: 0.07em;
                     text-decoration: none !important;
@@ -214,7 +212,7 @@ export default function HomepageSection({
                     transition: color 0.2s ease, transform 0.2s ease;
                 }
                 .homepage-section :global(.section-view-all-mobile:hover) {
-                    color: #b18442 !important;
+                    color: var(--gold-dark) !important;
                     transform: translate(2px, 1px);
                 }
                 .carousel-arrows {
@@ -348,14 +346,6 @@ export default function HomepageSection({
                     letter-spacing: 0.08em;
                     text-transform: uppercase;
                 }
-                .section-mobile-hint {
-                    display: none;
-                    color: #4f4435;
-                    font: 900 0.63rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.12em;
-                    text-align: center;
-                    text-transform: uppercase;
-                }
                 .homepage-section :global(.property-card) {
                     box-shadow:
                         none;
@@ -449,10 +439,6 @@ export default function HomepageSection({
                     .homepage-section :global(.end-card-action) {
                         margin-top: 12px;
                         font-size: 0.58rem;
-                    }
-                    .section-mobile-hint {
-                        display: block;
-                        margin-top: 2px;
                     }
                 }
             `}</style>

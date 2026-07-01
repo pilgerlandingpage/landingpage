@@ -1248,6 +1248,18 @@ export default async function PropertyDetailPage({
                             </div>
                         </section>
 
+                        <section id="mobile-ficha" className="plp-mobile-card plp-mobile-card--technical">
+                            <div className="plp-mobile-card-head">
+                                <span className="plp-kicker">Ficha técnica</span>
+                                <h2>Detalhes completos do imóvel.</h2>
+                            </div>
+                            <div className="plp-mobile-classic-lists">
+                                <InfoList title="Detalhes do imóvel" items={detailItems} />
+                                {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
+                                {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
+                            </div>
+                        </section>
+
                         <section className="plp-mobile-card plp-mobile-card--nearby">
                             <PropertyNearbyBenefits
                                 propertyId={property.id}
@@ -1443,7 +1455,6 @@ export default async function PropertyDetailPage({
                         <section id="ficha" className="plp-section">
                             <div className="plp-section-head">
                                 <span className="plp-kicker">Ficha rápida</span>
-                                <h2>Dados principais do imóvel.</h2>
                             </div>
                             <div className="plp-spec-grid">
                                 {area > 0 && <SpecCard icon={<Ruler size={21} />} label="Área" value={`${area.toLocaleString('pt-BR')} m²`} />}
@@ -1452,18 +1463,17 @@ export default async function PropertyDetailPage({
                                 {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
                                 <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
                             </div>
+                            <div className="plp-classic-lists plp-classic-lists--before-nearby">
+                                <InfoList title="Detalhes do imóvel" items={detailItems} />
+                                {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
+                                {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
+                            </div>
                             <PropertyNearbyBenefits
                                 propertyId={property.id}
                                 title={displayTitle}
                                 latLng={propertyMapLatLng}
                                 locationLabel={locationLabel || mapLocation || displayCity}
                             />
-                        </section>
-
-                        <section className="plp-section plp-classic-lists">
-                            <InfoList title="Detalhes do imóvel" items={detailItems} />
-                            {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
-                            {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
                         </section>
 
                         <section id="historico-precos" className="plp-section plp-market-history">

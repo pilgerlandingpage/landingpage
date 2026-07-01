@@ -2524,6 +2524,10 @@ export default function PropertyLandingStyles() {
                     gap: 24px;
                 }
 
+                .plp-classic-lists--before-nearby {
+                    margin-top: clamp(22px, 3vw, 34px);
+                }
+
                 .plp-info-list h3 {
                     margin: 0 0 12px;
                     padding-bottom: 8px;
@@ -5431,6 +5435,63 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-description-body p:first-child {
                         color: #202428;
                         font-weight: 560;
+                    }
+
+                    .plp-mobile-card--technical {
+                        padding: 16px 15px 17px;
+                    }
+
+                    .plp-mobile-classic-lists {
+                        display: grid;
+                        gap: 18px;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list {
+                        display: grid;
+                        gap: 9px;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list h3 {
+                        margin: 0;
+                        padding-bottom: 8px;
+                        border-bottom: 1px solid rgba(184,148,95,0.18);
+                        color: #171a1d;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: 0.98rem;
+                        font-weight: 780;
+                        line-height: 1.15;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list > div {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr);
+                        gap: 6px;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list ul {
+                        display: grid;
+                        gap: 7px;
+                        margin: 0;
+                        padding: 0;
+                        list-style: none;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list li {
+                        position: relative;
+                        padding-left: 14px;
+                        color: #354049;
+                        font-size: 0.82rem;
+                        font-weight: 520;
+                        line-height: 1.38;
+                    }
+
+                    .plp-mobile-card--technical .plp-info-list li::before {
+                        content: '›';
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        color: var(--plp-gold-dark);
+                        font-weight: 900;
                     }
 
                     .plp-mobile-market-grid small,

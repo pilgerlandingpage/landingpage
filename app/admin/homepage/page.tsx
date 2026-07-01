@@ -10,8 +10,26 @@ type Property = {
     main_image_url: string
 }
 
+const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
+const FEATURED_SECTION_LEGACY_TITLES = new Set(['selecao exclusiva', 'selecao em destaque'])
+
+function normalizeFeaturedSectionTitle(value: unknown) {
+    const title = String(value || '').trim()
+    const normalized = title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+
+    if (!title || FEATURED_SECTION_LEGACY_TITLES.has(normalized)) {
+        return FEATURED_SECTION_DEFAULT_TITLE
+    }
+
+    return title
+}
+
 const SECTION_OPTIONS = [
-    { key: 'featured', label: 'Seleção Exclusiva', desc: 'Imóveis premium selecionados pelo admin' },
+    { key: 'featured', label: 'Destaques', desc: 'Imóveis premium selecionados pelo admin' },
     { key: 'newest', label: 'Recém Adicionados', desc: 'Os últimos imóveis cadastrados' },
     { key: 'cta', label: 'CTA WhatsApp', desc: 'Banner "Não encontrou?" com botão WhatsApp' },
     { key: 'by_city', label: 'Por Cidade', desc: 'Imóveis agrupados por cidade' },
@@ -39,7 +57,7 @@ export default function HomepageConfigPage() {
 
     // Config state
     const [featuredIds, setFeaturedIds] = useState<string[]>([])
-    const [featuredTitle, setFeaturedTitle] = useState('Seleção Exclusiva')
+    const [featuredTitle, setFeaturedTitle] = useState(FEATURED_SECTION_DEFAULT_TITLE)
     const [sectionsEnabled, setSectionsEnabled] = useState<string[]>(['featured', 'newest', 'cta', 'by_city'])
     const [featuredCities, setFeaturedCities] = useState<string[]>(['Balneário Camboriú', 'Itajaí', 'Itapema', 'Porto Belo'])
     const [itemsPerSection, setItemsPerSection] = useState(8)
@@ -54,7 +72,7 @@ export default function HomepageConfigPage() {
                 if (d.success) {
                     const c = d.config
                     try { setFeaturedIds(JSON.parse(c.homepage_featured_ids || '[]')) } catch { }
-                    setFeaturedTitle(c.homepage_featured_title || 'Seleção Exclusiva')
+                    setFeaturedTitle(normalizeFeaturedSectionTitle(c.homepage_featured_title))
                     try { setSectionsEnabled(JSON.parse(c.homepage_sections_enabled || '[]')) } catch { }
                     try { setFeaturedCities(JSON.parse(c.homepage_featured_cities || '[]')) } catch { }
                     setItemsPerSection(parseInt(c.homepage_items_per_section) || 8)
@@ -194,7 +212,7 @@ export default function HomepageConfigPage() {
 
             {/* FEATURED SECTION CONFIG */}
             <div className="hp-card">
-                <h3>⭐ Seleção Exclusiva</h3>
+                <h3>⭐ Destaques</h3>
                 <p className="desc">Configure o título, ordenação e filtro de preço da primeira seção</p>
 
                 <p className="hp-label">Título da seção</p>
@@ -202,7 +220,7 @@ export default function HomepageConfigPage() {
                     className="hp-input"
                     value={featuredTitle}
                     onChange={e => setFeaturedTitle(e.target.value)}
-                    placeholder="Ex: Seleção Exclusiva do Corretor"
+                    placeholder="Ex: Destaques do portfólio"
                 />
 
                 <div style={{ marginTop: 16 }}>
@@ -265,7 +283,7 @@ export default function HomepageConfigPage() {
             {featuredSort === 'manual' && (
                 <div className="hp-card">
                     <h3>🎯 Imóveis Selecionados Manualmente</h3>
-                    <p className="desc">Escolha quais imóveis aparecem na Seleção Exclusiva</p>
+                    <p className="desc">Escolha quais imóveis aparecem em Destaques</p>
 
                     {/* Selected items */}
                     {selectedProperties.length > 0 && (
