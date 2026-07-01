@@ -1784,12 +1784,12 @@ export default function PropertyMap({
                 <button
                     type="button"
                     className={`map-quick-filter-trigger${quickFilter !== 'all' ? ' active' : ''}`}
+                    aria-label="Abrir filtros"
                     aria-expanded={quickFilterMenuOpen}
                     aria-haspopup="menu"
                     onClick={() => setQuickFilterMenuOpen(isOpen => !isOpen)}
                 >
                     <SlidersHorizontal size={15} />
-                    <span>Mais filtros</span>
                 </button>
                 {quickFilterMenuOpen && (
                     <div className="map-quick-filter-menu" role="menu" aria-label="Filtros rápidos do mapa">
@@ -1827,16 +1827,15 @@ export default function PropertyMap({
                 <button
                     type="button"
                     className={`map-mobile-more-filter-button${mobileControlsOpen ? ' active' : ''}`}
-                    aria-label="Mais filtros"
+                    aria-label="Abrir filtros"
                     aria-expanded={mobileControlsOpen}
                     onClick={() => setMobileControlsOpen(isOpen => !isOpen)}
                 >
                     <SlidersHorizontal size={14} />
-                    <span>Mais filtros</span>
                 </button>
             </div>
 
-            <div className={`map-mobile-filter-panel${mobileControlsOpen ? ' is-open' : ''}`} role="group" aria-label="Mais filtros do mapa">
+            <div className={`map-mobile-filter-panel${mobileControlsOpen ? ' is-open' : ''}`} role="group" aria-label="Filtros do mapa">
                 <div className="map-mobile-filter-grid">
                     {QUICK_FILTERS.map(filter => (
                         <button
@@ -2066,9 +2065,9 @@ export default function PropertyMap({
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 7px;
                     height: 34px;
-                    padding: 0 13px;
+                    width: 34px;
+                    padding: 0;
                     border: 1px solid rgba(232,220,199,0.14);
                     background: rgba(18, 18, 18, 0.76);
                     color: #e8dcc7;
@@ -2193,7 +2192,9 @@ export default function PropertyMap({
                     border-color: rgba(255,255,255,0.28);
                 }
                 .map-mobile-more-filter-button {
-                    width: auto;
+                    justify-content: center;
+                    width: 29px;
+                    padding: 0;
                 }
                 .map-mobile-filter-panel {
                     position: absolute;

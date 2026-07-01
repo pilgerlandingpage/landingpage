@@ -17,7 +17,7 @@ import {
     X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type CSSProperties, type MouseEvent, type ReactNode } from 'react'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import MapPropertyPreviewCard from './MapPropertyPreviewCard'
@@ -952,6 +952,28 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         setIsMapModalOpen(false)
     }, [])
 
+    const openMapFiltersFromSearch = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+
+        const mapPanel =
+            event.currentTarget.closest('.map-preview-panel, .mobile-map-preview-panel') as HTMLElement | null ||
+            wrapperRef.current?.querySelector<HTMLElement>('.home-preview-map-panel') ||
+            null
+        const isCompactMap = window.matchMedia('(max-width: 1023px)').matches
+        const mapOptionsButton = mapPanel?.querySelector<HTMLButtonElement>('.map-mobile-action-dock button[aria-label="Abrir opções do mapa"]')
+        const quickFilterButton = mapPanel?.querySelector<HTMLButtonElement>('.map-quick-filter-trigger')
+        const filterControl = isCompactMap
+            ? mapOptionsButton || quickFilterButton
+            : quickFilterButton || mapOptionsButton
+
+        filterControl?.click()
+
+        void trackEvent('home_map_more_filters_clicked', {
+            mode: isCompactMap ? 'map_options' : 'quick_filters',
+            source: isMapModalOpen ? 'mobile_map_modal' : 'home_map',
+        })
+    }, [isMapModalOpen])
+
     const markGuidedSearchSeen = useCallback(() => {
         try {
             window.localStorage.setItem(GUIDED_SEARCH_STORAGE_KEY, 'true')
@@ -1254,8 +1276,9 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             />
                         </>
                     )}
-                    <div className="map-search-panel map-search-panel-new home-map-search-panel">
+                    <div className="map-search-panel map-search-panel-new home-map-search-panel home-map-search-panel--overlay">
                         <HomeSearchBar
+                            onMoreFiltersClick={openMapFiltersFromSearch}
                             onSubmitValues={submitOverlaySearchInMap}
                             onValuesChange={syncOverlaySearchWithMap}
                             suggestionsPlacement="down"
@@ -1274,6 +1297,18 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         </div>
                     )}
                 </div>
+
+                {isDesktopFilters && (
+                    <div className="map-search-panel home-map-search-panel home-map-search-panel--desktop">
+                        <HomeSearchBar
+                            onMoreFiltersClick={openMapFiltersFromSearch}
+                            onSubmitValues={submitOverlaySearchInMap}
+                            onValuesChange={syncOverlaySearchWithMap}
+                            suggestionsPlacement="down"
+                            variant="map"
+                        />
+                    </div>
+                )}
 
                 <form
                     aria-hidden="true"
@@ -1376,9 +1411,8 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     </button>
 
                     <div className="search-actions">
-                        <button type="button" className="utility-button advanced-toggle" onClick={toggleAdvancedFilters} aria-expanded={showAdvancedPanel}>
+                        <button type="button" className="utility-button advanced-toggle" onClick={toggleAdvancedFilters} aria-expanded={showAdvancedPanel} aria-label="Abrir filtros">
                             <Filter size={15} />
-                            <span>Mais filtros</span>
                             {selectedFilterCount > 0 && <strong>{selectedFilterCount}</strong>}
                         </button>
                         <button type="button" className="utility-button muted" onClick={clearSearch}>
@@ -1480,6 +1514,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                 )}
                                 <div className="map-search-panel map-search-panel-new mobile-map-search-panel">
                                     <HomeSearchBar
+                                        onMoreFiltersClick={openMapFiltersFromSearch}
                                         onSubmitValues={submitOverlaySearchInMap}
                                         onValuesChange={syncOverlaySearchWithMap}
                                         variant="map"
@@ -1799,10 +1834,19 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     width: 100%;
                 }
                 .home-map-search-panel {
+                    max-width: 960px;
+                    width: min(960px, calc(100% - 40px));
+                }
+                .home-map-search-panel--overlay {
                     bottom: auto;
-                    max-width: 820px;
                     top: clamp(18px, 3vw, 34px);
-                    width: min(820px, calc(100% - 40px));
+                }
+                .home-map-search-panel--desktop {
+                    background: transparent;
+                    display: none !important;
+                    margin: clamp(16px, 2.2vw, 24px) auto 0;
+                    padding: 0;
+                    pointer-events: auto;
                 }
                 .home-map-search-panel :global(.home-search-box-map .home-search-panel) {
                     backdrop-filter: none;
@@ -1815,7 +1859,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     gap: 6px;
                     grid-template-areas:
                         "selects location";
-                    grid-template-columns: minmax(280px, 0.92fr) minmax(360px, 1.08fr);
+                    grid-template-columns: minmax(220px, 0.84fr) minmax(0, 1.16fr);
                     max-width: none;
                     padding: 0;
                 }
@@ -2353,6 +2397,12 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .utility-button.muted {
                     color: #746858;
                 }
+                .utility-button.advanced-toggle {
+                    justify-self: start;
+                    min-width: 36px;
+                    width: 36px;
+                    padding: 0;
+                }
                 .suggestions-dropdown {
                     background: #fff;
                     border: 1px solid rgba(116,104,88,0.18);
@@ -2485,6 +2535,12 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     .map-preview-panel {
                         height: clamp(520px, 38vw, 660px);
                         min-height: 520px;
+                    }
+                    .home-map-search-panel--overlay {
+                        display: none;
+                    }
+                    .home-map-search-panel--desktop {
+                        display: grid !important;
                     }
                     .home-map-property-preview--compact :global(.map-property-preview) {
                         bottom: 24px;

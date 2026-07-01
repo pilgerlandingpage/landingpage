@@ -2,6 +2,7 @@
 
 import { Building2, MapPin, Search, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent } from 'react'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import { searchLocationName } from '@/lib/locations/display'
@@ -335,6 +336,21 @@ export default function MobileMapSearchModal({
         setIsOpen(false)
     }, [])
 
+    const openMapFiltersFromSearch = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+
+        const mapPanel = event.currentTarget.closest('.mobile-map-preview-panel') as HTMLElement | null
+        const filterControl =
+            mapPanel?.querySelector<HTMLButtonElement>('.map-mobile-action-dock button[aria-label="Abrir opções do mapa"]') ||
+            mapPanel?.querySelector<HTMLButtonElement>('.map-quick-filter-trigger')
+
+        filterControl?.click()
+
+        void trackEvent('property_map_modal_more_filters_clicked', {
+            source: defaultSource,
+        })
+    }, [defaultSource])
+
     const showLockedMapHint = useCallback(() => {
         if (!isMapLocked) return
 
@@ -482,6 +498,7 @@ export default function MobileMapSearchModal({
 
                         <div className="mobile-map-search-panel">
                             <HomeSearchBar
+                                onMoreFiltersClick={openMapFiltersFromSearch}
                                 onSubmitValues={submitSearchInMap}
                                 onValuesChange={syncSearchWithMap}
                                 variant="map"

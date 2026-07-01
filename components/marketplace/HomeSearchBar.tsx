@@ -1,9 +1,9 @@
 'use client'
 
-import { Building2, ChevronDown, MapPin, Search } from 'lucide-react'
+import { Building2, ChevronDown, MapPin, Search, SlidersHorizontal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent, KeyboardEvent } from 'react'
+import type { FormEvent, KeyboardEvent, MouseEvent } from 'react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
@@ -30,6 +30,7 @@ export type HomeSearchValues = {
 
 type HomeSearchBarProps = {
     initialSearchParams?: string
+    onMoreFiltersClick?: (event: MouseEvent<HTMLButtonElement>) => void
     onSubmitValues?: (values: HomeSearchValues) => void
     onValuesChange?: (values: HomeSearchValues) => void
     showTitle?: boolean
@@ -180,6 +181,7 @@ function formatPrice(price: number) {
 
 export default function HomeSearchBar({
     initialSearchParams,
+    onMoreFiltersClick,
     onSubmitValues,
     onValuesChange,
     showTitle,
@@ -460,7 +462,7 @@ export default function HomeSearchBar({
     let suggestionIndex = -1
 
     return (
-        <section className={`home-search-box home-search-box-${variant} home-search-suggestions-${suggestionsDirection} ${shouldShowTitle ? 'home-search-title-enabled' : ''}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
+        <section className={`home-search-box home-search-box-${variant} home-search-suggestions-${suggestionsDirection} ${shouldShowTitle ? 'home-search-title-enabled' : ''} ${onMoreFiltersClick ? 'home-search-has-more-filters' : ''}`} id={variant === 'home' ? 'search' : undefined} ref={wrapperRef}>
             <form className="home-search-panel" onSubmit={submitSearch}>
                 {shouldShowTitle && (
                     <div className="home-search-title">
@@ -510,9 +512,19 @@ export default function HomeSearchBar({
                             value={locationLabel}
                         />
                     </label>
-                    <button type="submit" aria-label="Buscar imóveis">
+                    <button type="submit" className="home-search-submit-button" aria-label="Buscar imóveis">
                         <Search size={20} />
                     </button>
+                    {onMoreFiltersClick && (
+                        <button
+                            type="button"
+                            className="home-search-filter-button"
+                            aria-label="Abrir filtros do mapa"
+                            onClick={onMoreFiltersClick}
+                        >
+                            <SlidersHorizontal size={16} />
+                        </button>
+                    )}
 
                     {showSuggestions && (groupedSuggestions.length > 0 || isLoading) && (
                         <div className="home-search-suggestions">
@@ -698,20 +710,46 @@ export default function HomeSearchBar({
                     margin-top: 9px;
                     position: relative;
                 }
-                .home-search-location-row > button {
+                .home-search-has-more-filters .home-search-location-row {
+                    grid-template-columns: minmax(0, 1fr) 78px 44px;
+                }
+                .home-search-submit-button,
+                .home-search-filter-button {
                     align-self: end;
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
                     border: 0;
                     border-radius: 6px;
-                    color: #111;
                     cursor: pointer;
-                    display: grid;
                     height: 44px;
-                    place-items: center;
                     transition: transform 0.16s ease, box-shadow 0.16s ease;
                 }
-                .home-search-location-row > button:hover {
+                .home-search-submit-button {
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #111;
+                    display: grid;
+                    place-items: center;
+                }
+                .home-search-filter-button {
+                    align-items: center;
+                    background: #171410;
+                    color: #dfc18e;
+                    display: inline-flex;
+                    font: 900 0.68rem/1 'Inter', sans-serif;
+                    justify-content: center;
+                    letter-spacing: 0.02em;
+                    min-width: 44px;
+                    padding: 0;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+                .home-search-filter-button svg {
+                    flex: 0 0 auto;
+                }
+                .home-search-submit-button:hover {
                     box-shadow: 0 14px 26px rgba(223,193,142,0.26);
+                    transform: translateY(-1px);
+                }
+                .home-search-filter-button:hover {
+                    box-shadow: 0 14px 26px rgba(23,20,16,0.22);
                     transform: translateY(-1px);
                 }
                 .home-search-suggestions {
@@ -841,7 +879,7 @@ export default function HomeSearchBar({
                     grid-template-columns: minmax(0, 1fr) 46px;
                     margin-top: 7px;
                 }
-                .home-search-box-results .home-search-location-row > button {
+                .home-search-box-results .home-search-submit-button {
                     border-radius: 6px;
                     height: 38px;
                     width: 46px;
@@ -863,7 +901,8 @@ export default function HomeSearchBar({
                     .home-search-location-row {
                         grid-template-columns: 1fr;
                     }
-                    .home-search-location-row > button {
+                    .home-search-submit-button,
+                    .home-search-filter-button {
                         width: 100%;
                     }
                     .home-search-suggestions {
@@ -885,7 +924,7 @@ export default function HomeSearchBar({
                         grid-template-columns: minmax(0, 1fr) 50px;
                         margin-top: 4px;
                     }
-                    .home-search-box-map .home-search-location-row > button {
+                    .home-search-box-map .home-search-submit-button {
                         width: auto;
                     }
                     .home-search-box-map .home-search-suggestions {
@@ -907,7 +946,7 @@ export default function HomeSearchBar({
                         grid-template-columns: minmax(0, 1fr) 46px;
                         margin-top: 7px;
                     }
-                    .home-search-box-results .home-search-location-row > button {
+                    .home-search-box-results .home-search-submit-button {
                         width: 46px;
                     }
                     .home-search-box-results .home-search-suggestions {
@@ -1015,7 +1054,7 @@ export default function HomeSearchBar({
                     margin-top: 4px;
                     padding-right: 54px;
                 }
-                .home-search-box-map .home-search-location-row > button {
+                .home-search-box-map .home-search-submit-button {
                     border-radius: 3px;
                     box-shadow: 0 10px 22px rgba(18,16,12,0.16);
                     height: 34px;
@@ -1023,6 +1062,28 @@ export default function HomeSearchBar({
                     right: 0;
                     top: 0;
                     width: 50px;
+                }
+                .home-search-box-map.home-search-has-more-filters .home-search-location-row {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 50px 34px;
+                    padding-right: 0;
+                }
+                .home-search-box-map.home-search-has-more-filters .home-search-submit-button,
+                .home-search-box-map.home-search-has-more-filters .home-search-filter-button {
+                    height: 34px;
+                    position: static;
+                    top: auto;
+                }
+                .home-search-box-map.home-search-has-more-filters .home-search-submit-button {
+                    width: 50px;
+                }
+                .home-search-box-map.home-search-has-more-filters .home-search-filter-button {
+                    border-radius: 5px;
+                    box-shadow: 0 10px 22px rgba(18,16,12,0.18);
+                    font-size: 0.56rem;
+                    min-width: 34px;
+                    padding: 0;
+                    width: 34px;
                 }
                 .home-search-box-map .home-search-location-row label {
                     display: block;
@@ -1037,6 +1098,9 @@ export default function HomeSearchBar({
                     right: 56px;
                     top: auto;
                     z-index: 1500;
+                }
+                .home-search-box-map.home-search-has-more-filters .home-search-suggestions {
+                    right: 0;
                 }
                 .home-search-box-map.home-search-suggestions-down .home-search-suggestions {
                     bottom: auto;
@@ -1081,6 +1145,19 @@ export default function HomeSearchBar({
                     .home-search-box-map .home-search-location-row {
                         margin-top: 4px;
                         padding-right: 52px;
+                    }
+                    .home-search-box-map.home-search-has-more-filters .home-search-location-row {
+                        grid-template-columns: minmax(0, 1fr) 48px 34px;
+                        padding-right: 0;
+                    }
+                    .home-search-box-map.home-search-has-more-filters .home-search-submit-button {
+                        width: 48px;
+                    }
+                    .home-search-box-map.home-search-has-more-filters .home-search-filter-button {
+                        font-size: 0.52rem;
+                        min-width: 34px;
+                        padding: 0;
+                        width: 34px;
                     }
                     .home-search-box-map .home-search-suggestions {
                         bottom: calc(100% + 6px);

@@ -19,8 +19,12 @@ import {
     MapPin,
     MessageCircle,
     Ruler,
+    ShieldCheck,
     Star,
+    SunMedium,
     TrendingUp,
+    Umbrella,
+    Waves,
 } from 'lucide-react'
 import PropertyLandingTracker from '@/components/property/PropertyLandingTracker'
 import PropertyLandingUrlTracker from '@/components/property/PropertyLandingUrlTracker'
@@ -125,6 +129,11 @@ type RelatedPropertyScore = {
     priceScore: number
     qualityScore: number
     premiumAlternative: boolean
+}
+
+type MobileSummaryHighlight = {
+    label: string
+    icon: ReactNode
 }
 
 function isUuid(value: string) {
@@ -323,6 +332,76 @@ function isMobileDescriptionDuplicate(sentence: string, property: any, displayTi
     if (repeatsLocation && repeatsTitle) return true
 
     return false
+}
+
+function buildMobileSummaryHighlights(params: {
+    property: any
+    amenities: string[]
+    paragraphs: string[]
+    mainBenefitTag: string
+}): MobileSummaryHighlight[] {
+    const haystack = normalizeContentKey([
+        params.property?.title,
+        params.property?.seo_title,
+        params.property?.description,
+        params.property?.seo_description,
+        params.property?.property_type,
+        params.property?.source_status,
+        params.mainBenefitTag,
+        ...params.amenities,
+        ...params.paragraphs,
+    ].filter(Boolean).join(' '))
+    const highlights: MobileSummaryHighlight[] = []
+    const seen = new Set<string>()
+    const hasAny = (...terms: string[]) => terms.some(term => haystack.includes(normalizeContentKey(term)))
+    const add = (label: string, icon: ReactNode) => {
+        const key = normalizeContentKey(label)
+        if (!key || seen.has(key) || highlights.length >= 4) return
+        seen.add(key)
+        highlights.push({ label, icon })
+    }
+
+    if (hasAny('vista permanente')) {
+        add('Vista permanente', <Waves size={21} />)
+    } else if (hasAny('frente mar', 'frente para o mar', 'vista mar', 'vista para o mar', 'beira mar')) {
+        add('Vista mar', <Waves size={21} />)
+    }
+
+    if (hasAny('sol da manha', 'face leste', 'nascente')) {
+        add('Sol da manhã', <SunMedium size={21} />)
+    }
+
+    if (hasAny('pe na areia', 'acesso direto', 'frente mar', 'beira mar', 'praia')) {
+        add(hasAny('acesso direto', 'pe na areia') ? 'Acesso direto à praia' : 'Perto da praia', <Umbrella size={21} />)
+    }
+
+    if (hasAny('portaria 24', 'seguranca 24', 'segurança 24', 'monitoramento 24')) {
+        add('Segurança 24h', <ShieldCheck size={21} />)
+    } else if (hasAny('portaria', 'seguranca', 'segurança', 'monitoramento', 'condominio fechado', 'condomínio fechado')) {
+        add('Segurança', <ShieldCheck size={21} />)
+    }
+
+    if (hasAny('piscina', 'spa', 'academia', 'fitness', 'playground', 'brinquedoteca', 'salao de festas', 'salão de festas')) {
+        add('Lazer completo', <Star size={21} />)
+    }
+
+    if (hasAny('mobiliado', 'mobiliada', 'decorado', 'decorada')) {
+        add('Pronto para morar', <CheckCircle2 size={21} />)
+    }
+
+    if (params.mainBenefitTag) {
+        add(params.mainBenefitTag, <Star size={21} />)
+    }
+
+    if (highlights.length < 4 && hasAny('condominio', 'condomínio')) {
+        add('Condomínio premium', <ShieldCheck size={21} />)
+    }
+
+    if (highlights.length < 4) {
+        add('Curadoria Pilger', <CheckCircle2 size={21} />)
+    }
+
+    return highlights.slice(0, 4)
 }
 
 function buildPropertyDescriptionParagraphs(
@@ -834,6 +913,11 @@ export default async function PropertyDetailPage({
     if (responsibleBroker.legacy_login) brokerPropertiesParams.set('brokerLogin', responsibleBroker.legacy_login)
     const brokerPropertiesQuery = brokerPropertiesParams.toString()
     const brokerPropertiesHref = brokerPropertiesQuery ? `/busca?${brokerPropertiesQuery}` : '/busca'
+    const relatedSearchParams = new URLSearchParams()
+    if (displayCity) relatedSearchParams.set('city', displayCity)
+    if (displayNeighborhood) relatedSearchParams.set('neighborhood', displayNeighborhood)
+    const relatedSearchQuery = relatedSearchParams.toString()
+    const relatedSearchHref = relatedSearchQuery ? `/busca?${relatedSearchQuery}` : '/busca'
     const brokerInsight = buildBrokerInsight(property)
     const primaryImage = gallery[0] || DEFAULT_OG_IMAGE
     const area = Number(property.area_private_m2 || property.area_m2 || 0)
@@ -857,6 +941,13 @@ export default async function PropertyDetailPage({
             parkingCount,
         }
     )
+    const mobileSummaryDescription = narrativeParagraphs[0] || brokerInsight.text
+    const mobileSummaryHighlights = buildMobileSummaryHighlights({
+        property,
+        amenities,
+        paragraphs: narrativeParagraphs,
+        mainBenefitTag,
+    })
     const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
     const projectItems = amenities.slice(24, 48)
@@ -1189,38 +1280,54 @@ export default async function PropertyDetailPage({
                         )}
                     >
                         <section className="plp-mobile-sheet-summary plp-mobile-card plp-mobile-card--summary">
-                            <span className={`plp-mobile-price-badge plp-mobile-price-badge-${primaryQualityLabel.tone}`}>
-                                {mainBenefitTag}
-                            </span>
-                            <h2 className="plp-mobile-sheet-title">{displayTitle}</h2>
-                            <span className="plp-mobile-sheet-price">{formatMoney(property.price)}</span>
+                            <div className="plp-mobile-summary-head">
+                                <div className="plp-mobile-summary-copy">
+                                    <h2 className="plp-mobile-sheet-title">{displayTitle}</h2>
+                                    <span className="plp-mobile-summary-location">
+                                        <MapPin size={15} />
+                                        {locationLabel || displayTitle}
+                                    </span>
+                                </div>
+                                <div className="plp-mobile-summary-price-block">
+                                    <small>Valor</small>
+                                    <span className="plp-mobile-sheet-price">{formatMoney(property.price)}</span>
+                                </div>
+                            </div>
                             <div className="plp-mobile-sheet-facts">
                                 {bedroomCount > 0 && (
                                     <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--beds">
-                                        <BedDouble size={19} />
-                                        <span className="plp-mobile-sheet-fact-text">{bedroomCount} {statLabel(bedroomCount, 'dorm.', 'dorms.')}</span>
+                                        <BedDouble size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">
+                                            <strong>{bedroomCount}</strong>
+                                            <small>{statLabel(bedroomCount, 'dormitório', 'dormitórios')}</small>
+                                        </span>
                                     </span>
                                 )}
                                 {bathroomsCount > 0 && (
                                     <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--baths">
-                                        <Bath size={19} />
-                                        <span className="plp-mobile-sheet-fact-text">{bathroomsCount} {statLabel(bathroomsCount, 'banho', 'banhos')}</span>
+                                        <Bath size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">
+                                            <strong>{bathroomsCount}</strong>
+                                            <small>{statLabel(bathroomsCount, 'banheiro', 'banheiros')}</small>
+                                        </span>
                                     </span>
                                 )}
                                 {area > 0 && (
                                     <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--area">
-                                        <Ruler size={19} />
+                                        <Ruler size={21} />
                                         <span className="plp-mobile-sheet-fact-text">{area.toLocaleString('pt-BR')} m²</span>
                                     </span>
                                 )}
                                 {parkingCount > 0 && (
                                     <span className="plp-mobile-sheet-fact plp-mobile-sheet-fact--parking">
-                                        <Car size={19} />
-                                        <span className="plp-mobile-sheet-fact-text">{parkingCount} {statLabel(parkingCount, 'vaga', 'vagas')}</span>
+                                        <Car size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">
+                                            <strong>{parkingCount}</strong>
+                                            <small>{statLabel(parkingCount, 'vaga', 'vagas')}</small>
+                                        </span>
                                     </span>
                                 )}
                             </div>
-                            <p>{locationLabel || displayTitle}</p>
                             <div className="plp-mobile-listing-stats" aria-label="Indicadores de interesse do imóvel">
                                 <span>
                                     <Clock3 size={15} />
@@ -1238,20 +1345,37 @@ export default async function PropertyDetailPage({
                                     <small>{saveStat.label}</small>
                                 </span>
                             </div>
-                        </section>
-
-                        <section id="mobile-detalhes" className="plp-mobile-card plp-mobile-card--description">
-                            <div className="plp-mobile-description-body">
-                                {narrativeParagraphs.map((paragraph, index) => (
-                                    <p key={`mobile-description-${index}`}>{paragraph}</p>
-                                ))}
-                            </div>
+                            {mobileSummaryDescription && (
+                                <details className="plp-mobile-summary-description">
+                                    <summary>
+                                        <span className="plp-mobile-summary-description-preview">{mobileSummaryDescription}</span>
+                                        <span className="plp-mobile-summary-description-toggle">
+                                            <span className="plp-mobile-summary-description-toggle-closed">Ver descrição completa</span>
+                                            <span className="plp-mobile-summary-description-toggle-open">Ocultar descrição</span>
+                                        </span>
+                                    </summary>
+                                    <div className="plp-mobile-summary-description-full">
+                                        {narrativeParagraphs.map((paragraph, index) => (
+                                            <p key={`mobile-full-description-${index}`}>{paragraph}</p>
+                                        ))}
+                                    </div>
+                                </details>
+                            )}
+                            {mobileSummaryHighlights.length > 0 && (
+                                <div className="plp-mobile-summary-highlights" aria-label="Diferenciais do imóvel">
+                                    {mobileSummaryHighlights.map(item => (
+                                        <span key={item.label}>
+                                            {item.icon}
+                                            <strong>{item.label}</strong>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </section>
 
                         <section id="mobile-ficha" className="plp-mobile-card plp-mobile-card--technical">
-                            <div className="plp-mobile-card-head">
-                                <span className="plp-kicker">Ficha técnica</span>
-                                <h2>Detalhes completos do imóvel.</h2>
+                            <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
+                                <h2>Ficha técnica</h2>
                             </div>
                             <div className="plp-mobile-classic-lists">
                                 <InfoList title="Detalhes do imóvel" items={detailItems} />
@@ -1268,21 +1392,6 @@ export default async function PropertyDetailPage({
                                 locationLabel={locationLabel || mapLocation || displayCity}
                                 variant="mobile"
                             />
-                        </section>
-
-                        <section className="plp-mobile-card plp-mobile-broker-card">
-                            <div className="plp-mobile-broker-head">
-                                <img src={brokerCardImage} alt={brokerCardName} />
-                                <div>
-                                    <span className="plp-kicker">Especialista</span>
-                                    <h2>{brokerCardName}</h2>
-                                    <p>{brokerCredentialLine}</p>
-                                    <Link href={brokerPropertiesHref} className="plp-mobile-broker-properties-link">
-                                        <Home size={15} />
-                                        Mais imóveis deste corretor
-                                    </Link>
-                                </div>
-                            </div>
                         </section>
 
                         <section className="plp-mobile-card plp-mobile-market-section">
@@ -1330,7 +1439,7 @@ export default async function PropertyDetailPage({
                             </div>
                             <p className="plp-mobile-market-reading">
                                 <TrendingUp size={15} />
-                                {marketHistory.reading}
+                                <span>{marketHistory.reading}</span>
                             </p>
                             <div className="plp-mobile-timeline">
                                 {marketHistory.timeline.map((event, index) => (
@@ -1348,9 +1457,15 @@ export default async function PropertyDetailPage({
 
                         {related.length > 0 && (
                             <section className="plp-mobile-card plp-mobile-related-section">
-                                <div className="plp-mobile-card-head">
-                                    <span className="plp-kicker">Comparação</span>
-                                    <h2>Imóveis semelhantes.</h2>
+                                <div className="plp-mobile-card-head plp-mobile-card-head--split">
+                                    <div>
+                                        <span className="plp-kicker">Comparação</span>
+                                        <h2>Imóveis semelhantes.</h2>
+                                    </div>
+                                    <Link href={relatedSearchHref}>
+                                        Ver mais
+                                        <ArrowRight size={15} />
+                                    </Link>
                                 </div>
                                 <div className="plp-mobile-related-rail">
                                     {related.map((item: any) => {
@@ -1377,6 +1492,39 @@ export default async function PropertyDetailPage({
                                 </div>
                             </section>
                         )}
+
+                        <section className="plp-mobile-card plp-mobile-broker-card">
+                            <div className="plp-mobile-broker-head">
+                                <img src={brokerCardImage} alt={brokerCardName} />
+                                <div>
+                                    <span className="plp-kicker">Especialista</span>
+                                    <h2>{brokerCardName}</h2>
+                                    <p>{brokerCredentialLine}</p>
+                                </div>
+                            </div>
+                            <WhatsAppCaptureLink
+                                phone={contactPhone}
+                                message={`Olá, quero falar com o especialista sobre este imóvel ${propertyUrl}`}
+                                slug="imovel"
+                                template="property-mobile-broker-card"
+                                metadata={{
+                                    ...propertyTrackingMetadata,
+                                    tracking_event_type: 'property_specialist_contact_requested',
+                                    premium_intent: 'specialist_contact',
+                                    requested_action: 'Falar com especialista pelo card mobile',
+                                    cta_context: 'mobile_broker_card',
+                                    cta_label: 'Falar com especialista',
+                                }}
+                                className="plp-mobile-broker-cta"
+                            >
+                                <MessageCircle size={16} />
+                                Falar com especialista
+                            </WhatsAppCaptureLink>
+                            <Link href={brokerPropertiesHref} className="plp-mobile-broker-properties-link">
+                                <Home size={15} />
+                                Ver imóveis do especialista
+                            </Link>
+                        </section>
 
                         <section className="plp-mobile-card plp-mobile-transparency-card">
                             <div className="plp-mobile-card-head">

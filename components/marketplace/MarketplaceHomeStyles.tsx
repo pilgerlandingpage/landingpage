@@ -2140,6 +2140,22 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             font-size: 0.68rem;
           }
         }
+
+        /* Homepage title typography */
+        .marketplace-container :is(h1, h2, h3, h4),
+        .marketplace-container .section-title,
+        .marketplace-container .property-title,
+        .marketplace-container .property-title strong,
+        .marketplace-container .premium-category-copy strong,
+        .marketplace-container .premium-category-card .premium-category-copy strong,
+        .marketplace-container .gp-location-copy strong,
+        .marketplace-container .gp-authority-stats a.gp-location-card .gp-location-copy strong,
+        .marketplace-container .section-end-card strong,
+        .marketplace-container .social-card strong,
+        .marketplace-container .media-social-card strong {
+          font-family: 'Montserrat', 'Inter', sans-serif !important;
+          font-weight: 400 !important;
+        }
 `
 
 export default function MarketplaceHomeStyles() {

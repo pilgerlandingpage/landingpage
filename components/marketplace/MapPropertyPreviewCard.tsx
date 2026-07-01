@@ -8,6 +8,7 @@ import type {
     UIEvent as ReactUIEvent,
 } from 'react'
 import { ArrowRight, BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
@@ -127,6 +128,7 @@ export default function MapPropertyPreviewCard({
     onPropertySelect,
     onClose,
 }: MapPropertyPreviewCardProps) {
+    const router = useRouter()
     const [imageState, setImageState] = useState<{ propertyId: string; index: number }>({ propertyId: property.id, index: 0 })
     const touchStartX = useRef<number | null>(null)
     const trackRef = useRef<HTMLDivElement | null>(null)
@@ -151,6 +153,9 @@ export default function MapPropertyPreviewCard({
     const selectedId = selectedPropertyId || property.id
     const carouselMode = carouselProperties.length > 1
     const selectedProperty = carouselProperties.find(item => item.id === selectedId) || property
+    const selectedPropertyIndex = carouselProperties.findIndex(item => item.id === selectedId)
+    const canGoPrevious = carouselMode && selectedPropertyIndex > 0
+    const canGoNext = carouselMode && selectedPropertyIndex >= 0 && selectedPropertyIndex < carouselProperties.length - 1
     const selectedGallery = useMemo(() => galleryFor(selectedProperty), [selectedProperty])
     const selectedBadges = useMemo(() => getBadges(selectedProperty), [selectedProperty])
     const selectedBadgesKey = selectedBadges.join(', ')
@@ -276,6 +281,17 @@ export default function MapPropertyPreviewCard({
         onPropertySelect?.(nextProperty, source)
     }, [onPropertySelect])
 
+    const goToAdjacentProperty = useCallback((direction: 1 | -1) => {
+        if (!carouselMode || selectedPropertyIndex < 0) return
+
+        const nextIndex = Math.min(carouselProperties.length - 1, Math.max(0, selectedPropertyIndex + direction))
+        const nextProperty = carouselProperties[nextIndex]
+        if (!nextProperty || nextProperty.id === selectedId) return
+
+        selectProperty(nextProperty, direction > 0 ? 'carousel_next_button' : 'carousel_previous_button')
+        settlePropertyIntoCenter(nextProperty.id, 'smooth')
+    }, [carouselMode, carouselProperties, selectProperty, selectedId, selectedPropertyIndex, settlePropertyIntoCenter])
+
     const handleTrackScroll = useCallback((event: ReactUIEvent<HTMLDivElement>) => {
         if (!carouselMode || !onPropertySelect) return
         if (suppressScrollSelection.current) return
@@ -382,6 +398,19 @@ export default function MapPropertyPreviewCard({
         }
     }, [carouselProperties, selectProperty, settlePropertyIntoCenter])
 
+    const navigateToPropertyDetails = useCallback((targetProperty: PreviewProperty, source: string) => {
+        const meta = previewMetaFor(targetProperty)
+
+        void trackEvent('property_map_preview_details_clicked', {
+            property_id: targetProperty.id,
+            title: meta.displayTitle,
+            price: targetProperty.price || null,
+            destination: meta.detailsHref,
+            source,
+        })
+        router.push(meta.detailsHref)
+    }, [router])
+
     const handlePreviewCardClick = useCallback((event: ReactMouseEvent<HTMLElement>, nextProperty: PreviewProperty) => {
         if (suppressCardClick.current) {
             event.preventDefault()
@@ -390,8 +419,10 @@ export default function MapPropertyPreviewCard({
             return
         }
 
-        selectProperty(nextProperty, 'carousel_click')
-    }, [selectProperty])
+        if ((event.target as HTMLElement).closest('a, button')) return
+
+        navigateToPropertyDetails(nextProperty, 'card_click')
+    }, [navigateToPropertyDetails])
 
     const goToImage = useCallback((targetProperty: PreviewProperty, gallery: string[], direction: 1 | -1) => {
         if (gallery.length < 2) return
@@ -649,6 +680,40 @@ export default function MapPropertyPreviewCard({
                 }
                 .map-preview-nav.prev { left: 7px; }
                 .map-preview-nav.next { right: 7px; }
+                .map-preview-carousel-button {
+                    position: absolute;
+                    top: 50%;
+                    z-index: 6;
+                    display: grid;
+                    place-items: center;
+                    width: 42px;
+                    height: 42px;
+                    border: 1px solid rgba(255,255,255,0.74);
+                    border-radius: 999px;
+                    background: rgba(255,253,248,0.94);
+                    color: #5f4930;
+                    cursor: pointer;
+                    pointer-events: auto;
+                    box-shadow: 0 14px 34px rgba(31,24,16,0.26);
+                    transform: translateY(-50%);
+                    transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+                }
+                .map-preview-carousel-button:hover:not(:disabled) {
+                    background: #dfc18e;
+                    color: #111;
+                    transform: translateY(-50%) scale(1.04);
+                }
+                .map-preview-carousel-button:disabled {
+                    cursor: default;
+                    opacity: 0.28;
+                    box-shadow: 0 8px 18px rgba(31,24,16,0.12);
+                }
+                .map-preview-carousel-button.prev {
+                    left: 8px;
+                }
+                .map-preview-carousel-button.next {
+                    right: 8px;
+                }
                 .map-preview-close {
                     position: absolute;
                     top: 8px;
@@ -873,6 +938,9 @@ export default function MapPropertyPreviewCard({
                     .map-preview-open-indicator {
                         display: none;
                     }
+                    .map-preview-carousel-button {
+                        display: none;
+                    }
                     .map-preview-photo-count {
                         bottom: 6px;
                         height: 19px;
@@ -901,6 +969,35 @@ export default function MapPropertyPreviewCard({
                     }
                 }
             `}</style>
+
+            {carouselMode && (
+                <>
+                    <button
+                        type="button"
+                        className="map-preview-carousel-button prev"
+                        aria-label="Ver imóvel anterior"
+                        onClick={event => {
+                            event.stopPropagation()
+                            goToAdjacentProperty(-1)
+                        }}
+                        disabled={!canGoPrevious}
+                    >
+                        <ChevronLeft size={19} />
+                    </button>
+                    <button
+                        type="button"
+                        className="map-preview-carousel-button next"
+                        aria-label="Ver próximo imóvel"
+                        onClick={event => {
+                            event.stopPropagation()
+                            goToAdjacentProperty(1)
+                        }}
+                        disabled={!canGoNext}
+                    >
+                        <ChevronRight size={19} />
+                    </button>
+                </>
+            )}
 
             <div
                 className="map-preview-track"
