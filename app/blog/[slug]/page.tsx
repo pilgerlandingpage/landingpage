@@ -13,8 +13,11 @@ import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
 import { JsonLd, articleJsonLd, breadcrumbJsonLd, faqPageJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 300
+
+export function generateStaticParams() {
+    return []
+}
 
 const BLOG_POST_SELECT = [
     'id',

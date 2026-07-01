@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
@@ -26,6 +26,8 @@ export const metadata: Metadata = {
         images: [DEFAULT_OG_IMAGE],
     },
 }
+
+export const revalidate = 120
 
 function hasCoordinates(p: any) {
     return p.latitude && p.longitude
@@ -254,6 +256,26 @@ const SEARCH_PROPERTY_FIELDS = [
 ].join(',')
 
 const MIN_SEARCH_PRICE = 4000000
+const SEARCH_PROPERTY_DESCRIPTION_LIMIT = 360
+const SEARCH_PROPERTY_IMAGE_LIMIT = 6
+const SEARCH_PROPERTY_AMENITY_LIMIT = 8
+
+function compactSearchProperty(property: any) {
+    const description = String(property.description || '')
+
+    return {
+        ...property,
+        description: description.length > SEARCH_PROPERTY_DESCRIPTION_LIMIT
+            ? `${description.slice(0, SEARCH_PROPERTY_DESCRIPTION_LIMIT)}...`
+            : description,
+        images: Array.isArray(property.images)
+            ? property.images.filter(Boolean).slice(0, SEARCH_PROPERTY_IMAGE_LIMIT)
+            : property.images,
+        amenities: Array.isArray(property.amenities)
+            ? property.amenities.filter(Boolean).slice(0, SEARCH_PROPERTY_AMENITY_LIMIT)
+            : property.amenities,
+    }
+}
 
 export default async function SearchPage({
     searchParams
@@ -280,8 +302,8 @@ export default async function SearchPage({
             description: 'Busca premium de imóveis de alto padrão no litoral catarinense.',
         },
     ]
-    const supabase = await createServerSupabase()
-    const adminSupabase = createAdminClient()
+    const supabase = createAdminClient()
+    const adminSupabase = supabase
     const resolvedParams = await searchParams
 
     const rawQ = firstParam(resolvedParams.q)
@@ -412,7 +434,8 @@ export default async function SearchPage({
         lpMap[lp.property_id] = lp.slug
     })
 
-    const propertiesWithCoords = properties?.filter(hasCoordinates) || []
+    const compactProperties = (properties || []).map(compactSearchProperty)
+    const propertiesWithCoords = compactProperties.filter(hasCoordinates)
 
     return (
         <div
@@ -423,7 +446,7 @@ export default async function SearchPage({
             <JsonLd data={jsonLd} />
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 <SearchResults
-                    properties={properties || []}
+                    properties={compactProperties}
                     propertiesWithCoords={propertiesWithCoords}
                     lpMap={lpMap}
                     brokerSearchName={brokerName || null}

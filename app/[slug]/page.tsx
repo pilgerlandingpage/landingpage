@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
@@ -12,11 +12,14 @@ import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
-// Force dynamic rendering since we rely on DB data
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
+
+export function generateStaticParams() {
+    return []
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const paramsAwaited = await params
     const { slug } = paramsAwaited
 
@@ -36,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function DynamicLandingPage({ params }: { params: Promise<{ slug: string }> }) {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { slug } = await params
 
     // 1. Fetch Landing Page data with related Property and Agent

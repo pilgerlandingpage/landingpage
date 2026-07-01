@@ -6,13 +6,13 @@ import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import PropertyCard from '@/components/marketplace/PropertyCard'
-import { createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { geoPages, getGeoPage } from '@/lib/seo/geo-pages'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 type PageParams = { params: Promise<{ city: string }> }
 
@@ -38,6 +38,10 @@ const PROPERTY_FIELDS = [
   'amenities',
   'source_status',
 ].join(',')
+
+const GEO_PROPERTY_DESCRIPTION_LIMIT = 360
+const GEO_PROPERTY_IMAGE_LIMIT = 6
+const GEO_PROPERTY_AMENITY_LIMIT = 8
 
 export function generateStaticParams() {
   return geoPages.map(page => ({ city: page.slug }))
@@ -139,8 +143,25 @@ function matchesTextTerms(property: any, terms?: string[]) {
   return terms.every(term => text.includes(normalizeSearchText(term)))
 }
 
+function compactGeoProperty(property: any) {
+  const description = String(property.description || '')
+
+  return {
+    ...property,
+    description: description.length > GEO_PROPERTY_DESCRIPTION_LIMIT
+      ? `${description.slice(0, GEO_PROPERTY_DESCRIPTION_LIMIT)}...`
+      : description,
+    images: Array.isArray(property.images)
+      ? property.images.filter(Boolean).slice(0, GEO_PROPERTY_IMAGE_LIMIT)
+      : property.images,
+    amenities: Array.isArray(property.amenities)
+      ? property.amenities.filter(Boolean).slice(0, GEO_PROPERTY_AMENITY_LIMIT)
+      : property.amenities,
+  }
+}
+
 async function getProperties(page: NonNullable<ReturnType<typeof getGeoPage>>) {
-  const supabase = await createServerSupabase()
+  const supabase = createAdminClient()
   let query = supabase
     .from('properties')
     .select(PROPERTY_FIELDS)
@@ -164,7 +185,10 @@ async function getProperties(page: NonNullable<ReturnType<typeof getGeoPage>>) {
   })
 
   return {
-    properties: (properties || []).filter(property => matchesTextTerms(property, page.filters.textTerms)).slice(0, 12),
+    properties: (properties || [])
+      .filter((property: any) => matchesTextTerms(property, page.filters.textTerms))
+      .slice(0, 12)
+      .map(compactGeoProperty),
     lpMap,
   }
 }

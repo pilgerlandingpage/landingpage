@@ -8,7 +8,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { DEFAULT_EVENT_HERO, formatEventDate } from '@/lib/events/utils'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export const metadata: Metadata = {
     title: 'Eventos para corretores',

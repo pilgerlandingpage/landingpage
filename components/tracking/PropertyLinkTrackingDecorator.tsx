@@ -34,6 +34,10 @@ function hasAnyUtm(params: URLSearchParams) {
     return UTM_KEYS.some(key => Boolean(params.get(key)))
 }
 
+function hasAnyLeadParam(params: URLSearchParams) {
+    return LEAD_KEYS.some(key => Boolean(params.get(key)))
+}
+
 function copyParam(source: URLSearchParams, target: URLSearchParams, key: string) {
     const value = source.get(key)
     if (value && !target.get(key)) target.set(key, value)
@@ -72,35 +76,58 @@ function decoratePropertyHref(anchor: HTMLAnchorElement) {
     const propertyId = extractPropertyId(url.pathname)
     if (!propertyId) return
 
+    const originalHref = `${url.pathname}${url.search}${url.hash}`
     if (/^\/imovel\/[0-9a-f-]{36}\/?$/i.test(url.pathname)) {
         url.pathname = `/imovel/${propertyId}/detalhes`
     }
 
     const currentParams = new URLSearchParams(window.location.search)
-    if (!hasAnyUtm(url.searchParams)) {
-        if (hasAnyUtm(currentParams)) {
-            UTM_KEYS.forEach(key => copyParam(currentParams, url.searchParams, key))
-        } else {
-            url.searchParams.set('utm_source', 'site')
-            url.searchParams.set('utm_medium', 'property_link')
-            url.searchParams.set('utm_campaign', 'property_navigation')
-        }
+    const shouldCarryAttribution = hasAnyUtm(currentParams) || hasAnyLeadParam(currentParams) || hasAnyUtm(url.searchParams) || hasAnyLeadParam(url.searchParams)
+
+    if (!shouldCarryAttribution) {
+        const nextHref = `${url.pathname}${url.search}${url.hash}`
+        if (nextHref !== originalHref) anchor.href = nextHref
+        return
     }
 
-    if (!url.searchParams.get('utm_content')) {
+    if (!hasAnyUtm(url.searchParams) && hasAnyUtm(currentParams)) {
+        UTM_KEYS.forEach(key => copyParam(currentParams, url.searchParams, key))
+    }
+
+    if (!url.searchParams.get('utm_content') && hasAnyUtm(url.searchParams)) {
         url.searchParams.set('utm_content', linkContent(anchor, propertyId))
     }
 
     LEAD_KEYS.forEach(key => copyParam(currentParams, url.searchParams, key))
-    anchor.href = `${url.pathname}${url.search}${url.hash}`
+    const nextHref = `${url.pathname}${url.search}${url.hash}`
+    if (nextHref !== originalHref) anchor.href = nextHref
 }
 
 export default function PropertyLinkTrackingDecorator() {
     useEffect(() => {
         if (!isPublicSitePath(window.location.pathname)) return
 
+        let disposed = false
+        let pending = false
+
         const decorateAll = () => {
             document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach(decoratePropertyHref)
+        }
+
+        const scheduleDecorateAll = () => {
+            if (pending || disposed) return
+            pending = true
+
+            const run = () => {
+                pending = false
+                if (!disposed) decorateAll()
+            }
+
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(run, { timeout: 1000 })
+            } else {
+                globalThis.setTimeout(run, 80)
+            }
         }
 
         const handleClick = (event: MouseEvent) => {
@@ -108,13 +135,14 @@ export default function PropertyLinkTrackingDecorator() {
             if (target) decoratePropertyHref(target)
         }
 
-        decorateAll()
+        scheduleDecorateAll()
 
-        const observer = new MutationObserver(() => decorateAll())
+        const observer = new MutationObserver(() => scheduleDecorateAll())
         observer.observe(document.body, { childList: true, subtree: true })
         document.addEventListener('click', handleClick, true)
 
         return () => {
+            disposed = true
             observer.disconnect()
             document.removeEventListener('click', handleClick, true)
         }

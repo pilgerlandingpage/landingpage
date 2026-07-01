@@ -9,7 +9,11 @@ import { DEFAULT_EVENT_HERO, DEFAULT_EVENT_PROFILE, formatEventDate } from '@/li
 import RegistrationForm, { EventFormAnchorButton } from './RegistrationForm'
 import { JsonLd, breadcrumbJsonLd, eventJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
+
+export function generateStaticParams() {
+    return []
+}
 
 type PageProps = { params: Promise<{ slug: string }> }
 

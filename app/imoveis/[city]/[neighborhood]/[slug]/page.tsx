@@ -2,6 +2,12 @@ import { notFound } from 'next/navigation'
 import PropertyDetailPage, { generateMetadata as generatePropertyDetailMetadata } from '@/app/imovel/[id]/detalhes/page'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 
+export const revalidate = 300
+
+export function generateStaticParams() {
+  return []
+}
+
 type PageParams = {
   params: Promise<{
     city: string

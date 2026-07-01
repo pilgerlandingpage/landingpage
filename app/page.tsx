@@ -45,6 +45,7 @@ export const revalidate = 300
 
 const HOME_EXCLUDED_CITIES = new Set(['camboriu', 'navegantes', 'blumenau'])
 const HOME_PROPERTY_DESCRIPTION_LIMIT = 320
+const HOME_PROPERTY_IMAGE_LIMIT = 4
 const HOME_MAP_MIN_PRICE = 4000000
 const HOME_PROPERTY_FIELDS = [
   'id',
@@ -61,7 +62,6 @@ const HOME_PROPERTY_FIELDS = [
   'area_private_m2',
   'featured_image',
   'images',
-  'video_url',
   'status',
   'created_at',
   'latitude',
@@ -103,8 +103,7 @@ function compactHomeProperty(property: any) {
     area_m2: property.area_m2,
     area_private_m2: property.area_private_m2,
     featured_image: property.featured_image,
-    images: Array.isArray(property.images) ? property.images.filter(Boolean) : property.images,
-    video_url: property.video_url,
+    images: Array.isArray(property.images) ? property.images.filter(Boolean).slice(0, HOME_PROPERTY_IMAGE_LIMIT) : property.images,
     status: property.status,
     created_at: property.created_at,
     latitude: property.latitude,

@@ -146,7 +146,7 @@ const MAP_AMENITY_ICONS: Record<MapAmenityLayer, typeof MapPin> = {
     marina: Anchor,
     park: TreePalm,
 }
-const AGENCY_MARKER_ICON_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/icon.png'
+const AGENCY_MARKER_ICON_URL = '/images/agency-marker.webp'
 const AGENCY_CARD_IMAGE_URL = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/unnamed.webp'
 const MAP_CONTROL_HINT_STORAGE_KEY = 'pilger_map_control_hints_seen_v1'
 const MIN_DRAW_PIXEL_DISTANCE = 10

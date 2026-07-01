@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { createAdminClient, createServerSupabase } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -54,7 +54,11 @@ import {
     type MarketComparable,
 } from '@/lib/market-analysis/radar'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
+
+export function generateStaticParams() {
+    return []
+}
 
 const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -123,32 +127,12 @@ type RelatedPropertyScore = {
     premiumAlternative: boolean
 }
 
-type PageSearchParams = Record<string, string | string[] | undefined>
-
 function isUuid(value: string) {
     return UUID_PATTERN.test(value)
 }
 
-function serializeSearchParams(searchParams: PageSearchParams | undefined) {
-    const params = new URLSearchParams()
-
-    for (const [key, value] of Object.entries(searchParams || {})) {
-        if (Array.isArray(value)) {
-            value.forEach(item => {
-                if (item !== undefined) params.append(key, item)
-            })
-            continue
-        }
-
-        if (value !== undefined) params.set(key, value)
-    }
-
-    const query = params.toString()
-    return query ? `?${query}` : ''
-}
-
 async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
-    const supabase = await createServerSupabase()
+    const supabase = createAdminClient()
     const decodedIdentifier = decodeURIComponent(identifier || '').trim()
     const idFromSeoSlug = extractPropertyIdFromSeoSlug(decodedIdentifier)
 
@@ -759,16 +743,14 @@ function buildDetailItems(property: any, locationLabel: string, area: number) {
 
 type PropertyDetailPageProps = {
     params: Promise<{ id: string }>
-    searchParams?: Promise<PageSearchParams>
     canonicalize?: boolean
 }
 
 export default async function PropertyDetailPage({
     params,
-    searchParams,
     canonicalize = true,
 }: PropertyDetailPageProps) {
-    const supabase = await createServerSupabase()
+    const supabase = createAdminClient()
     const { id } = await params
 
     const property = await getPropertyByIdentifier(id)
@@ -778,8 +760,7 @@ export default async function PropertyDetailPage({
     const canonicalSegment = propertyDetailsSegment(property)
     const currentSegment = decodeURIComponent(id || '').trim()
     if (canonicalize && canonicalSegment && currentSegment !== canonicalSegment) {
-        const query = serializeSearchParams(searchParams ? await searchParams : undefined)
-        redirect(`${propertyDetailsPath(property)}${query}`)
+        redirect(propertyDetailsPath(property))
     }
 
     const adminSupabase = createAdminClient()

@@ -1,2 +1,1 @@
-export { default, generateMetadata } from '@/app/blog/[slug]/page'
-
+export { default, generateMetadata, generateStaticParams } from '@/app/blog/[slug]/page'
