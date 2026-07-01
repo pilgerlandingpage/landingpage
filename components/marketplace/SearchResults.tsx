@@ -314,15 +314,18 @@ interface MapBounds {
 
 interface SearchResultsProps {
     properties: any[]
-    propertiesWithCoords: any[]
     lpMap: Record<string, string>
     brokerSearchName?: string | null
 }
 
-export default function SearchResults({ properties, propertiesWithCoords, lpMap, brokerSearchName }: SearchResultsProps) {
+export default function SearchResults({ properties, lpMap, brokerSearchName }: SearchResultsProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
+    const propertiesWithCoords = useMemo(
+        () => properties.filter(property => Boolean(getLatLng(property))),
+        [properties]
+    )
     const mapSelectionKey = useMemo(() => {
         const params = new URLSearchParams(searchKey)
         params.delete(MAP_PROPERTY_PARAM)

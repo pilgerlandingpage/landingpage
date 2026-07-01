@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import SearchResults from '@/components/marketplace/SearchResults'
 import GlobalHeader from '@/components/layout/GlobalHeader'
@@ -28,10 +29,6 @@ export const metadata: Metadata = {
 }
 
 export const revalidate = 120
-
-function hasCoordinates(p: any) {
-    return p.latitude && p.longitude
-}
 
 function firstParam(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] : value
@@ -92,6 +89,33 @@ type MapBounds = {
     south: number
     east: number
     west: number
+}
+
+type SearchPageParams = { [key: string]: string | string[] | undefined }
+
+type SearchDataInput = {
+    q: string | undefined
+    type: string | undefined
+    subtype: string | undefined
+    city: string | undefined
+    tag: string | undefined
+    exclusiveOnly: boolean
+    brokerName: string | undefined
+    brokerLogin: string | undefined
+    offer: string | undefined
+    price: string | undefined
+    bedrooms: number
+    bedroomsMin: number
+    suites: number
+    suitesMin: number
+    bathroomsMin: number
+    parkingMin: number
+    areaMin: number
+    areaMax: number
+    priceMin: number
+    priceMax: number
+    drawArea: MapDrawArea | null
+    mapBounds: MapBounds | null
 }
 
 function parseDrawAreaParam(value: string | string[] | undefined): MapDrawArea | null {
@@ -277,68 +301,47 @@ function compactSearchProperty(property: any) {
     }
 }
 
-export default async function SearchPage({
-    searchParams
-}: {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-    const jsonLd = [
-        organizationJsonLd(),
-        webPageJsonLd({
-            path: '/busca',
-            name: 'Busca de imóveis de luxo',
-            description: 'Encontre apartamentos, coberturas, casas de alto padrão e imóveis frente mar no litoral catarinense.',
-            type: 'CollectionPage',
-        }),
-        breadcrumbJsonLd([
-            { name: 'Home', url: '/' },
-            { name: 'Busca', url: '/busca' },
-        ]),
-        {
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            name: 'Busca de imóveis de luxo',
-            url: absoluteUrl('/busca'),
-            description: 'Busca premium de imóveis de alto padrão no litoral catarinense.',
-        },
-    ]
-    const supabase = createAdminClient()
-    const adminSupabase = supabase
-    const resolvedParams = await searchParams
-
+function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput {
     const rawQ = firstParam(resolvedParams.q)
     const naturalSearch = parseNaturalSearch(rawQ)
-    const q = naturalSearch.hasStructuredFilters ? naturalSearch.q : rawQ
-    const type = firstParam(resolvedParams.type) || naturalSearch.type
-    const subtype = firstParam(resolvedParams.subtype) || naturalSearch.subtype
-    const city = firstParam(resolvedParams.city) || naturalSearch.city
-    const tag = firstParam(resolvedParams.tag) || naturalSearch.tag
-    const exclusiveOnly = asBooleanParam(resolvedParams.exclusive)
-    const brokerName = firstParam(resolvedParams.broker)
-    const brokerLogin = firstParam(resolvedParams.brokerLogin)
-    const offer = firstParam(resolvedParams.offer)
-    const price = firstParam(resolvedParams.price)
-    const bedrooms = asNumber(resolvedParams.bedrooms)
-    const bedroomsMin = asNumber(resolvedParams.bedroomsMin) || Number(naturalSearch.bedroomsMin || 0)
-    const suites = asNumber(resolvedParams.suites)
-    const suitesMin = asNumber(resolvedParams.suitesMin) || Number(naturalSearch.suitesMin || 0)
-    const bathroomsMin = asNumber(resolvedParams.bathroomsMin) || Number(naturalSearch.bathroomsMin || 0)
-    const parkingMin = asNumber(resolvedParams.parkingMin) || Number(naturalSearch.parkingMin || 0)
-    const areaMin = asNumber(resolvedParams.areaMin) || Number(naturalSearch.areaMin || 0)
-    const areaMax = asNumber(resolvedParams.areaMax) || Number(naturalSearch.areaMax || 0)
-    const priceMin = asNumber(resolvedParams.priceMin) || Number(naturalSearch.priceMin || 0)
-    const priceMax = asNumber(resolvedParams.priceMax) || Number(naturalSearch.priceMax || 0)
-    const drawArea = parseDrawAreaParam(resolvedParams.drawArea)
-    const mapBounds = parseMapBoundsParam(resolvedParams.mapBounds)
-    const hasServerSpatialFilter = Boolean(drawArea || mapBounds)
-    const brokerPropertyIds = await resolveBrokerPropertyIds(adminSupabase, brokerName, brokerLogin)
+
+    return {
+        q: naturalSearch.hasStructuredFilters ? naturalSearch.q : rawQ,
+        type: firstParam(resolvedParams.type) || naturalSearch.type,
+        subtype: firstParam(resolvedParams.subtype) || naturalSearch.subtype,
+        city: firstParam(resolvedParams.city) || naturalSearch.city,
+        tag: firstParam(resolvedParams.tag) || naturalSearch.tag,
+        exclusiveOnly: asBooleanParam(resolvedParams.exclusive),
+        brokerName: firstParam(resolvedParams.broker),
+        brokerLogin: firstParam(resolvedParams.brokerLogin),
+        offer: firstParam(resolvedParams.offer),
+        price: firstParam(resolvedParams.price),
+        bedrooms: asNumber(resolvedParams.bedrooms),
+        bedroomsMin: asNumber(resolvedParams.bedroomsMin) || Number(naturalSearch.bedroomsMin || 0),
+        suites: asNumber(resolvedParams.suites),
+        suitesMin: asNumber(resolvedParams.suitesMin) || Number(naturalSearch.suitesMin || 0),
+        bathroomsMin: asNumber(resolvedParams.bathroomsMin) || Number(naturalSearch.bathroomsMin || 0),
+        parkingMin: asNumber(resolvedParams.parkingMin) || Number(naturalSearch.parkingMin || 0),
+        areaMin: asNumber(resolvedParams.areaMin) || Number(naturalSearch.areaMin || 0),
+        areaMax: asNumber(resolvedParams.areaMax) || Number(naturalSearch.areaMax || 0),
+        priceMin: asNumber(resolvedParams.priceMin) || Number(naturalSearch.priceMin || 0),
+        priceMax: asNumber(resolvedParams.priceMax) || Number(naturalSearch.priceMax || 0),
+        drawArea: parseDrawAreaParam(resolvedParams.drawArea),
+        mapBounds: parseMapBoundsParam(resolvedParams.mapBounds),
+    }
+}
+
+const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
+    const supabase = createAdminClient()
+    const hasServerSpatialFilter = Boolean(input.drawArea || input.mapBounds)
+    const brokerPropertyIds = await resolveBrokerPropertyIds(supabase, input.brokerName, input.brokerLogin)
 
     const createPropertyQuery = (useSpatialFilter: boolean) => (
         useSpatialFilter && hasServerSpatialFilter
             ? supabase
                 .rpc('search_active_properties_in_area', {
-                    p_draw_area: drawArea,
-                    p_bounds: mapBounds,
+                    p_draw_area: input.drawArea,
+                    p_bounds: input.mapBounds,
                 })
                 .select(SEARCH_PROPERTY_FIELDS)
             : supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
@@ -347,70 +350,69 @@ export default async function SearchPage({
     const applyPropertyFilters = (initialQuery: any) => {
         let query = initialQuery
 
-        query = applySearchTermFilter(query, q)
+        query = applySearchTermFilter(query, input.q)
+        query = applyLocationFilter(query, input.city)
 
-    query = applyLocationFilter(query, city)
+        if (input.type && input.type !== 'Todos os Imoveis' && input.type !== 'Todos os Imóveis') {
+            const normalizedType = input.type.toLowerCase()
 
-    if (type && type !== 'Todos os Imoveis' && type !== 'Todos os Imóveis') {
-        const normalizedType = type.toLowerCase()
-
-        if (normalizedType === 'comercial') {
-            query = query.or('property_type.ilike.%Comercial%,property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Comercial%,title.ilike.%Galpao%,title.ilike.%Galpão%')
-        } else if (type === 'Duplex / Triplex') {
-            query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
-        } else if (normalizedType === 'casa em condominio') {
-            query = query.or('property_type.ilike.%Casa em Condom%,title.ilike.%Casa em Condom%')
-        } else {
-            query = query.ilike('property_type', `%${type}%`)
+            if (normalizedType === 'comercial') {
+                query = query.or('property_type.ilike.%Comercial%,property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Comercial%,title.ilike.%Galpao%,title.ilike.%Galpão%')
+            } else if (input.type === 'Duplex / Triplex') {
+                query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
+            } else if (normalizedType === 'casa em condominio') {
+                query = query.or('property_type.ilike.%Casa em Condom%,title.ilike.%Casa em Condom%')
+            } else {
+                query = query.ilike('property_type', `%${input.type}%`)
+            }
         }
-    }
 
-    if (subtype === 'garden') query = query.ilike('property_type', '%Garden%')
-    if (subtype === 'cobertura') query = query.ilike('property_type', '%Cobertura%')
-    if (subtype === 'duplex') query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
-    if (subtype === 'loft') query = query.ilike('property_type', '%Loft%')
-    if (subtype === 'sobrado') query = query.ilike('property_type', '%Sobrado%')
-    if (subtype === 'predio-residencial') query = query.or('property_type.ilike.%Predio Residencial%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Predio Residencial%,title.ilike.%Predio%,title.ilike.%Prédio%')
-    if (subtype === 'condominio') query = query.or('property_type.ilike.%Casa em Cond%,title.ilike.%Casa%Cond%')
-    if (subtype === 'terreno-condominio') query = query.or('property_type.ilike.%Terreno em Cond%,title.ilike.%Terreno%Cond%,title.ilike.%Cond%Terreno%')
-    if (subtype === 'terreno-comercial') query = query.ilike('property_type', '%Terreno Comercial%')
-    if (subtype === 'galpao') query = query.or('property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Deposito%,property_type.ilike.%Depósito%,title.ilike.%Galpao%,title.ilike.%Galpão%,title.ilike.%Deposito%,title.ilike.%Depósito%')
-    if (subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,title.ilike.%Sala Comercial%')
+        if (input.subtype === 'garden') query = query.ilike('property_type', '%Garden%')
+        if (input.subtype === 'cobertura') query = query.ilike('property_type', '%Cobertura%')
+        if (input.subtype === 'duplex') query = query.or('property_type.ilike.%Duplex%,property_type.ilike.%Triplex%,title.ilike.%Duplex%,title.ilike.%Triplex%')
+        if (input.subtype === 'loft') query = query.ilike('property_type', '%Loft%')
+        if (input.subtype === 'sobrado') query = query.ilike('property_type', '%Sobrado%')
+        if (input.subtype === 'predio-residencial') query = query.or('property_type.ilike.%Predio Residencial%,property_type.ilike.%Predio%,property_type.ilike.%Prédio%,title.ilike.%Predio Residencial%,title.ilike.%Predio%,title.ilike.%Prédio%')
+        if (input.subtype === 'condominio') query = query.or('property_type.ilike.%Casa em Cond%,title.ilike.%Casa%Cond%')
+        if (input.subtype === 'terreno-condominio') query = query.or('property_type.ilike.%Terreno em Cond%,title.ilike.%Terreno%Cond%,title.ilike.%Cond%Terreno%')
+        if (input.subtype === 'terreno-comercial') query = query.ilike('property_type', '%Terreno Comercial%')
+        if (input.subtype === 'galpao') query = query.or('property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Deposito%,property_type.ilike.%Depósito%,title.ilike.%Galpao%,title.ilike.%Galpão%,title.ilike.%Deposito%,title.ilike.%Depósito%')
+        if (input.subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,title.ilike.%Sala Comercial%')
 
-    let selectedPriceMin = MIN_SEARCH_PRICE
-    let selectedPriceMax = 0
+        let selectedPriceMin = MIN_SEARCH_PRICE
+        let selectedPriceMax = 0
 
-    if (price && price !== 'Todos os Valores') {
-        const [minStr, maxStr] = price.split('-')
-        const min = parseInt(minStr, 10)
-        const max = maxStr ? parseInt(maxStr, 10) : 0
+        if (input.price && input.price !== 'Todos os Valores') {
+            const [minStr, maxStr] = input.price.split('-')
+            const min = parseInt(minStr, 10)
+            const max = maxStr ? parseInt(maxStr, 10) : 0
 
-        if (Number.isFinite(min) && min > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, min)
-        if (Number.isFinite(max) && max > 0) selectedPriceMax = max
-    }
+            if (Number.isFinite(min) && min > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, min)
+            if (Number.isFinite(max) && max > 0) selectedPriceMax = max
+        }
 
-    if (priceMin > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, priceMin)
-    if (priceMax > 0) selectedPriceMax = priceMax
-    query = query.gte('price', selectedPriceMin)
-    if (selectedPriceMax > 0) query = query.lte('price', selectedPriceMax)
-    if (bedrooms > 0) query = query.eq('bedrooms', bedrooms)
-    if (bedroomsMin > 0) query = query.gte('bedrooms', bedroomsMin)
-    if (suites > 0) query = query.eq('suites', suites)
-    if (suitesMin > 0) query = query.gte('suites', suitesMin)
-    if (bathroomsMin > 0) query = query.gte('bathrooms', bathroomsMin)
-    if (parkingMin > 0) query = query.gte('parking_spaces', parkingMin)
-    if (areaMin > 0) query = query.gte('area_m2', areaMin)
-    if (areaMax > 0) query = query.lte('area_m2', areaMax)
-    if (offer === 'rent') query = query.not('rent', 'is', null)
-    if (offer === 'sale') query = query.not('price', 'is', null)
-    if (exclusiveOnly) query = query.eq('exclusive', true)
-    if (brokerPropertyIds) {
-        query = brokerPropertyIds.length > 0
-            ? query.in('id', brokerPropertyIds)
-            : query.eq('id', '00000000-0000-0000-0000-000000000000')
-    }
+        if (input.priceMin > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, input.priceMin)
+        if (input.priceMax > 0) selectedPriceMax = input.priceMax
+        query = query.gte('price', selectedPriceMin)
+        if (selectedPriceMax > 0) query = query.lte('price', selectedPriceMax)
+        if (input.bedrooms > 0) query = query.eq('bedrooms', input.bedrooms)
+        if (input.bedroomsMin > 0) query = query.gte('bedrooms', input.bedroomsMin)
+        if (input.suites > 0) query = query.eq('suites', input.suites)
+        if (input.suitesMin > 0) query = query.gte('suites', input.suitesMin)
+        if (input.bathroomsMin > 0) query = query.gte('bathrooms', input.bathroomsMin)
+        if (input.parkingMin > 0) query = query.gte('parking_spaces', input.parkingMin)
+        if (input.areaMin > 0) query = query.gte('area_m2', input.areaMin)
+        if (input.areaMax > 0) query = query.lte('area_m2', input.areaMax)
+        if (input.offer === 'rent') query = query.not('rent', 'is', null)
+        if (input.offer === 'sale') query = query.not('price', 'is', null)
+        if (input.exclusiveOnly) query = query.eq('exclusive', true)
+        if (brokerPropertyIds) {
+            query = brokerPropertyIds.length > 0
+                ? query.in('id', brokerPropertyIds)
+                : query.eq('id', '00000000-0000-0000-0000-000000000000')
+        }
 
-        query = applyTextFilter(query, tag)
+        query = applyTextFilter(query, input.tag)
 
         return query.order('created_at', { ascending: false })
     }
@@ -434,8 +436,40 @@ export default async function SearchPage({
         lpMap[lp.property_id] = lp.slug
     })
 
-    const compactProperties = (properties || []).map(compactSearchProperty)
-    const propertiesWithCoords = compactProperties.filter(hasCoordinates)
+    return {
+        lpMap,
+        properties: (properties || []).map(compactSearchProperty),
+    }
+}, ['public-search-data-v1'], { revalidate: 120, tags: ['public-search'] })
+
+export default async function SearchPage({
+    searchParams
+}: {
+    searchParams: Promise<SearchPageParams>
+}) {
+    const jsonLd = [
+        organizationJsonLd(),
+        webPageJsonLd({
+            path: '/busca',
+            name: 'Busca de imóveis de luxo',
+            description: 'Encontre apartamentos, coberturas, casas de alto padrão e imóveis frente mar no litoral catarinense.',
+            type: 'CollectionPage',
+        }),
+        breadcrumbJsonLd([
+            { name: 'Home', url: '/' },
+            { name: 'Busca', url: '/busca' },
+        ]),
+        {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Busca de imóveis de luxo',
+            url: absoluteUrl('/busca'),
+            description: 'Busca premium de imóveis de alto padrão no litoral catarinense.',
+        },
+    ]
+    const resolvedParams = await searchParams
+    const searchDataInput = buildSearchDataInput(resolvedParams)
+    const { properties, lpMap } = await getCachedSearchData(searchDataInput)
 
     return (
         <div
@@ -446,10 +480,9 @@ export default async function SearchPage({
             <JsonLd data={jsonLd} />
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 <SearchResults
-                    properties={compactProperties}
-                    propertiesWithCoords={propertiesWithCoords}
+                    properties={properties}
                     lpMap={lpMap}
-                    brokerSearchName={brokerName || null}
+                    brokerSearchName={searchDataInput.brokerName || null}
                 />
             </div>
         </div>
