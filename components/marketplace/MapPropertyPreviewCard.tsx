@@ -7,7 +7,7 @@ import type {
     PointerEvent as ReactPointerEvent,
     UIEvent as ReactUIEvent,
 } from 'react'
-import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
+import { ArrowRight, BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
@@ -739,6 +739,23 @@ export default function MapPropertyPreviewCard({
                     text-align: right;
                     white-space: nowrap;
                 }
+                .map-preview-open-indicator {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    width: max-content;
+                    color: #8b642d;
+                    font: 850 0.56rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.07em;
+                    text-transform: uppercase;
+                }
+                .map-preview-open-indicator svg {
+                    stroke-width: 2.4;
+                    transition: transform 0.2s ease;
+                }
+                .map-preview-card:hover .map-preview-open-indicator svg {
+                    transform: translateX(2px);
+                }
                 .map-preview-swipe-hint {
                     display: inline-flex;
                     align-items: center;
@@ -852,6 +869,9 @@ export default function MapPropertyPreviewCard({
                     .map-preview-index,
                     .map-preview-swipe-hint {
                         font-size: 0.47rem;
+                    }
+                    .map-preview-open-indicator {
+                        display: none;
                     }
                     .map-preview-photo-count {
                         bottom: 6px;
@@ -1024,6 +1044,10 @@ export default function MapPropertyPreviewCard({
                                             {activeIndex + 1}/{gallery.length} fotos
                                         </span>
                                     </div>
+                                    <span className="map-preview-open-indicator">
+                                        Ver mais
+                                        <ArrowRight size={12} />
+                                    </span>
                                 </Link>
                             </div>
                         </section>
@@ -1041,7 +1065,7 @@ export default function MapPropertyPreviewCard({
                     onPointerCancel={handleCarouselPointerEnd}
                 >
                     <ChevronLeft size={12} />
-                    <span>Arraste para ver semelhantes</span>
+                    <span>Arraste para ver mais imóveis</span>
                     <ChevronRight size={12} />
                 </div>
             )}

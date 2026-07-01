@@ -739,6 +739,12 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     inset: 0;
                     overflow: hidden;
                 }
+                .search-map-property-preview {
+                    position: absolute;
+                    inset: 0;
+                    overflow: hidden;
+                    pointer-events: none !important;
+                }
                 .search-card-wrap {
                     position: relative;
                     min-width: 0;
@@ -751,6 +757,54 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                         0 14px 34px rgba(184,148,95,0.22);
                     transform: translateY(-2px);
                     z-index: 10;
+                }
+                @media (min-width: 1024px) {
+                    .search-map-property-preview .map-property-preview {
+                        bottom: 24px;
+                        left: 50%;
+                        right: auto;
+                        width: min(980px, calc(100% - 48px));
+                        transform: translateX(-50%);
+                    }
+                    .search-map-property-preview .map-preview-track {
+                        gap: 12px;
+                        padding-inline: 12px;
+                        scroll-padding-inline: 12px;
+                    }
+                    .search-map-property-preview .map-preview-card {
+                        flex-basis: clamp(260px, 28vw, 306px);
+                        max-width: 100%;
+                        grid-template-columns: 1fr;
+                        min-height: 0;
+                    }
+                    .search-map-property-preview .map-preview-media,
+                    .search-map-property-preview .map-preview-media img {
+                        height: 150px;
+                        min-height: 150px;
+                    }
+                    .search-map-property-preview .map-preview-body {
+                        padding: 8px 12px 10px;
+                    }
+                    .search-map-property-preview .map-preview-body-link {
+                        gap: 5px;
+                    }
+                    .search-map-property-preview .map-preview-location {
+                        font-size: 0.48rem;
+                    }
+                    .search-map-property-preview .map-preview-title {
+                        font-size: 0.78rem;
+                        line-height: 1.08;
+                        -webkit-line-clamp: 2;
+                    }
+                    .search-map-property-preview .map-preview-price {
+                        font-size: 0.8rem;
+                    }
+                    .search-map-property-preview .map-preview-stats .map-preview-stat:nth-child(n+3) {
+                        display: none;
+                    }
+                    .search-map-property-preview .map-preview-swipe-hint {
+                        margin-top: 1px;
+                    }
                 }
                 .search-results-grid {
                     display: grid;
@@ -1182,13 +1236,15 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     </div>
                 }
                 overlay={selectedMapProperty && (
-                    <MapPropertyPreviewCard
-                        property={selectedMapProperty}
-                        properties={mapPreviewProperties}
-                        selectedPropertyId={selectedMapPropertyId}
-                        onClose={handleMapPropertyPreviewClose}
-                        onPropertySelect={mapPreviewProperties.length > 1 ? handleMapPreviewPropertySelect : undefined}
-                    />
+                    <div className="search-map-property-preview">
+                        <MapPropertyPreviewCard
+                            property={selectedMapProperty}
+                            properties={mapPreviewProperties}
+                            selectedPropertyId={selectedMapPropertyId}
+                            onClose={handleMapPropertyPreviewClose}
+                            onPropertySelect={mapPreviewProperties.length > 1 ? handleMapPreviewPropertySelect : undefined}
+                        />
+                    </div>
                 )}
             >
                 <header className="result-lux-header">

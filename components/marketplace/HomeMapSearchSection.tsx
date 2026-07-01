@@ -2490,24 +2490,24 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         bottom: 24px;
                         left: 50%;
                         right: auto;
-                        width: min(430px, calc(100% - 48px));
+                        width: min(980px, calc(100% - 48px));
                         transform: translateX(-50%);
                     }
                     .home-map-property-preview--compact :global(.map-preview-track) {
                         gap: 12px;
-                        padding-inline: 10px;
-                        scroll-padding-inline: 10px;
+                        padding-inline: 12px;
+                        scroll-padding-inline: 12px;
                     }
                     .home-map-property-preview--compact :global(.map-preview-card) {
-                        flex-basis: min(410px, 100%);
+                        flex-basis: clamp(260px, 28vw, 306px);
                         max-width: 100%;
                         grid-template-columns: 1fr;
                         min-height: 0;
                     }
                     .home-map-property-preview--compact :global(.map-preview-media),
                     .home-map-property-preview--compact :global(.map-preview-media img) {
-                        height: 210px;
-                        min-height: 210px;
+                        height: 150px;
+                        min-height: 150px;
                     }
                     .home-map-property-preview--compact :global(.map-preview-body) {
                         padding: 8px 12px 10px;
@@ -2516,12 +2516,21 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         gap: 5px;
                     }
                     .home-map-property-preview--compact :global(.map-preview-title) {
-                        font-size: 0.86rem;
+                        font-size: 0.78rem;
                         line-height: 1.08;
                         -webkit-line-clamp: 2;
                     }
                     .home-map-property-preview--compact :global(.map-preview-price) {
-                        font-size: 0.86rem;
+                        font-size: 0.8rem;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-location) {
+                        font-size: 0.48rem;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-stats .map-preview-stat:nth-child(n+3)) {
+                        display: none;
+                    }
+                    .home-map-property-preview--compact :global(.map-preview-swipe-hint) {
+                        margin-top: 1px;
                     }
                     .mobile-map-modal-backdrop {
                         padding: clamp(20px, 4vw, 44px);
