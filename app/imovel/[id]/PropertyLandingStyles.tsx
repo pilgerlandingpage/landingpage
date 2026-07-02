@@ -5481,6 +5481,14 @@ export default function PropertyLandingStyles() {
                         font-weight: 560;
                     }
 
+                    .plp-mobile-card--description {
+                        padding: 17px 16px 18px;
+                    }
+
+                    .plp-mobile-card--description .plp-mobile-card-head {
+                        margin-bottom: 12px;
+                    }
+
                     .plp-mobile-card--technical {
                         padding: 16px 15px 17px;
                     }

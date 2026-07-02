@@ -942,6 +942,9 @@ export default async function PropertyDetailPage({
         }
     )
     const mobileSummaryDescription = narrativeParagraphs[0] || brokerInsight.text
+    const mobileDescriptionParagraphs = mobileSummaryDescription
+        ? (narrativeParagraphs.length > 0 ? narrativeParagraphs : [mobileSummaryDescription])
+        : []
     const mobileSummaryHighlights = buildMobileSummaryHighlights({
         property,
         amenities,
@@ -1345,22 +1348,6 @@ export default async function PropertyDetailPage({
                                     <small>{saveStat.label}</small>
                                 </span>
                             </div>
-                            {mobileSummaryDescription && (
-                                <details className="plp-mobile-summary-description">
-                                    <summary>
-                                        <span className="plp-mobile-summary-description-preview">{mobileSummaryDescription}</span>
-                                        <span className="plp-mobile-summary-description-toggle">
-                                            <span className="plp-mobile-summary-description-toggle-closed">Ver descrição completa</span>
-                                            <span className="plp-mobile-summary-description-toggle-open">Ocultar descrição</span>
-                                        </span>
-                                    </summary>
-                                    <div className="plp-mobile-summary-description-full">
-                                        {narrativeParagraphs.map((paragraph, index) => (
-                                            <p key={`mobile-full-description-${index}`}>{paragraph}</p>
-                                        ))}
-                                    </div>
-                                </details>
-                            )}
                             {mobileSummaryHighlights.length > 0 && (
                                 <div className="plp-mobile-summary-highlights" aria-label="Diferenciais do imóvel">
                                     {mobileSummaryHighlights.map(item => (
@@ -1372,6 +1359,19 @@ export default async function PropertyDetailPage({
                                 </div>
                             )}
                         </section>
+
+                        {mobileDescriptionParagraphs.length > 0 && (
+                            <section className="plp-mobile-card plp-mobile-card--description" aria-labelledby="mobile-descricao-title">
+                                <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
+                                    <h2 id="mobile-descricao-title">Descrição</h2>
+                                </div>
+                                <div className="plp-mobile-description-body">
+                                    {mobileDescriptionParagraphs.map((paragraph, index) => (
+                                        <p key={`mobile-description-card-${index}`}>{paragraph}</p>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         <section className="plp-mobile-card plp-mobile-card--quick-facts" aria-labelledby="mobile-ficha-rapida-title">
                             <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
