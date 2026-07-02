@@ -1842,7 +1842,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .home-map-search-panel--desktop {
                     background: transparent;
                     display: none !important;
-                    margin: clamp(16px, 2.2vw, 24px) auto 0;
+                    margin: 4px auto 0;
                     padding: 0;
                     pointer-events: auto;
                 }
