@@ -8,6 +8,7 @@ import {
     ChartPie,
     CheckCircle2,
     Copy,
+    Download,
     ExternalLink,
     Loader2,
     Mail,
@@ -556,6 +557,10 @@ export default function EventDetailClient({ eventId }: Props) {
         setTimeout(() => setCopied(false), 1600)
     }
 
+    const downloadContacts = () => {
+        window.location.href = `/api/admin/eventos/export-contacts?eventId=${encodeURIComponent(eventId)}`
+    }
+
     const updateEmailField = (field: keyof typeof emailForm, value: string) => {
         setEmailForm(prev => ({ ...prev, [field]: value }))
     }
@@ -636,6 +641,10 @@ export default function EventDetailClient({ eventId }: Props) {
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button type="button" className="btn btn-outline" onClick={downloadContacts}>
+                        <Download size={16} />
+                        Baixar contatos
+                    </button>
                     <button className="btn btn-outline" onClick={copyPublicUrl}>
                         {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
                         {copied ? 'Copiado' : 'Copiar link'}

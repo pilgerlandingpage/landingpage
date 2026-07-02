@@ -8,6 +8,7 @@ import {
     CheckCircle2,
     Clock,
     Copy,
+    Download,
     ExternalLink,
     Loader2,
     MapPin,
@@ -121,6 +122,13 @@ export default function EventosAdminPage() {
         setTimeout(() => setCopied(null), 1600)
     }
 
+    const downloadContacts = (eventId?: string) => {
+        const url = eventId
+            ? `/api/admin/eventos/export-contacts?eventId=${encodeURIComponent(eventId)}`
+            : '/api/admin/eventos/export-contacts'
+        window.location.href = url
+    }
+
     return (
         <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 8px 48px' }}>
             <div className="admin-header">
@@ -132,10 +140,16 @@ export default function EventosAdminPage() {
                         Crie paginas de confirmacao, acompanhe inscritos e controle automacoes pelo WhatsApp global.
                     </p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShowCreate(prev => !prev)}>
-                    <Plus size={16} />
-                    Novo evento
-                </button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button type="button" className="btn btn-outline" onClick={() => downloadContacts()}>
+                        <Download size={16} />
+                        Baixar contatos
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setShowCreate(prev => !prev)}>
+                        <Plus size={16} />
+                        Novo evento
+                    </button>
+                </div>
             </div>
 
             {error && (
@@ -244,6 +258,10 @@ export default function EventosAdminPage() {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
+                                <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
+                                    <Download size={14} />
+                                    Contatos
+                                </button>
                                 <button className="btn btn-outline btn-sm" onClick={() => copyLink(event.slug)}>
                                     {copied === event.slug ? <CheckCircle2 size={14} /> : <Copy size={14} />}
                                     {copied === event.slug ? 'Copiado' : 'Copiar'}
