@@ -576,7 +576,7 @@ export default function PropertyLandingStyles() {
                 .plp-desktop-photo-nav {
                     position: absolute;
                     inset: 0;
-                    z-index: 18;
+                    z-index: 34;
                     pointer-events: none;
                 }
 

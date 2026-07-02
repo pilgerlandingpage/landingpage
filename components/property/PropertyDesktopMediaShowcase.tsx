@@ -205,7 +205,7 @@ export default function PropertyDesktopMediaShowcase({
     const [isOpen, setIsOpen] = useState(false)
 
     const activeMedia = mediaItems[Math.min(activeMediaIndex, Math.max(mediaItems.length - 1, 0))]
-    const canBrowsePhotos = gallery.length > 1
+    const canBrowseMedia = mediaItems.length > 1
 
     useEffect(() => {
         if (!isOpen) return
@@ -243,14 +243,20 @@ export default function PropertyDesktopMediaShowcase({
         })
     }
 
-    const selectMedia = (item: MediaItem, index: number) => {
-        setActiveMediaIndex(index)
+    const selectMediaByIndex = (targetIndex: number, source: 'button' | 'thumbnail') => {
+        if (!mediaItems.length) return
+
+        const safeMediaIndex = (targetIndex + mediaItems.length) % mediaItems.length
+        const item = mediaItems[safeMediaIndex]
+
+        setActiveMediaIndex(safeMediaIndex)
         if (item.type === 'photo') setActivePhotoIndex(item.photoIndex)
 
         void trackEvent('property_desktop_media_selected', {
             ...metadata,
+            source,
             media_type: item.type,
-            media_index: index,
+            media_index: safeMediaIndex,
             photo_index: item.type === 'photo' ? item.photoIndex : null,
         })
     }
@@ -270,11 +276,35 @@ export default function PropertyDesktopMediaShowcase({
         })
     }
 
-    const browsePhoto = (direction: -1 | 1) => {
-        if (!canBrowsePhotos) return
+    const browseMedia = (direction: -1 | 1) => {
+        if (!canBrowseMedia) return
 
-        const currentPhotoIndex = activeMedia.type === 'photo' ? activeMedia.photoIndex : activePhotoIndex
-        selectPhotoByIndex(currentPhotoIndex + direction, 'button')
+        selectMediaByIndex(activeMediaIndex + direction, 'button')
+    }
+
+    const renderMediaNav = () => {
+        if (!canBrowseMedia) return null
+
+        return (
+            <div className="plp-desktop-photo-nav" aria-label="Passar fotos, mapa e Street View">
+                <button
+                    type="button"
+                    className="plp-desktop-photo-nav-btn prev"
+                    onClick={() => browseMedia(-1)}
+                    aria-label="Mídia anterior"
+                >
+                    <ChevronLeft size={22} />
+                </button>
+                <button
+                    type="button"
+                    className="plp-desktop-photo-nav-btn next"
+                    onClick={() => browseMedia(1)}
+                    aria-label="Próxima mídia"
+                >
+                    <ChevronRight size={22} />
+                </button>
+            </div>
+        )
     }
 
     const renderMedia = () => {
@@ -290,26 +320,6 @@ export default function PropertyDesktopMediaShowcase({
                         <img src={activeMedia.src} alt={`${title} - ${activeMedia.label}`} />
                     </button>
 
-                    {canBrowsePhotos && (
-                        <div className="plp-desktop-photo-nav" aria-label="Passar fotos">
-                            <button
-                                type="button"
-                                className="plp-desktop-photo-nav-btn prev"
-                                onClick={() => browsePhoto(-1)}
-                                aria-label="Foto anterior"
-                            >
-                                <ChevronLeft size={22} />
-                            </button>
-                            <button
-                                type="button"
-                                className="plp-desktop-photo-nav-btn next"
-                                onClick={() => browsePhoto(1)}
-                                aria-label="Próxima foto"
-                            >
-                                <ChevronRight size={22} />
-                            </button>
-                        </div>
-                    )}
                 </div>
             )
         }
@@ -382,6 +392,7 @@ export default function PropertyDesktopMediaShowcase({
                 <div className="plp-desktop-media-stage">
                     <div className="plp-desktop-media-main">
                         {renderMedia()}
+                        {renderMediaNav()}
                     </div>
 
                     <div className="plp-desktop-media-rail" aria-label="Navegar por fotos, Street View e mapa">
@@ -396,7 +407,7 @@ export default function PropertyDesktopMediaShowcase({
                                         return
                                     }
 
-                                    selectMedia(item, index)
+                                    selectMediaByIndex(index, 'thumbnail')
                                 }}
                                 aria-pressed={index === activeMediaIndex}
                                 aria-label={`Ver ${item.label}`}
