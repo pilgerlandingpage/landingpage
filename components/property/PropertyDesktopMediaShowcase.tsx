@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
-import { Images, MapPinned, Navigation, PlayCircle, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Images, MapPinned, Navigation, PlayCircle, X } from 'lucide-react'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyVideoEmbed, { getPropertyVideoSource } from '@/components/property/PropertyVideoEmbed'
 import { trackEvent } from '@/lib/tracking/client'
@@ -205,6 +205,7 @@ export default function PropertyDesktopMediaShowcase({
     const [isOpen, setIsOpen] = useState(false)
 
     const activeMedia = mediaItems[Math.min(activeMediaIndex, Math.max(mediaItems.length - 1, 0))]
+    const canBrowsePhotos = gallery.length > 1
 
     useEffect(() => {
         if (!isOpen) return
@@ -254,17 +255,62 @@ export default function PropertyDesktopMediaShowcase({
         })
     }
 
+    const selectPhotoByIndex = (photoIndex: number, source: 'button' | 'thumbnail') => {
+        const safePhotoIndex = (photoIndex + gallery.length) % gallery.length
+        const mediaIndex = mediaItems.findIndex(item => item.type === 'photo' && item.photoIndex === safePhotoIndex)
+
+        setActivePhotoIndex(safePhotoIndex)
+        if (mediaIndex >= 0) setActiveMediaIndex(mediaIndex)
+
+        void trackEvent('property_desktop_media_photo_changed', {
+            ...metadata,
+            source,
+            image_index: safePhotoIndex,
+            gallery_count: gallery.length,
+        })
+    }
+
+    const browsePhoto = (direction: -1 | 1) => {
+        if (!canBrowsePhotos) return
+
+        const currentPhotoIndex = activeMedia.type === 'photo' ? activeMedia.photoIndex : activePhotoIndex
+        selectPhotoByIndex(currentPhotoIndex + direction, 'button')
+    }
+
     const renderMedia = () => {
         if (activeMedia.type === 'photo') {
             return (
-                <button
-                    type="button"
-                    className="plp-desktop-media-photo"
-                    onClick={() => openGallery(activeMedia.photoIndex)}
-                    aria-label="Abrir galeria de fotos"
-                >
-                    <img src={activeMedia.src} alt={`${title} - ${activeMedia.label}`} />
-                </button>
+                <div className="plp-desktop-media-photo-wrap">
+                    <button
+                        type="button"
+                        className="plp-desktop-media-photo"
+                        onClick={() => openGallery(activeMedia.photoIndex)}
+                        aria-label="Abrir galeria de fotos"
+                    >
+                        <img src={activeMedia.src} alt={`${title} - ${activeMedia.label}`} />
+                    </button>
+
+                    {canBrowsePhotos && (
+                        <div className="plp-desktop-photo-nav" aria-label="Passar fotos">
+                            <button
+                                type="button"
+                                className="plp-desktop-photo-nav-btn prev"
+                                onClick={() => browsePhoto(-1)}
+                                aria-label="Foto anterior"
+                            >
+                                <ChevronLeft size={22} />
+                            </button>
+                            <button
+                                type="button"
+                                className="plp-desktop-photo-nav-btn next"
+                                onClick={() => browsePhoto(1)}
+                                aria-label="Próxima foto"
+                            >
+                                <ChevronRight size={22} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             )
         }
 
@@ -344,7 +390,14 @@ export default function PropertyDesktopMediaShowcase({
                                 type="button"
                                 key={`${item.type}-${item.type === 'photo' ? item.src : item.label}-${index}`}
                                 className={`plp-desktop-media-thumb ${index === activeMediaIndex ? 'active' : ''}`}
-                                onClick={() => selectMedia(item, index)}
+                                onClick={() => {
+                                    if (item.type === 'photo') {
+                                        selectPhotoByIndex(item.photoIndex, 'thumbnail')
+                                        return
+                                    }
+
+                                    selectMedia(item, index)
+                                }}
                                 aria-pressed={index === activeMediaIndex}
                                 aria-label={`Ver ${item.label}`}
                             >

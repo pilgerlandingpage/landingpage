@@ -1036,9 +1036,9 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         }
 
         .premium-categories-showcase {
-          max-width: 1360px;
+          max-width: 1440px;
           margin: 18px auto 20px;
-          padding: 12px 32px 20px;
+          padding: 12px clamp(12px, 3vw, 48px) 20px;
         }
         .premium-section-head {
           display: flex;
@@ -1928,9 +1928,9 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           grid-template-columns: minmax(0, 1fr) !important;
           box-sizing: border-box;
           width: 100%;
-          max-width: 1360px !important;
+          max-width: 1440px !important;
           margin: 20px auto 18px !important;
-          padding: 12px 32px 0 !important;
+          padding: 12px clamp(12px, 3vw, 48px) 0 !important;
           border: 0 !important;
           border-radius: 0 !important;
           background: transparent !important;
@@ -2007,6 +2007,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           display: grid;
           gap: 5px;
           z-index: 2;
+          text-transform: none;
         }
         .gp-authority-stats a.gp-location-card .gp-location-copy strong {
           display: block;
@@ -2017,6 +2018,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           font-weight: 850 !important;
           line-height: 1 !important;
           letter-spacing: 0 !important;
+          text-transform: uppercase !important;
           text-shadow: 0 2px 14px rgba(0,0,0,0.34);
         }
         .gp-authority-stats a.gp-location-card .gp-location-copy small {
@@ -2034,6 +2036,28 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           color: #dfc18e;
           font-size: 0.96rem;
           line-height: 1;
+        }
+
+        @media (min-width: 1024px) {
+          .premium-categories-showcase {
+            padding-left: 40px;
+            padding-right: 40px;
+          }
+          .gp-authority-strip {
+            padding-left: 40px !important;
+            padding-right: 40px !important;
+          }
+        }
+
+        @media (min-width: 1440px) {
+          .premium-categories-showcase {
+            padding-left: 48px;
+            padding-right: 48px;
+          }
+          .gp-authority-strip {
+            padding-left: 48px !important;
+            padding-right: 48px !important;
+          }
         }
 
         @media (max-width: 640px) {

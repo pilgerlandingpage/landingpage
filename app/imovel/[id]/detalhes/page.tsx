@@ -1373,6 +1373,19 @@ export default async function PropertyDetailPage({
                             )}
                         </section>
 
+                        <section className="plp-mobile-card plp-mobile-card--quick-facts" aria-labelledby="mobile-ficha-rapida-title">
+                            <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
+                                <h2 id="mobile-ficha-rapida-title">Ficha rápida</h2>
+                            </div>
+                            <div className="plp-spec-grid">
+                                {area > 0 && <SpecCard icon={<Ruler size={21} />} label="Área" value={`${area.toLocaleString('pt-BR')} m²`} />}
+                                {suiteCount > 0 && <SpecCard icon={<BedDouble size={21} />} label="Configuração" value={`${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}`} />}
+                                {bathroomsCount > 0 && <SpecCard icon={<Bath size={21} />} label="Banheiros" value={String(bathroomsCount)} />}
+                                {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
+                                <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
+                            </div>
+                        </section>
+
                         <section id="mobile-ficha" className="plp-mobile-card plp-mobile-card--technical">
                             <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
                                 <h2>Ficha técnica</h2>

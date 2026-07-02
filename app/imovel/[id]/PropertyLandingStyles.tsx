@@ -551,6 +551,7 @@ export default function PropertyLandingStyles() {
                     box-shadow: 0 20px 54px rgba(19, 24, 29, 0.13);
                 }
 
+                .plp-desktop-media-photo-wrap,
                 .plp-desktop-media-photo,
                 .plp-desktop-media-map,
                 .plp-desktop-media-video {
@@ -570,6 +571,49 @@ export default function PropertyLandingStyles() {
 
                 .plp-desktop-media-photo {
                     cursor: zoom-in;
+                }
+
+                .plp-desktop-photo-nav {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 18;
+                    pointer-events: none;
+                }
+
+                .plp-desktop-photo-nav-btn {
+                    position: absolute;
+                    top: 50%;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 42px;
+                    height: 42px;
+                    border: 1px solid rgba(255, 255, 255, 0.72);
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.88);
+                    color: #171410;
+                    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+                    cursor: pointer;
+                    pointer-events: auto;
+                    transform: translateY(-50%);
+                    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+                }
+
+                .plp-desktop-photo-nav-btn.prev {
+                    left: 14px;
+                }
+
+                .plp-desktop-photo-nav-btn.next {
+                    right: 14px;
+                }
+
+                .plp-desktop-photo-nav-btn:hover,
+                .plp-desktop-photo-nav-btn:focus-visible {
+                    border-color: rgba(189, 149, 81, 0.82);
+                    background: #fff;
+                    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+                    transform: translateY(-50%) scale(1.04);
+                    outline: none;
                 }
 
                 .plp-property-video-embed {
@@ -7701,6 +7745,49 @@ export default function PropertyLandingStyles() {
                         padding: 17px 15px 16px;
                         border-color: rgba(24,31,42,0.08);
                         background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
+                    }
+
+                    .plp-mobile-card--quick-facts {
+                        margin-top: 12px;
+                        padding: 17px 15px 16px;
+                        border-color: rgba(184,148,95,0.14);
+                        background: #fff;
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-mobile-card-head {
+                        margin-bottom: 13px;
+                        padding-bottom: 12px;
+                        border-bottom: 1px solid rgba(25,32,43,0.08);
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-spec-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-spec-card {
+                        grid-template-columns: 34px minmax(0, 1fr);
+                        min-height: 62px;
+                        gap: 8px;
+                        padding: 10px;
+                        border-radius: 12px;
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-spec-card > span {
+                        width: 34px;
+                        height: 34px;
+                        border-radius: 10px;
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-spec-card small {
+                        font-size: 0.58rem;
+                    }
+
+                    .plp-mobile-card--quick-facts .plp-spec-card strong {
+                        font-size: 0.8rem;
+                        line-height: 1.18;
+                        white-space: normal;
+                        overflow-wrap: anywhere;
                     }
 
                     .plp-mobile-card--technical .plp-mobile-card-head {
