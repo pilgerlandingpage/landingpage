@@ -2018,7 +2018,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           font-weight: 850 !important;
           line-height: 1 !important;
           letter-spacing: 0 !important;
-          text-transform: lowercase !important;
+          text-transform: none !important;
           text-shadow: 0 2px 14px rgba(0,0,0,0.34);
         }
         .gp-authority-stats a.gp-location-card .gp-location-copy small {
