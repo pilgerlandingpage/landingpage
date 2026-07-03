@@ -20,17 +20,18 @@ export default function AboutGuilhermeSection() {
 
                 <div className="about-copy">
                     <span className="about-kicker">Sobre o Guilherme</span>
-                    <h2>Alto padrão exige leitura local e critério.</h2>
+                    <h2>Uma forma irreverente de apresentar os melhores imóveis do litoral Catarinense.</h2>
                     <p className="about-lead">
-                        Desde 2008, Guilherme Pilger atua entre Balneário Camboriú, Praia Brava
-                        e Itapema com leitura precisa de avaliação, posicionamento e negociação.
-                        Cada indicação passa por contexto, potencial e aderência ao momento de
-                        quem compra, vende ou investe.
+                        Guilherme Pilger está entre os principais players do mercado imobiliário brasileiro.
+                        Eleito pelo CRECI como um dos 3 melhores estrategistas na venda de imóveis,
+                        Guilherme é um dos corretores com maior visibilidade do Sul do país com mais de
+                        1 milhão de visualizações mensais em suas redes sociais.
                     </p>
 
                     <div className="about-quote">
-                        CRECI RS, Conecta Imobi e A Chave da Venda: repertório para decidir com
-                        segurança.
+                        Como dono de uma das imobiliárias de Balneário Camboriú que mais crescem,
+                        a expertise de mercado está entre as suas maiores habilidades, principalmente
+                        na venda de propriedades imobiliárias que requerem atendimento especializado.
                     </div>
 
                 </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type TouchEvent } from 'react'
 import { ArrowUpRight, Star } from 'lucide-react'
 import type { HomepageGoogleReview, HomepageGoogleReviews } from '@/lib/google-reviews'
 
@@ -79,6 +79,7 @@ export default function GoogleReviewsSection({ data }: { data: HomepageGoogleRev
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
   const [isCarouselPaused, setIsCarouselPaused] = useState(false)
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
 
   const clearResumeTimer = useCallback(() => {
     if (!resumeTimerRef.current) return
@@ -107,6 +108,51 @@ export default function GoogleReviewsSection({ data }: { data: HomepageGoogleRev
     setActiveReviewIndex(index)
     pauseCarousel(9000)
   }, [pauseCarousel])
+
+  const showPreviousReview = useCallback(() => {
+    setActiveReviewIndex(current => (current - 1 + reviewCount) % reviewCount)
+    pauseCarousel(9000)
+  }, [pauseCarousel, reviewCount])
+
+  const showNextReview = useCallback(() => {
+    setActiveReviewIndex(current => (current + 1) % reviewCount)
+    pauseCarousel(9000)
+  }, [pauseCarousel, reviewCount])
+
+  const handleReviewTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    if (reviewCount <= 1) return
+
+    const touch = event.touches[0]
+    if (!touch) return
+
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    }
+    pauseCarousel(9000)
+  }, [pauseCarousel, reviewCount])
+
+  const handleReviewTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current
+    touchStartRef.current = null
+
+    if (!start || reviewCount <= 1) return
+
+    const touch = event.changedTouches[0]
+    if (!touch) return
+
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+    const isHorizontalSwipe = Math.abs(deltaX) > 42 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25
+
+    if (!isHorizontalSwipe) return
+
+    if (deltaX < 0) {
+      showNextReview()
+    } else {
+      showPreviousReview()
+    }
+  }, [reviewCount, showNextReview, showPreviousReview])
 
   useEffect(() => {
     if (reviewCount <= 1 || isCarouselPaused) return
@@ -168,7 +214,9 @@ export default function GoogleReviewsSection({ data }: { data: HomepageGoogleRev
           onMouseEnter={() => pauseCarousel()}
           onMouseLeave={resumeCarousel}
           onPointerDown={() => pauseCarousel(9000)}
-          onTouchStart={() => pauseCarousel(9000)}
+          onTouchStart={handleReviewTouchStart}
+          onTouchEnd={handleReviewTouchEnd}
+          onTouchCancel={() => { touchStartRef.current = null }}
           onFocusCapture={() => pauseCarousel()}
           onBlurCapture={resumeCarousel}
         >
@@ -498,6 +546,11 @@ export default function GoogleReviewsSection({ data }: { data: HomepageGoogleRev
             min-height: 272px;
             overflow: hidden;
             touch-action: pan-y;
+            cursor: grab;
+            user-select: none;
+          }
+          .google-reviews-grid:active {
+            cursor: grabbing;
           }
           .google-review-card {
             grid-area: 1 / 1;

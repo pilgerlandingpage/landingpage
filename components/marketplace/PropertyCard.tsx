@@ -864,7 +864,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     font-size: 0.73rem;
                     line-height: 1;
                     margin-top: 6px;
-                    padding-bottom: 8px;
+                    padding-bottom: 0;
                 }
                 .property-card-compact .property-meta .compact-feature-item {
                     align-items: center;
@@ -929,7 +929,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     line-height: 1;
                     margin-top: 7px;
                     overflow: hidden;
-                    padding-bottom: 7px;
+                    padding-bottom: 0;
                     white-space: nowrap;
                 }
                 .property-card-compact .property-meta .compact-feature-item {
@@ -943,12 +943,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 }
                 .property-card-compact .property-price {
                     order: 4;
-                    border-top: 1px solid rgba(31, 27, 21, 0.08);
+                    border-top: 0;
+                    border-bottom: 1px solid rgba(31, 27, 21, 0.08);
                     color: #1f1b16;
                     font-size: 0.86rem;
                     font-weight: 650;
-                    margin-top: auto;
-                    padding-top: 8px;
+                    margin-top: 5px;
+                    padding-bottom: 8px;
                 }
                 .favorite-toggle {
                     position: absolute;
@@ -1168,7 +1169,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         line-height: 1;
                         margin-top: 5px;
                         overflow: visible;
-                        padding-bottom: 6px;
+                        padding-bottom: 0;
                         white-space: normal;
                     }
                     .property-card-compact .property-meta .compact-feature-item {
@@ -1179,11 +1180,12 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         height: 12px;
                     }
                     .property-card-compact .property-price {
-                        border-top: 1px solid rgba(31, 27, 21, 0.08);
+                        border-top: 0;
+                        border-bottom: 1px solid rgba(31, 27, 21, 0.08);
                         font-size: 0.7rem;
                         font-weight: 650;
-                        margin-top: auto;
-                        padding-top: 7px;
+                        margin-top: 4px;
+                        padding-bottom: 7px;
                     }
                     .property-intelligence-row {
                         gap: 4px;
