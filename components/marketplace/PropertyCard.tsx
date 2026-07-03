@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode, TouchEvent, WheelEvent } from 'react'
-import { BedDouble, Camera, Car, ChevronLeft, ChevronRight, Heart, MapPin, Ruler } from 'lucide-react'
+import { Bath, BedDouble, Camera, Car, ChevronLeft, ChevronRight, Eye, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyIntelligenceLabels, getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
@@ -36,6 +36,7 @@ interface PropertyCardProps {
         status?: string | null
         created_at?: string | null
         updated_at?: string | null
+        view_count?: number | null
     }
     landingPageSlug?: string
     imagePriority?: boolean
@@ -101,6 +102,80 @@ function boldifyTitle(title: string): ReactNode {
     return title
 }
 
+type HomeFilterBadge = {
+    key: string
+    label: string
+    tone: 'gold' | 'dark' | 'green' | 'blue'
+    patterns: RegExp[]
+}
+
+const HOME_FILTER_BADGES: HomeFilterBadge[] = [
+    {
+        key: 'frente-mar',
+        label: 'Frente mar',
+        tone: 'blue',
+        patterns: [/frente\s*(ao\s*)?(para\s*o\s*)?mar/, /beira\s*mar/, /pe\s*na\s*areia/],
+    },
+    {
+        key: 'vista-mar',
+        label: 'Vista mar',
+        tone: 'blue',
+        patterns: [/vista\s*(para\s*o\s*)?mar/, /vista\s*oceanica/, /vista\s*panoramica/],
+    },
+    {
+        key: 'quadra-mar',
+        label: 'Quadra mar',
+        tone: 'blue',
+        patterns: [/quadra\s*(do\s*)?mar/, /uma\s*quadra\s*do\s*mar/],
+    },
+    {
+        key: 'lancamento',
+        label: 'Lancamento',
+        tone: 'gold',
+        patterns: [/lancamento/, /pre\s*lancamento/],
+    },
+    {
+        key: 'em-construcao',
+        label: 'Em construcao',
+        tone: 'gold',
+        patterns: [/em\s*construcao/, /construcao/, /na\s*planta/, /entrega\s*prevista/],
+    },
+    {
+        key: 'pronto',
+        label: 'Pronto',
+        tone: 'green',
+        patterns: [/pronto/, /pronta/, /pronto\s*para\s*morar/],
+    },
+    {
+        key: 'mobiliado',
+        label: 'Mobiliado',
+        tone: 'green',
+        patterns: [/mobiliad/, /porteira\s*fechada/, /com\s*moveis/],
+    },
+]
+
+function normalizeHomeFilterText(value: unknown) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+}
+
+function getHomeFilterBadge(property: PropertyCardProps['property']) {
+    const amenities = Array.isArray(property.amenities) ? property.amenities.join(' ') : ''
+    const text = [
+        property.title,
+        property.description,
+        property.property_type,
+        property.source_status,
+        property.neighborhood,
+        property.city,
+        amenities,
+    ].map(normalizeHomeFilterText).join(' ')
+
+    return HOME_FILTER_BADGES.find(badge => badge.patterns.some(pattern => pattern.test(text))) || null
+}
+
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
     const showFavoriteToggle = !isHomeCompact
@@ -131,6 +206,10 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         : 0
     const safeActiveImageIndex = Math.min(activeImageIndex, Math.max(displayGalleryImages.length - 1, 0))
     const imageSrc = displayGalleryImages[safeActiveImageIndex] || FALLBACK_IMAGE
+    const rawViewCount = Number(property.view_count)
+    const compactViewCount = Number.isFinite(rawViewCount) ? Math.max(0, Math.trunc(rawViewCount)) : null
+    const hasCompactViewCount = isHomeCompact && compactViewCount !== null
+    const compactViewLabel = compactViewCount !== null ? formatCompactNumber(compactViewCount) : ''
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
     const displayCity = displayLocationName(property.city)
     const displayNeighborhood = replaceItajaiWithPraiaBrava(property.neighborhood)
@@ -142,6 +221,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
     const primaryQualityLabel = getPropertyPrimaryQualityLabel(property)
+    const homeFilterBadge = isHomeCompact ? getHomeFilterBadge(property) : null
     const intelligenceLabels = isHomeCompact
         ? []
         : getPropertyIntelligenceLabels(property, {
@@ -163,10 +243,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         : [displayCity, displayNeighborhood]
     const compactLocation = compactLocationParts.filter(Boolean).join(' - ').toUpperCase()
     const compactArea = Number(property.area_private_m2 || property.area_m2 || 0)
+    const compactPrivateArea = Number(property.area_private_m2 || 0)
+    const compactTotalArea = Number(property.area_m2 || 0)
+    const shouldShowTotalArea = compactPrivateArea > 0 && compactTotalArea > 0 && compactTotalArea !== compactPrivateArea
     const compactFeatureItems = [
         property.bedrooms ? { key: 'bedrooms', icon: <BedDouble size={14} aria-hidden="true" />, label: `${property.bedrooms}` } : null,
+        property.bathrooms ? { key: 'bathrooms', icon: <Bath size={14} aria-hidden="true" />, label: `${property.bathrooms}` } : null,
         property.parking_spaces ? { key: 'parking', icon: <Car size={14} aria-hidden="true" />, label: `${property.parking_spaces}` } : null,
         compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m²` } : null,
+        shouldShowTotalArea ? { key: 'total-area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactTotalArea)} m\u00b2` } : null,
     ].filter(Boolean) as { key: string; icon: ReactNode; label: string }[]
     const handlePropertyClick = () => {
         if (!isHomeCompact) return
@@ -397,15 +482,27 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                                 loading={imagePriority ? undefined : 'lazy'}
                                 decoding="async"
                             />
-                            {imageCount > 0 && (
-                                <span className="compact-photo-count">
-                                    <Camera size={13} />
-                                    {imageCount}
+                            {(imageCount > 0 || hasCompactViewCount) && (
+                                <span className="compact-media-badges">
+                                    {imageCount > 0 && (
+                                        <span className="compact-photo-count" aria-label={`${imageCount} fotos`}>
+                                            <Camera size={13} aria-hidden="true" />
+                                            {imageCount}
+                                        </span>
+                                    )}
+                                    {hasCompactViewCount && (
+                                        <span className="compact-view-count" aria-label={`${compactViewCount} views`}>
+                                            <Eye size={13} aria-hidden="true" />
+                                            {compactViewLabel}
+                                        </span>
+                                    )}
                                 </span>
                             )}
-                            <span className={`property-quality-badge property-quality-badge-${primaryQualityLabel.tone}`}>
-                                {primaryQualityLabel.label}
-                            </span>
+                            {homeFilterBadge && (
+                                <span className={`property-quality-badge property-quality-badge-${homeFilterBadge.tone}`}>
+                                    {homeFilterBadge.label}
+                                </span>
+                            )}
                         </>
                     ) : (
                         <>
@@ -478,7 +575,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             <Link href={href} className="card-content-link" onClick={handlePropertyClick}>
                 <div className="property-head">
                     <div className="property-heading-copy">
-                        <div className="property-title">{boldifyTitle(isHomeCompact ? displayTitle : cardTitle)}</div>
+                        <div className="property-title">{isHomeCompact ? displayTitle : boldifyTitle(cardTitle)}</div>
                         <div className={`property-location ${isHomeCompact ? 'compact-location-row' : ''}`}>
                             {isHomeCompact && <MapPin size={13} aria-hidden="true" />}
                             <span>{isHomeCompact ? compactLocation || locationLabel : locationLabel}</span>
@@ -486,7 +583,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     </div>
                 </div>
 
-                <div className="property-price">{formattedPrice}</div>
+                {!isHomeCompact && <div className="property-price">{formattedPrice}</div>}
 
                 {intelligenceLabels.length > 0 && (
                     <div className="property-intelligence-row" aria-label="Sinais de curadoria">
@@ -515,6 +612,8 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                         </>
                     )}
                 </div>
+
+                {isHomeCompact && <div className="property-price">{formattedPrice}</div>}
 
                 {!isHomeCompact && visibleAmenities.length > 0 && (
                     <div className="property-tags">
@@ -594,6 +693,22 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 .card-content-link:visited,
                 .card-content-link:active,
                 .card-content-link:focus {
+                    color: inherit !important;
+                    text-decoration: none !important;
+                }
+                .property-card :global(.card-content-link) {
+                    display: flex;
+                    flex: 1;
+                    flex-direction: column;
+                    gap: 0;
+                    padding: 13px 0 0;
+                    color: inherit !important;
+                    text-decoration: none !important;
+                }
+                .property-card :global(.card-content-link:hover),
+                .property-card :global(.card-content-link:visited),
+                .property-card :global(.card-content-link:active),
+                .property-card :global(.card-content-link:focus) {
                     color: inherit !important;
                     text-decoration: none !important;
                 }
@@ -765,6 +880,76 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     flex: 0 0 auto;
                     stroke-width: 2.25;
                 }
+                .property-card-compact .card-content-link {
+                    min-height: 112px;
+                    padding: 12px 2px 0;
+                }
+                .property-card-compact :global(.card-content-link) {
+                    min-height: 112px;
+                    padding: 12px 2px 0;
+                }
+                .property-card-compact .property-head {
+                    order: 1;
+                }
+                .property-card-compact .property-heading-copy {
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                }
+                .property-card-compact .compact-location-row {
+                    order: 1;
+                    color: #2e2a25;
+                    font-size: 0.7rem;
+                    font-weight: 820;
+                    letter-spacing: 0;
+                    line-height: 1.12;
+                    margin-bottom: 4px;
+                }
+                .property-card-compact .compact-location-row span {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .property-card-compact .property-title {
+                    order: 2;
+                    color: #4f463b;
+                    font-size: 0.76rem;
+                    font-weight: 430;
+                    line-height: 1.28;
+                    margin-bottom: 0;
+                    -webkit-line-clamp: 1;
+                }
+                .property-card-compact .property-meta {
+                    order: 3;
+                    align-items: center;
+                    color: #574f45;
+                    flex-wrap: nowrap;
+                    gap: 6px;
+                    line-height: 1;
+                    margin-top: 7px;
+                    overflow: hidden;
+                    padding-bottom: 7px;
+                    white-space: nowrap;
+                }
+                .property-card-compact .property-meta .compact-feature-item {
+                    flex: 0 1 auto;
+                    min-width: 0;
+                }
+                .property-card-compact .property-meta .compact-feature-item span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .property-card-compact .property-price {
+                    order: 4;
+                    border-top: 1px solid rgba(31, 27, 21, 0.08);
+                    color: #1f1b16;
+                    font-size: 0.86rem;
+                    font-weight: 650;
+                    margin-top: auto;
+                    padding-top: 8px;
+                }
                 .favorite-toggle {
                     position: absolute;
                     top: 10px;
@@ -799,11 +984,19 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 .favorite-toggle-active svg {
                     fill: #ef7182;
                 }
-                .compact-photo-count {
+                .compact-media-badges {
                     position: absolute;
                     right: 9px;
                     bottom: 9px;
                     z-index: 2;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    max-width: calc(100% - 18px);
+                    pointer-events: none;
+                }
+                .compact-photo-count,
+                .compact-view-count {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
@@ -813,6 +1006,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     color: #fff8ea;
                     font: 560 0.66rem/1 'Inter', sans-serif;
                     backdrop-filter: blur(8px);
+                }
+                .compact-view-count {
+                    background: rgba(17, 14, 10, 0.72);
+                }
+                .compact-photo-count svg,
+                .compact-view-count svg {
+                    flex: 0 0 auto;
                 }
                 .property-intelligence-row {
                     display: flex;
@@ -940,6 +1140,50 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     }
                     .property-card-compact .property-meta span:not(:last-child)::after {
                         margin-left: 3px;
+                    }
+                    .property-card-compact .card-content-link {
+                        min-height: 96px;
+                        padding: 10px 1px 0;
+                    }
+                    .property-card-compact :global(.card-content-link) {
+                        min-height: 96px;
+                        padding: 10px 1px 0;
+                    }
+                    .property-card-compact .compact-location-row {
+                        font-size: 0.58rem;
+                        font-weight: 820;
+                        line-height: 1.12;
+                        margin-bottom: 3px;
+                    }
+                    .property-card-compact .property-title {
+                        color: #4f463b;
+                        font-size: 0.64rem;
+                        font-weight: 430;
+                        line-height: 1.22;
+                        -webkit-line-clamp: 1;
+                    }
+                    .property-card-compact .property-meta {
+                        flex-wrap: wrap;
+                        gap: 4px 6px;
+                        line-height: 1;
+                        margin-top: 5px;
+                        overflow: visible;
+                        padding-bottom: 6px;
+                        white-space: normal;
+                    }
+                    .property-card-compact .property-meta .compact-feature-item {
+                        gap: 2px;
+                    }
+                    .property-card-compact .property-meta .compact-feature-item svg {
+                        width: 12px;
+                        height: 12px;
+                    }
+                    .property-card-compact .property-price {
+                        border-top: 1px solid rgba(31, 27, 21, 0.08);
+                        font-size: 0.7rem;
+                        font-weight: 650;
+                        margin-top: auto;
+                        padding-top: 7px;
                     }
                     .property-intelligence-row {
                         gap: 4px;

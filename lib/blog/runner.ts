@@ -1,6 +1,7 @@
 import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
 import { getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
+import { registerEditorialVisualPlanUsage } from '@/lib/media/editorial-image-curator'
 import { generateBlogArticleDraft } from './agent'
 import { notifyBlogReviewReady } from './review-notifications'
 import { getAvailableBlogSlug } from './types'
@@ -35,6 +36,10 @@ export async function runBlogAgentDraft(options: RunBlogAgentOptions = {}) {
       .single()
 
     if (error || !post) throw new Error(error?.message || 'Nao foi possivel salvar o artigo do agente de blog.')
+
+    await registerEditorialVisualPlanUsage(supabase, post).catch((mediaError: any) => {
+      console.warn('[Blog Agent] editorial media usage register failed:', mediaError?.message || mediaError)
+    })
 
     const intelligence = await (async () => {
       try {

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BookOpen, CalendarDays, Newspaper, Search } from 'lucide-react'
+import { BookOpen, CalendarDays, Eye, Newspaper, Search } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
+import { attachBlogPostViewCounts, blogViewLabel, formatBlogViewCount, getBlogPostViewCounts } from '@/lib/blog/views'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
@@ -75,7 +76,9 @@ async function getNewsPosts() {
             return []
         }
 
-        return ((data || []) as BlogPost[]).filter(isNewsPost)
+        const posts = ((data || []) as BlogPost[]).filter(isNewsPost)
+        const viewCounts = await getBlogPostViewCounts(supabase, posts)
+        return attachBlogPostViewCounts(posts, viewCounts)
     } catch (error) {
         console.warn('[Noticias] public list unavailable:', summarizeSupabaseError(error))
         return []
@@ -85,6 +88,11 @@ async function getNewsPosts() {
 function formatDate(value?: string | null) {
     if (!value) return ''
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value))
+}
+
+function postViewCount(post: BlogPost) {
+    const count = Number(post.view_count)
+    return Number.isFinite(count) && count > 0 ? Math.trunc(count) : 0
 }
 
 export default async function NoticiasPage() {
@@ -165,7 +173,10 @@ export default async function NoticiasPage() {
                             <span>Notícia em destaque</span>
                             <h2><Link href={`/noticias/${featured.slug}`}>{featured.title}</Link></h2>
                             <p>{pickPublicBlogSummary(featured)}</p>
-                            <div className="news-meta"><CalendarDays size={15} /> {formatDate(featured.published_at || featured.created_at)}</div>
+                            <div className="news-meta">
+                                <span><CalendarDays size={15} /> {formatDate(featured.published_at || featured.created_at)}</span>
+                                <span aria-label={blogViewLabel(postViewCount(featured))}><Eye size={15} /> {formatBlogViewCount(postViewCount(featured))}</span>
+                            </div>
                         </div>
                     </section>
                 ) : (
@@ -186,7 +197,10 @@ export default async function NoticiasPage() {
                                     <span>{post.category || 'Notícias'}</span>
                                     <h2><Link href={`/noticias/${post.slug}`}>{post.title}</Link></h2>
                                     <p>{pickPublicBlogSummary(post)}</p>
-                                    <div className="news-meta"><CalendarDays size={14} /> {formatDate(post.published_at || post.created_at)}</div>
+                                    <div className="news-meta">
+                                        <span><CalendarDays size={14} /> {formatDate(post.published_at || post.created_at)}</span>
+                                        <span aria-label={blogViewLabel(postViewCount(post))}><Eye size={14} /> {formatBlogViewCount(postViewCount(post))}</span>
+                                    </div>
                                 </div>
                             </article>
                         ))}
@@ -215,7 +229,8 @@ export default async function NoticiasPage() {
                 .news-featured h2 { font-family: var(--font-serif); font-size: clamp(1.55rem, 2.8vw, 2.55rem); line-height: 1.08; margin: 0 0 16px; }
                 .news-featured a, .news-card a { color: inherit; text-decoration: none; }
                 .news-featured p, .news-card p { color: #6e6358; line-height: 1.65; }
-                .news-meta { align-items: center; color: #8b7d6b; display: flex; gap: 8px; font-size: .82rem; font-weight: 850; margin-top: 16px; }
+                .news-meta { align-items: center; color: #8b7d6b; display: flex; flex-wrap: wrap; gap: 12px; font-size: .82rem; font-weight: 850; margin-top: 16px; }
+                .news-meta span { align-items: center; display: inline-flex; gap: 7px; white-space: nowrap; }
                 .news-grid { display: grid; gap: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 20px 7vw 72px; }
                 .news-card { background: #fff; border: 1px solid rgba(201,169,110,.2); border-radius: 16px; overflow: hidden; }
                 .news-card-media { border-radius: 0; min-height: 220px; }

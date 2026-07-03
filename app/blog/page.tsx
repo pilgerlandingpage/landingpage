@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CalendarDays, Newspaper, Search } from 'lucide-react'
+import { CalendarDays, Eye, Newspaper, Search } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
+import { attachBlogPostViewCounts, blogViewLabel, formatBlogViewCount, getBlogPostViewCounts } from '@/lib/blog/views'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
@@ -61,7 +62,9 @@ async function getPublishedPosts() {
             return []
         }
 
-        return ((data || []) as BlogPost[]).filter(post => !isNewsLikeContent(post)).slice(0, 60)
+        const posts = ((data || []) as BlogPost[]).filter(post => !isNewsLikeContent(post)).slice(0, 60)
+        const viewCounts = await getBlogPostViewCounts(supabase, posts)
+        return attachBlogPostViewCounts(posts, viewCounts)
     } catch (error) {
         console.warn('[Blog] public list unavailable:', summarizeSupabaseError(error))
         return []
@@ -71,6 +74,11 @@ async function getPublishedPosts() {
 function formatDate(value?: string | null) {
     if (!value) return ''
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value))
+}
+
+function postViewCount(post: BlogPost) {
+    const count = Number(post.view_count)
+    return Number.isFinite(count) && count > 0 ? Math.trunc(count) : 0
 }
 
 export default async function BlogPage() {
@@ -129,7 +137,10 @@ export default async function BlogPage() {
                             <span>{featured.category || 'Mercado imobiliário'}</span>
                             <h2><Link href={`/blog/${featured.slug}`}>{featured.title}</Link></h2>
                             <p>{pickPublicBlogSummary(featured)}</p>
-                            <div className="blog-card-meta"><CalendarDays size={15} /> {formatDate(featured.published_at || featured.created_at)}</div>
+                            <div className="blog-card-meta">
+                                <span><CalendarDays size={15} /> {formatDate(featured.published_at || featured.created_at)}</span>
+                                <span aria-label={blogViewLabel(postViewCount(featured))}><Eye size={15} /> {formatBlogViewCount(postViewCount(featured))}</span>
+                            </div>
                             <Link href={`/blog/${featured.slug}`} className="blog-read">Ler artigo</Link>
                         </div>
                     </section>
@@ -150,7 +161,10 @@ export default async function BlogPage() {
                                     <span>{post.category || 'Mercado imobiliário'}</span>
                                     <h2><Link href={`/blog/${post.slug}`}>{post.title}</Link></h2>
                                     <p>{pickPublicBlogSummary(post)}</p>
-                                    <div className="blog-card-meta"><CalendarDays size={14} /> {formatDate(post.published_at || post.created_at)}</div>
+                                    <div className="blog-card-meta">
+                                        <span><CalendarDays size={14} /> {formatDate(post.published_at || post.created_at)}</span>
+                                        <span aria-label={blogViewLabel(postViewCount(post))}><Eye size={14} /> {formatBlogViewCount(postViewCount(post))}</span>
+                                    </div>
                                 </div>
                             </article>
                         ))}
@@ -179,7 +193,8 @@ export default async function BlogPage() {
                 .blog-featured h2 { font-family: var(--font-serif); font-size: clamp(1.55rem, 2.8vw, 2.6rem); line-height: 1.08; margin: 0 0 18px; }
                 .blog-featured a, .blog-card a { color: inherit; text-decoration: none; }
                 .blog-featured p, .blog-card p { color: #6f6558; line-height: 1.65; }
-                .blog-card-meta { align-items: center; color: #8b7d6b; display: flex; gap: 8px; font-size: .84rem; font-weight: 800; margin-top: 16px; }
+                .blog-card-meta { align-items: center; color: #8b7d6b; display: flex; flex-wrap: wrap; gap: 12px; font-size: .84rem; font-weight: 800; margin-top: 16px; }
+                .blog-card-meta span { align-items: center; display: inline-flex; gap: 7px; white-space: nowrap; }
                 .blog-read { background: #c9a96e; border-radius: 999px; color: #111 !important; display: inline-flex; font-weight: 900; margin-top: 24px; padding: 13px 18px; text-transform: uppercase; }
                 .blog-grid { display: grid; gap: 22px; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0 7vw 70px; }
                 .blog-card { background: #fff; border: 1px solid rgba(201,169,110,.2); border-radius: 18px; overflow: hidden; }

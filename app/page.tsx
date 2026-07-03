@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import { unstable_cache } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -13,12 +14,17 @@ import MarketplaceHomeStyles from '@/components/marketplace/MarketplaceHomeStyle
 import HomepageSection from '@/components/marketplace/HomepageSection'
 import HomeMapSearchSection from '@/components/marketplace/HomeMapSearchSection'
 import AboutGuilhermeSection from '@/components/marketplace/AboutGuilhermeSection'
+import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import YoutubeFeedSection from '@/components/marketplace/YoutubeFeedSection'
+import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
 import PremiumCategoryAutoRail from '@/components/marketplace/PremiumCategoryAutoRail'
 import HeroVideoBackground from '@/components/marketplace/HeroVideoBackground'
 import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
 import { isPropertyFrontSea, isPropertyLaunch } from '@/lib/properties/intelligence'
-import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
+import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { attachBlogPostViewCounts, getBlogPostViewCounts } from '@/lib/blog/views'
+import { getHomepageGoogleReviews } from '@/lib/google-reviews'
+import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'Imóveis de luxo em Balneário Camboriú e litoral catarinense',
@@ -47,8 +53,14 @@ const HOME_EXCLUDED_CITIES = new Set(['camboriu', 'navegantes', 'blumenau'])
 const HOME_PROPERTY_DESCRIPTION_LIMIT = 320
 const HOME_PROPERTY_IMAGE_LIMIT = 4
 const HOME_MAP_MIN_PRICE = 4000000
+const HOME_BASE_DATA_TIMEOUT_MS = 12000
+const HOME_SECONDARY_DATA_TIMEOUT_MS = 8000
+const HOME_BASE_REVALIDATE_SECONDS = 300
+const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
+const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
 const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
 const FEATURED_SECTION_LEGACY_TITLES = new Set(['selecao exclusiva', 'selecao em destaque'])
+const HOME_BLOG_POST_LIMIT = 4
 const HOME_PROPERTY_FIELDS = [
   'id',
   'source_slug',
@@ -77,6 +89,175 @@ const HOME_PROPERTY_FIELDS = [
   'exclusive',
   'amenities',
 ].join(',')
+
+const HOME_BLOG_POST_FIELDS = [
+  'id',
+  'title',
+  'slug',
+  'excerpt',
+  'cover_image_url',
+  'category',
+  'tags',
+  'meta_description',
+  'generated_by',
+  'created_at',
+  'published_at',
+].join(',')
+
+type HomeBaseData = {
+  configRows: any[]
+  properties: any[]
+  landingPages: any[]
+  blogPosts: HomeBlogPost[]
+  warnings: {
+    config?: string
+    properties?: string
+    landingPages?: string
+    blogPosts?: string
+  }
+}
+
+function emptyHomeBaseData(propertiesWarning?: string): HomeBaseData {
+  return {
+    configRows: [],
+    properties: [],
+    landingPages: [],
+    blogPosts: [],
+    warnings: propertiesWarning ? { properties: propertiesWarning } : {},
+  }
+}
+
+const getCachedHomeBaseData = unstable_cache(
+  async (): Promise<HomeBaseData> => {
+    const supabase = createSupabaseAdminClient()
+    const [
+      configResult,
+      propertiesResult,
+      landingPagesResult,
+      blogPostsResult,
+    ] = await Promise.all([
+      supabase
+        .from('app_config')
+        .select('key, value')
+        .like('key', 'homepage_%')
+        .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
+      supabase
+        .from('properties')
+        .select(HOME_PROPERTY_FIELDS)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
+      supabase
+        .from('landing_pages')
+        .select('id, slug, property_id')
+        .eq('status', 'published')
+        .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
+      supabase
+        .from('blog_posts')
+        .select(HOME_BLOG_POST_FIELDS)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(16)
+        .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
+    ])
+
+    if (propertiesResult.error) {
+      throw new Error(`[Home] property feed unavailable: ${summarizeSupabaseError(propertiesResult.error)}`)
+    }
+
+    return {
+      configRows: configResult.data || [],
+      properties: (propertiesResult.data || []).map(compactHomeProperty),
+      landingPages: landingPagesResult.data || [],
+      blogPosts: (blogPostsResult.data || []) as unknown as HomeBlogPost[],
+      warnings: {
+        config: configResult.error ? summarizeSupabaseError(configResult.error) : undefined,
+        landingPages: landingPagesResult.error ? summarizeSupabaseError(landingPagesResult.error) : undefined,
+        blogPosts: blogPostsResult.error ? summarizeSupabaseError(blogPostsResult.error) : undefined,
+      },
+    }
+  },
+  ['marketplace-home-base-data-v1'],
+  {
+    revalidate: HOME_BASE_REVALIDATE_SECONDS,
+    tags: ['marketplace-home'],
+  }
+)
+
+async function getHomeBaseData() {
+  try {
+    return await getCachedHomeBaseData()
+  } catch (error) {
+    return emptyHomeBaseData(summarizeSupabaseError(error))
+  }
+}
+
+function emptyBlogViewCounts(posts: HomeBlogPost[]) {
+  const counts = new Map<string, number>()
+  posts.forEach(post => {
+    if (post?.id) counts.set(post.id, 0)
+  })
+  return counts
+}
+
+async function getHomeBlogViewCounts(supabase: ReturnType<typeof createSupabaseAdminClient>, posts: HomeBlogPost[]) {
+  if (!posts.length) return emptyBlogViewCounts(posts)
+
+  try {
+    const timeout = new Promise<Map<string, number>>(resolve => {
+      setTimeout(() => resolve(emptyBlogViewCounts(posts)), HOME_SECONDARY_DATA_TIMEOUT_MS)
+    })
+    return await Promise.race([getBlogPostViewCounts(supabase, posts), timeout])
+  } catch (error) {
+    console.warn('[Home] blog view counts unavailable:', summarizeSupabaseError(error))
+    return emptyBlogViewCounts(posts)
+  }
+}
+
+function mixHomeEditorialPosts(posts: HomeBlogPost[], limit: number) {
+  const available = posts.filter(post => post?.id && post?.slug && post?.title)
+  if (available.length <= limit) return available
+
+  const news = available.filter(isNewsLikeContent)
+  const blog = available.filter(post => !isNewsLikeContent(post))
+  if (!news.length || !blog.length) return available.slice(0, limit)
+
+  const first = available[0]
+  const used = new Set<string>([first.id])
+  const mixed = [first]
+  let nextPool = isNewsLikeContent(first) ? blog : news
+  let alternatePool = isNewsLikeContent(first) ? news : blog
+
+  while (mixed.length < limit) {
+    const candidate =
+      nextPool.find(post => !used.has(post.id))
+      || alternatePool.find(post => !used.has(post.id))
+      || available.find(post => !used.has(post.id))
+
+    if (!candidate) break
+    mixed.push(candidate)
+    used.add(candidate.id)
+    const previousPool = nextPool
+    nextPool = alternatePool
+    alternatePool = previousPool
+  }
+
+  return mixed
+}
+
+function editorialDateMs(post: HomeBlogPost) {
+  const value = post.published_at || post.created_at
+  const time = value ? new Date(value).getTime() : 0
+  return Number.isFinite(time) ? time : 0
+}
+
+function sortHomeEditorialPosts(posts: HomeBlogPost[]) {
+  return [...posts].sort((a, b) => {
+    const viewDiff = Number(b.view_count || 0) - Number(a.view_count || 0)
+    if (viewDiff !== 0) return viewDiff
+    return editorialDateMs(b) - editorialDateMs(a)
+  })
+}
 
 function normalizeCityName(value: unknown) {
   return normalizeLocationName(value)
@@ -132,43 +313,26 @@ function compactHomeProperty(property: any) {
 // This is a Server Component
 export default async function MarketplaceHome() {
   const supabase = createSupabaseAdminClient()
-  const [
-    configResult,
-    propertiesResult,
-    landingPagesResult,
-  ] = await Promise.all([
-    supabase
-      .from('app_config')
-      .select('key, value')
-      .like('key', 'homepage_%')
-      .abortSignal(createSupabaseAbortSignal()),
-    supabase
-      .from('properties')
-      .select(HOME_PROPERTY_FIELDS)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .abortSignal(createSupabaseAbortSignal()),
-    supabase
-      .from('landing_pages')
-      .select('id, slug, property_id')
-      .eq('status', 'published')
-      .abortSignal(createSupabaseAbortSignal()),
-  ])
+  const homeBaseData = await getHomeBaseData()
 
-  if (configResult.error) {
-    console.warn('[Home] homepage config unavailable:', summarizeSupabaseError(configResult.error))
+  if (homeBaseData.warnings.config) {
+    console.warn('[Home] homepage config unavailable:', homeBaseData.warnings.config)
   }
 
-  if (propertiesResult.error) {
-    console.warn('[Home] property feed unavailable:', summarizeSupabaseError(propertiesResult.error))
+  if (homeBaseData.warnings.properties) {
+    console.warn('[Home] property feed unavailable:', homeBaseData.warnings.properties)
   }
 
-  if (landingPagesResult.error) {
-    console.warn('[Home] landing page links unavailable:', summarizeSupabaseError(landingPagesResult.error))
+  if (homeBaseData.warnings.landingPages) {
+    console.warn('[Home] landing page links unavailable:', homeBaseData.warnings.landingPages)
+  }
+
+  if (homeBaseData.warnings.blogPosts) {
+    console.warn('[Home] blog posts unavailable:', homeBaseData.warnings.blogPosts)
   }
 
   const configMap: Record<string, string> = {}
-  const configRows = configResult.data || []
+  const configRows = homeBaseData.configRows
   configRows?.forEach((row: any) => { configMap[row.key] = row.value })
 
   const featuredTitle = normalizeFeaturedSectionTitle(configMap.homepage_featured_title)
@@ -186,9 +350,20 @@ export default async function MarketplaceHome() {
   let manualFeaturedIds: string[] = []
   try { manualFeaturedIds = JSON.parse(configMap.homepage_featured_ids || '[]') } catch { }
 
-  const allProperties = propertiesResult.data || []
+  const allProperties = homeBaseData.properties
   const properties = (allProperties || []).map(compactHomeProperty)
+  const rawHomeBlogPosts = homeBaseData.blogPosts
+  const [homeBlogViewCounts, googleReviews] = await Promise.all([
+    getHomeBlogViewCounts(supabase, rawHomeBlogPosts),
+    getHomepageGoogleReviews(configMap),
+  ])
+  const homeBlogPostsWithViews = attachBlogPostViewCounts(rawHomeBlogPosts, homeBlogViewCounts)
+  const homeBlogPosts = mixHomeEditorialPosts(
+    sortHomeEditorialPosts(homeBlogPostsWithViews),
+    HOME_BLOG_POST_LIMIT
+  )
   const homeProperties = properties.filter(isAllowedOnHome)
+  const isPropertyFeedUnavailable = Boolean(homeBaseData.warnings.properties)
   const homeMapProperties = homeProperties.filter(property => Number(property.price || property.rent || 0) >= HOME_MAP_MIN_PRICE)
   const luxuryCount = homeProperties.filter(p => Number(p.price || 0) >= 5000000).length
   const authorityCities = [
@@ -280,7 +455,7 @@ export default async function MarketplaceHome() {
   ]
 
   // Also fetch any landing pages linked to properties
-  const landingPages = landingPagesResult.data || []
+  const landingPages = homeBaseData.landingPages
   const lpMap = new Map()
   landingPages?.forEach((lp: any) => {
     lpMap.set(lp.property_id, lp.slug)
@@ -288,21 +463,41 @@ export default async function MarketplaceHome() {
 
   let funnelEvents: any[] = []
   const landingPageIds = (landingPages || []).map((lp: any) => lp.id).filter(Boolean)
-  if (landingPageIds.length > 0) {
-    const { data: eventRows, error: eventRowsError } = await supabase
-      .from('funnel_events')
-      .select('landing_page_id, event_type, created_at')
-      .in('landing_page_id', landingPageIds)
-      .in('event_type', ['page_view', 'cookie_consent', 'chat_opened', 'form_submitted', 'whatsapp_property_click', 'whatsapp_link_click'])
-      .order('created_at', { ascending: false })
-      .limit(2000)
-      .abortSignal(createSupabaseAbortSignal())
+  const shouldLoadDemandEvents = homeProperties.length > 0
+  const [propertyViewEventsResult, landingPageViewEventsResult] = shouldLoadDemandEvents
+    ? await Promise.all([
+      supabase
+        .from('funnel_events')
+        .select('landing_page_id, event_type, metadata, created_at')
+        .eq('event_type', 'property_details_landing_viewed')
+        .order('created_at', { ascending: false })
+        .limit(HOME_PROPERTY_VIEW_EVENT_LIMIT)
+        .abortSignal(createSupabaseAbortSignal()),
+      landingPageIds.length > 0
+        ? supabase
+          .from('funnel_events')
+          .select('landing_page_id, event_type, metadata, created_at')
+          .in('landing_page_id', landingPageIds)
+          .eq('event_type', 'page_view')
+          .order('created_at', { ascending: false })
+          .limit(HOME_LANDING_PAGE_VIEW_EVENT_LIMIT)
+          .abortSignal(createSupabaseAbortSignal())
+        : Promise.resolve({ data: [], error: null }),
+    ])
+    : [{ data: [], error: null }, { data: [], error: null }]
 
-    if (eventRowsError) {
-      console.warn('[Home] demand events unavailable:', summarizeSupabaseError(eventRowsError))
-    }
-    funnelEvents = eventRows || []
+  if (propertyViewEventsResult.error) {
+    console.warn('[Home] property view events unavailable:', summarizeSupabaseError(propertyViewEventsResult.error))
   }
+
+  if (landingPageViewEventsResult.error) {
+    console.warn('[Home] landing page view events unavailable:', summarizeSupabaseError(landingPageViewEventsResult.error))
+  }
+
+  funnelEvents = [
+    ...(propertyViewEventsResult.data || []),
+    ...(landingPageViewEventsResult.data || []),
+  ]
 
   // === BUILD SECTIONS ===
 
@@ -404,7 +599,9 @@ export default async function MarketplaceHome() {
               <span className="gp-location-shade" />
               <span className="gp-location-copy">
                 <strong>{city.label}</strong>
-                <small><b>{city.count.toLocaleString('pt-BR')}</b> imóveis</small>
+                <small>
+                  {isPropertyFeedUnavailable ? 'Ver imóveis' : <><b>{city.count.toLocaleString('pt-BR')}</b> imóveis</>}
+                </small>
               </span>
             </Link>
           ))}
@@ -483,6 +680,7 @@ export default async function MarketplaceHome() {
         {mostViewed.length > 0 && (
           <HomepageSection
             title="Mais Vistos"
+            titleIcon="eye"
             subtitle="As oportunidades que mais chamam atenção de quem busca alto padrão"
             properties={mostViewed}
             lpMap={lpMap}
@@ -515,7 +713,9 @@ export default async function MarketplaceHome() {
       </div>
       
       <AboutGuilhermeSection />
+      <GoogleReviewsSection data={googleReviews} />
       <YoutubeFeedSection />
+      <HomeBlogSection posts={homeBlogPosts} />
 
         <Footer />
       </main>
@@ -567,37 +767,83 @@ function buildMostViewedProperties(
 
   const viewCounts = new Map<string, number>()
   events.forEach((event: any) => {
-    const propertyId = landingPageToProperty.get(event.landing_page_id)
+    const propertyId = propertyIdFromViewEvent(event, landingPageToProperty)
     if (!propertyId) return
-    const weight = event.event_type === 'form_submitted' || event.event_type === 'whatsapp_property_click'
-      ? 4
-      : event.event_type === 'chat_opened' || event.event_type === 'whatsapp_link_click'
-        ? 2
-        : 1
-    viewCounts.set(propertyId, (viewCounts.get(propertyId) || 0) + weight)
+    viewCounts.set(propertyId, (viewCounts.get(propertyId) || 0) + 1)
   })
 
   const hasRealViews = Array.from(viewCounts.values()).some(count => count > 0)
   const scored = properties
     .filter(property => property?.id && property.status === 'active')
     .map(property => {
-      const realViews = viewCounts.get(property.id) || 0
+      const viewCount = viewCounts.get(property.id) || 0
       const fallback = demandScore(property)
       return {
-        property,
-        score: hasRealViews ? (realViews * 1000000) + fallback : fallback,
+        property: {
+          ...property,
+          view_count: viewCount,
+        },
+        viewCount,
+        fallback,
       }
     })
     .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score
+      if (hasRealViews && b.viewCount !== a.viewCount) return b.viewCount - a.viewCount
+      if (b.fallback !== a.fallback) return b.fallback - a.fallback
       return Number(b.property.price || 0) - Number(a.property.price || 0)
     })
     .map(item => item.property)
+
+  if (hasRealViews) {
+    return scored.slice(0, limit)
+  }
 
   const withoutFeatured = scored.filter(property => !excludeIds.has(property.id))
   const pool = withoutFeatured.length >= Math.min(2, limit) ? withoutFeatured : scored
 
   return pool.slice(0, limit)
+}
+
+function metadataRecord(value: unknown): Record<string, any> {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, any>
+  }
+
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+    } catch {
+      return {}
+    }
+  }
+
+  return {}
+}
+
+function propertyIdFromViewEvent(event: any, landingPageToProperty: Map<string, string>) {
+  const metadata = metadataRecord(event?.metadata)
+  const directId = metadata.property_id
+    || metadata.target_property_id
+    || metadata.lead_property_id
+
+  if (directId) return String(directId)
+
+  if (event?.landing_page_id) {
+    const propertyId = landingPageToProperty.get(String(event.landing_page_id))
+    if (propertyId) return propertyId
+  }
+
+  const path = String(
+    metadata.property_slug
+    || metadata.property_path
+    || metadata.page_path
+    || metadata.pathname
+    || metadata.page_url
+    || ''
+  )
+
+  return extractPropertyIdFromSeoSlug(path)
 }
 
 function demandScore(property: any) {

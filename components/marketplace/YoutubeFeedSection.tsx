@@ -2,8 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Instagram, MessageCircle, Play, PlayCircle, Youtube } from 'lucide-react'
-import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
+import { ChevronLeft, ChevronRight, Instagram, Play, PlayCircle, Youtube } from 'lucide-react'
 
 interface Video {
   id: string
@@ -89,15 +88,6 @@ export default function YoutubeFeedSection() {
     })
   }
 
-  const openWhatsAppCapture = () => {
-    openWhatsAppWithLeadCapture({
-      phone: '5547992528080',
-      message: 'Olá! Vim pelo site e quero falar com o Guilherme.',
-      slug: 'home',
-      template: 'media-proof-whatsapp',
-    })
-  }
-
   const featuredVideo = videos[0]
   const sideVideos = videos.slice(1, 7)
   const socialCards = [
@@ -140,10 +130,6 @@ export default function YoutubeFeedSection() {
               <Youtube size={16} />
               Ver canal
             </a>
-            <button type="button" className="media-main-link media-main-link-gold" onClick={openWhatsAppCapture}>
-              <MessageCircle size={16} />
-              WhatsApp
-            </button>
           </div>
         </div>
 
@@ -189,12 +175,6 @@ export default function YoutubeFeedSection() {
                   <small>{card.label}</small>
                 </a>
               ))}
-              <button type="button" className="media-social-card whatsapp" onClick={openWhatsAppCapture}>
-                <span className="media-social-icon"><MessageCircle size={18} /></span>
-                <span className="media-social-name">WhatsApp</span>
-                <strong>1:1</strong>
-                <small>consultoria</small>
-              </button>
             </div>
 
             <div className="media-video-head">
@@ -302,12 +282,6 @@ const sectionStyles = `
     font: 950 0.68rem/1 'Inter', sans-serif;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-  .media-main-link-gold {
-    border: 0;
-    background: linear-gradient(135deg, #dfc18e, #b8945f);
-    color: #11100e !important;
-    cursor: pointer;
   }
   .media-proof-grid {
     display: grid;
@@ -422,7 +396,7 @@ const sectionStyles = `
   }
   .media-social-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
   .media-social-card {
@@ -445,7 +419,6 @@ const sectionStyles = `
   .media-social-card.instagram .media-social-icon { color: #e1306c; }
   .media-social-card.tiktok .media-social-icon { color: #8be8ef; }
   .media-social-card.youtube .media-social-icon { color: #ff6b6b; }
-  .media-social-card.whatsapp .media-social-icon { color: #25d366; }
   .media-social-name {
     margin-top: 7px;
     color: #766a5a;
@@ -543,7 +516,7 @@ const sectionStyles = `
       grid-template-columns: 1fr;
     }
     .media-social-row {
-      grid-template-columns: repeat(4, minmax(78px, 1fr));
+      grid-template-columns: repeat(3, minmax(92px, 1fr));
       overflow-x: auto;
       padding-bottom: 2px;
       scrollbar-width: none;

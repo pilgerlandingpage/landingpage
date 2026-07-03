@@ -45,6 +45,39 @@ function normalize(value) {
     .toLowerCase()
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function isRetryableSupabaseError(error) {
+  const message = String(error?.message || error || '').toLowerCase()
+  return [
+    'fetch failed',
+    'headers timeout',
+    'connection timed out',
+    'canceling statement',
+    'error code 520',
+    'error code 522',
+    'error code 523',
+    'error code 524',
+    '503',
+    '504',
+    'timeout',
+  ].some(pattern => message.includes(pattern))
+}
+
+async function runSupabase(label, queryFactory, attempts = 3) {
+  let lastResult = null
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    lastResult = await queryFactory()
+    if (!lastResult?.error) return lastResult
+    if (!isRetryableSupabaseError(lastResult.error) || attempt === attempts) return lastResult
+    console.warn(`[copy-review] ${label} falhou, tentativa ${attempt}/${attempts}: ${lastResult.error?.message || lastResult.error}`)
+    await sleep(1200 * attempt)
+  }
+  return lastResult
+}
+
 function cleanJsonText(text) {
   return String(text || '')
     .replace(/```json\s*/gi, '')
@@ -163,10 +196,10 @@ function mergeSourceSummary(post, before, after) {
 }
 
 async function loadConfig() {
-  const { data, error } = await supabase
+  const { data, error } = await runSupabase('loadConfig', () => supabase
     .from('app_config')
     .select('key, value')
-    .in('key', CONFIG_KEYS)
+    .in('key', CONFIG_KEYS))
   if (error) throw error
   return Object.fromEntries((data || []).map(row => [row.key, String(row.value || '')]))
 }
@@ -174,7 +207,7 @@ async function loadConfig() {
 async function loadPosts() {
   let query = supabase
     .from('blog_posts')
-    .select('id,title,slug,status,excerpt,content_markdown,category,tags,seo_title,meta_description,primary_keyword,secondary_keywords,local_entities,aeo_questions,internal_links,approval_notes,source_summary,generated_by,created_at,published_at')
+    .select('id,title,slug,status,excerpt,content_markdown,category,tags,seo_title,meta_description,primary_keyword,secondary_keywords,local_entities,aeo_questions,internal_links,approval_notes,generated_by,created_at,published_at')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -186,9 +219,23 @@ async function loadPosts() {
     query = query.neq('status', 'archived')
   }
 
-  const { data, error } = await query
+  const { data, error } = await runSupabase('loadPosts', () => query)
   if (error) throw error
   return data || []
+}
+
+async function loadPostSourceSummary(postId) {
+  const { data, error } = await runSupabase('loadPostSourceSummary', () => supabase
+    .from('blog_posts')
+    .select('source_summary')
+    .eq('id', postId)
+    .maybeSingle())
+
+  if (error) {
+    console.warn('[copy-review] source summary unavailable:', error?.message || error)
+    return null
+  }
+  return data?.source_summary || null
 }
 
 function buildInstruction() {
@@ -320,14 +367,15 @@ async function main() {
         continue
       }
 
-      const { error } = await supabase
+      const currentSourceSummary = await loadPostSourceSummary(post.id)
+      const { error } = await runSupabase('updatePostCopy', () => supabase
         .from('blog_posts')
         .update({
           ...after,
-          source_summary: mergeSourceSummary(post, before, after),
+          source_summary: mergeSourceSummary({ ...post, source_summary: currentSourceSummary }, before, after),
           updated_at: new Date().toISOString(),
         })
-        .eq('id', post.id)
+        .eq('id', post.id))
 
       if (error) throw error
 

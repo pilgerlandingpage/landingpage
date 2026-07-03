@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
                 name: matchedBroker.name,
                 phone: matchedBroker.phone,
                 photo_url: matchedBroker.photo_url,
-                greeting_message: matchedBroker.greeting_message || `Olá! Sou o ${matchedBroker.name}. Como posso ajudar?`
+                greeting_message: matchedBroker.greeting_message || 'Olá, gostaria de mais informações sobre os imóveis'
             }
         })
     } catch (error) {

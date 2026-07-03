@@ -64,6 +64,10 @@ export default function HomepageConfigPage() {
     const [featuredMinPrice, setFeaturedMinPrice] = useState(0)
     const [featuredMaxPrice, setFeaturedMaxPrice] = useState(0)
     const [featuredSort, setFeaturedSort] = useState('price-desc')
+    const [googleReviewsEnabled, setGoogleReviewsEnabled] = useState(true)
+    const [googleReviewsPlaceId, setGoogleReviewsPlaceId] = useState('')
+    const [googleReviewsUrl, setGoogleReviewsUrl] = useState('')
+    const [googleMapsUrl, setGoogleMapsUrl] = useState('')
 
     useEffect(() => {
         fetch('/api/admin/homepage-config')
@@ -79,6 +83,10 @@ export default function HomepageConfigPage() {
                     setFeaturedMinPrice(parseInt(c.homepage_featured_min_price) || 0)
                     setFeaturedMaxPrice(parseInt(c.homepage_featured_max_price) || 0)
                     setFeaturedSort(c.homepage_featured_sort || 'price-desc')
+                    setGoogleReviewsEnabled((c.homepage_google_reviews_enabled || 'true') !== 'false')
+                    setGoogleReviewsPlaceId(c.homepage_google_reviews_place_id || '')
+                    setGoogleReviewsUrl(c.homepage_google_reviews_url || '')
+                    setGoogleMapsUrl(c.homepage_google_maps_url || '')
                     setProperties(d.properties || [])
                 }
             })
@@ -103,6 +111,10 @@ export default function HomepageConfigPage() {
                         homepage_featured_min_price: String(featuredMinPrice),
                         homepage_featured_max_price: String(featuredMaxPrice),
                         homepage_featured_sort: featuredSort,
+                        homepage_google_reviews_enabled: googleReviewsEnabled ? 'true' : 'false',
+                        homepage_google_reviews_place_id: googleReviewsPlaceId.trim(),
+                        homepage_google_reviews_url: googleReviewsUrl.trim(),
+                        homepage_google_maps_url: googleMapsUrl.trim(),
                     }
                 })
             })
@@ -113,7 +125,20 @@ export default function HomepageConfigPage() {
         } finally {
             setSaving(false)
         }
-    }, [featuredIds, featuredTitle, sectionsEnabled, featuredCities, itemsPerSection, featuredMinPrice, featuredMaxPrice, featuredSort])
+    }, [
+        featuredIds,
+        featuredTitle,
+        sectionsEnabled,
+        featuredCities,
+        itemsPerSection,
+        featuredMinPrice,
+        featuredMaxPrice,
+        featuredSort,
+        googleReviewsEnabled,
+        googleReviewsPlaceId,
+        googleReviewsUrl,
+        googleMapsUrl,
+    ])
 
     const toggleSection = (key: string) => {
         setSectionsEnabled(prev =>
@@ -183,6 +208,9 @@ export default function HomepageConfigPage() {
                 .hp-msg { font-size: 0.82rem; font-weight: 600; }
                 .hp-price-row { display: flex; gap: 12px; align-items: center; }
                 .hp-price-input { width: 180px; }
+                .hp-toggle { display: inline-flex; align-items: center; gap: 9px; color: #333; font-size: 0.84rem; font-weight: 700; cursor: pointer; user-select: none; }
+                .hp-toggle input { width: 18px; height: 18px; accent-color: #b8945f; }
+                .hp-help { color: #8a7c6b; font-size: 0.73rem; line-height: 1.45; margin: 6px 0 0; }
             `}</style>
 
             <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
@@ -207,6 +235,57 @@ export default function HomepageConfigPage() {
                             {sectionsEnabled.includes(s.key) ? '✓' : '○'} {s.label}
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* GOOGLE REVIEWS */}
+            <div className="hp-card">
+                <h3>Avaliacoes do Google</h3>
+                <p className="desc">Exibe reviews reais do Google na home e envia o cliente para avaliar no Google.</p>
+
+                <label className="hp-toggle">
+                    <input
+                        type="checkbox"
+                        checked={googleReviewsEnabled}
+                        onChange={event => setGoogleReviewsEnabled(event.target.checked)}
+                    />
+                    Exibir secao de avaliacoes na home
+                </label>
+
+                <div style={{ marginTop: 16 }}>
+                    <p className="hp-label">Google Place ID</p>
+                    <input
+                        className="hp-input"
+                        value={googleReviewsPlaceId}
+                        onChange={event => setGoogleReviewsPlaceId(event.target.value)}
+                        placeholder="Ex: ChIJ..."
+                    />
+                    <p className="hp-help">
+                        Necessario para buscar as avaliacoes pela Places API. A chave deve estar no ambiente como GOOGLE_PLACES_API_KEY, GOOGLE_MAPS_API_KEY ou NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
+                    </p>
+                </div>
+
+                <div style={{ marginTop: 16 }}>
+                    <p className="hp-label">Link para avaliar no Google</p>
+                    <input
+                        className="hp-input"
+                        value={googleReviewsUrl}
+                        onChange={event => setGoogleReviewsUrl(event.target.value)}
+                        placeholder="Cole aqui o link oficial de avaliacao do Perfil da Empresa"
+                    />
+                    <p className="hp-help">
+                        Se ficar vazio, o site tenta gerar um link de avaliacao usando o Place ID.
+                    </p>
+                </div>
+
+                <div style={{ marginTop: 16 }}>
+                    <p className="hp-label">Link do perfil no Google Maps</p>
+                    <input
+                        className="hp-input"
+                        value={googleMapsUrl}
+                        onChange={event => setGoogleMapsUrl(event.target.value)}
+                        placeholder="Opcional: URL publica do perfil no Google Maps"
+                    />
                 </div>
             </div>
 

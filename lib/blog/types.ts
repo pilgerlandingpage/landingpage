@@ -24,6 +24,7 @@ export type BlogPost = {
     created_at: string
     updated_at: string
     published_at: string | null
+    view_count?: number | null
 }
 
 function normalizeSummaryCheck(value?: string | null) {

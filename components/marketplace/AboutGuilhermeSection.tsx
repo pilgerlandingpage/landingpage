@@ -1,15 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { BadgeCheck, Camera, Crown, TrendingUp } from 'lucide-react'
-
-const AUTHORITY_BADGES = [
-    { icon: Crown, label: 'Especialista em luxo' },
-    { icon: Camera, label: 'Presença online' },
-    { icon: TrendingUp, label: 'Leitura de mercado' },
-    { icon: BadgeCheck, label: 'CRECI/SC 6772-J' },
-]
-
 export default function AboutGuilhermeSection() {
     return (
         <section id="sobre-guilherme" className="about-section">
@@ -29,26 +20,17 @@ export default function AboutGuilhermeSection() {
 
                 <div className="about-copy">
                     <span className="about-kicker">Sobre o Guilherme</span>
-                    <h2>Curadoria de alto padrão com visão de mercado.</h2>
+                    <h2>Alto padrão exige leitura local e critério.</h2>
                     <p className="about-lead">
-                        Guilherme Pilger filtra oportunidades, lê o movimento do litoral e mostra
-                        o que realmente faz sentido antes da visita.
+                        Desde 2008, Guilherme Pilger atua entre Balneário Camboriú, Praia Brava
+                        e Itapema com leitura precisa de avaliação, posicionamento e negociação.
+                        Cada indicação passa por contexto, potencial e aderência ao momento de
+                        quem compra, vende ou investe.
                     </p>
 
                     <div className="about-quote">
-                        Menos volume. Mais contexto para decidir com segurança.
-                    </div>
-
-                    <div className="about-badges">
-                        {AUTHORITY_BADGES.map((badge) => {
-                            const Icon = badge.icon
-                            return (
-                                <span key={badge.label}>
-                                    <Icon size={14} />
-                                    {badge.label}
-                                </span>
-                            )
-                        })}
+                        CRECI RS, Conecta Imobi e A Chave da Venda: repertório para decidir com
+                        segurança.
                     </div>
 
                 </div>
@@ -166,30 +148,6 @@ export default function AboutGuilhermeSection() {
                     font-weight: 600;
                     line-height: 1.3;
                 }
-                .about-badges {
-                    display: grid;
-                    grid-template-columns: repeat(4, minmax(0, max-content));
-                    gap: 6px;
-                    align-items: center;
-                    margin-top: 14px;
-                }
-                .about-badges span {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 5px;
-                    min-height: 24px;
-                    padding: 0 8px;
-                    border: 1px solid rgba(223,193,142,0.18);
-                    border-radius: 999px;
-                    background: rgba(255,255,255,0.055);
-                    color: #ead8b5;
-                    font-size: 0.55rem;
-                    font-weight: 900;
-                    letter-spacing: 0.045em;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                }
                 @media (max-width: 860px) {
                     .about-section {
                         overflow-x: hidden;
@@ -234,25 +192,6 @@ export default function AboutGuilhermeSection() {
                     .about-quote {
                         max-width: 100%;
                         overflow-wrap: anywhere;
-                    }
-                    .about-badges {
-                        width: 100%;
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 6px;
-                    }
-                    .about-badges span {
-                        justify-content: center;
-                        gap: 5px;
-                        min-height: 25px;
-                        padding: 0 7px;
-                        font-size: 0.51rem;
-                        letter-spacing: 0.035em;
-                    }
-                    .about-badges span :global(svg) {
-                        display: block;
-                        width: 11px;
-                        height: 11px;
-                        flex: 0 0 auto;
                     }
                 }
                 @media (min-width: 861px) and (max-width: 1180px) {

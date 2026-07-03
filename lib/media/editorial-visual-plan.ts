@@ -1,5 +1,9 @@
 import { getMostVisitedBlogProperties, type BlogPropertyRecommendation } from '@/lib/blog/properties'
-import { searchEditorialImages, persistEditorialImageToR2, type EditorialImageResult } from '@/lib/media/editorial-image-providers'
+import {
+  curateEditorialImages,
+  persistCuratedEditorialImage,
+  type EditorialImageCandidate,
+} from '@/lib/media/editorial-image-curator'
 import { slugifyBlog } from '@/lib/blog/types'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
@@ -13,8 +17,16 @@ export type EditorialVisualAsset = {
   image_url: string
   original_url?: string
   source_url?: string
+  provider_asset_id?: string
+  preview_url?: string
   author?: string
+  author_url?: string
   license?: string
+  width?: number
+  height?: number
+  tags?: string[]
+  r2_key?: string
+  source_query?: string
   alt: string
   caption: string
   credit?: string
@@ -89,7 +101,7 @@ function buildImageSearchQuery(input: BuildVisualPlanInput) {
 }
 
 function externalAssetFromImage(
-  image: EditorialImageResult & { r2Url?: string },
+  image: EditorialImageCandidate & { r2Url?: string; r2Key?: string },
   role: EditorialVisualAsset['role'],
   title: string,
 ): EditorialVisualAsset {
@@ -100,8 +112,16 @@ function externalAssetFromImage(
     image_url: image.r2Url || image.imageUrl,
     original_url: image.imageUrl,
     source_url: image.sourceUrl,
+    provider_asset_id: image.id,
+    preview_url: image.previewUrl,
     author: image.author,
+    author_url: image.authorUrl,
     license: image.license,
+    width: image.width,
+    height: image.height,
+    tags: image.tags,
+    r2_key: image.r2Key,
+    source_query: image.sourceQuery,
     alt: image.alt || title,
     caption: role === 'cover'
       ? `Imagem editorial selecionada para ilustrar ${title}.`
@@ -205,16 +225,18 @@ export async function buildEditorialVisualPlan(
   const assets: EditorialVisualAsset[] = []
   const inlineLimit = input.maxInlineImages || 2
   const externalNeeded = inlineLimit + 1
-  const externalImages = await searchEditorialImages({
-    query: imageSearchQuery,
-    orientation: 'horizontal',
-    perPage: Math.max(8, externalNeeded * 4),
+  const externalImages = await curateEditorialImages(supabase, {
+    contentType: input.contentType,
+    title: input.title,
+    keywords,
+    count: externalNeeded + 2,
+    perPage: Math.max(10, externalNeeded * 5),
   }).catch(() => [])
 
-  for (const externalImage of externalImages.slice(0, externalNeeded + 2)) {
+  for (const externalImage of externalImages) {
     if (assets.filter(asset => asset.role === 'cover').length && assets.filter(asset => asset.role === 'inline').length >= inlineLimit) break
     const role = assets.some(asset => asset.role === 'cover') ? 'inline' : 'cover'
-    const persisted = await persistEditorialImageToR2(externalImage, {
+    const persisted = await persistCuratedEditorialImage(externalImage, {
       folder: input.contentType === 'news' ? 'editorial-images/news' : 'editorial-images/blog',
       slug: slugifyBlog(`${input.title}-${externalImage.provider}-${externalImage.id}`),
     })

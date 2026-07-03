@@ -21,7 +21,7 @@ export default function WhatsAppFloatingButton() {
     const openChat = useCallback(() => {
         const fallbackPhone = '5547992528080'
         const phone = broker?.phone || fallbackPhone
-        const message = broker?.greeting_message || 'Olá! Vim pelo site e gostaria de mais informações.'
+        const message = broker?.greeting_message || 'Olá, gostaria de mais informações sobre os imóveis'
 
         openWhatsAppWithLeadCapture({
             phone,

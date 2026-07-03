@@ -3,12 +3,15 @@ import { uploadFile } from '@/lib/r2'
 
 export type EditorialImageProvider = 'pexels' | 'pixabay'
 export type EditorialImageOrientation = 'horizontal' | 'vertical' | 'all'
+export type EditorialImageOrder = 'popular' | 'latest'
 
 export type EditorialImageSearchOptions = {
   query: string
   orientation?: EditorialImageOrientation
   perPage?: number
   provider?: EditorialImageProvider
+  page?: number
+  order?: EditorialImageOrder
 }
 
 export type EditorialImageResult = {
@@ -160,6 +163,7 @@ export async function searchPexelsImages(
     per_page: String(options.perPage || config.pexelsPerPage),
     locale: 'pt-BR',
   })
+  if (options.page && options.page > 1) params.set('page', String(options.page))
   if (orientation) params.set('orientation', orientation)
 
   const response = await fetch(`https://api.pexels.com/v1/search?${params.toString()}`, {
@@ -209,6 +213,8 @@ export async function searchPixabayImages(
     safesearch: config.safeSearch ? 'true' : 'false',
     per_page: String(options.perPage || config.pixabayPerPage),
   })
+  if (options.page && options.page > 1) params.set('page', String(options.page))
+  if (options.order) params.set('order', options.order)
 
   const response = await fetch(`https://pixabay.com/api/?${params.toString()}`, {
     cache: 'no-store',

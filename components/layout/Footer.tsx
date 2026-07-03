@@ -48,7 +48,6 @@ export default function Footer() {
                 <div className="footer-brand">
                     <Link href="/" className="footer-logo">
                         <span className="footer-logo-name">GUILHERME PILGER</span>
-                        <span className="footer-logo-sub">CRECI/SC 6772-J</span>
                     </Link>
                     <p className="footer-description">
                         Curadoria, conteúdo e negociação para alto padrão em Balneário Camboriú e litoral de Santa Catarina.
@@ -200,14 +199,6 @@ export default function Footer() {
                     font-weight: 700;
                     letter-spacing: 0.08em;
                     line-height: 1;
-                }
-                .footer-logo-sub {
-                    margin-top: 5px;
-                    color: #d8b979;
-                    font-size: 0.68rem;
-                    font-weight: 900;
-                    letter-spacing: 0.16em;
-                    text-transform: uppercase;
                 }
                 .footer-description {
                     max-width: 430px;

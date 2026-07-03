@@ -3,6 +3,7 @@ import { generateNewsArticleDraft } from '@/lib/blog/agent'
 import { notifyBlogReviewReady } from '@/lib/blog/review-notifications'
 import { getAvailableBlogSlug } from '@/lib/blog/types'
 import { getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
+import { registerEditorialVisualPlanUsage } from '@/lib/media/editorial-image-curator'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type RunNewsAgentOptions = {
@@ -35,6 +36,10 @@ export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
       .single()
 
     if (error || !post) throw new Error(error?.message || 'Nao foi possivel salvar a noticia do agente.')
+
+    await registerEditorialVisualPlanUsage(supabase, post).catch((mediaError: any) => {
+      console.warn('[News Agent] editorial media usage register failed:', mediaError?.message || mediaError)
+    })
 
     const intelligence = await (async () => {
       try {

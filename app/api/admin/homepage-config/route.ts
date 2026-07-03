@@ -18,6 +18,10 @@ const HOMEPAGE_CONFIG_KEYS = [
     'homepage_featured_min_price',  // Minimum price filter for featured
     'homepage_featured_max_price',  // Maximum price filter for featured
     'homepage_featured_sort',       // Sort order: price-desc, price-asc, newest, manual
+    'homepage_google_reviews_enabled',
+    'homepage_google_reviews_place_id',
+    'homepage_google_reviews_url',
+    'homepage_google_maps_url',
 ]
 
 const DEFAULTS: Record<string, string> = {
@@ -29,6 +33,10 @@ const DEFAULTS: Record<string, string> = {
     homepage_featured_min_price: '0',
     homepage_featured_max_price: '0',
     homepage_featured_sort: 'price-desc',
+    homepage_google_reviews_enabled: 'true',
+    homepage_google_reviews_place_id: 'ChIJ7Y5_0DW32JQRatagLzFhcJc',
+    homepage_google_reviews_url: '',
+    homepage_google_maps_url: '',
 }
 
 export async function GET() {

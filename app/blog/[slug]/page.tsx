@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { CalendarDays, MessageCircle } from 'lucide-react'
+import { CalendarDays, Eye, MessageCircle } from 'lucide-react'
+import BlogPostViewTracker from '@/components/blog/BlogPostViewTracker'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
@@ -10,6 +11,7 @@ import { BLOG_AUTHOR_IMAGE_URL, BLOG_AUTHOR_NAME } from '@/lib/blog/author'
 import { markdownToHtml } from '@/lib/blog/markdown'
 import { getMostVisitedBlogProperties, type BlogPropertyRecommendation } from '@/lib/blog/properties'
 import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
+import { blogViewLabel, formatBlogViewCount, getBlogPostViewCount } from '@/lib/blog/views'
 import { JsonLd, articleJsonLd, breadcrumbJsonLd, faqPageJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
@@ -128,18 +130,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     if (!post) notFound()
 
     const supabase = createAdminClient()
-    const mostVisitedProperties = await getMostVisitedBlogProperties(supabase, {
-        limit: 3,
-        days: 90,
-        keywords: [
-            post.primary_keyword,
-            ...(post.secondary_keywords || []),
-            ...(post.local_entities || []),
-        ].filter(Boolean) as string[],
-    }).catch(error => {
-        console.warn('[Blog] most visited properties unavailable:', error?.message || error)
-        return []
-    })
+    const [postViewCount, mostVisitedProperties] = await Promise.all([
+        getBlogPostViewCount(supabase, post.id),
+        getMostVisitedBlogProperties(supabase, {
+            limit: 3,
+            days: 90,
+            keywords: [
+                post.primary_keyword,
+                ...(post.secondary_keywords || []),
+                ...(post.local_entities || []),
+            ].filter(Boolean) as string[],
+        }).catch(error => {
+            console.warn('[Blog] most visited properties unavailable:', error?.message || error)
+            return []
+        }),
+    ])
     const authorName = BLOG_AUTHOR_NAME
     const cover = post.cover_image_url || 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/fundo%20imobiliaria.jpeg'
     const description = pickPublicBlogSummary(post) || undefined
@@ -173,6 +178,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <>
             <GlobalHeader />
             <JsonLd data={jsonLd} />
+            <BlogPostViewTracker
+                postId={post.id}
+                slug={post.slug}
+                title={post.title}
+                contentType={isNews ? 'news' : 'blog'}
+                category={post.category}
+            />
             <main className="blog-post-page">
                 <section className="blog-post-hero">
                     <div>
@@ -180,9 +192,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <h1>{post.title}</h1>
                         {description ? <p>{description}</p> : null}
                         <div className="blog-post-meta">
-                            <CalendarDays size={15} />
-                            {formatDate(post.published_at || post.created_at)}
-                            {post.author_name ? ` · ${post.author_name}` : ''}
+                            <span><CalendarDays size={15} /> {formatDate(post.published_at || post.created_at)}</span>
+                            {post.author_name ? <span>{post.author_name}</span> : null}
+                            <span aria-label={blogViewLabel(postViewCount)}><Eye size={15} /> {formatBlogViewCount(postViewCount)}</span>
                         </div>
                     </div>
                     <div className="blog-post-cover" style={{ backgroundImage: `url(${cover})` }} />
@@ -265,7 +277,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 .blog-post-hero span { color: #c9a96e; display: block; font-size: .72rem; font-weight: 900; letter-spacing: .15em; margin-bottom: 14px; text-transform: uppercase; }
                 .blog-post-hero h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4.3vw, 3.9rem); line-height: 1; margin: 0; }
                 .blog-post-hero p { color: rgba(255,255,255,.72); font-size: 1.04rem; line-height: 1.6; max-width: 790px; }
-                .blog-post-meta { align-items: center; color: rgba(255,255,255,.7); display: flex; gap: 8px; font-weight: 800; }
+                .blog-post-meta { align-items: center; color: rgba(255,255,255,.7); display: flex; flex-wrap: wrap; gap: 12px; font-weight: 800; }
+                .blog-post-meta span { align-items: center; display: inline-flex; gap: 7px; white-space: nowrap; }
                 .blog-post-cover { background-position: center; background-size: cover; border-radius: 20px; min-height: 430px; }
                 .blog-post-shell { align-items: start; display: grid; gap: 38px; grid-template-columns: minmax(0, 1fr) 340px; padding: 58px 7vw; }
                 .blog-post-content { background: #fff; border: 1px solid rgba(201,169,110,.18); border-radius: 18px; padding: clamp(24px, 5vw, 56px); }

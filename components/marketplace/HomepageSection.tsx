@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import PropertyCard from '@/components/marketplace/PropertyCard'
+
+type HomepageSectionTitleIcon = 'eye'
 
 interface HomepageSectionProps {
     title: string
+    titleIcon?: HomepageSectionTitleIcon
     subtitle?: string
     properties: any[]
     lpMap: Map<string, string>
@@ -16,6 +19,7 @@ interface HomepageSectionProps {
 
 export default function HomepageSection({
     title,
+    titleIcon,
     subtitle,
     properties,
     lpMap,
@@ -70,12 +74,16 @@ export default function HomepageSection({
     }
 
     if (!properties || properties.length === 0) return null
+    const TitleIcon = titleIcon === 'eye' ? Eye : null
 
     return (
         <section className="homepage-section">
             <div className="section-header">
                 <div className="section-copy">
-                    <h2 className="section-title">{title}</h2>
+                    <h2 className="section-title">
+                        {TitleIcon && <TitleIcon size={18} aria-hidden="true" />}
+                        <span>{title}</span>
+                    </h2>
                     {viewAllHref && (
                         <Link href={viewAllHref} className="section-view-all-mobile">
                             <span>{viewAllLabel}</span>
@@ -168,6 +176,9 @@ export default function HomepageSection({
                     flex-shrink: 0;
                 }
                 .section-title {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
                     color: #1f1b16;
                     font-family: 'Montserrat', 'Inter', sans-serif;
                     font-size: clamp(1.2rem, 1.72vw, 1.88rem);
@@ -175,6 +186,11 @@ export default function HomepageSection({
                     line-height: 1;
                     letter-spacing: 0;
                     margin: 0;
+                }
+                .section-title :global(svg) {
+                    color: var(--gold);
+                    flex: 0 0 auto;
+                    stroke-width: 2.25;
                 }
                 .homepage-section :global(.section-view-all) {
                     display: none;
