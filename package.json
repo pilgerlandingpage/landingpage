@@ -10,6 +10,8 @@
     "monitor:vercel": "node scripts/monitor-vercel-traffic.mjs",
     "editorial:covers:dry-run": "node scripts/refresh-editorial-covers.mjs",
     "editorial:covers:apply": "node scripts/refresh-editorial-covers.mjs --apply",
+    "editorial:media:dry-run": "node scripts/repair-editorial-media-duplicates.mjs",
+    "editorial:media:apply": "node scripts/repair-editorial-media-duplicates.mjs --apply",
     "editorial:copy:dry-run": "node scripts/review-editorial-copy.mjs",
     "editorial:copy:apply": "node scripts/review-editorial-copy.mjs --apply",
     "properties:copy:review": "node scripts/property-copy-review.mjs",

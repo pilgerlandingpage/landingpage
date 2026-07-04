@@ -237,39 +237,35 @@ async function loadMediaMemory(supabase: SupabaseLike, avoidUrls: string[] = [])
     console.warn('[Editorial Image Curator] existing cover memory unavailable:', error?.message || error)
   }
 
-  if (process.env.EDITORIAL_IMAGE_READ_SOURCE_SUMMARY === 'true') {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('source_summary')
-        .not('source_summary', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(120)
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('source_summary->editorial_visual_plan')
+      .not('source_summary', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(800)
 
-      if (error) throw error
+    if (error) throw error
 
-      for (const post of data || []) {
-        const summary = metadataRecord(post.source_summary)
-        const assets = Array.isArray(summary.editorial_visual_plan?.assets)
-          ? summary.editorial_visual_plan.assets
-          : []
-        for (const asset of assets) {
-          addUrl(memory.urls, asset.image_url)
-          addUrl(memory.urls, asset.original_url)
-          addUrl(memory.urls, asset.source_url)
-          addUrl(memory.recentUrls, asset.image_url)
-          addUrl(memory.recentUrls, asset.original_url)
-          addUrl(memory.recentUrls, asset.source_url)
-          const key = providerAssetKey(asset.source || asset.provider, asset.provider_asset_id || asset.id)
-          if (key) {
-            memory.providerAssetKeys.add(key)
-            memory.recentProviderAssetKeys.add(key)
-          }
+    for (const post of data || []) {
+      const plan = metadataRecord((post as any).editorial_visual_plan)
+      const assets = Array.isArray(plan.assets) ? plan.assets : []
+      for (const asset of assets) {
+        addUrl(memory.urls, asset.image_url)
+        addUrl(memory.urls, asset.original_url)
+        addUrl(memory.urls, asset.source_url)
+        addUrl(memory.recentUrls, asset.image_url)
+        addUrl(memory.recentUrls, asset.original_url)
+        addUrl(memory.recentUrls, asset.source_url)
+        const key = providerAssetKey(asset.source || asset.provider, asset.provider_asset_id || asset.id)
+        if (key) {
+          memory.providerAssetKeys.add(key)
+          memory.recentProviderAssetKeys.add(key)
         }
       }
-    } catch (error: any) {
-      console.warn('[Editorial Image Curator] existing visual metadata memory unavailable:', error?.message || error)
     }
+  } catch (error: any) {
+    console.warn('[Editorial Image Curator] existing visual metadata memory unavailable:', error?.message || error)
   }
 
   return memory
