@@ -6329,6 +6329,58 @@ h6 {
                     border-left-color: #b8942f;
                 }
 
+                .gh-developments-dropdown {
+                    left: 50%;
+                    width: min(620px, calc(100vw - 48px));
+                    padding: 10px;
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 6px;
+                    transform: translateX(-50%) translateY(4px);
+                }
+                .gh-menu-item:hover > .gh-developments-dropdown {
+                    transform: translateX(-50%) translateY(0);
+                }
+                .gh-development-link {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 0;
+                    padding: 12px 14px;
+                    border: 1px solid transparent;
+                    border-radius: 7px;
+                    color: #17120b;
+                    text-decoration: none;
+                    transition: background 0.2s, border-color 0.2s, color 0.2s;
+                }
+                .gh-development-link:hover {
+                    background: #faf8f5;
+                    border-color: rgba(184, 148, 47, 0.18);
+                    color: #9a7425;
+                }
+                .gh-development-link strong {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: inherit;
+                    font-size: 0.76rem;
+                    font-weight: 800;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+                .gh-development-link span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: #8d8376;
+                    font-size: 0.68rem;
+                    line-height: 1.25;
+                    white-space: nowrap;
+                }
+                .gh-development-overview {
+                    grid-column: 1 / -1;
+                    background: #faf8f5;
+                    border-color: rgba(184, 148, 47, 0.18);
+                }
+
                 /* Mega Menu */
                 .gh-mega {
                     position: absolute;
@@ -6759,6 +6811,31 @@ h6 {
                     font-weight: 600;
                     border-bottom: none;
                     margin-top: 6px;
+                }
+                .gh-mobile-sub a.gh-mobile-development-link {
+                    align-items: flex-start;
+                    flex-direction: column;
+                    gap: 3px;
+                    min-height: auto;
+                    padding: 10px 14px;
+                    border-radius: 14px;
+                    line-height: 1.2;
+                }
+                .gh-mobile-development-link strong {
+                    color: #24262a;
+                    font-size: 0.78rem;
+                    font-weight: 650;
+                    letter-spacing: 0;
+                }
+                .gh-mobile-development-link small {
+                    color: #8f8475;
+                    font-size: 0.66rem;
+                    line-height: 1.25;
+                }
+                .gh-mobile-sub a.gh-mobile-development-link.gh-accent {
+                    background: rgba(184, 148, 47, 0.1);
+                    color: #7f632e;
+                    margin-top: 0;
                 }
                 .gh-mobile-instagram {
                     padding: 24px 20px 96px;

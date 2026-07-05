@@ -106,6 +106,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     // 4. Common Props for all templates
     const commonProps = {
         data: displayData,
+        content,
         slug: slug,
         landingPageId: lp.id,
         agentName: agent.name,
@@ -166,7 +167,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     const page = (() => {
         switch (templateId) {
             case 'brava-concetto':
-                return <BravaConcettoTemplate {...commonProps} />
+                return <BravaConcettoTemplate key={slug} {...commonProps} />
             case 'modern':
                 return <ModernLuxuryTemplate {...commonProps} />
             case 'lead-capture':

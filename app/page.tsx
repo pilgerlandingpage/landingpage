@@ -149,7 +149,7 @@ const getCachedHomeBaseData = unstable_cache(
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
       supabase
         .from('landing_pages')
-        .select('id, slug, property_id')
+        .select('id, slug, title, property_id, content')
         .eq('status', 'published')
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
       supabase
@@ -177,7 +177,7 @@ const getCachedHomeBaseData = unstable_cache(
       },
     }
   },
-  ['marketplace-home-base-data-v1'],
+  ['marketplace-home-base-data-v2'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
@@ -198,6 +198,77 @@ function emptyBlogViewCounts(posts: HomeBlogPost[]) {
     if (post?.id) counts.set(post.id, 0)
   })
   return counts
+}
+
+type HomeDevelopmentPage = {
+  slug: string
+  name: string
+  locationName: string
+  priceRange: string
+  availableUnitsCount: number | null
+  heroImage: string
+}
+
+function homeContentRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function homeText(value: unknown, fallback = '') {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function homeNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
+
+function firstDevelopmentImage(content: Record<string, any>) {
+  const development = homeContentRecord(content.development)
+  const galleries = [
+    ...(Array.isArray(content.custom_gallery) ? content.custom_gallery : []),
+    ...(Array.isArray(development.gallery) ? development.gallery : []),
+  ]
+
+  for (const item of galleries) {
+    const image = homeText(homeContentRecord(item).image)
+    if (image) return image
+  }
+
+  return '/placeholder-house.jpg'
+}
+
+function buildHomeDevelopmentPages(landingPages: any[]): HomeDevelopmentPage[] {
+  return landingPages
+    .map((page) => {
+      const content = homeContentRecord(page?.content)
+      if (content.template && content.template !== 'brava-concetto') return null
+
+      const development = homeContentRecord(content.development)
+      const slug = homeText(page?.slug)
+      if (!slug) return null
+      const isBravaConcetto = slug === 'bravaconceto'
+
+      return {
+        slug,
+        name: homeText(development.name, isBravaConcetto ? 'Brava Concetto' : homeText(content.custom_title, homeText(page?.title, 'Empreendimento'))),
+        locationName: homeText(development.locationName ?? development.location_name, isBravaConcetto ? 'Praia Brava, Itajai - SC' : 'Litoral catarinense'),
+        priceRange: homeText(development.priceRange ?? development.price_range, isBravaConcetto ? 'R$ 8.600.000 a R$ 21.000.000' : 'Consultar valores'),
+        availableUnitsCount: homeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (isBravaConcetto ? 3 : null),
+        heroImage: isBravaConcetto
+          ? homeText(development.heroImage ?? development.hero_image, '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg')
+          : homeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstDevelopmentImage(content)),
+      }
+    })
+    .filter((item): item is HomeDevelopmentPage => Boolean(item))
+    .sort((a, b) => {
+      if (a.slug === 'bravaconceto') return -1
+      if (b.slug === 'bravaconceto') return 1
+      return a.name.localeCompare(b.name, 'pt-BR')
+    })
 }
 
 async function getHomeBlogViewCounts(supabase: ReturnType<typeof createSupabaseAdminClient>, posts: HomeBlogPost[]) {
@@ -456,6 +527,7 @@ export default async function MarketplaceHome() {
 
   // Also fetch any landing pages linked to properties
   const landingPages = homeBaseData.landingPages
+  const developmentPages = buildHomeDevelopmentPages(landingPages || [])
   const lpMap = new Map()
   landingPages?.forEach((lp: any) => {
     lpMap.set(lp.property_id, lp.slug)
@@ -581,6 +653,39 @@ export default async function MarketplaceHome() {
       </div>
 
       <HomeMapSearchSection properties={homeMapProperties} />
+
+      {developmentPages.length > 0 && (
+        <section id="empreendimentos" className="home-developments-section" aria-labelledby="home-developments-title">
+          <div className="home-developments-head">
+            <span>Empreendimentos</span>
+            <h2 id="home-developments-title">Landing pages exclusivas dos empreendimentos</h2>
+            <p>Veja os predios e condominios em destaque, com unidades, localizacao e detalhes reunidos em uma pagina propria.</p>
+          </div>
+          <div className="home-developments-grid">
+            {developmentPages.map(development => (
+              <Link key={development.slug} href={`/${development.slug}`} className="home-development-card">
+                <Image
+                  src={development.heroImage}
+                  alt={development.name}
+                  fill
+                  sizes="(max-width: 760px) 72vw, (max-width: 1200px) 33vw, 260px"
+                  className="home-development-image"
+                />
+                <span className="home-development-shade" />
+                <span className="home-development-copy">
+                  <small>{development.locationName}</small>
+                  <strong>{development.name}</strong>
+                  <em>
+                    {development.availableUnitsCount
+                      ? `${development.availableUnitsCount} unidades`
+                      : development.priceRange}
+                  </em>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="gp-authority-strip">
         <div className="gp-authority-copy">

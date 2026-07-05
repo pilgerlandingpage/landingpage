@@ -28,6 +28,14 @@ type HeaderInstagramPost = {
     permalink?: string | null
 }
 
+type DevelopmentMenuPage = {
+    slug: string
+    name: string
+    locationName?: string
+    priceRange?: string
+    availableUnitsCount?: number | null
+}
+
 const TiktokIcon = ({ size = 16 }: { size?: number }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
 )
@@ -179,6 +187,7 @@ export default function GlobalHeader() {
     const [openAccordion, setOpenAccordion] = useState<string | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
     const [mobileInstagramPosts, setMobileInstagramPosts] = useState<HeaderInstagramPost[]>([])
+    const [developmentPages, setDevelopmentPages] = useState<DevelopmentMenuPage[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
 
     const closeMobileMenu = () => {
@@ -214,6 +223,23 @@ export default function GlobalHeader() {
         if (searchOpen) document.addEventListener('mousedown', handleClick)
         return () => document.removeEventListener('mousedown', handleClick)
     }, [searchOpen])
+
+    useEffect(() => {
+        let cancelled = false
+
+        fetch('/api/public/developments')
+            .then(response => response.ok ? response.json() : null)
+            .then(data => {
+                if (cancelled) return
+                const pages = Array.isArray(data?.developments) ? data.developments : []
+                setDevelopmentPages(pages.slice(0, 12))
+            })
+            .catch(() => null)
+
+        return () => {
+            cancelled = true
+        }
+    }, [])
 
     useEffect(() => {
         if (!mobileMenuOpen || mobileInstagramPosts.length) return
@@ -270,6 +296,24 @@ export default function GlobalHeader() {
                         <li className="gh-menu-item">
                             <Link href="/" className="gh-menu-label" aria-label="Home"><Home size={18} color="currentColor" /></Link>
                         </li>
+
+                        {developmentPages.length > 0 && (
+                            <li className="gh-menu-item">
+                                <span className="gh-menu-label">EMPREENDIMENTOS</span>
+                                <div className="gh-dropdown gh-developments-dropdown">
+                                    <Link href="/#empreendimentos" className="gh-development-link gh-development-overview">
+                                        <strong>Todos os empreendimentos</strong>
+                                        <span>Ver vitrine na pagina inicial</span>
+                                    </Link>
+                                    {developmentPages.map(development => (
+                                        <Link key={development.slug} href={`/${development.slug}`} className="gh-development-link">
+                                            <strong>{development.name}</strong>
+                                            <span>{development.locationName || development.priceRange || 'Empreendimento Guilherme Pilger'}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </li>
+                        )}
 
                         <li className="gh-menu-item">
                             <span className="gh-menu-label">A IMOBILIÁRIA ▾</span>
@@ -371,6 +415,29 @@ export default function GlobalHeader() {
                             <Link href="/" className="gh-mobile-nav-item" onClick={handleMobileHomeClick}>
                                 <span className="gh-mobile-link-main"><Home size={17} strokeWidth={1.75} /><span>Home</span></span>
                             </Link>
+
+                            {developmentPages.length > 0 && (
+                                <>
+                                    <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('empreendimentos')} aria-expanded={openAccordion === 'empreendimentos'}>
+                                        <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>Empreendimentos</span></span>
+                                        <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
+                                    </button>
+                                    {openAccordion === 'empreendimentos' && (
+                                        <div className="gh-mobile-sub gh-mobile-developments-sub">
+                                            <Link href="/#empreendimentos" className="gh-mobile-development-link gh-accent" onClick={closeMobileMenu}>
+                                                <strong>Todos os empreendimentos</strong>
+                                                <small>Ver vitrine na home</small>
+                                            </Link>
+                                            {developmentPages.map(development => (
+                                                <Link key={development.slug} href={`/${development.slug}`} className="gh-mobile-development-link" onClick={closeMobileMenu}>
+                                                    <strong>{development.name}</strong>
+                                                    <small>{development.locationName || 'Guilherme Pilger'}</small>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
 
                             <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('imobiliaria')} aria-expanded={openAccordion === 'imobiliaria'}>
                                 <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>A imobiliária</span></span>

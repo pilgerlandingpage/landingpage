@@ -1035,6 +1035,107 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           white-space: nowrap;
         }
 
+        .home-developments-section {
+          max-width: 1440px;
+          margin: 20px auto 12px;
+          padding: 18px clamp(12px, 3vw, 48px) 22px;
+        }
+        .home-developments-head {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 24px;
+          margin-bottom: 14px;
+        }
+        .home-developments-head span {
+          display: inline-flex;
+          color: #a78042;
+          font-size: 0.68rem;
+          font-weight: 950;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+        .home-developments-head h2 {
+          max-width: 620px;
+          margin: 4px 0 0;
+          color: #1f1b16;
+          font-size: clamp(1.35rem, 2vw, 2rem);
+          letter-spacing: 0;
+          line-height: 1.08;
+        }
+        .home-developments-head p {
+          max-width: 470px;
+          margin: 0;
+          color: #6d6255;
+          font-size: 0.9rem;
+          font-weight: 600;
+          line-height: 1.5;
+        }
+        .home-developments-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+          gap: 12px;
+        }
+        .home-development-card {
+          position: relative;
+          min-height: 220px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.46);
+          border-radius: 14px;
+          background: #14110d;
+          color: #fff !important;
+          isolation: isolate;
+          box-shadow: 0 18px 40px rgba(25,20,14,0.13);
+          text-decoration: none;
+        }
+        .home-development-image {
+          object-fit: cover;
+          transform: scale(1.02);
+          transition: transform 0.55s ease, filter 0.55s ease;
+          filter: saturate(1.02) contrast(1.04) brightness(1.04);
+          z-index: 0;
+        }
+        .home-development-card:hover .home-development-image {
+          transform: scale(1.08);
+          filter: saturate(1.04) contrast(1.08);
+        }
+        .home-development-shade {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            linear-gradient(to top, rgba(8,8,8,0.82), rgba(8,8,8,0.38) 40%, rgba(8,8,8,0.05) 68%),
+            linear-gradient(90deg, rgba(8,8,8,0.26), rgba(8,8,8,0));
+        }
+        .home-development-copy {
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 15px;
+          z-index: 2;
+          display: grid;
+          gap: 5px;
+        }
+        .home-development-copy small {
+          color: rgba(255,255,255,0.7);
+          font-size: 0.62rem;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .home-development-copy strong {
+          color: #fff;
+          font-size: clamp(1.02rem, 1.45vw, 1.34rem);
+          line-height: 1.08;
+        }
+        .home-development-copy em {
+          color: #dfc58a;
+          font-size: 0.72rem;
+          font-style: normal;
+          font-weight: 850;
+          text-transform: uppercase;
+        }
+
         .premium-categories-showcase {
           max-width: 1440px;
           margin: 18px auto 20px;
@@ -1786,6 +1887,48 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             top: auto !important;
             bottom: -28px !important;
           }
+          .home-developments-section {
+            margin: 10px 0 12px;
+            padding: 14px 12px 16px;
+            overflow: hidden;
+          }
+          .home-developments-head {
+            display: block;
+            margin-bottom: 10px;
+          }
+          .home-developments-head h2 {
+            max-width: 100%;
+            font-size: clamp(1.05rem, 5.2vw, 1.42rem);
+          }
+          .home-developments-head p {
+            margin-top: 6px;
+            font-size: 0.78rem;
+          }
+          .home-developments-grid {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 6px;
+            scroll-snap-type: x proximity;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+          }
+          .home-developments-grid::-webkit-scrollbar {
+            display: none;
+          }
+          .home-development-card {
+            flex: 0 0 min(78vw, 320px);
+            min-height: 178px;
+            border-radius: 12px;
+            scroll-snap-align: start;
+          }
+          .home-development-copy {
+            left: 13px;
+            right: 13px;
+            bottom: 13px;
+          }
           .premium-section-head {
             display: block !important;
             margin-bottom: 10px;
@@ -2174,6 +2317,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         .marketplace-container .premium-category-card .premium-category-copy strong,
         .marketplace-container .gp-location-copy strong,
         .marketplace-container .gp-authority-stats a.gp-location-card .gp-location-copy strong,
+        .marketplace-container .home-development-copy strong,
         .marketplace-container .section-end-card strong,
         .marketplace-container .social-card strong,
         .marketplace-container .media-social-card strong {

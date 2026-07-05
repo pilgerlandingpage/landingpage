@@ -18,6 +18,7 @@ export interface LandingPageData {
 
 export interface TemplateProps {
     data: LandingPageData
+    content?: Record<string, unknown>
     // These props are needed for the AI Agent/Chat Widget integration
     slug: string
     landingPageId: string

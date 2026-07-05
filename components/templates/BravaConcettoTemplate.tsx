@@ -8,7 +8,6 @@ import {
     BedDouble,
     Building2,
     Car,
-    ChevronRight,
     Compass,
     Dumbbell,
     KeyRound,
@@ -44,6 +43,7 @@ type Unit = {
 type Development = {
     id: string
     name: string
+    pageSlug?: string
     city: string
     locationName: string
     tagline: string
@@ -62,12 +62,13 @@ type Development = {
 }
 
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
-const GUILHERME_AVATAR = '/images/eventos/guilherme-pilger-avatar.png'
+const GUILHERME_AVATAR = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/IMG_2868.jpg'
 
 const DEVELOPMENTS: Development[] = [
     {
         id: 'brava-concetto',
         name: 'Brava Concetto',
+        pageSlug: 'bravaconceto',
         city: 'Itajai',
         locationName: 'Praia Brava, Itajai - SC',
         tagline: 'O privilegio de viver na Praia Brava com elegancia, exclusividade e design atemporal.',
@@ -143,6 +144,7 @@ const DEVELOPMENTS: Development[] = [
     {
         id: 'ibiza-towers',
         name: 'Ibiza Towers',
+        pageSlug: 'ibiza-towers',
         city: 'Balneario Camboriu',
         locationName: 'Barra Sul, Balneario Camboriu - SC',
         tagline: 'Frente mar real, lazer monumental e unidades amplas em uma das torres mais desejadas da Barra Sul.',
@@ -216,6 +218,7 @@ const DEVELOPMENTS: Development[] = [
     {
         id: 'one-tower',
         name: 'One Tower',
+        pageSlug: 'one-tower',
         city: 'Balneario Camboriu',
         locationName: 'Centro, Balneario Camboriu - SC',
         tagline: 'Um endereco frente mar iconico para quem busca exclusividade, vista e solidez patrimonial.',
@@ -297,21 +300,150 @@ const iconMap = {
     KeyRound,
 }
 
-function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    document.body.scrollTo?.({ top: 0, behavior: 'smooth' })
+const DEFAULT_DEVELOPMENT_ID = 'brava-concetto'
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
 
-export default function BravaConcettoTemplate({ slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
-    const [selectedDevId, setSelectedDevId] = useState('brava-concetto')
+function asText(value: unknown, fallback = '') {
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function asNumber(value: unknown, fallback = 0) {
+    const number = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(number) ? number : fallback
+}
+
+function normalizeUnit(value: unknown): Unit | null {
+    if (!isRecord(value)) return null
+
+    const id = asText(value.id)
+    const type = asText(value.type)
+    const title = asText(value.title, type)
+    const image = asText(value.image)
+    const sourceSlug = asText(value.sourceSlug ?? value.source_slug)
+
+    if (!id || !type || !title || !image || !sourceSlug) return null
+
+    return {
+        id,
+        type,
+        title,
+        area: asText(value.area, 'Consulte'),
+        suites: asText(value.suites, 'Consulte'),
+        vagas: asText(value.vagas, 'Consulte'),
+        price: asText(value.price, 'Consulte'),
+        image,
+        status: asText(value.status, 'Disponivel'),
+        sourceSlug,
+    }
+}
+
+function normalizeGalleryItem(value: unknown): Development['gallery'][number] | null {
+    if (!isRecord(value)) return null
+
+    const image = asText(value.image)
+    if (!image) return null
+
+    return {
+        title: asText(value.title, 'Imagem do empreendimento'),
+        image,
+        category: asText(value.category, 'Empreendimento'),
+    }
+}
+
+function normalizeBenefit(value: unknown): Development['benefits'][number] | null {
+    if (!isRecord(value)) return null
+
+    const icon = asText(value.icon, 'Building2') as keyof typeof iconMap
+    if (!iconMap[icon]) return null
+
+    return {
+        title: asText(value.title),
+        description: asText(value.description),
+        icon,
+    }
+}
+
+function normalizeDifferential(value: unknown): Development['differentials'][number] | null {
+    if (!isRecord(value)) return null
+
+    const title = asText(value.title)
+    const description = asText(value.description)
+    if (!title || !description) return null
+
+    return { title, description }
+}
+
+function normalizeFaq(value: unknown): Development['faq'][number] | null {
+    if (!isRecord(value)) return null
+
+    const question = asText(value.question)
+    const answer = asText(value.answer)
+    if (!question || !answer) return null
+
+    return { question, answer }
+}
+
+function normalizeDevelopment(value: unknown): Development | null {
+    if (!isRecord(value)) return null
+
+    const id = asText(value.id)
+    if (!id) return null
+
+    const fallback = DEVELOPMENTS.find((item) => item.id === id)
+    const name = asText(value.name, fallback?.name)
+    if (!name) return null
+
+    const benefits = Array.isArray(value.benefits)
+        ? value.benefits.map(normalizeBenefit).filter((item): item is Development['benefits'][number] => Boolean(item))
+        : []
+    const differentials = Array.isArray(value.differentials)
+        ? value.differentials.map(normalizeDifferential).filter((item): item is Development['differentials'][number] => Boolean(item))
+        : []
+    const units = Array.isArray(value.units)
+        ? value.units.map(normalizeUnit).filter((item): item is Unit => Boolean(item))
+        : []
+    const gallery = Array.isArray(value.gallery)
+        ? value.gallery.map(normalizeGalleryItem).filter((item): item is Development['gallery'][number] => Boolean(item))
+        : []
+    const faq = Array.isArray(value.faq)
+        ? value.faq.map(normalizeFaq).filter((item): item is Development['faq'][number] => Boolean(item))
+        : []
+
+    return {
+        id,
+        name,
+        pageSlug: asText(value.pageSlug ?? value.page_slug ?? value.slug, fallback?.pageSlug),
+        city: asText(value.city, fallback?.city || 'Santa Catarina'),
+        locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localizacao privilegiada'),
+        tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrao com curadoria Guilherme Pilger.'),
+        priceRange: asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Consulte'),
+        availableUnitsCount: asNumber(value.availableUnitsCount ?? value.available_units_count, fallback?.availableUnitsCount || units.length),
+        areaRange: asText(value.areaRange ?? value.area_range, fallback?.areaRange || 'Consulte'),
+        suitesRange: asText(value.suitesRange ?? value.suites_range, fallback?.suitesRange || 'Consulte'),
+        heroImage: asText(value.heroImage ?? value.hero_image, fallback?.heroImage || gallery[0]?.image || '/placeholder-house.jpg'),
+        description: asText(value.description, fallback?.description || 'Empreendimento selecionado pela curadoria Guilherme Pilger.'),
+        address: asText(value.address, fallback?.address || asText(value.locationName ?? value.location_name, 'Santa Catarina')),
+        benefits: benefits.length ? benefits : (fallback?.benefits || []),
+        differentials: differentials.length ? differentials : (fallback?.differentials || []),
+        units: units.length ? units : (fallback?.units || []),
+        gallery: gallery.length ? gallery : (fallback?.gallery || []),
+        faq: faq.length ? faq : (fallback?.faq || []),
+    }
+}
+
+export default function BravaConcettoTemplate({ slug, landingPageId, agentName, greetingMessage, content }: TemplateProps) {
+    const contentDevelopment = useMemo(() => normalizeDevelopment(content?.development), [content])
     const [faqOpen, setFaqOpen] = useState<number | null>(0)
     const [broker, setBroker] = useState<{ name?: string; phone?: string; photo_url?: string | null; greeting_message?: string } | null>(null)
     const [failedBrokerPhotoUrl, setFailedBrokerPhotoUrl] = useState<string | null>(null)
 
-    const activeDev = useMemo(
-        () => DEVELOPMENTS.find((item) => item.id === selectedDevId) || DEVELOPMENTS[0],
-        [selectedDevId]
-    )
+    const activeDev = useMemo(() => {
+        const contentDevelopmentId = asText(content?.development_id, contentDevelopment?.id || DEFAULT_DEVELOPMENT_ID)
+        return contentDevelopment || normalizeDevelopment({ id: contentDevelopmentId }) || DEVELOPMENTS[0]
+    }, [content, contentDevelopment])
 
     useEffect(() => {
         fetch(`/api/broker-for-page?slug=${slug}`)
@@ -338,12 +470,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             template: 'brava-concetto',
         })
     }, [activeDev.name, broker, slug])
-
-    const handleSelectDevelopment = (id: string) => {
-        setSelectedDevId(id)
-        setFaqOpen(0)
-        scrollToTop()
-    }
 
     const handleScrollToUnits = () => {
         document.getElementById('unidades-disponiveis')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -378,21 +504,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Consultoria imobiliaria de luxo</p>
                         </div>
                     </div>
-
-                    <nav className="rounded-lg border border-zinc-800 bg-[#11161D] p-1">
-                        <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
-                            {DEVELOPMENTS.map((item) => (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    onClick={() => handleSelectDevelopment(item.id)}
-                                    className={`bc-dev-button ${selectedDevId === item.id ? 'bc-dev-active' : ''}`}
-                                >
-                                    {item.name}
-                                </button>
-                            ))}
-                        </div>
-                    </nav>
 
                     <button
                         type="button"
@@ -620,19 +731,13 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         <p className="font-serif text-xl uppercase tracking-[0.18em] text-white">Guilherme Pilger</p>
                         <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">Curadoria de empreendimentos e unidades de alto padrao no litoral catarinense.</p>
                     </div>
-                    <div className="flex flex-wrap gap-3">
-                        {DEVELOPMENTS.map((item) => (
-                            <button
-                                key={item.id}
-                                type="button"
-                                onClick={() => handleSelectDevelopment(item.id)}
-                                className="inline-flex items-center gap-1 rounded border border-zinc-800 px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 hover:border-[#D4AF37]/60 hover:text-[#D4AF37]"
-                            >
-                                <ChevronRight size={13} />
-                                {item.name}
-                            </button>
-                        ))}
-                    </div>
+                    <Link
+                        href="/#empreendimentos"
+                        className="inline-flex items-center gap-2 rounded border border-zinc-800 px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 transition hover:border-[#D4AF37]/60 hover:text-[#D4AF37]"
+                    >
+                        Ver outros empreendimentos
+                        <ArrowRight size={13} />
+                    </Link>
                 </div>
             </footer>
 
@@ -764,53 +869,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     font-size: 9px;
                     letter-spacing: 0.18em;
                     text-transform: uppercase;
-                }
-
-                .bc-page nav {
-                    border: 1px solid #272e38;
-                    border-radius: 8px;
-                    background: #11161d;
-                    padding: 3px;
-                    flex: 1;
-                    max-width: 460px;
-                }
-
-                .bc-page nav > div {
-                    display: grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    gap: 3px;
-                }
-
-                .bc-dev-button {
-                    border: 0;
-                    border-radius: 6px;
-                    background: transparent;
-                    color: #a1a1aa;
-                    min-height: 36px;
-                    padding: 9px 14px;
-                    font-size: 10px;
-                    font-weight: 950;
-                    letter-spacing: 0.08em;
-                    line-height: 1;
-                    text-align: center;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-                }
-
-                .bc-page nav .bc-dev-button {
-                    min-height: 34px;
-                    padding: 8px 13px;
-                    font-size: 10px !important;
-                    line-height: 1 !important;
-                    letter-spacing: 0.07em;
-                }
-
-                .bc-dev-button:hover,
-                .bc-dev-active {
-                    background: #d4af37;
-                    color: #0a0d10;
-                    box-shadow: 0 8px 18px rgba(212, 175, 55, 0.16);
                 }
 
                 .bc-page header > div > button {
@@ -1608,21 +1666,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     justify-content: flex-end;
                 }
 
-                .bc-page footer button {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 5px;
-                    border: 1px solid #272e38;
-                    border-radius: 4px;
-                    background: transparent;
-                    color: #858b94;
-                    padding: 9px 12px;
-                    font-size: 10px;
-                    font-weight: 950;
-                    letter-spacing: 0.13em;
-                    text-transform: uppercase;
-                }
-
                 .bc-page .bc-floating-actions {
                     position: fixed;
                     right: 28px;
@@ -1672,10 +1715,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     .bc-page header > div {
                         flex-direction: column;
                         align-items: stretch;
-                    }
-
-                    .bc-page nav {
-                        max-width: none;
                     }
 
                     .bc-page header > div > button {
@@ -1732,26 +1771,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     .bc-page header p:last-child {
                         margin-top: 3px;
                         font-size: 8px;
-                    }
-
-                    .bc-page nav {
-                        padding: 4px;
-                    }
-
-                    .bc-page nav > div {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 4px;
-                    }
-
-                    .bc-dev-button {
-                        min-height: 34px;
-                        padding: 9px 10px;
-                        text-align: center;
-                        white-space: normal;
-                    }
-
-                    .bc-dev-button:nth-child(3) {
-                        grid-column: 1 / 2;
                     }
 
                     .bc-page main > section:nth-of-type(1) {
