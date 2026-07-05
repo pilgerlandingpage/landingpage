@@ -471,7 +471,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     }
 
     return (
-        <div className="bc-page min-h-screen bg-[#0A0D10] text-zinc-300 antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
+        <div className="bc-page min-h-screen bg-[#F7F5F0] text-[#2F2A22] antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
 
             <main>
@@ -723,8 +723,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             <style jsx global>{`
                 .bc-page {
                     min-height: 100vh;
-                    background: #0a0d10;
-                    color: #d4d4d8;
+                    background: #f7f5f0;
+                    color: #2f2a22;
                     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                     overflow-x: clip;
                     padding-bottom: 82px;
@@ -753,7 +753,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: flex;
                     align-items: center;
                     overflow: hidden;
-                    background: #07090c;
+                    background: #f0ede8;
                 }
 
                 .bc-page main > section:nth-of-type(1) > div:first-child {
@@ -766,7 +766,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     height: 100%;
                     display: block;
                     object-fit: cover;
-                    opacity: 0.56;
+                    opacity: 0.82;
+                    filter: saturate(0.94) contrast(1.02);
                 }
 
                 .bc-page .bc-hero-depth-overlay,
@@ -776,11 +777,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-depth-overlay {
-                    background: linear-gradient(to top, #0a0d10 0%, rgba(10, 13, 16, 0.48) 52%, rgba(10, 13, 16, 0.76) 100%);
+                    background: linear-gradient(to top, rgba(247, 245, 240, 0.94) 0%, rgba(247, 245, 240, 0.6) 48%, rgba(247, 245, 240, 0.78) 100%);
                 }
 
                 .bc-page .bc-hero-side-fade {
-                    background: linear-gradient(90deg, rgba(10, 13, 16, 0.95), rgba(10, 13, 16, 0.28), transparent);
+                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.96), rgba(247, 245, 240, 0.42), rgba(247, 245, 240, 0.08));
                 }
 
                 .bc-page .bc-hero-top-fade {
@@ -790,9 +791,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     pointer-events: none;
                     background: linear-gradient(
                         to bottom,
-                        rgba(255, 255, 255, 0.98) 0%,
-                        rgba(255, 255, 255, 0.88) 26%,
-                        rgba(255, 255, 255, 0.42) 64%,
+                        rgba(255, 255, 255, 1) 0%,
+                        rgba(255, 255, 255, 0.92) 26%,
+                        rgba(255, 255, 255, 0.52) 64%,
                         rgba(255, 255, 255, 0) 100%
                     );
                 }
@@ -818,7 +819,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(1) h1 {
                     max-width: 700px;
                     margin: 0 0 22px;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: clamp(2.75rem, 3vw, 3.7rem);
                     font-weight: 400;
@@ -833,7 +834,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(1) h1 + p {
                     max-width: 640px;
                     margin-bottom: 30px;
-                    color: #e5e7eb;
+                    color: #4c4539;
                     font-size: clamp(0.98rem, 1.1vw, 1.18rem);
                     font-weight: 300;
                     line-height: 1.72;
@@ -845,10 +846,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     align-items: center;
                     gap: 8px;
                     margin-bottom: 22px;
-                    border: 1px solid rgba(212, 175, 55, 0.35);
+                    border: 1px solid rgba(184, 148, 95, 0.34);
                     border-radius: 999px;
-                    background: rgba(17, 22, 29, 0.9);
-                    color: #d4af37;
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #9b761f;
                     padding: 8px 13px;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 9px;
@@ -882,7 +883,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     border: 0;
                     background: #d4af37;
                     color: #0a0d10;
-                    box-shadow: 0 18px 38px rgba(212, 175, 55, 0.12);
+                    box-shadow: 0 18px 38px rgba(184, 148, 95, 0.18);
                 }
 
                 .bc-page main > section:nth-of-type(1) > div:last-child > div:first-child button:last-child {
@@ -890,9 +891,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    border: 1px solid #272e38;
-                    background: rgba(17, 22, 29, 0.86);
-                    color: #ffffff;
+                    border: 1px solid rgba(31, 27, 21, 0.13);
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #211d18;
                 }
 
                 .bc-page .bc-hero-metrics {
@@ -900,11 +901,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, 1fr));
                     gap: 0;
-                    border: 1px solid rgba(63, 63, 70, 0.78);
+                    border: 1px solid rgba(184, 148, 95, 0.22);
                     border-radius: 8px;
-                    background: rgba(17, 22, 29, 0.88);
+                    background: rgba(255, 255, 255, 0.82);
                     padding: 14px;
-                    box-shadow: 0 22px 58px rgba(0, 0, 0, 0.26);
+                    box-shadow: 0 22px 58px rgba(31, 27, 21, 0.1);
                     backdrop-filter: blur(14px);
                 }
 
@@ -912,7 +913,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: flex;
                     min-width: 0;
                     gap: 11px;
-                    border-right: 1px solid rgba(63, 63, 70, 0.78);
+                    border-right: 1px solid rgba(31, 27, 21, 0.12);
                     padding: 3px 14px;
                 }
 
@@ -926,9 +927,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     flex: 0 0 auto;
                     display: grid;
                     place-items: center;
-                    border: 1px solid #272e38;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: 6px;
-                    background: #07090c;
+                    background: #fbf8f1;
                     color: #d4af37;
                 }
 
@@ -938,7 +939,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-metric p {
-                    color: #8c939f;
+                    color: #8a7a5d;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 9px;
                     font-weight: 500;
@@ -948,22 +949,26 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page .bc-hero-metric h3 {
                     margin: 4px 0 3px;
-                    color: #ffffff;
+                    color: #211d18;
                     font-size: 13px;
                     font-weight: 500;
                     line-height: 1.35;
                     overflow-wrap: anywhere;
                 }
 
+                .bc-page .bc-hero-metric h3.text-emerald-400 {
+                    color: #0f8d54;
+                }
+
                 .bc-page .bc-hero-metric span {
-                    color: #8c939f;
+                    color: #7c7468;
                     font-size: 10px;
                 }
 
                 .bc-page main > section:nth-of-type(2) {
-                    border-top: 1px solid rgba(63, 63, 70, 0.5);
-                    border-bottom: 1px solid rgba(63, 63, 70, 0.5);
-                    background: #11161d;
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #ffffff;
                     padding: 26px 0;
                 }
 
@@ -978,7 +983,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(2) p:first-child {
                     margin: 0;
-                    color: #858b94;
+                    color: #8a7a5d;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 10px;
                     letter-spacing: 0.2em;
@@ -987,9 +992,13 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(2) p:last-child {
                     margin: 4px 0 0;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: 18px;
+                }
+
+                .bc-page main > section:nth-of-type(2) .bc-stat-value.is-gold {
+                    color: #b58a28;
                 }
 
                 .bc-page #unidades-disponiveis,
@@ -1002,8 +1011,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page #unidades-disponiveis {
-                    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
-                    background: #0d1117;
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #f7f5f0;
                     scroll-margin-top: 86px;
                 }
 
@@ -1038,7 +1047,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(8) h2 {
                     max-width: 720px;
                     margin: 0;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: clamp(1.95rem, 2.1vw, 2.85rem);
                     font-weight: 400;
@@ -1052,7 +1061,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(6) span,
                 .bc-page main > section:nth-of-type(7) span,
                 .bc-page main > section:nth-of-type(8) span {
-                    color: #d4af37;
+                    color: #b58a28;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 11px;
                     font-weight: 850;
@@ -1067,7 +1076,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(7) p,
                 .bc-page main > section:nth-of-type(8) p {
                     margin: 16px 0 0;
-                    color: #a1a1aa;
+                    color: #655f55;
                     font-size: 14px;
                     line-height: 1.78;
                 }
@@ -1076,10 +1085,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    border: 1px solid #272e38;
+                    border: 1px solid rgba(184, 148, 95, 0.2);
                     border-radius: 8px;
-                    background: #141a24;
-                    color: #d4d4d8;
+                    background: rgba(255, 255, 255, 0.82);
+                    color: #3d362b;
                     padding: 12px 14px;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 11px;
@@ -1108,23 +1117,24 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     min-width: 0;
                     flex-direction: column;
                     overflow: hidden;
-                    border: 1px solid rgba(63, 63, 70, 0.88);
+                    border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: 8px;
-                    background: rgba(17, 22, 29, 0.78);
+                    background: rgba(255, 255, 255, 0.92);
+                    box-shadow: 0 12px 30px rgba(31, 27, 21, 0.06);
                     transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
                 }
 
                 .bc-page article:hover {
                     transform: translateY(-4px);
                     border-color: rgba(212, 175, 55, 0.46);
-                    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+                    box-shadow: 0 24px 58px rgba(31, 27, 21, 0.12);
                 }
 
                 .bc-page article > div:first-child {
                     position: relative;
                     aspect-ratio: 16 / 10;
                     overflow: hidden;
-                    background: #18181b;
+                    background: #e8dfcf;
                 }
 
                 .bc-page article > div:first-child img {
@@ -1152,7 +1162,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     font-weight: 900;
                     letter-spacing: 0.12em;
                     text-transform: uppercase;
-                    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+                    box-shadow: 0 10px 20px rgba(31, 27, 21, 0.18);
                 }
 
                 .bc-page #unidades-disponiveis article > div:first-child > span {
@@ -1195,7 +1205,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page article > div:last-child > p {
                     margin: 0 0 8px;
-                    color: #d4af37;
+                    color: #b58a28;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 9px;
                     letter-spacing: 0.16em;
@@ -1204,7 +1214,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page article h3 {
                     margin: 0 0 16px;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: 18px;
                     font-weight: 450;
@@ -1216,16 +1226,16 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 8px;
                     margin-bottom: 16px;
-                    border-top: 1px solid rgba(63, 63, 70, 0.62);
-                    border-bottom: 1px solid rgba(63, 63, 70, 0.62);
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
                     padding: 12px 0;
                 }
 
                 .bc-page article > div:last-child > div:nth-of-type(1) > div {
                     min-height: 62px;
-                    border: 1px solid rgba(63, 63, 70, 0.5);
+                    border: 1px solid rgba(184, 148, 95, 0.14);
                     border-radius: 5px;
-                    background: rgba(24, 24, 27, 0.38);
+                    background: #faf8f2;
                     padding: 7px 5px;
                     display: flex;
                     align-items: center;
@@ -1242,7 +1252,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page article > div:last-child > div:nth-of-type(1) span:first-of-type {
-                    color: #858b94;
+                    color: #8a8170;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 8px;
                     letter-spacing: 0.11em;
@@ -1250,20 +1260,20 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page #unidades-disponiveis article > div:last-child > div:nth-of-type(1) span:first-of-type {
-                    color: #858b94;
+                    color: #8a8170;
                     font-size: 8px;
                     letter-spacing: 0.11em;
                 }
 
                 .bc-page article > div:last-child > div:nth-of-type(1) span:last-of-type {
                     margin-top: 3px;
-                    color: #ffffff;
+                    color: #211d18;
                     font-size: 10px;
                     font-weight: 850;
                 }
 
                 .bc-page #unidades-disponiveis article > div:last-child > div:nth-of-type(1) span:last-of-type {
-                    color: #ffffff;
+                    color: #211d18;
                     font-size: 10px;
                     letter-spacing: 0;
                     text-transform: none;
@@ -1298,13 +1308,13 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page article a {
-                    border: 1px solid #272e38;
-                    color: #a1a1aa;
-                    background: transparent;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
+                    color: #4f4636;
+                    background: rgba(255, 255, 255, 0.74);
                 }
 
                 .bc-page main > section:nth-of-type(4) {
-                    background: #0a0d10;
+                    background: #ffffff;
                 }
 
                 .bc-page main > section:nth-of-type(4) > div,
@@ -1325,10 +1335,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(4) > div > div:last-child > div,
                 .bc-page main > section:nth-of-type(5) > div > div:last-child > div {
-                    border: 1px solid #272e38;
+                    border: 1px solid rgba(184, 148, 95, 0.16);
                     border-radius: 8px;
-                    background: rgba(17, 22, 29, 0.76);
+                    background: rgba(255, 255, 255, 0.9);
                     padding: 24px;
+                    box-shadow: 0 12px 30px rgba(31, 27, 21, 0.045);
                 }
 
                 .bc-page main > section:nth-of-type(4) > div > div:last-child > div > div:first-child {
@@ -1336,9 +1347,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     height: 44px;
                     display: grid;
                     place-items: center;
-                    border: 1px solid rgba(212, 175, 55, 0.25);
+                    border: 1px solid rgba(184, 148, 95, 0.2);
                     border-radius: 6px;
-                    background: rgba(212, 175, 55, 0.1);
+                    background: rgba(184, 148, 95, 0.1);
                     color: #d4af37;
                     margin-bottom: 18px;
                 }
@@ -1346,7 +1357,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page main > section:nth-of-type(4) h3,
                 .bc-page main > section:nth-of-type(5) h3 {
                     margin: 0 0 10px;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: 18px;
                     font-weight: 450;
@@ -1354,9 +1365,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page main > section:nth-of-type(5) {
-                    border-top: 1px solid #272e38;
-                    border-bottom: 1px solid #272e38;
-                    background: #11161d;
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #f4efe6;
                 }
 
                 .bc-page main > section:nth-of-type(5) > div > div:first-child {
@@ -1366,13 +1377,13 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(5) > div > div:last-child > div > div:first-child {
                     margin-bottom: 24px;
-                    color: #d4af37;
+                    color: #b58a28;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 12px;
                 }
 
                 .bc-page main > section:nth-of-type(6) {
-                    background: #0a0d10;
+                    background: #ffffff;
                 }
 
                 .bc-page main > section:nth-of-type(6) > div > div:last-child {
@@ -1385,9 +1396,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     position: relative;
                     min-height: 250px;
                     overflow: hidden;
-                    border: 1px solid #272e38;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: 8px;
-                    background: #090b0f;
+                    background: #ebe3d4;
                 }
 
                 .bc-page main > section:nth-of-type(6) > div > div:last-child > div:first-child {
@@ -1431,9 +1442,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page main > section:nth-of-type(7) {
-                    border-top: 1px solid #272e38;
-                    border-bottom: 1px solid #272e38;
-                    background: #11161d;
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #f4efe6;
                 }
 
                 .bc-page main > section:nth-of-type(7) a {
@@ -1454,9 +1465,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(7) > div > div:last-child {
                     overflow: hidden;
-                    border: 1px solid #272e38;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: 8px;
-                    background: #090b0f;
+                    background: #ffffff;
                 }
 
                 .bc-page main > section:nth-of-type(7) iframe {
@@ -1468,14 +1479,14 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page main > section:nth-of-type(8) {
-                    background: #0a0d10;
+                    background: #ffffff;
                 }
 
                 .bc-page main > section:nth-of-type(8) button {
                     width: 100%;
                     display: block;
                     border: 0;
-                    border-bottom: 1px solid #272e38;
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.18);
                     background: transparent;
                     color: inherit;
                     padding: 24px 0;
@@ -1491,7 +1502,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page main > section:nth-of-type(8) h3 {
                     margin: 0;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: 17px;
                     font-weight: 450;
@@ -1499,8 +1510,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page footer {
-                    border-top: 1px solid #18181b;
-                    background: #07090c;
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #f7f5f0;
                     padding: 48px 0;
                 }
 
@@ -1515,7 +1526,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page footer p:first-child {
                     margin: 0;
-                    color: #ffffff;
+                    color: #211d18;
                     font-family: "Playfair Display", Georgia, "Times New Roman", serif;
                     font-size: 22px;
                     letter-spacing: 0.16em;
@@ -1535,6 +1546,17 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     flex-wrap: wrap;
                     gap: 10px;
                     justify-content: flex-end;
+                }
+
+                .bc-page footer a {
+                    border: 1px solid rgba(184, 148, 95, 0.22);
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #5a4f3e;
+                }
+
+                .bc-page footer a:hover {
+                    border-color: rgba(184, 148, 95, 0.55);
+                    color: #9b761f;
                 }
 
                 .bc-page .bc-floating-actions {
@@ -1807,7 +1829,7 @@ function Stat({ label, value, gold = false }: { label: string; value: string; go
     return (
         <div>
             <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-zinc-500">{label}</p>
-            <p className={`mt-1 font-serif text-base md:text-lg ${gold ? 'text-[#D4AF37]' : 'text-white'}`}>{value}</p>
+            <p className={`bc-stat-value mt-1 font-serif text-base md:text-lg ${gold ? 'is-gold text-[#D4AF37]' : 'text-white'}`}>{value}</p>
         </div>
     )
 }
