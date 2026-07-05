@@ -521,7 +521,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             </div>
                         </div>
 
-                        <div className="grid max-w-5xl grid-cols-1 gap-4 rounded-lg border border-zinc-800/70 bg-[#11161D]/85 p-5 shadow-2xl backdrop-blur-md sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="bc-hero-metrics grid max-w-5xl grid-cols-2 rounded-lg border border-zinc-800/70 bg-[#11161D]/85 shadow-2xl backdrop-blur-md lg:grid-cols-4">
                             <HeroMetric icon={MapPin} label="Localizacao" value={activeDev.locationName} note="Regiao nobre" />
                             <HeroMetric icon={KeyRound} label="Faixa de preco" value={activeDev.priceRange} note="Curadoria ativa" />
                             <HeroMetric icon={Maximize2} label="Oportunidade" value={`${activeDev.availableUnitsCount} unidades`} note="Disponiveis agora" highlight />
@@ -876,7 +876,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     color: #ffffff;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child {
+                .bc-page .bc-hero-metrics {
                     width: min(100%, 920px);
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -889,18 +889,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     backdrop-filter: blur(14px);
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child > div {
+                .bc-page .bc-hero-metric {
                     display: flex;
-                    gap: 12px;
+                    min-width: 0;
+                    gap: 11px;
                     border-right: 1px solid rgba(63, 63, 70, 0.78);
                     padding: 3px 14px;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child > div:last-child {
+                .bc-page .bc-hero-metric:last-child {
                     border-right: 0;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child > div > div:first-child {
+                .bc-page .bc-hero-metric-icon {
                     width: 36px;
                     height: 36px;
                     flex: 0 0 auto;
@@ -912,28 +913,30 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     color: #d4af37;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child p,
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child span {
+                .bc-page .bc-hero-metric p,
+                .bc-page .bc-hero-metric span {
                     margin: 0;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child p {
+                .bc-page .bc-hero-metric p {
                     color: #8c939f;
                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                     font-size: 9px;
+                    font-weight: 500;
                     letter-spacing: 0.18em;
                     text-transform: uppercase;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child h3 {
+                .bc-page .bc-hero-metric h3 {
                     margin: 4px 0 3px;
                     color: #ffffff;
                     font-size: 13px;
-                    font-weight: 800;
+                    font-weight: 500;
                     line-height: 1.35;
+                    overflow-wrap: anywhere;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child span {
+                .bc-page .bc-hero-metric span {
                     color: #8c939f;
                     font-size: 10px;
                 }
@@ -1561,8 +1564,20 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 @media (max-width: 1024px) {
-                    .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child {
+                    .bc-page .bc-hero-metrics {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    .bc-page .bc-hero-metric {
+                        border-bottom: 1px solid rgba(63, 63, 70, 0.78);
+                    }
+
+                    .bc-page .bc-hero-metric:nth-child(2n) {
+                        border-right: 0;
+                    }
+
+                    .bc-page .bc-hero-metric:nth-last-child(-n + 2) {
+                        border-bottom: 0;
                     }
 
                     .bc-page #unidades-disponiveis > div > div:last-child,
@@ -1610,19 +1625,37 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         width: 100%;
                     }
 
-                    .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child {
-                        grid-template-columns: 1fr;
-                        padding: 16px;
+                    .bc-page .bc-hero-metrics {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        padding: 12px;
                     }
 
-                    .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child > div {
-                        border-right: 0;
-                        border-bottom: 1px solid rgba(63, 63, 70, 0.78);
-                        padding: 0 0 14px;
+                    .bc-page .bc-hero-metric {
+                        gap: 8px;
+                        padding: 0 9px 12px;
                     }
 
-                    .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child > div:last-child {
+                    .bc-page .bc-hero-metric:last-child {
                         border-bottom: 0;
+                    }
+
+                    .bc-page .bc-hero-metric-icon {
+                        width: 34px;
+                        height: 34px;
+                    }
+
+                    .bc-page .bc-hero-metric p {
+                        font-size: 8px;
+                        letter-spacing: 0.15em;
+                    }
+
+                    .bc-page .bc-hero-metric h3 {
+                        font-size: 12px;
+                        font-weight: 500;
+                    }
+
+                    .bc-page .bc-hero-metric span {
+                        font-size: 9px;
                     }
 
                     .bc-page main > section:nth-of-type(2) > div {
@@ -1738,14 +1771,14 @@ function HeroMetric({ icon: Icon, label, value, note, highlight = false }: {
     highlight?: boolean
 }) {
     return (
-        <div className="flex gap-4 border-b border-zinc-800/70 pb-4 last:border-b-0 sm:border-b-0 sm:border-r sm:pr-4 sm:last:border-r-0">
-            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-800 bg-zinc-950 text-[#D4AF37]">
-                <Icon size={20} />
+        <div className="bc-hero-metric">
+            <div className="bc-hero-metric-icon">
+                <Icon size={18} />
             </div>
-            <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-zinc-500">{label}</p>
-                <h3 className={`mt-1 text-sm font-semibold ${highlight ? 'text-emerald-400' : 'text-white'}`}>{value}</h3>
-                <span className="mt-1 block text-[11px] text-zinc-500">{note}</span>
+            <div className="min-w-0">
+                <p>{label}</p>
+                <h3 className={highlight ? 'text-emerald-400' : 'text-white'}>{value}</h3>
+                <span>{note}</span>
             </div>
         </div>
     )
