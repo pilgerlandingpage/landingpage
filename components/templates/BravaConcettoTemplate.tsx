@@ -766,8 +766,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     height: 100%;
                     display: block;
                     object-fit: cover;
-                    opacity: 0.82;
-                    filter: saturate(0.94) contrast(1.02);
+                    opacity: 0.96;
+                    filter: saturate(0.98) contrast(1.04);
                 }
 
                 .bc-page .bc-hero-depth-overlay,
@@ -777,23 +777,23 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-depth-overlay {
-                    background: linear-gradient(to top, rgba(247, 245, 240, 0.94) 0%, rgba(247, 245, 240, 0.6) 48%, rgba(247, 245, 240, 0.78) 100%);
+                    background: linear-gradient(to top, rgba(247, 245, 240, 0.72) 0%, rgba(247, 245, 240, 0.28) 46%, rgba(247, 245, 240, 0.44) 100%);
                 }
 
                 .bc-page .bc-hero-side-fade {
-                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.96), rgba(247, 245, 240, 0.42), rgba(247, 245, 240, 0.08));
+                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.9), rgba(247, 245, 240, 0.36) 38%, rgba(247, 245, 240, 0.04) 78%);
                 }
 
                 .bc-page .bc-hero-top-fade {
                     position: absolute;
                     inset: 0 0 auto;
-                    height: clamp(86px, 10vw, 150px);
+                    height: clamp(70px, 7vw, 112px);
                     pointer-events: none;
                     background: linear-gradient(
                         to bottom,
-                        rgba(255, 255, 255, 1) 0%,
-                        rgba(255, 255, 255, 0.92) 26%,
-                        rgba(255, 255, 255, 0.52) 64%,
+                        rgba(255, 255, 255, 0.98) 0%,
+                        rgba(255, 255, 255, 0.72) 34%,
+                        rgba(255, 255, 255, 0.18) 74%,
                         rgba(255, 255, 255, 0) 100%
                     );
                 }
