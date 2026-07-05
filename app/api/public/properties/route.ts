@@ -19,6 +19,7 @@ const PUBLIC_PROPERTY_SELECT = [
     'area_private_m2',
     'featured_image',
     'images',
+    'source_slug',
     'property_type',
     'exclusive',
     'source_status',
@@ -36,17 +37,25 @@ export async function GET(req: NextRequest) {
         .map(id => id.trim())
         .filter(Boolean)
         .slice(0, MAX_PUBLIC_PROPERTIES)
+    const slugs = (req.nextUrl.searchParams.get('slugs') || '')
+        .split(',')
+        .map(slug => slug.trim())
+        .filter(Boolean)
+        .slice(0, MAX_PUBLIC_PROPERTIES)
 
-    if (ids.length === 0) {
+    if (ids.length === 0 && slugs.length === 0) {
         return NextResponse.json({ properties: [] })
     }
 
     const supabase = await createServerSupabase()
-    const { data, error } = await supabase
+    let query = supabase
         .from('properties')
         .select(PUBLIC_PROPERTY_SELECT)
         .eq('status', 'active')
-        .in('id', ids)
+
+    query = ids.length > 0 ? query.in('id', ids) : query.in('source_slug', slugs)
+
+    const { data, error } = await query
 
     if (error) {
         return NextResponse.json({ properties: [], error: 'Nao foi possivel carregar os imoveis.' }, { status: 500 })

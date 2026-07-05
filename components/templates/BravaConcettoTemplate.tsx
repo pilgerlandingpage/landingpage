@@ -1,17 +1,21 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
     ArrowRight,
     ArrowUpRight,
     BedDouble,
     Building2,
+    Camera,
     Car,
+    ChevronLeft,
+    ChevronRight,
     Compass,
     Dumbbell,
     KeyRound,
     Lock,
+    MapPinned,
     MapPin,
     Maximize2,
     MessageSquare,
@@ -24,6 +28,7 @@ import {
     Waves,
 } from 'lucide-react'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import Footer from '@/components/layout/Footer'
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
@@ -39,6 +44,7 @@ type Unit = {
     vagas: string
     price: string
     image: string
+    images?: string[]
     status: string
     sourceSlug: string
 }
@@ -70,6 +76,12 @@ type RelatedDevelopment = {
     locationName: string
     availableUnitsCount: number | null
     heroImage: string
+}
+
+type UnitPropertyMedia = {
+    source_slug?: string | null
+    featured_image?: string | null
+    images?: string[] | null
 }
 
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
@@ -339,6 +351,9 @@ function normalizeUnit(value: unknown): Unit | null {
     const type = asText(value.type)
     const title = asText(value.title, type)
     const image = asText(value.image)
+    const images = Array.isArray(value.images)
+        ? value.images.map(item => asText(item)).filter(Boolean)
+        : []
     const sourceSlug = asText(value.sourceSlug ?? value.source_slug)
 
     if (!id || !type || !title || !image || !sourceSlug) return null
@@ -352,6 +367,7 @@ function normalizeUnit(value: unknown): Unit | null {
         vagas: asText(value.vagas, 'Consulte'),
         price: asText(value.price, 'Consulte'),
         image,
+        images,
         status: asText(value.status, 'Disponivel'),
         sourceSlug,
     }
@@ -451,6 +467,92 @@ function normalizeDevelopment(value: unknown): Development | null {
     }
 }
 
+function summarizeUnitTypes(development: Development) {
+    const types = Array.from(new Set(development.units.map(unit => unit.type).filter(Boolean))).slice(0, 3)
+    if (!types.length) return 'unidades selecionadas'
+    if (types.length === 1) return types[0].toLowerCase()
+    if (types.length === 2) return `${types[0].toLowerCase()} e ${types[1].toLowerCase()}`
+    return `${types.slice(0, -1).map(type => type.toLowerCase()).join(', ')} e ${types[types.length - 1].toLowerCase()}`
+}
+
+function buildDevelopmentSellingDescription(development: Development) {
+    const unitTypes = summarizeUnitTypes(development)
+    return `O ${development.name} reune ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. A pagina ajuda voce a comparar ${unitTypes}, faixa de valor, metragens, imagens e entorno antes de conversar com o especialista.`
+}
+
+function buildDevelopmentBenefits(development: Development): Development['benefits'] {
+    const unitTypes = summarizeUnitTypes(development)
+    return [
+        {
+            title: `Endereco em ${development.locationName}`,
+            description: `Uma leitura clara do entorno para entender rotina, acesso, conveniencia e potencial de valorizacao antes da visita.`,
+            icon: 'Compass',
+        },
+        {
+            title: 'Comparacao no mesmo empreendimento',
+            description: `Veja ${unitTypes} lado a lado, com area, suites, vagas, valor estimado e fotos para comparar com calma.`,
+            icon: 'Building2',
+        },
+        {
+            title: 'Curadoria para escolher melhor',
+            description: `A equipe confirma disponibilidade, condicoes de negociacao e detalhes relevantes para avancar com seguranca.`,
+            icon: 'ShieldCheck',
+        },
+    ]
+}
+
+function buildDevelopmentDifferentials(development: Development): Development['differentials'] {
+    return [
+        {
+            title: 'Unidades em comparacao real',
+            description: `${development.availableUnitsCount} opcoes ativas aparecem reunidas para comparar preco, metragem, suites e vagas sem alternar entre varias paginas.`,
+        },
+        {
+            title: 'Fotos, mapa e Street View',
+            description: `A galeria padronizada mostra o empreendimento, o entorno no mapa e a rua pelo Street View para uma primeira leitura visual mais completa.`,
+        },
+        {
+            title: 'Proximo passo objetivo',
+            description: `Abra os detalhes da unidade que chamou atencao ou chame o especialista para receber uma comparacao direta entre as melhores opcoes.`,
+        },
+    ]
+}
+
+function mapQueryFor(development: Development) {
+    return encodeURIComponent([development.address, development.locationName].filter(Boolean).join(', '))
+}
+
+function buildMapEmbedSrc(development: Development) {
+    return `https://maps.google.com/maps?q=${mapQueryFor(development)}&z=16&output=embed&hl=pt-BR`
+}
+
+function buildStreetViewEmbedSrc(development: Development) {
+    return `https://maps.google.com/maps?q=${mapQueryFor(development)}&layer=c&z=17&output=svembed&hl=pt-BR`
+}
+
+function uniqueImages(images: string[]) {
+    const seen = new Set<string>()
+    return images.filter((image) => {
+        if (!image || seen.has(image)) return false
+        seen.add(image)
+        return true
+    })
+}
+
+function galleryForUnit(unit: Unit, propertyMedia: UnitPropertyMedia | undefined, development: Development) {
+    const propertyImages = Array.isArray(propertyMedia?.images)
+        ? propertyMedia.images.map((image) => asText(image)).filter(Boolean)
+        : []
+
+    return uniqueImages([
+        unit.image,
+        ...(unit.images || []),
+        asText(propertyMedia?.featured_image),
+        ...propertyImages,
+        ...development.gallery.map((item) => item.image),
+    ]).slice(0, 12)
+}
+
 export default function BravaConcettoTemplate({ slug, landingPageId, agentName, greetingMessage, content }: TemplateProps) {
     const contentDevelopment = useMemo(() => normalizeDevelopment(content?.development), [content])
     const [faqOpen, setFaqOpen] = useState<number | null>(0)
@@ -458,11 +560,17 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const [googleReviews, setGoogleReviews] = useState<HomepageGoogleReviews | null>(null)
     const [editorialPosts, setEditorialPosts] = useState<HomeBlogPost[]>([])
     const [publicDevelopments, setPublicDevelopments] = useState<RelatedDevelopment[]>([])
+    const [unitMediaBySlug, setUnitMediaBySlug] = useState<Record<string, UnitPropertyMedia>>({})
 
     const activeDev = useMemo(() => {
         const contentDevelopmentId = asText(content?.development_id, contentDevelopment?.id || DEFAULT_DEVELOPMENT_ID)
         return contentDevelopment || normalizeDevelopment({ id: contentDevelopmentId }) || DEVELOPMENTS[0]
     }, [content, contentDevelopment])
+
+    const unitSlugKey = useMemo(
+        () => Array.from(new Set(activeDev.units.map(unit => unit.sourceSlug).filter(Boolean))).join(','),
+        [activeDev.units]
+    )
 
     useEffect(() => {
         fetch(`/api/broker-for-page?slug=${slug}`)
@@ -516,6 +624,40 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         }
     }, [])
 
+    useEffect(() => {
+        let cancelled = false
+
+        async function loadUnitMedia() {
+            if (!unitSlugKey) {
+                setUnitMediaBySlug({})
+                return
+            }
+
+            try {
+                const response = await fetch(`/api/public/properties?slugs=${encodeURIComponent(unitSlugKey)}`)
+                if (!response.ok) throw new Error('properties unavailable')
+                const payload = await response.json()
+                if (cancelled) return
+
+                const mediaMap: Record<string, UnitPropertyMedia> = {}
+                const properties = Array.isArray(payload?.properties) ? payload.properties : []
+                properties.forEach((property: UnitPropertyMedia) => {
+                    const sourceSlug = asText(property.source_slug)
+                    if (sourceSlug) mediaMap[sourceSlug] = property
+                })
+                setUnitMediaBySlug(mediaMap)
+            } catch {
+                if (!cancelled) setUnitMediaBySlug({})
+            }
+        }
+
+        loadUnitMedia()
+
+        return () => {
+            cancelled = true
+        }
+    }, [unitSlugKey])
+
     const relatedDevelopments = useMemo(() => {
         const activeIdentifiers = new Set([
             normalizeSlug(activeDev.id),
@@ -543,6 +685,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 heroImage: development.heroImage,
             }))
     }, [activeDev.id, activeDev.name, activeDev.pageSlug, publicDevelopments])
+    const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
+    const sellingBenefits = useMemo(() => buildDevelopmentBenefits(activeDev), [activeDev])
+    const decisionDifferentials = useMemo(() => buildDevelopmentDifferentials(activeDev), [activeDev])
+    const mapEmbedSrc = useMemo(() => buildMapEmbedSrc(activeDev), [activeDev])
+    const streetViewEmbedSrc = useMemo(() => buildStreetViewEmbedSrc(activeDev), [activeDev])
 
     const openChat = useCallback((unit?: Unit) => {
         if (!broker?.phone) return
@@ -628,7 +775,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <div className="mx-auto grid max-w-[1320px] grid-cols-2 gap-6 px-4 text-center md:grid-cols-4 md:px-8">
                         <Stat label="Produto" value="Empreendimento" />
                         <Stat label="Estoque" value={`${activeDev.availableUnitsCount} unidades`} gold />
-                        <Stat label="Perfil" value={activeDev.city} />
+                        <Stat label="Localizacao" value={activeDev.city} />
                         <Stat label="Padrao" value="Alto luxo" />
                     </div>
                 </section>
@@ -651,7 +798,12 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
                             {activeDev.units.map((unit) => (
-                                <UnitCard key={unit.id} unit={unit} development={activeDev} />
+                                <UnitCard
+                                    key={unit.id}
+                                    unit={unit}
+                                    development={activeDev}
+                                    propertyMedia={unitMediaBySlug[unit.sourceSlug]}
+                                />
                             ))}
                         </div>
                     </div>
@@ -661,11 +813,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-12 px-4 md:px-8 lg:grid-cols-12">
                         <div className="lg:col-span-4">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Por que este empreendimento</span>
-                            <h2 className="text-4xl font-semibold leading-tight text-white md:text-5xl">Mais do que uma unidade, uma tese de moradia e patrimonio.</h2>
-                            <p className="mt-5 text-sm leading-relaxed text-zinc-400">{activeDev.description}</p>
+                            <h2 className="text-4xl font-semibold leading-tight text-white md:text-5xl">Compare o empreendimento antes da visita.</h2>
+                            <p className="mt-5 text-sm leading-relaxed text-zinc-400">{sellingDescription}</p>
                         </div>
                         <div className="grid gap-5 md:grid-cols-3 lg:col-span-8">
-                            {activeDev.benefits.map((benefit) => {
+                            {sellingBenefits.map((benefit) => {
                                 const Icon = iconMap[benefit.icon]
                                 return (
                                     <div key={benefit.title} className="rounded-lg border border-zinc-800 bg-[#11161D]/75 p-6">
@@ -685,10 +837,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <div className="mx-auto max-w-[1320px] px-4 md:px-8">
                         <div className="mb-12 max-w-2xl">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Diferenciais</span>
-                            <h2 className="text-4xl font-semibold text-white md:text-5xl">Leitura tecnica para decidir melhor.</h2>
+                            <h2 className="text-4xl font-semibold text-white md:text-5xl">Pontos para comparar melhor.</h2>
                         </div>
                         <div className="grid gap-4 md:grid-cols-3">
-                            {activeDev.differentials.map((item, index) => (
+                            {decisionDifferentials.map((item, index) => (
                                 <div key={item.title} className="rounded-lg border border-zinc-800 bg-[#0D1117] p-6">
                                     <div className="mb-6 text-xs font-mono text-[#D4AF37]">0{index + 1}</div>
                                     <h3 className="mb-3 text-xl font-semibold text-white">{item.title}</h3>
@@ -706,12 +858,12 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Galeria</span>
                                 <h2 className="text-4xl font-semibold text-white md:text-5xl">Visual do empreendimento</h2>
                             </div>
-                            <p className="max-w-sm text-sm text-zinc-500">Imagens do empreendimento e das unidades para apoiar a primeira comparacao visual.</p>
+                            <p className="max-w-sm text-sm text-zinc-500">Imagens, mapa e Street View para entender o empreendimento e o entorno antes da visita.</p>
                         </div>
-                        <div className="grid gap-5 md:grid-cols-3">
+                        <div className="bc-development-media-grid">
                             {activeDev.gallery.map((item, index) => (
-                                <div key={`${item.title}-${index}`} className={`group relative overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}>
-                                    <img src={item.image} alt={item.title} className={`w-full object-cover transition duration-700 group-hover:scale-105 ${index === 0 ? 'h-[520px]' : 'h-[250px]'}`} referrerPolicy="no-referrer" />
+                                <div key={`${item.title}-${index}`} className="bc-development-media-card group">
+                                    <img src={item.image} alt={item.title} referrerPolicy="no-referrer" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                     <div className="absolute bottom-4 left-4">
                                         <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#D4AF37]">{item.category}</p>
@@ -719,6 +871,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                     </div>
                                 </div>
                             ))}
+                            <DevelopmentMediaFrame icon={MapPinned} title="Mapa do entorno" kicker="Localizacao" src={mapEmbedSrc} />
+                            <DevelopmentMediaFrame icon={Navigation} title="Street View" kicker="Rua e acesso" src={streetViewEmbedSrc} />
                         </div>
                     </div>
                 </section>
@@ -783,21 +937,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <HomeBlogSection posts={editorialPosts} />
             </main>
 
-            <footer className="border-t border-zinc-900 bg-[#07090C] py-14">
-                <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 md:px-8 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <p className="font-serif text-xl uppercase tracking-[0.18em] text-white">Guilherme Pilger</p>
-                        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">Curadoria de empreendimentos e unidades de alto padrao no litoral catarinense.</p>
-                    </div>
-                    <Link
-                        href="/#empreendimentos"
-                        className="inline-flex items-center gap-2 rounded border border-zinc-800 px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 transition hover:border-[#D4AF37]/60 hover:text-[#D4AF37]"
-                    >
-                        Ver outros empreendimentos
-                        <ArrowRight size={13} />
-                    </Link>
-                </div>
-            </footer>
+            <Footer />
 
             <div className="bc-floating-actions">
                 <button
@@ -1384,7 +1524,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     gap: 8px;
                 }
 
-                .bc-page #unidades-disponiveis article button,
                 .bc-page #unidades-disponiveis article a {
                     min-height: 38px;
                     border-radius: 4px;
@@ -1400,16 +1539,92 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     text-transform: uppercase;
                 }
 
-                .bc-page #unidades-disponiveis article button {
-                    border: 0;
-                    background: #25d366;
-                    color: #07130c;
-                }
-
                 .bc-page #unidades-disponiveis article a {
                     border: 1px solid rgba(184, 148, 95, 0.18);
                     color: #4f4636;
                     background: rgba(255, 255, 255, 0.74);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-controls {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 3;
+                    padding: 0;
+                    background: none;
+                    pointer-events: none;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-nav {
+                    position: absolute;
+                    top: 50%;
+                    z-index: 4;
+                    width: 34px;
+                    height: 34px;
+                    min-height: 0;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(255, 255, 255, 0.42);
+                    border-radius: 999px;
+                    background: rgba(10, 13, 16, 0.66);
+                    color: #ffffff;
+                    pointer-events: auto;
+                    transform: translateY(-50%);
+                    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-nav:hover {
+                    border-color: rgba(212, 175, 55, 0.72);
+                    background: rgba(10, 13, 16, 0.92);
+                    transform: translateY(-50%) scale(1.04);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-nav--prev {
+                    left: 10px;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-nav--next {
+                    right: 10px;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-count {
+                    position: absolute;
+                    right: 12px;
+                    top: 12px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    min-height: 26px;
+                    border-radius: 999px;
+                    background: rgba(10, 13, 16, 0.7);
+                    color: #ffffff;
+                    padding: 0 9px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    letter-spacing: 0;
+                    pointer-events: none;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-dots {
+                    position: absolute;
+                    left: 50%;
+                    bottom: 92px;
+                    display: inline-flex;
+                    gap: 5px;
+                    transform: translateX(-50%);
+                    pointer-events: none;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-dot {
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.48);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-dot.is-active {
+                    width: 14px;
+                    background: #d4af37;
                 }
 
                 .bc-page main > section:nth-of-type(4) {
@@ -1540,6 +1755,76 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     font-weight: 450;
                 }
 
+                .bc-page main > section:nth-of-type(6) .bc-development-media-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 18px;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card,
+                .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card:first-child {
+                    position: relative;
+                    grid-column: auto;
+                    grid-row: auto;
+                    aspect-ratio: 4 / 3;
+                    min-height: 0;
+                    overflow: hidden;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
+                    border-radius: 8px;
+                    background: #ebe3d4;
+                    box-shadow: 0 14px 34px rgba(31, 27, 21, 0.07);
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-card img,
+                .bc-page main > section:nth-of-type(6) .bc-development-media-card iframe {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    border: 0;
+                    object-fit: cover;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-card:hover img {
+                    transform: scale(1.05);
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-card--embed iframe {
+                    filter: grayscale(0.15) contrast(0.95);
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label {
+                    position: absolute;
+                    left: 16px;
+                    right: 16px;
+                    bottom: 14px;
+                    z-index: 2;
+                    display: grid;
+                    gap: 2px;
+                    color: #ffffff;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label svg {
+                    color: #d4af37;
+                    margin-bottom: 4px;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label span {
+                    color: #d4af37;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 9px;
+                    font-weight: 850;
+                    letter-spacing: 0.2em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label strong {
+                    color: #ffffff;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: 18px;
+                    font-weight: 450;
+                    line-height: 1.15;
+                }
+
                 .bc-page main > section:nth-of-type(7) {
                     border-top: 1px solid rgba(184, 148, 95, 0.16);
                     border-bottom: 1px solid rgba(184, 148, 95, 0.16);
@@ -1656,13 +1941,22 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-related-developments-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    display: flex;
                     gap: 16px;
+                    overflow-x: auto;
+                    padding: 2px 2px 16px;
+                    scroll-snap-type: x mandatory;
+                    scrollbar-width: none;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .bc-page .bc-related-developments-grid::-webkit-scrollbar {
+                    display: none;
                 }
 
                 .bc-page .bc-related-development-card {
                     position: relative;
+                    flex: 0 0 min(320px, 78vw);
                     min-height: 210px;
                     overflow: hidden;
                     border: 1px solid rgba(184, 148, 95, 0.18);
@@ -1670,6 +1964,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     background: #1f1a14;
                     color: #fff;
                     text-decoration: none;
+                    scroll-snap-align: start;
                     box-shadow: 0 16px 36px rgba(31, 27, 21, 0.08);
                     transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
                 }
@@ -1733,56 +2028,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page .home-blog-section {
                     border-top: 1px solid rgba(184, 148, 95, 0.16);
-                }
-
-                .bc-page footer {
-                    border-top: 1px solid rgba(184, 148, 95, 0.16);
-                    background: #f7f5f0;
-                    padding: 48px 0;
-                }
-
-                .bc-page footer > div {
-                    width: min(1320px, calc(100% - 32px));
-                    margin: 0 auto;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 32px;
-                }
-
-                .bc-page footer p:first-child {
-                    margin: 0;
-                    color: #211d18;
-                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-                    font-size: 22px;
-                    letter-spacing: 0.16em;
-                    text-transform: uppercase;
-                }
-
-                .bc-page footer p:last-child {
-                    max-width: 610px;
-                    margin: 10px 0 0;
-                    color: #71717a;
-                    font-size: 12px;
-                    line-height: 1.6;
-                }
-
-                .bc-page footer > div > div:last-child {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    justify-content: flex-end;
-                }
-
-                .bc-page footer a {
-                    border: 1px solid rgba(184, 148, 95, 0.22);
-                    background: rgba(255, 255, 255, 0.72);
-                    color: #5a4f3e;
-                }
-
-                .bc-page footer a:hover {
-                    border-color: rgba(184, 148, 95, 0.55);
-                    color: #9b761f;
                 }
 
                 .bc-page .bc-floating-actions {
@@ -1865,7 +2110,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     }
 
                     .bc-page .bc-related-developments-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        margin-right: -32px;
+                        padding-right: 32px;
                     }
                 }
 
@@ -2073,6 +2319,31 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         line-height: 1.15;
                     }
 
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-nav {
+                        width: 28px;
+                        height: 28px;
+                    }
+
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-nav--prev {
+                        left: 6px;
+                    }
+
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-nav--next {
+                        right: 6px;
+                    }
+
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-count {
+                        right: 8px;
+                        top: 8px;
+                        min-height: 22px;
+                        padding: 0 7px;
+                        font-size: 8px;
+                    }
+
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-dots {
+                        bottom: 74px;
+                    }
+
                     .bc-page .bc-related-developments-section {
                         padding: 54px 0 58px;
                     }
@@ -2090,12 +2361,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         font-size: clamp(1.7rem, 7vw, 2rem);
                     }
 
-                    .bc-page .bc-related-developments-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 12px;
-                    }
-
                     .bc-page .bc-related-development-card {
+                        flex-basis: min(236px, 72vw);
                         min-height: 165px;
                     }
 
@@ -2122,18 +2389,21 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         min-height: 240px;
                     }
 
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card,
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card:first-child {
+                        grid-column: auto;
+                        grid-row: auto;
+                        aspect-ratio: 4 / 3;
+                        min-height: 0;
+                    }
+
                     .bc-page main > section:nth-of-type(7) iframe {
                         height: 340px;
-                    }
-
-                    .bc-page footer > div {
-                        width: min(100% - 28px, 1320px);
-                        align-items: flex-start;
-                        flex-direction: column;
-                    }
-
-                    .bc-page footer > div > div:last-child {
-                        justify-content: flex-start;
                     }
 
                     .bc-page .bc-floating-actions {
@@ -2205,6 +2475,29 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
     )
 }
 
+function DevelopmentMediaFrame({ icon: Icon, title, kicker, src }: {
+    icon: React.ComponentType<{ size?: number; className?: string }>
+    title: string
+    kicker: string
+    src: string
+}) {
+    return (
+        <div className="bc-development-media-card bc-development-media-card--embed">
+            <iframe
+                title={`${kicker} ${title}`}
+                src={src}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+            />
+            <div className="bc-development-media-frame-label">
+                <Icon size={15} />
+                <span>{kicker}</span>
+                <strong>{title}</strong>
+            </div>
+        </div>
+    )
+}
+
 function HeroMetric({ icon: Icon, label, value, note, highlight = false }: {
     icon: React.ComponentType<{ size?: number; className?: string }>
     label: string
@@ -2235,15 +2528,74 @@ function Stat({ label, value, gold = false }: { label: string; value: string; go
     )
 }
 
-function UnitCard({ unit, development }: { unit: Unit; development: Development }) {
+function UnitCard({ unit, development, propertyMedia }: { unit: Unit; development: Development; propertyMedia?: UnitPropertyMedia }) {
+    const touchStartX = useRef<number | null>(null)
+    const gallery = useMemo(() => galleryForUnit(unit, propertyMedia, development), [development, propertyMedia, unit])
+    const [activeImageIndex, setActiveImageIndex] = useState(0)
+    const safeImageIndex = gallery.length ? activeImageIndex % gallery.length : 0
+    const activeImage = gallery[safeImageIndex] || unit.image
+    const showGalleryControls = gallery.length > 1
+
+    const moveGallery = useCallback((direction: number) => {
+        if (!gallery.length) return
+        setActiveImageIndex((current) => (current + direction + gallery.length) % gallery.length)
+    }, [gallery.length])
+
+    const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+        const startX = touchStartX.current
+        const endX = event.changedTouches[0]?.clientX
+        touchStartX.current = null
+
+        if (startX == null || endX == null) return
+
+        const distance = endX - startX
+        if (Math.abs(distance) < 34) return
+        moveGallery(distance < 0 ? 1 : -1)
+    }
+
     return (
         <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-zinc-800/85 bg-[#11161D]/75 transition duration-500 hover:border-[#D4AF37]/45 hover:shadow-2xl hover:shadow-[#D4AF37]/5">
-            <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
-                <img src={unit.image} alt={unit.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" referrerPolicy="no-referrer" />
+            <div
+                className="bc-unit-photo relative aspect-[4/3] overflow-hidden bg-zinc-900"
+                onTouchStart={(event) => {
+                    touchStartX.current = event.touches[0]?.clientX ?? null
+                }}
+                onTouchEnd={handleTouchEnd}
+            >
+                <img src={activeImage} alt={unit.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" referrerPolicy="no-referrer" />
                 <span className={`absolute left-4 top-4 rounded px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.16em] shadow-md ${unit.status.toLowerCase().includes('ultima') ? 'bg-amber-500 text-zinc-950' : 'border border-[#D4AF37]/40 bg-[#0A0D10]/95 text-[#D4AF37]'}`}>
                     {unit.status}
                 </span>
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0A0D10]/95 via-[#0A0D10]/55 to-transparent p-5">
+                {showGalleryControls && (
+                    <div className="bc-unit-photo-controls">
+                        <button
+                            type="button"
+                            className="bc-unit-photo-nav bc-unit-photo-nav--prev"
+                            aria-label={`Foto anterior de ${unit.type}`}
+                            onClick={() => moveGallery(-1)}
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            className="bc-unit-photo-nav bc-unit-photo-nav--next"
+                            aria-label={`Proxima foto de ${unit.type}`}
+                            onClick={() => moveGallery(1)}
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                        <div className="bc-unit-photo-count">
+                            <Camera size={13} />
+                            {safeImageIndex + 1}/{gallery.length}
+                        </div>
+                        <div className="bc-unit-photo-dots" aria-hidden="true">
+                            {gallery.slice(0, 5).map((image, index) => (
+                                <span key={`${image}-${index}`} className={`bc-unit-photo-dot ${index === safeImageIndex ? 'is-active' : ''}`} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+                <div className="bc-unit-photo-price absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0A0D10]/95 via-[#0A0D10]/55 to-transparent p-5">
                     <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-zinc-400">Preco estimado</p>
                     <p className="mt-1 font-serif text-xl text-white">{unit.price}</p>
                 </div>
