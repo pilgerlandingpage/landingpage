@@ -388,14 +388,19 @@ export default function GlobalHeader() {
                         </li>
                     </ul>
 
-                    <button
-                        className="gh-burger"
-                        onClick={() => setMobileMenuOpen(open => !open)}
-                        aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-                        aria-expanded={mobileMenuOpen}
-                    >
-                        {mobileMenuOpen ? <X size={28} color="#b8942f" /> : <Menu size={28} color="#b8942f" />}
-                    </button>
+                    <div className="gh-mobile-actions">
+                        <Link href="/busca" className="gh-mobile-search-button" aria-label="Abrir busca">
+                            <Search size={21} color="currentColor" />
+                        </Link>
+                        <button
+                            className="gh-burger"
+                            onClick={() => setMobileMenuOpen(open => !open)}
+                            aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+                            aria-expanded={mobileMenuOpen}
+                        >
+                            {mobileMenuOpen ? <X size={28} color="#b8942f" /> : <Menu size={28} color="#b8942f" />}
+                        </button>
+                    </div>
                 </div>
             </header>
 

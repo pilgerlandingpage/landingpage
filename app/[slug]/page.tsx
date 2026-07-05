@@ -8,6 +8,7 @@ import UrgencyTemplate from '@/components/templates/UrgencyTemplate'
 import SocialProofTemplate from '@/components/templates/SocialProofTemplate'
 import VipExclusiveTemplate from '@/components/templates/VipExclusiveTemplate'
 import BravaConcettoTemplate from '@/components/templates/BravaConcettoTemplate'
+import GlobalHeader from '@/components/layout/GlobalHeader'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
@@ -167,7 +168,12 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     const page = (() => {
         switch (templateId) {
             case 'brava-concetto':
-                return <BravaConcettoTemplate key={slug} {...commonProps} />
+                return (
+                    <>
+                        <GlobalHeader />
+                        <BravaConcettoTemplate key={slug} {...commonProps} />
+                    </>
+                )
             case 'modern':
                 return <ModernLuxuryTemplate {...commonProps} />
             case 'lead-capture':

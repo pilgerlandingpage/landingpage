@@ -6573,6 +6573,29 @@ h6 {
                 .gh-search-form button:hover { opacity: 0.9; }
 
                 /* Mobile burger */
+                .gh-mobile-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .gh-mobile-search-button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 40px;
+                    height: 40px;
+                    border: 1px solid rgba(184,148,95,0.2);
+                    border-radius: 999px;
+                    color: #b8942f;
+                    text-decoration: none;
+                    background: rgba(255,255,255,0.78);
+                    transition: background 0.2s, border-color 0.2s, color 0.2s;
+                }
+                .gh-mobile-search-button:hover {
+                    background: #fff;
+                    border-color: rgba(184,148,95,0.38);
+                    color: #8a6729;
+                }
                 .gh-burger {
                     display: flex;
                     align-items: center;
@@ -6585,7 +6608,7 @@ h6 {
                 }
                 .gh-burger:hover { color: #b8945f; }
                 @media (min-width: 1200px) {
-                    .gh-burger { display: none; }
+                    .gh-mobile-actions { display: none; }
                 }
 
                 @media (max-width: 767px) {
@@ -6612,11 +6635,15 @@ h6 {
                     .gh-wrap.gh-home-mobile .gh-logo {
                         display: none;
                     }
-                    .gh-wrap.gh-home-mobile .gh-burger {
+                    .gh-wrap.gh-home-mobile .gh-mobile-actions {
                         position: fixed;
                         top: 14px;
                         right: 14px;
                         z-index: 6200;
+                        pointer-events: auto;
+                    }
+                    .gh-wrap.gh-home-mobile .gh-mobile-search-button,
+                    .gh-wrap.gh-home-mobile .gh-burger {
                         width: 42px;
                         height: 42px;
                         padding: 0;
@@ -6627,9 +6654,10 @@ h6 {
                         backdrop-filter: blur(14px);
                         pointer-events: auto;
                     }
-                    .gh-wrap.gh-home-topbar-mobile .gh-burger {
+                    .gh-wrap.gh-home-topbar-mobile .gh-mobile-actions {
                         top: 34px;
                     }
+                    .gh-wrap.gh-home-mobile .gh-mobile-search-button svg,
                     .gh-wrap.gh-home-mobile .gh-burger svg {
                         width: 24px;
                         height: 24px;

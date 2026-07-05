@@ -62,8 +62,6 @@ type Development = {
 }
 
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
-const GUILHERME_AVATAR = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/IMG_2868.jpg'
-
 const DEVELOPMENTS: Development[] = [
     {
         id: 'brava-concetto',
@@ -438,7 +436,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const contentDevelopment = useMemo(() => normalizeDevelopment(content?.development), [content])
     const [faqOpen, setFaqOpen] = useState<number | null>(0)
     const [broker, setBroker] = useState<{ name?: string; phone?: string; photo_url?: string | null; greeting_message?: string } | null>(null)
-    const [failedBrokerPhotoUrl, setFailedBrokerPhotoUrl] = useState<string | null>(null)
 
     const activeDev = useMemo(() => {
         const contentDevelopmentId = asText(content?.development_id, contentDevelopment?.id || DEFAULT_DEVELOPMENT_ID)
@@ -453,8 +450,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             })
             .catch(() => {})
     }, [slug])
-
-    const brokerPhotoUrl = failedBrokerPhotoUrl === GUILHERME_AVATAR ? null : GUILHERME_AVATAR
 
     const openChat = useCallback((unit?: Unit) => {
         if (!broker?.phone) return
@@ -478,43 +473,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     return (
         <div className="bc-page min-h-screen bg-[#0A0D10] text-zinc-300 antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
-
-            <div className="bg-[#D4AF37] px-4 py-2 text-center text-[10px] font-black uppercase tracking-[0.28em] text-[#0A0D10]">
-                Oportunidades de alto padrao em Balneario Camboriu e Praia Brava
-            </div>
-
-            <header className="sticky top-0 z-50 border-b border-[#D4AF37]/15 bg-[#0A0D10]/92 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-5 md:px-8 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="bc-brand-avatar flex h-12 w-12 items-center justify-center rounded-full border border-[#D4AF37] text-[#D4AF37]">
-                            {brokerPhotoUrl ? (
-                                <img
-                                    src={brokerPhotoUrl}
-                                    alt={broker?.name || 'Guilherme Pilger'}
-                                    className="bc-brand-photo"
-                                    referrerPolicy="no-referrer"
-                                    onError={() => setFailedBrokerPhotoUrl(brokerPhotoUrl)}
-                                />
-                            ) : (
-                                <span className="font-serif text-sm font-bold tracking-widest">GP</span>
-                            )}
-                        </div>
-                        <div>
-                            <p className="font-serif text-lg font-semibold uppercase tracking-[0.18em] text-white md:text-xl">Guilherme Pilger</p>
-                            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Consultoria imobiliaria de luxo</p>
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={() => openChat()}
-                        className="hidden items-center justify-center gap-2 rounded border border-[#D4AF37]/70 px-6 py-3 text-xs font-black uppercase tracking-[0.16em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-[#0A0D10] lg:flex"
-                    >
-                        <Phone size={15} />
-                        Falar com especialista
-                    </button>
-                </div>
-            </header>
 
             <main>
                 <section className="relative flex min-h-[calc(100vh-120px)] items-center overflow-hidden bg-[#07090C]">
@@ -783,115 +741,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page button {
                     cursor: pointer;
-                }
-
-                .bc-page > div:nth-of-type(1) {
-                    background: #d4af37;
-                    color: #0a0d10;
-                    padding: 7px 16px;
-                    text-align: center;
-                    font-size: 9px;
-                    font-weight: 950;
-                    letter-spacing: 0.24em;
-                    text-transform: uppercase;
-                }
-
-                .bc-page header {
-                    position: sticky;
-                    top: 0;
-                    z-index: 50;
-                    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
-                    background: rgba(10, 13, 16, 0.94);
-                    backdrop-filter: blur(18px);
-                }
-
-                .bc-page header > div {
-                    width: min(1260px, calc(100% - 32px));
-                    margin: 0 auto;
-                    padding: 12px 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 18px;
-                }
-
-                .bc-page header > div > div:first-child {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    min-width: 222px;
-                }
-
-                .bc-page header > div > div:first-child > div:first-child {
-                    width: 40px;
-                    height: 40px;
-                    border: 1px solid #d4af37;
-                    border-radius: 999px;
-                    display: grid;
-                    place-items: center;
-                    color: #d4af37;
-                    flex: 0 0 auto;
-                    overflow: hidden;
-                    background: #0a0d10;
-                }
-
-                .bc-brand-photo {
-                    width: 100%;
-                    height: 100%;
-                    display: block;
-                    object-fit: cover;
-                }
-
-                .bc-page header span {
-                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-                    font-size: 12px;
-                    font-weight: 800;
-                    letter-spacing: 0.16em;
-                }
-
-                .bc-page header p {
-                    margin: 0;
-                }
-
-                .bc-page header p:first-child {
-                    color: #ffffff;
-                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-                    font-size: 17px;
-                    font-weight: 700;
-                    letter-spacing: 0.14em;
-                    line-height: 1.1;
-                    text-transform: uppercase;
-                }
-
-                .bc-page header p:last-child {
-                    margin-top: 4px;
-                    color: #858b94;
-                    font-size: 9px;
-                    letter-spacing: 0.18em;
-                    text-transform: uppercase;
-                }
-
-                .bc-page header > div > button {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    border: 1px solid rgba(212, 175, 55, 0.7);
-                    border-radius: 4px;
-                    background: transparent;
-                    color: #d4af37;
-                    padding: 10px 17px;
-                    font-size: 10px;
-                    font-weight: 950;
-                    letter-spacing: 0.13em;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                    transition: background 0.2s ease, color 0.2s ease;
-                }
-
-                .bc-page header > div > button:hover {
-                    background: #d4af37;
-                    color: #0a0d10;
                 }
 
                 .bc-page main > section {
@@ -1712,15 +1561,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 @media (max-width: 1024px) {
-                    .bc-page header > div {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-
-                    .bc-page header > div > button {
-                        display: none;
-                    }
-
                     .bc-page main > section:nth-of-type(1) > div:last-child > div:last-child {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
@@ -1741,36 +1581,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 @media (max-width: 720px) {
                     .bc-page {
                         padding-bottom: 88px;
-                    }
-
-                    .bc-page > div:nth-of-type(1) {
-                        font-size: 9px;
-                        letter-spacing: 0.14em;
-                        line-height: 1.4;
-                    }
-
-                    .bc-page header > div {
-                        width: min(100% - 32px, 1320px);
-                        padding: 13px 0;
-                        gap: 12px;
-                    }
-
-                    .bc-page header > div > div:first-child {
-                        min-width: 0;
-                    }
-
-                    .bc-page header > div > div:first-child > div:first-child {
-                        width: 38px;
-                        height: 38px;
-                    }
-
-                    .bc-page header p:first-child {
-                        font-size: 15px;
-                    }
-
-                    .bc-page header p:last-child {
-                        margin-top: 3px;
-                        font-size: 8px;
                     }
 
                     .bc-page main > section:nth-of-type(1) {
