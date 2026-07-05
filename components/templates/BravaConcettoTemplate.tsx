@@ -483,8 +483,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             className="h-full w-full object-cover opacity-55 transition duration-700"
                             referrerPolicy="no-referrer"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D10] via-[#0A0D10]/45 to-[#0A0D10]/75" />
-                        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#0A0D10]/95 via-[#0A0D10]/25 to-transparent lg:block" />
+                        <div className="bc-hero-depth-overlay absolute inset-0 bg-gradient-to-t from-[#0A0D10] via-[#0A0D10]/45 to-[#0A0D10]/75" />
+                        <div className="bc-hero-side-fade absolute inset-0 hidden bg-gradient-to-r from-[#0A0D10]/95 via-[#0A0D10]/25 to-transparent lg:block" />
+                        <div className="bc-hero-top-fade" />
                     </div>
 
                     <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-[1320px] flex-col justify-between gap-12 px-4 py-14 md:px-8 lg:py-20">
@@ -768,14 +769,32 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     opacity: 0.56;
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:first-child > div {
+                .bc-page .bc-hero-depth-overlay,
+                .bc-page .bc-hero-side-fade {
                     position: absolute;
                     inset: 0;
+                }
+
+                .bc-page .bc-hero-depth-overlay {
                     background: linear-gradient(to top, #0a0d10 0%, rgba(10, 13, 16, 0.48) 52%, rgba(10, 13, 16, 0.76) 100%);
                 }
 
-                .bc-page main > section:nth-of-type(1) > div:first-child > div:last-child {
+                .bc-page .bc-hero-side-fade {
                     background: linear-gradient(90deg, rgba(10, 13, 16, 0.95), rgba(10, 13, 16, 0.28), transparent);
+                }
+
+                .bc-page .bc-hero-top-fade {
+                    position: absolute;
+                    inset: 0 0 auto;
+                    height: clamp(86px, 10vw, 150px);
+                    pointer-events: none;
+                    background: linear-gradient(
+                        to bottom,
+                        rgba(255, 255, 255, 0.98) 0%,
+                        rgba(255, 255, 255, 0.88) 26%,
+                        rgba(255, 255, 255, 0.42) 64%,
+                        rgba(255, 255, 255, 0) 100%
+                    );
                 }
 
                 .bc-page main > section:nth-of-type(1) > div:last-child {
