@@ -654,39 +654,6 @@ export default async function MarketplaceHome() {
 
       <HomeMapSearchSection properties={homeMapProperties} />
 
-      {developmentPages.length > 0 && (
-        <section id="empreendimentos" className="home-developments-section" aria-labelledby="home-developments-title">
-          <div className="home-developments-head">
-            <span>Empreendimentos</span>
-            <h2 id="home-developments-title">Landing pages exclusivas dos empreendimentos</h2>
-            <p>Veja os predios e condominios em destaque, com unidades, localizacao e detalhes reunidos em uma pagina propria.</p>
-          </div>
-          <div className="home-developments-grid">
-            {developmentPages.map(development => (
-              <Link key={development.slug} href={`/${development.slug}`} className="home-development-card">
-                <Image
-                  src={development.heroImage}
-                  alt={development.name}
-                  fill
-                  sizes="(max-width: 760px) 72vw, (max-width: 1200px) 33vw, 260px"
-                  className="home-development-image"
-                />
-                <span className="home-development-shade" />
-                <span className="home-development-copy">
-                  <small>{development.locationName}</small>
-                  <strong>{development.name}</strong>
-                  <em>
-                    {development.availableUnitsCount
-                      ? `${development.availableUnitsCount} unidades`
-                      : development.priceRange}
-                  </em>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
       <section className="gp-authority-strip">
         <div className="gp-authority-copy">
           <h2>Escolha pela localização</h2>
@@ -712,6 +679,36 @@ export default async function MarketplaceHome() {
           ))}
         </div>
       </section>
+
+      {developmentPages.length > 0 && (
+        <section id="empreendimentos" className="premium-categories-showcase home-developments-showcase" aria-labelledby="home-developments-title">
+          <div className="premium-section-head">
+            <h2 id="home-developments-title">Escolha pelo empreendimento</h2>
+          </div>
+          <PremiumCategoryAutoRail>
+            {developmentPages.map(development => (
+              <Link key={development.slug} href={`/${development.slug}`} className="premium-category-card home-development-card">
+                <Image
+                  src={development.heroImage}
+                  alt={development.name}
+                  className="premium-category-image"
+                  fill
+                  sizes="(max-width: 649px) 44vw, 280px"
+                />
+                <span className="premium-category-shade" />
+                <span className="premium-category-copy">
+                  <strong>{development.name}</strong>
+                  <small>
+                    {development.availableUnitsCount
+                      ? `${development.availableUnitsCount} unidades`
+                      : development.locationName}
+                  </small>
+                </span>
+              </Link>
+            ))}
+          </PremiumCategoryAutoRail>
+        </section>
+      )}
 
       <section className="premium-categories-showcase">
         <div className="premium-section-head">
