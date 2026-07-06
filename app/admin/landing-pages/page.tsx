@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, ExternalLink, Copy, Trash2, Loader2, Check, MessageSquare, X, Save, User } from 'lucide-react'
+import { FileText, ExternalLink, Copy, Trash2, Loader2, Check, MessageSquare, X, Save, User, Search } from 'lucide-react'
 import Link from 'next/link'
 
 interface LandingPage {
@@ -39,11 +39,93 @@ const TEMPLATES = [
     { id: 'vip', name: 'VIP Exclusivo', description: 'Experiência premium e exclusiva', color: '#a855f7' },
 ]
 
+type StageFilter = 'all' | 'launch' | 'construction' | 'ready'
+
+const STAGE_TABS: Array<{ id: StageFilter; label: string }> = [
+    { id: 'all', label: 'Todas' },
+    { id: 'launch', label: 'Lançamentos' },
+    { id: 'construction', label: 'Em construção' },
+    { id: 'ready', label: 'Prontas' },
+]
+
+function asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function normalizeFilterText(value: unknown) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+}
+
+function stageFromText(value: unknown): Exclude<StageFilter, 'all'> | null {
+    const text = normalizeFilterText(value)
+    if (!text) return null
+    if (/\b(launch|lancamento|pre lancamento|pre-lancamento|na planta)\b/.test(text)) return 'launch'
+    if (/\b(construction|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'construction'
+    if (/\b(ready|pronto|pronta|pronto para morar|entregue)\b/.test(text)) return 'ready'
+    return null
+}
+
+function getPageStage(page: LandingPage): Exclude<StageFilter, 'all'> {
+    const content = asRecord(page.content)
+    const development = asRecord(content.development)
+    const explicit = stageFromText(
+        development.stage
+        ?? development.status
+        ?? development.constructionStatus
+        ?? development.construction_status
+        ?? content.development_stage
+        ?? content.stage
+    )
+    if (explicit) return explicit
+
+    return stageFromText([
+        page.title,
+        content.custom_title,
+        content.custom_description,
+        development.name,
+        development.tagline,
+        development.description,
+        development.stageLabel,
+        development.stage_label,
+    ].filter(Boolean).join(' ')) || 'ready'
+}
+
+function pageMatchesSearch(page: LandingPage, query: string) {
+    const search = normalizeFilterText(query).trim()
+    if (!search) return true
+
+    const content = asRecord(page.content)
+    const development = asRecord(content.development)
+    const haystack = normalizeFilterText([
+        page.title,
+        page.slug,
+        page.status,
+        page.property?.title,
+        development.name,
+        development.locationName,
+        development.location_name,
+        development.city,
+        development.priceRange,
+        development.price_range,
+        development.stageLabel,
+        development.stage_label,
+        content.custom_title,
+        content.custom_description,
+    ].filter(Boolean).join(' '))
+
+    return haystack.includes(search)
+}
+
 export default function LandingPagesAdmin() {
     const [pages, setPages] = useState<LandingPage[]>([])
     const [loading, setLoading] = useState(true)
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
     const [brokers, setBrokers] = useState<Broker[]>([])
+    const [stageFilter, setStageFilter] = useState<StageFilter>('all')
+    const [searchQuery, setSearchQuery] = useState('')
 
     // AI Context Modal State
     const [editingContextId, setEditingContextId] = useState<string | null>(null)
@@ -184,6 +266,24 @@ export default function LandingPagesAdmin() {
         return TEMPLATES.find(t => t.id === templateId) || TEMPLATES[2]
     }
 
+    const stageCounts = useMemo(() => {
+        return pages.reduce<Record<StageFilter, number>>((acc, page) => {
+            const stage = getPageStage(page)
+            acc.all += 1
+            acc[stage] += 1
+            return acc
+        }, { all: 0, launch: 0, construction: 0, ready: 0 })
+    }, [pages])
+
+    const filteredPages = useMemo(() => {
+        return pages.filter(page => {
+            const matchesStage = stageFilter === 'all' || getPageStage(page) === stageFilter
+            return matchesStage && pageMatchesSearch(page, searchQuery)
+        })
+    }, [pages, stageFilter, searchQuery])
+
+    const hasActiveFilters = stageFilter !== 'all' || Boolean(searchQuery.trim())
+
     return (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 8px' }}>
             <div className="admin-header">
@@ -204,8 +304,55 @@ export default function LandingPagesAdmin() {
                     marginBottom: 16, fontFamily: 'Inter, sans-serif', fontWeight: 500,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                 }}>
-                    <span>Páginas Criadas ({pages.length})</span>
+                    <span>
+                        Páginas Criadas ({hasActiveFilters ? `${filteredPages.length} de ${pages.length}` : pages.length})
+                    </span>
                 </h3>
+
+                {!loading && pages.length > 0 && (
+                    <div className="landing-admin-filters">
+                        <label className="landing-admin-search">
+                            <Search size={15} />
+                            <input
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                placeholder="Buscar por título, slug, cidade ou empreendimento..."
+                            />
+                        </label>
+
+                        <div className="landing-admin-tabs" role="tablist" aria-label="Filtrar landing pages por estágio">
+                            {STAGE_TABS.map(tab => {
+                                const active = stageFilter === tab.id
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={active}
+                                        className={`landing-admin-tab ${active ? 'is-active' : ''}`}
+                                        onClick={() => setStageFilter(tab.id)}
+                                    >
+                                        <span>{tab.label}</span>
+                                        <strong>{stageCounts[tab.id]}</strong>
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                className="landing-admin-clear"
+                                onClick={() => {
+                                    setStageFilter('all')
+                                    setSearchQuery('')
+                                }}
+                            >
+                                Limpar filtros
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {loading ? (
                     <div className="chart-card" style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -220,11 +367,30 @@ export default function LandingPagesAdmin() {
                             As landing pages criadas aparecerão aqui.
                         </p>
                     </div>
+                ) : filteredPages.length === 0 ? (
+                    <div className="chart-card" style={{ padding: 42, textAlign: 'center' }}>
+                        <Search size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 16px', display: 'block' }} />
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: 8, fontSize: '1.05rem' }}>
+                            Nenhuma landing page encontrada para este filtro.
+                        </p>
+                        <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            onClick={() => {
+                                setStageFilter('all')
+                                setSearchQuery('')
+                            }}
+                        >
+                            Limpar filtros
+                        </button>
+                    </div>
                 ) : (
                     <div style={{ display: 'grid', gap: 12 }}>
-                        {pages.map((page) => {
+                        {filteredPages.map((page) => {
                             const template = getTemplateInfo(page.content)
                             const selectedBroker = brokers.find(broker => broker.id === page.assigned_broker_id)
+                            const pageStage = getPageStage(page)
+                            const stageLabel = STAGE_TABS.find(tab => tab.id === pageStage)?.label || 'Prontas'
                             return (
                                 <div
                                     key={page.id}
@@ -255,6 +421,7 @@ export default function LandingPagesAdmin() {
                                                 fontSize: '1.05rem', color: 'var(--text-primary)',
                                                 margin: 0, fontFamily: 'Inter, sans-serif', fontWeight: 600,
                                                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                minWidth: 0,
                                             }}>
                                                 {page.title || 'Sem título'}
                                             </h4>
@@ -265,9 +432,12 @@ export default function LandingPagesAdmin() {
                                                 color: template.color,
                                                 border: `1px solid ${template.color}30`,
                                                 fontWeight: 600, textTransform: 'uppercase',
-                                                letterSpacing: '0.05em', flexShrink: 0,
+                                                letterSpacing: 0, flexShrink: 0,
                                             }}>
                                                 {template.name}
+                                            </span>
+                                            <span className="landing-admin-stage-badge">
+                                                {stageLabel}
                                             </span>
                                         </div>
                                         <div style={{
@@ -441,6 +611,129 @@ export default function LandingPagesAdmin() {
             )}
 
             <style>{`
+                .landing-admin-filters {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                    margin: -2px 0 18px;
+                }
+
+                .landing-admin-search {
+                    min-height: 40px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 0 12px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.02);
+                    color: var(--text-muted);
+                }
+
+                .landing-admin-search input {
+                    width: 100%;
+                    min-width: 0;
+                    border: 0;
+                    outline: 0;
+                    background: transparent;
+                    color: var(--text-primary);
+                    font: inherit;
+                    font-size: 0.86rem;
+                    letter-spacing: 0;
+                }
+
+                .landing-admin-search input::placeholder {
+                    color: var(--text-muted);
+                }
+
+                .landing-admin-tabs {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .landing-admin-tab {
+                    min-height: 38px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    padding: 0 12px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: transparent;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font: inherit;
+                    font-size: 0.82rem;
+                    letter-spacing: 0;
+                    white-space: nowrap;
+                }
+
+                .landing-admin-tab span {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .landing-admin-tab strong {
+                    min-width: 24px;
+                    height: 22px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 7px;
+                    border-radius: 999px;
+                    background: rgba(148, 131, 105, 0.12);
+                    color: var(--text-primary);
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    letter-spacing: 0;
+                }
+
+                .landing-admin-tab.is-active {
+                    border-color: var(--gold);
+                    background: rgba(148, 131, 105, 0.12);
+                    color: var(--text-primary);
+                }
+
+                .landing-admin-clear {
+                    min-height: 38px;
+                    padding: 0 12px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: transparent;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font: inherit;
+                    font-size: 0.82rem;
+                    letter-spacing: 0;
+                }
+
+                .landing-admin-stage-badge {
+                    flex-shrink: 0;
+                    padding: 2px 8px;
+                    border: 1px solid rgba(148, 131, 105, 0.28);
+                    border-radius: 4px;
+                    background: rgba(148, 131, 105, 0.08);
+                    color: var(--text-secondary);
+                    font-size: 0.65rem;
+                    font-weight: 600;
+                    letter-spacing: 0;
+                    white-space: nowrap;
+                }
+
+                @media (min-width: 920px) {
+                    .landing-admin-filters {
+                        grid-template-columns: minmax(280px, 1fr) auto auto;
+                        align-items: center;
+                    }
+
+                    .landing-admin-tabs {
+                        justify-content: flex-end;
+                    }
+                }
+
                 .animate-spin { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
             `}</style>
