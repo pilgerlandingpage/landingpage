@@ -22,6 +22,11 @@ interface LandingPage {
 interface Broker {
     id: string
     name: string
+    phone?: string | null
+    is_active?: boolean
+    source?: 'whatsapp_instance' | 'virtual_broker'
+    instance_name?: string | null
+    instance_status?: string | null
 }
 
 const TEMPLATES = [
@@ -58,12 +63,21 @@ export default function LandingPagesAdmin() {
     }
 
     const fetchBrokers = async () => {
-        const { data } = await supabase
-            .from('virtual_brokers')
-            .select('id, name')
-            .eq('is_active', true)
-            .order('name')
-        if (data) setBrokers(data)
+        try {
+            const response = await fetch('/api/admin/landing-page-brokers', { cache: 'no-store' })
+            const payload = await response.json()
+            if (!response.ok) throw new Error(payload?.error || 'Erro ao carregar corretores')
+
+            setBrokers(Array.isArray(payload?.data) ? payload.data : [])
+        } catch (error) {
+            console.warn('Error loading broker instances:', error)
+            const { data } = await supabase
+                .from('virtual_brokers')
+                .select('id, name, phone')
+                .eq('is_active', true)
+                .order('name')
+            if (data) setBrokers(data.map(broker => ({ ...broker, source: 'virtual_broker' })))
+        }
     }
 
     useEffect(() => {
@@ -130,6 +144,41 @@ export default function LandingPagesAdmin() {
         }
     }
 
+    const brokerGroups = {
+        whatsapp: brokers.filter(broker => broker.source === 'whatsapp_instance'),
+        others: brokers.filter(broker => broker.source !== 'whatsapp_instance'),
+    }
+
+    const formatBrPhone = (phone?: string | null) => {
+        const digits = String(phone || '').replace(/\D/g, '')
+        if (!digits) return ''
+        if (digits.length === 13 && digits.startsWith('55')) return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+        if (digits.length === 12 && digits.startsWith('55')) return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 8)}-${digits.slice(8)}`
+        return `+${digits}`
+    }
+
+    const statusLabel = (status?: string | null) => {
+        const normalized = String(status || '').toLowerCase()
+        if (normalized === 'connected' || normalized === 'open') return 'online'
+        if (normalized === 'connecting') return 'conectando'
+        if (normalized === 'disconnected') return 'offline'
+        return null
+    }
+
+    const brokerOptionLabel = (broker: Broker) => {
+        const phone = formatBrPhone(broker.phone)
+        return phone ? `${broker.name} - ${phone}` : broker.name
+    }
+
+    const brokerDetail = (broker?: Broker) => {
+        if (!broker) return ''
+        const details = [
+            statusLabel(broker.instance_status) ? `WhatsApp ${statusLabel(broker.instance_status)}` : null,
+            broker.instance_name || null,
+        ].filter(Boolean)
+        return details.join(' - ')
+    }
+
     const getTemplateInfo = (content: any) => {
         const templateId = content?.template || 'classic'
         return TEMPLATES.find(t => t.id === templateId) || TEMPLATES[2]
@@ -175,6 +224,7 @@ export default function LandingPagesAdmin() {
                     <div style={{ display: 'grid', gap: 12 }}>
                         {pages.map((page) => {
                             const template = getTemplateInfo(page.content)
+                            const selectedBroker = brokers.find(broker => broker.id === page.assigned_broker_id)
                             return (
                                 <div
                                     key={page.id}
@@ -229,28 +279,48 @@ export default function LandingPagesAdmin() {
                                             <span>•</span>
                                             <span>{page.page_views || 0} views</span>
                                             <span>•</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                                                 <User size={12} />
+                                                <div style={{ display: 'grid', gap: 3, minWidth: 220, maxWidth: 360 }}>
                                                 <select
                                                     value={page.assigned_broker_id || ''}
                                                     onChange={(e) => handleBrokerChange(page.id, e.target.value)}
+                                                    title="Corretor que recebera os leads desta landing page"
                                                     style={{
                                                         background: 'transparent',
                                                         border: '1px solid var(--border)',
                                                         borderRadius: '4px',
                                                         fontSize: '0.75rem',
                                                         color: 'var(--text-secondary)',
-                                                        padding: '1px 4px',
-                                                        outline: 'none'
+                                                        padding: '3px 6px',
+                                                        outline: 'none',
+                                                        width: '100%'
                                                     }}
                                                 >
                                                     <option value="">Escala de Plantão (Auto)</option>
-                                                    {brokers.map(b => (
-                                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                                    ))}
+                                                    {brokerGroups.whatsapp.length > 0 && (
+                                                        <optgroup label="Corretores com WhatsApp">
+                                                            {brokerGroups.whatsapp.map(broker => (
+                                                                <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
+                                                            ))}
+                                                        </optgroup>
+                                                    )}
+                                                    {brokerGroups.others.length > 0 && (
+                                                        <optgroup label="Outros corretores">
+                                                            {brokerGroups.others.map(broker => (
+                                                                <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
+                                                            ))}
+                                                        </optgroup>
+                                                    )}
                                                 </select>
+                                                {brokerDetail(selectedBroker) && (
+                                                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {brokerDetail(selectedBroker)}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
+                                    </div>
                                     </div>
 
                                     {/* Actions */}
