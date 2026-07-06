@@ -389,9 +389,6 @@ export default function GlobalHeader() {
                     </ul>
 
                     <div className="gh-mobile-actions">
-                        <Link href="/busca" className="gh-mobile-search-button" aria-label="Abrir busca">
-                            <Search size={21} color="currentColor" />
-                        </Link>
                         <button
                             className="gh-burger"
                             onClick={() => setMobileMenuOpen(open => !open)}
