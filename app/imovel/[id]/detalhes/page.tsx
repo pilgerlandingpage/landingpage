@@ -165,6 +165,52 @@ type PropertyDevelopmentContext = {
     unit: PropertyDevelopmentUnitContext
 }
 
+const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
+    name: 'Brava Concetto',
+    pageSlug: 'bravaconceto',
+    locationName: 'Praia Brava, Itajai - SC',
+    priceRange: 'R$ 8.600.000 a R$ 21.000.000',
+    availableUnitsCount: 3,
+    areaRange: '280m2 a 592m2',
+    suitesRange: '4 suites',
+    heroImage: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
+    description: 'Um empreendimento de poucas unidades na Praia Brava, pensado para quem busca privacidade, arquitetura autoral e leitura clara de patrimonio.',
+    units: [
+        {
+            type: 'Apartamento Tipo',
+            title: 'Apartamento no Ed. Brava Concetto',
+            area: '280m2',
+            suites: '4 suites',
+            price: 'R$ 8.600.000',
+            sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
+        },
+        {
+            type: 'Apartamento Garden',
+            title: 'Apartamento Garden no Ed. Brava Concetto',
+            area: '368m2',
+            suites: '4 suites',
+            price: 'R$ 10.000.000',
+            sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
+        },
+        {
+            type: 'Cobertura Duplex',
+            title: 'Cobertura Duplex no Ed. Brava Concetto',
+            area: '592m2',
+            suites: '4 suites',
+            price: 'R$ 21.000.000',
+            sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
+        },
+    ],
+    gallery: [
+        { title: 'Fachada diurna', image: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg', category: 'Fachada' },
+        { title: 'Fachada noturna', image: '/images/brava-concetto/2_CL_BC_FACHADA_NOTURNA_R01.jpg', category: 'Fachada' },
+        { title: 'Vista aerea', image: '/images/brava-concetto/5_CL_BC_VOO_PASSARO_R01.jpg', category: 'Implantacao' },
+        { title: 'Hall de entrada', image: '/images/brava-concetto/8_CL_BC_HALL_DE_ENTRADA_EF_web.jpg', category: 'Hall' },
+        { title: 'Piscina', image: '/images/brava-concetto/15_CL_BC_PISCINA_EF_web.jpg', category: 'Lazer' },
+        { title: 'Living', image: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg', category: 'Interior' },
+    ],
+}
+
 function isUuid(value: string) {
     return UUID_PATTERN.test(value)
 }
@@ -188,6 +234,41 @@ function asSafeNumber(value: unknown): number | null {
 
 function normalizeSourceSlugKey(value: unknown) {
     return asSafeText(value).trim().toLowerCase()
+}
+
+function normalizeComparableText(value: unknown) {
+    return asSafeText(value)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+}
+
+function parseComparableNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    const text = asSafeText(value).replace(/m\s*(2|²)/gi, '')
+    if (!text) return null
+    const normalized = text
+        .replace(/[^\d,.-]/g, '')
+        .replace(/\.(?=\d{3}(\D|$))/g, '')
+        .replace(',', '.')
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function priceMatches(unitPrice: unknown, propertyPrice: unknown) {
+    const unitValue = parseComparableNumber(unitPrice)
+    const propertyValue = parseComparableNumber(propertyPrice)
+    if (unitValue === null || propertyValue === null) return false
+    return Math.abs(unitValue - propertyValue) < 1
+}
+
+function areaMatches(unitArea: unknown, property: any) {
+    const unitValue = parseComparableNumber(unitArea)
+    const propertyValue = parseComparableNumber(property?.area_private_m2 ?? property?.area_m2)
+    if (unitValue === null || propertyValue === null) return false
+    return Math.abs(unitValue - propertyValue) <= 1
 }
 
 function uniqueDevelopmentGallery(items: PropertyDevelopmentGalleryItem[]) {
@@ -232,6 +313,37 @@ function normalizeDevelopmentUnitContext(value: unknown): PropertyDevelopmentUni
         price: asSafeText(record.price, 'Consulte'),
         sourceSlug,
     }
+}
+
+function developmentFallbackForPage(page: any, content: Record<string, any>) {
+    const slug = asSafeText(page?.slug)
+    const template = asSafeText(content.template)
+    if (slug === 'bravaconceto' || template === 'brava-concetto') {
+        return PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT
+    }
+    return null
+}
+
+function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: any, propertySourceSlug: string) {
+    const candidates = units.filter((unit) => normalizeSourceSlugKey(unit.sourceSlug) === propertySourceSlug)
+    if (candidates.length <= 1) return candidates[0] || null
+
+    const propertyTitle = normalizeComparableText(property?.title)
+    const byTitle = candidates.find((unit) => {
+        const unitTitle = normalizeComparableText(unit.title)
+        const unitType = normalizeComparableText(unit.type)
+        return Boolean(
+            (unitTitle && propertyTitle && (propertyTitle.includes(unitTitle) || unitTitle.includes(propertyTitle))) ||
+            (unitType && propertyTitle && propertyTitle.includes(unitType))
+        )
+    })
+    if (byTitle) return byTitle
+
+    const byPrice = candidates.find((unit) => priceMatches(unit.price, property?.price))
+    if (byPrice) return byPrice
+
+    const byArea = candidates.find((unit) => areaMatches(unit.area, property))
+    return byArea || candidates[0]
 }
 
 function locationLabelFromProperty(property: any) {
@@ -283,18 +395,28 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
 
     for (const page of data || []) {
         const content = asSafeRecord(page.content)
-        const development = asSafeRecord(content.development)
-        const units = Array.isArray(development.units)
-            ? development.units.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
+        const contentDevelopment = asSafeRecord(content.development)
+        const fallbackDevelopment = developmentFallbackForPage(page, content)
+        const development = fallbackDevelopment
+            ? { ...fallbackDevelopment, ...contentDevelopment }
+            : contentDevelopment
+        const rawUnits = Array.isArray(contentDevelopment.units) && contentDevelopment.units.length
+            ? contentDevelopment.units
+            : (fallbackDevelopment?.units || [])
+        const units = Array.isArray(rawUnits)
+            ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
             : []
-        const matchedUnit = units.find((unit) => normalizeSourceSlugKey(unit.sourceSlug) === propertySourceSlug)
+        const matchedUnit = pickDevelopmentUnit(units, property, propertySourceSlug)
 
         if (!matchedUnit) continue
 
         const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
         const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
-        const developmentGallery = Array.isArray(development.gallery)
-            ? development.gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+        const rawDevelopmentGallery = Array.isArray(contentDevelopment.gallery) && contentDevelopment.gallery.length
+            ? contentDevelopment.gallery
+            : (fallbackDevelopment?.gallery || [])
+        const developmentGallery = Array.isArray(rawDevelopmentGallery)
+            ? rawDevelopmentGallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
             : []
         const customGallery = Array.isArray(content.custom_gallery)
             ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
