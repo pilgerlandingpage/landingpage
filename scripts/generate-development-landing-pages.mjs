@@ -206,8 +206,7 @@ function unitType(property) {
 
 function stageFromText(value) {
   const normalized = normalizeText(value)
-  if (/\b(lancamento|pre lancamento|pre-lancamento|na planta)\b/.test(normalized)) return 'launch'
-  if (/\b(em construcao|construcao|obra|em obra|entrega prevista)\b/.test(normalized)) return 'construction'
+  if (/\b(lancamento|pre lancamento|pre-lancamento|na planta|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(normalized)) return 'launch'
   if (/\b(pronto|pronta|pronto para morar|entregue)\b/.test(normalized)) return 'ready'
   return null
 }
@@ -248,7 +247,6 @@ function inferredDevelopmentName(property) {
 
 function stageLabel(stage) {
   if (stage === 'launch') return 'Lancamento'
-  if (stage === 'construction') return 'Em construcao'
   return 'Pronto'
 }
 

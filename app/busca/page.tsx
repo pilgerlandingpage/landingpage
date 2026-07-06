@@ -200,8 +200,8 @@ function applyTextFilter(query: any, tag: string | undefined) {
         'frente-mar': ['frente mar', 'frente ao mar', 'frente para o mar', 'beira mar', 'pe na areia', 'pé na areia'],
         'vista-mar': ['vista mar', 'vista para o mar', 'vista oceanica', 'vista panoramica'],
         'quadra-mar': ['quadra mar', 'quadra do mar', 'uma quadra do mar'],
-        lancamento: ['lancamento', 'lançamento'],
-        'em-construcao': ['construcao', 'construção', 'na planta'],
+        lancamento: ['lancamento', 'lançamento', 'pre lancamento', 'pré-lançamento', 'na planta', 'construcao', 'construção', 'em construcao', 'em construção', 'obra', 'em obra', 'entrega prevista'],
+        'em-construcao': ['lancamento', 'lançamento', 'pre lancamento', 'pré-lançamento', 'na planta', 'construcao', 'construção', 'em construcao', 'em construção', 'obra', 'em obra', 'entrega prevista'],
         pronto: ['pronto'],
         mobiliado: ['mobiliado'],
     }

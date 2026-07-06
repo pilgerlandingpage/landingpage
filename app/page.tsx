@@ -962,7 +962,7 @@ function demandScore(property: any) {
   if (price >= 5000000) score += 22
   if (text.includes('frente') && text.includes('mar')) score += 18
   if (text.includes('cobertura')) score += 14
-  if (text.includes('lançamento') || text.includes('lancamento') || text.includes('na planta')) score += 10
+  if (text.includes('lançamento') || text.includes('lancamento') || text.includes('na planta') || text.includes('construção') || text.includes('construcao') || text.includes('obra')) score += 10
   if (property.city && ['balneário camboriú', 'balneario camboriu', 'itajai', 'itajaí', 'itapema', 'porto belo'].includes(property.city.toLowerCase())) score += 8
 
   return score

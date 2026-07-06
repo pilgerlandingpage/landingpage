@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-type DevelopmentStage = 'launch' | 'construction' | 'ready'
+type DevelopmentStage = 'launch' | 'ready'
 
 type PublicDevelopment = {
     slug: string
@@ -28,11 +28,10 @@ const MENU_GROUP_LIMIT = 8
 
 const DEVELOPMENT_STAGE_META: Record<DevelopmentStage, { label: string; href: string }> = {
     launch: { label: 'Lancamentos', href: '/busca?tag=lancamento' },
-    construction: { label: 'Em construcao', href: '/busca?tag=em-construcao' },
     ready: { label: 'Prontos', href: '/busca?tag=pronto' },
 }
 
-const DEVELOPMENT_STAGE_ORDER: DevelopmentStage[] = ['launch', 'construction', 'ready']
+const DEVELOPMENT_STAGE_ORDER: DevelopmentStage[] = ['launch', 'ready']
 
 function asRecord(value: unknown): Record<string, any> {
     return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
@@ -75,8 +74,7 @@ function firstImageFromGallery(content: Record<string, any>) {
 function stageFromText(value: unknown): DevelopmentStage | null {
     const text = normalizeText(value)
     if (!text) return null
-    if (/\b(launch|lancamento|pre lancamento|pre-lancamento|na planta)\b/.test(text)) return 'launch'
-    if (/\b(construction|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'construction'
+    if (/\b(launch|construction|lancamento|pre lancamento|pre-lancamento|na planta|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'launch'
     if (/\b(ready|pronto|pronta|pronto para morar|entregue)\b/.test(text)) return 'ready'
     return null
 }

@@ -124,8 +124,8 @@ const TEXT_FILTERS: Record<string, string[]> = {
     'frente-mar': ['frente', 'mar'],
     'vista-mar': ['vista', 'mar'],
     'quadra-mar': ['quadra', 'mar'],
-    lancamento: ['lancamento', 'lançamento'],
-    'em-construcao': ['construcao', 'construção', 'na planta'],
+    lancamento: ['lancamento', 'lançamento', 'pre lancamento', 'pré-lançamento', 'na planta', 'construcao', 'construção', 'em construcao', 'em construção', 'obra', 'em obra', 'entrega prevista'],
+    'em-construcao': ['lancamento', 'lançamento', 'pre lancamento', 'pré-lançamento', 'na planta', 'construcao', 'construção', 'em construcao', 'em construção', 'obra', 'em obra', 'entrega prevista'],
     pronto: ['pronto'],
     mobiliado: ['mobiliado'],
 }

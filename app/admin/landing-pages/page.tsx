@@ -39,12 +39,11 @@ const TEMPLATES = [
     { id: 'vip', name: 'VIP Exclusivo', description: 'Experiência premium e exclusiva', color: '#a855f7' },
 ]
 
-type StageFilter = 'all' | 'launch' | 'construction' | 'ready'
+type StageFilter = 'all' | 'launch' | 'ready'
 
 const STAGE_TABS: Array<{ id: StageFilter; label: string }> = [
     { id: 'all', label: 'Todas' },
     { id: 'launch', label: 'Lançamentos' },
-    { id: 'construction', label: 'Em construção' },
     { id: 'ready', label: 'Prontas' },
 ]
 
@@ -62,8 +61,7 @@ function normalizeFilterText(value: unknown) {
 function stageFromText(value: unknown): Exclude<StageFilter, 'all'> | null {
     const text = normalizeFilterText(value)
     if (!text) return null
-    if (/\b(launch|lancamento|pre lancamento|pre-lancamento|na planta)\b/.test(text)) return 'launch'
-    if (/\b(construction|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'construction'
+    if (/\b(launch|construction|lancamento|pre lancamento|pre-lancamento|na planta|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'launch'
     if (/\b(ready|pronto|pronta|pronto para morar|entregue)\b/.test(text)) return 'ready'
     return null
 }
@@ -272,7 +270,7 @@ export default function LandingPagesAdmin() {
             acc.all += 1
             acc[stage] += 1
             return acc
-        }, { all: 0, launch: 0, construction: 0, ready: 0 })
+        }, { all: 0, launch: 0, ready: 0 })
     }, [pages])
 
     const filteredPages = useMemo(() => {

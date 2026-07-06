@@ -2349,7 +2349,7 @@ function applyAgentPropertyFilters(query: any, prefs: AgentPropertySearchPrefs) 
                 : tag === 'quadra-mar'
                     ? ['quadra mar', 'quadra do mar']
                     : tag === 'lancamento'
-                        ? ['lancamento', 'lançamento', 'na planta']
+                        ? ['lancamento', 'lançamento', 'na planta', 'construcao', 'construção', 'em construcao', 'em construção', 'obra', 'entrega prevista']
                         : [tag]
         const filter = buildTextOrFilter(['title', 'description', 'property_type'], terms)
         if (filter) query = query.or(filter)
