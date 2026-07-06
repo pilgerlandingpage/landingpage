@@ -18,7 +18,6 @@ import {
     MapPinned,
     MapPin,
     Maximize2,
-    MessageSquare,
     Minus,
     Navigation,
     Phone,
@@ -754,10 +753,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <button
                                     type="button"
                                     onClick={handleScrollToUnits}
-                                    className="group flex items-center justify-center gap-2 rounded border border-zinc-800 bg-[#11161D]/85 px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-[#D4AF37]/50"
+                                    className="group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
                                 >
                                     Ver unidades disponiveis
-                                    <ArrowRight className="h-4 w-4 text-[#D4AF37] transition group-hover:translate-x-1" />
+                                    <ArrowRight className="h-4 w-4 text-[#0A0D10] transition group-hover:translate-x-1" />
                                 </button>
                             </div>
                         </div>
@@ -943,19 +942,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <button
                     type="button"
                     onClick={() => openChat()}
-                    className="bc-floating-chat"
-                    aria-label="Abrir conversa com especialista"
-                >
-                    <MessageSquare size={19} />
-                </button>
-                <button
-                    type="button"
-                    onClick={() => openChat()}
                     className="bc-floating-consult"
                 >
                     <Phone size={16} />
-                    <span className="bc-floating-label-full">Especialista Guilherme Pilger</span>
-                    <span className="bc-floating-label-short">Consultar</span>
+                    <span>Falar com especialista</span>
                 </button>
             </div>
 
@@ -1130,9 +1120,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    border: 1px solid rgba(31, 27, 21, 0.13);
-                    background: rgba(255, 255, 255, 0.72);
-                    color: #211d18;
+                    border: 0;
+                    background: #d4af37;
+                    color: #0a0d10;
+                    box-shadow: 0 18px 38px rgba(184, 148, 95, 0.18);
                 }
 
                 .bc-page .bc-hero-metrics {
@@ -2038,25 +2029,15 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 10px;
                 }
 
-                .bc-page .bc-floating-chat,
                 .bc-page .bc-floating-consult {
                     border: 0;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     text-transform: uppercase;
-                    box-shadow: 0 18px 38px rgba(37, 211, 102, 0.18);
-                }
-
-                .bc-page .bc-floating-chat {
-                    width: 54px;
-                    height: 54px;
-                    border-radius: 999px;
-                    background: #25d366;
-                    color: #07130c;
+                    box-shadow: 0 18px 38px rgba(212, 175, 55, 0.24);
                 }
 
                 .bc-page .bc-floating-consult {
@@ -2069,10 +2050,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     font-size: 13px;
                     font-weight: 950;
                     letter-spacing: 0.11em;
-                }
-
-                .bc-page .bc-floating-label-short {
-                    display: none;
                 }
 
                 @media (max-width: 1024px) {
@@ -2411,28 +2388,15 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         left: 50%;
                         bottom: 16px;
                         transform: translateX(-50%);
-                        gap: 10px;
-                    }
-
-                    .bc-page .bc-floating-chat {
-                        width: 50px;
-                        height: 50px;
                     }
 
                     .bc-page .bc-floating-consult {
                         min-height: 50px;
-                        padding: 0 23px;
+                        padding: 0 22px;
                         font-size: 10px;
                         letter-spacing: 0.1em;
                     }
 
-                    .bc-page .bc-floating-label-full {
-                        display: none;
-                    }
-
-                    .bc-page .bc-floating-label-short {
-                        display: inline;
-                    }
                 }
             `}</style>
         </div>
