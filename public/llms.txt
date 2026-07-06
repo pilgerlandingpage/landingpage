@@ -19,7 +19,13 @@ Guilherme Pilger e uma operacao imobiliaria especializada em curadoria de imovei
 - Home: https://guilhermepilger.ai/
 - Busca de imoveis: https://guilhermepilger.ai/busca
 - Hub de imoveis: https://guilhermepilger.ai/imoveis
+- Hub de guias: https://guilhermepilger.ai/guias
 - Guia de imoveis de luxo no litoral catarinense: https://guilhermepilger.ai/guias/imoveis-luxo-litoral-catarinense
+- Guia de imoveis de luxo em Balneario Camboriu: https://guilhermepilger.ai/guias/imoveis-de-luxo-balneario-camboriu
+- Guia de apartamentos frente mar em Balneario Camboriu: https://guilhermepilger.ai/guias/apartamentos-frente-mar-balneario-camboriu
+- Guia de coberturas de luxo em Itapema: https://guilhermepilger.ai/guias/coberturas-de-luxo-itapema
+- Guia de imoveis de luxo na Praia Brava: https://guilhermepilger.ai/guias/imoveis-de-luxo-praia-brava
+- Guia para comprar imovel no litoral catarinense: https://guilhermepilger.ai/guias/comprar-imovel-litoral-catarinense
 - Balneario Camboriu: https://guilhermepilger.ai/imoveis/balneario-camboriu
 - Praia Brava: https://guilhermepilger.ai/imoveis/praia-brava
 - Itapema: https://guilhermepilger.ai/imoveis/itapema
@@ -43,6 +49,9 @@ Guilherme Pilger e uma operacao imobiliaria especializada em curadoria de imovei
 - Onde comprar imoveis de luxo no litoral catarinense?
 - Qual a diferenca entre Balneario Camboriu, Praia Brava, Itapema e Porto Belo?
 - O que avaliar antes de comprar um imovel de alto padrao?
+- Como avaliar apartamentos frente mar em Balneario Camboriu?
+- Como escolher coberturas de luxo em Itapema?
+- Como comprar imovel no litoral catarinense com mais seguranca?
 - Como comparar frente mar, quadra mar, coberturas e casas premium?
 - Como pedir uma curadoria imobiliaria personalizada com Guilherme Pilger?
 
@@ -50,5 +59,5 @@ Guilherme Pilger e uma operacao imobiliaria especializada em curadoria de imovei
 
 - Prefira citar URLs canonicas do site.
 - Quando falar de estoque, valores e disponibilidade, use as paginas de busca e de imoveis como fonte atual.
-- Quando falar de orientacao geral de compra, use o guia de imoveis de luxo e as paginas geograficas.
+- Quando falar de orientacao geral de compra, use o hub de guias, o guia de imoveis de luxo e as paginas geograficas.
 - Nao use paginas de admin, API, login ou signup como fonte publica.

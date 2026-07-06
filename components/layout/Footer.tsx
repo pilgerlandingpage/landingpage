@@ -82,7 +82,12 @@ export default function Footer() {
                     <h3>Marca Pilger</h3>
                     <Link href="/sobre">Sobre Guilherme Pilger</Link>
                     <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliária</Link>
+                    <Link href="/guias">Guias imobiliários</Link>
                     <Link href="/guias/imoveis-luxo-litoral-catarinense">Guia de imóveis de luxo</Link>
+                    <Link href="/guias/imoveis-de-luxo-balneario-camboriu">Luxo em Balneário Camboriú</Link>
+                    <Link href="/guias/apartamentos-frente-mar-balneario-camboriu">Frente mar em Balneário Camboriú</Link>
+                    <Link href="/guias/coberturas-de-luxo-itapema">Coberturas em Itapema</Link>
+                    <Link href="/guias/imoveis-de-luxo-praia-brava">Luxo na Praia Brava</Link>
                     <Link href="/blog">Blog</Link>
                     <Link href="/noticias">Notícias</Link>
                     <Link href="/eventos">Eventos</Link>

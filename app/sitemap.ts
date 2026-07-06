@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase/server'
 import { absoluteUrl, SITE_URL } from '@/lib/seo/json-ld'
 import { getGeoPages } from '@/lib/seo/geo-pages'
+import { aiGuidePages } from '@/lib/seo/ai-guide-pages'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
@@ -12,7 +13,13 @@ const staticRoutes: Array<{ path: string; priority: number; changeFrequency: Sit
   { path: '/imoveis', priority: 0.92, changeFrequency: 'daily' },
   { path: '/blog', priority: 0.75, changeFrequency: 'weekly' },
   { path: '/noticias', priority: 0.8, changeFrequency: 'daily' },
+  { path: '/guias', priority: 0.84, changeFrequency: 'weekly' },
   { path: '/guias/imoveis-luxo-litoral-catarinense', priority: 0.82, changeFrequency: 'monthly' },
+  ...aiGuidePages.map(guide => ({
+    path: guide.path,
+    priority: 0.82,
+    changeFrequency: 'monthly' as const,
+  })),
   { path: '/contato', priority: 0.65, changeFrequency: 'monthly' },
   { path: '/trabalhe-conosco', priority: 0.62, changeFrequency: 'monthly' },
   { path: '/politica-de-privacidade', priority: 0.2, changeFrequency: 'yearly' },

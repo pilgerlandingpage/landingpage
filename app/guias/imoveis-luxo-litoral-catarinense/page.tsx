@@ -288,10 +288,10 @@ export default function LuxuryCoastGuidePage() {
             <h2>Continue por intenção de compra.</h2>
           </div>
           <div className="ai-guide-related-links">
-            <Link href="/imoveis/frente-mar"><Building2 size={18} /> Imóveis frente mar</Link>
-            <Link href="/imoveis/coberturas"><Compass size={18} /> Coberturas de luxo</Link>
-            <Link href="/imoveis/casas-alto-padrao"><ShieldCheck size={18} /> Casas de alto padrão</Link>
-            <Link href="/blog"><BarChart3 size={18} /> Análises de mercado</Link>
+            <Link href="/guias/imoveis-de-luxo-balneario-camboriu"><Building2 size={18} /> Luxo em Balneário Camboriú</Link>
+            <Link href="/guias/apartamentos-frente-mar-balneario-camboriu"><Compass size={18} /> Frente mar em Balneário Camboriú</Link>
+            <Link href="/guias/coberturas-de-luxo-itapema"><ShieldCheck size={18} /> Coberturas em Itapema</Link>
+            <Link href="/guias/comprar-imovel-litoral-catarinense"><BarChart3 size={18} /> Comprar no litoral catarinense</Link>
           </div>
         </section>
       </main>

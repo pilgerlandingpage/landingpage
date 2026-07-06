@@ -6,6 +6,13 @@ Projeto: Guilherme Pilger - https://guilhermepilger.ai
 ## O que foi iniciado
 
 - Criada a pagina evergreen `/guias/imoveis-luxo-litoral-catarinense`.
+- Criado o hub `/guias` para concentrar os guias imobiliarios.
+- Criado o primeiro cluster adicional de guias:
+  - `/guias/imoveis-de-luxo-balneario-camboriu`
+  - `/guias/apartamentos-frente-mar-balneario-camboriu`
+  - `/guias/coberturas-de-luxo-itapema`
+  - `/guias/imoveis-de-luxo-praia-brava`
+  - `/guias/comprar-imovel-litoral-catarinense`
 - Incluida a nova pagina no `sitemap.xml`.
 - Adicionado link interno no rodape para a pagina-guia.
 - Criado `public/llms.txt` como indice publico auxiliar para assistentes e crawlers.
