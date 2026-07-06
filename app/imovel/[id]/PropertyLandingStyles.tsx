@@ -3968,26 +3968,20 @@ export default function PropertyLandingStyles() {
 
                 .plp-development-context-gallery {
                     display: grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    grid-auto-rows: minmax(112px, 1fr);
-                    gap: 8px;
-                    min-height: 360px;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    align-content: start;
+                    gap: 10px;
                 }
 
                 .plp-development-context-gallery figure {
                     position: relative;
                     min-width: 0;
-                    min-height: 112px;
                     margin: 0;
                     overflow: hidden;
                     border-radius: var(--plp-radius);
+                    aspect-ratio: 1 / 0.86;
                     background: #171a1d;
                     box-shadow: 0 10px 20px rgba(20, 24, 29, 0.12);
-                }
-
-                .plp-development-context-gallery figure.is-main {
-                    grid-column: span 2;
-                    grid-row: span 2;
                 }
 
                 .plp-development-context-gallery img {
@@ -5236,8 +5230,7 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-development-context-gallery {
-                        min-height: 0;
-                        grid-auto-rows: 150px;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
 
                     .plp-gallery-column {
@@ -8283,17 +8276,12 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-development-gallery figure {
                         position: relative;
                         min-width: 0;
-                        min-height: 92px;
                         margin: 0;
                         overflow: hidden;
-                        border-radius: 12px;
+                        border-radius: 7px;
+                        aspect-ratio: 1 / 0.86;
                         background: #171a1d;
                         box-shadow: 0 10px 20px rgba(24,31,42,0.12);
-                    }
-
-                    .plp-mobile-development-gallery figure.is-main {
-                        grid-column: 1 / -1;
-                        min-height: 156px;
                     }
 
                     .plp-mobile-development-gallery img {

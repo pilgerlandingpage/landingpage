@@ -1645,7 +1645,7 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-mobile-development-gallery">
                                     {developmentGalleryPreview.slice(0, 4).map((item, index) => (
-                                        <figure key={`${item.image}-${index}`} className={index === 0 ? 'is-main' : undefined}>
+                                        <figure key={`${item.image}-${index}`}>
                                             <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                             <figcaption>{index === 0 ? 'Empreendimento' : item.category}</figcaption>
                                         </figure>
@@ -1997,7 +1997,7 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-development-context-gallery" aria-label={`Imagens do empreendimento ${developmentContext.name}`}>
                                     {developmentGalleryPreview.slice(0, 5).map((item, index) => (
-                                        <figure key={`${item.image}-${index}`} className={index === 0 ? 'is-main' : undefined}>
+                                        <figure key={`${item.image}-${index}`}>
                                             <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
                                             <figcaption>
                                                 <span>{index === 0 ? 'Empreendimento' : item.category}</span>
