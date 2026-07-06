@@ -1297,9 +1297,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page .bc-hero-metrics {
                     width: min(100%, 920px);
+                    position: relative;
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, 1fr));
                     gap: 0;
+                    overflow: hidden;
                     border: 1px solid rgba(184, 148, 95, 0.22);
                     border-radius: 8px;
                     background: rgba(255, 255, 255, 0.82);
@@ -1308,7 +1310,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     backdrop-filter: blur(14px);
                 }
 
+                .bc-page .bc-hero-metrics::before,
+                .bc-page .bc-hero-metrics::after {
+                    content: "";
+                    position: absolute;
+                    z-index: 1;
+                    display: none;
+                    pointer-events: none;
+                    background: rgba(31, 27, 21, 0.14);
+                }
+
                 .bc-page .bc-hero-metric {
+                    position: relative;
+                    z-index: 2;
                     display: flex;
                     min-width: 0;
                     gap: 11px;
@@ -2423,18 +2437,32 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 @media (max-width: 1024px) {
                     .bc-page .bc-hero-metrics {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
+                        grid-auto-rows: minmax(82px, auto);
+                    }
+
+                    .bc-page .bc-hero-metrics::before {
+                        top: 14px;
+                        bottom: 14px;
+                        left: 50%;
+                        display: block;
+                        width: 1px;
+                        transform: translateX(-0.5px);
+                    }
+
+                    .bc-page .bc-hero-metrics::after {
+                        top: 50%;
+                        right: 14px;
+                        left: 14px;
+                        display: block;
+                        height: 1px;
+                        transform: translateY(-0.5px);
                     }
 
                     .bc-page .bc-hero-metric {
-                        border-bottom: 1px solid rgba(63, 63, 70, 0.78);
-                    }
-
-                    .bc-page .bc-hero-metric:nth-child(2n) {
                         border-right: 0;
-                    }
-
-                    .bc-page .bc-hero-metric:nth-last-child(-n + 2) {
                         border-bottom: 0;
+                        min-height: 82px;
+                        align-items: flex-start;
                     }
 
                     .bc-page #unidades-disponiveis > div > div:last-child,
@@ -2477,11 +2505,23 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     }
 
                     .bc-page main > section:nth-of-type(1) h1 {
-                        font-size: clamp(2rem, 8.4vw, 2.35rem);
+                        font-size: clamp(1.72rem, 6.8vw, 1.92rem);
+                        line-height: 1.08;
                     }
 
                     .bc-page main > section:nth-of-type(1) h1 + p {
-                        font-size: 0.98rem;
+                        width: min(100%, 330px);
+                        margin-bottom: 24px;
+                        border-left: 2px solid rgba(184, 148, 95, 0.5);
+                        border-radius: 6px;
+                        background: linear-gradient(90deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.36));
+                        padding: 9px 11px 9px 12px;
+                        color: #2c251c;
+                        font-size: 0.91rem;
+                        font-weight: 850;
+                        line-height: 1.55;
+                        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+                        backdrop-filter: blur(3px);
                     }
 
                     .bc-page main > section:nth-of-type(1) > div:last-child > div:first-child > div:last-child {
@@ -2494,12 +2534,16 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                     .bc-page .bc-hero-metrics {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
-                        padding: 12px;
+                        grid-auto-rows: minmax(78px, auto);
+                        padding: 10px;
                     }
 
                     .bc-page .bc-hero-metric {
                         gap: 8px;
-                        padding: 0 9px 12px;
+                        min-height: 78px;
+                        padding: 12px 10px;
+                        border-right: 0;
+                        border-bottom: 0;
                     }
 
                     .bc-page .bc-hero-metric:last-child {
@@ -2840,6 +2884,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-cta button {
+                    display: inline-grid;
+                    grid-template-columns: minmax(0, max-content) 18px;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
                     min-height: 43px;
                     border-radius: 4px;
                     padding: 13px 24px;
@@ -2852,6 +2901,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     text-transform: uppercase;
                     box-shadow: 0 18px 38px rgba(184, 148, 95, 0.18);
                     transition: transform 0.2s ease, background 0.2s ease;
+                }
+
+                .bc-page .bc-hero-units-label {
+                    display: block;
+                    line-height: 1;
+                }
+
+                .bc-page .bc-hero-units-button svg {
+                    width: 18px;
+                    height: 18px;
+                    display: block;
+                    align-self: center;
+                    justify-self: center;
                 }
 
                 .bc-page .bc-hero-cta button:hover {
@@ -4284,9 +4346,9 @@ function HeroUnitsButton({ onClick }: { onClick: () => void }) {
         <button
             type="button"
             onClick={onClick}
-            className="group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
+            className="bc-hero-units-button group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
         >
-            Ver unidades disponiveis
+            <span className="bc-hero-units-label">Ver unidades disponiveis</span>
             <ArrowRight className="h-4 w-4 text-[#0A0D10] transition group-hover:translate-x-1" />
         </button>
     )
