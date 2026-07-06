@@ -34,6 +34,17 @@ function firstParam(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] : value
 }
 
+function paramList(value: string | string[] | undefined) {
+    const values = Array.isArray(value) ? value : value ? [value] : []
+
+    return Array.from(new Set(
+        values
+            .flatMap(item => String(item || '').split(','))
+            .map(item => safeSearch(item))
+            .filter(Boolean)
+    ))
+}
+
 function safeSearch(value: string) {
     return value.replace(/[(),{}]/g, ' ').trim()
 }
@@ -99,6 +110,7 @@ type SearchDataInput = {
     subtype: string | undefined
     city: string | undefined
     tag: string | undefined
+    tags: string[]
     exclusiveOnly: boolean
     brokerName: string | undefined
     brokerLogin: string | undefined
@@ -311,6 +323,7 @@ function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput
         subtype: firstParam(resolvedParams.subtype) || naturalSearch.subtype,
         city: firstParam(resolvedParams.city) || naturalSearch.city,
         tag: firstParam(resolvedParams.tag) || naturalSearch.tag,
+        tags: paramList(resolvedParams.tags),
         exclusiveOnly: asBooleanParam(resolvedParams.exclusive),
         brokerName: firstParam(resolvedParams.broker),
         brokerLogin: firstParam(resolvedParams.brokerLogin),
@@ -412,7 +425,10 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
                 : query.eq('id', '00000000-0000-0000-0000-000000000000')
         }
 
-        query = applyTextFilter(query, input.tag)
+        const textTags = Array.from(new Set([input.tag, ...input.tags].filter(Boolean) as string[]))
+        textTags.forEach(tag => {
+            query = applyTextFilter(query, tag)
+        })
 
         return query.order('created_at', { ascending: false })
     }

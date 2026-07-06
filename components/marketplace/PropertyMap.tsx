@@ -6,7 +6,7 @@ import { Circle, MapContainer, TileLayer, Marker, Polygon, Polyline, Popup, useM
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Link from 'next/link'
-import { Anchor, Bath, Bed, Building2, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
+import { Anchor, Bath, Bed, Building2, Car, ChevronDown, CloudSun, Coffee, Cross, Eraser, Flame, Globe2, GraduationCap, Hand, Landmark, Layers, LocateFixed, Map as MapIcon, MapPin, Maximize, RotateCcw, Satellite, ShoppingBag, SlidersHorizontal, Sparkles, ThermometerSun, TreePalm, Utensils, Waves, Wind, X } from 'lucide-react'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leaflet-style'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
@@ -41,6 +41,9 @@ interface Property {
     description?: string | null
     source_status?: string | null
     exclusive?: boolean | null
+    purpose?: string | null
+    rent?: number | null
+    amenities?: string[] | null
     slug?: string
 }
 
@@ -68,6 +71,7 @@ interface PropertyMapProps {
     initialMapStyle?: MapStyle
     overviewMode?: boolean
     fixedOverviewView?: MapFixedView | null
+    onSearchFiltersApply?: (filters: MapSearchFilters, params: URLSearchParams) => void
 }
 
 type MappedProperty = {
@@ -99,6 +103,21 @@ type QuickFilter = 'all' | 'exclusive' | 'waterfront' | 'launch' | 'premium'
 type MapContextLayer = 'flood' | 'fire' | 'wind' | 'air' | 'heat'
 type MapAmenityLayer = NearbyBenefitLayer
 type LocateState = 'idle' | 'loading' | 'active' | 'error'
+type NumericFilterKey = 'bedroomsMin' | 'suitesMin' | 'parkingMin'
+
+export type MapSearchFilters = {
+    offer: 'sale' | 'rent' | null
+    type: string | null
+    pricePreset: string
+    priceMin: string
+    priceMax: string
+    bedroomsMin: number
+    suitesMin: number
+    parkingMin: number
+    areaMin: string
+    areaMax: string
+    features: string[]
+}
 
 type UserLocationSnapshot = {
     latitude: number
@@ -119,6 +138,53 @@ const QUICK_FILTERS: Array<{ value: QuickFilter; label: string }> = [
     { value: 'premium', label: 'Alto padrão' },
 ]
 
+const EMPTY_SEARCH_FILTERS: MapSearchFilters = {
+    offer: null,
+    type: null,
+    pricePreset: '',
+    priceMin: '',
+    priceMax: '',
+    bedroomsMin: 0,
+    suitesMin: 0,
+    parkingMin: 0,
+    areaMin: '',
+    areaMax: '',
+    features: [],
+}
+
+const PURPOSE_FILTERS: Array<{ value: NonNullable<MapSearchFilters['offer']>; label: string }> = [
+    { value: 'sale', label: 'Venda' },
+    { value: 'rent', label: 'Aluguel' },
+]
+
+const PROPERTY_TYPE_FILTERS = [
+    { value: '', label: 'Todos' },
+    { value: 'Apartamento', label: 'Apartamentos' },
+    { value: 'Casa', label: 'Casas' },
+    { value: 'Cobertura', label: 'Coberturas' },
+    { value: 'Casa em Condominio', label: 'Condomínio' },
+    { value: 'Terreno', label: 'Terrenos' },
+    { value: 'Comercial', label: 'Comercial' },
+]
+
+const PRICE_PRESET_FILTERS = [
+    { value: '', label: 'Todos' },
+    { value: '4000000-6000000', label: 'R$ 4-6 mi' },
+    { value: '6000000-8000000', label: 'R$ 6-8 mi' },
+    { value: '8000000-10000000', label: 'R$ 8-10 mi' },
+    { value: '10000000-', label: 'R$ 10 mi+' },
+]
+
+const STEP_FILTERS = [1, 2, 3, 4, 5]
+
+const FEATURE_FILTERS: Array<{ value: string; label: string }> = [
+    { value: 'exclusive', label: 'Exclusivos' },
+    { value: 'frente-mar', label: 'Frente mar' },
+    { value: 'lancamento', label: 'Lançamentos' },
+    { value: 'premium', label: 'Alto padrão' },
+    { value: 'mobiliado', label: 'Mobiliado' },
+]
+
 const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'satellite' | 'layers' }> = [
     { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
     { value: 'satellite', label: 'Satélite', icon: 'satellite' },
@@ -126,7 +192,7 @@ const MAP_STYLES: Array<{ value: MapStyle; label: string; icon: 'sparkles' | 'sa
 ]
 const MAP_OPTION_STYLES: Array<{ value: MapStyle; label: string; icon: 'map' | 'satellite' | 'sparkles' }> = [
     { value: 'classic', label: 'Ruas', icon: 'map' },
-    { value: 'satellite', label: 'Satelite', icon: 'satellite' },
+    { value: 'satellite', label: 'Satélite', icon: 'satellite' },
     { value: 'luxury', label: 'Leaflet', icon: 'sparkles' },
 ]
 const MAP_CONTEXT_LAYERS: Array<{ value: MapContextLayer; label: string; icon: 'flood' | 'fire' | 'wind' | 'air' | 'heat' }> = [
@@ -266,19 +332,148 @@ function formatMapPrice(price: number | null | undefined) {
     return `R$ ${Math.round(value).toLocaleString('pt-BR')}`
 }
 
+function normalizeSearchText(value: unknown) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+}
+
 function propertyText(property: Property) {
-    return [
+    return normalizeSearchText([
         property.title,
         property.description,
         property.property_type,
         property.neighborhood,
         property.source_status,
-    ].filter(Boolean).join(' ').toLowerCase()
+        property.purpose,
+        Array.isArray(property.amenities) ? property.amenities.join(' ') : '',
+    ].filter(Boolean).join(' '))
 }
 
 function textHasAny(property: Property, terms: string[]) {
     const text = propertyText(property)
-    return terms.some(term => text.includes(term))
+    return terms.some(term => text.includes(normalizeSearchText(term)))
+}
+
+function parseFilterNumber(value: string) {
+    const numeric = Number(String(value || '').replace(/\D/g, ''))
+    return Number.isFinite(numeric) ? numeric : 0
+}
+
+function parseFilterArea(value: string) {
+    const numeric = Number(String(value || '').replace(/[^\d]/g, ''))
+    return Number.isFinite(numeric) ? numeric : 0
+}
+
+function propertyPriceValue(property: Property) {
+    return Number(property.price || property.rent || 0)
+}
+
+function matchesPurpose(property: Property, offer: MapSearchFilters['offer']) {
+    if (!offer) return true
+
+    const purposeText = normalizeSearchText(property.purpose || property.source_status || property.description)
+    if (offer === 'rent') return Number(property.rent || 0) > 0 || purposeText.includes('alug')
+    return Number(property.price || 0) > 0 || purposeText.includes('vend')
+}
+
+function matchesPropertyType(property: Property, type: string | null) {
+    if (!type) return true
+
+    const text = propertyText(property)
+    const normalizedType = normalizeSearchText(type)
+
+    if (normalizedType === 'comercial') {
+        return ['comercial', 'galpao', 'sala comercial', 'predio'].some(term => text.includes(term))
+    }
+
+    if (normalizedType.includes('condominio')) return text.includes('condom')
+    if (normalizedType === 'cobertura') return text.includes('cobertura')
+    if (normalizedType === 'terreno') return text.includes('terreno')
+    if (normalizedType === 'casa') return text.includes('casa')
+    if (normalizedType === 'apartamento') return text.includes('apartamento') || text.includes('apto')
+
+    return text.includes(normalizedType)
+}
+
+function matchesFeature(property: Property, feature: string) {
+    if (feature === 'exclusive') return Boolean(property.exclusive)
+    if (feature === 'premium') return Number(property.price || 0) >= 5000000
+    if (feature === 'frente-mar') return textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
+    if (feature === 'lancamento') return textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
+    if (feature === 'mobiliado') return textHasAny(property, ['mobiliado', 'mobiliada', 'mobiliad'])
+
+    return true
+}
+
+function matchesSearchFilters(item: MappedProperty, filters: MapSearchFilters) {
+    const { property } = item
+    const price = propertyPriceValue(property)
+    const [presetMinRaw, presetMaxRaw] = filters.pricePreset.split('-')
+    const presetMin = parseFilterNumber(presetMinRaw)
+    const presetMax = parseFilterNumber(presetMaxRaw)
+    const priceMin = parseFilterNumber(filters.priceMin)
+    const priceMax = parseFilterNumber(filters.priceMax)
+    const areaMin = parseFilterArea(filters.areaMin)
+    const areaMax = parseFilterArea(filters.areaMax)
+    const area = Number(property.area_m2 || 0)
+
+    if (!matchesPurpose(property, filters.offer)) return false
+    if (!matchesPropertyType(property, filters.type)) return false
+    if (presetMin > 0 && (!price || price < presetMin)) return false
+    if (presetMax > 0 && (!price || price > presetMax)) return false
+    if (priceMin > 0 && (!price || price < priceMin)) return false
+    if (priceMax > 0 && (!price || price > priceMax)) return false
+    if (filters.bedroomsMin > 0 && Number(property.bedrooms || 0) < filters.bedroomsMin) return false
+    if (filters.suitesMin > 0 && Number(property.suites || 0) < filters.suitesMin) return false
+    if (filters.parkingMin > 0 && Number(property.parking_spaces || 0) < filters.parkingMin) return false
+    if (areaMin > 0 && (!area || area < areaMin)) return false
+    if (areaMax > 0 && (!area || area > areaMax)) return false
+    if (filters.features.some(feature => !matchesFeature(property, feature))) return false
+
+    return true
+}
+
+function buildSearchParamsFromFilters(filters: MapSearchFilters) {
+    const params = new URLSearchParams()
+    const tagFeatures = filters.features.filter(feature => ['frente-mar', 'lancamento', 'mobiliado'].includes(feature))
+
+    if (filters.offer) params.set('offer', filters.offer)
+    if (filters.type) params.set('type', filters.type)
+    if (filters.pricePreset) params.set('price', filters.pricePreset)
+    if (!filters.pricePreset && filters.priceMin) params.set('priceMin', String(parseFilterNumber(filters.priceMin)))
+    if (!filters.pricePreset && filters.priceMax) params.set('priceMax', String(parseFilterNumber(filters.priceMax)))
+    if (filters.bedroomsMin > 0) params.set('bedroomsMin', String(filters.bedroomsMin))
+    if (filters.suitesMin > 0) params.set('suitesMin', String(filters.suitesMin))
+    if (filters.parkingMin > 0) params.set('parkingMin', String(filters.parkingMin))
+    if (filters.areaMin) params.set('areaMin', String(parseFilterArea(filters.areaMin)))
+    if (filters.areaMax) params.set('areaMax', String(parseFilterArea(filters.areaMax)))
+    if (filters.features.includes('exclusive')) params.set('exclusive', 'true')
+    if (filters.features.includes('premium')) {
+        const currentMin = Number(params.get('priceMin') || 0)
+        if (!filters.pricePreset && currentMin < 5000000) params.set('priceMin', '5000000')
+    }
+    if (tagFeatures.length === 1) params.set('tag', tagFeatures[0])
+    if (tagFeatures.length > 1) params.set('tags', tagFeatures.join(','))
+
+    return params
+}
+
+function countActiveSearchFilters(filters: MapSearchFilters) {
+    return [
+        filters.offer,
+        filters.type,
+        filters.pricePreset,
+        filters.priceMin,
+        filters.priceMax,
+        filters.bedroomsMin > 0 ? filters.bedroomsMin : '',
+        filters.suitesMin > 0 ? filters.suitesMin : '',
+        filters.parkingMin > 0 ? filters.parkingMin : '',
+        filters.areaMin,
+        filters.areaMax,
+        ...filters.features,
+    ].filter(Boolean).length
 }
 
 function matchesQuickFilter(item: MappedProperty, filter: QuickFilter) {
@@ -1516,9 +1711,11 @@ export default function PropertyMap({
     initialMapStyle = 'luxury',
     overviewMode = false,
     fixedOverviewView = null,
+    onSearchFiltersApply,
 }: PropertyMapProps) {
     const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
+    const [searchFilters, setSearchFilters] = useState<MapSearchFilters>(EMPTY_SEARCH_FILTERS)
     const [mobileControlsOpen, setMobileControlsOpen] = useState(false)
     const [drawModeEnabled, setDrawModeEnabled] = useState(false)
     const [mapOptionsOpen, setMapOptionsOpen] = useState(false)
@@ -1540,8 +1737,8 @@ export default function PropertyMap({
     )
 
     const filteredProperties = useMemo(
-        () => validProperties.filter(item => matchesQuickFilter(item, quickFilter)),
-        [validProperties, quickFilter]
+        () => validProperties.filter(item => matchesQuickFilter(item, quickFilter) && matchesSearchFilters(item, searchFilters)),
+        [validProperties, quickFilter, searchFilters]
     )
     const focusAreaPoints = useMemo(() => {
         if (drawArea && drawArea.length >= 3) return drawArea
@@ -1590,10 +1787,65 @@ export default function PropertyMap({
         setMobileControlsOpen(false)
     }
 
+    const updateSearchFilter = <Key extends keyof MapSearchFilters>(key: Key, value: MapSearchFilters[Key]) => {
+        setSearchFilters(current => ({ ...current, [key]: value }))
+    }
+
+    const handleNumberFilterSelect = (key: NumericFilterKey, value: number) => {
+        setSearchFilters(current => ({
+            ...current,
+            [key]: current[key] === value ? 0 : value,
+        }))
+    }
+
+    const handleFeatureToggle = (feature: string) => {
+        setSearchFilters(current => ({
+            ...current,
+            features: current.features.includes(feature)
+                ? current.features.filter(item => item !== feature)
+                : [...current.features, feature],
+        }))
+    }
+
+    const searchFiltersWithQuickFilter = useMemo(() => {
+        const features = new Set(searchFilters.features)
+
+        if (quickFilter === 'exclusive') features.add('exclusive')
+        if (quickFilter === 'waterfront') features.add('frente-mar')
+        if (quickFilter === 'launch') features.add('lancamento')
+        if (quickFilter === 'premium') features.add('premium')
+
+        return { ...searchFilters, features: Array.from(features) }
+    }, [quickFilter, searchFilters])
+
+    const handleSearchFilterReset = () => {
+        setQuickFilter('all')
+        setSearchFilters({ ...EMPTY_SEARCH_FILTERS, features: [] })
+        setActiveContextLayers([])
+        setActiveAmenityLayers([])
+        void trackEvent('property_map_filters_reset', {
+            previous_filter_count: activeSearchFilterCount,
+            previous_layer_count: activeLayerCount,
+        })
+    }
+
+    const handleSearchFiltersApply = () => {
+        const params = buildSearchParamsFromFilters(searchFiltersWithQuickFilter)
+
+        void trackEvent('property_map_filters_applied', {
+            filter_count: countActiveSearchFilters(searchFiltersWithQuickFilter),
+            layer_count: activeLayerCount,
+            results_count: filteredProperties.length,
+            total_count: validProperties.length,
+        })
+
+        onSearchFiltersApply?.(searchFiltersWithQuickFilter, params)
+        setMapOptionsOpen(false)
+    }
+
     const handleMapStyleChange = (style: MapStyle) => {
         const option = MAP_STYLES.find(item => item.value === style)
         setMapStyle(style)
-        setMapOptionsOpen(false)
         void trackEvent('property_map_style_changed', {
             style,
             style_label: option?.label || style,
@@ -1775,7 +2027,9 @@ export default function PropertyMap({
         }
     }, [])
 
+    const activeSearchFilterCount = countActiveSearchFilters(searchFilters) + (quickFilter !== 'all' ? 1 : 0)
     const activeLayerCount = activeContextLayers.length + activeAmenityLayers.length
+    const activeMapOptionCount = activeSearchFilterCount + activeLayerCount
     const shouldShowControlHints = showControlHints && !officeMarker
 
     return (
@@ -1883,7 +2137,7 @@ export default function PropertyMap({
             <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa" onPointerDown={showControlHintsTemporarily}>
                 <button
                     type="button"
-                    className={`${mapOptionsOpen ? 'active' : ''}${activeLayerCount > 0 ? ' has-active-layers' : ''}`}
+                    className={`${mapOptionsOpen ? 'active' : ''}${activeMapOptionCount > 0 ? ' has-active-layers' : ''}`}
                     aria-label="Abrir opções do mapa"
                     aria-expanded={mapOptionsOpen}
                     title="Opções do mapa"
@@ -1894,9 +2148,9 @@ export default function PropertyMap({
                     }}
                 >
                     <Globe2 size={24} />
-                    {activeLayerCount > 0 && (
-                        <strong className="map-mobile-action-count" aria-label={`${activeLayerCount} filtros ativos`}>
-                            {activeLayerCount}
+                    {activeMapOptionCount > 0 && (
+                        <strong className="map-mobile-action-count" aria-label={`${activeMapOptionCount} filtros ativos`}>
+                            {activeMapOptionCount}
                         </strong>
                     )}
                     <span>Mapa</span>
@@ -1940,89 +2194,334 @@ export default function PropertyMap({
                         onPointerUp={event => event.stopPropagation()}
                     >
                         <header>
-                            <h2>Opções do mapa</h2>
-                            <button
-                                type="button"
-                                aria-label="Fechar opções do mapa"
-                                onClick={event => {
-                                    event.stopPropagation()
-                                    setMapOptionsOpen(false)
-                                }}
-                                onPointerDown={event => event.stopPropagation()}
-                                onPointerUp={event => {
-                                    event.stopPropagation()
-                                }}
-                            >
-                                <X size={25} />
-                            </button>
-                        </header>
-                        <div className="map-options-style-row" role="group" aria-label="Visualização do mapa">
-                            {MAP_OPTION_STYLES.map(style => (
+                            <div className="map-options-title">
+                                <h2>Filtros do mapa</h2>
+                                <p>{filteredProperties.length} imóveis visíveis</p>
+                            </div>
+                            <div className="map-options-header-actions">
+                                {activeMapOptionCount > 0 && (
+                                    <strong className="map-options-active-count">{activeMapOptionCount}</strong>
+                                )}
                                 <button
-                                    key={style.value}
                                     type="button"
-                                    className={mapStyle === style.value ? 'active' : ''}
-                                    aria-pressed={mapStyle === style.value}
-                                    onClick={() => handleMapStyleChange(style.value)}
+                                    className="map-options-reset-button"
+                                    aria-label="Limpar filtros do mapa"
+                                    onClick={event => {
+                                        event.stopPropagation()
+                                        handleSearchFilterReset()
+                                    }}
+                                    onPointerDown={event => event.stopPropagation()}
                                 >
-                                    {getMapOptionIcon(style.icon)}
-                                    <span>{style.label}</span>
+                                    <RotateCcw size={18} />
                                 </button>
-                            ))}
-                        </div>
-                        <div className="map-options-divider" />
-                        <div className="map-options-section">
-                            <h3>Riscos e entorno</h3>
-                            <div className="map-context-grid" role="group" aria-label="Camadas de risco e entorno">
-                                {MAP_CONTEXT_LAYERS.map(layer => (
-                                    <button
-                                        key={layer.value}
-                                        type="button"
-                                        className={activeContextLayers.includes(layer.value) ? 'active' : ''}
-                                        aria-pressed={activeContextLayers.includes(layer.value)}
-                                        onClick={() => handleContextLayerToggle(layer.value)}
-                                    >
-                                        {getContextLayerIcon(layer.icon)}
-                                        <span>{layer.label}</span>
-                                    </button>
-                                ))}
+                                <button
+                                    type="button"
+                                    className="map-options-close-button"
+                                    aria-label="Fechar filtros do mapa"
+                                    onClick={event => {
+                                        event.stopPropagation()
+                                        setMapOptionsOpen(false)
+                                    }}
+                                    onPointerDown={event => event.stopPropagation()}
+                                    onPointerUp={event => {
+                                        event.stopPropagation()
+                                    }}
+                                >
+                                    <X size={25} />
+                                </button>
                             </div>
+                        </header>
+
+                        <div className="map-filter-summary">
+                            <span>{validProperties.length} imóveis no mapa</span>
+                            <strong>{filteredProperties.length}</strong>
                         </div>
-                        <div className="map-options-section">
-                            <h3>Benefícios próximos</h3>
-                            <div className="map-amenity-grid" role="group" aria-label="Benefícios próximos no mapa">
-                                {MAP_AMENITY_LAYERS.map(layer => {
-                                    const Icon = MAP_AMENITY_ICONS[layer.value] || MapPin
-                                    return (
+
+                        <div className="map-options-body">
+                            <details className="map-filter-group">
+                                <summary>
+                                    <span>Mapa</span>
+                                    <small>{MAP_OPTION_STYLES.find(style => style.value === mapStyle)?.label || 'Leaflet'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-options-style-row" role="group" aria-label="Visualização do mapa">
+                                    {MAP_OPTION_STYLES.map(style => (
                                         <button
-                                            key={layer.value}
+                                            key={style.value}
                                             type="button"
-                                            className={activeAmenityLayers.includes(layer.value) ? 'active' : ''}
-                                            aria-pressed={activeAmenityLayers.includes(layer.value)}
-                                            onClick={() => handleAmenityLayerToggle(layer.value)}
+                                            className={mapStyle === style.value ? 'active' : ''}
+                                            aria-pressed={mapStyle === style.value}
+                                            onClick={() => handleMapStyleChange(style.value)}
                                         >
-                                            <Icon size={17} />
-                                            <span>{layer.label}</span>
+                                            {getMapOptionIcon(style.icon)}
+                                            <span>{style.label}</span>
                                         </button>
-                                    )
-                                })}
-                            </div>
+                                    ))}
+                                </div>
+                            </details>
+
+                            <details className="map-filter-group" open>
+                                <summary>
+                                    <span>Perfil</span>
+                                    <small>{searchFilters.offer || searchFilters.type ? 'Ativo' : 'Todos'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-options-section">
+                                    <h3>Finalidade</h3>
+                                    <div className="map-options-filter-grid map-options-filter-grid--compact" role="group" aria-label="Finalidade">
+                                        <button
+                                            type="button"
+                                            className={!searchFilters.offer ? 'active' : ''}
+                                            aria-pressed={!searchFilters.offer}
+                                            onClick={() => updateSearchFilter('offer', null)}
+                                        >
+                                            Todos
+                                        </button>
+                                        {PURPOSE_FILTERS.map(option => (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                className={searchFilters.offer === option.value ? 'active' : ''}
+                                                aria-pressed={searchFilters.offer === option.value}
+                                                onClick={() => updateSearchFilter('offer', searchFilters.offer === option.value ? null : option.value)}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="map-options-section">
+                                    <h3>Tipo de imóvel</h3>
+                                    <div className="map-options-filter-grid" role="group" aria-label="Tipo de imóvel">
+                                        {PROPERTY_TYPE_FILTERS.map(option => (
+                                            <button
+                                                key={option.value || 'all'}
+                                                type="button"
+                                                className={(searchFilters.type || '') === option.value ? 'active' : ''}
+                                                aria-pressed={(searchFilters.type || '') === option.value}
+                                                onClick={() => updateSearchFilter('type', option.value || null)}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details className="map-filter-group">
+                                <summary>
+                                    <span>Preço e área</span>
+                                    <small>{searchFilters.pricePreset || searchFilters.priceMin || searchFilters.priceMax || searchFilters.areaMin || searchFilters.areaMax ? 'Ativo' : 'Livre'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-options-section">
+                                    <h3>Faixa de preço</h3>
+                                    <div className="map-options-filter-grid" role="group" aria-label="Faixa de preço">
+                                        {PRICE_PRESET_FILTERS.map(option => (
+                                            <button
+                                                key={option.value || 'all'}
+                                                type="button"
+                                                className={searchFilters.pricePreset === option.value ? 'active' : ''}
+                                                aria-pressed={searchFilters.pricePreset === option.value}
+                                                onClick={() => setSearchFilters(current => ({
+                                                    ...current,
+                                                    pricePreset: option.value,
+                                                    priceMin: option.value ? '' : current.priceMin,
+                                                    priceMax: option.value ? '' : current.priceMax,
+                                                }))}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="map-filter-input-row">
+                                        <label>
+                                            <span>Mínimo</span>
+                                            <input
+                                                inputMode="numeric"
+                                                placeholder="R$"
+                                                value={searchFilters.priceMin}
+                                                onChange={event => setSearchFilters(current => ({ ...current, pricePreset: '', priceMin: event.target.value }))}
+                                            />
+                                        </label>
+                                        <label>
+                                            <span>Máximo</span>
+                                            <input
+                                                inputMode="numeric"
+                                                placeholder="R$"
+                                                value={searchFilters.priceMax}
+                                                onChange={event => setSearchFilters(current => ({ ...current, pricePreset: '', priceMax: event.target.value }))}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="map-options-section">
+                                    <h3>Área total</h3>
+                                    <div className="map-filter-input-row">
+                                        <label>
+                                            <span>Mínima</span>
+                                            <input
+                                                inputMode="numeric"
+                                                placeholder="m²"
+                                                value={searchFilters.areaMin}
+                                                onChange={event => updateSearchFilter('areaMin', event.target.value)}
+                                            />
+                                        </label>
+                                        <label>
+                                            <span>Máxima</span>
+                                            <input
+                                                inputMode="numeric"
+                                                placeholder="m²"
+                                                value={searchFilters.areaMax}
+                                                onChange={event => updateSearchFilter('areaMax', event.target.value)}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details className="map-filter-group">
+                                <summary>
+                                    <span>Quartos e vagas</span>
+                                    <small>{searchFilters.bedroomsMin || searchFilters.suitesMin || searchFilters.parkingMin ? 'Ativo' : 'Qualquer'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-step-filter">
+                                    <span><Bed size={15} /> Dormitórios</span>
+                                    <div role="group" aria-label="Dormitórios">
+                                        {STEP_FILTERS.map(value => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                className={searchFilters.bedroomsMin === value ? 'active' : ''}
+                                                aria-pressed={searchFilters.bedroomsMin === value}
+                                                onClick={() => handleNumberFilterSelect('bedroomsMin', value)}
+                                            >
+                                                {value}+
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="map-step-filter">
+                                    <span><Bath size={15} /> Suítes</span>
+                                    <div role="group" aria-label="Suítes">
+                                        {STEP_FILTERS.map(value => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                className={searchFilters.suitesMin === value ? 'active' : ''}
+                                                aria-pressed={searchFilters.suitesMin === value}
+                                                onClick={() => handleNumberFilterSelect('suitesMin', value)}
+                                            >
+                                                {value}+
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="map-step-filter">
+                                    <span><Car size={15} /> Garagens</span>
+                                    <div role="group" aria-label="Garagens">
+                                        {STEP_FILTERS.map(value => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                className={searchFilters.parkingMin === value ? 'active' : ''}
+                                                aria-pressed={searchFilters.parkingMin === value}
+                                                onClick={() => handleNumberFilterSelect('parkingMin', value)}
+                                            >
+                                                {value}+
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details className="map-filter-group">
+                                <summary>
+                                    <span>Diferenciais</span>
+                                    <small>{searchFilters.features.length || quickFilter !== 'all' ? 'Ativo' : 'Todos'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-options-filter-grid" role="group" aria-label="Diferenciais">
+                                    {QUICK_FILTERS.map(filter => (
+                                        <button
+                                            key={filter.value}
+                                            type="button"
+                                            className={quickFilter === filter.value ? 'active' : ''}
+                                            aria-pressed={quickFilter === filter.value}
+                                            onClick={() => handleQuickFilterChange(filter.value)}
+                                        >
+                                            {filter.label}
+                                        </button>
+                                    ))}
+                                    {FEATURE_FILTERS.filter(feature => !['exclusive', 'frente-mar', 'lancamento', 'premium'].includes(feature.value)).map(feature => (
+                                        <button
+                                            key={feature.value}
+                                            type="button"
+                                            className={searchFilters.features.includes(feature.value) ? 'active' : ''}
+                                            aria-pressed={searchFilters.features.includes(feature.value)}
+                                            onClick={() => handleFeatureToggle(feature.value)}
+                                        >
+                                            {feature.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </details>
+
+                            <details className="map-filter-group">
+                                <summary>
+                                    <span>Entorno</span>
+                                    <small>{activeLayerCount ? `${activeLayerCount} ativos` : 'Opcional'}</small>
+                                    <ChevronDown size={17} />
+                                </summary>
+                                <div className="map-options-section">
+                                    <h3>Riscos e entorno</h3>
+                                    <div className="map-context-grid" role="group" aria-label="Camadas de risco e entorno">
+                                        {MAP_CONTEXT_LAYERS.map(layer => (
+                                            <button
+                                                key={layer.value}
+                                                type="button"
+                                                className={activeContextLayers.includes(layer.value) ? 'active' : ''}
+                                                aria-pressed={activeContextLayers.includes(layer.value)}
+                                                onClick={() => handleContextLayerToggle(layer.value)}
+                                            >
+                                                {getContextLayerIcon(layer.icon)}
+                                                <span>{layer.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="map-options-section">
+                                    <h3>Benefícios próximos</h3>
+                                    <div className="map-amenity-grid" role="group" aria-label="Benefícios próximos no mapa">
+                                        {MAP_AMENITY_LAYERS.map(layer => {
+                                            const Icon = MAP_AMENITY_ICONS[layer.value] || MapPin
+                                            return (
+                                                <button
+                                                    key={layer.value}
+                                                    type="button"
+                                                    className={activeAmenityLayers.includes(layer.value) ? 'active' : ''}
+                                                    aria-pressed={activeAmenityLayers.includes(layer.value)}
+                                                    onClick={() => handleAmenityLayerToggle(layer.value)}
+                                                >
+                                                    <Icon size={17} />
+                                                    <span>{layer.label}</span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            </details>
                         </div>
-                        <div className="map-options-section">
-                            <h3>Filtros rapidos</h3>
-                            <div className="map-options-filter-grid" role="group" aria-label="Filtros rapidos do mapa">
-                                {QUICK_FILTERS.map(filter => (
-                                    <button
-                                        key={filter.value}
-                                        type="button"
-                                        className={quickFilter === filter.value ? 'active' : ''}
-                                        onClick={() => handleQuickFilterChange(filter.value)}
-                                    >
-                                        {filter.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+
+                        <footer className="map-options-footer">
+                            <button type="button" onClick={handleSearchFilterReset}>
+                                Limpar
+                            </button>
+                            <button type="button" onClick={handleSearchFiltersApply}>
+                                Ver {filteredProperties.length} imóveis
+                            </button>
+                        </footer>
                     </section>
                 </div>
             ), mapOptionsPortalRoot)}
@@ -2473,7 +2972,7 @@ export default function PropertyMap({
                     display: block;
                     position: fixed;
                     inset: 0;
-                    z-index: 7000;
+                    z-index: 10040;
                     background: transparent;
                     backdrop-filter: blur(1px);
                     pointer-events: auto;
@@ -2502,6 +3001,11 @@ export default function PropertyMap({
                     justify-content: space-between;
                     gap: 12px;
                 }
+                .map-options-title {
+                    display: grid;
+                    gap: 4px;
+                    min-width: 0;
+                }
                 .map-options-sheet h2,
                 .map-options-sheet h3 {
                     margin: 0;
@@ -2514,17 +3018,116 @@ export default function PropertyMap({
                 .map-options-sheet h3 {
                     font: 950 1.18rem/1.1 'Inter', sans-serif;
                 }
-                .map-options-sheet header button {
+                .map-options-title p {
+                    margin: 0;
+                    color: #6a7178;
+                    font: 850 0.78rem/1.2 'Inter', sans-serif;
+                }
+                .map-options-header-actions {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 0 0 auto;
+                }
+                .map-options-active-count {
+                    display: grid;
+                    min-width: 25px;
+                    height: 25px;
+                    place-items: center;
+                    padding: 0 7px;
+                    border-radius: 999px;
+                    background: #171410;
+                    color: #dfc18e;
+                    font: 950 0.68rem/1 'Inter', sans-serif;
+                }
+                .map-options-sheet header button,
+                .map-options-footer button {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
+                    cursor: pointer;
+                    font-family: 'Inter', sans-serif;
+                }
+                .map-options-sheet header button {
                     width: 46px;
                     height: 46px;
                     border: 0;
                     border-radius: 999px;
                     background: #fff;
                     color: #202326;
+                }
+                .map-options-reset-button {
+                    border: 1px solid rgba(18,24,30,0.1) !important;
+                    background: #f6f7f8 !important;
+                    color: #2b3035 !important;
+                }
+                .map-options-close-button {
+                    background: #fff !important;
+                }
+                .map-filter-summary {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    min-height: 42px;
+                    padding: 0 14px;
+                    border: 1px solid rgba(184,148,95,0.2);
+                    border-radius: 14px;
+                    background: linear-gradient(180deg, #fff8ea, #f8f3e8);
+                    color: #5d3e16;
+                }
+                .map-filter-summary span {
+                    font: 900 0.78rem/1 'Inter', sans-serif;
+                }
+                .map-filter-summary strong {
+                    font: 950 1.06rem/1 'Inter', sans-serif;
+                }
+                .map-options-body {
+                    display: grid;
+                    gap: 10px;
+                    padding-bottom: 78px;
+                }
+                .map-filter-group {
+                    overflow: hidden;
+                    border: 1px solid #e2e6ea;
+                    border-radius: 14px;
+                    background: #fff;
+                }
+                .map-filter-group summary {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto auto;
+                    align-items: center;
+                    gap: 10px;
+                    min-height: 48px;
+                    padding: 0 13px;
+                    color: #202326;
                     cursor: pointer;
+                    list-style: none;
+                    font: 950 0.88rem/1 'Inter', sans-serif;
+                }
+                .map-filter-group summary::-webkit-details-marker {
+                    display: none;
+                }
+                .map-filter-group summary small {
+                    color: #7d858c;
+                    font: 850 0.66rem/1 'Inter', sans-serif;
+                    white-space: nowrap;
+                }
+                .map-filter-group summary svg {
+                    color: #7d858c;
+                    transition: transform 0.18s ease;
+                }
+                .map-filter-group[open] summary {
+                    border-bottom: 1px solid #edf0f2;
+                }
+                .map-filter-group[open] summary svg {
+                    transform: rotate(180deg);
+                }
+                .map-filter-group > .map-options-section,
+                .map-filter-group > .map-step-filter,
+                .map-filter-group > .map-options-filter-grid,
+                .map-filter-group > .map-options-style-row {
+                    margin: 12px;
                 }
                 .map-options-style-row {
                     display: grid;
@@ -2559,12 +3162,20 @@ export default function PropertyMap({
                     display: grid;
                     gap: 12px;
                 }
+                .map-options-section + .map-options-section,
+                .map-step-filter + .map-step-filter {
+                    margin-top: 0;
+                    padding-top: 0;
+                }
                 .map-context-grid,
                 .map-amenity-grid,
                 .map-options-filter-grid {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 10px;
+                }
+                .map-options-filter-grid--compact button {
+                    flex: 1 1 88px;
                 }
                 .map-context-grid button,
                 .map-amenity-grid button,
@@ -2589,6 +3200,93 @@ export default function PropertyMap({
                     background: linear-gradient(180deg, #fff8ea, #f4ead7);
                     color: #5d3e16;
                     box-shadow: 0 8px 18px rgba(184,148,95,0.14);
+                }
+                .map-filter-input-row {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 10px;
+                }
+                .map-filter-input-row label {
+                    display: grid;
+                    gap: 6px;
+                    min-width: 0;
+                    color: #3d4349;
+                    font: 850 0.72rem/1 'Inter', sans-serif;
+                }
+                .map-filter-input-row input {
+                    min-width: 0;
+                    width: 100%;
+                    height: 40px;
+                    padding: 0 11px;
+                    border: 1.5px solid #d8dde3;
+                    border-radius: 10px;
+                    background: #fff;
+                    color: #202326;
+                    font: 850 0.82rem/1 'Inter', sans-serif;
+                    outline: none;
+                }
+                .map-filter-input-row input:focus {
+                    border-color: #b8945f;
+                    box-shadow: 0 0 0 3px rgba(184,148,95,0.14);
+                }
+                .map-step-filter {
+                    display: grid;
+                    gap: 9px;
+                }
+                .map-step-filter > span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    color: #3d4349;
+                    font: 950 0.78rem/1 'Inter', sans-serif;
+                }
+                .map-step-filter > div {
+                    display: grid;
+                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    gap: 7px;
+                }
+                .map-step-filter button {
+                    min-width: 0;
+                    height: 38px;
+                    border: 1.5px solid #d8dde3;
+                    border-radius: 10px;
+                    background: #fff;
+                    color: #2b3035;
+                    cursor: pointer;
+                    font: 950 0.78rem/1 'Inter', sans-serif;
+                }
+                .map-step-filter button.active {
+                    border-color: #b8945f;
+                    background: linear-gradient(180deg, #fff8ea, #f4ead7);
+                    color: #5d3e16;
+                    box-shadow: 0 8px 18px rgba(184,148,95,0.14);
+                }
+                .map-options-footer {
+                    position: sticky;
+                    bottom: 0;
+                    display: grid;
+                    grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+                    gap: 9px;
+                    margin: 2px -4px -4px;
+                    padding: 10px 4px 4px;
+                    background: linear-gradient(180deg, rgba(255,255,255,0.82), #fff 45%);
+                }
+                .map-options-footer button {
+                    min-width: 0;
+                    min-height: 44px;
+                    border-radius: 12px;
+                    font: 950 0.82rem/1 'Inter', sans-serif;
+                }
+                .map-options-footer button:first-child {
+                    border: 1.5px solid #d8dde3;
+                    background: #fff;
+                    color: #2b3035;
+                }
+                .map-options-footer button:last-child {
+                    border: 1.5px solid rgba(184,148,95,0.42);
+                    background: linear-gradient(135deg, #dfc18e, #b8945f);
+                    color: #101010;
+                    box-shadow: 0 12px 24px rgba(184,148,95,0.18);
                 }
                 @keyframes mapOptionsRise {
                     from { transform: translateY(24px); opacity: 0; }
@@ -3378,7 +4076,7 @@ export default function PropertyMap({
                         display: block;
                         position: fixed;
                         inset: 0;
-                        z-index: 7000;
+                        z-index: 10040;
                         background: rgba(15,18,22,0.42);
                         padding: 10px;
                         pointer-events: auto;

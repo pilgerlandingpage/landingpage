@@ -22,7 +22,7 @@ import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
 import MapPropertyPreviewCard from './MapPropertyPreviewCard'
 import { orderPropertiesBySmoothGeoPath } from './mapRecommendationOrder'
-import type { MapDrawArea, MapFixedView } from './PropertyMap'
+import type { MapDrawArea, MapFixedView, MapSearchFilters } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
@@ -1053,6 +1053,21 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
         router.push(destination)
     }, [buildSearchParams, finishGuidedSearch, getSearchSnapshot, isGuidedSearchActive, router])
 
+    const handleMapSearchFiltersApply = useCallback((filters: MapSearchFilters, params: URLSearchParams) => {
+        const queryString = params.toString()
+        const destination = queryString ? `/busca?${queryString}` : '/busca'
+
+        void trackEvent('home_map_filter_sheet_submitted', {
+            source: 'home_map_filter_sheet',
+            feature_count: filters.features.length,
+            has_type: Boolean(filters.type),
+            has_price: Boolean(filters.pricePreset || filters.priceMin || filters.priceMax),
+            destination,
+        })
+
+        router.push(destination)
+    }, [router])
+
     const applySearch = (event?: React.FormEvent) => {
         event?.preventDefault()
 
@@ -1249,6 +1264,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             fixedOverviewView={isMapInteractionLocked ? HOME_LOCKED_MAP_VIEW : null}
                             onPropertySelect={handleHomeMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
+                            onSearchFiltersApply={handleMapSearchFiltersApply}
                         />
                     ) : (
                         <div className="map-preview-placeholder" aria-hidden="true">
@@ -1481,6 +1497,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                                         initialMapStyle="luxury"
                                         onPropertySelect={handleHomeMapPropertySelect}
                                         onDrawAreaChange={handleDrawAreaChange}
+                                        onSearchFiltersApply={handleMapSearchFiltersApply}
                                     />
                                 ) : (
                                     <div className="map-preview-placeholder" aria-hidden="true">

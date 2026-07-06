@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { MapDrawArea, MapFixedView, MapStyle } from './PropertyMap'
+import type { MapDrawArea, MapFixedView, MapSearchFilters, MapStyle } from './PropertyMap'
 import type { MapRegionArea } from '@/lib/locations/map-regions'
 
 const PropertyMap = dynamic(
@@ -78,6 +78,7 @@ interface MapSearchProps {
     initialMapStyle?: MapStyle
     overviewMode?: boolean
     fixedOverviewView?: MapFixedView | null
+    onSearchFiltersApply?: (filters: MapSearchFilters, params: URLSearchParams) => void
 }
 
 export default function MapSearch({
@@ -97,6 +98,7 @@ export default function MapSearch({
     initialMapStyle = 'luxury',
     overviewMode = false,
     fixedOverviewView = null,
+    onSearchFiltersApply,
 }: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>
@@ -117,6 +119,7 @@ export default function MapSearch({
                 initialMapStyle={initialMapStyle}
                 overviewMode={overviewMode}
                 fixedOverviewView={fixedOverviewView}
+                onSearchFiltersApply={onSearchFiltersApply}
             />
         </div>
     )

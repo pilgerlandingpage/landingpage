@@ -1,10 +1,12 @@
 'use client'
 
 import { Building2, MapPin, Search, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import MapSearch from './MapSearch'
+import type { MapSearchFilters } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { trackEvent } from '@/lib/tracking/client'
@@ -208,6 +210,7 @@ export default function MobileMapSearchModal({
     defaultSource = 'property_details_mobile_nav',
     statFallback = 'Curadoria no mapa',
 }: MobileMapSearchModalProps) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [type, setType] = useState('all')
@@ -384,6 +387,22 @@ export default function MobileMapSearchModal({
         })
     }, [filteredProperties, pendingAreaBounds])
 
+    const handleMapSearchFiltersApply = useCallback((filters: MapSearchFilters, params: URLSearchParams) => {
+        const queryString = params.toString()
+        const destination = queryString ? `/busca?${queryString}` : '/busca'
+
+        void trackEvent('property_map_modal_filter_sheet_submitted', {
+            source: defaultSource,
+            feature_count: filters.features.length,
+            has_type: Boolean(filters.type),
+            has_price: Boolean(filters.pricePreset || filters.priceMin || filters.priceMax),
+            destination,
+        })
+
+        setIsOpen(false)
+        router.push(destination)
+    }, [defaultSource, router])
+
     useEffect(() => {
         const handleOpenMapSearch = (event: Event) => {
             event.preventDefault()
@@ -457,6 +476,7 @@ export default function MobileMapSearchModal({
                             initialMapStyle="luxury"
                             overviewMode={isMapLocked || isOfficeLocationSelected}
                             onUserBoundsChange={handleUserBoundsChange}
+                            onSearchFiltersApply={handleMapSearchFiltersApply}
                         />
 
                         {shouldShowSearchThisArea && (

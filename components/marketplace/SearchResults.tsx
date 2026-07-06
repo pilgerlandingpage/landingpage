@@ -11,7 +11,7 @@ import MapPropertyPreviewCard from './MapPropertyPreviewCard'
 import { orderPropertiesBySmoothGeoPath } from './mapRecommendationOrder'
 import SearchAlertsPanel from './SearchAlertsPanel'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
-import type { MapDrawArea } from './PropertyMap'
+import type { MapDrawArea, MapSearchFilters } from './PropertyMap'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { findMapRegionForSearchParams } from '@/lib/locations/map-regions'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
@@ -25,6 +25,21 @@ const OFFICE_SEARCH_PARAM_VALUE = '1'
 const MAP_PROPERTY_PARAM = 'mapProperty'
 const DRAW_AREA_PARAM = 'drawArea'
 const MAP_BOUNDS_PARAM = 'mapBounds'
+const MAP_FILTER_PARAM_KEYS = [
+    'offer',
+    'type',
+    'price',
+    'priceMin',
+    'priceMax',
+    'bedroomsMin',
+    'suitesMin',
+    'parkingMin',
+    'areaMin',
+    'areaMax',
+    'exclusive',
+    'tag',
+    'tags',
+]
 type SearchMemorySource = 'favorite' | 'history'
 const OFFICE_LOCATION_MARKER = {
     latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
@@ -219,6 +234,14 @@ function getFilterLabel(key: string, value: string) {
         'em-construcao': 'Em construcao',
         pronto: 'Pronto',
         mobiliado: 'Mobiliado',
+    }
+
+    if (key === 'tags') {
+        return value
+            .split(',')
+            .map(item => tagLabels[item] || item.replace(/-/g, ' '))
+            .filter(Boolean)
+            .join(' + ')
     }
 
     const labels: Record<string, string> = {
@@ -470,6 +493,29 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
 
         const query = params.toString()
         router.replace(`${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`, { scroll: false })
+    }, [router, searchParams])
+
+    const handleMapSearchFiltersApply = useCallback((filters: MapSearchFilters, nextFilters: URLSearchParams) => {
+        const params = new URLSearchParams(searchParams.toString())
+
+        MAP_FILTER_PARAM_KEYS.forEach(key => params.delete(key))
+        params.delete(MAP_PROPERTY_PARAM)
+
+        nextFilters.forEach((value, key) => {
+            if (value) params.set(key, value)
+        })
+
+        const query = params.toString()
+        const destination = `${window.location.pathname}${query ? `?${query}` : ''}`
+
+        void trackEvent('search_results_map_filters_applied', {
+            feature_count: filters.features.length,
+            has_type: Boolean(filters.type),
+            has_price: Boolean(filters.pricePreset || filters.priceMin || filters.priceMax),
+            destination,
+        })
+
+        router.replace(`${destination}${window.location.hash}`, { scroll: false })
     }, [router, searchParams])
 
     const handleCardHover = useCallback((id: string | null) => {
@@ -1229,6 +1275,7 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                             onMarkerHover={handleMarkerHover}
                             onPropertySelect={handleMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
+                            onSearchFiltersApply={handleMapSearchFiltersApply}
                             refitKey={mapViewKey}
                             officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
                             initialMapStyle="luxury"
