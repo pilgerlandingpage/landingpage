@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import {
     ArrowRight,
@@ -25,6 +26,7 @@ import {
     ShieldCheck,
     Sparkles,
     Waves,
+    X,
 } from 'lucide-react'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import Footer from '@/components/layout/Footer'
@@ -62,6 +64,8 @@ type Development = {
     heroImage: string
     description: string
     address: string
+    latitude?: number | null
+    longitude?: number | null
     benefits: Array<{ title: string; description: string; icon: 'ShieldCheck' | 'Waves' | 'Dumbbell' | 'Lock' | 'Compass' | 'Building2' | 'KeyRound' }>
     differentials: Array<{ title: string; description: string }>
     units: Unit[]
@@ -83,6 +87,8 @@ type UnitPropertyMedia = {
     images?: string[] | null
 }
 
+type DevelopmentLocationMode = 'map' | 'street'
+
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
 const DEVELOPMENTS: Development[] = [
     {
@@ -99,6 +105,8 @@ const DEVELOPMENTS: Development[] = [
         heroImage: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
         description: 'Um empreendimento de poucas unidades na Praia Brava, pensado para quem busca privacidade, arquitetura autoral e uma experiencia residencial com leitura de patrimonio.',
         address: 'Av. Carlos Drummond de Andrade, 111 - Praia Brava',
+        latitude: -26.95665680834595,
+        longitude: -48.62979654548911,
         benefits: [
             { title: 'Privacidade e Exclusividade', description: 'Poucas unidades, plantas amplas e uma atmosfera residencial reservada.', icon: 'ShieldCheck' },
             { title: 'Lazer com Essencia de Resort', description: 'Piscina, salao de festas, espaco gourmet, fitness e areas sociais integradas.', icon: 'Waves' },
@@ -343,6 +351,11 @@ function asNumber(value: unknown, fallback = 0) {
     return Number.isFinite(number) ? number : fallback
 }
 
+function asOptionalNumber(value: unknown) {
+    const number = typeof value === 'number' ? value : Number(String(value ?? '').replace(',', '.'))
+    return Number.isFinite(number) ? number : null
+}
+
 function normalizeUnit(value: unknown): Unit | null {
     if (!isRecord(value)) return null
 
@@ -458,6 +471,8 @@ function normalizeDevelopment(value: unknown): Development | null {
         heroImage: asText(value.heroImage ?? value.hero_image, fallback?.heroImage || gallery[0]?.image || '/placeholder-house.jpg'),
         description: asText(value.description, fallback?.description || 'Empreendimento selecionado pela curadoria Guilherme Pilger.'),
         address: asText(value.address, fallback?.address || asText(value.locationName ?? value.location_name, 'Santa Catarina')),
+        latitude: asOptionalNumber(value.latitude ?? value.lat ?? value.location_latitude) ?? fallback?.latitude ?? null,
+        longitude: asOptionalNumber(value.longitude ?? value.lng ?? value.lon ?? value.location_longitude) ?? fallback?.longitude ?? null,
         benefits: benefits.length ? benefits : (fallback?.benefits || []),
         differentials: differentials.length ? differentials : (fallback?.differentials || []),
         units: units.length ? units : (fallback?.units || []),
@@ -522,10 +537,18 @@ function mapQueryFor(development: Development) {
 }
 
 function buildMapEmbedSrc(development: Development) {
-    return `https://maps.google.com/maps?q=${mapQueryFor(development)}&z=16&output=embed&hl=pt-BR`
+    const coordinates = development.latitude && development.longitude
+        ? `${development.latitude},${development.longitude}`
+        : ''
+    const query = coordinates ? encodeURIComponent(coordinates) : mapQueryFor(development)
+    return `https://maps.google.com/maps?q=${query}&z=16&output=embed&hl=pt-BR`
 }
 
 function buildStreetViewEmbedSrc(development: Development) {
+    if (development.latitude && development.longitude) {
+        return `https://maps.google.com/maps?layer=c&cbll=${development.latitude},${development.longitude}&cbp=12,0,0,0,0&output=svembed&hl=pt-BR`
+    }
+
     return `https://maps.google.com/maps?q=${mapQueryFor(development)}&layer=c&z=17&output=svembed&hl=pt-BR`
 }
 
@@ -560,6 +583,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const [editorialPosts, setEditorialPosts] = useState<HomeBlogPost[]>([])
     const [publicDevelopments, setPublicDevelopments] = useState<RelatedDevelopment[]>([])
     const [unitMediaBySlug, setUnitMediaBySlug] = useState<Record<string, UnitPropertyMedia>>({})
+    const [locationModal, setLocationModal] = useState<DevelopmentLocationMode | null>(null)
 
     const activeDev = useMemo(() => {
         const contentDevelopmentId = asText(content?.development_id, contentDevelopment?.id || DEFAULT_DEVELOPMENT_ID)
@@ -689,6 +713,41 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const decisionDifferentials = useMemo(() => buildDevelopmentDifferentials(activeDev), [activeDev])
     const mapEmbedSrc = useMemo(() => buildMapEmbedSrc(activeDev), [activeDev])
     const streetViewEmbedSrc = useMemo(() => buildStreetViewEmbedSrc(activeDev), [activeDev])
+    const locationMediaItems = useMemo(() => ([
+        {
+            mode: 'map' as const,
+            icon: MapPinned,
+            title: 'Mapa do entorno',
+            kicker: 'Mapa',
+            actionLabel: 'Ver mapa',
+            src: mapEmbedSrc,
+        },
+        {
+            mode: 'street' as const,
+            icon: Navigation,
+            title: 'Street View',
+            kicker: 'Rua e acesso',
+            actionLabel: 'Abrir',
+            src: streetViewEmbedSrc,
+        },
+    ]), [mapEmbedSrc, streetViewEmbedSrc])
+
+    useEffect(() => {
+        if (!locationModal) return
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setLocationModal(null)
+            }
+        }
+
+        document.body.classList.add('bc-location-modal-open')
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.body.classList.remove('bc-location-modal-open')
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [locationModal])
 
     const openChat = useCallback((unit?: Unit) => {
         if (!broker?.phone) return
@@ -743,13 +802,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             </p>
 
                             <div className="flex flex-col gap-4 sm:flex-row">
-                                <button
-                                    type="button"
-                                    onClick={() => openChat()}
-                                    className="rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
-                                >
-                                    Falar com especialista
-                                </button>
                                 <button
                                     type="button"
                                     onClick={handleScrollToUnits}
@@ -870,8 +922,17 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                     </div>
                                 </div>
                             ))}
-                            <DevelopmentMediaFrame icon={MapPinned} title="Mapa do entorno" kicker="Localizacao" src={mapEmbedSrc} />
-                            <DevelopmentMediaFrame icon={Navigation} title="Street View" kicker="Rua e acesso" src={streetViewEmbedSrc} />
+                            {locationMediaItems.map((item) => (
+                                <DevelopmentLocationFrame
+                                    key={item.mode}
+                                    actionLabel={item.actionLabel}
+                                    icon={item.icon}
+                                    kicker={item.kicker}
+                                    onOpen={() => setLocationModal(item.mode)}
+                                    src={item.src}
+                                    title={item.title}
+                                />
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -892,14 +953,14 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <Navigation size={15} />
                             </a>
                         </div>
-                        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 lg:col-span-8">
-                            <iframe
-                                title={`Mapa ${activeDev.name}`}
-                                src={`https://maps.google.com/maps?q=${encodeURIComponent(activeDev.address)}&z=15&output=embed&hl=pt-BR`}
-                                className="h-[420px] w-full grayscale"
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            />
+                        <div className="bc-location-address-card lg:col-span-8">
+                            <span>Mapa e Street View</span>
+                            <h3>Explore o entorno na galeria acima.</h3>
+                            <p>O mapa e a rua do empreendimento ficam juntos das fotos para comparar fachada, acesso e localizacao em uma unica leitura visual.</p>
+                            <button type="button" onClick={() => setLocationModal('map')}>
+                                Ver mapa em tela cheia
+                                <ArrowUpRight size={15} />
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -937,6 +998,16 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             </main>
 
             <Footer />
+
+            {locationModal && createPortal(
+                <DevelopmentLocationModal
+                    mode={locationModal}
+                    onClose={() => setLocationModal(null)}
+                    src={locationModal === 'street' ? streetViewEmbedSrc : mapEmbedSrc}
+                    title={locationModal === 'street' ? `Street View de ${activeDev.name}` : `Mapa de ${activeDev.name}`}
+                />,
+                document.body,
+            )}
 
             <div className="bc-floating-actions">
                 <button
@@ -1536,6 +1607,50 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     background: rgba(255, 255, 255, 0.74);
                 }
 
+                .bc-page #unidades-disponiveis article .bc-unit-photo::after {
+                    content: "";
+                    position: absolute;
+                    inset: auto 0 0;
+                    z-index: 1;
+                    height: 42%;
+                    background: linear-gradient(to top, rgba(10, 13, 16, 0.34), rgba(10, 13, 16, 0.12) 58%, transparent);
+                    pointer-events: none;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo > span:first-of-type {
+                    z-index: 5;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price {
+                    z-index: 2;
+                    max-width: calc(100% - 24px);
+                    border-radius: 6px;
+                    padding: 8px 10px;
+                    color: #ffffff;
+                    isolation: isolate;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    z-index: -1;
+                    border-radius: inherit;
+                    background: linear-gradient(180deg, rgba(10, 13, 16, 0.48), rgba(10, 13, 16, 0.62));
+                    box-shadow: 0 10px 24px rgba(10, 13, 16, 0.12);
+                    backdrop-filter: blur(2px);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p {
+                    position: relative;
+                    z-index: 1;
+                    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p:first-child {
+                    color: rgba(255, 255, 255, 0.66);
+                }
+
                 .bc-page #unidades-disponiveis article .bc-unit-photo-controls {
                     position: absolute;
                     inset: 0;
@@ -1775,6 +1890,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     object-fit: cover;
                 }
 
+                .bc-page main > section:nth-of-type(6) .bc-development-media-card iframe {
+                    pointer-events: none;
+                }
+
                 .bc-page main > section:nth-of-type(6) .bc-development-media-card:hover img {
                     transform: scale(1.05);
                 }
@@ -1816,6 +1935,41 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     line-height: 1.15;
                 }
 
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 3;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: flex-end;
+                    border: 0;
+                    background: linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.62));
+                    padding: 16px;
+                    color: #ffffff;
+                    cursor: pointer;
+                    text-align: left;
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    min-height: 34px;
+                    border-radius: 999px;
+                    background: rgba(31, 27, 21, 0.78);
+                    padding: 0 13px;
+                    color: #ffffff;
+                    font-size: 11px;
+                    font-weight: 900;
+                    letter-spacing: 0.02em;
+                    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+                    backdrop-filter: blur(8px);
+                }
+
+                .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit span svg {
+                    color: #d4af37;
+                }
+
                 .bc-page main > section:nth-of-type(7) {
                     border-top: 1px solid rgba(184, 148, 95, 0.16);
                     border-bottom: 1px solid rgba(184, 148, 95, 0.16);
@@ -1851,6 +2005,71 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: block;
                     border: 0;
                     filter: grayscale(1) contrast(0.9);
+                }
+
+                .bc-page .bc-location-address-card {
+                    min-height: 300px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    gap: 12px;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
+                    border-radius: 8px;
+                    background:
+                        linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(245, 239, 230, 0.72)),
+                        radial-gradient(circle at top right, rgba(212, 175, 55, 0.18), transparent 34%);
+                    padding: clamp(24px, 4vw, 44px);
+                    box-shadow: 0 18px 44px rgba(31, 27, 21, 0.08);
+                }
+
+                .bc-page .bc-location-address-card span {
+                    color: #b58a28;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 10px;
+                    font-weight: 850;
+                    letter-spacing: 0.2em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page .bc-location-address-card h3 {
+                    margin: 0;
+                    color: #211d18;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: clamp(1.55rem, 2.2vw, 2.3rem);
+                    font-weight: 420;
+                    line-height: 1.1;
+                }
+
+                .bc-page .bc-location-address-card p {
+                    max-width: 620px;
+                    margin: 0;
+                    color: #655f55;
+                    font-size: 14px;
+                    line-height: 1.65;
+                }
+
+                .bc-page .bc-location-address-card button {
+                    width: fit-content;
+                    margin-top: 6px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    border: 1px solid rgba(212, 175, 55, 0.55);
+                    border-radius: 999px;
+                    background: #d4af37;
+                    color: #11100d;
+                    padding: 12px 18px;
+                    font-size: 11px;
+                    font-weight: 950;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    cursor: pointer;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+
+                .bc-page .bc-location-address-card button:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 14px 28px rgba(212, 175, 55, 0.22);
                 }
 
                 .bc-page main > section:nth-of-type(8) {
@@ -2052,6 +2271,57 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     letter-spacing: 0.11em;
                 }
 
+                body.bc-location-modal-open {
+                    overflow: hidden;
+                }
+
+                .bc-location-modal {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(17, 13, 8, 0.72);
+                    padding: 24px;
+                    backdrop-filter: blur(8px);
+                }
+
+                .bc-location-modal-close {
+                    position: fixed;
+                    top: 18px;
+                    right: 18px;
+                    z-index: 2;
+                    width: 44px;
+                    height: 44px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(255, 255, 255, 0.32);
+                    border-radius: 999px;
+                    background: rgba(17, 13, 8, 0.72);
+                    color: #ffffff;
+                    cursor: pointer;
+                    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+                }
+
+                .bc-location-modal-body {
+                    width: min(1120px, 100%);
+                    height: min(76vh, 780px);
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.24);
+                    border-radius: 12px;
+                    background: #f5f1e8;
+                    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
+                }
+
+                .bc-location-modal-body iframe {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    border: 0;
+                }
+
                 @media (max-width: 1024px) {
                     .bc-page .bc-hero-metrics {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2233,16 +2503,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         letter-spacing: 0.08em;
                     }
 
-                    .bc-page #unidades-disponiveis article > div:first-child > div {
-                        padding: 34px 10px 10px;
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-price {
+                        bottom: 8px;
+                        left: 8px;
+                        max-width: calc(100% - 16px);
+                        padding: 6px 7px;
                     }
 
-                    .bc-page #unidades-disponiveis article > div:first-child > div p:first-child {
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-price p:first-child {
                         font-size: 7px;
                         letter-spacing: 0.12em;
                     }
 
-                    .bc-page #unidades-disponiveis article > div:first-child > div p:last-child {
+                    .bc-page #unidades-disponiveis article .bc-unit-photo-price p:last-child {
                         font-size: 14px;
                         line-height: 1.12;
                     }
@@ -2366,17 +2639,82 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         min-height: 240px;
                     }
 
-                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid {
-                        grid-template-columns: 1fr;
-                        gap: 12px;
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid,
+                    .bc-page main > section:nth-of-type(6) > div > .bc-development-media-grid,
+                    .bc-page main > section:nth-of-type(6) > div > div:last-child.bc-development-media-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 10px;
                     }
 
                     .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card,
-                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card:first-child {
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-grid > .bc-development-media-card:first-child,
+                    .bc-page main > section:nth-of-type(6) > div > .bc-development-media-grid > .bc-development-media-card {
                         grid-column: auto;
                         grid-row: auto;
-                        aspect-ratio: 4 / 3;
+                        aspect-ratio: 1 / 0.86;
                         min-height: 0;
+                        border-radius: 7px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-card--embed {
+                        min-height: 158px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label {
+                        left: 10px;
+                        right: 10px;
+                        bottom: 42px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label svg {
+                        width: 13px;
+                        height: 13px;
+                        margin-bottom: 2px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label span {
+                        font-size: 7px;
+                        letter-spacing: 0.12em;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-label strong {
+                        font-size: 14px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit {
+                        padding: 9px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit span {
+                        min-height: 28px;
+                        padding: 0 9px;
+                        font-size: 9px;
+                        gap: 5px;
+                    }
+
+                    .bc-page main > section:nth-of-type(6) .bc-development-media-frame-hit span svg {
+                        width: 12px;
+                        height: 12px;
+                    }
+
+                    .bc-page .bc-location-address-card {
+                        min-height: 220px;
+                    }
+
+                    .bc-location-modal {
+                        padding: 0;
+                    }
+
+                    .bc-location-modal-close {
+                        top: 12px;
+                        right: 12px;
+                    }
+
+                    .bc-location-modal-body {
+                        width: 100vw;
+                        height: 100dvh;
+                        border: 0;
+                        border-radius: 0;
                     }
 
                     .bc-page main > section:nth-of-type(7) iframe {
@@ -2439,24 +2777,58 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
     )
 }
 
-function DevelopmentMediaFrame({ icon: Icon, title, kicker, src }: {
+function DevelopmentLocationFrame({ icon: Icon, title, kicker, src, actionLabel, onOpen }: {
     icon: React.ComponentType<{ size?: number; className?: string }>
     title: string
     kicker: string
     src: string
+    actionLabel: string
+    onOpen: () => void
 }) {
     return (
-        <div className="bc-development-media-card bc-development-media-card--embed">
+        <article className="bc-development-media-card bc-development-media-card--embed">
             <iframe
                 title={`${kicker} ${title}`}
                 src={src}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
+                tabIndex={-1}
             />
             <div className="bc-development-media-frame-label">
                 <Icon size={15} />
                 <span>{kicker}</span>
                 <strong>{title}</strong>
+            </div>
+            <button type="button" className="bc-development-media-frame-hit" onClick={onOpen} aria-label={`Abrir ${title}`}>
+                <span>
+                    <Icon size={15} />
+                    {actionLabel}
+                </span>
+            </button>
+        </article>
+    )
+}
+
+function DevelopmentLocationModal({ mode, src, title, onClose }: {
+    mode: DevelopmentLocationMode
+    src: string
+    title: string
+    onClose: () => void
+}) {
+    return (
+        <div className={`bc-location-modal bc-location-modal--${mode}`} role="dialog" aria-modal="true" aria-label={title}>
+            <button type="button" className="bc-location-modal-close" onClick={onClose} aria-label="Fechar">
+                <X size={22} />
+            </button>
+            <div className="bc-location-modal-body">
+                <iframe
+                    title={title}
+                    src={src}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allow="fullscreen; geolocation"
+                    allowFullScreen
+                />
             </div>
         </div>
     )
@@ -2559,7 +2931,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
                         </div>
                     </div>
                 )}
-                <div className="bc-unit-photo-price absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0A0D10]/95 via-[#0A0D10]/55 to-transparent p-5">
+                <div className="bc-unit-photo-price absolute bottom-3 left-3">
                     <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-zinc-400">Preco estimado</p>
                     <p className="mt-1 font-serif text-xl text-white">{unit.price}</p>
                 </div>

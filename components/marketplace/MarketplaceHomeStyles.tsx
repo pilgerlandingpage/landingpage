@@ -1054,8 +1054,8 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           display: none;
         }
         .home-developments-showcase .premium-category-card {
-          flex: 0 0 min(25vw, 320px);
-          min-width: 240px;
+          flex: 0 0 calc((100% - 42px) / 4);
+          min-width: 0;
           min-height: 160px;
           scroll-snap-align: start;
         }
@@ -1849,6 +1849,12 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             aspect-ratio: 1 / 0.68;
             border-radius: 12px;
             scroll-snap-align: start;
+          }
+          .home-developments-showcase .premium-category-card {
+            flex: 0 0 calc(50% - 5px) !important;
+            min-width: calc(50% - 5px);
+            min-height: 0;
+            aspect-ratio: 1 / 0.68;
           }
           .premium-category-icon {
             top: 9px !important;
