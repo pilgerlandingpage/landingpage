@@ -285,7 +285,7 @@ export default function LandingPagesAdmin() {
     const hasActiveFilters = stageFilter !== 'all' || Boolean(searchQuery.trim())
 
     return (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 8px' }}>
+        <div className="landing-pages-admin-page">
             <div className="admin-header">
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -385,7 +385,7 @@ export default function LandingPagesAdmin() {
                         </button>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: 12 }}>
+                    <div className="landing-page-list">
                         {filteredPages.map((page) => {
                             const template = getTemplateInfo(page.content)
                             const selectedBroker = brokers.find(broker => broker.id === page.assigned_broker_id)
@@ -394,107 +394,93 @@ export default function LandingPagesAdmin() {
                             return (
                                 <div
                                     key={page.id}
-                                    className="chart-card"
+                                    className="chart-card landing-page-card"
                                     style={{
-                                        padding: '20px 24px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 20,
                                         borderLeft: `3px solid ${template.color}`,
                                     }}
                                 >
                                     {/* Template indicator */}
-                                    <div style={{
-                                        width: 48, height: 48, borderRadius: 8,
-                                        background: `${template.color}15`,
-                                        border: `1px solid ${template.color}30`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}>
+                                    <div
+                                        className="landing-page-template-icon"
+                                        style={{
+                                            background: `${template.color}15`,
+                                            border: `1px solid ${template.color}30`,
+                                        }}
+                                    >
                                         <FileText size={20} style={{ color: template.color }} />
                                     </div>
 
                                     {/* Info */}
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                                            <h4 style={{
-                                                fontSize: '1.05rem', color: 'var(--text-primary)',
-                                                margin: 0, fontFamily: 'Inter, sans-serif', fontWeight: 600,
-                                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                                minWidth: 0,
-                                            }}>
+                                    <div className="landing-page-info">
+                                        <div className="landing-page-title-row">
+                                            <h4 className="landing-page-title">
                                                 {page.title || 'Sem título'}
                                             </h4>
-                                            <span style={{
-                                                fontSize: '0.65rem', padding: '2px 8px',
-                                                borderRadius: 4,
-                                                background: `${template.color}15`,
-                                                color: template.color,
-                                                border: `1px solid ${template.color}30`,
-                                                fontWeight: 600, textTransform: 'uppercase',
-                                                letterSpacing: 0, flexShrink: 0,
-                                            }}>
+                                            <span
+                                                className="landing-page-template-badge"
+                                                style={{
+                                                    background: `${template.color}15`,
+                                                    color: template.color,
+                                                    border: `1px solid ${template.color}30`,
+                                                }}
+                                            >
                                                 {template.name}
                                             </span>
                                             <span className="landing-admin-stage-badge">
                                                 {stageLabel}
                                             </span>
                                         </div>
-                                        <div style={{
-                                            display: 'flex', gap: 16, fontSize: '0.8rem',
-                                            color: 'var(--text-muted)', flexWrap: 'wrap',
-                                            alignItems: 'center'
-                                        }}>
+                                        <div className="landing-page-meta-row">
                                             <span>/{page.slug}</span>
                                             <span>•</span>
                                             <span>{page.page_views || 0} views</span>
                                             <span>•</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                                            <div className="landing-page-broker">
                                                 <User size={12} />
-                                                <div style={{ display: 'grid', gap: 3, minWidth: 220, maxWidth: 360 }}>
-                                                <select
-                                                    value={page.assigned_broker_id || ''}
-                                                    onChange={(e) => handleBrokerChange(page.id, e.target.value)}
-                                                    title="Corretor que recebera os leads desta landing page"
-                                                    style={{
-                                                        background: 'transparent',
-                                                        border: '1px solid var(--border)',
-                                                        borderRadius: '4px',
-                                                        fontSize: '0.75rem',
-                                                        color: 'var(--text-secondary)',
-                                                        padding: '3px 6px',
-                                                        outline: 'none',
-                                                        width: '100%'
-                                                    }}
-                                                >
-                                                    <option value="">Escala de Plantão (Auto)</option>
-                                                    {brokerGroups.whatsapp.length > 0 && (
-                                                        <optgroup label="Corretores com WhatsApp">
-                                                            {brokerGroups.whatsapp.map(broker => (
-                                                                <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
-                                                            ))}
-                                                        </optgroup>
+                                                <div className="landing-page-broker-select">
+                                                    <select
+                                                        value={page.assigned_broker_id || ''}
+                                                        onChange={(e) => handleBrokerChange(page.id, e.target.value)}
+                                                        title="Corretor que recebera os leads desta landing page"
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: '1px solid var(--border)',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.75rem',
+                                                            color: 'var(--text-secondary)',
+                                                            padding: '3px 6px',
+                                                            outline: 'none',
+                                                            width: '100%'
+                                                        }}
+                                                    >
+                                                        <option value="">Escala de Plantão (Auto)</option>
+                                                        {brokerGroups.whatsapp.length > 0 && (
+                                                            <optgroup label="Corretores com WhatsApp">
+                                                                {brokerGroups.whatsapp.map(broker => (
+                                                                    <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
+                                                                ))}
+                                                            </optgroup>
+                                                        )}
+                                                        {brokerGroups.others.length > 0 && (
+                                                            <optgroup label="Outros corretores">
+                                                                {brokerGroups.others.map(broker => (
+                                                                    <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
+                                                                ))}
+                                                            </optgroup>
+                                                        )}
+                                                    </select>
+                                                    {brokerDetail(selectedBroker) && (
+                                                        <span className="landing-page-broker-detail">
+                                                            {brokerDetail(selectedBroker)}
+                                                        </span>
                                                     )}
-                                                    {brokerGroups.others.length > 0 && (
-                                                        <optgroup label="Outros corretores">
-                                                            {brokerGroups.others.map(broker => (
-                                                                <option key={broker.id} value={broker.id}>{brokerOptionLabel(broker)}</option>
-                                                            ))}
-                                                        </optgroup>
-                                                    )}
-                                                </select>
-                                                {brokerDetail(selectedBroker) && (
-                                                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {brokerDetail(selectedBroker)}
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
                                     </div>
 
                                     {/* Actions */}
-                                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                                    <div className="landing-page-actions">
                                         <button
                                             className="btn btn-outline btn-sm"
                                             title="Instruções e Treinamento da IA"
@@ -611,6 +597,131 @@ export default function LandingPagesAdmin() {
             )}
 
             <style>{`
+                .landing-pages-admin-page {
+                    width: min(100%, 1320px);
+                    margin: 0 auto;
+                    padding: 0 8px;
+                    box-sizing: border-box;
+                }
+
+                .landing-page-list {
+                    display: grid;
+                    gap: 12px;
+                    width: 100%;
+                    min-width: 0;
+                }
+
+                .landing-page-card {
+                    width: 100%;
+                    max-width: 100%;
+                    display: grid;
+                    grid-template-columns: 48px minmax(0, 1fr) auto;
+                    align-items: center;
+                    gap: 18px;
+                    padding: 20px 24px;
+                    margin-bottom: 0;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                }
+
+                .landing-page-template-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .landing-page-info {
+                    min-width: 0;
+                }
+
+                .landing-page-title-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    min-width: 0;
+                    margin-bottom: 4px;
+                }
+
+                .landing-page-title {
+                    flex: 1 1 auto;
+                    min-width: 0;
+                    margin: 0;
+                    overflow: hidden;
+                    color: var(--text-primary);
+                    font-family: Inter, sans-serif;
+                    font-size: 1.05rem;
+                    font-weight: 600;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    letter-spacing: 0;
+                }
+
+                .landing-page-template-badge {
+                    flex-shrink: 0;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 0.65rem;
+                    font-weight: 600;
+                    letter-spacing: 0;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                .landing-page-meta-row {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 10px 14px;
+                    min-width: 0;
+                    color: var(--text-muted);
+                    font-size: 0.8rem;
+                }
+
+                .landing-page-meta-row > span:first-child {
+                    max-width: min(260px, 100%);
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .landing-page-broker {
+                    display: flex;
+                    align-items: center;
+                    flex: 1 1 260px;
+                    gap: 6px;
+                    min-width: 0;
+                    max-width: 380px;
+                }
+
+                .landing-page-broker-select {
+                    display: grid;
+                    gap: 3px;
+                    width: 100%;
+                    min-width: 180px;
+                    max-width: 360px;
+                }
+
+                .landing-page-broker-detail {
+                    min-width: 0;
+                    overflow: hidden;
+                    color: var(--text-muted);
+                    font-size: 0.68rem;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .landing-page-actions {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 8px;
+                    min-width: max-content;
+                }
+
                 .landing-admin-filters {
                     display: grid;
                     grid-template-columns: 1fr;
@@ -731,6 +842,48 @@ export default function LandingPagesAdmin() {
 
                     .landing-admin-tabs {
                         justify-content: flex-end;
+                    }
+                }
+
+                @media (max-width: 1380px) {
+                    .landing-page-card {
+                        grid-template-columns: 48px minmax(0, 1fr);
+                    }
+
+                    .landing-page-title-row {
+                        flex-wrap: wrap;
+                    }
+
+                    .landing-page-actions {
+                        grid-column: 2;
+                        justify-content: flex-start;
+                        flex-wrap: wrap;
+                        min-width: 0;
+                    }
+                }
+
+                @media (max-width: 720px) {
+                    .landing-pages-admin-page {
+                        padding: 0;
+                    }
+
+                    .landing-page-card {
+                        grid-template-columns: 1fr;
+                        padding: 16px;
+                    }
+
+                    .landing-page-template-icon {
+                        width: 42px;
+                        height: 42px;
+                    }
+
+                    .landing-page-actions {
+                        grid-column: 1;
+                    }
+
+                    .landing-page-actions .btn,
+                    .landing-page-actions a {
+                        flex: 1 1 auto;
                     }
                 }
 
