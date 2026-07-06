@@ -28,13 +28,13 @@ import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, 
 
 export const metadata: Metadata = {
   title: 'Imóveis de luxo em Balneário Camboriú e litoral catarinense',
-  description: 'Busque apartamentos, coberturas, casas de alto padrão e imóveis frente mar com a curadoria de Guilherme Pilger. Portfólio exclusivo acima de R$ 4 milhões em Santa Catarina.',
+  description: 'Imóveis de luxo, apartamentos frente mar e coberturas com curadoria Guilherme Pilger em Balneário Camboriú e litoral catarinense.',
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'Guilherme Pilger | Imóveis de luxo em Santa Catarina',
-    description: 'Curadoria premium de imóveis acima de R$ 4 milhões no litoral catarinense. Apartamentos frente mar, coberturas e casas de alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
+    description: 'Curadoria premium de imóveis frente mar, coberturas e casas de alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
     url: '/',
     type: 'website',
     images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Guilherme Pilger | Imóveis de luxo em Santa Catarina',
-    description: 'Curadoria premium de imóveis acima de R$ 4 milhões no litoral catarinense. Apartamentos frente mar, coberturas e casas de alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
+    description: 'Curadoria premium de imóveis frente mar, coberturas e casas de alto padrão em Balneário Camboriú, Praia Brava e Itapema.',
     images: [DEFAULT_OG_IMAGE],
   },
 }

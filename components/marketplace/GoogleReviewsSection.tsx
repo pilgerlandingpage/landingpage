@@ -34,14 +34,14 @@ function ReviewStars({ rating, size = 14 }: { rating: number; size?: number }) {
 
 function ReviewAuthor({ review }: { review: HomepageGoogleReview }) {
   const avatar = review.authorPhotoUri ? (
-    <img src={review.authorPhotoUri} alt="" loading="lazy" referrerPolicy="no-referrer" />
+    <img src={review.authorPhotoUri} alt={`Foto de ${review.authorName} no Google`} loading="lazy" referrerPolicy="no-referrer" />
   ) : (
     <span>{review.authorName.charAt(0).toUpperCase()}</span>
   )
 
   const content = (
     <>
-      <span className="google-review-avatar" aria-hidden="true">{avatar}</span>
+      <span className="google-review-avatar">{avatar}</span>
       <span className="google-review-author-copy">
         <strong>{review.authorName}</strong>
         {review.publishedLabel && <small>{review.publishedLabel}</small>}

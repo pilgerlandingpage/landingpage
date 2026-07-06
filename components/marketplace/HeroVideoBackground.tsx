@@ -8,8 +8,7 @@ export default function HeroVideoBackground() {
   return (
     <Image
       src={HERO_BACKGROUND_IMAGE_SRC}
-      alt=""
-      aria-hidden="true"
+      alt="Guilherme Pilger em curadoria de imóveis de alto padrão no litoral catarinense"
       className="hero-background-frame"
       fill
       priority
