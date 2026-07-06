@@ -738,7 +738,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 {activeDev.name}
                             </h1>
 
-                            <p className="mb-8 max-w-2xl text-lg font-light leading-relaxed text-zinc-200 md:text-2xl">
+                            <p className="mb-8 max-w-2xl text-lg font-bold leading-relaxed text-zinc-200 md:text-2xl">
                                 {activeDev.tagline}
                             </p>
 
@@ -1006,11 +1006,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-depth-overlay {
-                    background: linear-gradient(to top, rgba(247, 245, 240, 0.72) 0%, rgba(247, 245, 240, 0.28) 46%, rgba(247, 245, 240, 0.44) 100%);
+                    background: linear-gradient(to top, rgba(247, 245, 240, 0.58) 0%, rgba(247, 245, 240, 0.22) 46%, rgba(247, 245, 240, 0.35) 100%);
                 }
 
                 .bc-page .bc-hero-side-fade {
-                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.9), rgba(247, 245, 240, 0.36) 38%, rgba(247, 245, 240, 0.04) 78%);
+                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.72), rgba(247, 245, 240, 0.29) 38%, rgba(247, 245, 240, 0.03) 78%);
                 }
 
                 .bc-page .bc-hero-top-fade {
@@ -1020,9 +1020,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     pointer-events: none;
                     background: linear-gradient(
                         to bottom,
-                        rgba(255, 255, 255, 0.98) 0%,
-                        rgba(255, 255, 255, 0.72) 34%,
-                        rgba(255, 255, 255, 0.18) 74%,
+                        rgba(255, 255, 255, 0.78) 0%,
+                        rgba(255, 255, 255, 0.58) 34%,
+                        rgba(255, 255, 255, 0.14) 74%,
                         rgba(255, 255, 255, 0) 100%
                     );
                 }
@@ -1065,7 +1065,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     margin-bottom: 30px;
                     color: #4c4539;
                     font-size: clamp(0.98rem, 1.1vw, 1.18rem);
-                    font-weight: 300;
+                    font-weight: 700;
                     line-height: 1.72;
                 }
 
