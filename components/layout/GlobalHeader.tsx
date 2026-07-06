@@ -34,6 +34,16 @@ type DevelopmentMenuPage = {
     locationName?: string
     priceRange?: string
     availableUnitsCount?: number | null
+    stage?: 'launch' | 'construction' | 'ready'
+    stageLabel?: string
+}
+
+type DevelopmentMenuGroup = {
+    id: string
+    label: string
+    href: string
+    total?: number
+    developments: DevelopmentMenuPage[]
 }
 
 const TiktokIcon = ({ size = 16 }: { size?: number }) => (
@@ -47,6 +57,43 @@ function busca(params: Record<string, string | number>) {
             return acc
         }, {})
     ).toString()}`
+}
+
+const developmentStageFallback: Record<string, { label: string; href: string }> = {
+    launch: { label: 'Lancamentos', href: busca({ tag: 'lancamento' }) },
+    construction: { label: 'Em construcao', href: busca({ tag: 'em-construcao' }) },
+    ready: { label: 'Prontos', href: busca({ tag: 'pronto' }) },
+}
+
+const developmentStageOrder = ['launch', 'construction', 'ready']
+
+function normalizeDevelopmentMenuGroups(data: any): DevelopmentMenuGroup[] {
+    if (Array.isArray(data?.groups)) {
+        return data.groups
+            .map((group: any) => ({
+                id: String(group.id || ''),
+                label: String(group.label || developmentStageFallback[group.id]?.label || 'Empreendimentos'),
+                href: String(group.href || developmentStageFallback[group.id]?.href || '/busca'),
+                total: typeof group.total === 'number' ? group.total : undefined,
+                developments: Array.isArray(group.developments) ? group.developments : [],
+            }))
+            .filter((group: DevelopmentMenuGroup) => group.id && group.developments.length > 0)
+    }
+
+    const pages = Array.isArray(data?.developments) ? data.developments : []
+    return developmentStageOrder
+        .map(stage => {
+            const fallback = developmentStageFallback[stage]
+            const developments = pages.filter((page: DevelopmentMenuPage) => (page.stage || 'ready') === stage)
+            return {
+                id: stage,
+                label: fallback.label,
+                href: fallback.href,
+                total: developments.length,
+                developments,
+            }
+        })
+        .filter(group => group.developments.length > 0)
 }
 
 const saleSections: MenuSection[] = [
@@ -181,14 +228,49 @@ function MobileLink({ link, onClose }: { link: MenuLink; onClose: () => void }) 
     )
 }
 
+function DesktopDevelopmentGroup({ group }: { group: DevelopmentMenuGroup }) {
+    return (
+        <div className="gh-development-group">
+            <div className="gh-development-group-head">
+                <strong>{group.label}</strong>
+                <Link href={group.href}>Ver todos</Link>
+            </div>
+            {group.developments.map(development => (
+                <Link key={development.slug} href={`/${development.slug}`} className="gh-development-link">
+                    <strong>{development.name}</strong>
+                    <span>{development.locationName || development.priceRange || 'Empreendimento Guilherme Pilger'}</span>
+                </Link>
+            ))}
+        </div>
+    )
+}
+
+function MobileDevelopmentGroup({ group, onClose }: { group: DevelopmentMenuGroup; onClose: () => void }) {
+    return (
+        <div className="gh-mobile-development-group">
+            <div className="gh-mobile-development-group-title">
+                <span>{group.label}</span>
+                <Link href={group.href} onClick={onClose}>Ver todos</Link>
+            </div>
+            {group.developments.map(development => (
+                <Link key={development.slug} href={`/${development.slug}`} className="gh-mobile-development-link" onClick={onClose}>
+                    <strong>{development.name}</strong>
+                    <small>{development.locationName || development.priceRange || 'Guilherme Pilger'}</small>
+                </Link>
+            ))}
+        </div>
+    )
+}
+
 export default function GlobalHeader() {
     const pathname = usePathname()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [openAccordion, setOpenAccordion] = useState<string | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
     const [mobileInstagramPosts, setMobileInstagramPosts] = useState<HeaderInstagramPost[]>([])
-    const [developmentPages, setDevelopmentPages] = useState<DevelopmentMenuPage[]>([])
+    const [developmentGroups, setDevelopmentGroups] = useState<DevelopmentMenuGroup[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
+    const hasDevelopmentGroups = developmentGroups.some(group => group.developments.length > 0)
 
     const closeMobileMenu = () => {
         setMobileMenuOpen(false)
@@ -227,12 +309,11 @@ export default function GlobalHeader() {
     useEffect(() => {
         let cancelled = false
 
-        fetch('/api/public/developments')
+        fetch('/api/public/developments?menu=1')
             .then(response => response.ok ? response.json() : null)
             .then(data => {
                 if (cancelled) return
-                const pages = Array.isArray(data?.developments) ? data.developments : []
-                setDevelopmentPages(pages.slice(0, 12))
+                setDevelopmentGroups(normalizeDevelopmentMenuGroups(data))
             })
             .catch(() => null)
 
@@ -297,19 +378,16 @@ export default function GlobalHeader() {
                             <Link href="/" className="gh-menu-label" aria-label="Home"><Home size={18} color="currentColor" /></Link>
                         </li>
 
-                        {developmentPages.length > 0 && (
+                        {hasDevelopmentGroups && (
                             <li className="gh-menu-item">
                                 <span className="gh-menu-label">EMPREENDIMENTOS</span>
                                 <div className="gh-dropdown gh-developments-dropdown">
                                     <Link href="/#empreendimentos" className="gh-development-link gh-development-overview">
-                                        <strong>Todos os empreendimentos</strong>
-                                        <span>Ver vitrine na pagina inicial</span>
+                                        <strong>Empreendimentos em destaque</strong>
+                                        <span>Ver vitrine selecionada na pagina inicial</span>
                                     </Link>
-                                    {developmentPages.map(development => (
-                                        <Link key={development.slug} href={`/${development.slug}`} className="gh-development-link">
-                                            <strong>{development.name}</strong>
-                                            <span>{development.locationName || development.priceRange || 'Empreendimento Guilherme Pilger'}</span>
-                                        </Link>
+                                    {developmentGroups.map(group => (
+                                        <DesktopDevelopmentGroup key={group.id} group={group} />
                                     ))}
                                 </div>
                             </li>
@@ -421,7 +499,7 @@ export default function GlobalHeader() {
                                 <span className="gh-mobile-link-main"><Search size={17} strokeWidth={1.75} /><span>Pesquisar imoveis</span></span>
                             </Link>
 
-                            {developmentPages.length > 0 && (
+                            {hasDevelopmentGroups && (
                                 <>
                                     <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('empreendimentos')} aria-expanded={openAccordion === 'empreendimentos'}>
                                         <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>Empreendimentos</span></span>
@@ -430,14 +508,11 @@ export default function GlobalHeader() {
                                     {openAccordion === 'empreendimentos' && (
                                         <div className="gh-mobile-sub gh-mobile-developments-sub">
                                             <Link href="/#empreendimentos" className="gh-mobile-development-link gh-accent" onClick={closeMobileMenu}>
-                                                <strong>Todos os empreendimentos</strong>
-                                                <small>Ver vitrine na home</small>
+                                                <strong>Empreendimentos em destaque</strong>
+                                                <small>Ver vitrine selecionada na home</small>
                                             </Link>
-                                            {developmentPages.map(development => (
-                                                <Link key={development.slug} href={`/${development.slug}`} className="gh-mobile-development-link" onClick={closeMobileMenu}>
-                                                    <strong>{development.name}</strong>
-                                                    <small>{development.locationName || 'Guilherme Pilger'}</small>
-                                                </Link>
+                                            {developmentGroups.map(group => (
+                                                <MobileDevelopmentGroup key={group.id} group={group} onClose={closeMobileMenu} />
                                             ))}
                                         </div>
                                     )}

@@ -143,6 +143,9 @@ type PropertyDevelopmentGalleryItem = {
 }
 
 type PropertyDevelopmentUnitContext = {
+    id?: string
+    propertyId?: string
+    sourceReference?: string
     title: string
     type: string
     area: string
@@ -300,12 +303,18 @@ function normalizeDevelopmentGalleryItem(value: unknown, fallbackTitle: string):
 
 function normalizeDevelopmentUnitContext(value: unknown): PropertyDevelopmentUnitContext | null {
     const record = asSafeRecord(value)
-    const sourceSlug = asSafeText(record.sourceSlug ?? record.source_slug)
+    const id = asSafeText(record.id)
+    const propertyId = asSafeText(record.propertyId ?? record.property_id)
+    const sourceReference = asSafeText(record.sourceReference ?? record.source_reference)
+    const sourceSlug = asSafeText(record.sourceSlug ?? record.source_slug ?? record.slug) || propertyId || id || sourceReference
     const type = asSafeText(record.type, 'Unidade')
     const title = asSafeText(record.title, type)
-    if (!sourceSlug || !title) return null
+    if (!title || (!sourceSlug && !propertyId && !sourceReference && !id)) return null
 
     return {
+        id,
+        propertyId,
+        sourceReference,
         title,
         type,
         area: asSafeText(record.area, 'Area sob consulta'),
@@ -313,6 +322,18 @@ function normalizeDevelopmentUnitContext(value: unknown): PropertyDevelopmentUni
         price: asSafeText(record.price, 'Consulte'),
         sourceSlug,
     }
+}
+
+function propertyDevelopmentKeys(property: any) {
+    return new Set(
+        [
+            property?.source_slug,
+            property?.id,
+            property?.source_reference,
+        ]
+            .map(normalizeSourceSlugKey)
+            .filter(Boolean)
+    )
 }
 
 function developmentFallbackForPage(page: any, content: Record<string, any>) {
@@ -324,8 +345,17 @@ function developmentFallbackForPage(page: any, content: Record<string, any>) {
     return null
 }
 
-function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: any, propertySourceSlug: string) {
-    const candidates = units.filter((unit) => normalizeSourceSlugKey(unit.sourceSlug) === propertySourceSlug)
+function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: any) {
+    const propertyKeys = propertyDevelopmentKeys(property)
+    const candidates = units.filter((unit) => {
+        const unitKeys = [
+            unit.sourceSlug,
+            unit.propertyId,
+            unit.sourceReference,
+            unit.id,
+        ].map(normalizeSourceSlugKey).filter(Boolean)
+        return unitKeys.some(key => propertyKeys.has(key))
+    })
     if (candidates.length <= 1) return candidates[0] || null
 
     const propertyTitle = normalizeComparableText(property?.title)
@@ -379,8 +409,7 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
 }
 
 async function getPropertyDevelopmentContext(supabase: any, property: any): Promise<PropertyDevelopmentContext | null> {
-    const propertySourceSlug = normalizeSourceSlugKey(property?.source_slug)
-    if (!propertySourceSlug) return null
+    if (!propertyDevelopmentKeys(property).size) return null
 
     const { data, error } = await supabase
         .from('landing_pages')
@@ -406,7 +435,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         const units = Array.isArray(rawUnits)
             ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
             : []
-        const matchedUnit = pickDevelopmentUnit(units, property, propertySourceSlug)
+        const matchedUnit = pickDevelopmentUnit(units, property)
 
         if (!matchedUnit) continue
 

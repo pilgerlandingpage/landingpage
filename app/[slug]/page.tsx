@@ -1,6 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
 import ModernLuxuryTemplate from '@/components/templates/ModernLuxuryTemplate'
 import LeadCaptureTemplate from '@/components/templates/LeadCaptureTemplate'
@@ -11,12 +10,176 @@ import BravaConcettoTemplate from '@/components/templates/BravaConcettoTemplate'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
-import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
+import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, faqPageJsonLd, itemListJsonLd } from '@/lib/seo/json-ld'
 
 export const revalidate = 300
 
 export function generateStaticParams() {
     return []
+}
+
+function landingRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function landingText(value: unknown, fallback = '') {
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function landingNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value.replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'))
+        if (Number.isFinite(parsed)) return parsed
+    }
+    return null
+}
+
+function firstGalleryImage(content: Record<string, any>, development: Record<string, any>) {
+    const galleries = [
+        ...(Array.isArray(content.custom_gallery) ? content.custom_gallery : []),
+        ...(Array.isArray(development.gallery) ? development.gallery : []),
+    ]
+
+    for (const item of galleries) {
+        if (typeof item === 'string' && item.trim()) return item.trim()
+        const record = landingRecord(item)
+        const image = landingText(record.image ?? record.url ?? record.src)
+        if (image) return image
+    }
+
+    return ''
+}
+
+function landingSeo(content: Record<string, any>) {
+    return landingRecord(content.seo)
+}
+
+function landingFaqItems(content: Record<string, any>) {
+    const development = landingRecord(content.development)
+    const seo = landingSeo(content)
+    const sources = [
+        development.faq,
+        content.aeo_questions,
+        content.aeoQuestions,
+        seo.aeo_questions,
+        seo.aeoQuestions,
+    ]
+
+    const items = sources
+        .flatMap(source => Array.isArray(source) ? source : [])
+        .map(item => {
+            const record = landingRecord(item)
+            return {
+                question: landingText(record.question ?? record.q),
+                answer: landingText(record.answer ?? record.a),
+            }
+        })
+        .filter(item => item.question && item.answer)
+
+    const seen = new Set<string>()
+    return items.filter(item => {
+        const key = item.question.toLowerCase()
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+    }).slice(0, 12)
+}
+
+function unitDetailPath(unit: Record<string, any>) {
+    const sourceSlug = landingText(unit.sourceSlug ?? unit.source_slug ?? unit.slug ?? unit.propertyId ?? unit.property_id ?? unit.id)
+    return sourceSlug ? `/imovel/${encodeURIComponent(sourceSlug)}` : ''
+}
+
+function developmentUnitItems(development: Record<string, any>) {
+    const units = Array.isArray(development.units) ? development.units : []
+
+    return units
+        .map(item => landingRecord(item))
+        .map(unit => {
+            const url = unitDetailPath(unit)
+            const name = landingText(unit.title, landingText(unit.type, 'Unidade disponivel'))
+            if (!url || !name) return null
+            return {
+                name,
+                url,
+                description: [
+                    landingText(unit.area),
+                    landingText(unit.suites),
+                    landingText(unit.vagas),
+                    landingText(unit.price),
+                ].filter(Boolean).join(' | '),
+                image: landingText(unit.image) || (Array.isArray(unit.images) ? landingText(unit.images[0]) : ''),
+                type: 'RealEstateListing',
+            }
+        })
+        .filter((item): item is { name: string; url: string; description: string; image: string; type: string } => Boolean(item))
+}
+
+function developmentJsonLd(content: Record<string, any>, path: string, title: string, description: string, heroImage: string) {
+    const development = landingRecord(content.development)
+    const name = landingText(development.name, title)
+    if (!name) return []
+
+    const url = absoluteUrl(path)
+    const image = landingText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, heroImage || DEFAULT_OG_IMAGE)
+    const city = landingText(development.city, landingText(development.locationName ?? development.location_name))
+    const address = landingText(development.address, city || 'Santa Catarina')
+    const geo = landingRecord(development.geo)
+    const latitude = landingNumber(development.latitude ?? development.lat ?? geo.latitude)
+    const longitude = landingNumber(development.longitude ?? development.lng ?? development.lon ?? geo.longitude)
+    const unitItems = developmentUnitItems(development)
+    const amenities = [
+        ...(Array.isArray(development.benefits) ? development.benefits : []),
+        ...(Array.isArray(development.differentials) ? development.differentials : []),
+    ]
+        .map(item => landingText(landingRecord(item).title ?? item))
+        .filter(Boolean)
+        .slice(0, 16)
+
+    return [
+        {
+            '@context': 'https://schema.org',
+            '@type': ['Place', 'Residence'],
+            '@id': `${url}#development`,
+            name,
+            url,
+            image,
+            description: landingText(development.description, description),
+            mainEntityOfPage: {
+                '@id': `${url}#webpage`,
+            },
+            address: {
+                '@type': 'PostalAddress',
+                streetAddress: address,
+                addressLocality: city || undefined,
+                addressRegion: 'SC',
+                addressCountry: 'BR',
+            },
+            geo: latitude !== null && longitude !== null ? {
+                '@type': 'GeoCoordinates',
+                latitude,
+                longitude,
+            } : undefined,
+            amenityFeature: amenities.map(item => ({
+                '@type': 'LocationFeatureSpecification',
+                name: item,
+                value: true,
+            })),
+            containsPlace: unitItems.slice(0, 40).map(unit => ({
+                '@type': 'Accommodation',
+                name: unit.name,
+                url: absoluteUrl(unit.url),
+                image: unit.image || undefined,
+            })),
+        },
+        unitItems.length ? itemListJsonLd({
+            name: `Unidades disponiveis no ${name}`,
+            description: `Lista de imoveis ativos vinculados ao empreendimento ${name}.`,
+            path,
+            items: unitItems.slice(0, 80),
+        }) : undefined,
+    ].filter(Boolean) as Record<string, unknown>[]
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -30,12 +193,41 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         .eq('slug', slug)
         .single()
 
+    if (!lp) return { title: 'Pagina nao encontrada' }
 
-    if (!lp) return { title: 'Página não encontrada' }
+    const content = landingRecord(lp.content)
+    const development = landingRecord(content.development)
+    const seo = landingSeo(content)
+    const title = landingText(seo.title ?? content.seo_title ?? content.custom_title, lp.title)
+    const description = landingText(
+        seo.description ?? content.meta_description ?? content.custom_description ?? development.description,
+        'Confira este imovel exclusivo.'
+    )
+    const image = landingText(
+        seo.og_image ?? seo.image ?? content.custom_hero_image ?? development.heroImage ?? development.hero_image,
+        firstGalleryImage(content, development) || DEFAULT_OG_IMAGE
+    )
+    const canonical = landingText(seo.canonical_path ?? content.canonical_path, `/${slug}`)
 
     return {
-        title: (lp.content as any)?.custom_title || lp.title,
-        description: (lp.content as any)?.custom_description || 'Confira este imóvel exclusivo.',
+        title,
+        description,
+        alternates: {
+            canonical,
+        },
+        openGraph: {
+            title,
+            description,
+            url: canonical,
+            type: 'website',
+            images: [{ url: image, width: 1200, height: 630 }],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: [image],
+        },
     }
 }
 
@@ -43,7 +235,6 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     const supabase = createAdminClient()
     const { slug } = await params
 
-    // 1. Fetch Landing Page data with related Property and Agent
     const { data: lp, error } = await supabase
         .from('landing_pages')
         .select(`
@@ -58,23 +249,17 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         notFound()
     }
 
-    // 2. Normalize Data for Templates
-    // We prioritize "Custom Content" from JSONB, then fall back to "Property Data", then defaults.
-    const content = lp.content || {}
-    const property = lp.property || {}
-    const agent = lp.agent || {}
+    const content = landingRecord(lp.content)
+    const property = landingRecord(lp.property)
+    const agent = landingRecord(lp.agent)
 
-    // Helper to get array of images
     const getGallery = () => {
-        // 1. Custom Gallery from Cloner
         if (content.custom_gallery && Array.isArray(content.custom_gallery) && content.custom_gallery.length > 0) {
             return content.custom_gallery
         }
 
-        // 2. Property Images
         const propImages = property.images || []
 
-        // 3. Fallback: Custom Hero as single gallery item
         if (propImages.length === 0 && content.custom_hero_image) {
             return [content.custom_hero_image]
         }
@@ -84,7 +269,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
 
     const displayData: LandingPageData = {
         title: content.custom_title || property.title || lp.title,
-        description: content.custom_description || property.description || 'Descrição não disponível.',
+        description: content.custom_description || property.description || 'Descricao nao disponivel.',
         heroImage: content.custom_hero_image || (property.images && property.images[0]) || '/placeholder-house.jpg',
         price: content.custom_price || (property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte'),
         cta: content.custom_cta || 'Agendar Visita',
@@ -92,7 +277,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
             bedrooms: (content.custom_stats?.bedrooms) ?? (property.bedrooms || 0),
             bathrooms: (content.custom_stats?.bathrooms) ?? (property.bathrooms || 0),
             area: (content.custom_stats?.area) ?? (property.area || 0),
-            location: (content.custom_stats?.location) ?? (property.location || 'Localização Privilegiada')
+            location: (content.custom_stats?.location) ?? (property.location || 'Localizacao privilegiada')
         },
         amenities: (content.custom_features && content.custom_features.length > 0)
             ? content.custom_features
@@ -101,10 +286,8 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         primaryColor: lp.primary_color || '#c9a96e'
     }
 
-    // 3. Determine Template
     const templateId = content.template || 'classic'
 
-    // 4. Common Props for all templates
     const commonProps = {
         data: displayData,
         content,
@@ -115,6 +298,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     }
     const gallery = getGallery()
     const pageUrl = absoluteUrl(`/${slug}`)
+    const faqItems = landingFaqItems(content)
     const jsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
@@ -128,6 +312,8 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
             { name: 'Home', url: '/' },
             { name: displayData.title, url: `/${slug}` },
         ]),
+        ...developmentJsonLd(content, `/${slug}`, displayData.title, displayData.description, displayData.heroImage),
+        ...(faqItems.length ? [faqPageJsonLd(faqItems)] : []),
         property.id ? {
             '@context': 'https://schema.org',
             '@type': 'RealEstateListing',
@@ -190,7 +376,6 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         }
     })()
 
-    // 5. Render Selected Template
     return (
         <>
             <JsonLd data={jsonLd} />

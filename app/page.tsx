@@ -50,8 +50,8 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 const HOME_EXCLUDED_CITIES = new Set(['camboriu', 'navegantes', 'blumenau'])
-const HOME_PROPERTY_DESCRIPTION_LIMIT = 320
-const HOME_PROPERTY_IMAGE_LIMIT = 4
+const HOME_PROPERTY_DESCRIPTION_LIMIT = 240
+const HOME_PROPERTY_IMAGE_LIMIT = 2
 const HOME_MAP_MIN_PRICE = 4000000
 const HOME_BASE_DATA_TIMEOUT_MS = 12000
 const HOME_SECONDARY_DATA_TIMEOUT_MS = 8000
@@ -151,6 +151,8 @@ const getCachedHomeBaseData = unstable_cache(
         .from('landing_pages')
         .select('id, slug, title, property_id, content')
         .eq('status', 'published')
+        .or('content->>home_featured.is.null,content->>home_featured.neq.false')
+        .order('created_at', { ascending: true })
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
       supabase
         .from('blog_posts')
@@ -248,6 +250,8 @@ function buildHomeDevelopmentPages(landingPages: any[]): HomeDevelopmentPage[] {
       if (content.template && content.template !== 'brava-concetto') return null
 
       const development = homeContentRecord(content.development)
+      if (content.home_featured === false || content.show_on_home === false || development.showOnHome === false || development.show_on_home === false) return null
+
       const slug = homeText(page?.slug)
       if (!slug) return null
       const isBravaConcetto = slug === 'bravaconceto'
