@@ -136,8 +136,108 @@ type MobileSummaryHighlight = {
     icon: ReactNode
 }
 
+type PropertyDevelopmentGalleryItem = {
+    title: string
+    image: string
+    category: string
+}
+
+type PropertyDevelopmentUnitContext = {
+    title: string
+    type: string
+    area: string
+    suites: string
+    price: string
+    sourceSlug: string
+}
+
+type PropertyDevelopmentContext = {
+    slug: string
+    name: string
+    locationName: string
+    priceRange: string
+    availableUnitsCount: number | null
+    areaRange: string
+    suitesRange: string
+    heroImage: string
+    description: string
+    gallery: PropertyDevelopmentGalleryItem[]
+    unit: PropertyDevelopmentUnitContext
+}
+
 function isUuid(value: string) {
     return UUID_PATTERN.test(value)
+}
+
+function asSafeRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function asSafeText(value: unknown, fallback = '') {
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function asSafeNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value.replace(',', '.'))
+        if (Number.isFinite(parsed)) return parsed
+    }
+    return null
+}
+
+function normalizeSourceSlugKey(value: unknown) {
+    return asSafeText(value).trim().toLowerCase()
+}
+
+function uniqueDevelopmentGallery(items: PropertyDevelopmentGalleryItem[]) {
+    const seen = new Set<string>()
+    return items.filter((item) => {
+        const image = asSafeText(item.image)
+        if (!image || seen.has(image)) return false
+        seen.add(image)
+        return true
+    })
+}
+
+function normalizeDevelopmentGalleryItem(value: unknown, fallbackTitle: string): PropertyDevelopmentGalleryItem | null {
+    if (typeof value === 'string') {
+        const image = asSafeText(value)
+        return image ? { image, title: fallbackTitle, category: 'Empreendimento' } : null
+    }
+
+    const record = asSafeRecord(value)
+    const image = asSafeText(record.image ?? record.url ?? record.src)
+    if (!image) return null
+
+    return {
+        image,
+        title: asSafeText(record.title, fallbackTitle),
+        category: asSafeText(record.category, 'Empreendimento'),
+    }
+}
+
+function normalizeDevelopmentUnitContext(value: unknown): PropertyDevelopmentUnitContext | null {
+    const record = asSafeRecord(value)
+    const sourceSlug = asSafeText(record.sourceSlug ?? record.source_slug)
+    const type = asSafeText(record.type, 'Unidade')
+    const title = asSafeText(record.title, type)
+    if (!sourceSlug || !title) return null
+
+    return {
+        title,
+        type,
+        area: asSafeText(record.area, 'Area sob consulta'),
+        suites: asSafeText(record.suites, 'Configuracao sob consulta'),
+        price: asSafeText(record.price, 'Consulte'),
+        sourceSlug,
+    }
+}
+
+function locationLabelFromProperty(property: any) {
+    return [...buildDisplayLocationParts(property?.neighborhood, property?.city), property?.state]
+        .filter(Boolean)
+        .join(' - ')
 }
 
 async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
@@ -164,6 +264,65 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
         .maybeSingle()
 
     return (data || null) as T | null
+}
+
+async function getPropertyDevelopmentContext(supabase: any, property: any): Promise<PropertyDevelopmentContext | null> {
+    const propertySourceSlug = normalizeSourceSlugKey(property?.source_slug)
+    if (!propertySourceSlug) return null
+
+    const { data, error } = await supabase
+        .from('landing_pages')
+        .select('id, slug, title, content, created_at')
+        .eq('status', 'published')
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.warn('[Property Detail] development context unavailable:', error.message)
+        return null
+    }
+
+    for (const page of data || []) {
+        const content = asSafeRecord(page.content)
+        const development = asSafeRecord(content.development)
+        const units = Array.isArray(development.units)
+            ? development.units.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
+            : []
+        const matchedUnit = units.find((unit) => normalizeSourceSlugKey(unit.sourceSlug) === propertySourceSlug)
+
+        if (!matchedUnit) continue
+
+        const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
+        const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
+        const developmentGallery = Array.isArray(development.gallery)
+            ? development.gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+            : []
+        const customGallery = Array.isArray(content.custom_gallery)
+            ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+            : []
+        const gallery = uniqueDevelopmentGallery([
+            { image: heroImage, title: name, category: 'Empreendimento' },
+            ...developmentGallery,
+            ...customGallery,
+        ]).slice(0, 6)
+        const availableUnitsCount = asSafeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
+            ?? (units.length || null)
+
+        return {
+            slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
+            name,
+            locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
+            priceRange: asSafeText(development.priceRange ?? development.price_range, matchedUnit.price),
+            availableUnitsCount,
+            areaRange: asSafeText(development.areaRange ?? development.area_range, matchedUnit.area),
+            suitesRange: asSafeText(development.suitesRange ?? development.suites_range, matchedUnit.suites),
+            heroImage,
+            description: asSafeText(development.description, `Conheca o empreendimento ${name} e compare as unidades disponiveis antes da visita.`),
+            gallery,
+            unit: matchedUnit,
+        }
+    }
+
+    return null
 }
 
 async function getPropertyForSeo(identifier: string) {
@@ -991,9 +1150,10 @@ export default async function PropertyDetailPage({
         exclusive: property.exclusive || null,
     }
 
-    const [relatedCandidates, priceHistoryEvents] = await Promise.all([
+    const [relatedCandidates, priceHistoryEvents, developmentContext] = await Promise.all([
         getRelatedPropertyCandidates(supabase, property),
         fetchPropertyPriceHistory(adminSupabase, property.id),
+        getPropertyDevelopmentContext(adminSupabase, property),
     ])
     const marketHistory = buildMarketHistory(property, relatedCandidates, area, locationLabel, priceHistoryEvents)
     const related = selectRelatedProperties(property, relatedCandidates)
@@ -1169,6 +1329,15 @@ export default async function PropertyDetailPage({
         ...(mobileVideoItem ? [mobileVideoItem] : []),
         ...mobilePhotoItems.slice(2),
     ]
+    const developmentHref = developmentContext?.slug ? `/${developmentContext.slug}` : ''
+    const developmentCtaMessage = developmentContext
+        ? `Ola, vi este imovel e quero conhecer o empreendimento ${developmentContext.name}: ${absoluteUrl(developmentHref || propertyPath)}`
+        : ''
+    const developmentGalleryPreview = developmentContext?.gallery?.length
+        ? developmentContext.gallery
+        : developmentContext
+            ? [{ image: developmentContext.heroImage, title: developmentContext.name, category: 'Empreendimento' }]
+            : []
 
     const renderMobileMediaItem = (item: MobilePropertyMediaItem, index: number, keyPrefix: string) => {
         if (item.type === 'video') {
@@ -1468,6 +1637,56 @@ export default async function PropertyDetailPage({
                             </div>
                         </section>
 
+                        {developmentContext && (
+                            <section className="plp-mobile-card plp-mobile-development-section" aria-labelledby="mobile-empreendimento-title">
+                                <div className="plp-mobile-card-head">
+                                    <span className="plp-kicker">Empreendimento</span>
+                                    <h2 id="mobile-empreendimento-title">Conheca o {developmentContext.name}.</h2>
+                                </div>
+                                <div className="plp-mobile-development-gallery">
+                                    {developmentGalleryPreview.slice(0, 4).map((item, index) => (
+                                        <figure key={`${item.image}-${index}`} className={index === 0 ? 'is-main' : undefined}>
+                                            <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
+                                            <figcaption>{index === 0 ? 'Empreendimento' : item.category}</figcaption>
+                                        </figure>
+                                    ))}
+                                </div>
+                                <p className="plp-mobile-development-copy">
+                                    Este imovel faz parte do {developmentContext.name}. Veja imagens, contexto do empreendimento e unidades disponiveis antes de conversar com o especialista.
+                                </p>
+                                <div className="plp-mobile-development-facts">
+                                    <span><MapPin size={14} /> {developmentContext.locationName}</span>
+                                    <span><Home size={14} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades` : 'Unidades sob consulta'}</span>
+                                    <span><BarChart3 size={14} /> {developmentContext.priceRange}</span>
+                                    <span><Ruler size={14} /> {developmentContext.areaRange}</span>
+                                </div>
+                                <div className="plp-mobile-development-actions">
+                                    <Link href={developmentHref || '/busca'}>
+                                        Conhecer empreendimento
+                                        <ArrowRight size={15} />
+                                    </Link>
+                                    <WhatsAppCaptureLink
+                                        phone={contactPhone}
+                                        message={developmentCtaMessage}
+                                        slug="imovel"
+                                        template="property-development-context-mobile"
+                                        metadata={{
+                                            ...propertyTrackingMetadata,
+                                            tracking_event_type: 'property_development_context_requested',
+                                            section_id: 'empreendimento-do-imovel',
+                                            section_label: 'Empreendimento do imovel',
+                                            development_slug: developmentContext.slug,
+                                            development_name: developmentContext.name,
+                                            cta_context: 'property_development_mobile',
+                                            cta_label: 'Falar sobre empreendimento',
+                                        }}
+                                    >
+                                        Falar com especialista
+                                    </WhatsAppCaptureLink>
+                                </div>
+                            </section>
+                        )}
+
                         {related.length > 0 && (
                             <section className="plp-mobile-card plp-mobile-related-section">
                                 <div className="plp-mobile-card-head plp-mobile-card-head--split">
@@ -1729,6 +1948,66 @@ export default async function PropertyDetailPage({
                                 </article>
                             </div>
                         </section>
+
+                        {developmentContext && (
+                            <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band">
+                                <div className="plp-development-context-copy">
+                                    <span className="plp-kicker">Empreendimento vinculado</span>
+                                    <h2>Este imovel faz parte do {developmentContext.name}.</h2>
+                                    <p>
+                                        Conheca o empreendimento completo, veja imagens do projeto e compare as unidades disponiveis antes de decidir a visita.
+                                    </p>
+                                    <div className="plp-development-context-facts">
+                                        <span><MapPin size={15} /> {developmentContext.locationName}</span>
+                                        <span><Home size={15} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades ativas` : 'Unidades sob consulta'}</span>
+                                        <span><BarChart3 size={15} /> {developmentContext.priceRange}</span>
+                                        <span><Ruler size={15} /> {developmentContext.areaRange}</span>
+                                        <span><BedDouble size={15} /> {developmentContext.suitesRange}</span>
+                                    </div>
+                                    <div className="plp-development-context-unit">
+                                        <small>Unidade relacionada</small>
+                                        <strong>{developmentContext.unit.title}</strong>
+                                        <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
+                                    </div>
+                                    <div className="plp-development-context-actions">
+                                        <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
+                                            Conhecer empreendimento
+                                            <ArrowRight size={16} />
+                                        </Link>
+                                        <WhatsAppCaptureLink
+                                            phone={contactPhone}
+                                            message={developmentCtaMessage}
+                                            slug="imovel"
+                                            template="property-development-context"
+                                            metadata={{
+                                                ...propertyTrackingMetadata,
+                                                tracking_event_type: 'property_development_context_requested',
+                                                section_id: 'empreendimento-do-imovel',
+                                                section_label: 'Empreendimento do imovel',
+                                                development_slug: developmentContext.slug,
+                                                development_name: developmentContext.name,
+                                                cta_context: 'property_development_desktop',
+                                                cta_label: 'Falar sobre empreendimento',
+                                            }}
+                                            className="plp-development-secondary-link"
+                                        >
+                                            Falar sobre o empreendimento
+                                        </WhatsAppCaptureLink>
+                                    </div>
+                                </div>
+                                <div className="plp-development-context-gallery" aria-label={`Imagens do empreendimento ${developmentContext.name}`}>
+                                    {developmentGalleryPreview.slice(0, 5).map((item, index) => (
+                                        <figure key={`${item.image}-${index}`} className={index === 0 ? 'is-main' : undefined}>
+                                            <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
+                                            <figcaption>
+                                                <span>{index === 0 ? 'Empreendimento' : item.category}</span>
+                                                <strong>{item.title}</strong>
+                                            </figcaption>
+                                        </figure>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                     </div>
 

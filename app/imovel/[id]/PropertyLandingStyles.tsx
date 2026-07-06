@@ -3823,6 +3823,209 @@ export default function PropertyLandingStyles() {
                     font-size: 18px;
                 }
 
+                .plp-development-context-band {
+                    margin: 34px 44px 0;
+                    padding: 24px;
+                    display: grid;
+                    grid-template-columns: minmax(0, 0.92fr) minmax(300px, 1.08fr);
+                    gap: 22px;
+                    align-items: stretch;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: linear-gradient(180deg, #fff 0%, #f7f2ea 100%);
+                    color: var(--plp-ink);
+                    box-shadow: 0 16px 34px rgba(36, 29, 20, 0.08);
+                }
+
+                .plp-development-context-copy {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                    min-width: 0;
+                }
+
+                .plp-development-context-copy h2 {
+                    max-width: 620px;
+                    margin: 0;
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: clamp(28px, 2.3vw, 40px);
+                    font-weight: 500;
+                    line-height: 1.03;
+                    letter-spacing: 0;
+                }
+
+                .plp-development-context-copy p {
+                    max-width: 610px;
+                    margin: 0;
+                    color: #4d5662;
+                    font-size: 15px;
+                    line-height: 1.65;
+                }
+
+                .plp-development-context-facts {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 8px;
+                    margin-top: 2px;
+                }
+
+                .plp-development-context-facts span,
+                .plp-development-context-unit {
+                    min-width: 0;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255, 255, 255, 0.74);
+                    color: #28313d;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+                }
+
+                .plp-development-context-facts span {
+                    min-height: 42px;
+                    padding: 10px 11px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 13px;
+                    font-weight: 750;
+                    line-height: 1.25;
+                }
+
+                .plp-development-context-facts svg {
+                    flex: 0 0 auto;
+                    color: var(--plp-gold-dark);
+                }
+
+                .plp-development-context-unit {
+                    padding: 12px 13px;
+                    display: grid;
+                    gap: 4px;
+                }
+
+                .plp-development-context-unit small {
+                    color: var(--plp-gold-dark);
+                    font-size: 10px;
+                    font-weight: 900;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                }
+
+                .plp-development-context-unit strong {
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: 18px;
+                    font-weight: 500;
+                    line-height: 1.18;
+                }
+
+                .plp-development-context-unit span {
+                    color: #5c6570;
+                    font-size: 12px;
+                    line-height: 1.45;
+                }
+
+                .plp-development-context-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-top: auto;
+                }
+
+                .plp-development-primary-link,
+                .plp-development-secondary-link {
+                    min-height: 44px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 9px;
+                    padding: 0 18px;
+                    border-radius: var(--plp-radius);
+                    font-size: 12px;
+                    font-weight: 900;
+                    letter-spacing: 0.04em;
+                    text-decoration: none;
+                    text-transform: uppercase;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+                }
+
+                .plp-development-primary-link {
+                    background: #d9b52f;
+                    color: #101010;
+                    box-shadow: 0 14px 24px rgba(217, 181, 47, 0.2);
+                }
+
+                .plp-development-secondary-link {
+                    border: 1px solid rgba(184, 148, 95, 0.28);
+                    background: #fff;
+                    color: var(--plp-gold-dark);
+                }
+
+                .plp-development-primary-link:hover,
+                .plp-development-secondary-link:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 16px 28px rgba(36, 29, 20, 0.11);
+                }
+
+                .plp-development-context-gallery {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    grid-auto-rows: minmax(112px, 1fr);
+                    gap: 8px;
+                    min-height: 360px;
+                }
+
+                .plp-development-context-gallery figure {
+                    position: relative;
+                    min-width: 0;
+                    min-height: 112px;
+                    margin: 0;
+                    overflow: hidden;
+                    border-radius: var(--plp-radius);
+                    background: #171a1d;
+                    box-shadow: 0 10px 20px rgba(20, 24, 29, 0.12);
+                }
+
+                .plp-development-context-gallery figure.is-main {
+                    grid-column: span 2;
+                    grid-row: span 2;
+                }
+
+                .plp-development-context-gallery img {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                    object-position: center;
+                    transform: scale(1.01);
+                }
+
+                .plp-development-context-gallery figcaption {
+                    position: absolute;
+                    inset: auto 0 0;
+                    padding: 28px 12px 11px;
+                    display: grid;
+                    gap: 3px;
+                    color: #fff;
+                    background: linear-gradient(180deg, rgba(17, 20, 24, 0) 0%, rgba(17, 20, 24, 0.74) 100%);
+                    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.34);
+                }
+
+                .plp-development-context-gallery figcaption span {
+                    color: rgba(255, 255, 255, 0.72);
+                    font-size: 10px;
+                    font-weight: 850;
+                    letter-spacing: 0.06em;
+                    text-transform: uppercase;
+                }
+
+                .plp-development-context-gallery figcaption strong {
+                    color: #fff;
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: 16px;
+                    font-weight: 500;
+                    line-height: 1.08;
+                }
+
                 .plp-related-band {
                     margin: 36px 44px 0;
                     padding: 30px;
@@ -4992,6 +5195,11 @@ export default function PropertyLandingStyles() {
                     padding: 22px;
                 }
 
+                .plp-development-context-band {
+                    margin: 26px 22px 0;
+                    padding: 22px;
+                }
+
                 .plp-related-head {
                     margin-bottom: 12px;
                 }
@@ -5021,6 +5229,15 @@ export default function PropertyLandingStyles() {
                 @media (max-width: 1120px) {
                     .plp-detail-layout {
                         grid-template-columns: 1fr;
+                    }
+
+                    .plp-development-context-band {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-development-context-gallery {
+                        min-height: 0;
+                        grid-auto-rows: 150px;
                     }
 
                     .plp-gallery-column {
@@ -8036,6 +8253,139 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-timeline-item b {
                         grid-column: auto;
+                    }
+
+                    .plp-mobile-development-section {
+                        margin-top: 12px;
+                        padding: 15px 14px 16px;
+                        border-color: rgba(24,31,42,0.08);
+                        background: linear-gradient(180deg, #ffffff 0%, #fff9ef 100%);
+                    }
+
+                    .plp-mobile-development-section .plp-mobile-card-head {
+                        margin-bottom: 12px;
+                    }
+
+                    .plp-mobile-development-section .plp-mobile-card-head h2 {
+                        max-width: 100%;
+                        color: #122033;
+                        font-size: 1.08rem;
+                        font-weight: 560;
+                        line-height: 1.15;
+                    }
+
+                    .plp-mobile-development-gallery {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                    }
+
+                    .plp-mobile-development-gallery figure {
+                        position: relative;
+                        min-width: 0;
+                        min-height: 92px;
+                        margin: 0;
+                        overflow: hidden;
+                        border-radius: 12px;
+                        background: #171a1d;
+                        box-shadow: 0 10px 20px rgba(24,31,42,0.12);
+                    }
+
+                    .plp-mobile-development-gallery figure.is-main {
+                        grid-column: 1 / -1;
+                        min-height: 156px;
+                    }
+
+                    .plp-mobile-development-gallery img {
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                        object-fit: cover;
+                        object-position: center;
+                    }
+
+                    .plp-mobile-development-gallery figcaption {
+                        position: absolute;
+                        left: 8px;
+                        bottom: 8px;
+                        max-width: calc(100% - 16px);
+                        padding: 5px 8px;
+                        border-radius: 999px;
+                        background: rgba(18, 24, 31, 0.78);
+                        color: #fff;
+                        font-size: 0.62rem;
+                        font-weight: 780;
+                        line-height: 1;
+                        text-transform: uppercase;
+                    }
+
+                    .plp-mobile-development-copy {
+                        margin: 12px 0 0;
+                        color: #3d4856;
+                        font-size: 0.86rem;
+                        line-height: 1.55;
+                    }
+
+                    .plp-mobile-development-facts {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 7px;
+                        margin-top: 11px;
+                    }
+
+                    .plp-mobile-development-facts span {
+                        min-width: 0;
+                        min-height: 38px;
+                        padding: 9px 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        border: 1px solid rgba(184,148,95,0.15);
+                        border-radius: 11px;
+                        background: rgba(255,255,255,0.78);
+                        color: #28313d;
+                        font-size: 0.77rem;
+                        font-weight: 620;
+                        line-height: 1.25;
+                    }
+
+                    .plp-mobile-development-facts svg {
+                        flex: 0 0 auto;
+                        color: var(--plp-gold-dark);
+                    }
+
+                    .plp-mobile-development-actions {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 8px;
+                        margin-top: 12px;
+                    }
+
+                    .plp-mobile-development-actions a {
+                        min-height: 42px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        border-radius: 12px;
+                        font-size: 0.68rem;
+                        font-weight: 900;
+                        letter-spacing: 0.04em;
+                        line-height: 1.1;
+                        text-align: center;
+                        text-decoration: none;
+                        text-transform: uppercase;
+                    }
+
+                    .plp-mobile-development-actions a:first-child {
+                        background: #d9b52f;
+                        color: #111;
+                    }
+
+                    .plp-mobile-development-actions a:last-child {
+                        border: 1px solid rgba(184,148,95,0.24);
+                        background: #fff;
+                        color: var(--plp-gold-dark);
                     }
 
                     .plp-mobile-related-section {
