@@ -547,7 +547,7 @@ function GoogleStreetViewPanorama({
                     title={`Street View de ${title}`}
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    allow="fullscreen; geolocation"
+                    allow="geolocation"
                     allowFullScreen
                     tabIndex={0}
                 />
@@ -788,7 +788,7 @@ export default function PropertyFeedMap({
                             title={`Street View de ${copy.title}`}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            allow="fullscreen; geolocation"
+                            allow="geolocation"
                             allowFullScreen
                             tabIndex={0}
                         />

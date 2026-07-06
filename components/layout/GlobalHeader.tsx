@@ -420,6 +420,9 @@ export default function GlobalHeader() {
                             <Link href="/" className="gh-mobile-nav-item" onClick={handleMobileHomeClick}>
                                 <span className="gh-mobile-link-main"><Home size={17} strokeWidth={1.75} /><span>Home</span></span>
                             </Link>
+                            <Link href="/busca" className="gh-mobile-nav-item gh-accent" onClick={closeMobileMenu}>
+                                <span className="gh-mobile-link-main"><Search size={17} strokeWidth={1.75} /><span>Pesquisar imoveis</span></span>
+                            </Link>
 
                             {developmentPages.length > 0 && (
                                 <>

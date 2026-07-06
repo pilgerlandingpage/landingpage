@@ -14,16 +14,19 @@ import {
     ChevronRight,
     Compass,
     Dumbbell,
+    Heart,
     KeyRound,
     Lock,
     MapPinned,
     MapPin,
     Maximize2,
+    Menu,
     Minus,
     Navigation,
     Phone,
     Plus,
     ShieldCheck,
+    Share2,
     Sparkles,
     Waves,
     X,
@@ -32,6 +35,8 @@ import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import Footer from '@/components/layout/Footer'
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
+import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
+import PropertyLandingStyles from '@/app/imovel/[id]/PropertyLandingStyles'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 import { TemplateProps } from './types'
@@ -85,11 +90,14 @@ type UnitPropertyMedia = {
     source_slug?: string | null
     featured_image?: string | null
     images?: string[] | null
+    latitude?: number | string | null
+    longitude?: number | string | null
 }
 
 type DevelopmentLocationMode = 'map' | 'street'
 
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
+const GOOGLE_STATIC_PREVIEW_SIZE = '320x190'
 const DEVELOPMENTS: Development[] = [
     {
         id: 'brava-concetto',
@@ -352,6 +360,9 @@ function asNumber(value: unknown, fallback = 0) {
 }
 
 function asOptionalNumber(value: unknown) {
+    if (value === null || value === undefined) return null
+    if (typeof value === 'string' && !value.trim()) return null
+
     const number = typeof value === 'number' ? value : Number(String(value ?? '').replace(',', '.'))
     return Number.isFinite(number) ? number : null
 }
@@ -456,6 +467,37 @@ function normalizeDevelopment(value: unknown): Development | null {
     const faq = Array.isArray(value.faq)
         ? value.faq.map(normalizeFaq).filter((item): item is Development['faq'][number] => Boolean(item))
         : []
+    const locationRecord = isRecord(value.location) ? value.location : null
+    const coordinatesRecord = isRecord(value.coordinates) ? value.coordinates : null
+    const latitude = asOptionalNumber(
+        value.latitude
+        ?? value.lat
+        ?? value.location_latitude
+        ?? value.locationLatitude
+        ?? value.map_lat
+        ?? value.mapLatitude
+        ?? value.geo_latitude
+        ?? coordinatesRecord?.latitude
+        ?? coordinatesRecord?.lat
+        ?? locationRecord?.latitude
+        ?? locationRecord?.lat
+    )
+    const longitude = asOptionalNumber(
+        value.longitude
+        ?? value.lng
+        ?? value.lon
+        ?? value.location_longitude
+        ?? value.locationLongitude
+        ?? value.map_lng
+        ?? value.mapLongitude
+        ?? value.geo_longitude
+        ?? coordinatesRecord?.longitude
+        ?? coordinatesRecord?.lng
+        ?? coordinatesRecord?.lon
+        ?? locationRecord?.longitude
+        ?? locationRecord?.lng
+        ?? locationRecord?.lon
+    )
 
     return {
         id,
@@ -471,8 +513,8 @@ function normalizeDevelopment(value: unknown): Development | null {
         heroImage: asText(value.heroImage ?? value.hero_image, fallback?.heroImage || gallery[0]?.image || '/placeholder-house.jpg'),
         description: asText(value.description, fallback?.description || 'Empreendimento selecionado pela curadoria Guilherme Pilger.'),
         address: asText(value.address, fallback?.address || asText(value.locationName ?? value.location_name, 'Santa Catarina')),
-        latitude: asOptionalNumber(value.latitude ?? value.lat ?? value.location_latitude) ?? fallback?.latitude ?? null,
-        longitude: asOptionalNumber(value.longitude ?? value.lng ?? value.lon ?? value.location_longitude) ?? fallback?.longitude ?? null,
+        latitude: latitude ?? fallback?.latitude ?? null,
+        longitude: longitude ?? fallback?.longitude ?? null,
         benefits: benefits.length ? benefits : (fallback?.benefits || []),
         differentials: differentials.length ? differentials : (fallback?.differentials || []),
         units: units.length ? units : (fallback?.units || []),
@@ -536,20 +578,66 @@ function mapQueryFor(development: Development) {
     return encodeURIComponent([development.address, development.locationName].filter(Boolean).join(', '))
 }
 
-function buildMapEmbedSrc(development: Development) {
-    const coordinates = development.latitude && development.longitude
-        ? `${development.latitude},${development.longitude}`
+function validLatLng(latValue: unknown, lngValue: unknown): [number, number] | null {
+    const lat = asOptionalNumber(latValue)
+    const lng = asOptionalNumber(lngValue)
+
+    if (
+        typeof lat === 'number'
+        && typeof lng === 'number'
+        && Number.isFinite(lat)
+        && Number.isFinite(lng)
+        && lat >= -90
+        && lat <= 90
+        && lng >= -180
+        && lng <= 180
+    ) {
+        return [lat, lng]
+    }
+
+    return null
+}
+
+function developmentLatLngFor(development: Development) {
+    return validLatLng(development.latitude, development.longitude)
+}
+
+function buildMapEmbedSrc(development: Development, latLng?: [number, number] | null) {
+    const coordinates = latLng || developmentLatLngFor(development)
+    const coordinatesQuery = coordinates
+        ? `${coordinates[0]},${coordinates[1]}`
         : ''
-    const query = coordinates ? encodeURIComponent(coordinates) : mapQueryFor(development)
+    const query = coordinatesQuery ? encodeURIComponent(coordinatesQuery) : mapQueryFor(development)
     return `https://maps.google.com/maps?q=${query}&z=16&output=embed&hl=pt-BR`
 }
 
-function buildStreetViewEmbedSrc(development: Development) {
-    if (development.latitude && development.longitude) {
-        return `https://maps.google.com/maps?layer=c&cbll=${development.latitude},${development.longitude}&cbp=12,0,0,0,0&output=svembed&hl=pt-BR`
+function buildStreetViewEmbedSrc(development: Development, latLng?: [number, number] | null) {
+    const coordinates = latLng || developmentLatLngFor(development)
+
+    if (coordinates) {
+        return `https://maps.google.com/maps?layer=c&cbll=${coordinates[0]},${coordinates[1]}&cbp=12,0,0,0,0&output=svembed&hl=pt-BR`
     }
 
     return `https://maps.google.com/maps?q=${mapQueryFor(development)}&layer=c&z=17&output=svembed&hl=pt-BR`
+}
+
+function buildStaticStreetViewPreviewUrl(latLng?: [number, number] | null) {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    if (!apiKey || !latLng) return null
+
+    const [lat, lng] = latLng
+    const params = new URLSearchParams({
+        size: GOOGLE_STATIC_PREVIEW_SIZE,
+        location: `${lat},${lng}`,
+        fov: '80',
+        heading: '0',
+        pitch: '0',
+        source: 'outdoor',
+        return_error_code: 'true',
+        key: apiKey,
+    })
+
+    return `https://maps.googleapis.com/maps/api/streetview?${params.toString()}`
 }
 
 function uniqueImages(images: string[]) {
@@ -573,6 +661,32 @@ function galleryForUnit(unit: Unit, propertyMedia: UnitPropertyMedia | undefined
         ...propertyImages,
         ...development.gallery.map((item) => item.image),
     ]).slice(0, 12)
+}
+
+function numberFromText(value: string) {
+    const match = value.match(/\d+(?:[,.]\d+)?/)
+    if (!match) return null
+
+    const parsed = Number(match[0].replace(',', '.'))
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function buildDevelopmentLocationProperty(development: Development): PropertyLocationMapProperty {
+    return {
+        id: `development-${development.id}`,
+        title: development.name,
+        description: development.description,
+        seo_title: development.name,
+        seo_description: development.description,
+        city: development.city,
+        state: 'SC',
+        neighborhood: development.locationName.split(',')[0]?.trim() || development.locationName,
+        suites: numberFromText(development.suitesRange),
+        area_m2: numberFromText(development.areaRange),
+        area_private_m2: numberFromText(development.areaRange),
+        property_type: 'Empreendimento',
+        exclusive: true,
+    }
 }
 
 export default function BravaConcettoTemplate({ slug, landingPageId, agentName, greetingMessage, content }: TemplateProps) {
@@ -711,26 +825,23 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
     const sellingBenefits = useMemo(() => buildDevelopmentBenefits(activeDev), [activeDev])
     const decisionDifferentials = useMemo(() => buildDevelopmentDifferentials(activeDev), [activeDev])
-    const mapEmbedSrc = useMemo(() => buildMapEmbedSrc(activeDev), [activeDev])
-    const streetViewEmbedSrc = useMemo(() => buildStreetViewEmbedSrc(activeDev), [activeDev])
-    const locationMediaItems = useMemo(() => ([
-        {
-            mode: 'map' as const,
-            icon: MapPinned,
-            title: 'Mapa do entorno',
-            kicker: 'Mapa',
-            actionLabel: 'Ver mapa',
-            src: mapEmbedSrc,
-        },
-        {
-            mode: 'street' as const,
-            icon: Navigation,
-            title: 'Street View',
-            kicker: 'Rua e acesso',
-            actionLabel: 'Abrir',
-            src: streetViewEmbedSrc,
-        },
-    ]), [mapEmbedSrc, streetViewEmbedSrc])
+    const developmentLocationProperty = useMemo(() => buildDevelopmentLocationProperty(activeDev), [activeDev])
+    const unitMediaLatLng = useMemo<[number, number] | null>(() => {
+        for (const unit of activeDev.units) {
+            const latLng = validLatLng(
+                unitMediaBySlug[unit.sourceSlug]?.latitude,
+                unitMediaBySlug[unit.sourceSlug]?.longitude
+            )
+            if (latLng) return latLng
+        }
+
+        return null
+    }, [activeDev.units, unitMediaBySlug])
+    const developmentLatLng = useMemo<[number, number] | null>(() => {
+        return developmentLatLngFor(activeDev) || unitMediaLatLng
+    }, [activeDev, unitMediaLatLng])
+    const mapEmbedSrc = useMemo(() => buildMapEmbedSrc(activeDev, developmentLatLng), [activeDev, developmentLatLng])
+    const streetViewEmbedSrc = useMemo(() => buildStreetViewEmbedSrc(activeDev, developmentLatLng), [activeDev, developmentLatLng])
 
     useEffect(() => {
         if (!locationModal) return
@@ -771,6 +882,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     return (
         <div className="bc-page min-h-screen bg-[#F7F5F0] text-[#2F2A22] antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
+            <LandingMobileHeader />
 
             <main>
                 <section className="relative flex min-h-[calc(100vh-120px)] items-center overflow-hidden bg-[#07090C]">
@@ -778,7 +890,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         <img
                             src={activeDev.heroImage}
                             alt={activeDev.name}
-                            className="h-full w-full object-cover opacity-55 transition duration-700"
+                            className="h-full w-full object-cover opacity-90 transition duration-700"
                             referrerPolicy="no-referrer"
                         />
                         <div className="bc-hero-depth-overlay absolute inset-0 bg-gradient-to-t from-[#0A0D10] via-[#0A0D10]/45 to-[#0A0D10]/75" />
@@ -787,7 +899,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
 
                     <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-[1320px] flex-col justify-between gap-12 px-4 py-14 md:px-8 lg:py-20">
-                        <div className="max-w-4xl pt-8">
+                        <div className="bc-hero-copy max-w-4xl pt-8">
                             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/35 bg-[#11161D]/90 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.22em] text-[#D4AF37]">
                                 <Sparkles size={14} />
                                 Empreendimento exclusivo
@@ -801,15 +913,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 {activeDev.tagline}
                             </p>
 
-                            <div className="flex flex-col gap-4 sm:flex-row">
-                                <button
-                                    type="button"
-                                    onClick={handleScrollToUnits}
-                                    className="group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
-                                >
-                                    Ver unidades disponiveis
-                                    <ArrowRight className="h-4 w-4 text-[#0A0D10] transition group-hover:translate-x-1" />
-                                </button>
+                            <div className="bc-hero-cta bc-hero-cta--desktop flex flex-col gap-4 sm:flex-row">
+                                <HeroUnitsButton onClick={handleScrollToUnits} />
                             </div>
                         </div>
 
@@ -818,6 +923,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             <HeroMetric icon={KeyRound} label="Faixa de preco" value={activeDev.priceRange} note="Curadoria ativa" />
                             <HeroMetric icon={Maximize2} label="Oportunidade" value={`${activeDev.availableUnitsCount} unidades`} note="Disponiveis agora" highlight />
                             <HeroMetric icon={BedDouble} label="Configuracoes" value={activeDev.suitesRange} note={activeDev.areaRange} />
+                        </div>
+
+                        <div className="bc-hero-cta bc-hero-cta--mobile">
+                            <HeroUnitsButton onClick={handleScrollToUnits} />
                         </div>
                     </div>
                 </section>
@@ -860,7 +969,27 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="bg-[#0A0D10] py-20 md:py-24">
+                <section className="bc-development-gallery-section bg-[#0A0D10] py-20 md:py-24">
+                    <div className="mx-auto max-w-[1320px] px-4 md:px-8">
+                        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                            <div>
+                                <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Galeria</span>
+                                <h2 className="text-4xl font-semibold text-white md:text-5xl">Visual do empreendimento</h2>
+                            </div>
+                            <p className="max-w-sm text-sm text-zinc-500">Imagens, mapa e Street View para entender o empreendimento e o entorno antes da visita.</p>
+                        </div>
+                        <DevelopmentMediaShowcase
+                            development={activeDev}
+                            latLng={developmentLatLng}
+                            mapEmbedSrc={mapEmbedSrc}
+                            onOpenLocation={setLocationModal}
+                            property={developmentLocationProperty}
+                            streetViewEmbedSrc={streetViewEmbedSrc}
+                        />
+                    </div>
+                </section>
+
+                <section className="bc-compare-section bg-[#0A0D10] py-20 md:py-24">
                     <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-12 px-4 md:px-8 lg:grid-cols-12">
                         <div className="lg:col-span-4">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Por que este empreendimento</span>
@@ -884,7 +1013,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="border-y border-zinc-800 bg-[#11161D] py-20">
+                <section className="bc-differentials-section border-y border-zinc-800 bg-[#11161D] py-20">
                     <div className="mx-auto max-w-[1320px] px-4 md:px-8">
                         <div className="mb-12 max-w-2xl">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Diferenciais</span>
@@ -902,42 +1031,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="bg-[#0A0D10] py-20 md:py-24">
-                    <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-                        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                            <div>
-                                <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Galeria</span>
-                                <h2 className="text-4xl font-semibold text-white md:text-5xl">Visual do empreendimento</h2>
-                            </div>
-                            <p className="max-w-sm text-sm text-zinc-500">Imagens, mapa e Street View para entender o empreendimento e o entorno antes da visita.</p>
-                        </div>
-                        <div className="bc-development-media-grid">
-                            {activeDev.gallery.map((item, index) => (
-                                <div key={`${item.title}-${index}`} className="bc-development-media-card group">
-                                    <img src={item.image} alt={item.title} referrerPolicy="no-referrer" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                                    <div className="absolute bottom-4 left-4">
-                                        <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#D4AF37]">{item.category}</p>
-                                        <h3 className="mt-1 text-lg font-semibold text-white">{item.title}</h3>
-                                    </div>
-                                </div>
-                            ))}
-                            {locationMediaItems.map((item) => (
-                                <DevelopmentLocationFrame
-                                    key={item.mode}
-                                    actionLabel={item.actionLabel}
-                                    icon={item.icon}
-                                    kicker={item.kicker}
-                                    onOpen={() => setLocationModal(item.mode)}
-                                    src={item.src}
-                                    title={item.title}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="border-y border-zinc-800 bg-[#11161D] py-20">
+                <section className="bc-location-section border-y border-zinc-800 bg-[#11161D] py-20">
                     <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12">
                         <div className="lg:col-span-4">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Localizacao</span>
@@ -965,7 +1059,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="bg-[#0A0D10] py-20">
+                <section className="bc-faq-section bg-[#0A0D10] py-20">
                     <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12">
                         <div className="lg:col-span-4">
                             <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Duvidas frequentes</span>
@@ -1001,9 +1095,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
             {locationModal && createPortal(
                 <DevelopmentLocationModal
+                    fallbackSrc={locationModal === 'street' ? streetViewEmbedSrc : mapEmbedSrc}
+                    latLng={developmentLatLng}
                     mode={locationModal}
                     onClose={() => setLocationModal(null)}
-                    src={locationModal === 'street' ? streetViewEmbedSrc : mapEmbedSrc}
+                    property={developmentLocationProperty}
                     title={locationModal === 'street' ? `Street View de ${activeDev.name}` : `Mapa de ${activeDev.name}`}
                 />,
                 document.body,
@@ -1019,6 +1115,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <span>Falar com especialista</span>
                 </button>
             </div>
+
+            <PropertyLandingStyles />
 
             <style jsx global>{`
                 .bc-page {
@@ -1066,8 +1164,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     height: 100%;
                     display: block;
                     object-fit: cover;
-                    opacity: 0.96;
-                    filter: saturate(0.98) contrast(1.04);
+                    opacity: 1;
+                    filter: saturate(1.04) contrast(1.06);
                 }
 
                 .bc-page .bc-hero-depth-overlay,
@@ -1077,11 +1175,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-hero-depth-overlay {
-                    background: linear-gradient(to top, rgba(247, 245, 240, 0.58) 0%, rgba(247, 245, 240, 0.22) 46%, rgba(247, 245, 240, 0.35) 100%);
+                    background: linear-gradient(to top, rgba(247, 245, 240, 0.24) 0%, rgba(247, 245, 240, 0.07) 46%, rgba(247, 245, 240, 0.11) 100%);
                 }
 
                 .bc-page .bc-hero-side-fade {
-                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.72), rgba(247, 245, 240, 0.29) 38%, rgba(247, 245, 240, 0.03) 78%);
+                    background: linear-gradient(90deg, rgba(247, 245, 240, 0.28), rgba(247, 245, 240, 0.08) 38%, rgba(247, 245, 240, 0) 78%);
                 }
 
                 .bc-page .bc-hero-top-fade {
@@ -1091,9 +1189,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     pointer-events: none;
                     background: linear-gradient(
                         to bottom,
-                        rgba(255, 255, 255, 0.78) 0%,
-                        rgba(255, 255, 255, 0.58) 34%,
-                        rgba(255, 255, 255, 0.14) 74%,
+                        rgba(255, 255, 255, 0.24) 0%,
+                        rgba(255, 255, 255, 0.14) 34%,
+                        rgba(255, 255, 255, 0.04) 74%,
                         rgba(255, 255, 255, 0) 100%
                     );
                 }
@@ -2736,6 +2834,1035 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     }
 
                 }
+
+                .bc-page .bc-hero-cta--mobile {
+                    display: none;
+                }
+
+                .bc-page .bc-hero-cta button {
+                    min-height: 43px;
+                    border-radius: 4px;
+                    padding: 13px 24px;
+                    border: 0;
+                    background: #d4af37;
+                    color: #0a0d10;
+                    font-size: 10px;
+                    font-weight: 950;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    box-shadow: 0 18px 38px rgba(184, 148, 95, 0.18);
+                    transition: transform 0.2s ease, background 0.2s ease;
+                }
+
+                .bc-page .bc-hero-cta button:hover {
+                    transform: translateY(-1px);
+                }
+
+                .bc-page .bc-development-gallery-section {
+                    border-top: 1px solid rgba(184, 148, 95, 0.16);
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                    background: #ffffff !important;
+                }
+
+                .bc-page .bc-development-gallery-section > div {
+                    display: block !important;
+                    width: min(1320px, calc(100% - 32px));
+                    margin: 0 auto;
+                }
+
+                .bc-page .bc-development-gallery-section > div > div:first-child {
+                    margin-bottom: 42px;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: space-between;
+                    gap: 28px;
+                }
+
+                .bc-page .bc-development-gallery-section h2,
+                .bc-page .bc-compare-section h2,
+                .bc-page .bc-differentials-section h2 {
+                    max-width: 720px;
+                    margin: 0;
+                    color: #211d18 !important;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: clamp(1.95rem, 2.1vw, 2.85rem);
+                    font-weight: 400;
+                    line-height: 1.12;
+                    letter-spacing: 0;
+                }
+
+                .bc-page .bc-development-gallery-section span,
+                .bc-page .bc-compare-section span,
+                .bc-page .bc-differentials-section span {
+                    color: #b58a28;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 11px;
+                    font-weight: 850;
+                    letter-spacing: 0.22em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page .bc-development-gallery-section p,
+                .bc-page .bc-compare-section p,
+                .bc-page .bc-differentials-section p {
+                    color: #655f55 !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-grid {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 18px;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-card {
+                    position: relative !important;
+                    min-height: 0 !important;
+                    aspect-ratio: 4 / 3;
+                    overflow: hidden !important;
+                    border: 1px solid rgba(184, 148, 95, 0.18) !important;
+                    border-radius: 8px !important;
+                    background: #ebe3d4 !important;
+                    padding: 0 !important;
+                    box-shadow: 0 14px 34px rgba(31, 27, 21, 0.07);
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-card::after,
+                .bc-page .bc-development-gallery-section .bc-development-media-shade {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-card img,
+                .bc-page .bc-development-gallery-section .bc-development-media-card iframe,
+                .bc-page .bc-development-gallery-section .bc-development-location-map {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    border: 0;
+                    object-fit: cover;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-card iframe {
+                    pointer-events: none;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-media-card:hover img {
+                    transform: scale(1.035);
+                }
+
+                .bc-page .bc-development-media-copy,
+                .bc-page .bc-development-media-frame-label {
+                    position: absolute;
+                    left: 12px;
+                    right: 12px;
+                    bottom: 12px;
+                    z-index: 2;
+                    width: fit-content;
+                    max-width: calc(100% - 24px);
+                    display: grid;
+                    gap: 2px;
+                    border: 1px solid rgba(184, 148, 95, 0.22);
+                    border-radius: 7px;
+                    background: rgba(255, 255, 255, 0.86);
+                    padding: 8px 10px;
+                    box-shadow: 0 10px 24px rgba(31, 27, 21, 0.12);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
+
+                .bc-page .bc-development-media-copy p,
+                .bc-page .bc-development-media-frame-label span {
+                    margin: 0;
+                    color: #b58a28 !important;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 8px;
+                    font-weight: 850;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page .bc-development-media-copy h3,
+                .bc-page .bc-development-media-frame-label strong {
+                    margin: 0;
+                    color: #211d18 !important;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: 16px;
+                    font-weight: 500;
+                    line-height: 1.12;
+                }
+
+                .bc-page .bc-development-media-frame-label svg {
+                    display: none;
+                }
+
+                .bc-page .bc-development-media-frame-hit {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 3;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: flex-end;
+                    border: 0;
+                    background: transparent !important;
+                    padding: 12px;
+                    color: #ffffff;
+                    cursor: pointer;
+                    text-align: left;
+                }
+
+                .bc-page .bc-development-media-frame-hit span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    min-height: 32px;
+                    border-radius: 999px;
+                    background: rgba(31, 27, 21, 0.74);
+                    padding: 0 12px;
+                    color: #ffffff;
+                    font-size: 11px;
+                    font-weight: 900;
+                    letter-spacing: 0.02em;
+                    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+                    backdrop-filter: blur(8px);
+                }
+
+                .bc-page .bc-development-media-frame-hit span svg {
+                    color: #d4af37;
+                }
+
+                .bc-page .bc-development-showcase {
+                    color: #211d18;
+                }
+
+                .bc-page .bc-development-showcase-toolbar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 12px;
+                }
+
+                .bc-page .bc-development-showcase-pill {
+                    min-height: 36px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border: 1px solid rgba(36, 31, 24, 0.14);
+                    border-radius: 999px;
+                    background: #ffffff;
+                    padding: 0 14px;
+                    color: #211d18;
+                    font-size: 12px;
+                    font-weight: 850;
+                    letter-spacing: 0;
+                    line-height: 1;
+                    box-shadow: 0 8px 18px rgba(31, 27, 21, 0.04);
+                }
+
+                .bc-page .bc-development-showcase-pill svg {
+                    color: #b58a28;
+                }
+
+                .bc-page .bc-development-showcase-pill strong {
+                    min-width: 22px;
+                    height: 20px;
+                    display: inline-grid;
+                    place-items: center;
+                    border-radius: 999px;
+                    background: #9b7427;
+                    color: #ffffff;
+                    font-size: 11px;
+                    font-weight: 900;
+                }
+
+                .bc-page .bc-development-showcase-stage {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 162px;
+                    gap: 12px;
+                    align-items: stretch;
+                }
+
+                .bc-page .bc-development-showcase-main {
+                    position: relative;
+                    min-height: clamp(430px, 44vw, 570px);
+                    overflow: hidden;
+                    border: 1px solid rgba(36, 31, 24, 0.1);
+                    border-radius: 8px;
+                    background: #efe8db;
+                    box-shadow: 0 18px 46px rgba(31, 27, 21, 0.08);
+                    touch-action: pan-y;
+                }
+
+                .bc-page .bc-development-showcase-main > img,
+                .bc-page .bc-development-showcase-main > iframe,
+                .bc-page .bc-development-showcase-thumb > img,
+                .bc-page .bc-development-showcase-thumb > iframe {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    border: 0;
+                    object-fit: cover;
+                }
+
+                .bc-page .bc-development-showcase-main > iframe,
+                .bc-page .bc-development-showcase-thumb > iframe {
+                    background: #d8eef5;
+                }
+
+                .bc-page .bc-development-showcase-thumb > iframe {
+                    pointer-events: none;
+                }
+
+                .bc-page .bc-development-location-thumb {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: grid;
+                    place-items: center;
+                    align-content: center;
+                    gap: 5px;
+                    background:
+                        linear-gradient(135deg, rgba(33, 29, 24, 0.92), rgba(33, 29, 24, 0.68)),
+                        radial-gradient(circle at 78% 22%, rgba(212, 175, 55, 0.24), transparent 32%);
+                    color: #ffffff;
+                    text-align: center;
+                }
+
+                .bc-page .bc-development-location-thumb svg {
+                    color: #d4af37;
+                }
+
+                .bc-page .bc-development-location-thumb strong {
+                    color: #ffffff;
+                    font-size: 11px;
+                    font-weight: 900;
+                    line-height: 1;
+                }
+
+                .bc-page .bc-development-location-thumb span {
+                    color: rgba(255, 255, 255, 0.68) !important;
+                    font-family: Arial, Helvetica, sans-serif !important;
+                    font-size: 9px !important;
+                    font-weight: 700 !important;
+                    letter-spacing: 0 !important;
+                    line-height: 1 !important;
+                    text-transform: none !important;
+                }
+
+                .bc-page .bc-development-location-static-thumb {
+                    position: absolute;
+                    inset: 0;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    background: #d8eef5;
+                }
+
+                .bc-page .bc-development-location-static-thumb img {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                }
+
+                .bc-page .bc-development-location-static-thumb::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.03) 62%);
+                    pointer-events: none;
+                }
+
+                .bc-page .bc-development-showcase-nav {
+                    position: absolute;
+                    top: 50%;
+                    z-index: 4;
+                    width: 52px;
+                    height: 52px;
+                    display: grid;
+                    place-items: center;
+                    border: 0;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.94);
+                    color: #211d18;
+                    box-shadow: 0 12px 28px rgba(31, 27, 21, 0.14);
+                    transform: translateY(-50%);
+                }
+
+                .bc-page .bc-development-showcase-nav--prev {
+                    left: 18px;
+                }
+
+                .bc-page .bc-development-showcase-nav--next {
+                    right: 18px;
+                }
+
+                .bc-page .bc-development-showcase-open {
+                    position: absolute;
+                    left: 18px;
+                    top: 18px;
+                    z-index: 5;
+                    min-height: 36px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    border: 0;
+                    border-radius: 999px;
+                    background: rgba(31, 31, 31, 0.84);
+                    padding: 0 14px;
+                    color: #ffffff;
+                    font-size: 12px;
+                    font-weight: 900;
+                    letter-spacing: 0;
+                    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
+
+                .bc-page .bc-development-showcase-open svg {
+                    color: #d4af37;
+                }
+
+                .bc-page .bc-development-showcase-rail {
+                    max-height: clamp(430px, 44vw, 570px);
+                    display: grid;
+                    gap: 10px;
+                    overflow-y: auto;
+                    padding-right: 4px;
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(181, 138, 40, 0.55) rgba(239, 232, 219, 0.8);
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .bc-page .bc-development-showcase-thumb {
+                    position: relative;
+                    width: 100%;
+                    min-height: 0;
+                    aspect-ratio: 4 / 3;
+                    overflow: hidden;
+                    border: 2px solid transparent;
+                    border-radius: 8px;
+                    background: #efe8db;
+                    padding: 0;
+                    box-shadow: 0 10px 22px rgba(31, 27, 21, 0.08);
+                }
+
+                .bc-page .bc-development-showcase-thumb.is-active {
+                    border-color: #d4af37;
+                }
+
+                .bc-page .bc-development-showcase-thumb-label {
+                    position: absolute;
+                    left: 8px;
+                    bottom: 8px;
+                    z-index: 3;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    max-width: calc(100% - 16px);
+                    min-height: 28px;
+                    border-radius: 999px;
+                    background: rgba(31, 31, 31, 0.82);
+                    padding: 0 9px;
+                    color: #ffffff !important;
+                    font-family: Arial, Helvetica, sans-serif !important;
+                    font-size: 11px !important;
+                    font-weight: 900 !important;
+                    letter-spacing: 0 !important;
+                    line-height: 1 !important;
+                    text-transform: none !important;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .bc-page .bc-development-showcase-thumb-label svg {
+                    flex: 0 0 auto;
+                    color: #ffffff;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase {
+                    width: 100% !important;
+                    height: auto !important;
+                    display: block !important;
+                    grid-template-columns: none !important;
+                    gap: 0 !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-toolbar,
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-stage {
+                    position: static !important;
+                    grid-column: auto !important;
+                    grid-row: auto !important;
+                    width: 100% !important;
+                    min-height: 0 !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                    border: 0 !important;
+                    border-radius: 0 !important;
+                    background: transparent !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-toolbar {
+                    display: flex !important;
+                    margin-bottom: 12px !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-stage {
+                    display: grid !important;
+                    grid-template-columns: minmax(0, 1fr) 162px !important;
+                    gap: 12px !important;
+                    align-items: stretch !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-toolbar::after,
+                .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-stage::after {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-main,
+                .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-rail {
+                    grid-column: auto !important;
+                    grid-row: auto !important;
+                    min-height: 0 !important;
+                    overflow: visible;
+                    border-radius: 0;
+                    padding: 0 !important;
+                    transform: none !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-main {
+                    position: relative !important;
+                    width: auto !important;
+                    height: auto !important;
+                    min-height: clamp(430px, 44vw, 570px) !important;
+                    display: block !important;
+                    overflow: hidden !important;
+                    border: 1px solid rgba(36, 31, 24, 0.1) !important;
+                    border-radius: 8px !important;
+                    background: #efe8db !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-rail {
+                    position: static !important;
+                    width: 162px !important;
+                    height: auto !important;
+                    max-height: clamp(430px, 44vw, 570px) !important;
+                    display: grid !important;
+                    overflow-y: auto !important;
+                    border: 0 !important;
+                    background: transparent !important;
+                }
+
+                .bc-page .bc-development-gallery-section .bc-development-showcase-pill {
+                    height: auto !important;
+                    min-height: 36px !important;
+                    padding: 0 14px !important;
+                }
+
+                .bc-mobile-landing-header {
+                    display: none;
+                }
+
+                .bc-page .bc-development-location-map,
+                .bc-location-modal .bc-development-location-map {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                }
+
+                .bc-page .bc-development-location-map .plp-location-explorer,
+                .bc-location-modal .bc-development-location-map .plp-location-explorer {
+                    position: absolute;
+                    inset: 0;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 0;
+                    overflow: hidden;
+                    border-radius: inherit;
+                }
+
+                .bc-page .bc-development-location-map .plp-location-context,
+                .bc-page .bc-development-location-map .plp-location-actions,
+                .bc-location-modal .bc-development-location-map .plp-location-context,
+                .bc-location-modal .bc-development-location-map .plp-location-actions {
+                    display: none !important;
+                }
+
+                .bc-page .bc-development-location-map .property-feed-map-shell,
+                .bc-page .bc-development-location-map .property-feed-map-canvas,
+                .bc-page .bc-development-location-map .property-feed-map-street-view,
+                .bc-page .bc-development-location-map .property-feed-map-street-frame,
+                .bc-page .bc-development-location-map .property-feed-map-street-native,
+                .bc-page .bc-development-location-map .property-feed-map-street-native-canvas,
+                .bc-page .bc-development-location-map .plp-nearby-map-shell,
+                .bc-page .bc-development-location-map .plp-nearby-real-map,
+                .bc-page .bc-development-location-map .leaflet-container,
+                .bc-location-modal .bc-development-location-map .property-feed-map-shell,
+                .bc-location-modal .bc-development-location-map .property-feed-map-canvas,
+                .bc-location-modal .bc-development-location-map .property-feed-map-street-view,
+                .bc-location-modal .bc-development-location-map .property-feed-map-street-frame,
+                .bc-location-modal .bc-development-location-map .property-feed-map-street-native,
+                .bc-location-modal .bc-development-location-map .property-feed-map-street-native-canvas,
+                .bc-location-modal .bc-development-location-map .plp-nearby-map-shell,
+                .bc-location-modal .bc-development-location-map .plp-nearby-real-map,
+                .bc-location-modal .bc-development-location-map .leaflet-container {
+                    width: 100% !important;
+                    height: 100% !important;
+                    min-height: 0 !important;
+                    border-radius: inherit;
+                }
+
+                .bc-page .bc-development-location-map .plp-nearby-map-shell,
+                .bc-location-modal .bc-development-location-map .plp-nearby-map-shell {
+                    border: 0;
+                    border-radius: inherit;
+                    box-shadow: none;
+                }
+
+                .bc-page .bc-development-location-map .property-feed-map-style-control,
+                .bc-page .bc-development-location-map .property-feed-map-caption,
+                .bc-page .bc-development-location-map .property-feed-map-street-toggle,
+                .bc-page .bc-development-location-map .property-feed-map-street-guide,
+                .bc-location-modal .bc-development-location-map .property-feed-map-style-control,
+                .bc-location-modal .bc-development-location-map .property-feed-map-caption {
+                    display: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo::after {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article > div:first-child > div.bc-unit-photo-price,
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price {
+                    background: rgba(255, 255, 255, 0.84) !important;
+                    color: #211d18 !important;
+                    padding: 8px 10px !important;
+                    box-shadow: 0 10px 22px rgba(31, 27, 21, 0.12);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price::before {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p {
+                    text-shadow: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p:first-child {
+                    color: #8a7a5d !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p:last-child {
+                    color: #211d18 !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo::before,
+                .bc-page #unidades-disponiveis article .bc-unit-photo::after {
+                    display: none !important;
+                    content: none !important;
+                    background: transparent !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-controls {
+                    background: transparent !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price,
+                .bc-page #unidades-disponiveis article > div:first-child > .bc-unit-photo-price {
+                    position: absolute !important;
+                    left: 10px !important;
+                    right: auto !important;
+                    bottom: 10px !important;
+                    top: auto !important;
+                    width: auto !important;
+                    max-width: calc(100% - 20px) !important;
+                    min-height: 0 !important;
+                    border: 1px solid rgba(184, 148, 95, 0.16) !important;
+                    border-radius: 7px !important;
+                    background: rgba(255, 255, 255, 0.9) !important;
+                    padding: 7px 9px !important;
+                    color: #211d18 !important;
+                    box-shadow: 0 10px 22px rgba(31, 27, 21, 0.1) !important;
+                    backdrop-filter: blur(10px) !important;
+                    -webkit-backdrop-filter: blur(10px) !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price::before,
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price::after {
+                    display: none !important;
+                    content: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    backdrop-filter: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p {
+                    color: #211d18 !important;
+                    text-shadow: none !important;
+                }
+
+                .bc-page #unidades-disponiveis article .bc-unit-photo-price p:first-child {
+                    color: #8a7a5d !important;
+                }
+
+                .bc-page .bc-compare-section {
+                    background: #ffffff !important;
+                }
+
+                .bc-page .bc-compare-section > div {
+                    display: grid !important;
+                    grid-template-columns: 4fr 8fr;
+                    gap: 48px;
+                    align-items: start;
+                    width: min(1320px, calc(100% - 32px));
+                    margin: 0 auto;
+                }
+
+                .bc-page .bc-compare-section > div > div:last-child,
+                .bc-page .bc-differentials-section > div > div:last-child {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 18px;
+                }
+
+                .bc-page .bc-compare-section > div > div:last-child > div,
+                .bc-page .bc-differentials-section > div > div:last-child > div {
+                    position: static !important;
+                    min-height: 0 !important;
+                    overflow: visible !important;
+                    border: 1px solid rgba(184, 148, 95, 0.16) !important;
+                    border-radius: 8px !important;
+                    background: rgba(255, 255, 255, 0.9) !important;
+                    padding: 24px !important;
+                    box-shadow: 0 12px 30px rgba(31, 27, 21, 0.045);
+                }
+
+                .bc-page .bc-compare-section > div > div:last-child > div::after,
+                .bc-page .bc-differentials-section > div > div:last-child > div::after {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                .bc-page .bc-compare-section > div > div:last-child > div > div:first-child {
+                    width: 44px;
+                    height: 44px;
+                    display: grid;
+                    place-items: center;
+                    border: 1px solid rgba(184, 148, 95, 0.2);
+                    border-radius: 6px;
+                    background: rgba(184, 148, 95, 0.1);
+                    color: #d4af37;
+                    margin-bottom: 18px;
+                }
+
+                .bc-page .bc-compare-section h3,
+                .bc-page .bc-differentials-section h3 {
+                    margin: 0 0 10px;
+                    color: #211d18 !important;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: 18px;
+                    font-weight: 450;
+                    line-height: 1.26;
+                }
+
+                .bc-page .bc-differentials-section {
+                    border-top: 1px solid rgba(184, 148, 95, 0.16) !important;
+                    border-bottom: 1px solid rgba(184, 148, 95, 0.16) !important;
+                    background: #f4efe6 !important;
+                }
+
+                .bc-page .bc-differentials-section > div {
+                    display: block !important;
+                    width: min(1320px, calc(100% - 32px));
+                    margin: 0 auto;
+                }
+
+                .bc-page .bc-differentials-section > div > div:first-child {
+                    max-width: 720px;
+                    margin-bottom: 42px;
+                }
+
+                .bc-page .bc-differentials-section > div > div:last-child > div > div:first-child {
+                    margin-bottom: 24px;
+                    color: #b58a28;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 12px;
+                }
+
+                @media (max-width: 1024px) {
+                    .bc-page .bc-compare-section > div {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .bc-page .bc-compare-section > div > div:last-child,
+                    .bc-page .bc-differentials-section > div > div:last-child {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                }
+
+                @media (max-width: 720px) {
+                    body:has(.bc-page) .gh-wrap {
+                        display: none !important;
+                    }
+
+                    .bc-mobile-landing-header {
+                        position: sticky;
+                        top: 0;
+                        z-index: 80;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 14px;
+                        min-height: 68px;
+                        border-bottom: 1px solid rgba(184, 148, 95, 0.16);
+                        background: #ffffff;
+                        padding: 12px 18px;
+                        color: #211d18;
+                        box-shadow: 0 12px 26px rgba(31, 27, 21, 0.05);
+                    }
+
+                    .bc-mobile-landing-logo {
+                        display: grid;
+                        gap: 1px;
+                        min-width: 0;
+                        color: #b58a28;
+                        text-decoration: none;
+                    }
+
+                    .bc-mobile-landing-logo strong {
+                        overflow: hidden;
+                        font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                        font-size: clamp(19px, 5.1vw, 24px);
+                        font-weight: 700;
+                        letter-spacing: 0.06em;
+                        line-height: 1;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .bc-mobile-landing-logo span {
+                        color: #8a6a2a !important;
+                        font-size: 10px !important;
+                        font-weight: 800 !important;
+                        letter-spacing: 0.12em !important;
+                        line-height: 1 !important;
+                        text-transform: uppercase !important;
+                    }
+
+                    .bc-mobile-landing-actions {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        flex: 0 0 auto;
+                    }
+
+                    .bc-mobile-landing-icon {
+                        width: 42px;
+                        height: 42px;
+                        display: grid;
+                        place-items: center;
+                        border: 1px solid rgba(184, 148, 95, 0.22);
+                        border-radius: 50%;
+                        background: #ffffff;
+                        color: #b58a28;
+                        box-shadow: 0 8px 20px rgba(31, 27, 21, 0.05);
+                    }
+
+                    .bc-page .bc-hero-copy {
+                        order: 1;
+                    }
+
+                    .bc-page .bc-hero-metrics {
+                        order: 2;
+                    }
+
+                    .bc-page .bc-hero-cta--desktop {
+                        display: none !important;
+                    }
+
+                    .bc-page .bc-hero-cta--mobile {
+                        order: 3;
+                        display: flex;
+                        width: 100%;
+                    }
+
+                    .bc-page .bc-hero-cta--mobile button {
+                        width: 100%;
+                    }
+
+                    .bc-page .bc-development-gallery-section > div,
+                    .bc-page .bc-compare-section > div,
+                    .bc-page .bc-differentials-section > div {
+                        width: min(100% - 28px, 1320px);
+                    }
+
+                    .bc-page .bc-development-gallery-section > div > div:first-child {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        margin-bottom: 28px;
+                    }
+
+                    .bc-page .bc-development-showcase-toolbar {
+                        gap: 7px;
+                        overflow-x: auto;
+                        padding-bottom: 2px;
+                    }
+
+                    .bc-page .bc-development-showcase-pill {
+                        flex: 0 0 auto;
+                        min-height: 34px;
+                        padding: 0 12px;
+                        font-size: 11px;
+                    }
+
+                    .bc-page .bc-development-showcase-stage {
+                        grid-template-columns: 1fr !important;
+                        gap: 10px !important;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-stage {
+                        grid-template-columns: 1fr !important;
+                        gap: 10px !important;
+                    }
+
+                    .bc-page .bc-development-showcase-main {
+                        min-height: 0 !important;
+                        aspect-ratio: 16 / 10;
+                        border-radius: 8px;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-main {
+                        width: 100% !important;
+                        min-height: 0 !important;
+                        aspect-ratio: 16 / 10;
+                    }
+
+                    .bc-page .bc-development-showcase-nav {
+                        width: 42px;
+                        height: 42px;
+                    }
+
+                    .bc-page .bc-development-showcase-nav--prev {
+                        left: 10px;
+                    }
+
+                    .bc-page .bc-development-showcase-nav--next {
+                        right: 10px;
+                    }
+
+                    .bc-page .bc-development-showcase-open {
+                        left: 10px;
+                        top: 10px;
+                        min-height: 32px;
+                        padding: 0 11px;
+                        font-size: 11px;
+                    }
+
+                    .bc-page .bc-development-showcase-rail {
+                        width: 100% !important;
+                        max-height: none !important;
+                        display: flex !important;
+                        gap: 8px;
+                        overflow-x: auto;
+                        overflow-y: hidden !important;
+                        padding: 0 0 4px;
+                        scroll-snap-type: x proximity;
+                        touch-action: pan-x;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-rail {
+                        width: 100% !important;
+                        max-height: none !important;
+                        display: flex !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                    }
+
+                    .bc-page .bc-development-showcase-thumb {
+                        flex: 0 0 132px;
+                        scroll-snap-align: start;
+                    }
+
+                    .bc-page .bc-development-showcase-thumb-label {
+                        left: 7px;
+                        bottom: 7px;
+                        min-height: 25px;
+                        max-width: calc(100% - 14px);
+                        padding: 0 8px;
+                        font-size: 10px !important;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-media-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 10px;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-media-card {
+                        aspect-ratio: 1 / 0.86;
+                        border-radius: 7px !important;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-media-card:first-child {
+                        grid-column: 1 / -1;
+                        aspect-ratio: 16 / 10;
+                    }
+
+                    .bc-page .bc-development-gallery-section .bc-development-media-card--embed {
+                        min-height: 158px !important;
+                    }
+
+                    .bc-page .bc-development-media-copy,
+                    .bc-page .bc-development-media-frame-label {
+                        left: 8px;
+                        right: 8px;
+                        bottom: 8px;
+                        max-width: calc(100% - 16px);
+                        padding: 7px 8px;
+                    }
+
+                    .bc-page .bc-development-media-copy p,
+                    .bc-page .bc-development-media-frame-label span {
+                        font-size: 7px;
+                        letter-spacing: 0.11em;
+                    }
+
+                    .bc-page .bc-development-media-copy h3,
+                    .bc-page .bc-development-media-frame-label strong {
+                        font-size: 14px;
+                    }
+
+                    .bc-page .bc-development-media-frame-hit {
+                        padding: 8px;
+                    }
+
+                    .bc-page .bc-development-media-frame-hit span {
+                        min-height: 28px;
+                        padding: 0 9px;
+                        font-size: 9px;
+                        gap: 5px;
+                    }
+
+                    .bc-page .bc-compare-section > div > div:last-child,
+                    .bc-page .bc-differentials-section > div > div:last-child {
+                        grid-template-columns: 1fr;
+                    }
+                }
             `}</style>
         </div>
     )
@@ -2777,42 +3904,337 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
     )
 }
 
-function DevelopmentLocationFrame({ icon: Icon, title, kicker, src, actionLabel, onOpen }: {
-    icon: React.ComponentType<{ size?: number; className?: string }>
-    title: string
-    kicker: string
-    src: string
-    actionLabel: string
-    onOpen: () => void
-}) {
+function LandingMobileHeader() {
+    const openGlobalMenu = () => {
+        window.dispatchEvent(new CustomEvent('pilger:open-global-menu'))
+    }
+
     return (
-        <article className="bc-development-media-card bc-development-media-card--embed">
-            <iframe
-                title={`${kicker} ${title}`}
-                src={src}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                tabIndex={-1}
-            />
-            <div className="bc-development-media-frame-label">
-                <Icon size={15} />
-                <span>{kicker}</span>
-                <strong>{title}</strong>
+        <header className="bc-mobile-landing-header" aria-label="Cabecalho mobile da landing page">
+            <Link href="/" className="bc-mobile-landing-logo">
+                <strong>GUILHERME PILGER</strong>
+                <span>CRECI/SC 6772-J</span>
+            </Link>
+
+            <div className="bc-mobile-landing-actions">
+                <button
+                    type="button"
+                    className="bc-mobile-landing-icon"
+                    onClick={openGlobalMenu}
+                    aria-label="Abrir menu global"
+                    aria-expanded={false}
+                >
+                    <Menu size={25} />
+                </button>
             </div>
-            <button type="button" className="bc-development-media-frame-hit" onClick={onOpen} aria-label={`Abrir ${title}`}>
-                <span>
-                    <Icon size={15} />
-                    {actionLabel}
-                </span>
-            </button>
-        </article>
+        </header>
     )
 }
 
-function DevelopmentLocationModal({ mode, src, title, onClose }: {
-    mode: DevelopmentLocationMode
-    src: string
+type DevelopmentShowcaseMediaItem =
+    | {
+        type: 'photo'
+        title: string
+        label: string
+        kicker: string
+        src: string
+        photoIndex: number
+    }
+    | {
+        type: DevelopmentLocationMode
+        title: string
+        label: string
+        kicker: string
+        fallbackSrc: string
+        icon: React.ComponentType<{ size?: number; className?: string }>
+    }
+
+function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc, property, latLng, onOpenLocation }: {
+    development: Development
+    mapEmbedSrc: string
+    streetViewEmbedSrc: string
+    property: PropertyLocationMapProperty
+    latLng: [number, number] | null
+    onOpenLocation: (mode: DevelopmentLocationMode) => void
+}) {
+    const mediaItems = useMemo<DevelopmentShowcaseMediaItem[]>(() => {
+        const photoItems: DevelopmentShowcaseMediaItem[] = development.gallery.map((item, index) => ({
+            type: 'photo',
+            title: item.title,
+            label: index === 0 ? 'Foto principal' : `Imagem ${index + 1}`,
+            kicker: item.category,
+            src: item.image,
+            photoIndex: index,
+        }))
+        const items: DevelopmentShowcaseMediaItem[] = []
+
+        if (photoItems[0]) items.push(photoItems[0])
+
+        items.push({
+            type: 'street',
+            title: 'Street View',
+            label: 'Street View',
+            kicker: 'Rua e acesso',
+            fallbackSrc: streetViewEmbedSrc,
+            icon: Navigation,
+        })
+        items.push({
+            type: 'map',
+            title: 'Mapa do entorno',
+            label: 'Mapa',
+            kicker: 'Proximidades',
+            fallbackSrc: mapEmbedSrc,
+            icon: MapPinned,
+        })
+        items.push(...photoItems.slice(1))
+
+        return items
+    }, [development.gallery, mapEmbedSrc, streetViewEmbedSrc])
+    const [activeMediaIndex, setActiveMediaIndex] = useState(0)
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+    const touchCurrentRef = useRef<{ x: number; y: number } | null>(null)
+    const galleryCount = development.gallery.length
+    const safeActiveIndex = Math.min(activeMediaIndex, Math.max(mediaItems.length - 1, 0))
+    const activeMedia = mediaItems[safeActiveIndex]
+    const canBrowse = mediaItems.length > 1
+
+    if (!activeMedia) return null
+
+    const selectMedia = (targetIndex: number) => {
+        if (!mediaItems.length) return
+        setActiveMediaIndex((targetIndex + mediaItems.length) % mediaItems.length)
+    }
+    const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+        const touch = event.touches[0]
+        if (!touch) return
+
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+        touchCurrentRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+    const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+        const touch = event.touches[0]
+        if (!touch) return
+
+        touchCurrentRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+    const handleTouchEnd = () => {
+        const start = touchStartRef.current
+        const current = touchCurrentRef.current
+        touchStartRef.current = null
+        touchCurrentRef.current = null
+
+        if (!start || !current || !canBrowse) return
+
+        const deltaX = current.x - start.x
+        const deltaY = current.y - start.y
+        const isHorizontalSwipe = Math.abs(deltaX) > 42 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25
+
+        if (!isHorizontalSwipe) return
+        selectMedia(safeActiveIndex + (deltaX < 0 ? 1 : -1))
+    }
+    const isLocationMedia = activeMedia.type === 'map' || activeMedia.type === 'street'
+
+    return (
+        <div className="bc-development-showcase" aria-label={`Midias de ${development.name}`}>
+            <div className="bc-development-showcase-toolbar">
+                <button type="button" className="bc-development-showcase-pill" onClick={() => selectMedia(0)}>
+                    <Camera size={15} />
+                    Fotos
+                    <strong>{galleryCount}</strong>
+                </button>
+                <button type="button" className="bc-development-showcase-pill">
+                    <Heart size={15} />
+                    Salvar
+                </button>
+                <button type="button" className="bc-development-showcase-pill">
+                    <Share2 size={15} />
+                    Compartilhar
+                </button>
+            </div>
+
+            <div className="bc-development-showcase-stage">
+                <div
+                    className={`bc-development-showcase-main bc-development-showcase-main--${activeMedia.type}`}
+                    onTouchCancel={handleTouchEnd}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchMove={handleTouchMove}
+                    onTouchStart={handleTouchStart}
+                >
+                    <DevelopmentMediaContent
+                        item={activeMedia}
+                        latLng={latLng}
+                        property={property}
+                    />
+
+                    {canBrowse && (
+                        <>
+                            <button
+                                type="button"
+                                className="bc-development-showcase-nav bc-development-showcase-nav--prev"
+                                onClick={() => selectMedia(safeActiveIndex - 1)}
+                                aria-label="Midia anterior"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+                            <button
+                                type="button"
+                                className="bc-development-showcase-nav bc-development-showcase-nav--next"
+                                onClick={() => selectMedia(safeActiveIndex + 1)}
+                                aria-label="Proxima midia"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </>
+                    )}
+
+                    {isLocationMedia && (
+                        <button
+                            type="button"
+                            className="bc-development-showcase-open"
+                            onClick={() => onOpenLocation(activeMedia.type)}
+                        >
+                            {activeMedia.type === 'map' ? <MapPinned size={16} /> : <Navigation size={16} />}
+                            {activeMedia.type === 'map' ? 'Ver mapa' : 'Abrir Street View'}
+                        </button>
+                    )}
+                </div>
+
+                <div className="bc-development-showcase-rail" aria-label="Selecionar midia">
+                    {mediaItems.map((item, index) => (
+                        <button
+                            key={`${item.type}-${item.type === 'photo' ? item.photoIndex : item.title}`}
+                            type="button"
+                            className={`bc-development-showcase-thumb ${index === safeActiveIndex ? 'is-active' : ''}`}
+                            onClick={() => selectMedia(index)}
+                            aria-label={`Abrir ${item.label}`}
+                        >
+                            <DevelopmentMediaContent
+                                compact
+                                item={item}
+                                latLng={latLng}
+                                property={property}
+                            />
+                            <span className="bc-development-showcase-thumb-label">
+                                {item.type === 'map' ? <MapPinned size={13} /> : item.type === 'street' ? <Navigation size={13} /> : <Camera size={13} />}
+                                {item.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function DevelopmentMediaContent({ item, property, latLng, compact = false }: {
+    item: DevelopmentShowcaseMediaItem
+    property: PropertyLocationMapProperty
+    latLng: [number, number] | null
+    compact?: boolean
+}) {
+    if (item.type === 'photo') {
+        return (
+            <img
+                src={item.src}
+                alt={item.title}
+                loading={compact ? 'lazy' : undefined}
+                referrerPolicy="no-referrer"
+            />
+        )
+    }
+
+    if (item.type === 'street' && compact) {
+        return (
+            <StaticDevelopmentStreetViewThumb
+                fallbackSrc={item.fallbackSrc}
+                latLng={latLng}
+                title={`${item.label} de ${property.title}`}
+            />
+        )
+    }
+
+    if (item.type === 'street' && latLng) {
+        return (
+            <div className="bc-development-location-map bc-development-location-map--street">
+                <PropertyLocationMap
+                    property={property}
+                    latLng={latLng}
+                    initialView="street"
+                    allowedViews={['street']}
+                    showViewControl={false}
+                />
+            </div>
+        )
+    }
+
+    if (item.type === 'map' && latLng && !compact) {
+        return (
+            <div className="bc-development-location-map">
+                <PropertyLocationMap
+                    property={property}
+                    latLng={latLng}
+                    initialView="luxury"
+                    allowedViews={['luxury']}
+                    showViewControl={false}
+                    showNearbyBenefits
+                />
+            </div>
+        )
+    }
+
+    return (
+        <iframe
+            title={item.title}
+            src={item.fallbackSrc}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allow="geolocation; accelerometer; gyroscope"
+            allowFullScreen
+            tabIndex={compact ? -1 : undefined}
+        />
+    )
+}
+
+function StaticDevelopmentStreetViewThumb({ fallbackSrc, latLng, title }: {
+    fallbackSrc: string
+    latLng: [number, number] | null
     title: string
+}) {
+    const [failed, setFailed] = useState(false)
+    const previewUrl = useMemo(() => buildStaticStreetViewPreviewUrl(latLng), [latLng])
+
+    if (!previewUrl || failed) {
+        return (
+            <iframe
+                title={title}
+                src={fallbackSrc}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allow="geolocation; accelerometer; gyroscope"
+                allowFullScreen
+                tabIndex={-1}
+            />
+        )
+    }
+
+    return (
+        <span className="bc-development-location-static-thumb">
+            <img
+                src={previewUrl}
+                alt={title}
+                loading="lazy"
+                onError={() => setFailed(true)}
+            />
+        </span>
+    )
+}
+
+function DevelopmentLocationModal({ mode, fallbackSrc, title, property, latLng, onClose }: {
+    mode: DevelopmentLocationMode
+    fallbackSrc: string
+    title: string
+    property: PropertyLocationMapProperty
+    latLng: [number, number] | null
     onClose: () => void
 }) {
     return (
@@ -2821,16 +4243,52 @@ function DevelopmentLocationModal({ mode, src, title, onClose }: {
                 <X size={22} />
             </button>
             <div className="bc-location-modal-body">
-                <iframe
-                    title={title}
-                    src={src}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    allow="fullscreen; geolocation"
-                    allowFullScreen
-                />
+                {latLng && mode === 'map' ? (
+                    <div className="bc-development-location-map">
+                        <PropertyLocationMap
+                            property={property}
+                            latLng={latLng}
+                            initialView="luxury"
+                            allowedViews={['luxury']}
+                            showViewControl={false}
+                            showNearbyBenefits
+                        />
+                    </div>
+                ) : latLng && mode === 'street' ? (
+                    <div className="bc-development-location-map bc-development-location-map--street">
+                        <PropertyLocationMap
+                            property={property}
+                            latLng={latLng}
+                            initialView="street"
+                            allowedViews={['street']}
+                            showViewControl={false}
+                        />
+                    </div>
+                ) : (
+                    <iframe
+                        title={title}
+                        src={fallbackSrc}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        allow="geolocation; accelerometer; gyroscope"
+                        allowFullScreen
+                    />
+                )}
             </div>
         </div>
+    )
+}
+
+function HeroUnitsButton({ onClick }: { onClick: () => void }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className="group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
+        >
+            Ver unidades disponiveis
+            <ArrowRight className="h-4 w-4 text-[#0A0D10] transition group-hover:translate-x-1" />
+        </button>
     )
 }
 
