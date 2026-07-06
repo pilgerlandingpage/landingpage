@@ -82,6 +82,7 @@ export default function Footer() {
                     <h3>Marca Pilger</h3>
                     <Link href="/sobre">Sobre Guilherme Pilger</Link>
                     <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliária</Link>
+                    <Link href="/guias/imoveis-luxo-litoral-catarinense">Guia de imóveis de luxo</Link>
                     <Link href="/blog">Blog</Link>
                     <Link href="/noticias">Notícias</Link>
                     <Link href="/eventos">Eventos</Link>

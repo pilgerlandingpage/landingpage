@@ -12,6 +12,7 @@ const staticRoutes: Array<{ path: string; priority: number; changeFrequency: Sit
   { path: '/imoveis', priority: 0.92, changeFrequency: 'daily' },
   { path: '/blog', priority: 0.75, changeFrequency: 'weekly' },
   { path: '/noticias', priority: 0.8, changeFrequency: 'daily' },
+  { path: '/guias/imoveis-luxo-litoral-catarinense', priority: 0.82, changeFrequency: 'monthly' },
   { path: '/contato', priority: 0.65, changeFrequency: 'monthly' },
   { path: '/trabalhe-conosco', priority: 0.62, changeFrequency: 'monthly' },
   { path: '/politica-de-privacidade', priority: 0.2, changeFrequency: 'yearly' },

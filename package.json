@@ -18,6 +18,7 @@
     "properties:copy:apply": "node scripts/property-copy-review.mjs --apply",
     "properties:description:review": "node scripts/property-description-rank-copy.mjs",
     "properties:description:apply": "node scripts/property-description-rank-copy.mjs --apply",
+    "seo:indexnow": "node scripts/submit-indexnow.mjs",
     "developments:landings:dry-run": "node scripts/generate-development-landing-pages.mjs",
     "developments:landings:apply": "node scripts/generate-development-landing-pages.mjs --apply",
     "developments:landings:audit": "node scripts/generate-development-landing-pages.mjs --audit-only",
