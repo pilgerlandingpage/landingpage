@@ -422,8 +422,8 @@ Forma de pensar:
 - Use Research Pilger/external_research para enriquecer fatos publicos. Se a pesquisa externa nao estiver disponivel, nao invente dados externos.
 - Use sinais de WhatsApp e leads como inteligencia agregada, nunca como citacao literal identificavel.
 - Ao sugerir links internos, priorize imoveis reais do estoque, imoveis mais visitados, paginas de busca, bairros, empreendimentos e artigos relacionados.
-- Para capa, gere termos para Pexels/Pixabay e priorize imagem editorial horizontal, premium, coerente com tema, local e intenção. Use imagem real do estoque como capa apenas quando ela for diretamente aderente e superior ao banco editorial.
-- Sugira imagens reais do estoque como apoio interno quando houver imoveis aderentes; quando faltar acervo interno, gere termos para Pexels/Pixabay coerentes com a linha editorial.
+- Para capa, gere termos para imagens locais/licenciadas com Google Imagens Creative Commons/Wikimedia Commons e priorize imagem editorial horizontal, premium, coerente com tema, local e intenção. Use imagem real do estoque quando ela for diretamente aderente e superior ao banco editorial.
+- Sugira imagens reais do estoque como apoio interno quando houver imoveis aderentes; quando faltar acervo interno, gere termos para Google licenciado e deixe Pexels/Pixabay apenas como fallback coerente com a linha editorial.
 - Planeje imagem de capa e imagens internas por secao. A imagem deve combinar com o tema, local, tipo de imovel e tom do texto.
 - Escreva primeiro para pessoas e depois para busca: conteudo util, original, confiavel, com experiencia local e valor alem do obvio.
 - Insira links internos e externos em Markdown quando fizer sentido para SEO, AEO, GEO, snippets, AI Overviews, AI Mode e buscas conversacionais.
@@ -525,7 +525,7 @@ Forma de pensar:
 - Trate SEO, AEO e GEO como parte da apuracao: titulo claro, resposta direta, entidades locais, data/contexto, perguntas relacionadas e estrutura facil de entender por mecanismos de resposta.
 - Para buscas com IA, cubra perguntas de contexto e fan-out: o que aconteceu, onde, quando, quem confirmou, por que importa, quais cuidados e quais regioes podem ser afetadas.
 - Produza noticia util e nao sensacionalista, com leitura editorial especializada adicionando contexto local sem transformar fato publico em promessa comercial.
-- Para capa, gere termos para Pexels/Pixabay e priorize imagem editorial horizontal, premium e não enganosa. Use imagem real do estoque apenas como apoio interno ou quando ela for diretamente aderente ao contexto.
+- Para capa, gere termos para imagens locais/licenciadas com Google Imagens Creative Commons/Wikimedia Commons e priorize imagem editorial horizontal, premium e não enganosa. Use imagem real do estoque quando ela for diretamente aderente ao contexto; Pexels/Pixabay ficam como fallback.
 - Planeje imagem de capa e imagens internas; para noticias, deixe claro quando a imagem e ilustrativa e nunca sugira foto real de um fato sem base.
 - Imagens devem ter alt text descritivo, estar perto da secao relevante e evitar excesso de palavras-chave.
 

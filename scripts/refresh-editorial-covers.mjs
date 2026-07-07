@@ -10,9 +10,11 @@ const apply = args.has('--apply')
 const limitArg = process.argv.find(arg => arg.startsWith('--limit='))
 const statusArg = process.argv.find(arg => arg.startsWith('--status='))
 const idsArg = process.argv.find(arg => arg.startsWith('--ids='))
+const providersArg = process.argv.find(arg => arg.startsWith('--providers='))
 const limit = Math.max(1, Math.min(200, Number.parseInt(limitArg?.split('=')[1] || '80', 10) || 80))
 const statusFilter = statusArg?.split('=')[1]?.trim()
 const idFilter = idsArg?.split('=')[1]?.split(',').map(id => id.trim()).filter(Boolean) || []
+const providerFilter = new Set((providersArg?.split('=')[1] || 'google_licensed,pexels,pixabay').split(',').map(provider => provider.trim()).filter(Boolean))
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -24,6 +26,14 @@ if (!supabaseUrl || !serviceRoleKey) {
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 const CONFIG_KEYS = [
+  'google_image_search_api_key',
+  'google_image_search_cx',
+  'google_image_search_enabled',
+  'google_image_search_priority',
+  'google_image_search_per_page',
+  'google_image_search_rights',
+  'google_image_search_require_license_metadata',
+  'google_image_search_commercial_only',
   'pexels_api_key',
   'pexels_enabled',
   'pexels_priority',
@@ -105,9 +115,18 @@ function unique(values) {
   return Array.from(new Set(values.map(value => String(value || '').trim()).filter(Boolean)))
 }
 
+function decodeText(value) {
+  const raw = String(value || '').replace(/\+/g, ' ')
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw.replace(/%20/g, ' ')
+  }
+}
+
 function compactSearchTerm(value) {
   const ignored = new Set(['blog', 'noticia', 'noticias', 'mercado', 'imobiliario', 'imoveis', 'imovel', 'guia', 'premium', 'sobre'])
-  return String(value || '')
+  return decodeText(value)
     .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -162,7 +181,198 @@ function tagsFrom(value) {
   return String(value).split(',').map(item => item.trim()).filter(Boolean)
 }
 
+function metadataRecord(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+}
+
+function firstText(...values) {
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      const nested = firstText(...value)
+      if (nested) return nested
+      continue
+    }
+    const text = String(value || '').trim()
+    if (text) return text
+  }
+  return ''
+}
+
+function sourceDomain(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase()
+  } catch {
+    return ''
+  }
+}
+
+function normalizeGoogleRights(value) {
+  const selected = String(value || '').trim()
+  return selected || 'cc_publicdomain|cc_attribute'
+}
+
+function getGoogleLicenseMetadata(item) {
+  const metatags = Array.isArray(item?.pagemap?.metatags) ? item.pagemap.metatags : []
+  const creativework = Array.isArray(item?.pagemap?.creativework) ? item.pagemap.creativework : []
+  const imageobject = Array.isArray(item?.pagemap?.imageobject) ? item.pagemap.imageobject : []
+  const all = [...metatags, ...creativework, ...imageobject].filter(entry => entry && typeof entry === 'object')
+  return {
+    licenseUrl: firstText(
+      ...all.map(entry => entry.license),
+      ...all.map(entry => entry['og:license']),
+      ...all.map(entry => entry['cc:license']),
+      ...all.map(entry => entry['dc.rights']),
+      ...all.map(entry => entry.citation_license),
+    ),
+    author: firstText(
+      ...all.map(entry => entry.creator),
+      ...all.map(entry => entry.author),
+      ...all.map(entry => entry['article:author']),
+      ...all.map(entry => entry['dc.creator']),
+    ),
+    creditText: firstText(
+      ...all.map(entry => entry.credittext),
+      ...all.map(entry => entry.creditText),
+      ...all.map(entry => entry.copyrightnotice),
+      ...all.map(entry => entry.copyrightNotice),
+    ),
+  }
+}
+
+function isTrustedCommonsSource(url) {
+  const domain = sourceDomain(url)
+  return domain === 'commons.wikimedia.org'
+    || domain.endsWith('.wikimedia.org')
+    || domain === 'creativecommons.org'
+    || domain.endsWith('.creativecommons.org')
+}
+
+function matchesHorizontal(width, height) {
+  if (!width || !height) return true
+  return width / height >= 1.12
+}
+
+function googleRightsAllowCommercialUse(rights) {
+  return !String(rights || '').toLowerCase().includes('cc_noncommercial')
+}
+
+function postContextText(post) {
+  return normalize([
+    post.title,
+    post.primary_keyword,
+    ...(Array.isArray(post.secondary_keywords) ? post.secondary_keywords : []),
+    ...(Array.isArray(post.local_entities) ? post.local_entities : []),
+    ...(Array.isArray(post.tags) ? post.tags : []),
+    post.category,
+  ].join(' '))
+}
+
+function sanitizePlannedQuery(post, value) {
+  const query = decodeText(value).replace(/\s+/g, ' ').trim()
+  if (!query) return ''
+
+  const normalizedQuery = normalize(query)
+  const unrelatedPlaces = [
+    'dubai',
+    'miami',
+    'new york',
+    'nova york',
+    'londres',
+    'london',
+    'nuremberg',
+    'nurnberg',
+    'paris',
+  ]
+
+  if (unrelatedPlaces.some(place => normalizedQuery.includes(place))) {
+    return ''
+  }
+
+  if (normalizedQuery.length > 170 && /(imagem editorial|sem sugerir|relacionada|relacionado|acontecimento especifico)/i.test(normalizedQuery)) {
+    return ''
+  }
+
+  return query
+}
+
+function imageText(image) {
+  return normalize(`${image.title} ${image.description} ${image.alt} ${(image.tags || []).join(' ')}`)
+}
+
+function isBadVisualCandidate(image) {
+  const text = imageText(image)
+  return [
+    'animal',
+    'arte de rua',
+    'ave',
+    'aves',
+    'bird',
+    'cachorro',
+    'carro',
+    'chapim',
+    'comida',
+    'cama',
+    'calcado',
+    'estacao de metro',
+    'estacao de trem',
+    'garca',
+    'gato',
+    'grafite',
+    'hotel',
+    'inseto',
+    'interior',
+    'metro station',
+    'moinho',
+    'mosteiro',
+    'moveis',
+    'palma',
+    'passaro',
+    'pescaria',
+    'quarto',
+    'salto',
+    'sapato',
+    'trem',
+    'train',
+    'veiculo',
+    'veiculos',
+  ].some(term => text.includes(term))
+}
+
+function hasDomainVisualSignal(image) {
+  const text = imageText(image)
+  return [
+    'apartamento',
+    'apartamentos',
+    'arquitetura',
+    'arranha',
+    'beira mar',
+    'cidade',
+    'condominio',
+    'construcao',
+    'costa',
+    'edificio',
+    'edificios',
+    'fachada',
+    'litoral',
+    'mar',
+    'orla',
+    'praia',
+    'predio',
+    'predios',
+    'residencial',
+    'residenciais',
+    'skyline',
+    'urbano',
+    'urbana',
+  ].some(term => text.includes(term))
+}
+
 function buildCoverQueries(post) {
+  const visualPlan = metadataRecord(post.editorial_visual_plan)
+  const plannedQueries = [
+    visualPlan.image_search_query,
+    ...(Array.isArray(visualPlan.image_plan) ? visualPlan.image_plan.map(item => item?.query) : []),
+  ].map(query => sanitizePlannedQuery(post, query)).filter(Boolean)
   const tags = [
     post.primary_keyword,
     ...(Array.isArray(post.secondary_keywords) ? post.secondary_keywords : []),
@@ -179,19 +389,20 @@ function buildCoverQueries(post) {
   const local = cleaned.find(term => /balneario|camboriu|itajai|itapema|porto belo|praia brava|santa catarina/i.test(normalize(term)))
   const suffixes = isNewsPost(post)
     ? [
-      'editorial real estate city beach architecture',
-      'urban development buildings Brazil',
-      'residential buildings city beach',
-      'real estate market architecture',
+      'Creative Commons cidade litoral arquitetura',
+      'Wikimedia Commons desenvolvimento urbano Santa Catarina',
+      'skyline arquitetura urbana Creative Commons',
+      'mercado imobiliario cidade litoral fonte verificavel',
     ]
     : [
-      'luxury real estate editorial beach architecture',
-      'modern apartment building facade',
-      'premium residential building beach',
-      'real estate investment city skyline',
+      'Creative Commons arquitetura urbana litoral',
+      'Wikimedia Commons skyline Santa Catarina',
+      'alto padrao cidade praia arquitetura licenciada',
+      'mercado imobiliario skyline cidade Creative Commons',
     ]
 
   return unique([
+    ...plannedQueries,
     unique([local, cleaned.slice(0, 3).join(' '), titleWords, suffixes[0]]).join(' '),
     unique([cleaned.slice(0, 3).join(' '), suffixes[1]]).join(' '),
     unique([local, suffixes[2]]).join(' '),
@@ -201,7 +412,7 @@ function buildCoverQueries(post) {
     'real estate investment city buildings',
     'luxury apartment facade city',
   ])
-    .map(query => query.replace(/\s+/g, ' ').trim())
+    .map(query => sanitizePlannedQuery(post, query))
     .filter(query => query.length > 8)
     .slice(0, 8)
 }
@@ -219,6 +430,14 @@ function isNewsPost(post) {
 
 function getProviderConfig(configMap) {
   return {
+    googleImageSearchApiKey: (configMap.google_image_search_api_key || process.env.GOOGLE_IMAGE_SEARCH_API_KEY || process.env.GOOGLE_CSE_API_KEY || '').trim(),
+    googleImageSearchCx: (configMap.google_image_search_cx || process.env.GOOGLE_IMAGE_SEARCH_CX || process.env.GOOGLE_CSE_CX || '').trim(),
+    googleImageSearchEnabled: toBool(configMap.google_image_search_enabled, true),
+    googleImageSearchPriority: toInt(configMap.google_image_search_priority, 1, 1, 3),
+    googleImageSearchPerPage: toInt(configMap.google_image_search_per_page, 10, 3, 10),
+    googleImageSearchRights: normalizeGoogleRights(configMap.google_image_search_rights),
+    googleImageSearchRequireLicenseMetadata: toBool(configMap.google_image_search_require_license_metadata, true),
+    googleImageSearchCommercialOnly: toBool(configMap.google_image_search_commercial_only, true),
     pexelsApiKey: (configMap.pexels_api_key || process.env.PEXELS_API_KEY || '').trim(),
     pexelsEnabled: toBool(configMap.pexels_enabled, true),
     pexelsPriority: toInt(configMap.pexels_priority, 1, 1, 3),
@@ -239,13 +458,125 @@ function getProviderConfig(configMap) {
   }
 }
 
+async function searchGoogleLicensed(config, query, options = {}) {
+  if (!config.googleImageSearchEnabled || !config.googleImageSearchApiKey || !config.googleImageSearchCx) return []
+  if (config.googleImageSearchCommercialOnly && !googleRightsAllowCommercialUse(config.googleImageSearchRights)) {
+    throw new Error('Google rights contem licenca nao comercial.')
+  }
+
+  const perPage = Math.min(10, Math.max(3, config.googleImageSearchPerPage || 10))
+  const page = Math.max(1, options.page || 1)
+  const start = Math.min(91, ((page - 1) * perPage) + 1)
+  const lang = String(config.lang || 'pt').split('-')[0] || 'pt'
+  const params = new URLSearchParams({
+    key: config.googleImageSearchApiKey,
+    cx: config.googleImageSearchCx,
+    q: query,
+    searchType: 'image',
+    num: String(perPage),
+    start: String(start),
+    safe: config.safeSearch ? 'active' : 'off',
+    rights: config.googleImageSearchRights,
+    imgSize: 'large',
+    imgType: 'photo',
+    hl: config.lang,
+    lr: `lang_${lang}`,
+  })
+
+  const response = await fetch(`https://customsearch.googleapis.com/customsearch/v1?${params.toString()}`)
+  const payload = await response.json().catch(() => null)
+  if (!response.ok) throw new Error(`Google Image Search ${response.status}: ${payload?.error?.message || response.statusText}`)
+
+  return (Array.isArray(payload?.items) ? payload.items : [])
+    .map(item => {
+      const googleImage = item?.image || {}
+      const sourceUrl = String(googleImage.contextLink || item?.link || '').trim()
+      const imageUrl = String(item?.link || '').trim()
+      const previewUrl = String(googleImage.thumbnailLink || item?.pagemap?.cse_thumbnail?.[0]?.src || imageUrl)
+      const width = Number(googleImage.width || 0)
+      const height = Number(googleImage.height || 0)
+      const licenseMetadata = getGoogleLicenseMetadata(item)
+      const trustedCommons = isTrustedCommonsSource(sourceUrl)
+      const licenseStatus = licenseMetadata.licenseUrl
+        ? 'metadata_confirmed'
+        : trustedCommons ? 'trusted_commons_source' : 'google_rights_filter'
+      const trustedEnough = !config.googleImageSearchRequireLicenseMetadata || Boolean(licenseMetadata.licenseUrl) || trustedCommons
+      if (!trustedEnough || !matchesHorizontal(width, height)) return null
+
+      const domain = sourceDomain(sourceUrl) || String(item?.displayLink || 'Google')
+      const title = String(item?.title || query)
+      const description = String(item?.snippet || title || query)
+      const tags = tagsFrom(`${title}, ${description}, ${domain}`)
+      const result = {
+        provider: 'google_licensed',
+        id: String(item?.cacheId || googleImage.byteSize || imageUrl || sourceUrl),
+        title,
+        description,
+        imageUrl,
+        previewUrl,
+        downloadUrl: imageUrl,
+        sourceUrl,
+        author: licenseMetadata.author || licenseMetadata.creditText || domain,
+        authorUrl: sourceUrl,
+        width,
+        height,
+        tags,
+        alt: title || query,
+        license: licenseMetadata.licenseUrl
+          ? 'Creative Commons / licenca declarada na origem'
+          : `Google rights filter: ${config.googleImageSearchRights}`,
+        licenseUrl: licenseMetadata.licenseUrl || null,
+        licenseStatus,
+        attributionRequired: config.googleImageSearchRights.includes('cc_attribute') || Boolean(licenseMetadata.creditText),
+        metadata: {
+          display_link: item?.displayLink || null,
+          mime: item?.mime || null,
+          byte_size: googleImage.byteSize || null,
+          rights_filter: config.googleImageSearchRights,
+          credit_text: licenseMetadata.creditText || null,
+          license_validation: licenseStatus,
+        },
+      }
+      return {
+        ...result,
+        score: rankImage(result, query, config.googleImageSearchPriority) + 6 + (trustedCommons ? 10 : 0) + (licenseMetadata.licenseUrl ? 8 : 0),
+      }
+    })
+    .filter(item => item?.imageUrl && item?.sourceUrl)
+}
+
 function makeQueryScore(query, text) {
   const haystack = normalize(text)
   const terms = normalize(query)
     .split(/\s+/)
     .map(term => term.replace(/[^a-z0-9]+/g, ''))
     .filter(term => term.length > 2)
-  return terms.reduce((score, term) => score + (haystack.includes(term) ? 4 : 0), 0)
+    .filter(term => term !== 'real')
+  const aliases = {
+    apartment: ['apartamento', 'apartamentos'],
+    apartments: ['apartamento', 'apartamentos'],
+    architecture: ['arquitetura', 'arquitetonico', 'arquitetonica'],
+    beach: ['praia', 'orla', 'costeira', 'litoral'],
+    building: ['predio', 'predios', 'edificio', 'edificios'],
+    buildings: ['predio', 'predios', 'edificio', 'edificios'],
+    city: ['cidade', 'urbano', 'urbana'],
+    development: ['desenvolvimento', 'obra', 'obras'],
+    estate: ['imobiliario', 'imobiliaria', 'imoveis', 'imovel'],
+    facade: ['fachada'],
+    investment: ['investimento'],
+    luxury: ['luxo'],
+    market: ['mercado'],
+    modern: ['moderno', 'moderna', 'modernos', 'modernas'],
+    premium: ['luxo'],
+    real: ['imobiliario', 'imobiliaria', 'imoveis', 'imovel'],
+    residential: ['residencial', 'residenciais'],
+    skyline: ['horizonte', 'arranha', 'ceu', 'cidade'],
+    urban: ['urbano', 'urbana', 'cidade'],
+  }
+  return terms.reduce((score, term) => {
+    const variants = [term, ...(aliases[term] || [])]
+    return score + (variants.some(variant => haystack.includes(variant)) ? 4 : 0)
+  }, 0)
 }
 
 function rankImage(result, query, providerPriority) {
@@ -395,22 +726,44 @@ function weightedPick(candidates) {
 async function searchEditorialCover(config, queries, memory) {
   const seen = new Set()
   const candidates = []
+  const providers = [
+    {
+      id: 'google_licensed',
+      priority: config.googleImageSearchPriority,
+      enabled: providerFilter.has('google_licensed') && config.googleImageSearchEnabled && Boolean(config.googleImageSearchApiKey && config.googleImageSearchCx),
+      search: searchGoogleLicensed,
+    },
+    {
+      id: 'pexels',
+      priority: config.pexelsPriority,
+      enabled: providerFilter.has('pexels') && config.pexelsEnabled && Boolean(config.pexelsApiKey),
+      search: searchPexels,
+    },
+    {
+      id: 'pixabay',
+      priority: config.pixabayPriority,
+      enabled: providerFilter.has('pixabay') && config.pixabayEnabled && Boolean(config.pixabayApiKey),
+      search: searchPixabay,
+    },
+  ]
+    .filter(provider => provider.enabled)
+    .sort((a, b) => a.priority - b.priority || ['google_licensed', 'pexels', 'pixabay'].indexOf(a.id) - ['google_licensed', 'pexels', 'pixabay'].indexOf(b.id))
 
   for (const query of queries) {
     const page = randomInt(1, 8)
     const order = Math.random() > 0.45 ? 'popular' : 'latest'
-    const results = await Promise.allSettled([
-      searchPexels(config, query, { page }),
-      searchPixabay(config, query, { page, order }),
-    ])
+    const results = await Promise.allSettled(providers.map(provider => provider.search(config, query, { page, order })))
 
     for (const image of results.flatMap(result => result.status === 'fulfilled' ? result.value : [])) {
       const key = providerAssetKey(image.provider, image.id) || image.sourceUrl || image.imageUrl
       if (!key || seen.has(key)) continue
       seen.add(key)
       if (isRecentlyUsed(image, memory)) continue
+      if (isBadVisualCandidate(image)) continue
+      const textScore = makeQueryScore(query, `${image.title} ${image.description} ${image.alt} ${image.tags.join(' ')}`)
+      if (image.provider !== 'google_licensed' && (!hasDomainVisualSignal(image) || textScore < 4)) continue
 
-      const score = diversityScore(image, query, memory)
+      const score = diversityScore(image, query, memory) + textScore
       if (score <= 0) continue
       candidates.push({
         ...image,
@@ -478,6 +831,9 @@ function mergeSourceSummary(post, image, persisted, query) {
     source_url: image.sourceUrl,
     author: image.author,
     license: image.license,
+    license_url: image.licenseUrl || null,
+    license_status: image.licenseStatus || null,
+    attribution_required: image.attributionRequired ?? null,
     r2_key: persisted.key,
   }
 
@@ -500,7 +856,7 @@ async function loadConfig() {
 async function loadPosts() {
   let query = supabase
     .from('blog_posts')
-    .select('id,title,slug,status,category,tags,primary_keyword,secondary_keywords,local_entities,cover_image_url,generated_by,created_at,published_at')
+    .select('id,title,slug,status,category,tags,primary_keyword,secondary_keywords,local_entities,cover_image_url,generated_by,created_at,published_at,source_summary->editorial_visual_plan')
     .order('created_at', { ascending: false })
     .limit(limit)
 
@@ -654,6 +1010,10 @@ async function registerMediaUsage(post, image, persisted, query) {
           source_query: query,
           score: image.score ?? null,
           diversity_score: image.diversityScore ?? null,
+          license_url: image.licenseUrl || null,
+          license_status: image.licenseStatus || null,
+          attribution_required: image.attributionRequired ?? null,
+          provider_metadata: image.metadata || null,
         },
         updated_at: now,
       }, { onConflict: 'provider,provider_asset_id' })
@@ -687,6 +1047,9 @@ async function registerMediaUsage(post, image, persisted, query) {
           source_url: image.sourceUrl || null,
           author: image.author || null,
           license: image.license || null,
+          license_url: image.licenseUrl || null,
+          license_status: image.licenseStatus || null,
+          attribution_required: image.attributionRequired ?? null,
         },
       }))
     if (insertError) throw insertError
@@ -767,6 +1130,7 @@ async function main() {
 
   const summary = {
     mode: apply ? 'apply' : 'dry-run',
+    providers: Array.from(providerFilter),
     total: results.length,
     updated: results.filter(result => result.ok && !result.dryRun).length,
     ready: results.filter(result => result.ok && result.dryRun).length,

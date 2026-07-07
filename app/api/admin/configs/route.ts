@@ -107,6 +107,8 @@ const ENV_FALLBACKS: Record<string, string> = {
     brevo_sender_email: 'BREVO_SENDER_EMAIL',
     brevo_reply_to_email: 'BREVO_REPLY_TO_EMAIL',
     brevo_test_recipient: 'BREVO_TEST_RECIPIENT',
+    google_image_search_api_key: 'GOOGLE_IMAGE_SEARCH_API_KEY',
+    google_image_search_cx: 'GOOGLE_IMAGE_SEARCH_CX',
     pexels_api_key: 'PEXELS_API_KEY',
     pixabay_api_key: 'PIXABAY_API_KEY',
     meta_app_id: 'META_APP_ID',
@@ -297,11 +299,17 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     brevo_sender_email: 'contato@guilhermepilger.ai',
     brevo_reply_to_email: 'contato@guilhermepilger.ai',
     brevo_test_recipient: '',
+    google_image_search_enabled: 'true',
+    google_image_search_priority: '1',
+    google_image_search_per_page: '10',
+    google_image_search_rights: 'cc_publicdomain|cc_attribute',
+    google_image_search_require_license_metadata: 'true',
+    google_image_search_commercial_only: 'true',
     pexels_enabled: 'true',
-    pexels_priority: '1',
+    pexels_priority: '2',
     pexels_per_page: '12',
     pixabay_enabled: 'true',
-    pixabay_priority: '2',
+    pixabay_priority: '3',
     pixabay_per_page: '12',
     editorial_image_default_orientation: 'horizontal',
     editorial_image_safe_search: 'true',
@@ -406,6 +414,8 @@ function normalizeConfigValue(key: string, value: string) {
         editorial_distribution_push_daily_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_push_daily_limit, min: 1, max: 10000 },
         editorial_distribution_recommendation_min_score: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_min_score, min: 1, max: 100 },
         editorial_distribution_recommendation_batch_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_batch_limit, min: 1, max: 500 },
+        google_image_search_priority: { fallback: DEFAULT_CONFIGS.google_image_search_priority, min: 1, max: 3 },
+        google_image_search_per_page: { fallback: DEFAULT_CONFIGS.google_image_search_per_page, min: 3, max: 10 },
         pexels_priority: { fallback: DEFAULT_CONFIGS.pexels_priority, min: 1, max: 3 },
         pexels_per_page: { fallback: DEFAULT_CONFIGS.pexels_per_page, min: 3, max: 40 },
         pixabay_priority: { fallback: DEFAULT_CONFIGS.pixabay_priority, min: 1, max: 3 },
@@ -444,6 +454,20 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'editorial_distribution_push_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'editorial_distribution_message_review_required') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_distribution_recommendations_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'google_image_search_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'google_image_search_require_license_metadata') return value === 'true' ? 'true' : 'false'
+    if (key === 'google_image_search_commercial_only') return value === 'false' ? 'false' : 'true'
+    if (key === 'google_image_search_rights') {
+        const selected = String(value || '').trim()
+        const allowed = new Set([
+            'cc_publicdomain|cc_attribute',
+            'cc_publicdomain',
+            'cc_attribute',
+            'cc_attribute|cc_sharealike',
+            'cc_sharealike',
+        ])
+        return allowed.has(selected) ? selected : DEFAULT_CONFIGS.google_image_search_rights
+    }
     if (key === 'pexels_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'pixabay_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_image_safe_search') return value === 'false' ? 'false' : 'true'

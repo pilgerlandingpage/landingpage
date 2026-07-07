@@ -103,9 +103,74 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
 
     {
+        id: 'google_images',
+        title: 'Google Imagens Licenciadas - Editorial',
+        description: 'Busca programatica de imagens com filtro Creative Commons/licencas livres. O agente usa termos contextuais, valida sinais de licenca e espelha a imagem aprovada no R2 antes de usar em blog e noticias.',
+        icon: 'image_bank',
+        fields: [
+            { key: 'google_image_search_api_key', label: 'Google Custom Search API Key', placeholder: 'Chave da API do Google Custom Search', isSecret: true },
+            { key: 'google_image_search_cx', label: 'Search Engine ID (CX)', placeholder: 'ID do mecanismo de busca programavel', isSecret: false },
+            {
+                key: 'google_image_search_enabled',
+                label: 'Uso nos agentes',
+                placeholder: 'Ativo',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'google_image_search_priority',
+                label: 'Prioridade',
+                placeholder: '1',
+                isSecret: false,
+                options: [
+                    { value: '1', label: '1 - Principal' },
+                    { value: '2', label: '2 - Backup' },
+                    { value: '3', label: '3 - Ultimo recurso' },
+                ],
+            },
+            { key: 'google_image_search_per_page', label: 'Imagens por busca', placeholder: '10', isSecret: false },
+            {
+                key: 'google_image_search_rights',
+                label: 'Filtro de licenca',
+                placeholder: 'cc_publicdomain|cc_attribute',
+                isSecret: false,
+                options: [
+                    { value: 'cc_publicdomain|cc_attribute', label: 'Public domain + atribuição' },
+                    { value: 'cc_publicdomain', label: 'Somente public domain' },
+                    { value: 'cc_attribute', label: 'Creative Commons com atribuição' },
+                    { value: 'cc_attribute|cc_sharealike', label: 'Atribuição + share alike' },
+                ],
+            },
+            {
+                key: 'google_image_search_commercial_only',
+                label: 'Uso comercial',
+                placeholder: 'Exigir',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Exigir uso comercial' },
+                    { value: 'false', label: 'Permitir filtro manual' },
+                ],
+            },
+            {
+                key: 'google_image_search_require_license_metadata',
+                label: 'Metadado de licenca',
+                placeholder: 'Flexivel',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Exigir metadado/fonte confiavel' },
+                    { value: 'false', label: 'Aceitar filtro Google' },
+                ],
+            },
+        ],
+    },
+
+    {
         id: 'pexels',
         title: 'Pexels - Banco de Imagens Editorial',
-        description: 'Biblioteca externa para os agentes buscarem imagens editoriais de blog e noticias. O agente usa a API pelo servidor e escolhe imagens alinhadas ao conteudo.',
+        description: 'Biblioteca externa de apoio para os agentes quando acervo real e Google licenciado nao retornarem imagem adequada.',
         icon: 'image_bank',
         fields: [
             { key: 'pexels_api_key', label: 'Pexels API Key', placeholder: 'Sua chave da Pexels API', isSecret: true },
@@ -137,7 +202,7 @@ const INTEGRATIONS: IntegrationCard[] = [
     {
         id: 'pixabay',
         title: 'Pixabay - Banco de Imagens Editorial',
-        description: 'Fonte complementar para fotos, ilustracoes e imagens editoriais. As imagens escolhidas depois poderao ser baixadas para o R2 antes de publicar.',
+        description: 'Fonte complementar para fotos, ilustracoes e imagens editoriais quando Google licenciado e acervo interno nao forem suficientes.',
         icon: 'image_bank',
         fields: [
             { key: 'pixabay_api_key', label: 'Pixabay API Key', placeholder: 'Sua chave da Pixabay API', isSecret: true },

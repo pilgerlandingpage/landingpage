@@ -1,6 +1,7 @@
 import {
   persistEditorialImageToR2,
   searchEditorialImages,
+  type EditorialImageProvider,
   type EditorialImageResult,
   type PersistedEditorialImage,
 } from '@/lib/media/editorial-image-providers'
@@ -372,7 +373,7 @@ export async function curateEditorialImages(
 export async function registerEditorialImageUsage(
   supabase: SupabaseLike,
   image: Partial<PersistedEditorialImage> & Partial<EditorialImageCandidate> & {
-    provider: 'pexels' | 'pixabay'
+    provider: EditorialImageProvider
     provider_asset_id?: string | null
   },
   usage: RegisterEditorialImageUsageInput,
@@ -403,6 +404,10 @@ export async function registerEditorialImageUsage(
           score: image.score ?? null,
           diversity_score: (image as any).diversityScore ?? null,
           source_query: usage.sourceQuery || (image as any).sourceQuery || null,
+          license_url: image.licenseUrl || null,
+          license_status: image.licenseStatus || null,
+          attribution_required: image.attributionRequired ?? null,
+          provider_metadata: image.metadata || null,
         },
         updated_at: now,
       }, { onConflict: 'provider,provider_asset_id' })
@@ -436,6 +441,9 @@ export async function registerEditorialImageUsage(
             source_url: image.sourceUrl || null,
             author: image.author || null,
             license: image.license || null,
+            license_url: image.licenseUrl || null,
+            license_status: image.licenseStatus || null,
+            attribution_required: image.attributionRequired ?? null,
           },
         })
     }
@@ -462,9 +470,9 @@ export async function registerEditorialVisualPlanUsage(
 
   for (const asset of assets) {
     const source = String(asset.source || asset.provider || '')
-    if (source !== 'pexels' && source !== 'pixabay') continue
+    if (source !== 'google_licensed' && source !== 'pexels' && source !== 'pixabay') continue
     await registerEditorialImageUsage(supabase, {
-      provider: source,
+      provider: source as EditorialImageProvider,
       provider_asset_id: asset.provider_asset_id || asset.id,
       id: asset.provider_asset_id || asset.id,
       title: asset.alt || '',
@@ -480,6 +488,9 @@ export async function registerEditorialVisualPlanUsage(
       tags: Array.isArray(asset.tags) ? asset.tags : [],
       alt: asset.alt || '',
       license: asset.license || '',
+      licenseUrl: asset.license_url || asset.licenseUrl || undefined,
+      licenseStatus: asset.license_status || asset.licenseStatus || undefined,
+      attributionRequired: asset.attribution_required ?? asset.attributionRequired ?? undefined,
       score: Number(asset.score || 0),
       r2Url: asset.image_url,
       r2Key: asset.r2_key || undefined,

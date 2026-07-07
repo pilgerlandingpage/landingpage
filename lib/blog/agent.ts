@@ -516,11 +516,16 @@ function fallbackDraft(context: any, topic?: string): BlogAgentDraft {
             internal: 'Conectar o leitor ao estoque ativo e a páginas de busca relacionadas.',
             external: 'Usar apenas quando houver dado público verificável.',
         },
-        image_search_terms: [keyword, city, 'luxury real estate beach architecture'].filter(Boolean),
+        image_search_terms: [
+            keyword,
+            city,
+            `${city} skyline arquitetura urbana Creative Commons`,
+            `${city} Wikimedia Commons mercado imobiliário`,
+        ].filter(Boolean),
         visual_brief: `Imagem editorial premium relacionada a ${keyword}, com litoral, arquitetura e mercado imobiliário de alto padrão.`,
         image_plan: [
-            { section: 'Capa', query: `${keyword} ${city} luxury real estate`, reason: 'Imagem de abertura alinhada ao tema e ao mercado premium.' },
-            { section: 'Contexto local', query: `${city} beach architecture real estate`, reason: 'Imagem interna para apoiar leitura local.' },
+            { section: 'Capa', query: `${keyword} ${city} skyline arquitetura Creative Commons`, reason: 'Imagem de abertura local, licenciável e alinhada ao mercado premium.' },
+            { section: 'Contexto local', query: `${city} litoral arquitetura urbana Wikimedia Commons`, reason: 'Imagem interna para apoiar leitura local.' },
         ],
         editorial_quality_check: [
             'Separar fatos, inferências e recomendações.',
@@ -562,11 +567,16 @@ function fallbackNewsDraft(context: any, topic?: string): BlogAgentDraft {
             internal: 'Relacionar a notícia a bairros, busca ou imóveis sem forçar promessa comercial.',
             external: 'Obrigatório quando houver fato público, data, obra, número ou declaração.',
         },
-        image_search_terms: [keyword, city, 'real estate city beach architecture'].filter(Boolean),
+        image_search_terms: [
+            keyword,
+            city,
+            `${city} skyline arquitetura urbana Creative Commons`,
+            `${city} Wikimedia Commons cidade litoral`,
+        ].filter(Boolean),
         visual_brief: `Imagem editorial verificável e não enganosa relacionada a ${keyword}, sem sugerir foto factual de um acontecimento específico.`,
         image_plan: [
-            { section: 'Capa', query: `${keyword} ${city} city real estate`, reason: 'Imagem editorial sem sugerir registro factual do acontecimento.' },
-            { section: 'Impacto imobiliário', query: `${city} urban development real estate`, reason: 'Imagem interna para contextualizar cidade e mercado.' },
+            { section: 'Capa', query: `${keyword} ${city} Creative Commons cidade`, reason: 'Imagem editorial licenciável sem sugerir registro factual do acontecimento.' },
+            { section: 'Impacto imobiliário', query: `${city} desenvolvimento urbano Wikimedia Commons`, reason: 'Imagem interna para contextualizar cidade e mercado.' },
         ],
         editorial_quality_check: [
             'Confirmar fonte, data e atualidade.',
@@ -596,10 +606,10 @@ Regras adicionais obrigatórias de linha editorial, fontes, links e imagens:
 - Não copie texto de fontes externas; sintetize com palavras próprias e adicione leitura editorial especializada, contexto local e impacto para o público.
 - Não use "Notícia Pilger", "Blog Pilger", "Pauta Pilger", "Radar Pilger", "Leitura Pilger" ou qualquer redline baseada na marca. Título, H1, seo_title, meta_description e primeira chamada devem ranquear por assunto, cidade, bairro, tipo de imóvel, fato e intenção de busca.
 - Se precisar mencionar a empresa ou o profissional, use "Imobiliária Guilherme Pilger" ou "corretor de imóveis Guilherme Pilger" apenas em contexto institucional, assinatura ou CTA discreto.
-- Sugira imagem de capa e imagens internas por seção. Cada imagem precisa ter tema, motivo e alt text esperado.
-- Para a imagem de capa, priorize Pexels/Pixabay com imagem editorial coerente, horizontal, premium e alinhada ao tema. Use foto de imóvel interno como capa apenas se os bancos editoriais não retornarem imagem adequada.
-- Use imagens reais de imóveis do ecossistema como apoio interno quando o tema falar de cidade, bairro, tipo de imóvel, empreendimento, frente mar, cobertura, luxo ou investimento.
-- Quando usar Pexels/Pixabay, escolha imagens editoriais coerentes e não enganosas; em notícias, não use imagem que pareça registro factual de um acontecimento se for apenas ilustrativa.
+- Sugira imagem de capa e imagens internas por seção. Cada imagem precisa ter tema, motivo, consulta de busca e alt text esperado.
+- Gere termos de busca visuais específicos para Google Imagens licenciadas/Creative Commons, priorizando cidade, bairro, praia, skyline, obra, arquitetura local, Wikimedia Commons e fonte verificável quando fizer sentido.
+- Use imagens reais de imóveis/acervo do ecossistema como primeira opção quando forem diretamente aderentes ao tema. Se faltar aderência, use Google licenciado com validação de licença; Pexels/Pixabay entram apenas como fallback.
+- Não sugira imagem genérica de mansão, Dubai, Miami, praia aleatória, sala de luxo ou fachada sem relação com cidade/tema. Em notícias, não use imagem que pareça registro factual de um acontecimento se for apenas ilustrativa.
 - Planeje imagens próximas das seções relevantes, com descrição útil e sem keyword stuffing no alt text.
 - O artigo/notícia final deve mostrar links internos e fontes externas no Markdown sempre que existirem; não deixe isso apenas nos campos JSON.
 - Antes de finalizar, faça uma checagem editorial: utilidade real, originalidade, fonte verificável, links internos úteis, imagem coerente e ausência de promessa exagerada.
@@ -888,6 +898,7 @@ export async function generateBlogArticleDraft(topic?: string, options: Editoria
             draft.primary_keyword,
             draft.visual_brief || '',
             ...(draft.image_search_terms || []),
+            ...(draft.image_plan || []).map(plan => plan.query),
             ...draft.secondary_keywords,
             ...draft.local_entities,
         ],
@@ -930,6 +941,7 @@ export async function generateBlogArticleDraft(topic?: string, options: Editoria
             draft.primary_keyword,
             draft.visual_brief || '',
             ...(draft.image_search_terms || []),
+            ...(draft.image_plan || []).map(plan => plan.query),
             ...draft.secondary_keywords,
             ...draft.local_entities,
         ].filter(Boolean))].slice(0, 16),
@@ -979,6 +991,7 @@ export async function generateNewsArticleDraft(topic?: string, options: Editoria
             draft.primary_keyword,
             draft.visual_brief || '',
             ...(draft.image_search_terms || []),
+            ...(draft.image_plan || []).map(plan => plan.query),
             ...draft.secondary_keywords,
             ...draft.local_entities,
             'noticias',
@@ -1022,6 +1035,7 @@ export async function generateNewsArticleDraft(topic?: string, options: Editoria
             draft.primary_keyword,
             draft.visual_brief,
             ...(draft.image_search_terms || []),
+            ...(draft.image_plan || []).map(plan => plan.query),
             ...draft.secondary_keywords,
             ...draft.local_entities,
             'noticias',

@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { uploadFile } from '@/lib/r2'
 
-export type EditorialImageProvider = 'pexels' | 'pixabay'
+export type EditorialImageProvider = 'google_licensed' | 'pexels' | 'pixabay'
 export type EditorialImageOrientation = 'horizontal' | 'vertical' | 'all'
 export type EditorialImageOrder = 'popular' | 'latest'
 
@@ -30,6 +30,10 @@ export type EditorialImageResult = {
   tags: string[]
   alt: string
   license: string
+  licenseUrl?: string
+  licenseStatus?: 'metadata_confirmed' | 'trusted_commons_source' | 'google_rights_filter'
+  attributionRequired?: boolean
+  metadata?: Record<string, unknown>
   score: number
 }
 
@@ -39,6 +43,14 @@ export type PersistedEditorialImage = EditorialImageResult & {
 }
 
 export type EditorialImageProviderConfig = {
+  googleImageSearchApiKey: string
+  googleImageSearchCx: string
+  googleImageSearchEnabled: boolean
+  googleImageSearchPriority: number
+  googleImageSearchPerPage: number
+  googleImageSearchRights: string
+  googleImageSearchRequireLicenseMetadata: boolean
+  googleImageSearchCommercialOnly: boolean
   pexelsApiKey: string
   pexelsEnabled: boolean
   pexelsPriority: number
@@ -53,6 +65,14 @@ export type EditorialImageProviderConfig = {
 }
 
 const IMAGE_CONFIG_KEYS = [
+  'google_image_search_api_key',
+  'google_image_search_cx',
+  'google_image_search_enabled',
+  'google_image_search_priority',
+  'google_image_search_per_page',
+  'google_image_search_rights',
+  'google_image_search_require_license_metadata',
+  'google_image_search_commercial_only',
   'pexels_api_key',
   'pexels_enabled',
   'pexels_priority',
@@ -85,12 +105,38 @@ function normalizeOrientation(value: unknown): EditorialImageOrientation {
   return 'horizontal'
 }
 
+function normalizeGoogleRights(value: unknown) {
+  const selected = String(value || '').trim()
+  return selected || 'cc_publicdomain|cc_attribute'
+}
+
 function normalizeTags(value: unknown) {
   if (Array.isArray(value)) return value.map(String).map(tag => tag.trim()).filter(Boolean)
   return String(value || '')
     .split(',')
     .map(tag => tag.trim())
     .filter(Boolean)
+}
+
+function firstText(...values: unknown[]): string {
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      const nested: string = firstText(...value)
+      if (nested) return nested
+      continue
+    }
+    const text = String(value || '').trim()
+    if (text) return text
+  }
+  return ''
+}
+
+function sourceDomain(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase()
+  } catch {
+    return ''
+  }
 }
 
 function getPexelsOrientation(orientation: EditorialImageOrientation) {
@@ -102,6 +148,13 @@ function getPexelsOrientation(orientation: EditorialImageOrientation) {
 function getPixabayOrientation(orientation: EditorialImageOrientation) {
   if (orientation === 'horizontal' || orientation === 'vertical') return orientation
   return 'all'
+}
+
+function matchesOrientation(width: number, height: number, orientation: EditorialImageOrientation) {
+  if (!width || !height || orientation === 'all') return true
+  const ratio = width / height
+  if (orientation === 'horizontal') return ratio >= 1.12
+  return ratio <= 0.95
 }
 
 function makeQueryScore(query: string, text: string) {
@@ -137,6 +190,14 @@ export async function getEditorialImageProviderConfig(source?: Record<string, st
   const appConfig = source || await readImageConfigRows()
 
   return {
+    googleImageSearchApiKey: (appConfig.google_image_search_api_key || process.env.GOOGLE_IMAGE_SEARCH_API_KEY || process.env.GOOGLE_CSE_API_KEY || '').trim(),
+    googleImageSearchCx: (appConfig.google_image_search_cx || process.env.GOOGLE_IMAGE_SEARCH_CX || process.env.GOOGLE_CSE_CX || '').trim(),
+    googleImageSearchEnabled: toBool(appConfig.google_image_search_enabled, true),
+    googleImageSearchPriority: toInt(appConfig.google_image_search_priority, 1, 1, 3),
+    googleImageSearchPerPage: toInt(appConfig.google_image_search_per_page, 10, 3, 10),
+    googleImageSearchRights: normalizeGoogleRights(appConfig.google_image_search_rights),
+    googleImageSearchRequireLicenseMetadata: toBool(appConfig.google_image_search_require_license_metadata, true),
+    googleImageSearchCommercialOnly: toBool(appConfig.google_image_search_commercial_only, true),
     pexelsApiKey: (appConfig.pexels_api_key || process.env.PEXELS_API_KEY || '').trim(),
     pexelsEnabled: toBool(appConfig.pexels_enabled, true),
     pexelsPriority: toInt(appConfig.pexels_priority, 1, 1, 3),
@@ -149,6 +210,152 @@ export async function getEditorialImageProviderConfig(source?: Record<string, st
     safeSearch: toBool(appConfig.editorial_image_safe_search, true),
     lang: String(appConfig.editorial_image_lang || 'pt').trim().toLowerCase() || 'pt',
   }
+}
+
+function getGoogleLicenseMetadata(item: any) {
+  const metatags = Array.isArray(item?.pagemap?.metatags) ? item.pagemap.metatags : []
+  const creativework = Array.isArray(item?.pagemap?.creativework) ? item.pagemap.creativework : []
+  const imageobject = Array.isArray(item?.pagemap?.imageobject) ? item.pagemap.imageobject : []
+  const all = [...metatags, ...creativework, ...imageobject].filter(entry => entry && typeof entry === 'object')
+  const licenseUrl = firstText(
+    ...all.map(entry => entry.license),
+    ...all.map(entry => entry['og:license']),
+    ...all.map(entry => entry['cc:license']),
+    ...all.map(entry => entry['dc.rights']),
+    ...all.map(entry => entry['citation_license']),
+  )
+  const author = firstText(
+    ...all.map(entry => entry.creator),
+    ...all.map(entry => entry.author),
+    ...all.map(entry => entry['article:author']),
+    ...all.map(entry => entry['dc.creator']),
+  )
+  const creditText = firstText(
+    ...all.map(entry => entry.credittext),
+    ...all.map(entry => entry.creditText),
+    ...all.map(entry => entry.copyrightnotice),
+    ...all.map(entry => entry.copyrightNotice),
+  )
+
+  return { licenseUrl, author, creditText }
+}
+
+function isTrustedCommonsSource(url: string) {
+  const domain = sourceDomain(url)
+  return domain === 'commons.wikimedia.org'
+    || domain.endsWith('.wikimedia.org')
+    || domain === 'creativecommons.org'
+    || domain.endsWith('.creativecommons.org')
+}
+
+function googleRightsAllowCommercialUse(rights: string) {
+  return !String(rights || '').toLowerCase().includes('cc_noncommercial')
+}
+
+export async function searchGoogleLicensedImages(
+  config: EditorialImageProviderConfig,
+  options: EditorialImageSearchOptions,
+): Promise<EditorialImageResult[]> {
+  if (!config.googleImageSearchApiKey || !config.googleImageSearchCx) {
+    throw new Error('Google Image Search API Key/CX nao configurados.')
+  }
+  if (config.googleImageSearchCommercialOnly && !googleRightsAllowCommercialUse(config.googleImageSearchRights)) {
+    throw new Error('Filtro Google contem licenca nao comercial; ajuste google_image_search_rights.')
+  }
+
+  const orientation = options.orientation || config.defaultOrientation
+  const perPage = Math.min(10, Math.max(3, options.perPage || config.googleImageSearchPerPage))
+  const page = Math.max(1, options.page || 1)
+  const start = Math.min(91, ((page - 1) * perPage) + 1)
+  const lang = config.lang.split('-')[0] || 'pt'
+  const params = new URLSearchParams({
+    key: config.googleImageSearchApiKey,
+    cx: config.googleImageSearchCx,
+    q: options.query,
+    searchType: 'image',
+    num: String(perPage),
+    start: String(start),
+    safe: config.safeSearch ? 'active' : 'off',
+    rights: config.googleImageSearchRights,
+    imgSize: 'large',
+    imgType: 'photo',
+    hl: config.lang,
+    lr: `lang_${lang}`,
+  })
+
+  const response = await fetch(`https://customsearch.googleapis.com/customsearch/v1?${params.toString()}`, {
+    cache: 'no-store',
+  })
+
+  const payload = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new Error(`Google Image Search retornou ${response.status}: ${payload?.error?.message || response.statusText}`)
+  }
+
+  return (Array.isArray(payload?.items) ? payload.items : []).map((item: any) => {
+    const image = item?.image || {}
+    const sourceUrl = String(image.contextLink || item?.link || '').trim()
+    const imageUrl = String(item?.link || '').trim()
+    const previewUrl = String(image.thumbnailLink || item?.pagemap?.cse_thumbnail?.[0]?.src || imageUrl)
+    const width = Number(image.width || 0)
+    const height = Number(image.height || 0)
+    const licenseMetadata = getGoogleLicenseMetadata(item)
+    const trustedCommons = isTrustedCommonsSource(sourceUrl)
+    const licenseStatus = licenseMetadata.licenseUrl
+      ? 'metadata_confirmed'
+      : trustedCommons ? 'trusted_commons_source' : 'google_rights_filter'
+    const domain = sourceDomain(sourceUrl) || String(item?.displayLink || 'Google')
+    const title = String(item?.title || options.query)
+    const description = String(item?.snippet || title || options.query)
+    const tags = normalizeTags(`${title}, ${description}, ${domain}`)
+    const author = licenseMetadata.author || licenseMetadata.creditText || domain
+
+    const result: Omit<EditorialImageResult, 'score'> = {
+      provider: 'google_licensed',
+      id: String(item?.cacheId || item?.image?.byteSize || imageUrl || sourceUrl),
+      title,
+      description,
+      imageUrl,
+      previewUrl,
+      downloadUrl: imageUrl,
+      sourceUrl,
+      author,
+      authorUrl: sourceUrl,
+      width,
+      height,
+      tags,
+      alt: title || options.query,
+      license: licenseMetadata.licenseUrl
+        ? 'Creative Commons / licenca declarada na origem'
+        : `Google rights filter: ${config.googleImageSearchRights}`,
+      licenseUrl: licenseMetadata.licenseUrl || undefined,
+      licenseStatus,
+      attributionRequired: config.googleImageSearchRights.includes('cc_attribute') || Boolean(licenseMetadata.creditText),
+      metadata: {
+        display_link: item?.displayLink || null,
+        mime: item?.mime || null,
+        byte_size: image.byteSize || null,
+        rights_filter: config.googleImageSearchRights,
+        credit_text: licenseMetadata.creditText || null,
+        license_validation: licenseStatus,
+      },
+    }
+
+    const trustedEnough = !config.googleImageSearchRequireLicenseMetadata
+      || Boolean(result.licenseUrl)
+      || trustedCommons
+
+    if (!trustedEnough) return null
+    if (!matchesOrientation(result.width, result.height, orientation)) return null
+
+    return {
+      ...result,
+      score: rankImage(result, options.query, config.googleImageSearchPriority)
+        + 6
+        + (trustedCommons ? 10 : 0)
+        + (result.licenseUrl ? 8 : 0),
+    }
+  }).filter((item: EditorialImageResult | null): item is EditorialImageResult => Boolean(item?.imageUrl && item?.sourceUrl))
 }
 
 export async function searchPexelsImages(
@@ -250,15 +457,27 @@ export async function searchPixabayImages(
 
 export async function searchEditorialImages(options: EditorialImageSearchOptions) {
   const config = await getEditorialImageProviderConfig()
+  const providerOrder: Record<EditorialImageProvider, number> = {
+    google_licensed: 0,
+    pexels: 1,
+    pixabay: 2,
+  }
   const providers: Array<{ id: EditorialImageProvider; priority: number; enabled: boolean }> = [
+    {
+      id: 'google_licensed' as const,
+      priority: config.googleImageSearchPriority,
+      enabled: config.googleImageSearchEnabled && Boolean(config.googleImageSearchApiKey && config.googleImageSearchCx),
+    },
     { id: 'pexels' as const, priority: config.pexelsPriority, enabled: config.pexelsEnabled && Boolean(config.pexelsApiKey) },
     { id: 'pixabay' as const, priority: config.pixabayPriority, enabled: config.pixabayEnabled && Boolean(config.pixabayApiKey) },
   ]
     .filter(provider => provider.enabled && (!options.provider || provider.id === options.provider))
-    .sort((a, b) => a.priority - b.priority)
+    .sort((a, b) => a.priority - b.priority || providerOrder[a.id] - providerOrder[b.id])
 
   const results = await Promise.allSettled(providers.map(provider => {
-    const perPage = options.perPage || (provider.id === 'pexels' ? config.pexelsPerPage : config.pixabayPerPage)
+    const perPage = options.perPage
+      || (provider.id === 'google_licensed' ? config.googleImageSearchPerPage : provider.id === 'pexels' ? config.pexelsPerPage : config.pixabayPerPage)
+    if (provider.id === 'google_licensed') return searchGoogleLicensedImages(config, { ...options, perPage })
     if (provider.id === 'pexels') return searchPexelsImages(config, { ...options, perPage })
     return searchPixabayImages(config, { ...options, perPage })
   }))
@@ -270,11 +489,13 @@ export async function searchEditorialImages(options: EditorialImageSearchOptions
 
 export async function testEditorialImageProvider(provider: EditorialImageProvider, source?: Record<string, string>) {
   const config = await getEditorialImageProviderConfig(source)
-  const query = 'luxury real estate beach'
+  const query = 'Balneario Camboriu skyline arquitetura'
   const options: EditorialImageSearchOptions = { query, orientation: 'horizontal', perPage: 3, provider }
-  const results = provider === 'pexels'
-    ? await searchPexelsImages(config, options)
-    : await searchPixabayImages(config, options)
+  const results = provider === 'google_licensed'
+    ? await searchGoogleLicensedImages(config, options)
+    : provider === 'pexels'
+      ? await searchPexelsImages(config, options)
+      : await searchPixabayImages(config, options)
 
   return {
     provider,

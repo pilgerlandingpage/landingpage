@@ -4,6 +4,7 @@ import {
   persistCuratedEditorialImage,
   type EditorialImageCandidate,
 } from '@/lib/media/editorial-image-curator'
+import type { EditorialImageProvider } from '@/lib/media/editorial-image-providers'
 import { slugifyBlog } from '@/lib/blog/types'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
@@ -13,7 +14,7 @@ type SupabaseLike = {
 
 export type EditorialVisualAsset = {
   role: 'cover' | 'inline'
-  source: 'property' | 'pexels' | 'pixabay'
+  source: 'property' | EditorialImageProvider
   image_url: string
   original_url?: string
   source_url?: string
@@ -22,6 +23,9 @@ export type EditorialVisualAsset = {
   author?: string
   author_url?: string
   license?: string
+  license_url?: string
+  license_status?: string
+  attribution_required?: boolean
   width?: number
   height?: number
   tags?: string[]
@@ -100,12 +104,23 @@ function buildImageSearchQuery(input: BuildVisualPlanInput) {
   return unique([local, base, suffix]).join(' ').trim() || suffix
 }
 
+function providerLabel(provider: EditorialImageProvider) {
+  if (provider === 'google_licensed') return 'Google Imagens licenciadas'
+  if (provider === 'pexels') return 'Pexels'
+  return 'Pixabay'
+}
+
+function shouldUsePropertyAsCover(contentType: BuildVisualPlanInput['contentType'], score: number) {
+  return score >= (contentType === 'blog' ? 34 : 46)
+}
+
 function externalAssetFromImage(
   image: EditorialImageCandidate & { r2Url?: string; r2Key?: string },
   role: EditorialVisualAsset['role'],
   title: string,
 ): EditorialVisualAsset {
-  const providerLabel = image.provider === 'pexels' ? 'Pexels' : 'Pixabay'
+  const label = providerLabel(image.provider)
+  const credit = image.author ? `${label}: ${image.author}` : label
   return {
     role,
     source: image.provider,
@@ -117,6 +132,9 @@ function externalAssetFromImage(
     author: image.author,
     author_url: image.authorUrl,
     license: image.license,
+    license_url: image.licenseUrl,
+    license_status: image.licenseStatus,
+    attribution_required: image.attributionRequired,
     width: image.width,
     height: image.height,
     tags: image.tags,
@@ -126,7 +144,7 @@ function externalAssetFromImage(
     caption: role === 'cover'
       ? `Imagem editorial selecionada para ilustrar ${title}.`
       : image.description || `Imagem editorial relacionada a ${title}.`,
-    credit: `${providerLabel}: ${image.author}`,
+    credit,
     relevance_reason: `Selecionada automaticamente por aderencia visual ao tema "${title}".`,
     score: image.score,
   }
@@ -225,6 +243,16 @@ export async function buildEditorialVisualPlan(
   const assets: EditorialVisualAsset[] = []
   const inlineLimit = input.maxInlineImages || 2
   const externalNeeded = inlineLimit + 1
+
+  const leadingProperty = scoredProperties[0]
+  if (leadingProperty && shouldUsePropertyAsCover(input.contentType, leadingProperty.score)) {
+    const imageUrl = getPropertyImages(leadingProperty.property)[0]
+    if (imageUrl) {
+      usedImages.add(imageUrl)
+      assets.push(propertyAssetFromImage(leadingProperty.property, imageUrl, 'cover', leadingProperty.score))
+    }
+  }
+
   const externalImages = await curateEditorialImages(supabase, {
     contentType: input.contentType,
     title: input.title,

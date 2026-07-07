@@ -604,6 +604,22 @@ export async function POST(request: NextRequest) {
                     })
                 }
             }
+            case 'google_images':
+            case 'google_licensed': {
+                try {
+                    const result = await testEditorialImageProvider('google_licensed', config)
+                    return NextResponse.json({
+                        success: true,
+                        message: `Google Imagens licenciadas conectado. ${result.count} imagem(ns) retornada(s) no teste editorial.`,
+                        sample: result.sample,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro Google Imagens licenciadas: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
             case 'pexels': {
                 try {
                     const result = await testEditorialImageProvider('pexels', config)

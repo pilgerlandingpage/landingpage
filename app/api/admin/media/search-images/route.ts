@@ -9,7 +9,7 @@ function normalizeOrientation(value: string | null): EditorialImageOrientation {
 }
 
 function normalizeProvider(value: string | null): EditorialImageProvider | undefined {
-  if (value === 'pexels' || value === 'pixabay') return value
+  if (value === 'google_licensed' || value === 'pexels' || value === 'pixabay') return value
   return undefined
 }
 
