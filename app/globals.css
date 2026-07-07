@@ -6260,6 +6260,9 @@ h6 {
                     display: flex;
                     align-items: center;
                 }
+                .gh-menu-item:has(> .gh-mega) {
+                    position: static;
+                }
                 .gh-menu-item > .gh-menu-label {
                     padding: 0 16px;
                     height: 100%;

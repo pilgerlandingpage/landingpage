@@ -883,6 +883,20 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         }
     }, [locationModal])
 
+    useEffect(() => {
+        const resetHorizontalScroll = () => {
+            document.body.scrollLeft = 0
+            document.documentElement.scrollLeft = 0
+            if (window.scrollX !== 0) {
+                window.scrollTo(0, window.scrollY)
+            }
+        }
+
+        resetHorizontalScroll()
+        window.addEventListener('resize', resetHorizontalScroll)
+        return () => window.removeEventListener('resize', resetHorizontalScroll)
+    }, [])
+
     const openChat = useCallback((unit?: Unit) => {
         if (!broker?.phone) return
 
@@ -1141,6 +1155,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             <PropertyLandingStyles />
 
             <style jsx global>{`
+                body:has(.bc-page) {
+                    max-width: 100vw;
+                    overflow-x: clip !important;
+                }
+
                 .bc-page {
                     min-height: 100vh;
                     background: #f7f5f0;
@@ -1149,6 +1168,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     overflow-x: clip;
                     padding-bottom: 82px;
                     letter-spacing: 0;
+                    max-width: 100vw;
                 }
 
                 .bc-page * {
@@ -3340,6 +3360,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page .bc-development-showcase-rail {
                     max-height: clamp(500px, 50vw, 680px);
                     display: grid;
+                    grid-auto-rows: minmax(108px, auto);
+                    align-content: start;
                     gap: 10px;
                     overflow-y: auto;
                     padding-right: 4px;
@@ -3351,8 +3373,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page .bc-development-showcase-thumb {
                     position: relative;
                     width: 100%;
-                    min-height: 0;
-                    aspect-ratio: 4 / 3;
+                    min-height: 108px;
                     overflow: hidden;
                     border: 2px solid transparent;
                     border-radius: 8px;
@@ -3466,6 +3487,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     height: auto !important;
                     max-height: clamp(500px, 50vw, 680px) !important;
                     display: grid !important;
+                    grid-auto-rows: minmax(108px, auto) !important;
+                    align-content: start !important;
+                    gap: 10px !important;
                     overflow-y: auto !important;
                     border: 0 !important;
                     background: transparent !important;
@@ -3887,6 +3911,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         width: 100% !important;
                         max-height: none !important;
                         display: flex !important;
+                        align-content: stretch !important;
                         gap: 8px;
                         overflow-x: auto;
                         overflow-y: hidden !important;
@@ -3899,12 +3924,16 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         width: 100% !important;
                         max-height: none !important;
                         display: flex !important;
+                        grid-auto-rows: unset !important;
+                        align-content: stretch !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                     }
 
                     .bc-page .bc-development-showcase-thumb {
                         flex: 0 0 132px;
+                        min-height: 96px;
+                        aspect-ratio: 4 / 3;
                         scroll-snap-align: start;
                     }
 
