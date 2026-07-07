@@ -101,7 +101,7 @@ function contextPropertySignals(context: any) {
 }
 
 function buildBlogDepthExpansion(draft: BlogAgentDraft, context: any) {
-    const keyword = draft.primary_keyword || draft.seo_title || 'mercado imobiliario de alto padrao'
+    const keyword = draft.primary_keyword || draft.seo_title || 'mercado imobiliário de alto padrão'
     const city = contextCity(context, draft.local_entities?.[0] || 'Santa Catarina')
     const researchSummary = contextResearchSummary(context)
     const propertySignals = contextPropertySignals(context)
@@ -109,91 +109,91 @@ function buildBlogDepthExpansion(draft: BlogAgentDraft, context: any) {
     return [
         `## Leitura de mercado para ${keyword}`,
         '',
-        `Uma boa decisao em imoveis de alto padrao raramente nasce de um unico dado. O comprador precisa cruzar localizacao, liquidez, padrao construtivo, momento de demanda, perfil do estoque e objetivo de uso. No caso de ${keyword}, a leitura fica mais forte quando o tema e analisado dentro do contexto de ${city}, porque cada bairro, eixo de acesso e tipologia tem um comportamento diferente.`,
+        `Uma boa decisão em imóveis de alto padrão raramente nasce de um único dado. O comprador precisa cruzar localização, liquidez, padrão construtivo, momento de demanda, perfil do estoque e objetivo de uso. No caso de ${keyword}, a leitura fica mais forte quando o tema é analisado dentro do contexto de ${city}, porque cada bairro, eixo de acesso e tipologia tem um comportamento diferente.`,
         '',
         researchSummary
-            ? `O contexto de pesquisa disponivel para esta pauta indica o seguinte ponto de partida: ${researchSummary}. Essa leitura nao deve ser tratada como promessa de valorizacao, mas como insumo para entender por que o assunto merece uma analise mais cuidadosa antes da visita ou da proposta.`
-            : 'Quando nao ha um dado publico unico que explique o tema, a analise precisa se apoiar em sinais combinados: comportamento de busca, recorrencia de duvidas dos leads, tipo de estoque disponivel e comparacao entre regioes com liquidez semelhante.',
+            ? `O contexto de pesquisa disponível para esta pauta indica o seguinte ponto de partida: ${researchSummary}. Essa leitura não deve ser tratada como promessa de valorização, mas como insumo para entender por que o assunto merece uma análise mais cuidadosa antes da visita ou da proposta.`
+            : 'Quando não há um dado público único que explique o tema, a análise precisa se apoiar em sinais combinados: comportamento de busca, recorrência de dúvidas dos leads, tipo de estoque disponível e comparação entre regiões com liquidez semelhante.',
         '',
         '## O que muda para quem quer comprar',
         '',
-        'Para o comprador, a pergunta principal nao e apenas se o imovel parece bom, mas se ele combina com o plano de vida ou investimento. Um apartamento para morar precisa responder bem a rotina, privacidade, acesso, insolacao, ruido, vagas e servicos no entorno. Um imovel para investimento exige outra camada: liquidez futura, raridade, facilidade de locacao, conservacao do edificio, padrao da vizinhanca e risco de comprar apenas pelo entusiasmo do momento.',
+        'Para o comprador, a pergunta principal não é apenas se o imóvel parece bom, mas se ele combina com o plano de vida ou investimento. Um apartamento para morar precisa responder bem à rotina, privacidade, acesso, insolação, ruído, vagas e serviços no entorno. Um imóvel para investimento exige outra camada: liquidez futura, raridade, facilidade de locação, conservação do edifício, padrão da vizinhança e risco de comprar apenas pelo entusiasmo do momento.',
         '',
-        'Na pratica, uma avaliacao premium precisa observar:',
+        'Na prática, uma avaliação premium precisa observar:',
         '',
-        '- se a localizacao sustenta valor percebido mesmo fora de ciclos de alta;',
-        '- se a planta entrega conforto real, e nao apenas metragem no papel;',
-        '- se o edificio ou empreendimento tem manutencao, fachada, areas comuns e gestao coerentes com o publico-alvo;',
-        '- se a vista, posicao solar, ventilacao e ruido valorizam ou limitam o uso diario;',
-        '- se o preco pedido conversa com alternativas comparaveis na mesma regiao;',
+        '- se a localização sustenta valor percebido mesmo fora de ciclos de alta;',
+        '- se a planta entrega conforto real, e não apenas metragem no papel;',
+        '- se o edifício ou empreendimento tem manutenção, fachada, áreas comuns e gestão coerentes com o público-alvo;',
+        '- se a vista, posição solar, ventilação e ruído valorizam ou limitam o uso diário;',
+        '- se o preço pedido conversa com alternativas comparáveis na mesma região;',
         '- se existe uma tese clara para revenda, renda ou uso familiar.',
         '',
         '## Como cruzar o tema com estoque real',
         '',
         propertySignals.length
-            ? `Entre os sinais internos que merecem comparacao estao: ${propertySignals.join('; ')}. Esses exemplos ajudam a transformar uma pauta ampla em uma curadoria concreta, porque mostram quais tipos de imovel podem ser avaliados dentro da mesma intencao de busca.`
-            : 'O proximo passo e cruzar a tese editorial com oportunidades reais do estoque. Sem essa comparacao, o conteudo vira apenas opiniao. Com ela, o leitor consegue perceber diferencas entre bairros, tipologias, faixas de investimento e padroes de acabamento.',
+            ? `Entre os sinais internos que merecem comparação estão: ${propertySignals.join('; ')}. Esses exemplos ajudam a transformar uma pauta ampla em uma curadoria concreta, porque mostram quais tipos de imóvel podem ser avaliados dentro da mesma intenção de busca.`
+            : 'O próximo passo é cruzar a tese editorial com oportunidades reais do estoque. Sem essa comparação, o conteúdo vira apenas opinião. Com ela, o leitor consegue perceber diferenças entre bairros, tipologias, faixas de investimento e padrões de acabamento.',
         '',
         '## Riscos de uma leitura rasa',
         '',
-        'O risco de uma analise superficial e tratar todo imovel de luxo como se fosse igual. Dois apartamentos com valores parecidos podem ter liquidez completamente diferente por causa de posicao, edificio, garagem, vista, privacidade, idade, padrao de entrega ou ate reputacao do entorno. Tambem e comum confundir desejo com decisao: uma capa bonita, uma vista forte ou um discurso de oportunidade nao substituem diligencia.',
+        'O risco de uma análise superficial é tratar todo imóvel de luxo como se fosse igual. Dois apartamentos com valores parecidos podem ter liquidez completamente diferente por causa de posição, edifício, garagem, vista, privacidade, idade, padrão de entrega ou até reputação do entorno. Também é comum confundir desejo com decisão: uma capa bonita, uma vista forte ou um discurso de oportunidade não substituem diligência.',
         '',
-        'Por isso, antes de avancar, vale fazer perguntas objetivas: o imovel resolve qual problema? Existe comparavel melhor? A localizacao sera desejada daqui a alguns anos? O custo de condominio e manutencao faz sentido para o perfil do comprador? A unidade tem atributos raros ou apenas repete o estoque comum da regiao?',
+        'Por isso, antes de avançar, vale fazer perguntas objetivas: o imóvel resolve qual problema? Existe comparável melhor? A localização será desejada daqui a alguns anos? O custo de condomínio e manutenção faz sentido para o perfil do comprador? A unidade tem atributos raros ou apenas repete o estoque comum da região?',
         '',
-        '## Checklist para decidir com mais seguranca',
+        '## Checklist para decidir com mais segurança',
         '',
-        'Uma decisao bem tomada costuma passar por quatro etapas. Primeiro, definir o objetivo: morar, investir, preservar patrimonio, gerar renda ou combinar uso familiar com valorizacao. Depois, comparar alternativas equivalentes, evitando olhar apenas para um imovel isolado. Em seguida, validar pontos tecnicos como documentacao, condominio, estado de conservacao, padrao construtivo e custos recorrentes. Por fim, negociar com clareza sobre prazo, forma de pagamento e margem real.',
+        'Uma decisão bem tomada costuma passar por quatro etapas. Primeiro, definir o objetivo: morar, investir, preservar patrimônio, gerar renda ou combinar uso familiar com valorização. Depois, comparar alternativas equivalentes, evitando olhar apenas para um imóvel isolado. Em seguida, validar pontos técnicos como documentação, condomínio, estado de conservação, padrão construtivo e custos recorrentes. Por fim, negociar com clareza sobre prazo, forma de pagamento e margem real.',
         '',
-        'Esse processo nao elimina o componente emocional da compra, mas impede que ele seja o unico criterio. Em mercados de alto padrao, a melhor oportunidade costuma ser aquela que une desejo, racionalidade e timing.',
+        'Esse processo não elimina o componente emocional da compra, mas impede que ele seja o único critério. Em mercados de alto padrão, a melhor oportunidade costuma ser aquela que une desejo, racionalidade e timing.',
         '',
-        '## Proximo passo',
+        '## Próximo passo',
         '',
-        'Se o tema faz sentido para o seu momento, o caminho mais eficiente e transformar a leitura em uma lista curta de oportunidades. A equipe da Imobiliaria Guilherme Pilger pode comparar regioes, tipologias e imoveis aderentes ao seu objetivo para separar o que e apenas bonito do que realmente merece visita.',
+        'Se o tema faz sentido para o seu momento, o caminho mais eficiente é transformar a leitura em uma lista curta de oportunidades. A equipe da Imobiliária Guilherme Pilger pode comparar regiões, tipologias e imóveis aderentes ao seu objetivo para separar o que é apenas bonito do que realmente merece visita.',
     ].join('\n')
 }
 
 function buildNewsDepthExpansion(draft: BlogAgentDraft, context: any) {
-    const keyword = draft.primary_keyword || draft.seo_title || 'noticia do mercado imobiliario'
+    const keyword = draft.primary_keyword || draft.seo_title || 'notícia do mercado imobiliário'
     const city = contextCity(context)
     const researchSummary = contextResearchSummary(context)
 
     return [
-        `## Contexto do fato e por que ele merece atencao`,
+        `## Contexto do fato e por que ele merece atenção`,
         '',
-        `Uma noticia sobre ${keyword} so ganha relevancia imobiliaria quando ajuda o leitor a entender o que pode mudar na pratica. Em mercados como ${city} e o litoral catarinense, obras, mobilidade, turismo, novos empreendimentos, indicadores de preco e movimentos de construtoras podem alterar percepcao de valor, fluxo de pessoas e prioridades de compra.`,
+        `Uma notícia sobre ${keyword} só ganha relevância imobiliária quando ajuda o leitor a entender o que pode mudar na prática. Em mercados como ${city} e o litoral catarinense, obras, mobilidade, turismo, novos empreendimentos, indicadores de preço e movimentos de construtoras podem alterar percepção de valor, fluxo de pessoas e prioridades de compra.`,
         '',
         researchSummary
-            ? `A base de pesquisa disponivel para esta pauta aponta: ${researchSummary}. Esse contexto deve ser lido com prudencia, separando o que ja esta confirmado do que ainda depende de acompanhamento publico ou validacao editorial.`
-            : 'Quando o fato ainda nao tem uma base publica completa no contexto do agente, a noticia precisa ser tratada como alerta de acompanhamento. O mais importante e explicar quais informacoes devem ser confirmadas antes de transformar o tema em decisao de compra, venda ou investimento.',
+            ? `A base de pesquisa disponível para esta pauta aponta: ${researchSummary}. Esse contexto deve ser lido com prudência, separando o que já está confirmado do que ainda depende de acompanhamento público ou validação editorial.`
+            : 'Quando o fato ainda não tem uma base pública completa no contexto do agente, a notícia precisa ser tratada como alerta de acompanhamento. O mais importante é explicar quais informações devem ser confirmadas antes de transformar o tema em decisão de compra, venda ou investimento.',
         '',
         '## O que compradores e investidores devem observar',
         '',
-        'Para quem esta avaliando imoveis, a primeira pergunta e se a noticia afeta uso, acesso, liquidez ou percepcao de valor. Um anuncio de infraestrutura pode melhorar deslocamentos, mas tambem pode trazer periodo de obra, mudanca de fluxo e impacto temporario no entorno. Um indicador de valorizacao pode reforcar a atratividade de uma cidade, mas nao significa que qualquer unidade tenha o mesmo desempenho.',
+        'Para quem está avaliando imóveis, a primeira pergunta é se a notícia afeta uso, acesso, liquidez ou percepção de valor. Um anúncio de infraestrutura pode melhorar deslocamentos, mas também pode trazer período de obra, mudança de fluxo e impacto temporário no entorno. Um indicador de valorização pode reforçar a atratividade de uma cidade, mas não significa que qualquer unidade tenha o mesmo desempenho.',
         '',
-        'Os pontos mais importantes sao:',
+        'Os pontos mais importantes são:',
         '',
-        '- qual orgao, entidade ou fonte confirmou a informacao;',
-        '- se ha data, etapa, prazo ou apenas intencao anunciada;',
-        '- quais bairros, eixos de acesso ou regioes podem ser afetados;',
-        '- se o impacto e imediato, gradual ou ainda incerto;',
+        '- qual órgão, entidade ou fonte confirmou a informação;',
+        '- se há data, etapa, prazo ou apenas intenção anunciada;',
+        '- quais bairros, eixos de acesso ou regiões podem ser afetados;',
+        '- se o impacto é imediato, gradual ou ainda incerto;',
         '- como o fato conversa com estoque, demanda e perfil de comprador;',
-        '- quais riscos precisam ser acompanhados antes de uma decisao.',
+        '- quais riscos precisam ser acompanhados antes de uma decisão.',
         '',
-        '## Impacto imobiliario provavel',
+        '## Impacto imobiliário provável',
         '',
-        'O impacto mais relevante costuma aparecer em tres frentes. A primeira e a percepcao de conveniencia: melhor mobilidade, novos servicos ou maior atratividade turistica podem tornar certas regioes mais desejadas. A segunda e a leitura de liquidez: quando uma area ganha mais procura qualificada, bons imoveis tendem a ter mais defensabilidade. A terceira e a comparacao entre alternativas: o comprador passa a medir se vale pagar mais por uma localizacao consolidada ou antecipar movimento em uma regiao em transformacao.',
+        'O impacto mais relevante costuma aparecer em três frentes. A primeira é a percepção de conveniência: melhor mobilidade, novos serviços ou maior atratividade turística podem tornar certas regiões mais desejadas. A segunda é a leitura de liquidez: quando uma área ganha mais procura qualificada, bons imóveis tendem a ter mais defensabilidade. A terceira é a comparação entre alternativas: o comprador passa a medir se vale pagar mais por uma localização consolidada ou antecipar movimento em uma região em transformação.',
         '',
-        'Mesmo assim, e importante evitar conclusoes automaticas. Valorizacao depende de produto, posicao, padrao, vista, conservacao, oferta concorrente e capacidade de pagamento do publico-alvo. A noticia cria contexto; a decisao exige analise individual do imovel.',
+        'Mesmo assim, é importante evitar conclusões automáticas. Valorização depende de produto, posição, padrão, vista, conservação, oferta concorrente e capacidade de pagamento do público-alvo. A notícia cria contexto; a decisão exige análise individual do imóvel.',
         '',
         '## Cuidados antes de decidir',
         '',
-        'Noticias de mercado ajudam a orientar a conversa, mas nao substituem verificacao. Antes de comprar ou vender com base em um fato recente, vale confirmar a fonte, buscar documentos oficiais quando houver, entender o cronograma e comparar imoveis equivalentes. Tambem e prudente avaliar se o movimento ja esta precificado ou se ainda existe assimetria real entre preco pedido e potencial percebido.',
+        'Notícias de mercado ajudam a orientar a conversa, mas não substituem verificação. Antes de comprar ou vender com base em um fato recente, vale confirmar a fonte, buscar documentos oficiais quando houver, entender o cronograma e comparar imóveis equivalentes. Também é prudente avaliar se o movimento já está precificado ou se ainda existe assimetria real entre preço pedido e potencial percebido.',
         '',
-        'Para proprietarios, a noticia pode indicar melhor momento para reposicionar um ativo, atualizar preco ou revisar a estrategia de exposicao. Para compradores, pode abrir uma janela de estudo antes que o mercado absorva completamente o novo contexto.',
+        'Para proprietários, a notícia pode indicar melhor momento para reposicionar um ativo, atualizar preço ou revisar a estratégia de exposição. Para compradores, pode abrir uma janela de estudo antes que o mercado absorva completamente o novo contexto.',
         '',
-        '## Proximo acompanhamento',
+        '## Próximo acompanhamento',
         '',
-        'A leitura editorial deve continuar acompanhando desdobramentos, novas fontes e reflexos no estoque real. Quando houver confirmacao adicional, o tema pode evoluir para uma analise mais detalhada no blog, com comparativos de regioes, tipos de imovel e criterios de decisao.',
+        'A leitura editorial deve continuar acompanhando desdobramentos, novas fontes e reflexos no estoque real. Quando houver confirmação adicional, o tema pode evoluir para uma análise mais detalhada no blog, com comparativos de regiões, tipos de imóvel e critérios de decisão.',
     ].join('\n')
 }
 
@@ -214,11 +214,11 @@ function deepenDraftIfNeeded(draft: BlogAgentDraft, context: any, contentType: '
         article_markdown: articleMarkdown,
         approval_notes: [
             ...(draft.approval_notes || []),
-            `Rascunho original tinha ${words} palavras; o sistema aprofundou a materia antes de enviar para revisao.`,
+            `Rascunho original tinha ${words} palavras; o sistema aprofundou a matéria antes de enviar para revisão.`,
         ].slice(0, 12),
         editorial_quality_check: [
             ...(draft.editorial_quality_check || []),
-            `Texto revisado para profundidade minima de ${minWords} palavras.`,
+            `Texto revisado para profundidade mínima de ${minWords} palavras.`,
         ].slice(0, 12),
     }
 }
@@ -240,7 +240,7 @@ function cleanJsonText(text: string) {
     return cleaned
 }
 
-function cleanEditorialRedline(value: string, fallback = 'Guia imobiliario de alto padrao') {
+function cleanEditorialRedline(value: string, fallback = 'Guia imobiliário de alto padrão') {
     let output = String(value || '').trim()
 
     const blockedPrefixes = [
@@ -257,10 +257,10 @@ function cleanEditorialRedline(value: string, fallback = 'Guia imobiliario de al
     }
 
     output = output
-        .replace(/\bnot(?:i|\u00ed)cia\s+pilger\b/gi, 'noticia do mercado imobiliario')
-        .replace(/\bblog\s+pilger\b/gi, 'conteudo imobiliario')
-        .replace(/\bpauta\s+pilger\b/gi, 'pauta imobiliaria')
-        .replace(/\bradar\s+pilger\b/gi, 'radar imobiliario')
+        .replace(/\bnot(?:i|\u00ed)cia\s+pilger\b/gi, 'notícia do mercado imobiliário')
+        .replace(/\bblog\s+pilger\b/gi, 'conteúdo imobiliário')
+        .replace(/\bpauta\s+pilger\b/gi, 'pauta imobiliária')
+        .replace(/\bradar\s+pilger\b/gi, 'radar imobiliário')
         .replace(/\bleitura\s+pilger\b/gi, 'leitura editorial')
         .trim()
 
@@ -275,10 +275,10 @@ function cleanEditorialMarkdownRedlines(markdown: string, title: string) {
         .replace(/^#\s*(?:not(?:i|\u00ed)cia|blog|pauta|radar|leitura|artigo)\s+pilger\s*[:\-–—]\s*.+$/im, `# ${title}`)
         .replace(/^#\s*pilger\s*[:\-–—]\s*.+$/im, `# ${title}`)
         .replace(/^##\s*Leitura\s+Pilger\s*$/gim, '## Leitura editorial')
-        .replace(/\bnot(?:i|\u00ed)cia\s+pilger\b/gi, 'noticia do mercado imobiliario')
-        .replace(/\bblog\s+pilger\b/gi, 'conteudo imobiliario')
-        .replace(/\bpauta\s+pilger\b/gi, 'pauta imobiliaria')
-        .replace(/\bradar\s+pilger\b/gi, 'radar imobiliario')
+        .replace(/\bnot(?:i|\u00ed)cia\s+pilger\b/gi, 'notícia do mercado imobiliário')
+        .replace(/\bblog\s+pilger\b/gi, 'conteúdo imobiliário')
+        .replace(/\bpauta\s+pilger\b/gi, 'pauta imobiliária')
+        .replace(/\bradar\s+pilger\b/gi, 'radar imobiliário')
         .replace(/\bleitura\s+pilger\b/gi, 'leitura editorial')
 
     return output
@@ -333,14 +333,73 @@ function mergePolishedDraft(original: BlogAgentDraft, polished: any): BlogAgentD
     }
 }
 
+async function getEditorialProviderOrder() {
+    const primary = await getActiveAIProvider()
+    const normalizedPrimary = primary === 'openai' ? 'openai' : 'gemini'
+
+    return Array.from(new Set([
+        normalizedPrimary,
+        normalizedPrimary === 'openai' ? 'gemini' : 'openai',
+    ]))
+}
+
+async function generateEditorialJsonText(options: {
+    systemInstruction: string
+    userPrompt: string
+    temperature: number
+}) {
+    const providers = await getEditorialProviderOrder()
+    let lastError: unknown = null
+
+    for (const provider of providers) {
+        try {
+            if (provider === 'openai') {
+                const apiKey = await getOpenAIApiKey()
+                if (!apiKey) throw new Error('OpenAI API Key não configurada.')
+                const model = (await getAIConfig('openai_model')) || 'gpt-4o-mini'
+                const openai = new OpenAI({ apiKey })
+                const result = await openai.chat.completions.create({
+                    model,
+                    messages: [
+                        { role: 'system', content: options.systemInstruction },
+                        { role: 'user', content: options.userPrompt },
+                    ],
+                    response_format: { type: 'json_object' },
+                    temperature: options.temperature,
+                })
+                return result.choices[0]?.message?.content || '{}'
+            }
+
+            const apiKey = await getGeminiApiKey()
+            if (!apiKey) throw new Error('Gemini API Key não configurada.')
+            const modelName = (await getAIConfig('gemini_model')) || 'gemini-2.5-flash'
+            const genAI = new GoogleGenerativeAI(apiKey)
+            const model = genAI.getGenerativeModel({ model: modelName })
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: options.userPrompt }] }],
+                systemInstruction: { role: 'model', parts: [{ text: options.systemInstruction }] },
+                generationConfig: { responseMimeType: 'application/json', temperature: options.temperature },
+            })
+            return result.response.text()
+        } catch (error: any) {
+            lastError = error
+            console.warn(`[Blog Agent] provider ${provider} failed, trying fallback:`, error?.message || error)
+        }
+    }
+
+    throw lastError || new Error('Nenhum provedor de IA disponível para o agente editorial.')
+}
+
 async function polishPortugueseCopyIfNeeded(draft: BlogAgentDraft): Promise<BlogAgentDraft> {
-    if (!needsPortugueseCopyReview(draft)) return draft
+    if (draft.decision !== 'create_article' && !needsPortugueseCopyReview(draft)) return draft
 
     const instruction = [
         'Revise o conteúdo editorial em português do Brasil.',
-        'Corrija acentuação, ortografia, concordância e pontuação, mantendo tom premium, claro e natural.',
+        'Corrija acentuação, ortografia, concordância, pontuação e maiúsculas/minúsculas, mantendo tom premium, claro e natural.',
         'Não mude fatos, números, datas, nomes, URLs, links Markdown, slugs, placeholders, CTAs ou estrutura principal.',
         'Não acrescente informações novas. Apenas corrija a escrita.',
+        'Use títulos em frase natural de português, com maiúsculas apenas em nomes próprios e início de frase.',
+        'Corrija termos como imóveis, imobiliário, Balneário Camboriú, Itajaí, região, localização, decisão, notícia, valorização, construção, público e alto padrão quando estiverem sem acento.',
         'Retorne somente JSON válido com os mesmos campos recebidos.',
     ].join('\n')
     const payload = {
@@ -355,36 +414,11 @@ async function polishPortugueseCopyIfNeeded(draft: BlogAgentDraft): Promise<Blog
     }
 
     try {
-        const provider = await getActiveAIProvider()
-        let text = ''
-        if (provider === 'openai') {
-            const apiKey = await getOpenAIApiKey()
-            if (!apiKey) return draft
-            const model = (await getAIConfig('openai_model')) || 'gpt-4o-mini'
-            const openai = new OpenAI({ apiKey })
-            const result = await openai.chat.completions.create({
-                model,
-                messages: [
-                    { role: 'system', content: instruction },
-                    { role: 'user', content: JSON.stringify(payload, null, 2) },
-                ],
-                response_format: { type: 'json_object' },
-                temperature: 0.1,
-            })
-            text = result.choices[0]?.message?.content || '{}'
-        } else {
-            const apiKey = await getGeminiApiKey()
-            if (!apiKey) return draft
-            const modelName = (await getAIConfig('gemini_model')) || 'gemini-2.5-flash'
-            const genAI = new GoogleGenerativeAI(apiKey)
-            const model = genAI.getGenerativeModel({ model: modelName })
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: JSON.stringify(payload, null, 2) }] }],
-                systemInstruction: { role: 'model', parts: [{ text: instruction }] },
-                generationConfig: { responseMimeType: 'application/json', temperature: 0.1 },
-            })
-            text = result.response.text()
-        }
+        const text = await generateEditorialJsonText({
+            systemInstruction: instruction,
+            userPrompt: JSON.stringify(payload, null, 2),
+            temperature: 0.1,
+        })
         return mergePolishedDraft(draft, JSON.parse(cleanJsonText(text)))
     } catch (error: any) {
         console.warn('[Blog Agent] Portuguese polish skipped:', error?.message || error)
@@ -511,13 +545,13 @@ function fallbackNewsDraft(context: any, topic?: string): BlogAgentDraft {
         secondary_keywords: ['notícias imobiliárias', 'mercado imobiliário', 'Santa Catarina'],
         local_entities: [city, 'Santa Catarina'].filter(Boolean),
         search_intent: 'informational',
-        seo_title: `${keyword}: contexto e impacto no mercado imobiliario`,
+        seo_title: `${keyword}: contexto e impacto no mercado imobiliário`,
         meta_description: `Entenda o contexto de ${keyword} e o possível impacto para compradores, investidores e proprietários no litoral catarinense.`,
         outline: [
             { heading: 'O que aconteceu', children: ['Resumo do fato público', 'Contexto local'] },
             { heading: 'Por que isso importa para o mercado imobiliário', children: ['Possíveis impactos', 'Pontos de atenção'] },
         ],
-        article_markdown: `# ${keyword}: contexto e impacto no mercado imobiliario\n\nUma nova movimentação relacionada a ${keyword} merece atenção de compradores, investidores e proprietários no mercado imobiliário de alto padrão.\n\n## O que observar\n\n- Confirmar a fonte oficial e a data da informação.\n- Entender se o fato impacta mobilidade, turismo, infraestrutura, oferta ou demanda.\n- Avaliar a relação com regiões e empreendimentos de interesse dos leads.\n\n## Leitura editorial\n\nA notícia deve ser analisada com prudência. Antes de transformar o tema em decisão de compra, venda ou investimento, vale cruzar o fato com localização, liquidez, estoque disponível e objetivo do cliente.`,
+        article_markdown: `# ${keyword}: contexto e impacto no mercado imobiliário\n\nUma nova movimentação relacionada a ${keyword} merece atenção de compradores, investidores e proprietários no mercado imobiliário de alto padrão.\n\n## O que observar\n\n- Confirmar a fonte oficial e a data da informação.\n- Entender se o fato impacta mobilidade, turismo, infraestrutura, oferta ou demanda.\n- Avaliar a relação com regiões e empreendimentos de interesse dos leads.\n\n## Leitura editorial\n\nA notícia deve ser analisada com prudência. Antes de transformar o tema em decisão de compra, venda ou investimento, vale cruzar o fato com localização, liquidez, estoque disponível e objetivo do cliente.`,
         aeo_questions: [
             { question: `Por que ${keyword} importa para o mercado imobiliário?`, answer: 'Porque fatos públicos sobre infraestrutura, economia, turismo e cidade podem influenciar percepção de valor, demanda e timing de decisão.' },
         ],
@@ -532,7 +566,7 @@ function fallbackNewsDraft(context: any, topic?: string): BlogAgentDraft {
         visual_brief: `Imagem editorial verificável e não enganosa relacionada a ${keyword}, sem sugerir foto factual de um acontecimento específico.`,
         image_plan: [
             { section: 'Capa', query: `${keyword} ${city} city real estate`, reason: 'Imagem editorial sem sugerir registro factual do acontecimento.' },
-            { section: 'Impacto imobiliario', query: `${city} urban development real estate`, reason: 'Imagem interna para contextualizar cidade e mercado.' },
+            { section: 'Impacto imobiliário', query: `${city} urban development real estate`, reason: 'Imagem interna para contextualizar cidade e mercado.' },
         ],
         editorial_quality_check: [
             'Confirmar fonte, data e atualidade.',
@@ -546,29 +580,29 @@ function fallbackNewsDraft(context: any, topic?: string): BlogAgentDraft {
 
 const EDITORIAL_VISUAL_PROMPT_APPENDIX = `
 
-Regras adicionais obrigatorias de linha editorial, fontes, links e imagens:
+Regras adicionais obrigatórias de linha editorial, fontes, links e imagens:
 - Escreva obrigatoriamente em português do Brasil com acentuação correta. Não entregue textos sem acentos.
 - Antes de retornar o JSON, revise ortografia, acentuação, concordância, pontuação e naturalidade. Corrija títulos, resumo, corpo, perguntas, CTA e notas.
 - Preserve nomes próprios, URLs, links Markdown, números, datas, placeholders e fatos. Não invente nada durante a revisão.
-- Crie conteudo para pessoas primeiro e para busca depois: util, original, especifico, confiavel, com experiencia local e valor alem do obvio.
-- SEO, AEO e GEO devem aparecer na estrutura: titulo claro, resposta direta para perguntas, entidades locais, contexto, secoes bem nomeadas e texto facil de entender por mecanismos de resposta.
-- Para buscas com IA, considere fan-out de consultas: responda tambem perguntas relacionadas, comparacoes, riscos, bairros, timing, exemplos praticos e criterios de decisao.
-- Separe fato, inferencia e recomendacao. Fato precisa vir do contexto ou de fonte externa citavel; inferencia deve ser prudente; recomendacao deve ser acionavel.
-- Use links internos naturais para home, busca, imoveis, empreendimentos, blog, noticias, bairros ou paginas relacionadas quando isso ajudar a jornada do leitor.
-- Anchora de link precisa ser descritiva e curta. Evite "clique aqui", "leia mais", "site" ou texto generico como ancora.
-- Quando usar fato externo, cite a fonte com link no proprio texto em Markdown perto da afirmacao. Nao invente fonte, URL, numero, data ou orgao.
+- Crie conteúdo para pessoas primeiro e para busca depois: útil, original, específico, confiável, com experiência local e valor além do óbvio.
+- SEO, AEO e GEO devem aparecer na estrutura: título claro, resposta direta para perguntas, entidades locais, contexto, seções bem nomeadas e texto fácil de entender por mecanismos de resposta.
+- Para buscas com IA, considere fan-out de consultas: responda também perguntas relacionadas, comparações, riscos, bairros, timing, exemplos práticos e critérios de decisão.
+- Separe fato, inferência e recomendação. Fato precisa vir do contexto ou de fonte externa citável; inferência deve ser prudente; recomendação deve ser acionável.
+- Use links internos naturais para home, busca, imóveis, empreendimentos, blog, notícias, bairros ou páginas relacionadas quando isso ajudar a jornada do leitor.
+- Âncora de link precisa ser descritiva e curta. Evite "clique aqui", "leia mais", "site" ou texto genérico como âncora.
+- Quando usar fato externo, cite a fonte com link no próprio texto em Markdown perto da afirmação. Não invente fonte, URL, número, data ou órgão.
 - Em noticias, fontes externas sao obrigatorias para fatos publicos, obras, indices, prazos, anuncios, declaracoes, dados de mercado ou movimentacoes de cidade.
-- Em blog, fontes externas devem ser usadas quando houver dado publico; links internos devem conectar o tema a estoque real, buscas, bairros, imoveis visitados e artigos relacionados.
-- Nao copie texto de fontes externas; sintetize com palavras proprias e adicione leitura editorial especializada, contexto local e impacto para o publico.
-- Nao use "Noticia Pilger", "Blog Pilger", "Pauta Pilger", "Radar Pilger", "Leitura Pilger" ou qualquer redline baseada na marca. Titulo, H1, seo_title, meta_description e primeira chamada devem ranquear por assunto, cidade, bairro, tipo de imovel, fato e intencao de busca.
-- Se precisar mencionar a empresa ou o profissional, use "Imobiliaria Guilherme Pilger" ou "corretor de imoveis Guilherme Pilger" apenas em contexto institucional, assinatura ou CTA discreto.
-- Sugira imagem de capa e imagens internas por secao. Cada imagem precisa ter tema, motivo e alt text esperado.
-- Para a imagem de capa, priorize Pexels/Pixabay com imagem editorial coerente, horizontal, premium e alinhada ao tema. Use foto de imovel interno como capa apenas se os bancos editoriais nao retornarem imagem adequada.
-- Use imagens reais de imoveis do ecossistema como apoio interno quando o tema falar de cidade, bairro, tipo de imovel, empreendimento, frente mar, cobertura, luxo ou investimento.
-- Quando usar Pexels/Pixabay, escolha imagens editoriais coerentes e nao enganosas; em noticias, nao use imagem que pareca registro factual de um acontecimento se for apenas ilustrativa.
-- Planeje imagens proximas das secoes relevantes, com descricao util e sem keyword stuffing no alt text.
-- O artigo/noticia final deve mostrar links internos e fontes externas no Markdown sempre que existirem; nao deixe isso apenas nos campos JSON.
-- Antes de finalizar, faca uma checagem editorial: utilidade real, originalidade, fonte verificavel, links internos uteis, imagem coerente e ausencia de promessa exagerada.
+- Em blog, fontes externas devem ser usadas quando houver dado público; links internos devem conectar o tema a estoque real, buscas, bairros, imóveis visitados e artigos relacionados.
+- Não copie texto de fontes externas; sintetize com palavras próprias e adicione leitura editorial especializada, contexto local e impacto para o público.
+- Não use "Notícia Pilger", "Blog Pilger", "Pauta Pilger", "Radar Pilger", "Leitura Pilger" ou qualquer redline baseada na marca. Título, H1, seo_title, meta_description e primeira chamada devem ranquear por assunto, cidade, bairro, tipo de imóvel, fato e intenção de busca.
+- Se precisar mencionar a empresa ou o profissional, use "Imobiliária Guilherme Pilger" ou "corretor de imóveis Guilherme Pilger" apenas em contexto institucional, assinatura ou CTA discreto.
+- Sugira imagem de capa e imagens internas por seção. Cada imagem precisa ter tema, motivo e alt text esperado.
+- Para a imagem de capa, priorize Pexels/Pixabay com imagem editorial coerente, horizontal, premium e alinhada ao tema. Use foto de imóvel interno como capa apenas se os bancos editoriais não retornarem imagem adequada.
+- Use imagens reais de imóveis do ecossistema como apoio interno quando o tema falar de cidade, bairro, tipo de imóvel, empreendimento, frente mar, cobertura, luxo ou investimento.
+- Quando usar Pexels/Pixabay, escolha imagens editoriais coerentes e não enganosas; em notícias, não use imagem que pareça registro factual de um acontecimento se for apenas ilustrativa.
+- Planeje imagens próximas das seções relevantes, com descrição útil e sem keyword stuffing no alt text.
+- O artigo/notícia final deve mostrar links internos e fontes externas no Markdown sempre que existirem; não deixe isso apenas nos campos JSON.
+- Antes de finalizar, faça uma checagem editorial: utilidade real, originalidade, fonte verificável, links internos úteis, imagem coerente e ausência de promessa exagerada.
 
 Inclua estes campos no JSON:
 "external_sources": [{"label": "string", "url": "https://...", "reason": "string"}],
@@ -610,11 +644,11 @@ function appendEditorialLinkSections(
         .map(link => formatEditorialLinkLine(link.label || 'Pagina relacionada', link.target, link.reason))
 
     if (internalLines.length) {
-        output += `\n\n## Leia tambem\n\n${internalLines.join('\n')}`
+        output += `\n\n## Leia também\n\n${internalLines.join('\n')}`
     }
 
     if (sourceLines.length) {
-        output += `\n\n## Fontes e referencias\n\n${sourceLines.join('\n')}`
+        output += `\n\n## Fontes e referências\n\n${sourceLines.join('\n')}`
     }
 
     return output
@@ -630,8 +664,8 @@ function inferResearchTopic(context: any, topic?: string) {
     const property = context.properties?.find((item: any) => item?.city || item?.property_type)
     if (property?.city && property?.property_type) return `${property.property_type} em ${property.city}`
     const visitor = context.visitors?.find((item: any) => item?.city)
-    if (visitor?.city) return `mercado imobiliario de luxo em ${visitor.city}`
-    return 'mercado imobiliario de luxo em Santa Catarina'
+    if (visitor?.city) return `mercado imobiliário de luxo em ${visitor.city}`
+    return 'mercado imobiliário de luxo em Santa Catarina'
 }
 
 function applyEditorialContextAugmentation(context: any, augmentation?: Record<string, unknown> | null) {
@@ -769,49 +803,25 @@ async function enrichWithExternalResearch(
 }
 
 async function callBlogAgent(prompt: string, context: any, topic?: string): Promise<BlogAgentDraft> {
-    const provider = await getActiveAIProvider()
     const centralBrief = buildAgentContextBrief(context)
     const userPrompt = [
         topic ? `Tema sugerido pelo admin: ${topic}` : 'Escolha a melhor pauta com base nos dados.',
-        'Regra de profundidade: se a decisao for create_article, entregue article_markdown completo. Blog deve ter pelo menos 950 palavras; noticia deve ter pelo menos 650 palavras. Se nao houver base factual/contextual suficiente, retorne observe ou reject.',
-        'Use primeiro a Central de Inteligencia: priorize central_intelligence, lara_benchmark_opportunities, latest_research, market_radar_insights, sinais de leads e estoque real. Quando usar Lara/benchmark, trate como inteligencia competitiva interna e nao mencione Lara, Benchmark Editorial ou pauta de benchmark para o leitor.',
+        'Regra de profundidade: se a decisão for create_article, entregue article_markdown completo. Blog deve ter pelo menos 950 palavras; notícia deve ter pelo menos 650 palavras. Se não houver base factual/contextual suficiente, retorne observe ou reject.',
+        'Use primeiro a Central de Inteligência: priorize central_intelligence, lara_benchmark_opportunities, latest_research, market_radar_insights, sinais de leads e estoque real. Quando usar Lara/benchmark, trate como inteligência competitiva interna e não mencione Lara, Benchmark Editorial ou pauta de benchmark para o leitor.',
+        'Antes de responder, faça revisão final de português do Brasil: acentuação, ortografia, concordância, pontuação, títulos naturais e maiúsculas/minúsculas.',
         '',
-        'Briefing consolidado da Central de Inteligencia:',
-        centralBrief || 'Sem briefing consolidado disponivel; use o JSON bruto com prudencia.',
+        'Briefing consolidado da Central de Inteligência:',
+        centralBrief || 'Sem briefing consolidado disponível; use o JSON bruto com prudência.',
         '',
         'Contexto do ecossistema em JSON:',
         JSON.stringify(context, null, 2),
     ].join('\n')
 
-    let text = ''
-    if (provider === 'openai') {
-        const apiKey = await getOpenAIApiKey()
-        if (!apiKey) throw new Error('OpenAI API Key nao configurada.')
-        const model = (await getAIConfig('openai_model')) || 'gpt-4o-mini'
-        const openai = new OpenAI({ apiKey })
-        const result = await openai.chat.completions.create({
-            model,
-            messages: [
-                { role: 'system', content: prompt },
-                { role: 'user', content: userPrompt },
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.35,
-        })
-        text = result.choices[0]?.message?.content || '{}'
-    } else {
-        const apiKey = await getGeminiApiKey()
-        if (!apiKey) throw new Error('Gemini API Key nao configurada.')
-        const modelName = (await getAIConfig('gemini_model')) || 'gemini-2.5-flash'
-        const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({ model: modelName })
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            systemInstruction: { role: 'model', parts: [{ text: prompt }] },
-            generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
-        })
-        text = result.response.text()
-    }
+    const text = await generateEditorialJsonText({
+        systemInstruction: prompt,
+        userPrompt,
+        temperature: 0.35,
+    })
 
     const parsed = JSON.parse(cleanJsonText(text))
     const draft: BlogAgentDraft = {
@@ -821,7 +831,7 @@ async function callBlogAgent(prompt: string, context: any, topic?: string): Prom
         secondary_keywords: safeArray(parsed.secondary_keywords, 12).map(String),
         local_entities: safeArray(parsed.local_entities, 12).map(String),
         search_intent: String(parsed.search_intent || 'commercial'),
-        seo_title: String(parsed.seo_title || parsed.title || topic || 'Guia imobiliario de alto padrao'),
+        seo_title: String(parsed.seo_title || parsed.title || topic || 'Guia imobiliário de alto padrão'),
         meta_description: String(parsed.meta_description || '').slice(0, 320),
         outline: safeArray(parsed.outline, 12) as BlogAgentDraft['outline'],
         article_markdown: String(parsed.article_markdown || ''),
@@ -842,7 +852,7 @@ async function callBlogAgent(prompt: string, context: any, topic?: string): Prom
         cta: String(parsed.cta || ''),
         approval_notes: safeArray(parsed.approval_notes, 12).map(String),
     }
-    return polishPortugueseCopyIfNeeded(normalizeEditorialDraft(draft, 'Guia imobiliario de alto padrao'))
+    return polishPortugueseCopyIfNeeded(normalizeEditorialDraft(draft, 'Guia imobiliário de alto padrão'))
 }
 
 export async function generateBlogArticleDraft(topic?: string, options: EditorialAgentDraftOptions = {}) {
@@ -864,12 +874,12 @@ export async function generateBlogArticleDraft(topic?: string, options: Editoria
     }
 
     draft = await polishPortugueseCopyIfNeeded(deepenDraftIfNeeded(
-        normalizeEditorialDraft(draft, 'Guia imobiliario de alto padrao'),
+        normalizeEditorialDraft(draft, 'Guia imobiliário de alto padrão'),
         context,
         'blog',
     ))
 
-    const title = draft.seo_title || draft.primary_keyword || 'Guia imobiliario de alto padrao'
+    const title = draft.seo_title || draft.primary_keyword || 'Guia imobiliário de alto padrão'
     const visualPlan = await buildEditorialVisualPlan(supabase, {
         contentType: 'blog',
         title,
@@ -915,7 +925,7 @@ export async function generateBlogArticleDraft(topic?: string, options: Editoria
         status: 'under_review' as const,
         cover_image_url: visualPlan.coverImageUrl,
         author_name: BLOG_AUTHOR_NAME,
-        category: 'Mercado Imobiliario',
+        category: 'Mercado Imobiliário',
         tags: [...new Set([
             draft.primary_keyword,
             draft.visual_brief || '',
@@ -955,12 +965,12 @@ export async function generateNewsArticleDraft(topic?: string, options: Editoria
     }
 
     draft = await polishPortugueseCopyIfNeeded(deepenDraftIfNeeded(
-        normalizeEditorialDraft(draft, 'Noticias do mercado imobiliario de alto padrao'),
+        normalizeEditorialDraft(draft, 'Notícias do mercado imobiliário de alto padrão'),
         context,
         'news',
     ))
 
-    const title = draft.seo_title || draft.primary_keyword || 'Noticias do mercado imobiliario de alto padrao'
+    const title = draft.seo_title || draft.primary_keyword || 'Notícias do mercado imobiliário de alto padrão'
     const visualPlan = await buildEditorialVisualPlan(supabase, {
         contentType: 'news',
         title,
@@ -1007,7 +1017,7 @@ export async function generateNewsArticleDraft(topic?: string, options: Editoria
         status: 'under_review' as const,
         cover_image_url: visualPlan.coverImageUrl,
         author_name: BLOG_AUTHOR_NAME,
-        category: 'Noticias',
+        category: 'Notícias',
         tags: [...new Set([
             draft.primary_keyword,
             draft.visual_brief,
