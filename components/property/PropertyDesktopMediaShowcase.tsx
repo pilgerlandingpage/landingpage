@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
+import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Images, MapPinned, Navigation, PlayCircle, X } from 'lucide-react'
 import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyVideoEmbed, { getPropertyVideoSource } from '@/components/property/PropertyVideoEmbed'
@@ -203,6 +203,7 @@ export default function PropertyDesktopMediaShowcase({
     const [activeMediaIndex, setActiveMediaIndex] = useState(0)
     const [activePhotoIndex, setActivePhotoIndex] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const mediaRailRef = useRef<HTMLDivElement>(null)
 
     const activeMedia = mediaItems[Math.min(activeMediaIndex, Math.max(mediaItems.length - 1, 0))]
     const canBrowseMedia = mediaItems.length > 1
@@ -229,6 +230,11 @@ export default function PropertyDesktopMediaShowcase({
             window.removeEventListener('keydown', onKeyDown)
         }
     }, [activePhotoIndex, isOpen])
+
+    useEffect(() => {
+        const activeThumb = mediaRailRef.current?.querySelector<HTMLElement>(`[data-plp-media-thumb="${activeMediaIndex}"]`)
+        activeThumb?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    }, [activeMediaIndex])
 
     if (!mediaItems.length || !gallery.length) return null
 
@@ -395,11 +401,12 @@ export default function PropertyDesktopMediaShowcase({
                         {renderMediaNav()}
                     </div>
 
-                    <div className="plp-desktop-media-rail" aria-label="Navegar por fotos, Street View e mapa">
+                    <div className="plp-desktop-media-rail" ref={mediaRailRef} aria-label="Navegar por fotos, Street View e mapa">
                         {mediaItems.map((item, index) => (
                             <button
                                 type="button"
                                 key={`${item.type}-${item.type === 'photo' ? item.src : item.label}-${index}`}
+                                data-plp-media-thumb={index}
                                 className={`plp-desktop-media-thumb ${index === activeMediaIndex ? 'active' : ''}`}
                                 onClick={() => {
                                     if (item.type === 'photo') {

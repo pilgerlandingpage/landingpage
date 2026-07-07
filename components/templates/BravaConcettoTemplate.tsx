@@ -640,6 +640,29 @@ function buildStaticStreetViewPreviewUrl(latLng?: [number, number] | null) {
     return `https://maps.googleapis.com/maps/api/streetview?${params.toString()}`
 }
 
+function buildStaticMapPreviewUrl(latLng?: [number, number] | null) {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    if (!apiKey || !latLng) return null
+
+    const [lat, lng] = latLng
+    const coordinate = `${lat},${lng}`
+    const params = new URLSearchParams({
+        center: coordinate,
+        zoom: '16',
+        size: GOOGLE_STATIC_PREVIEW_SIZE,
+        scale: '2',
+        maptype: 'roadmap',
+        markers: `color:0xD4AF37|${coordinate}`,
+        key: apiKey,
+    })
+
+    params.append('style', 'feature:poi|visibility:off')
+    params.append('style', 'feature:transit|visibility:off')
+    params.append('style', 'feature:road|element:labels|visibility:simplified')
+
+    return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`
+}
+
 function uniqueImages(images: string[]) {
     const seen = new Set<string>()
     return images.filter((image) => {
@@ -976,7 +999,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Galeria</span>
                                 <h2 className="text-4xl font-semibold text-white md:text-5xl">Visual do empreendimento</h2>
                             </div>
-                            <p className="max-w-sm text-sm text-zinc-500">Imagens, mapa e Street View para entender o empreendimento e o entorno antes da visita.</p>
                         </div>
                         <DevelopmentMediaShowcase
                             development={activeDev}
@@ -3139,18 +3161,18 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page .bc-development-showcase-stage {
                     display: grid;
-                    grid-template-columns: minmax(0, 1fr) 162px;
-                    gap: 12px;
+                    grid-template-columns: minmax(0, 1fr) 152px;
+                    gap: 10px;
                     align-items: stretch;
                 }
 
                 .bc-page .bc-development-showcase-main {
                     position: relative;
-                    min-height: clamp(430px, 44vw, 570px);
+                    min-height: clamp(500px, 50vw, 680px);
                     overflow: hidden;
                     border: 1px solid rgba(36, 31, 24, 0.1);
                     border-radius: 8px;
-                    background: #efe8db;
+                    background: #f4efe6;
                     box-shadow: 0 18px 46px rgba(31, 27, 21, 0.08);
                     touch-action: pan-y;
                 }
@@ -3166,6 +3188,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: block;
                     border: 0;
                     object-fit: cover;
+                }
+
+                .bc-page .bc-development-showcase-main > img {
+                    background: #f4efe6;
+                    object-fit: contain;
                 }
 
                 .bc-page .bc-development-showcase-main > iframe,
@@ -3220,7 +3247,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: block;
                     width: 100%;
                     height: 100%;
-                    background: #d8eef5;
+                    background:
+                        radial-gradient(circle at 78% 26%, rgba(212, 175, 55, 0.18), transparent 32%),
+                        linear-gradient(135deg, #d8eef5, #f4efe6);
                 }
 
                 .bc-page .bc-development-location-static-thumb img {
@@ -3238,6 +3267,24 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     inset: 0;
                     background: linear-gradient(to top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.03) 62%);
                     pointer-events: none;
+                }
+
+                .bc-page .bc-development-location-static-thumb.is-fallback {
+                    display: grid;
+                    place-items: center;
+                }
+
+                .bc-page .bc-development-location-static-thumb-fallback {
+                    position: relative;
+                    z-index: 2;
+                    display: inline-grid;
+                    place-items: center;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.82);
+                    color: #9b7427;
+                    box-shadow: 0 14px 28px rgba(31, 27, 21, 0.16);
                 }
 
                 .bc-page .bc-development-showcase-nav {
@@ -3291,7 +3338,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page .bc-development-showcase-rail {
-                    max-height: clamp(430px, 44vw, 570px);
+                    max-height: clamp(500px, 50vw, 680px);
                     display: grid;
                     gap: 10px;
                     overflow-y: auto;
@@ -3379,8 +3426,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 .bc-page .bc-development-gallery-section .bc-development-showcase > .bc-development-showcase-stage {
                     display: grid !important;
-                    grid-template-columns: minmax(0, 1fr) 162px !important;
-                    gap: 12px !important;
+                    grid-template-columns: minmax(0, 1fr) 152px !important;
+                    gap: 10px !important;
                     align-items: stretch !important;
                 }
 
@@ -3405,19 +3452,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     position: relative !important;
                     width: auto !important;
                     height: auto !important;
-                    min-height: clamp(430px, 44vw, 570px) !important;
+                    min-height: clamp(500px, 50vw, 680px) !important;
                     display: block !important;
                     overflow: hidden !important;
                     border: 1px solid rgba(36, 31, 24, 0.1) !important;
                     border-radius: 8px !important;
-                    background: #efe8db !important;
+                    background: #f4efe6 !important;
                 }
 
                 .bc-page .bc-development-gallery-section .bc-development-showcase-stage > .bc-development-showcase-rail {
                     position: static !important;
-                    width: 162px !important;
+                    width: 152px !important;
                     height: auto !important;
-                    max-height: clamp(430px, 44vw, 570px) !important;
+                    max-height: clamp(500px, 50vw, 680px) !important;
                     display: grid !important;
                     overflow-y: auto !important;
                     border: 0 !important;
@@ -3951,7 +3998,7 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
                             href={`/${development.slug}`}
                             className="bc-related-development-card"
                         >
-                            <img src={development.heroImage} alt={development.name} referrerPolicy="no-referrer" />
+                            <img src={development.heroImage} alt={development.name} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                             <span className="bc-related-development-shade" />
                             <span className="bc-related-development-copy">
                                 <small>{development.locationName}</small>
@@ -4053,12 +4100,18 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
         return items
     }, [development.gallery, mapEmbedSrc, streetViewEmbedSrc])
     const [activeMediaIndex, setActiveMediaIndex] = useState(0)
+    const railRef = useRef<HTMLDivElement>(null)
     const touchStartRef = useRef<{ x: number; y: number } | null>(null)
     const touchCurrentRef = useRef<{ x: number; y: number } | null>(null)
     const galleryCount = development.gallery.length
     const safeActiveIndex = Math.min(activeMediaIndex, Math.max(mediaItems.length - 1, 0))
     const activeMedia = mediaItems[safeActiveIndex]
     const canBrowse = mediaItems.length > 1
+
+    useEffect(() => {
+        const activeThumb = railRef.current?.querySelector<HTMLElement>(`[data-bc-development-thumb="${safeActiveIndex}"]`)
+        activeThumb?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    }, [safeActiveIndex])
 
     if (!activeMedia) return null
 
@@ -4161,14 +4214,16 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
                     )}
                 </div>
 
-                <div className="bc-development-showcase-rail" aria-label="Selecionar midia">
+                <div className="bc-development-showcase-rail" ref={railRef} aria-label="Selecionar midia">
                     {mediaItems.map((item, index) => (
                         <button
                             key={`${item.type}-${item.type === 'photo' ? item.photoIndex : item.title}`}
                             type="button"
+                            data-bc-development-thumb={index}
                             className={`bc-development-showcase-thumb ${index === safeActiveIndex ? 'is-active' : ''}`}
                             onClick={() => selectMedia(index)}
                             aria-label={`Abrir ${item.label}`}
+                            aria-pressed={index === safeActiveIndex}
                         >
                             <DevelopmentMediaContent
                                 compact
@@ -4205,11 +4260,11 @@ function DevelopmentMediaContent({ item, property, latLng, compact = false }: {
         )
     }
 
-    if (item.type === 'street' && compact) {
+    if ((item.type === 'street' || item.type === 'map') && compact) {
         return (
-            <StaticDevelopmentStreetViewThumb
-                fallbackSrc={item.fallbackSrc}
+            <StaticDevelopmentLocationThumb
                 latLng={latLng}
+                type={item.type}
                 title={`${item.label} de ${property.title}`}
             />
         )
@@ -4257,36 +4312,33 @@ function DevelopmentMediaContent({ item, property, latLng, compact = false }: {
     )
 }
 
-function StaticDevelopmentStreetViewThumb({ fallbackSrc, latLng, title }: {
-    fallbackSrc: string
+function StaticDevelopmentLocationThumb({ latLng, title, type }: {
     latLng: [number, number] | null
     title: string
+    type: DevelopmentLocationMode
 }) {
     const [failed, setFailed] = useState(false)
-    const previewUrl = useMemo(() => buildStaticStreetViewPreviewUrl(latLng), [latLng])
-
-    if (!previewUrl || failed) {
-        return (
-            <iframe
-                title={title}
-                src={fallbackSrc}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allow="geolocation; accelerometer; gyroscope"
-                allowFullScreen
-                tabIndex={-1}
-            />
-        )
-    }
+    const previewUrl = useMemo(() => {
+        return type === 'street'
+            ? buildStaticStreetViewPreviewUrl(latLng)
+            : buildStaticMapPreviewUrl(latLng)
+    }, [latLng, type])
+    const Icon = type === 'street' ? Navigation : MapPinned
 
     return (
-        <span className="bc-development-location-static-thumb">
-            <img
-                src={previewUrl}
-                alt={title}
-                loading="lazy"
-                onError={() => setFailed(true)}
-            />
+        <span className={`bc-development-location-static-thumb bc-development-location-static-thumb--${type}${!previewUrl || failed ? ' is-fallback' : ''}`}>
+            {previewUrl && !failed ? (
+                <img
+                    src={previewUrl}
+                    alt={title}
+                    loading="lazy"
+                    onError={() => setFailed(true)}
+                />
+            ) : (
+                <span className="bc-development-location-static-thumb-fallback" aria-hidden="true">
+                    <Icon size={24} />
+                </span>
+            )}
         </span>
     )
 }
@@ -4418,7 +4470,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
                 }}
                 onTouchEnd={handleTouchEnd}
             >
-                <img src={activeImage} alt={unit.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" referrerPolicy="no-referrer" />
+                <img src={activeImage} alt={unit.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                 <span className={`absolute left-4 top-4 rounded px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.16em] shadow-md ${unit.status.toLowerCase().includes('ultima') ? 'bg-amber-500 text-zinc-950' : 'border border-[#D4AF37]/40 bg-[#0A0D10]/95 text-[#D4AF37]'}`}>
                     {unit.status}
                 </span>

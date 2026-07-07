@@ -536,18 +536,18 @@ export default function PropertyLandingStyles() {
 
                 .plp-desktop-media-stage {
                     display: grid;
-                    grid-template-columns: minmax(0, 1fr) 164px;
-                    gap: 12px;
-                    min-height: 520px;
+                    grid-template-columns: minmax(0, 1fr) 150px;
+                    gap: 10px;
+                    min-height: clamp(500px, 50vw, 680px);
                 }
 
                 .plp-desktop-media-main {
                     position: relative;
                     min-width: 0;
-                    min-height: 520px;
+                    min-height: inherit;
                     overflow: hidden;
                     border-radius: var(--plp-radius);
-                    background: #111;
+                    background: #f4efe6;
                     box-shadow: 0 20px 54px rgba(19, 24, 29, 0.13);
                 }
 
@@ -565,7 +565,7 @@ export default function PropertyLandingStyles() {
                     border: 0;
                     padding: 0;
                     border-radius: inherit;
-                    background: #111;
+                    background: #f4efe6;
                     color: #fff;
                 }
 
@@ -685,7 +685,7 @@ export default function PropertyLandingStyles() {
                     width: 100%;
                     height: 100%;
                     display: block;
-                    object-fit: cover;
+                    object-fit: contain;
                     object-position: center;
                     transition: transform 0.34s ease;
                 }
@@ -870,7 +870,7 @@ export default function PropertyLandingStyles() {
                     display: grid;
                     align-content: start;
                     gap: 10px;
-                    max-height: 520px;
+                    max-height: clamp(500px, 50vw, 680px);
                     overflow-y: auto;
                     padding: 2px 2px 2px 0;
                     scrollbar-width: thin;
