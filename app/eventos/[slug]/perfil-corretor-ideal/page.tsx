@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
+import {
+    buildProfileAssessmentPath,
+    PROFILE_ASSESSMENT_PARENT_SLUG,
+    resolveProfileAssessmentEventSlug,
+} from '@/lib/events/profile-assessment'
 import { DEFAULT_EVENT_HERO, formatEventDate } from '@/lib/events/utils'
 import SelfAssessmentClient from './SelfAssessmentClient'
 
 export const dynamic = 'force-dynamic'
-
-const PROFILE_ASSESSMENT_EVENT_DATE = '2026-07-09T14:00:00-03:00'
 
 type PageProps = {
     params: Promise<{ slug: string }>
@@ -26,7 +29,7 @@ async function getEvent(slug: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params
-    const event = await getEvent(slug)
+    const event = await getEvent(resolveProfileAssessmentEventSlug(slug))
 
     if (!event) {
         return {
@@ -37,15 +40,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     return {
         title: `Perfil do Corretor Ideal - ${event.title}`,
-        description: 'Autoavaliação ao vivo para corretores no evento Guilherme Pilger.',
+        description: 'Autoavaliacao ao vivo para corretores no evento Guilherme Pilger.',
         robots: { index: false, follow: false },
-        alternates: { canonical: `/eventos/${event.slug}/perfil-corretor-ideal` },
+        alternates: { canonical: buildProfileAssessmentPath(event.slug) },
     }
 }
 
 export default async function PerfilCorretorIdealPage({ params }: PageProps) {
     const { slug } = await params
-    const event = await getEvent(slug)
+
+    if (slug === PROFILE_ASSESSMENT_PARENT_SLUG) {
+        redirect(buildProfileAssessmentPath())
+    }
+
+    const event = await getEvent(resolveProfileAssessmentEventSlug(slug))
 
     if (!event) notFound()
 
@@ -53,7 +61,7 @@ export default async function PerfilCorretorIdealPage({ params }: PageProps) {
         <SelfAssessmentClient
             eventTitle={event.title}
             eventSlug={event.slug}
-            eventDateLabel={formatEventDate(PROFILE_ASSESSMENT_EVENT_DATE)}
+            eventDateLabel={formatEventDate(event.event_date)}
             eventLocation={event.location_name || 'Evento Guilherme Pilger'}
             heroImage={event.hero_image_url || DEFAULT_EVENT_HERO}
         />

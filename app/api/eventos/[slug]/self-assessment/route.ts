@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { syncLeadEmailFromEventRegistration } from '@/lib/events/lead-email-sync'
+import { resolveProfileAssessmentEventSlug } from '@/lib/events/profile-assessment'
 import { cleanString, normalizePhone } from '@/lib/events/utils'
 import {
     SELF_ASSESSMENT_QUESTIONS,
@@ -85,6 +86,7 @@ function parsePayload(body: any, request: NextRequest) {
 export async function POST(request: NextRequest, { params }: RouteContext) {
     try {
         const { slug } = await params
+        const eventSlug = resolveProfileAssessmentEventSlug(slug)
         const body = await request.json()
         const payload = parsePayload(body, request)
         const supabase = createAdminClient()
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         const { data: event, error: eventError } = await supabase
             .from('event_events')
             .select('*')
-            .eq('slug', slug)
+            .eq('slug', eventSlug)
             .eq('status', 'published')
             .maybeSingle()
 
