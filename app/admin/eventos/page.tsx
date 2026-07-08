@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
+import { Fragment, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import {
     CalendarDays,
     CheckCircle2,
@@ -36,6 +36,18 @@ const defaultDate = () => {
     date.setDate(date.getDate() + 14)
     date.setHours(19, 0, 0, 0)
     return date.toISOString().slice(0, 16)
+}
+
+const PROFILE_ASSESSMENT_PARENT_SLUG = 'encontro-corretores-pilger'
+const PROFILE_ASSESSMENT_TITLE = 'Perfil do Corretor Ideal'
+const PROFILE_ASSESSMENT_EVENT_DATE = '2026-07-09T14:00:00-03:00'
+
+function profileAssessmentPath(slug: string) {
+    return `/eventos/${slug}/perfil-corretor-ideal`
+}
+
+function profileAssessmentCopyKey(slug: string) {
+    return `${slug}:perfil-corretor-ideal`
 }
 
 export default function EventosAdminPage() {
@@ -119,6 +131,13 @@ export default function EventosAdminPage() {
         const url = `${publicBase}/eventos/${slug}`
         await navigator.clipboard.writeText(url)
         setCopied(slug)
+        setTimeout(() => setCopied(null), 1600)
+    }
+
+    const copyProfileAssessmentLink = async (slug: string) => {
+        const url = `${publicBase}${profileAssessmentPath(slug)}`
+        await navigator.clipboard.writeText(url)
+        setCopied(profileAssessmentCopyKey(slug))
         setTimeout(() => setCopied(null), 1600)
     }
 
@@ -226,61 +245,115 @@ export default function EventosAdminPage() {
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: 14 }}>
-                    {events.map(event => (
-                        <div key={event.id} className="chart-card" style={{ padding: 20, display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: 18, alignItems: 'center' }}>
-                            <div
-                                style={{
-                                    width: 96,
-                                    height: 72,
-                                    borderRadius: 8,
-                                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.35)), url("${event.hero_image_url || DEFAULT_EVENT_HERO}")`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                    border: '1px solid var(--border)',
-                                }}
-                            />
-                            <div style={{ minWidth: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-                                    <Link href={`/admin/eventos/${event.id}`} style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '1.05rem' }}>
-                                        {event.title}
-                                    </Link>
-                                    <span style={statusPill(event.status)}>{statusLabel(event.status)}</span>
+                    {events.map(event => {
+                        const showProfileAssessment = event.slug === PROFILE_ASSESSMENT_PARENT_SLUG
+                        const assessmentPath = profileAssessmentPath(event.slug)
+                        const assessmentCopyKey = profileAssessmentCopyKey(event.slug)
+
+                        return (
+                            <Fragment key={event.id}>
+                                <div className="chart-card" style={{ padding: 20, display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: 18, alignItems: 'center' }}>
+                                    <div
+                                        style={{
+                                            width: 96,
+                                            height: 72,
+                                            borderRadius: 8,
+                                            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.35)), url("${event.hero_image_url || DEFAULT_EVENT_HERO}")`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            border: '1px solid var(--border)',
+                                        }}
+                                    />
+                                    <div style={{ minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                                            <Link href={`/admin/eventos/${event.id}`} style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '1.05rem' }}>
+                                                {event.title}
+                                            </Link>
+                                            <span style={statusPill(event.status)}>{statusLabel(event.status)}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                                            <span style={metaItem}><Clock size={14} />{formatShortDate(event.event_date)}</span>
+                                            <span style={metaItem}><MapPin size={14} />{event.location_name || 'Local a confirmar'}</span>
+                                            <span style={metaItem}><Users size={14} />{event.registrations_count || 0} inscritos</span>
+                                            <span>{event.checked_in_count || 0} check-ins</span>
+                                            <span>{event.pending_messages_count || 0} mensagens pendentes</span>
+                                        </div>
+                                        <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                                            /eventos/{event.slug}
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                        <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
+                                            <Download size={14} />
+                                            Contatos
+                                        </button>
+                                        <button className="btn btn-outline btn-sm" onClick={() => copyLink(event.slug)}>
+                                            {copied === event.slug ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+                                            {copied === event.slug ? 'Copiado' : 'Copiar'}
+                                        </button>
+                                        <Link href={`/eventos/${event.slug}`} className="btn btn-outline btn-sm" target="_blank">
+                                            <ExternalLink size={14} />
+                                            Abrir
+                                        </Link>
+                                        <Link href={`/admin/eventos/${event.id}`} className="btn btn-primary btn-sm">
+                                            Gerenciar
+                                        </Link>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                                    <span style={metaItem}><Clock size={14} />{formatShortDate(event.event_date)}</span>
-                                    <span style={metaItem}><MapPin size={14} />{event.location_name || 'Local a confirmar'}</span>
-                                    <span style={metaItem}><Users size={14} />{event.registrations_count || 0} inscritos</span>
-                                    <span>{event.checked_in_count || 0} check-ins</span>
-                                    <span>{event.pending_messages_count || 0} mensagens pendentes</span>
-                                </div>
-                                <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem', display: 'grid', gap: 4 }}>
-                                    <span>/eventos/{event.slug}</span>
-                                    <span>Autoavaliacao: /eventos/{event.slug}/perfil-corretor-ideal</span>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                                <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
-                                    <Download size={14} />
-                                    Contatos
-                                </button>
-                                <button className="btn btn-outline btn-sm" onClick={() => copyLink(event.slug)}>
-                                    {copied === event.slug ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-                                    {copied === event.slug ? 'Copiado' : 'Copiar'}
-                                </button>
-                                <Link href={`/eventos/${event.slug}`} className="btn btn-outline btn-sm" target="_blank">
-                                    <ExternalLink size={14} />
-                                    Abrir
-                                </Link>
-                                <Link href={`/eventos/${event.slug}/perfil-corretor-ideal`} className="btn btn-outline btn-sm" target="_blank">
-                                    <ExternalLink size={14} />
-                                    Perfil ideal
-                                </Link>
-                                <Link href={`/admin/eventos/${event.id}`} className="btn btn-primary btn-sm">
-                                    Gerenciar
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+
+                                {showProfileAssessment && (
+                                    <div className="chart-card" style={{ padding: 20, display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: 18, alignItems: 'center' }}>
+                                        <div
+                                            style={{
+                                                width: 96,
+                                                height: 72,
+                                                borderRadius: 8,
+                                                backgroundImage: `linear-gradient(135deg, rgba(232,190,94,0.72), rgba(15,23,42,0.56)), url("${event.hero_image_url || DEFAULT_EVENT_HERO}")`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                border: '1px solid rgba(196, 143, 48, 0.32)',
+                                            }}
+                                        />
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                                                <Link href={assessmentPath} target="_blank" style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '1.05rem' }}>
+                                                    {PROFILE_ASSESSMENT_TITLE}
+                                                </Link>
+                                                <span style={statusPill('published')}>Publicado</span>
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                                                <span style={metaItem}><Clock size={14} />{formatShortDate(PROFILE_ASSESSMENT_EVENT_DATE)}</span>
+                                                <span style={metaItem}><MapPin size={14} />{event.location_name || 'Local a confirmar'}</span>
+                                                <span style={metaItem}><Users size={14} />{event.registrations_count || 0} leads do evento</span>
+                                                <span>50 perguntas</span>
+                                                <span>Resultado no celular</span>
+                                            </div>
+                                            <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                                                {assessmentPath}
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                            <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
+                                                <Download size={14} />
+                                                Leads
+                                            </button>
+                                            <button className="btn btn-outline btn-sm" onClick={() => copyProfileAssessmentLink(event.slug)}>
+                                                {copied === assessmentCopyKey ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+                                                {copied === assessmentCopyKey ? 'Copiado' : 'Copiar'}
+                                            </button>
+                                            <Link href={assessmentPath} className="btn btn-outline btn-sm" target="_blank">
+                                                <ExternalLink size={14} />
+                                                Abrir
+                                            </Link>
+                                            <Link href={`/admin/eventos/${event.id}`} className="btn btn-primary btn-sm">
+                                                Gerenciar
+                                            </Link>
+                                        </div>
+                                    </div>
+                                )}
+                            </Fragment>
+                        )
+                    })}
                 </div>
             )}
         </div>
