@@ -17,6 +17,7 @@ import {
     Save,
     Send,
     ShieldCheck,
+    Presentation,
     Trash2,
     Users,
     X,
@@ -31,6 +32,7 @@ import {
     registrationMatchesSegment,
     segmentLabel,
 } from '@/lib/events/utils'
+import { buildProfileAssessmentPath, buildProfileAssessmentPresentationPath, isProfileAssessmentEvent } from '@/lib/events/profile-assessment'
 
 type Props = { eventId: string }
 type EventRow = Record<string, any>
@@ -52,7 +54,7 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
 </head>
 <body style="margin:0;padding:0;background-color:#f0ede8;font-family:Georgia,serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   <div style="display:none;font-size:1px;color:#f0ede8;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-    Seu evento esta chegando. Confira horario, transmissao online e tire qualquer duvida pelo WhatsApp.
+    Seu evento está chegando. Confira horário, transmissão online e tire qualquer dúvida pelo WhatsApp.
   </div>
 
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f0ede8;">
@@ -75,16 +77,16 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
                 </tr>
               </table>
               <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:4px;color:#b8973a;text-transform:uppercase;">Guilherme Pilger</p>
-              <h1 style="margin:0;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#ffffff;letter-spacing:1px;line-height:1.3;">Seu evento esta<br />chegando</h1>
+              <h1 style="margin:0;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#ffffff;letter-spacing:1px;line-height:1.3;">Seu evento está<br />chegando</h1>
             </td>
           </tr>
 
           <tr>
             <td style="background-color:#ffffff;padding:44px 48px 40px;">
-              <p style="margin:0 0 28px;font-family:Georgia,serif;font-size:17px;color:#2c2c2c;line-height:1.7;">Ola, <strong style="color:#1a1a1a;">{nome}</strong>,</p>
+              <p style="margin:0 0 28px;font-family:Georgia,serif;font-size:17px;color:#2c2c2c;line-height:1.7;">Olá, <strong style="color:#1a1a1a;">{nome}</strong>,</p>
 
               <p style="margin:0 0 28px;font-family:Georgia,serif;font-size:16px;color:#444444;line-height:1.8;">
-                Queremos lembrar que o <strong style="color:#1a1a1a;">{evento}</strong> esta se aproximando. Reserve este momento na sua agenda. Sera uma experiencia pensada para profissionais do mercado imobiliario que buscam crescimento real.
+                Queremos lembrar que o <strong style="color:#1a1a1a;">{evento}</strong> está se aproximando. Reserve este momento na sua agenda. Será uma experiência pensada para profissionais do mercado imobiliário que buscam crescimento real.
               </p>
 
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f9f7f4;border-left:3px solid #b8973a;margin-bottom:32px;">
@@ -95,14 +97,14 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
                     <p style="margin:18px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Data</p>
                     <p style="margin:2px 0 0;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;font-weight:bold;">{data_evento}</p>
 
-                    <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Horario</p>
+                    <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Horário</p>
                     <p style="margin:2px 0 0;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;font-weight:bold;">{hora_evento}</p>
 
                     <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Local</p>
                     <p style="margin:2px 0 0;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;font-weight:bold;">{local_evento}</p>
 
-                    <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Transmissao</p>
-                    <p style="margin:2px 0 0;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;">Tambem disponivel <strong>online</strong>. <a href="{link_evento}" style="color:#b8973a;text-decoration:none;">Acesse os detalhes aqui</a>.</p>
+                    <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#888888;letter-spacing:1px;text-transform:uppercase;">Transmissão</p>
+                    <p style="margin:2px 0 0;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;">Também disponível <strong>online</strong>. <a href="{link_evento}" style="color:#b8973a;text-decoration:none;">Acesse os detalhes aqui</a>.</p>
                   </td>
                 </tr>
               </table>
@@ -110,25 +112,25 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:36px;">
                 <tr>
                   <td style="background-color:#1a1a1a;padding:18px 32px;text-align:center;border-radius:3px;">
-                    <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#b8973a;">Seu codigo de check-in</p>
+                    <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#b8973a;">Seu código de check-in</p>
                     <p style="margin:0;font-family:Georgia,serif;font-size:24px;font-weight:bold;color:#ffffff;letter-spacing:6px;">{checkin_code}</p>
-                    <p style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:11px;color:#888888;">Apresente este codigo na entrada</p>
+                    <p style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:11px;color:#888888;">Apresente este código na entrada</p>
                   </td>
                 </tr>
               </table>
 
               <p style="margin:0 0 12px;font-family:Georgia,serif;font-size:16px;color:#444444;line-height:1.8;">
-                Se tiver qualquer duvida sobre horario, local, acesso online ou confirmacao de presenca, nossa equipe esta pronta para atender diretamente pelo WhatsApp.
+                Se tiver qualquer dúvida sobre horário, local, acesso online ou confirmação de presença, nossa equipe está pronta para atender diretamente pelo WhatsApp.
               </p>
               <p style="margin:0 0 32px;font-family:Georgia,serif;font-size:16px;color:#444444;line-height:1.8;">
-                E so clicar no botao abaixo.
+                É só clicar no botão abaixo.
               </p>
 
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 40px;">
                 <tr>
                   <td style="background-color:#1a8c3e;border-radius:3px;">
                     <a href="{link_whatsapp_evento}" style="display:inline-block;padding:16px 36px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;letter-spacing:1px;text-transform:uppercase;">
-                      Tirar duvida no WhatsApp
+                      Tirar dúvida no WhatsApp
                     </a>
                   </td>
                 </tr>
@@ -139,7 +141,7 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
                   <td>
                     <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:15px;color:#2c2c2c;">Com expectativa por esse encontro,</p>
                     <p style="margin:0;font-family:Georgia,serif;font-size:16px;font-weight:bold;color:#1a1a1a;">Equipe Guilherme Pilger</p>
-                    <p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#b8973a;letter-spacing:1px;">Marketing Imobiliario Premium</p>
+                    <p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#b8973a;letter-spacing:1px;">Marketing Imobiliário Premium</p>
                   </td>
                 </tr>
               </table>
@@ -160,7 +162,7 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
               </p>
 
               <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;color:#666666;line-height:1.6;">
-                Voce esta recebendo este e-mail porque se inscreveu em um evento da Guilherme Pilger.
+                Você está recebendo este e-mail porque se inscreveu em um evento da Guilherme Pilger.
               </p>
               <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#555555;">
                 <a href="https://guilhermepilger.ai" style="color:#888888;text-decoration:underline;">guilhermepilger.ai</a>
@@ -174,17 +176,17 @@ const DEFAULT_EVENT_EMAIL_HTML = String.raw`<!DOCTYPE html>
 </body>
 </html>`
 const DEFAULT_EVENT_EMAIL_TEXT = [
-    'Ola {nome},',
+    'Olá {nome},',
     '',
     'Estamos passando para lembrar do evento {evento}.',
     '',
     'Data: {data_evento}',
-    'Horario: {hora_evento}',
+    'Horário: {hora_evento}',
     'Local: {local_evento}',
-    'Transmissao online: {link_evento}',
-    'Codigo de check-in: {checkin_code}',
+    'Transmissão online: {link_evento}',
+    'Código de check-in: {checkin_code}',
     '',
-    'Se tiver qualquer duvida sobre horario, local, acesso online ou confirmacao de presenca, fale com a nossa equipe pelo WhatsApp:',
+    'Se tiver qualquer dúvida sobre horário, local, acesso online ou confirmação de presença, fale com a nossa equipe pelo WhatsApp:',
     '{link_whatsapp_evento}',
     '',
     'Equipe Guilherme Pilger',
@@ -234,25 +236,25 @@ function getTop3Intent(row: RegistrationRow) {
         score,
         level,
         levelLabel,
-        challenge: String(answers.main_challenge_label || 'Desafio nao informado'),
-        timeline: String(answers.improvement_timeline_label || 'Prazo nao informado'),
-        investment: String(answers.monthly_investment_label || 'Investimento nao informado'),
-        tool: String(answers.current_tool_label || 'Ferramenta nao informada'),
+        challenge: String(answers.main_challenge_label || 'Desafio não informado'),
+        timeline: String(answers.improvement_timeline_label || 'Prazo não informado'),
+        investment: String(answers.monthly_investment_label || 'Investimento não informado'),
+        tool: String(answers.current_tool_label || 'Ferramenta não informada'),
     }
 }
 
-function compactLabel(value: unknown, fallback = 'Nao informado') {
+function compactLabel(value: unknown, fallback = 'Não informado') {
     const label = String(value || '').trim()
     return label || fallback
 }
 
 function monthlyLeadLabel(value: unknown) {
     const key = String(value || '').trim()
-    return monthlyLeadLabels[key] || compactLabel(key, 'Leads nao informados')
+    return monthlyLeadLabels[key] || compactLabel(key, 'Leads não informados')
 }
 
 function brokerTypeLabel(row: RegistrationRow) {
-    return row.broker_type === 'imobiliaria' ? 'Imobiliaria' : 'Autonomo'
+    return row.broker_type === 'imobiliaria' ? 'Imobiliária' : 'Autônomo'
 }
 
 function getIntentAnswers(row: RegistrationRow) {
@@ -268,15 +270,15 @@ function getRegistrationFormDetails(row: RegistrationRow) {
 
     return [
         { label: 'Perfil', value: [brokerTypeLabel(row), row.real_estate_name].filter(Boolean).join(' - ') },
-        { label: 'Cidade de atuacao', value: row.city || 'Nao informado' },
-        { label: 'CRECI', value: [row.creci_state, row.creci].filter(Boolean).join(' ') || 'Nao informado' },
-        { label: 'Leads por mes', value: monthlyLeadLabel(row.monthly_leads) },
+        { label: 'Cidade de atuação', value: row.city || 'Não informado' },
+        { label: 'CRECI', value: [row.creci_state, row.creci].filter(Boolean).join(' ') || 'Não informado' },
+        { label: 'Leads por mês', value: monthlyLeadLabel(row.monthly_leads) },
         { label: 'Principal desafio', value: intent.challenge },
-        { label: 'Organizacao atual', value: intent.tool },
+        { label: 'Organização atual', value: intent.tool },
         { label: 'Prazo para melhorar', value: intent.timeline },
         { label: 'Investimento mensal', value: intent.investment },
-        { label: 'Desejo de automacao', value: compactLabel(answers.automation_wish, 'Nao informado') },
-        { label: 'Score de intencao', value: `${intent.levelLabel} - ${intent.score} pts` },
+        { label: 'Desejo de automação', value: compactLabel(answers.automation_wish, 'Não informado') },
+        { label: 'Score de intenção', value: `${intent.levelLabel} - ${intent.score} pts` },
     ]
 }
 
@@ -322,7 +324,7 @@ export default function EventDetailClient({ eventId }: Props) {
     const [copied, setCopied] = useState(false)
     const [emailForm, setEmailForm] = useState({
         segment: 'all' as EmailSegment,
-        subject: 'Lembrete: {evento} esta chegando',
+        subject: 'Lembrete: {evento} está chegando',
         htmlContent: DEFAULT_EVENT_EMAIL_HTML,
         textContent: DEFAULT_EVENT_EMAIL_TEXT,
         testRecipient: '',
@@ -331,10 +333,24 @@ export default function EventDetailClient({ eventId }: Props) {
     const [emailTesting, setEmailTesting] = useState(false)
     const [emailResult, setEmailResult] = useState<string | null>(null)
 
+    const assessmentEvent = useMemo(() => {
+        return event ? isProfileAssessmentEvent(event) : false
+    }, [event])
+
+    const publicPath = useMemo(() => {
+        if (!event?.slug) return ''
+        return assessmentEvent ? buildProfileAssessmentPath(event.slug) : `/eventos/${event.slug}`
+    }, [assessmentEvent, event?.slug])
+
+    const presentationPath = useMemo(() => {
+        if (!event?.slug || !assessmentEvent) return ''
+        return buildProfileAssessmentPresentationPath(event.slug)
+    }, [assessmentEvent, event?.slug])
+
     const publicUrl = useMemo(() => {
-        if (typeof window === 'undefined' || !event?.slug) return ''
-        return `${window.location.origin}/eventos/${event.slug}`
-    }, [event?.slug])
+        if (typeof window === 'undefined' || !publicPath) return ''
+        return `${window.location.origin}${publicPath}`
+    }, [publicPath])
 
     const messageBuckets = useMemo(() => {
         const pending = messages.filter(row => row.status === 'pending')
@@ -410,7 +426,7 @@ export default function EventDetailClient({ eventId }: Props) {
             },
             {
                 id: 'monthly_leads',
-                title: 'Leads por mes',
+                title: 'Leads por mês',
                 data: buildPieData(activeRows, row => monthlyLeadLabel(row.monthly_leads)),
             },
             {
@@ -516,7 +532,7 @@ export default function EventDetailClient({ eventId }: Props) {
     }
 
     const deleteRegistration = async (registration: RegistrationRow) => {
-        const confirmed = window.confirm(`Apagar o cadastro de ${registration.full_name}? Isso tambem remove a fila de mensagens desse inscrito.`)
+        const confirmed = window.confirm(`Apagar o cadastro de ${registration.full_name}? Isso também remove a fila de mensagens desse inscrito.`)
         if (!confirmed) return
 
         setDeletingRegistrationId(registration.id)
@@ -620,7 +636,7 @@ export default function EventDetailClient({ eventId }: Props) {
         return (
             <div style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
                 <Link href="/admin/eventos" className="btn btn-outline btn-sm"><ArrowLeft size={14} /> Voltar</Link>
-                <div className="chart-card" style={{ padding: 36, marginTop: 18 }}>Evento nao encontrado.</div>
+                <div className="chart-card" style={{ padding: 36, marginTop: 18 }}>Evento não encontrado.</div>
             </div>
         )
     }
@@ -649,10 +665,16 @@ export default function EventDetailClient({ eventId }: Props) {
                         {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
                         {copied ? 'Copiado' : 'Copiar link'}
                     </button>
-                    <Link href={`/eventos/${event.slug}`} className="btn btn-outline" target="_blank">
+                    <Link href={publicPath || `/eventos/${event.slug}`} className="btn btn-outline" target="_blank">
                         <ExternalLink size={16} />
-                        Abrir pagina
+                        {assessmentEvent ? 'Abrir autoavaliação' : 'Abrir página'}
                     </Link>
+                    {presentationPath && (
+                        <Link href={presentationPath} className="btn btn-outline" target="_blank">
+                            <Presentation size={16} />
+                            Apresentação
+                        </Link>
+                    )}
                     <button className="btn btn-primary" onClick={processQueue} disabled={processing}>
                         {processing ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
                         Processar fila
@@ -688,11 +710,11 @@ export default function EventDetailClient({ eventId }: Props) {
                             marginBottom: 16,
                         }}
                     />
-                    <label style={labelStyle}>Titulo<input style={adminLightInputStyle} value={eventForm.title || ''} onChange={e => updateEventField('title', e.target.value)} /></label>
+                    <label style={labelStyle}>Título<input style={adminLightInputStyle} value={eventForm.title || ''} onChange={e => updateEventField('title', e.target.value)} /></label>
                     <label style={labelStyle}>Slug<input style={adminLightInputStyle} value={eventForm.slug || ''} onChange={e => updateEventField('slug', e.target.value)} /></label>
-                    <label style={labelStyle}>Subtitulo<input style={adminLightInputStyle} value={eventForm.subtitle || ''} onChange={e => updateEventField('subtitle', e.target.value)} /></label>
+                    <label style={labelStyle}>Subtítulo<input style={adminLightInputStyle} value={eventForm.subtitle || ''} onChange={e => updateEventField('subtitle', e.target.value)} /></label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.62fr', gap: 12 }}>
-                        <label style={labelStyle}>Data e horario<input type="datetime-local" style={adminLightInputStyle} value={eventForm.event_date || ''} onChange={e => updateEventField('event_date', e.target.value)} /></label>
+                        <label style={labelStyle}>Data e horário<input type="datetime-local" style={adminLightInputStyle} value={eventForm.event_date || ''} onChange={e => updateEventField('event_date', e.target.value)} /></label>
                         <label style={labelStyle}>Status<select style={adminLightInputStyle} value={eventForm.status || 'draft'} onChange={e => updateEventField('status', e.target.value)}>
                             <option value="draft">Rascunho</option>
                             <option value="published">Publicado</option>
@@ -700,14 +722,14 @@ export default function EventDetailClient({ eventId }: Props) {
                         </select></label>
                     </div>
                     <label style={labelStyle}>Local<input style={adminLightInputStyle} value={eventForm.location_name || ''} onChange={e => updateEventField('location_name', e.target.value)} /></label>
-                    <label style={labelStyle}>Endereco<input style={adminLightInputStyle} value={eventForm.location_address || ''} onChange={e => updateEventField('location_address', e.target.value)} /></label>
+                    <label style={labelStyle}>Endereço<input style={adminLightInputStyle} value={eventForm.location_address || ''} onChange={e => updateEventField('location_address', e.target.value)} /></label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.5fr', gap: 12 }}>
                         <label style={labelStyle}>Imagem de capa<input style={adminLightInputStyle} value={eventForm.hero_image_url || ''} onChange={e => updateEventField('hero_image_url', e.target.value)} /></label>
                         <label style={labelStyle}>Vagas<input type="number" min="0" style={adminLightInputStyle} value={eventForm.capacity || ''} onChange={e => updateEventField('capacity', e.target.value)} /></label>
                     </div>
-                    <label style={labelStyle}>Descricao curta<textarea style={adminLightTextareaStyle} value={eventForm.description || ''} onChange={e => updateEventField('description', e.target.value)} /></label>
-                    <label style={labelStyle}>Conteudo editorial<textarea style={{ ...adminLightTextareaStyle, minHeight: 150 }} value={eventForm.content || ''} onChange={e => updateEventField('content', e.target.value)} /></label>
-                    <label style={labelStyle}>Mensagem padrao de confirmacao<textarea style={{ ...adminLightTextareaStyle, minHeight: 130 }} value={eventForm.confirmation_message_template || ''} onChange={e => updateEventField('confirmation_message_template', e.target.value)} /></label>
+                    <label style={labelStyle}>Descrição curta<textarea style={adminLightTextareaStyle} value={eventForm.description || ''} onChange={e => updateEventField('description', e.target.value)} /></label>
+                    <label style={labelStyle}>Conteúdo editorial<textarea style={{ ...adminLightTextareaStyle, minHeight: 150 }} value={eventForm.content || ''} onChange={e => updateEventField('content', e.target.value)} /></label>
+                    <label style={labelStyle}>Mensagem padrão de confirmação<textarea style={{ ...adminLightTextareaStyle, minHeight: 130 }} value={eventForm.confirmation_message_template || ''} onChange={e => updateEventField('confirmation_message_template', e.target.value)} /></label>
                     <button className="btn btn-primary" type="submit" disabled={saving} style={{ marginTop: 16 }}>
                         {saving ? <Loader2 className="spin" size={16} /> : <Save size={16} />}
                         Salvar evento
@@ -768,7 +790,7 @@ export default function EventDetailClient({ eventId }: Props) {
                                     style={emailInputStyle}
                                     value={emailForm.testRecipient}
                                     onChange={e => updateEmailField('testRecipient', e.target.value)}
-                                    placeholder="voce@empresa.com"
+                                    placeholder="você@empresa.com"
                                 />
                             </label>
                         </div>
@@ -834,7 +856,7 @@ export default function EventDetailClient({ eventId }: Props) {
                                 <th style={thStyle}>Nome</th>
                                 <th style={thStyle}>Contato</th>
                                 <th style={thStyle}>Perfil</th>
-                                <th style={thStyle}>Intencao</th>
+                                <th style={thStyle}>Intenção</th>
                                 <th style={thStyle}>CRECI</th>
                                 <th style={thStyle}>Status</th>
                                 <th style={thStyle}>Acoes</th>
@@ -859,14 +881,14 @@ export default function EventDetailClient({ eventId }: Props) {
                                             >
                                                 {row.full_name}
                                             </button>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>{row.city || 'Cidade nao informada'}</div>
+                                            <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>{row.city || 'Cidade não informada'}</div>
                                         </td>
                                         <td style={tdStyle}>
                                             <div>{formatPhoneDisplay(row.phone)}</div>
                                             <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>{row.email}</div>
                                         </td>
                                         <td style={tdStyle}>
-                                            {row.broker_type === 'imobiliaria' ? 'Imobiliaria' : 'Autonomo'}
+                                            {row.broker_type === 'imobiliaria' ? 'Imobiliária' : 'Autônomo'}
                                             {row.real_estate_name && <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>{row.real_estate_name}</div>}
                                         </td>
                                         <td style={tdStyle}>
@@ -881,7 +903,7 @@ export default function EventDetailClient({ eventId }: Props) {
                                         <td style={tdStyle}>
                                             <div>{row.creci_state || '--'} {row.creci || ''}</div>
                                             <select style={miniSelectStyle} value={row.creci_status} onChange={e => patchRegistration(row.id, { creci_status: e.target.value })}>
-                                                <option value="pending">Nao verificado</option>
+                                                <option value="pending">Não verificado</option>
                                                 <option value="manually_verified">Verificado</option>
                                                 <option value="rejected">Rejeitado</option>
                                             </select>
@@ -1077,10 +1099,10 @@ function RegistrationAnswersModal({ registration, onClose }: { registration: Reg
                     </div>
                     <div style={modalSummaryItemStyle}>
                         <span style={modalAnswerLabelStyle}>E-mail</span>
-                        <strong style={modalAnswerValueStyle}>{registration.email || 'Nao informado'}</strong>
+                        <strong style={modalAnswerValueStyle}>{registration.email || 'Não informado'}</strong>
                     </div>
                     <div style={modalSummaryItemStyle}>
-                        <span style={modalAnswerLabelStyle}>Intencao</span>
+                        <span style={modalAnswerLabelStyle}>Intenção</span>
                         <strong style={modalAnswerValueStyle}>{intent.levelLabel} · {intent.score} pts</strong>
                     </div>
                 </div>

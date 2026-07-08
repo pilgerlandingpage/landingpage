@@ -800,9 +800,9 @@ export default function SelfAssessmentClient({
                     padding: 0 18px;
                 }
                 .assessment-primary {
-                    background: linear-gradient(135deg, #e7c265, #b87b25);
+                    background: linear-gradient(135deg, #f2cc78, #c8932f);
                     color: #120d08;
-                    box-shadow: 0 18px 34px rgba(184, 123, 37, 0.22);
+                    box-shadow: 0 18px 38px rgba(184, 123, 37, 0.22);
                 }
                 .assessment-primary:hover,
                 .assessment-secondary:hover {
@@ -1161,8 +1161,9 @@ export default function SelfAssessmentClient({
                 .assessment-page {
                     color: #172033;
                     background:
-                        linear-gradient(135deg, rgba(252, 250, 245, 0.96), rgba(247, 243, 234, 0.94) 48%, rgba(255, 255, 255, 0.96)),
+                        linear-gradient(130deg, rgba(250, 247, 239, 0.98), rgba(243, 239, 229, 0.96) 46%, rgba(236, 244, 241, 0.97)),
                         var(--assessment-bg) center / cover fixed no-repeat;
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
                 }
                 .assessment-kicker,
                 .assessment-section-title span,
@@ -1176,6 +1177,8 @@ export default function SelfAssessmentClient({
                 .assessment-result h2,
                 .assessment-result-grid h3 {
                     color: #172033;
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+                    font-weight: 850;
                 }
                 .assessment-heading p,
                 .assessment-question p,
@@ -1184,19 +1187,21 @@ export default function SelfAssessmentClient({
                 }
                 .assessment-side,
                 .assessment-panel {
-                    border-color: rgba(154, 104, 23, 0.18);
+                    border-color: rgba(154, 104, 23, 0.2);
                     background:
-                        radial-gradient(circle at 100% 0%, rgba(220, 166, 54, 0.16), transparent 34%),
-                        rgba(255, 255, 255, 0.9);
-                    box-shadow: 0 22px 60px rgba(70, 50, 20, 0.12);
+                        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 244, 234, 0.88));
+                    box-shadow:
+                        0 26px 72px rgba(70, 50, 20, 0.13),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.88);
                 }
                 .assessment-side-event,
                 .assessment-side-mark,
                 .assessment-side-score,
                 .assessment-blocks div,
                 .assessment-result-grid > div {
-                    border-color: rgba(154, 104, 23, 0.16);
-                    background: rgba(255, 255, 255, 0.84);
+                    border-color: rgba(154, 104, 23, 0.18);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(250, 246, 238, 0.82));
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
                 }
                 .assessment-side svg,
                 .assessment-section-title svg,
@@ -1218,15 +1223,16 @@ export default function SelfAssessmentClient({
                     background: rgba(148, 163, 184, 0.22);
                 }
                 .assessment-progress span {
-                    background: linear-gradient(90deg, #c8932f, #22c55e);
+                    background: linear-gradient(90deg, #c8932f, #2f8f7f);
                 }
                 .assessment-form label {
                     color: #475569;
                 }
                 .assessment-form input {
-                    border-color: rgba(100, 116, 139, 0.28);
-                    background: rgba(255, 255, 255, 0.92);
+                    border-color: rgba(100, 116, 139, 0.24);
+                    background: rgba(255, 255, 255, 0.96);
                     color: #111827;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
                 }
                 .assessment-form input::placeholder {
                     color: #94a3b8;
@@ -1234,8 +1240,8 @@ export default function SelfAssessmentClient({
                 .assessment-type button,
                 .assessment-secondary,
                 .assessment-score-grid button {
-                    border-color: rgba(100, 116, 139, 0.24);
-                    background: rgba(255, 255, 255, 0.86);
+                    border-color: rgba(100, 116, 139, 0.22);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 243, 234, 0.84));
                     color: #172033;
                 }
                 .assessment-type button.active,
@@ -1262,12 +1268,12 @@ export default function SelfAssessmentClient({
                     color: #475569;
                 }
                 .assessment-awards-cta {
-                    border-color: rgba(154, 104, 23, 0.2);
-                    background:
-                        radial-gradient(circle at 100% 0%, rgba(248, 211, 120, 0.28), transparent 40%),
-                        rgba(255, 255, 255, 0.92);
+                    border-color: rgba(154, 104, 23, 0.22);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 244, 234, 0.86));
                     color: #172033;
-                    box-shadow: 0 20px 44px rgba(70, 50, 20, 0.12);
+                    box-shadow:
+                        0 24px 58px rgba(70, 50, 20, 0.13),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.78);
                 }
                 .assessment-awards-cta span {
                     color: #9a6817;

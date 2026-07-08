@@ -1,10 +1,15 @@
 export const PROFILE_ASSESSMENT_PARENT_SLUG = 'encontro-corretores-pilger'
 export const PROFILE_ASSESSMENT_EVENT_SLUG = 'perfil-corretor-ideal-ao-vivo'
 export const PROFILE_ASSESSMENT_PATH_SUFFIX = 'perfil-corretor-ideal'
+export const PROFILE_ASSESSMENT_PRESENTATION_PATH_SUFFIX = 'apresentacao'
 export const PROFILE_ASSESSMENT_METADATA_KEY = 'profile_self_assessment'
 
 export function buildProfileAssessmentPath(slug = PROFILE_ASSESSMENT_EVENT_SLUG) {
     return `/eventos/${slug}/${PROFILE_ASSESSMENT_PATH_SUFFIX}`
+}
+
+export function buildProfileAssessmentPresentationPath(slug = PROFILE_ASSESSMENT_EVENT_SLUG) {
+    return `/eventos/${slug}/${PROFILE_ASSESSMENT_PRESENTATION_PATH_SUFFIX}`
 }
 
 export function resolveProfileAssessmentEventSlug(slug: string) {

@@ -12,10 +12,11 @@ import {
     ExternalLink,
     Loader2,
     MapPin,
+    Presentation,
     Plus,
     Users,
 } from 'lucide-react'
-import { buildProfileAssessmentPath, isProfileAssessmentEvent } from '@/lib/events/profile-assessment'
+import { buildProfileAssessmentPath, buildProfileAssessmentPresentationPath, isProfileAssessmentEvent } from '@/lib/events/profile-assessment'
 import { DEFAULT_EVENT_HERO, buildEventSlug, formatShortDate, statusLabel } from '@/lib/events/utils'
 
 type EventRow = {
@@ -51,10 +52,10 @@ export default function EventosAdminPage() {
     const [form, setForm] = useState({
         title: 'Encontro exclusivo para corretores',
         slug: '',
-        subtitle: 'Uma apresentacao estrategica para profissionais do mercado imobiliario.',
+        subtitle: 'Uma apresentação estratégica para profissionais do mercado imobiliário.',
         event_date: defaultDate(),
-        location_name: 'Imobiliaria Guilherme Pilger',
-        location_address: 'Balneario Camboriu / SC',
+        location_name: 'Imobiliária Guilherme Pilger',
+        location_address: 'Balneário Camboriú / SC',
         format: 'presencial',
         capacity: '',
         status: 'draft',
@@ -143,7 +144,7 @@ export default function EventosAdminPage() {
                         <CalendarDays className="text-gold" size={28} /> Eventos
                     </h1>
                     <p style={{ color: 'var(--text-secondary)', marginTop: 8 }}>
-                        Crie paginas de confirmacao, acompanhe inscritos e controle automacoes pelo WhatsApp global.
+                        Crie páginas de confirmação, acompanhe inscritos e controle automações pelo WhatsApp global.
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -168,7 +169,7 @@ export default function EventosAdminPage() {
                 <form onSubmit={createEvent} className="chart-card" style={{ padding: 24, marginBottom: 22 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.8fr', gap: 16 }}>
                         <label style={labelStyle}>
-                            Titulo
+                            Título
                             <input style={inputStyle} value={form.title} onChange={e => updateForm('title', e.target.value)} required />
                         </label>
                         <label style={labelStyle}>
@@ -177,12 +178,12 @@ export default function EventosAdminPage() {
                         </label>
                     </div>
                     <label style={labelStyle}>
-                        Subtitulo
+                        Subtítulo
                         <input style={inputStyle} value={form.subtitle} onChange={e => updateForm('subtitle', e.target.value)} />
                     </label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 0.6fr 0.6fr', gap: 16 }}>
                         <label style={labelStyle}>
-                            Data e horario
+                            Data e horário
                             <input type="datetime-local" style={inputStyle} value={form.event_date} onChange={e => updateForm('event_date', e.target.value)} required />
                         </label>
                         <label style={labelStyle}>
@@ -202,7 +203,7 @@ export default function EventosAdminPage() {
                         </label>
                     </div>
                     <label style={labelStyle}>
-                        Endereco ou instrucoes de acesso
+                        Endereço ou instruções de acesso
                         <input style={inputStyle} value={form.location_address} onChange={e => updateForm('location_address', e.target.value)} />
                     </label>
                     <label style={labelStyle}>
@@ -228,13 +229,14 @@ export default function EventosAdminPage() {
                 <div className="chart-card" style={{ padding: 48, textAlign: 'center' }}>
                     <CalendarDays size={44} style={{ color: 'var(--text-muted)', margin: '0 auto 14px' }} />
                     <h3 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>Nenhum evento criado ainda</h3>
-                    <p style={{ color: 'var(--text-muted)' }}>Crie o primeiro encontro e publique a pagina de confirmacao.</p>
+                    <p style={{ color: 'var(--text-muted)' }}>Crie o primeiro encontro e publique a página de confirmação.</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: 14 }}>
                     {events.map(event => {
                         const publicPath = publicEventPath(event)
                         const assessmentEvent = isProfileAssessmentEvent(event)
+                        const presentationPath = assessmentEvent ? buildProfileAssessmentPresentationPath(event.slug) : ''
 
                         return (
                             <div key={event.id} className="chart-card" style={{ padding: 20, display: 'grid', gridTemplateColumns: '96px 1fr auto', gap: 18, alignItems: 'center' }}>
@@ -268,6 +270,11 @@ export default function EventosAdminPage() {
                                     <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem' }}>
                                         {publicPath}
                                     </div>
+                                    {assessmentEvent && (
+                                        <div style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                                            Apresentação: {presentationPath}
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                     <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
@@ -282,6 +289,12 @@ export default function EventosAdminPage() {
                                         <ExternalLink size={14} />
                                         Abrir
                                     </Link>
+                                    {assessmentEvent && (
+                                        <Link href={presentationPath} className="btn btn-outline btn-sm" target="_blank">
+                                            <Presentation size={14} />
+                                            Apresentação
+                                        </Link>
+                                    )}
                                     <Link href={`/admin/eventos/${event.id}`} className="btn btn-primary btn-sm">
                                         Gerenciar
                                     </Link>
