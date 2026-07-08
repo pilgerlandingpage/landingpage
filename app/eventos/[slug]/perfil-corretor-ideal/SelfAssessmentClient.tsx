@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import {
     SELF_ASSESSMENT_QUESTIONS,
+    SELF_ASSESSMENT_VERSION,
     calculateSelfAssessmentSummary,
     type SelfAssessmentSummary,
 } from '@/lib/events/self-assessment'
@@ -65,7 +66,7 @@ const initialForm: FormState = {
 const scoreOptions = Array.from({ length: 11 }, (_, index) => index)
 
 function draftKey(eventSlug: string) {
-    return `pilger:self-assessment:${eventSlug}`
+    return `pilger:self-assessment:${SELF_ASSESSMENT_VERSION}:${eventSlug}`
 }
 
 function getTrackingPayload() {
@@ -298,7 +299,7 @@ export default function SelfAssessmentClient({
                         <div className="assessment-side-mark">
                             <ClipboardCheck size={26} />
                             <div>
-                                <span>12 dimensões</span>
+                                <span>50 perguntas</span>
                                 <strong>{answeredCount}/{SELF_ASSESSMENT_QUESTIONS.length}</strong>
                             </div>
                         </div>
@@ -392,9 +393,9 @@ export default function SelfAssessmentClient({
                                     </label>
                                 )}
 
-                                <div className="assessment-form-grid three">
+                                <div className="assessment-optional-grid">
                                     <label>
-                                        CRECI
+                                        CRECI <span>opcional</span>
                                         <input
                                             value={form.creci}
                                             onChange={event => updateForm('creci', event.target.value)}
@@ -402,7 +403,7 @@ export default function SelfAssessmentClient({
                                         />
                                     </label>
                                     <label>
-                                        UF
+                                        UF <span>opcional</span>
                                         <input
                                             value={form.creci_state}
                                             onChange={event => updateForm('creci_state', event.target.value.toUpperCase().slice(0, 2))}
@@ -410,8 +411,8 @@ export default function SelfAssessmentClient({
                                             maxLength={2}
                                         />
                                     </label>
-                                    <label>
-                                        Cidade
+                                    <label className="assessment-city-field">
+                                        Cidade <span>opcional</span>
                                         <input
                                             value={form.city}
                                             onChange={event => updateForm('city', event.target.value)}
@@ -749,6 +750,21 @@ export default function SelfAssessmentClient({
                 .assessment-form-grid.three {
                     grid-template-columns: 1fr 86px 1fr;
                 }
+                .assessment-optional-grid {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 86px;
+                    gap: 12px;
+                }
+                .assessment-city-field {
+                    grid-column: 1 / -1;
+                }
+                .assessment-form label span {
+                    color: #94a3b8;
+                    font-size: 0.64rem;
+                    font-weight: 850;
+                    letter-spacing: 0.04em;
+                    text-transform: none;
+                }
                 .assessment-type {
                     display: grid;
                     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -972,7 +988,7 @@ export default function SelfAssessmentClient({
                 .assessment-blocks {
                     width: 100%;
                     display: grid;
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 10px;
                     margin-top: 8px;
                 }
@@ -1076,11 +1092,16 @@ export default function SelfAssessmentClient({
                         padding: 14px;
                     }
                     .assessment-form-grid,
-                    .assessment-form-grid.three,
                     .assessment-scale-labels,
                     .assessment-result-grid,
                     .assessment-blocks {
                         grid-template-columns: 1fr;
+                    }
+                    .assessment-form-grid.three {
+                        grid-template-columns: 1fr;
+                    }
+                    .assessment-optional-grid {
+                        grid-template-columns: minmax(0, 1fr) 74px;
                     }
                     .assessment-side {
                         grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.82fr) minmax(0, 0.82fr);

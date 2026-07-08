@@ -1,6 +1,6 @@
-export const SELF_ASSESSMENT_VERSION = 'perfil_corretor_ideal_v1'
+export const SELF_ASSESSMENT_VERSION = 'perfil_corretor_ideal_v2_50'
 
-export type SelfAssessmentBlock = 'comercial' | 'relacionamento' | 'gestao' | 'mentalidade'
+export type SelfAssessmentBlock = 'comportamento' | 'afazeres' | 'evitar'
 
 export type SelfAssessmentQuestion = {
     id: string
@@ -44,111 +44,81 @@ export type SelfAssessmentSummary = {
     answers: SelfAssessmentScoredAnswer[]
 }
 
-export const SELF_ASSESSMENT_QUESTIONS: SelfAssessmentQuestion[] = [
-    {
-        id: 'venda_fechamento',
-        block: 'comercial',
-        blockLabel: 'Comercial',
-        title: 'Venda e fechamento',
-        prompt: 'Como você avalia sua capacidade de conduzir uma venda até o fechamento?',
-        criteria: ['Vender', 'Closer', 'Perfil comercial', 'Técnicas comerciais'],
-    },
-    {
-        id: 'proatividade_iniciativa',
-        block: 'comercial',
-        blockLabel: 'Comercial',
-        title: 'Proatividade',
-        prompt: 'Como você avalia sua iniciativa para criar oportunidades antes de esperar demanda?',
-        criteria: ['Proatividade', 'Captar imóveis', 'Gravar conteúdo', 'Networking'],
-    },
-    {
-        id: 'conhecimento_mercado',
-        block: 'comercial',
-        blockLabel: 'Comercial',
-        title: 'Conhecimento de mercado',
-        prompt: 'Como você avalia seu domínio sobre mercado, imóveis, construtoras e oportunidades?',
-        criteria: ['Conhecer o mercado', 'Estudar o mercado', 'Visitas de imóveis', 'Visitas de construtoras'],
-    },
-    {
-        id: 'comunicacao_escuta',
-        block: 'relacionamento',
-        blockLabel: 'Relacionamento',
-        title: 'Comunicação e escuta',
-        prompt: 'Como você avalia sua comunicação, escuta ativa e conexão com pessoas?',
-        criteria: ['Comunicativo', 'Sociável', 'Escuta ativa', 'Conexão'],
-    },
-    {
-        id: 'postura_profissional',
-        block: 'relacionamento',
-        blockLabel: 'Relacionamento',
-        title: 'Postura profissional',
-        prompt: 'Como você avalia sua postura, imagem, ética e presença profissional?',
-        criteria: ['Posicionamento', 'Aparência', 'Pontualidade', 'Ética', 'Relacionamento'],
-    },
-    {
-        id: 'organizacao_processos',
-        block: 'gestao',
-        blockLabel: 'Gestão',
-        title: 'Organização e processos',
-        prompt: 'Como você avalia sua organização de rotina, informações e CRM?',
-        criteria: ['Rotina', 'CRM', 'Organizar informações', 'Disciplina'],
-    },
-    {
-        id: 'metas_foco',
-        block: 'gestao',
-        blockLabel: 'Gestão',
-        title: 'Metas e foco',
-        prompt: 'Como você avalia sua clareza de metas, foco e persistência no plano comercial?',
-        criteria: ['Metas claras', 'Foco', 'Persistência', 'Visão'],
-    },
-    {
-        id: 'inteligencia_emocional',
-        block: 'mentalidade',
-        blockLabel: 'Mentalidade',
-        title: 'Inteligência emocional',
-        prompt: 'Como você avalia seu controle emocional, resiliência e segurança nas negociações?',
-        criteria: ['Controle emocional', 'Resiliência', 'Segurança', 'Otimismo realista'],
-    },
-    {
-        id: 'energia_presenca',
-        block: 'mentalidade',
-        blockLabel: 'Mentalidade',
-        title: 'Energia e presença',
-        prompt: 'Como você avalia sua energia, influência, inovação e atitude empreendedora?',
-        criteria: ['Energia alta', 'Influente', 'Inovador', 'Empreendedor'],
-    },
-    {
-        id: 'responsabilidade_consistencia',
-        block: 'gestao',
-        blockLabel: 'Gestão',
-        title: 'Responsabilidade',
-        prompt: 'Como você avalia sua consistência para cumprir combinados e evitar procrastinação?',
-        criteria: ['Responsabilidade', 'Não procrastinar', 'Não se acomodar', 'Não ser relaxado'],
-    },
-    {
-        id: 'estrategia_atendimento',
-        block: 'relacionamento',
-        blockLabel: 'Relacionamento',
-        title: 'Estratégia no atendimento',
-        prompt: 'Como você avalia sua leitura de pessoas e estratégia durante o atendimento?',
-        criteria: ['Entender pessoas', 'Não subestimar cliente', 'Método CIS', 'Estratégia no atendimento'],
-    },
-    {
-        id: 'perfil_ideal_sintese',
-        block: 'mentalidade',
-        blockLabel: 'Mentalidade',
-        title: 'Síntese do perfil ideal',
-        prompt: 'De 0 a 10, quanto você representa hoje o perfil do corretor ideal?',
-        criteria: ['Autopercepção geral', 'Maturidade comercial', 'Potencial de referência'],
-    },
-]
-
 const BLOCK_LABELS: Record<SelfAssessmentBlock, string> = {
-    comercial: 'Comercial',
-    relacionamento: 'Relacionamento',
-    gestao: 'Gestão',
-    mentalidade: 'Mentalidade',
+    comportamento: 'Como se comporta',
+    afazeres: 'Afazeres',
+    evitar: 'O que evitar',
 }
+
+function createQuestion(
+    id: string,
+    block: SelfAssessmentBlock,
+    title: string,
+    prompt: string,
+    criteria: string[],
+): SelfAssessmentQuestion {
+    return {
+        id,
+        block,
+        blockLabel: BLOCK_LABELS[block],
+        title,
+        prompt,
+        criteria,
+    }
+}
+
+export const SELF_ASSESSMENT_QUESTIONS: SelfAssessmentQuestion[] = [
+    createQuestion('vender', 'comportamento', 'Vender', 'De 0 a 10, como você avalia sua capacidade de transformar oportunidade em venda?', ['Argumentação', 'Necessidade do cliente', 'Conversão']),
+    createQuestion('proatividade', 'comportamento', 'Proatividade', 'De 0 a 10, quanto você cria movimento antes de esperar alguém pedir?', ['Iniciativa', 'Velocidade', 'Busca ativa']),
+    createQuestion('posicionamento_imagem', 'comportamento', 'Posicionamento e imagem', 'De 0 a 10, como você avalia seu posicionamento, postura e aparência profissional?', ['Imagem', 'Postura', 'Presença']),
+    createQuestion('comunicativo', 'comportamento', 'Comunicativo', 'De 0 a 10, como você avalia sua clareza e segurança ao se comunicar?', ['Clareza', 'Confiança', 'Boa conversa']),
+    createQuestion('conhecer_mercado', 'comportamento', 'Conhecer o mercado', 'De 0 a 10, quanto você domina preços, regiões, produto e momento do mercado?', ['Região', 'Produto', 'Oportunidade']),
+    createQuestion('marketeiro', 'comportamento', 'Marketeiro', 'De 0 a 10, como você usa marketing para gerar autoridade e demanda?', ['Conteúdo', 'Oferta', 'Autoridade']),
+    createQuestion('sociavel', 'comportamento', 'Sociável', 'De 0 a 10, como você cria relacionamento com facilidade e naturalidade?', ['Abertura', 'Conexão', 'Relacionamento']),
+    createQuestion('escuta_ativa', 'comportamento', 'Escuta ativa', 'De 0 a 10, quanto você escuta antes de tentar vender?', ['Atenção', 'Perguntas', 'Leitura do cliente']),
+    createQuestion('disciplinado', 'comportamento', 'Disciplinado', 'De 0 a 10, como você mantém constância mesmo quando não está motivado?', ['Ritual', 'Constância', 'Execução']),
+    createQuestion('entender_pessoas', 'comportamento', 'Entender pessoas', 'De 0 a 10, como você identifica perfil, dor, desejo e momento de compra?', ['Perfil', 'Dor', 'Motivação']),
+    createQuestion('perfil_comercial_tecnicas', 'comportamento', 'Perfil comercial', 'De 0 a 10, como você avalia seu perfil comercial e uso de técnicas de venda?', ['Técnica', 'Negociação', 'Fechamento']),
+    createQuestion('metas_claras', 'comportamento', 'Metas claras', 'De 0 a 10, quanto suas metas são claras, mensuráveis e acompanhadas?', ['Meta', 'Prazo', 'Acompanhamento']),
+    createQuestion('resiliencia', 'comportamento', 'Resiliência', 'De 0 a 10, como você reage a recusas, pressão e ciclos difíceis?', ['Reação', 'Persistência', 'Aprendizado']),
+    createQuestion('controle_emocional', 'comportamento', 'Controle emocional', 'De 0 a 10, quanto você mantém calma e lucidez nas negociações?', ['Calma', 'Decisão', 'Equilíbrio']),
+    createQuestion('networking', 'comportamento', 'Networking', 'De 0 a 10, como você constrói e ativa uma rede de contatos relevante?', ['Rede', 'Parcerias', 'Indicações']),
+    createQuestion('influente', 'comportamento', 'Influente', 'De 0 a 10, quanto sua opinião gera confiança e movimento nas pessoas?', ['Confiança', 'Autoridade', 'Persuasão']),
+    createQuestion('inovador', 'comportamento', 'Inovador', 'De 0 a 10, quanto você testa novas formas de vender, atender e se posicionar?', ['Teste', 'Criatividade', 'Melhoria']),
+    createQuestion('closer', 'comportamento', 'Closer', 'De 0 a 10, como você conduz o cliente para a decisão com segurança?', ['Condução', 'Objeções', 'Decisão']),
+    createQuestion('energia_alta', 'comportamento', 'Energia alta', 'De 0 a 10, como você sustenta energia, presença e disposição no dia a dia?', ['Presença', 'Ritmo', 'Entusiasmo']),
+    createQuestion('rotina', 'comportamento', 'Rotina', 'De 0 a 10, quanto sua rotina comercial é clara e executada todos os dias?', ['Agenda', 'Prioridade', 'Execução']),
+    createQuestion('foco', 'comportamento', 'Foco', 'De 0 a 10, quanto você evita dispersão e mantém atenção no que gera venda?', ['Prioridade', 'Atenção', 'Resultado']),
+    createQuestion('visionario', 'comportamento', 'Visionário', 'De 0 a 10, quanto você enxerga oportunidades antes da maioria?', ['Visão', 'Tendência', 'Oportunidade']),
+    createQuestion('persistencia', 'comportamento', 'Persistência', 'De 0 a 10, quanto você continua executando mesmo quando o resultado demora?', ['Constância', 'Follow-up', 'Disciplina']),
+    createQuestion('conexao', 'comportamento', 'Conexão', 'De 0 a 10, como você cria conexão real com clientes e parceiros?', ['Empatia', 'Presença', 'Confiança']),
+    createQuestion('relacionamento', 'comportamento', 'Relacionamento', 'De 0 a 10, como você cultiva relacionamento antes, durante e depois da venda?', ['Pós-venda', 'Contato', 'Fidelização']),
+    createQuestion('empreendedor', 'comportamento', 'Empreendedor', 'De 0 a 10, quanto você age como dono do próprio resultado?', ['Autonomia', 'Risco', 'Crescimento']),
+    createQuestion('pontual', 'comportamento', 'Pontual', 'De 0 a 10, quanto você cumpre horários, prazos e combinados?', ['Horário', 'Prazo', 'Compromisso']),
+    createQuestion('ingles', 'comportamento', 'Inglês', 'De 0 a 10, como você avalia sua capacidade de atender oportunidades em inglês?', ['Comunicação', 'Vocabulário', 'Segurança']),
+    createQuestion('crm', 'comportamento', 'CRM', 'De 0 a 10, como você usa CRM para registrar, acompanhar e converter oportunidades?', ['Registro', 'Follow-up', 'Pipeline']),
+    createQuestion('gravar_conteudo', 'afazeres', 'Gravar conteúdo', 'De 0 a 10, quanto você grava conteúdo com frequência e intenção comercial?', ['Frequência', 'Clareza', 'Oferta']),
+    createQuestion('estudar_mercado', 'afazeres', 'Estudar mercado', 'De 0 a 10, quanto você estuda mercado de forma constante?', ['Dados', 'Regiões', 'Produtos']),
+    createQuestion('organizar_informacoes', 'afazeres', 'Organizar informações', 'De 0 a 10, quanto você mantém informações de clientes e imóveis organizadas?', ['Cadastro', 'Histórico', 'Acesso rápido']),
+    createQuestion('captar_imoveis', 'afazeres', 'Captar imóveis', 'De 0 a 10, quanto você capta imóveis e oportunidades de forma ativa?', ['Prospecção', 'Parcerias', 'Oferta']),
+    createQuestion('visitas_imoveis', 'afazeres', 'Visitas de imóveis', 'De 0 a 10, quanto você visita imóveis para conhecer melhor o produto?', ['Produto', 'Detalhes', 'Argumentos']),
+    createQuestion('visitas_construtoras', 'afazeres', 'Visitas às construtoras', 'De 0 a 10, quanto você visita construtoras e fortalece relacionamento com elas?', ['Relacionamento', 'Produto', 'Condições']),
+    createQuestion('metodo_cis', 'afazeres', 'Método CIS', 'De 0 a 10, quanto você aplica método para entender comportamento e decisão do cliente?', ['Perfil', 'Perguntas', 'Condução']),
+    createQuestion('evita_pessimismo', 'evitar', 'Evita pessimismo', 'De 0 a 10, quanto você evita postura pessimista diante de mercado, cliente e equipe?', ['Solução', 'Responsabilidade', 'Postura']),
+    createQuestion('evita_fofoca', 'evitar', 'Evita fofoca', 'De 0 a 10, quanto você evita fofoca e conversas que enfraquecem o ambiente?', ['Discrição', 'Respeito', 'Profissionalismo']),
+    createQuestion('nao_subestima_cliente', 'evitar', 'Não subestima cliente', 'De 0 a 10, quanto você evita julgar ou subestimar o potencial de um cliente?', ['Respeito', 'Atenção', 'Leitura']),
+    createQuestion('estrategia_atendimento', 'evitar', 'Atende com estratégia', 'De 0 a 10, quanto você evita atendimento improvisado e conduz com estratégia?', ['Plano', 'Perguntas', 'Próximo passo']),
+    createQuestion('evita_inseguranca', 'evitar', 'Evita insegurança', 'De 0 a 10, quanto você evita transmitir insegurança em produto, preço e condução?', ['Preparo', 'Confiança', 'Domínio']),
+    createQuestion('evita_procrastinar', 'evitar', 'Evita procrastinar', 'De 0 a 10, quanto você evita adiar tarefas comerciais importantes?', ['Ação', 'Prioridade', 'Execução']),
+    createQuestion('evita_irresponsabilidade', 'evitar', 'Evita irresponsabilidade', 'De 0 a 10, quanto você evita falhas com combinados, clientes e informações?', ['Cuidado', 'Compromisso', 'Confiabilidade']),
+    createQuestion('evita_acomodacao', 'evitar', 'Evita acomodação', 'De 0 a 10, quanto você evita se acomodar quando os resultados estão bons ou ruins?', ['Evolução', 'Movimento', 'Ambição']),
+    createQuestion('evita_incoerencia', 'evitar', 'Evita incoerência', 'De 0 a 10, quanto você mantém coerência entre discurso, atitude e entrega?', ['Verdade', 'Consistência', 'Confiança']),
+    createQuestion('evita_relaxo', 'evitar', 'Evita relaxo', 'De 0 a 10, quanto você evita relaxar em aparência, atendimento, rotina e entrega?', ['Capricho', 'Padrão', 'Atenção']),
+    createQuestion('evita_falta_etica', 'evitar', 'Age com ética', 'De 0 a 10, quanto você evita atalhos e mantém ética em toda negociação?', ['Transparência', 'Respeito', 'Conduta']),
+    createQuestion('controle_financeiro', 'evitar', 'Controle financeiro', 'De 0 a 10, quanto você evita descontrole financeiro na vida e na carreira?', ['Planejamento', 'Reserva', 'Gestão']),
+    createQuestion('evita_atrasos', 'evitar', 'Evita atrasos', 'De 0 a 10, quanto você evita falta de pontualidade em compromissos e retornos?', ['Pontualidade', 'Retorno', 'Respeito']),
+    createQuestion('nao_para_estudar', 'evitar', 'Não para de estudar', 'De 0 a 10, quanto você evita parar de estudar mercado, produto e vendas?', ['Aprendizado', 'Atualização', 'Repertório']),
+]
 
 export function clampAssessmentScore(value: unknown) {
     const score = Number(value)

@@ -253,11 +253,12 @@ export default function EventosAdminPage() {
                                     <span>{event.checked_in_count || 0} check-ins</span>
                                     <span>{event.pending_messages_count || 0} mensagens pendentes</span>
                                 </div>
-                                <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem' }}>
-                                    /eventos/{event.slug}
+                                <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: '0.76rem', display: 'grid', gap: 4 }}>
+                                    <span>/eventos/{event.slug}</span>
+                                    <span>Autoavaliacao: /eventos/{event.slug}/perfil-corretor-ideal</span>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: 8 }}>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                 <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadContacts(event.id)}>
                                     <Download size={14} />
                                     Contatos
@@ -269,6 +270,10 @@ export default function EventosAdminPage() {
                                 <Link href={`/eventos/${event.slug}`} className="btn btn-outline btn-sm" target="_blank">
                                     <ExternalLink size={14} />
                                     Abrir
+                                </Link>
+                                <Link href={`/eventos/${event.slug}/perfil-corretor-ideal`} className="btn btn-outline btn-sm" target="_blank">
+                                    <ExternalLink size={14} />
+                                    Perfil ideal
                                 </Link>
                                 <Link href={`/admin/eventos/${event.id}`} className="btn btn-primary btn-sm">
                                     Gerenciar
