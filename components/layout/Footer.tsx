@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowUpRight, Building2, ChevronLeft, ChevronRight, Facebook, Instagram, MapPin, MessageCircle, Navigation, Youtube } from 'lucide-react'
+import { ArrowUpRight, Building2, ChevronLeft, ChevronRight, Facebook, Instagram, MapPin, Navigation, Youtube } from 'lucide-react'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 
@@ -55,7 +55,7 @@ function FooterGooglePlaceShowcase() {
         }
     }, [])
 
-    const photos = place?.photos?.slice(0, 8) || []
+    const photos = place?.photos || []
     const visiblePhotos = photos.length
         ? photos
         : hasLoadedPlace
@@ -89,9 +89,6 @@ function FooterGooglePlaceShowcase() {
             <div className="footer-office-copy">
                 <span className="footer-kicker">Imobiliária no Google</span>
                 <h2>Conheça a base da Pilger na Praia Brava.</h2>
-                <p>
-                    Fotos oficiais do perfil da imobiliária no Google e endereço para chegar com facilidade antes da visita.
-                </p>
 
                 <div className="footer-office-address">
                     <span className="footer-office-icon"><Building2 size={18} /></span>
@@ -108,16 +105,6 @@ function FooterGooglePlaceShowcase() {
                         Ver rota no Google
                         <ArrowUpRight size={14} />
                     </a>
-                    <WhatsAppCaptureLink
-                        phone="5547992528080"
-                        message="Olá! Vim pelo site e quero falar com Guilherme Pilger."
-                        slug="footer"
-                        template="footer-office-whatsapp"
-                        className="footer-office-whatsapp"
-                    >
-                        <MessageCircle size={16} />
-                        WhatsApp
-                    </WhatsAppCaptureLink>
                 </div>
             </div>
 
@@ -183,20 +170,14 @@ function FooterGooglePlaceShowcase() {
                 border-bottom: 1px solid rgba(255,255,255,0.08);
             }
             .footer-office-copy h2 {
-                max-width: 640px;
-                margin: 8px 0 10px;
+                max-width: none;
+                margin: 8px 0 0;
                 color: #fff8ea;
                 font-family: 'Playfair Display', Georgia, serif;
-                font-size: clamp(2rem, 3.2vw, 3.35rem);
-                line-height: 1;
+                font-size: clamp(1.72rem, 1.65vw, 1.95rem);
+                line-height: 1.06;
                 letter-spacing: 0;
-            }
-            .footer-office-copy > p {
-                max-width: 560px;
-                margin: 0;
-                color: rgba(255,255,255,0.64);
-                font-size: 0.96rem;
-                line-height: 1.62;
+                white-space: nowrap;
             }
             .footer-office-address {
                 display: grid;
@@ -250,8 +231,7 @@ function FooterGooglePlaceShowcase() {
                 gap: 10px;
                 margin-top: 18px;
             }
-            .footer-maps-button,
-            :global(.footer-office-whatsapp) {
+            .footer-maps-button {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -269,11 +249,6 @@ function FooterGooglePlaceShowcase() {
                 border: 1px solid rgba(223,193,142,0.26);
                 background: rgba(255,255,255,0.06);
                 color: #fff8ea !important;
-            }
-            :global(.footer-office-whatsapp) {
-                background: #087a3d;
-                color: #fff !important;
-                box-shadow: 0 14px 28px rgba(8,122,61,0.24);
             }
             .footer-office-gallery {
                 display: grid;
@@ -406,7 +381,8 @@ function FooterGooglePlaceShowcase() {
                     padding: 32px 16px;
                 }
                 .footer-office-copy h2 {
-                    font-size: clamp(1.82rem, 10vw, 2.35rem);
+                    font-size: clamp(1.65rem, 8vw, 2.1rem);
+                    white-space: normal;
                 }
                 .footer-office-address {
                     grid-template-columns: 1fr;
@@ -414,8 +390,7 @@ function FooterGooglePlaceShowcase() {
                 .footer-office-actions {
                     display: grid;
                 }
-                .footer-maps-button,
-                :global(.footer-office-whatsapp) {
+                .footer-maps-button {
                     width: 100%;
                 }
                 .footer-office-gallery-head {
