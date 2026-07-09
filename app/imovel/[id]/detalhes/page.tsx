@@ -35,6 +35,7 @@ import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobi
 import PropertyContinuationRail from '@/components/property/PropertyContinuationRail'
 import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPreview'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
+import PropertyBrokerAvatar from '@/components/property/PropertyBrokerAvatar'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
 import PropertyVideoEmbed, { hasPropertyVideo } from '@/components/property/PropertyVideoEmbed'
 import MobileNav from '@/components/marketplace/MobileNav'
@@ -1188,6 +1189,7 @@ export default async function PropertyDetailPage({
     const isGlobalBrokerCard = responsibleBroker.source === 'global'
     const brokerCardName = responsibleBroker.name || GLOBAL_PROPERTY_BROKER_NAME
     const brokerCardImage = responsibleBroker.photo_url || null
+    const brokerCardPhotoLookupSlug = isGlobalBrokerCard ? 'home' : null
     const brokerCreci = formatBrokerCreci(responsibleBroker.creci)
     const brokerCredentialLine = isGlobalBrokerCard
         ? 'Atendimento oficial Pilger'
@@ -1836,7 +1838,11 @@ export default async function PropertyDetailPage({
 
                         <section className="plp-mobile-card plp-mobile-broker-card">
                             <div className="plp-mobile-broker-head">
-                                <BrokerAvatar image={brokerCardImage} name={brokerCardName} />
+                                <PropertyBrokerAvatar
+                                    image={brokerCardImage}
+                                    name={brokerCardName}
+                                    lookupSlug={brokerCardPhotoLookupSlug}
+                                />
                                 <div>
                                     <span className="plp-kicker">Especialista</span>
                                     <h2>{brokerCardName}</h2>
@@ -2138,7 +2144,11 @@ export default async function PropertyDetailPage({
                         </div>
 
                         <div className="plp-side-card plp-broker-card">
-                            <BrokerAvatar image={brokerCardImage} name={brokerCardName} />
+                            <PropertyBrokerAvatar
+                                image={brokerCardImage}
+                                name={brokerCardName}
+                                lookupSlug={brokerCardPhotoLookupSlug}
+                            />
                             <div>
                                 <h3>{brokerCardName}</h3>
                                 <p>{brokerCredentialLine}</p>
@@ -2304,26 +2314,6 @@ export default async function PropertyDetailPage({
             />
         </main>
         </>
-    )
-}
-
-function BrokerAvatar({ image, name }: { image: string | null; name: string }) {
-    if (image) {
-        return <img src={image} alt={name} />
-    }
-
-    const initials = name
-        .split(/\s+/)
-        .map(part => part[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join('')
-        .toUpperCase() || 'GP'
-
-    return (
-        <span className="plp-broker-avatar" aria-label={name} role="img">
-            {initials}
-        </span>
     )
 }
 
