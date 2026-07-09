@@ -470,11 +470,8 @@ export default async function MarketplaceHome() {
   const featuredMaxPrice = parseInt(configMap.homepage_featured_max_price) || 0
   const itemsPerSection = Math.min(20, Math.max(2, parseInt(configMap.homepage_items_per_section) || 8))
 
-  let sectionsEnabled: string[] = ['featured', 'newest', 'cta', 'by_city']
+  let sectionsEnabled: string[] = ['featured', 'newest', 'cta']
   try { sectionsEnabled = JSON.parse(configMap.homepage_sections_enabled || '[]') } catch { }
-
-  let featuredCities: string[] = ['Balneário Camboriú', 'Praia Brava', 'Itapema', 'Porto Belo']
-  try { featuredCities = JSON.parse(configMap.homepage_featured_cities || '[]') } catch { }
 
   let manualFeaturedIds: string[] = []
   try { manualFeaturedIds = JSON.parse(configMap.homepage_featured_ids || '[]') } catch { }
@@ -668,11 +665,7 @@ export default async function MarketplaceHome() {
     new Set(featured.map((p: any) => p.id))
   )
 
-  // 3. By City
-  const allowedFeaturedCities = featuredCities.filter(city => !HOME_EXCLUDED_CITIES.has(normalizeCityName(city)))
-  const citySections = buildCitySections(homeProperties, allowedFeaturedCities, itemsPerSection)
-
-  // 4. Premium tag sections
+  // 3. Premium tag sections
   const exclusiveProperties = homeProperties
     .filter(p => Boolean(p.exclusive))
     .slice(0, itemsPerSection)
@@ -860,16 +853,6 @@ export default async function MarketplaceHome() {
           />
         )}
 
-        {sectionsEnabled.includes('by_city') && citySections.map(({ city, searchCity, items }) => (
-          <HomepageSection
-            key={city}
-            title={city}
-            properties={items}
-            lpMap={lpMap}
-            viewAllHref={`/busca?city=${encodeURIComponent(searchCity)}`}
-          />
-        ))}
-
       </div>
       
       <AboutGuilhermeSection />
@@ -883,34 +866,6 @@ export default async function MarketplaceHome() {
       <MobileNav />
     </>
   )
-}
-
-
-// === Helper: Build city sections ===
-function buildCitySections(properties: any[], cities: string[], limit: number) {
-  const cityMap = new Map<string, { searchCity: string; items: any[] }>()
-
-  for (const p of properties) {
-    const propertyCity = p.city?.trim()
-    if (!propertyCity) continue
-    const normalizedCity = propertyCity.toLowerCase()
-    const normalizedDisplayCity = displayLocationName(propertyCity).toLowerCase()
-    const match = cities.find(c => {
-      const normalizedTarget = c.toLowerCase()
-      return normalizedCity === normalizedTarget || normalizedDisplayCity === normalizedTarget
-    })
-    if (!match) continue
-    if (!cityMap.has(match)) cityMap.set(match, { searchCity: propertyCity, items: [] })
-    cityMap.get(match)!.items.push(p)
-  }
-
-  return cities
-    .filter(city => cityMap.has(city) && cityMap.get(city)!.items.length >= 2)
-    .map(city => ({
-      city: displayLocationName(city),
-      searchCity: displayLocationName(cityMap.get(city)!.searchCity),
-      items: cityMap.get(city)!.items.slice(0, limit),
-    }))
 }
 
 function buildMostViewedProperties(

@@ -32,20 +32,16 @@ const SECTION_OPTIONS = [
     { key: 'featured', label: 'Destaques', desc: 'Imóveis premium selecionados pelo admin' },
     { key: 'newest', label: 'Recém Adicionados', desc: 'Os últimos imóveis cadastrados' },
     { key: 'cta', label: 'CTA WhatsApp', desc: 'Banner "Não encontrou?" com botão WhatsApp' },
-    { key: 'by_city', label: 'Por Cidade', desc: 'Imóveis agrupados por cidade' },
     { key: 'launches', label: 'Lançamentos', desc: 'Imóveis na planta ou em construção' },
 ]
+
+const ACTIVE_SECTION_KEYS = new Set(SECTION_OPTIONS.map(option => option.key))
 
 const SORT_OPTIONS = [
     { value: 'price-desc', label: 'Maior preço primeiro' },
     { value: 'price-asc', label: 'Menor preço primeiro' },
     { value: 'newest', label: 'Mais recentes' },
     { value: 'manual', label: 'Seleção manual' },
-]
-
-const CITY_OPTIONS = [
-    'Balneário Camboriú', 'Itajaí', 'Itapema', 'Porto Belo',
-    'Camboriú', 'Navegantes', 'Blumenau', 'Florianópolis',
 ]
 
 export default function HomepageConfigPage() {
@@ -58,8 +54,7 @@ export default function HomepageConfigPage() {
     // Config state
     const [featuredIds, setFeaturedIds] = useState<string[]>([])
     const [featuredTitle, setFeaturedTitle] = useState(FEATURED_SECTION_DEFAULT_TITLE)
-    const [sectionsEnabled, setSectionsEnabled] = useState<string[]>(['featured', 'newest', 'cta', 'by_city'])
-    const [featuredCities, setFeaturedCities] = useState<string[]>(['Balneário Camboriú', 'Itajaí', 'Itapema', 'Porto Belo'])
+    const [sectionsEnabled, setSectionsEnabled] = useState<string[]>(['featured', 'newest', 'cta'])
     const [itemsPerSection, setItemsPerSection] = useState(8)
     const [featuredMinPrice, setFeaturedMinPrice] = useState(0)
     const [featuredMaxPrice, setFeaturedMaxPrice] = useState(0)
@@ -77,8 +72,10 @@ export default function HomepageConfigPage() {
                     const c = d.config
                     try { setFeaturedIds(JSON.parse(c.homepage_featured_ids || '[]')) } catch { }
                     setFeaturedTitle(normalizeFeaturedSectionTitle(c.homepage_featured_title))
-                    try { setSectionsEnabled(JSON.parse(c.homepage_sections_enabled || '[]')) } catch { }
-                    try { setFeaturedCities(JSON.parse(c.homepage_featured_cities || '[]')) } catch { }
+                    try {
+                        const parsedSections = JSON.parse(c.homepage_sections_enabled || '[]')
+                        setSectionsEnabled(Array.isArray(parsedSections) ? parsedSections.filter((key: string) => ACTIVE_SECTION_KEYS.has(key)) : [])
+                    } catch { }
                     setItemsPerSection(parseInt(c.homepage_items_per_section) || 8)
                     setFeaturedMinPrice(parseInt(c.homepage_featured_min_price) || 0)
                     setFeaturedMaxPrice(parseInt(c.homepage_featured_max_price) || 0)
@@ -106,7 +103,6 @@ export default function HomepageConfigPage() {
                         homepage_featured_ids: JSON.stringify(featuredIds),
                         homepage_featured_title: featuredTitle,
                         homepage_sections_enabled: JSON.stringify(sectionsEnabled),
-                        homepage_featured_cities: JSON.stringify(featuredCities),
                         homepage_items_per_section: String(itemsPerSection),
                         homepage_featured_min_price: String(featuredMinPrice),
                         homepage_featured_max_price: String(featuredMaxPrice),
@@ -129,7 +125,6 @@ export default function HomepageConfigPage() {
         featuredIds,
         featuredTitle,
         sectionsEnabled,
-        featuredCities,
         itemsPerSection,
         featuredMinPrice,
         featuredMaxPrice,
@@ -143,12 +138,6 @@ export default function HomepageConfigPage() {
     const toggleSection = (key: string) => {
         setSectionsEnabled(prev =>
             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-        )
-    }
-
-    const toggleCity = (city: string) => {
-        setFeaturedCities(prev =>
-            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
         )
     }
 
@@ -409,23 +398,6 @@ export default function HomepageConfigPage() {
                     </div>
                 </div>
             )}
-
-            {/* CITIES */}
-            <div className="hp-card">
-                <h3>🏙️ Cidades em Destaque</h3>
-                <p className="desc">Selecione as cidades que terão seção própria na homepage</p>
-                <div className="hp-row">
-                    {CITY_OPTIONS.map(city => (
-                        <div
-                            key={city}
-                            className={`hp-chip ${featuredCities.includes(city) ? 'on' : 'off'}`}
-                            onClick={() => toggleCity(city)}
-                        >
-                            {featuredCities.includes(city) ? '✓' : '○'} {city}
-                        </div>
-                    ))}
-                </div>
-            </div>
 
             {/* SAVE BAR */}
             <div className="hp-save-bar">

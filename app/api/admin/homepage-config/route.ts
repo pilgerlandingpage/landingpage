@@ -27,7 +27,7 @@ const HOMEPAGE_CONFIG_KEYS = [
 const DEFAULTS: Record<string, string> = {
     homepage_featured_ids: '[]',
     homepage_featured_title: 'Destaques',
-    homepage_sections_enabled: '["featured","newest","cta","by_city"]',
+    homepage_sections_enabled: '["featured","newest","cta"]',
     homepage_featured_cities: '["Balneário Camboriú","Itajaí","Itapema","Porto Belo"]',
     homepage_items_per_section: '8',
     homepage_featured_min_price: '0',
