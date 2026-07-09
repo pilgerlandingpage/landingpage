@@ -537,6 +537,14 @@ export default function SelfAssessmentClient({
                                         Ele está concorrendo ao Real Estate Awards na categoria Influenciador do Ano.
                                         Seu voto ajuda a fortalecer a presença dele no mercado imobiliário.
                                     </p>
+                                    <div className="assessment-awards-frame" aria-label="Prévia da página de votação do Real Estate Awards">
+                                        <iframe
+                                            src={GUILHERME_AWARDS_VOTE_URL}
+                                            title="Votação do Guilherme Pilger no Real Estate Awards"
+                                            loading="lazy"
+                                            referrerPolicy="strict-origin-when-cross-origin"
+                                        />
+                                    </div>
                                     <a
                                         href={GUILHERME_AWARDS_VOTE_URL}
                                         target="_blank"
@@ -965,10 +973,10 @@ export default function SelfAssessmentClient({
                     line-height: 1.6;
                 }
                 .assessment-awards-cta {
-                    width: min(620px, 100%);
+                    width: min(760px, 100%);
                     display: grid;
                     justify-items: center;
-                    gap: 9px;
+                    gap: 12px;
                     padding: 18px;
                     border: 1px solid rgba(231, 194, 101, 0.32);
                     border-radius: 8px;
@@ -999,6 +1007,23 @@ export default function SelfAssessmentClient({
                     color: rgba(255, 248, 236, 0.72);
                     font-size: 0.92rem;
                     line-height: 1.5;
+                }
+                .assessment-awards-frame {
+                    width: 100%;
+                    height: clamp(420px, 68vh, 620px);
+                    margin-top: 4px;
+                    overflow: hidden;
+                    border: 1px solid rgba(231, 194, 101, 0.28);
+                    border-radius: 8px;
+                    background: #050505;
+                    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.24);
+                }
+                .assessment-awards-frame iframe {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    border: 0;
+                    background: #050505;
                 }
                 .assessment-awards-cta a {
                     display: inline-flex;
@@ -1188,6 +1213,9 @@ export default function SelfAssessmentClient({
                     .assessment-secondary {
                         width: 100%;
                     }
+                    .assessment-awards-frame {
+                        height: min(560px, 72vh);
+                    }
                 }
                 .assessment-page {
                     color: #172033;
@@ -1314,6 +1342,10 @@ export default function SelfAssessmentClient({
                 }
                 .assessment-awards-cta p {
                     color: #475569;
+                }
+                .assessment-awards-frame {
+                    border-color: rgba(154, 104, 23, 0.18);
+                    box-shadow: 0 22px 48px rgba(70, 50, 20, 0.16);
                 }
             `}</style>
         </main>
