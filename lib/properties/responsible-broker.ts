@@ -5,6 +5,10 @@ export const GLOBAL_PROPERTY_BROKER_NAME = 'Guilherme Pilger'
 const INSTANCE_PHOTO_CACHE_TTL_MS = 10 * 60 * 1000
 const instancePhotoCache = new Map<string, { photoUrl: string; expiresAt: number }>()
 
+type ResolveWhatsAppInstancePhotoUrlOptions = {
+    allowLiveLookup?: boolean
+}
+
 export type ResponsibleBrokerContact = {
     broker_id: string | null
     admin_user_id: string | null
@@ -147,7 +151,10 @@ function globalInstanceFor(instances: any[]) {
         })[0] || null
 }
 
-export async function resolveWhatsAppInstancePhotoUrl(instance: any): Promise<string> {
+export async function resolveWhatsAppInstancePhotoUrl(
+    instance: any,
+    options: ResolveWhatsAppInstancePhotoUrlOptions = {},
+): Promise<string> {
     const storedPhotoUrl = extractLivePhotoUrl(instance?.live_data)
     if (storedPhotoUrl) return storedPhotoUrl
 
@@ -157,6 +164,8 @@ export async function resolveWhatsAppInstancePhotoUrl(instance: any): Promise<st
     const cacheKey = String(instance?.id || instanceToken)
     const cached = instancePhotoCache.get(cacheKey)
     if (cached && cached.expiresAt > Date.now()) return cached.photoUrl
+
+    if (!options.allowLiveLookup) return ''
 
     let photoUrl = ''
 

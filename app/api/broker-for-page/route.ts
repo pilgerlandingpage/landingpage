@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
             const phone = extractLivePhone(globalInstance?.live_data) ||
                 normalizePhone(globalInstance?.phone_number) ||
                 GLOBAL_PROPERTY_WHATSAPP_PHONE
-            const photoUrl = await resolveWhatsAppInstancePhotoUrl(globalInstance)
+            const photoUrl = await resolveWhatsAppInstancePhotoUrl(globalInstance, { allowLiveLookup: true })
 
             return NextResponse.json({
                 broker: {
@@ -255,7 +255,7 @@ export async function GET(request: NextRequest) {
                 id: matchedBroker.id,
                 name: matchedBroker.name,
                 phone,
-                photo_url: matchedBroker.photo_url || await resolveWhatsAppInstancePhotoUrl(whatsappInstance),
+                photo_url: matchedBroker.photo_url || await resolveWhatsAppInstancePhotoUrl(whatsappInstance, { allowLiveLookup: true }),
                 greeting_message: matchedBroker.greeting_message || 'Ola, gostaria de mais informacoes sobre os imoveis',
                 whatsapp_instance_id: whatsappInstance?.id || null,
                 whatsapp_instance_name: whatsappInstance?.instance_name || null,
