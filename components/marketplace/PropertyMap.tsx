@@ -574,6 +574,10 @@ type NearbyAmenityPlace = {
     distanceMeters: number
 }
 
+const MAP_AMENITY_CACHE_TTL_MS = 1000 * 60 * 30
+const mapAmenityMemoryCache = new Map<string, { timestamp: number; results: any[] }>()
+const mapAmenityPendingCache = new Map<string, Promise<any[]>>()
+
 function getGooglePlacesWindow() {
     if (typeof window === 'undefined') return null
     return window as GooglePlacesWindow
@@ -668,6 +672,34 @@ function getPlaceLatLng(result: any): [number, number] | null {
     const lat = typeof location?.lat === 'function' ? location.lat() : Number(location?.lat)
     const lng = typeof location?.lng === 'function' ? location.lng() : Number(location?.lng)
     return isValidLatLng(lat, lng) ? [lat, lng] : null
+}
+
+function buildAmenitySearchCacheKey(layer: MapAmenityLayer, center: L.LatLng, radius: number) {
+    const radiusBucket = Math.round(radius / 250) * 250
+    return `${layer}:${center.lat.toFixed(3)}:${center.lng.toFixed(3)}:${radiusBucket}`
+}
+
+async function getCachedAmenityPlaces(googleMaps: any, layer: MapAmenityLayer, center: L.LatLng, radius: number) {
+    const cacheKey = buildAmenitySearchCacheKey(layer, center, radius)
+    const now = Date.now()
+    const cached = mapAmenityMemoryCache.get(cacheKey)
+    if (cached && now - cached.timestamp < MAP_AMENITY_CACHE_TTL_MS) return cached.results
+    if (cached) mapAmenityMemoryCache.delete(cacheKey)
+
+    const pending = mapAmenityPendingCache.get(cacheKey)
+    if (pending) return pending
+
+    const request = searchAmenityPlaces(googleMaps, layer, center, radius)
+        .then(results => {
+            mapAmenityMemoryCache.set(cacheKey, { timestamp: Date.now(), results })
+            return results
+        })
+        .finally(() => {
+            mapAmenityPendingCache.delete(cacheKey)
+        })
+
+    mapAmenityPendingCache.set(cacheKey, request)
+    return request
 }
 
 async function searchAmenityPlaces(googleMaps: any, layer: MapAmenityLayer, center: L.LatLng, radius: number): Promise<any[]> {
@@ -1367,7 +1399,7 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
                     const option = getAmenityOption(layer)
                     if (!option) return []
 
-                    const results = await searchAmenityPlaces(googleMaps, layer, center, radius)
+                    const results = await getCachedAmenityPlaces(googleMaps, layer, center, radius)
 
                     return results
                         .map((result): NearbyAmenityPlace | null => {

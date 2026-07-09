@@ -87,7 +87,6 @@ export default function PropertyMobileMapPreview({ property, latLng }: Props) {
                                 initialView={item.mode === 'street' ? 'street' : 'map'}
                                 allowedViews={item.mode === 'street' ? ['street'] : ['map']}
                                 showViewControl={false}
-                                showNearbyBenefits={item.mode === 'map'}
                             />
                         </div>
                         <button

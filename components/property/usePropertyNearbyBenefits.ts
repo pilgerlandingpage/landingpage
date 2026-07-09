@@ -42,6 +42,11 @@ const PROPERTY_BENEFIT_LAYERS: NearbyBenefitLayer[] = [
     'marina',
 ]
 
+const NEARBY_BENEFITS_CACHE_TTL_MS = 1000 * 60 * 60 * 24
+const NEARBY_BENEFITS_SESSION_PREFIX = 'pilger_nearby_benefits_v1:'
+const nearbyBenefitsMemoryCache = new Map<string, { timestamp: number; results: NearbyBenefitResult[] }>()
+const nearbyBenefitsPendingCache = new Map<string, Promise<NearbyBenefitResult[]>>()
+
 function getGooglePlacesWindow() {
     if (typeof window === 'undefined') return null
     return window as GooglePlacesWindow
@@ -109,6 +114,53 @@ function isValidLatLng(value: LatLngTuple | null): value is LatLngTuple {
     if (!value) return false
     const [lat, lng] = value
     return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
+}
+
+function buildNearbyBenefitsCacheKey(propertyId: string, origin: LatLngTuple) {
+    return `${propertyId}:${origin[0].toFixed(5)}:${origin[1].toFixed(5)}`
+}
+
+function readNearbyBenefitsCache(cacheKey: string): NearbyBenefitResult[] | null {
+    const now = Date.now()
+    const memoryEntry = nearbyBenefitsMemoryCache.get(cacheKey)
+    if (memoryEntry && now - memoryEntry.timestamp < NEARBY_BENEFITS_CACHE_TTL_MS) {
+        return memoryEntry.results
+    }
+    if (memoryEntry) nearbyBenefitsMemoryCache.delete(cacheKey)
+
+    if (typeof window === 'undefined') return null
+
+    try {
+        const raw = window.sessionStorage.getItem(`${NEARBY_BENEFITS_SESSION_PREFIX}${cacheKey}`)
+        if (!raw) return null
+
+        const parsed = JSON.parse(raw) as { timestamp?: unknown; results?: unknown }
+        const timestamp = Number(parsed.timestamp)
+        if (!Number.isFinite(timestamp) || now - timestamp >= NEARBY_BENEFITS_CACHE_TTL_MS) {
+            window.sessionStorage.removeItem(`${NEARBY_BENEFITS_SESSION_PREFIX}${cacheKey}`)
+            return null
+        }
+
+        if (!Array.isArray(parsed.results)) return null
+        const results = parsed.results as NearbyBenefitResult[]
+        nearbyBenefitsMemoryCache.set(cacheKey, { timestamp, results })
+        return results
+    } catch {
+        return null
+    }
+}
+
+function writeNearbyBenefitsCache(cacheKey: string, results: NearbyBenefitResult[]) {
+    const entry = { timestamp: Date.now(), results }
+    nearbyBenefitsMemoryCache.set(cacheKey, entry)
+
+    if (typeof window === 'undefined') return
+
+    try {
+        window.sessionStorage.setItem(`${NEARBY_BENEFITS_SESSION_PREFIX}${cacheKey}`, JSON.stringify(entry))
+    } catch {
+        // sessionStorage may be unavailable or full; memory cache still dedupes this page load.
+    }
 }
 
 function distanceMetersBetween(origin: LatLngTuple, target: LatLngTuple) {
@@ -223,6 +275,50 @@ function buildResultFromPlace(layer: NearbyBenefitLayer, result: any, origin: La
     }
 }
 
+async function fetchNearbyBenefitResults(apiKey: string, originLatLng: LatLngTuple) {
+    await loadGooglePlacesLibrary(apiKey)
+
+    const googleWindow = getGooglePlacesWindow()
+    const googleMaps = googleWindow?.google?.maps
+    if (!googleMaps?.places?.Place) {
+        throw new Error('Google Places indisponivel.')
+    }
+
+    const loadedResults = await Promise.all(PROPERTY_BENEFIT_LAYERS.map(async layer => {
+        const option = getNearbyBenefitConfig(layer)
+        if (!option) return null
+
+        const places = await searchPlacesForLayer(googleMaps, layer, originLatLng)
+        return places
+            .map(result => buildResultFromPlace(layer, result, originLatLng))
+            .filter((item): item is NearbyBenefitResult => Boolean(item))
+            .filter(item => item.distanceMeters <= getSearchRadius(layer) * 1.75)
+            .sort((a, b) => a.distanceMeters - b.distanceMeters)[0] || null
+    }))
+
+    return loadedResults.filter((item): item is NearbyBenefitResult => Boolean(item))
+}
+
+async function getCachedNearbyBenefitResults(cacheKey: string, apiKey: string, originLatLng: LatLngTuple) {
+    const cached = readNearbyBenefitsCache(cacheKey)
+    if (cached) return cached
+
+    const pending = nearbyBenefitsPendingCache.get(cacheKey)
+    if (pending) return pending
+
+    const request = fetchNearbyBenefitResults(apiKey, originLatLng)
+        .then(results => {
+            writeNearbyBenefitsCache(cacheKey, results)
+            return results
+        })
+        .finally(() => {
+            nearbyBenefitsPendingCache.delete(cacheKey)
+        })
+
+    nearbyBenefitsPendingCache.set(cacheKey, request)
+    return request
+}
+
 export function formatNearbyBenefitDistance(meters: number) {
     if (!Number.isFinite(meters)) return 'Sob consulta'
     if (meters < 1000) return `${Math.max(40, Math.round(meters / 10) * 10).toLocaleString('pt-BR')} m`
@@ -249,36 +345,15 @@ export function usePropertyNearbyBenefits({
         let cancelled = false
         const googleMapsApiKey = apiKey
         const originLatLng = safeLatLng
+        const cacheKey = buildNearbyBenefitsCacheKey(propertyId, originLatLng)
 
         async function loadBenefits() {
             setStatus('loading')
 
             try {
-                await loadGooglePlacesLibrary(googleMapsApiKey)
+                const compactResults = await getCachedNearbyBenefitResults(cacheKey, googleMapsApiKey, originLatLng)
                 if (cancelled) return
 
-                const googleWindow = getGooglePlacesWindow()
-                const googleMaps = googleWindow?.google?.maps
-                if (!googleMaps?.places?.Place) {
-                    setStatus('error')
-                    return
-                }
-
-                const loadedResults = await Promise.all(PROPERTY_BENEFIT_LAYERS.map(async layer => {
-                    const option = getNearbyBenefitConfig(layer)
-                    if (!option) return null
-
-                    const places = await searchPlacesForLayer(googleMaps, layer, originLatLng)
-                    return places
-                        .map(result => buildResultFromPlace(layer, result, originLatLng))
-                        .filter((item): item is NearbyBenefitResult => Boolean(item))
-                        .filter(item => item.distanceMeters <= getSearchRadius(layer) * 1.75)
-                        .sort((a, b) => a.distanceMeters - b.distanceMeters)[0] || null
-                }))
-
-                if (cancelled) return
-
-                const compactResults = loadedResults.filter((item): item is NearbyBenefitResult => Boolean(item))
                 setResults(compactResults)
                 setStatus(compactResults.length > 0 ? 'ready' : 'empty')
 
