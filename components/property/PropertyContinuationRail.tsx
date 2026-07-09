@@ -234,7 +234,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
             <style jsx>{`
                 .plp-continuation-rail {
                     margin: 26px 22px 0;
-                    padding: 22px;
+                    padding: 16px 18px 18px;
                     border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: var(--plp-radius);
                     background:
@@ -247,7 +247,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                     align-items: flex-end;
                     justify-content: space-between;
                     gap: 18px;
-                    margin-bottom: 18px;
+                    margin-bottom: 12px;
                 }
 
                 .plp-continuation-head span,
@@ -258,7 +258,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                 }
 
                 .plp-continuation-head span {
-                    margin-bottom: 6px;
+                    margin-bottom: 0;
                     color: var(--plp-gold-dark);
                     font-size: 12px;
                     font-weight: 900;
@@ -266,6 +266,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                 }
 
                 .plp-continuation-head h2 {
+                    display: none;
                     margin: 0;
                     color: var(--plp-ink);
                     font-family: 'Noto Serif', Georgia, serif;
@@ -288,13 +289,24 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                 }
 
                 .plp-continuation-grid {
-                    display: grid;
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
-                    gap: 14px;
+                    display: flex;
+                    gap: 12px;
+                    margin: 0 -18px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding: 0 18px 4px;
+                    scroll-snap-type: x proximity;
+                    scrollbar-width: none;
+                }
+
+                .plp-continuation-grid::-webkit-scrollbar {
+                    display: none;
                 }
 
                 .plp-continuation-card {
+                    flex: 0 0 clamp(210px, 21vw, 255px);
                     min-width: 0;
+                    scroll-snap-align: start;
                 }
 
                 .plp-continuation-loading {
@@ -308,8 +320,8 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                 }
 
                 @media (max-width: 1020px) {
-                    .plp-continuation-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    .plp-continuation-card {
+                        flex-basis: min(235px, 72vw);
                     }
                 }
 
@@ -325,7 +337,9 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                     }
 
                     .plp-continuation-grid {
-                        gap: 12px 10px;
+                        gap: 10px;
+                        margin: 0 -10px;
+                        padding-inline: 10px;
                     }
                 }
             `}</style>

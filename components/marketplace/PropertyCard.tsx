@@ -456,6 +456,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
 
     return (
         <div className={`property-card ${isHomeCompact ? 'property-card-compact' : ''}`}>
+            <Link
+                href={href}
+                className="card-shell-hit"
+                aria-label={`Abrir detalhes de ${displayTitle}`}
+                tabIndex={-1}
+                onClick={handlePropertyClick}
+            />
             <div className="card-image-container">
                 <Link
                     ref={imageLinkRef}
@@ -625,6 +632,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
 
             <style jsx>{`
                 .property-card {
+                    position: relative;
                     display: flex;
                     flex-direction: column;
                     width: 100%;
@@ -640,6 +648,14 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                     transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
                 }
+                .property-card :global(.card-shell-hit) {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 0;
+                    border-radius: inherit;
+                    color: inherit;
+                    text-decoration: none;
+                }
                 .property-card:hover {
                     transform: translateY(-5px);
                     border-color: rgba(201,169,110,0.3);
@@ -647,6 +663,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 }
                 .card-image-container {
                     position: relative;
+                    z-index: 1;
                     width: 100%;
                     height: 190px;
                     overflow: hidden;
@@ -681,6 +698,8 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     transform: scale(1.045);
                 }
                 .card-content-link {
+                    position: relative;
+                    z-index: 1;
                     display: flex;
                     flex: 1;
                     flex-direction: column;
@@ -697,6 +716,8 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     text-decoration: none !important;
                 }
                 .property-card :global(.card-content-link) {
+                    position: relative;
+                    z-index: 1;
                     display: flex;
                     flex: 1;
                     flex-direction: column;

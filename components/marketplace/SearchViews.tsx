@@ -178,9 +178,11 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
 
                 @media (min-width: 1024px) {
                     .sv-wrap {
-                        flex-direction: row;
-                        padding: 28px;
-                        gap: 28px;
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                        align-items: stretch;
+                        padding: 22px 28px;
+                        gap: 24px;
                         height: 100%;
                         min-height: 0;
                         background:
@@ -192,10 +194,9 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                         left: auto;
                         right: auto;
                         bottom: auto;
-                        width: 43%;
-                        min-width: 500px;
-                        max-width: 735px;
-                        flex-shrink: 0;
+                        width: 100%;
+                        min-width: 0;
+                        max-width: none;
                         background: transparent;
                         border-radius: 0;
                         border: 0;
@@ -221,22 +222,21 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                         left: auto;
                         right: auto;
                         bottom: auto;
-                        flex: 1;
                         min-width: 0;
-                        border-radius: 22px;
+                        min-height: 0;
+                        border-radius: 18px;
                         border: 1px solid rgba(35,31,26,0.08);
                         box-shadow:
-                            0 18px 48px rgba(30,25,18,0.16),
+                            0 14px 34px rgba(30,25,18,0.14),
                             0 0 0 1px rgba(255,255,255,0.78) inset;
                         overflow: hidden;
                     }
                 }
                 @media (min-width: 1280px) {
                     .sv-wrap {
-                        padding: 32px;
-                        gap: 32px;
+                        padding: 24px 34px 28px;
+                        gap: 26px;
                     }
-                    .sv-panel { max-width: 720px; }
                 }
 
                 .sv-map .leaflet-container {

@@ -855,15 +855,15 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                 .search-results-grid {
                     display: grid;
                     grid-template-columns: repeat(2, minmax(0, 1fr));
-                    gap: 22px 18px;
+                    gap: 20px 14px;
                     min-width: 0;
                 }
                 .result-lux-header {
                     position: sticky;
                     top: 0;
                     z-index: 20;
-                    margin: 0 0 18px;
-                    padding: 14px 0 16px;
+                    margin: 0 0 14px;
+                    padding: 8px 0 13px;
                     background:
                         linear-gradient(180deg, rgba(247,245,240,0.98) 0%, rgba(247,245,240,0.9) 82%, rgba(247,245,240,0) 100%);
                     backdrop-filter: blur(16px);
@@ -871,27 +871,29 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                 .result-kicker {
                     display: inline-flex;
                     align-items: center;
-                    gap: 7px;
-                    margin-bottom: 8px;
+                    gap: 6px;
+                    margin-bottom: 6px;
                     color: #a78042;
-                    font: 900 0.68rem/1 'Inter', sans-serif;
-                    letter-spacing: 0.18em;
+                    font: 900 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.15em;
                     text-transform: uppercase;
                 }
                 .result-main-row {
                     display: flex;
-                    align-items: flex-end;
+                    align-items: center;
                     justify-content: space-between;
+                    flex-wrap: wrap;
                     gap: 14px;
                 }
                 .result-title {
                     margin: 0;
                     color: #201d19;
                     font-family: 'Noto Serif', Georgia, serif;
-                    font-size: clamp(1.38rem, 2vw, 2rem);
+                    font-size: clamp(1.08rem, 1.35vw, 1.45rem);
                     font-weight: 700;
-                    line-height: 1.05;
+                    line-height: 1.08;
                     letter-spacing: 0;
+                    white-space: nowrap;
                 }
                 .result-subtitle {
                     margin: 5px 0 0;
@@ -899,9 +901,9 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     font: 800 0.76rem/1.22 'Inter', sans-serif;
                 }
                 .result-count {
-                    margin-top: 6px;
+                    margin-top: 4px;
                     color: #6d665c;
-                    font: 650 0.84rem/1.3 'Inter', sans-serif;
+                    font: 650 0.74rem/1.28 'Inter', sans-serif;
                 }
                 .result-count strong {
                     color: #b8945f;
@@ -917,6 +919,7 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     align-items: center;
                     gap: 8px;
                     flex-shrink: 0;
+                    margin-left: auto;
                 }
                 .result-action {
                     display: inline-flex;
@@ -998,12 +1001,12 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     color: #a78042;
                 }
                 .search-memory-panel {
-                    margin: 0 0 18px;
-                    padding: 13px;
+                    margin: 0 0 14px;
+                    padding: 11px;
                     border: 1px solid rgba(184,148,95,0.16);
-                    border-radius: 16px;
+                    border-radius: 14px;
                     background: rgba(255,255,255,0.82);
-                    box-shadow: 0 14px 32px rgba(31,24,16,0.08);
+                    box-shadow: 0 10px 24px rgba(31,24,16,0.07);
                 }
                 .search-memory-head {
                     display: flex;
@@ -1032,23 +1035,32 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     white-space: nowrap;
                 }
                 .search-memory-row {
-                    display: grid;
+                    display: flex;
                     gap: 9px;
-                    grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+                    margin: 0 -11px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding: 0 11px 2px;
+                    scroll-snap-type: x proximity;
+                    scrollbar-width: none;
+                }
+                .search-memory-row::-webkit-scrollbar {
+                    display: none;
                 }
                 .search-memory-card {
                     display: grid;
-                    grid-template-columns: 54px minmax(0, 1fr);
-                    gap: 9px;
-                    min-width: 0;
-                    min-height: 70px;
-                    padding: 8px;
+                    grid-template-columns: 50px minmax(0, 1fr);
+                    gap: 8px;
+                    flex: 0 0 clamp(205px, 37%, 238px);
+                    min-height: 64px;
+                    padding: 7px;
                     border: 1px solid rgba(35,31,26,0.08);
-                    border-radius: 12px;
+                    border-radius: 11px;
                     background: #fff;
                     color: #211d18;
                     text-decoration: none;
                     box-shadow: 0 8px 18px rgba(30,24,17,0.06);
+                    scroll-snap-align: start;
                     transition: transform 0.18s ease, border-color 0.18s ease;
                 }
                 .search-memory-card:hover {
@@ -1057,10 +1069,10 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                 }
                 .search-memory-media {
                     position: relative;
-                    width: 54px;
-                    min-height: 54px;
+                    width: 50px;
+                    min-height: 50px;
                     overflow: hidden;
-                    border-radius: 9px;
+                    border-radius: 8px;
                     background: #e6dfd1;
                 }
                 .search-memory-media img {
