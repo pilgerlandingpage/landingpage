@@ -56,6 +56,8 @@ const HOME_MAP_MIN_PRICE = 4000000
 const HOME_BASE_DATA_TIMEOUT_MS = 12000
 const HOME_SECONDARY_DATA_TIMEOUT_MS = 8000
 const HOME_BASE_REVALIDATE_SECONDS = 300
+const HOME_PROPERTY_FEED_LIMIT = 480
+const HOME_PROPERTY_FALLBACK_LIMIT = 120
 const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
 const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
 const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
@@ -127,6 +129,64 @@ function emptyHomeBaseData(propertiesWarning?: string): HomeBaseData {
   }
 }
 
+async function fetchHomeProperties(supabase: ReturnType<typeof createSupabaseAdminClient>) {
+  const runQuery = (limit: number, timeoutMs: number) => supabase
+    .from('properties')
+    .select(HOME_PROPERTY_FIELDS)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+    .abortSignal(createSupabaseAbortSignal(timeoutMs))
+
+  try {
+    const primaryResult = await runQuery(HOME_PROPERTY_FEED_LIMIT, HOME_BASE_DATA_TIMEOUT_MS)
+    if (!primaryResult.error) {
+      return {
+        data: primaryResult.data || [],
+        warning: undefined,
+      }
+    }
+
+    const primaryWarning = summarizeSupabaseError(primaryResult.error)
+    const fallbackResult = await runQuery(HOME_PROPERTY_FALLBACK_LIMIT, HOME_BASE_DATA_TIMEOUT_MS)
+    if (!fallbackResult.error) {
+      console.warn('[Home] property feed primary query unavailable, fallback used:', primaryWarning)
+      return {
+        data: fallbackResult.data || [],
+        warning: undefined,
+      }
+    }
+
+    return {
+      data: [],
+      warning: summarizeSupabaseError(fallbackResult.error) || primaryWarning,
+    }
+  } catch (error) {
+    const primaryWarning = summarizeSupabaseError(error)
+
+    try {
+      const fallbackResult = await runQuery(HOME_PROPERTY_FALLBACK_LIMIT, HOME_SECONDARY_DATA_TIMEOUT_MS)
+      if (!fallbackResult.error) {
+        console.warn('[Home] property feed primary query failed, fallback used:', primaryWarning)
+        return {
+          data: fallbackResult.data || [],
+          warning: undefined,
+        }
+      }
+
+      return {
+        data: [],
+        warning: summarizeSupabaseError(fallbackResult.error) || primaryWarning,
+      }
+    } catch (fallbackError) {
+      return {
+        data: [],
+        warning: summarizeSupabaseError(fallbackError) || primaryWarning,
+      }
+    }
+  }
+}
+
 const getCachedHomeBaseData = unstable_cache(
   async (): Promise<HomeBaseData> => {
     const supabase = createSupabaseAdminClient()
@@ -141,12 +201,7 @@ const getCachedHomeBaseData = unstable_cache(
         .select('key, value')
         .like('key', 'homepage_%')
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
-      supabase
-        .from('properties')
-        .select(HOME_PROPERTY_FIELDS)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
+      fetchHomeProperties(supabase),
       supabase
         .from('landing_pages')
         .select('id, slug, title, property_id, content')
@@ -163,10 +218,6 @@ const getCachedHomeBaseData = unstable_cache(
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
     ])
 
-    if (propertiesResult.error) {
-      throw new Error(`[Home] property feed unavailable: ${summarizeSupabaseError(propertiesResult.error)}`)
-    }
-
     return {
       configRows: configResult.data || [],
       properties: (propertiesResult.data || []).map(compactHomeProperty),
@@ -174,12 +225,13 @@ const getCachedHomeBaseData = unstable_cache(
       blogPosts: (blogPostsResult.data || []) as unknown as HomeBlogPost[],
       warnings: {
         config: configResult.error ? summarizeSupabaseError(configResult.error) : undefined,
+        properties: propertiesResult.warning,
         landingPages: landingPagesResult.error ? summarizeSupabaseError(landingPagesResult.error) : undefined,
         blogPosts: blogPostsResult.error ? summarizeSupabaseError(blogPostsResult.error) : undefined,
       },
     }
   },
-  ['marketplace-home-base-data-v4'],
+  ['marketplace-home-base-data-v2'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
