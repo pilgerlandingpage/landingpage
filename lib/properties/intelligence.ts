@@ -14,6 +14,7 @@ export type PropertyIntelligenceInput = {
     property_type?: string | null
     source_status?: string | null
     exclusive?: boolean | null
+    is_launch?: boolean | null
     amenities?: string[] | null
     created_at?: string | null
     updated_at?: string | null
@@ -85,7 +86,8 @@ export function isPropertyFrontSea(property: PropertyIntelligenceInput) {
 }
 
 export function isPropertyLaunch(property: PropertyIntelligenceInput) {
-    return /lancamento|pre\s*lancamento|na planta|em construcao|entrega prevista/.test(getPropertySearchText(property))
+    if (property.is_launch === true) return true
+    return /\b(launch|construction|lancamento|pre[\s-]*lancamento|na planta|em construcao|em obra|entrega prevista)\b/.test(getPropertySearchText(property))
 }
 
 export function getPropertyPrimaryQualityLabel(property: PropertyIntelligenceInput): PropertyIntelligenceLabel {
@@ -139,7 +141,7 @@ export function getPropertyIntelligenceLabels(
         push({ key: 'sea', label: 'Vista mar', tone: 'blue' })
     }
     if (wasUpdatedRecently(property)) push({ key: 'fresh', label: 'Novo no radar', tone: 'green' })
-    if (/lancamento|na planta|em construcao/.test(normalizeText(property.source_status)) || hasText(property, /lancamento|na planta|em construcao/)) {
+    if (isPropertyLaunch(property)) {
         push({ key: 'launch', label: 'Lancamento', tone: 'gold' })
     }
     if (/cobertura|garden|duplex|triplex|penthouse/.test(`${typeText} ${titleText}`)) {

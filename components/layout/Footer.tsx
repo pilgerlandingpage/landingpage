@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Facebook, Instagram, MapPin, MessageCircle, Youtube } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowUpRight, Building2, ChevronLeft, ChevronRight, Facebook, Instagram, MapPin, MessageCircle, Navigation, Youtube } from 'lucide-react'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 
 const TiktokIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
@@ -23,27 +25,419 @@ const cityLinks = [
     ['Porto Belo', '/busca?city=Porto+Belo'],
 ]
 
+const FOOTER_OFFICE_FALLBACK_ADDRESS = 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajaí - SC, 88306-800'
+const FOOTER_OFFICE_FALLBACK_MAPS_URL = `https://www.google.com/maps/search/${encodeURIComponent(FOOTER_OFFICE_FALLBACK_ADDRESS)}`
+const FOOTER_OFFICE_FALLBACK_PHOTO = '/images/eventos/fundo-imobiliaria.jpeg'
+
+function FooterGooglePlaceShowcase() {
+    const [place, setPlace] = useState<HomepageGoogleReviews | null>(null)
+    const [hasLoadedPlace, setHasLoadedPlace] = useState(false)
+    const galleryTrackRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        let active = true
+
+        fetch('/api/public/google-reviews')
+            .then(response => response.ok ? response.json() : null)
+            .then(payload => {
+                if (!active) return
+                setPlace(payload?.data || null)
+            })
+            .catch(() => {
+                if (active) setPlace(null)
+            })
+            .finally(() => {
+                if (active) setHasLoadedPlace(true)
+            })
+
+        return () => {
+            active = false
+        }
+    }, [])
+
+    const photos = place?.photos?.slice(0, 8) || []
+    const visiblePhotos = photos.length
+        ? photos
+        : hasLoadedPlace
+            ? [{
+                id: 'footer-office-fallback-photo',
+                imageUri: FOOTER_OFFICE_FALLBACK_PHOTO,
+                googleMapsUri: FOOTER_OFFICE_FALLBACK_MAPS_URL,
+            }]
+            : []
+    const address = place?.formattedAddress || FOOTER_OFFICE_FALLBACK_ADDRESS
+    const mapsUrl = place?.googleMapsUri || FOOTER_OFFICE_FALLBACK_MAPS_URL
+    const locationLabel = place?.shortFormattedAddress || 'Praia Brava, Itajaí - SC'
+    const photoSlots = useMemo(() => Array.from({ length: 3 }), [])
+    const isGalleryLoading = !hasLoadedPlace && visiblePhotos.length === 0
+    const shouldShowGalleryControls = visiblePhotos.length > 1
+
+    const scrollGallery = (direction: 'previous' | 'next') => {
+        const track = galleryTrackRef.current
+        if (!track) return
+
+        const distance = Math.max(260, track.clientWidth * 0.72)
+        track.scrollBy({
+            left: direction === 'next' ? distance : -distance,
+            behavior: 'smooth',
+        })
+    }
+
+    return (
+        <>
+        <div className="footer-office">
+            <div className="footer-office-copy">
+                <span className="footer-kicker">Imobiliária no Google</span>
+                <h2>Conheça a base da Pilger na Praia Brava.</h2>
+                <p>
+                    Fotos oficiais do perfil da imobiliária no Google e endereço para chegar com facilidade antes da visita.
+                </p>
+
+                <div className="footer-office-address">
+                    <span className="footer-office-icon"><Building2 size={18} /></span>
+                    <div>
+                        <strong>{place?.placeName || 'Imobiliária Guilherme Pilger'}</strong>
+                        <small><MapPin size={13} /> {locationLabel}</small>
+                        <p>{address}</p>
+                    </div>
+                </div>
+
+                <div className="footer-office-actions">
+                    <a className="footer-maps-button" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                        <Navigation size={16} />
+                        Ver rota no Google
+                        <ArrowUpRight size={14} />
+                    </a>
+                    <WhatsAppCaptureLink
+                        phone="5547992528080"
+                        message="Olá! Vim pelo site e quero falar com Guilherme Pilger."
+                        slug="footer"
+                        template="footer-office-whatsapp"
+                        className="footer-office-whatsapp"
+                    >
+                        <MessageCircle size={16} />
+                        WhatsApp
+                    </WhatsAppCaptureLink>
+                </div>
+            </div>
+
+            <div className={`footer-office-gallery${visiblePhotos.length ? ' has-photos' : ''}${visiblePhotos.length === 1 ? ' is-single-photo' : ''}`} aria-label="Fotos da imobiliária no Google">
+                <div className="footer-office-gallery-head">
+                    <span>{visiblePhotos.length > 1 ? `${visiblePhotos.length} fotos do Google` : 'Foto da base Pilger'}</span>
+                    {shouldShowGalleryControls && (
+                        <div className="footer-office-gallery-controls" aria-label="Navegar pelas fotos da imobiliária">
+                            <button type="button" onClick={() => scrollGallery('previous')} aria-label="Foto anterior">
+                                <ChevronLeft size={17} />
+                            </button>
+                            <button type="button" onClick={() => scrollGallery('next')} aria-label="Próxima foto">
+                                <ChevronRight size={17} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="footer-office-carousel" ref={galleryTrackRef} tabIndex={0}>
+                {(isGalleryLoading ? photoSlots : visiblePhotos).map((_, index) => {
+                    const photo = visiblePhotos[index]
+
+                    if (!photo) {
+                        return (
+                            <span className="footer-office-photo is-loading" key={`footer-office-placeholder-${index}`}>
+                                <span>Google</span>
+                            </span>
+                        )
+                    }
+
+                    return (
+                        <a
+                            className="footer-office-photo"
+                            href={photo.googleMapsUri || mapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            key={photo.id}
+                        >
+                            <img
+                                src={photo.imageUri}
+                                alt={`Foto da ${place?.placeName || 'imobiliária'} no Google`}
+                                loading="lazy"
+                                referrerPolicy="no-referrer"
+                            />
+                            <span>{photos.length ? 'Google' : 'Imobiliária'}</span>
+                        </a>
+                    )
+                })}
+                </div>
+            </div>
+        </div>
+        <style jsx>{`
+            .footer-office {
+                position: relative;
+                z-index: 1;
+                display: grid;
+                grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+                gap: clamp(22px, 4vw, 48px);
+                align-items: center;
+                max-width: 1320px;
+                margin: 0 auto;
+                padding: clamp(34px, 5vw, 58px) clamp(20px, 4vw, 44px);
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+            .footer-office-copy h2 {
+                max-width: 640px;
+                margin: 8px 0 10px;
+                color: #fff8ea;
+                font-family: 'Playfair Display', Georgia, serif;
+                font-size: clamp(2rem, 3.2vw, 3.35rem);
+                line-height: 1;
+                letter-spacing: 0;
+            }
+            .footer-office-copy > p {
+                max-width: 560px;
+                margin: 0;
+                color: rgba(255,255,255,0.64);
+                font-size: 0.96rem;
+                line-height: 1.62;
+            }
+            .footer-office-address {
+                display: grid;
+                grid-template-columns: 42px minmax(0, 1fr);
+                gap: 12px;
+                max-width: 600px;
+                margin-top: 20px;
+                padding: 14px;
+                border: 1px solid rgba(223,193,142,0.14);
+                border-radius: 8px;
+                background: rgba(255,255,255,0.045);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            }
+            .footer-office-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 42px;
+                height: 42px;
+                border-radius: 8px;
+                background: rgba(216,185,121,0.13);
+                color: #d8b979;
+            }
+            .footer-office-address strong {
+                display: block;
+                color: #fff8ea;
+                font-size: 0.94rem;
+                font-weight: 900;
+                line-height: 1.2;
+            }
+            .footer-office-address small {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                margin-top: 4px;
+                color: #dcc89f;
+                font-size: 0.72rem;
+                font-weight: 850;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .footer-office-address p {
+                margin: 8px 0 0;
+                color: rgba(255,255,255,0.72);
+                font-size: 0.86rem;
+                line-height: 1.45;
+            }
+            .footer-office-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 18px;
+            }
+            .footer-maps-button,
+            :global(.footer-office-whatsapp) {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 42px;
+                padding: 0 15px;
+                border-radius: 999px;
+                font-size: 0.72rem;
+                font-weight: 950;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .footer-maps-button {
+                border: 1px solid rgba(223,193,142,0.26);
+                background: rgba(255,255,255,0.06);
+                color: #fff8ea !important;
+            }
+            :global(.footer-office-whatsapp) {
+                background: #087a3d;
+                color: #fff !important;
+                box-shadow: 0 14px 28px rgba(8,122,61,0.24);
+            }
+            .footer-office-gallery {
+                display: grid;
+                gap: 12px;
+                min-width: 0;
+            }
+            .footer-office-gallery-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                min-height: 34px;
+            }
+            .footer-office-gallery-head > span {
+                color: rgba(255,248,234,0.78);
+                font-size: 0.72rem;
+                font-weight: 900;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .footer-office-gallery-controls {
+                display: inline-flex;
+                gap: 8px;
+            }
+            .footer-office-gallery-controls button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 34px;
+                height: 34px;
+                border: 1px solid rgba(223,193,142,0.22);
+                border-radius: 999px;
+                background: rgba(255,255,255,0.06);
+                color: #fff8ea;
+                cursor: pointer;
+                transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            }
+            .footer-office-gallery-controls button:hover {
+                border-color: rgba(223,193,142,0.42);
+                background: rgba(255,255,255,0.12);
+                transform: translateY(-1px);
+            }
+            .footer-office-carousel {
+                display: flex;
+                gap: 12px;
+                min-width: 0;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 2px 2px 16px;
+                scroll-behavior: smooth;
+                scroll-padding-left: 2px;
+                scroll-snap-type: x mandatory;
+                scrollbar-color: rgba(223,193,142,0.42) rgba(255,255,255,0.08);
+            }
+            .footer-office-carousel:focus-visible {
+                outline: 2px solid rgba(223,193,142,0.5);
+                outline-offset: 4px;
+            }
+            .footer-office-gallery.is-single-photo .footer-office-carousel {
+                justify-content: center;
+            }
+            .footer-office-photo {
+                position: relative;
+                display: block;
+                flex: 0 0 clamp(236px, 29vw, 342px);
+                aspect-ratio: 4 / 3;
+                min-width: 0;
+                overflow: hidden;
+                border-radius: 8px;
+                background:
+                    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+                    #1b1917;
+                border: 1px solid rgba(255,255,255,0.08);
+                box-shadow: 0 18px 40px rgba(0,0,0,0.24);
+                scroll-snap-align: start;
+            }
+            .footer-office-photo img {
+                width: 100%;
+                height: 100%;
+                display: block;
+                object-fit: cover;
+                transition: transform 0.45s ease;
+            }
+            .footer-office-photo:hover img {
+                transform: scale(1.045);
+            }
+            .footer-office-photo > span {
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                z-index: 1;
+                display: inline-flex;
+                min-height: 24px;
+                align-items: center;
+                padding: 0 9px;
+                border-radius: 999px;
+                background: rgba(10,10,9,0.72);
+                color: #fff8ea;
+                font-size: 0.62rem;
+                font-weight: 950;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                backdrop-filter: blur(8px);
+            }
+            .footer-office-photo.is-loading {
+                display: flex;
+                align-items: flex-end;
+            }
+            .footer-office-photo.is-loading::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(110deg, rgba(255,255,255,0.04), rgba(216,185,121,0.1), rgba(255,255,255,0.04));
+                animation: footerOfficeLoading 1.8s ease-in-out infinite;
+            }
+            @keyframes footerOfficeLoading {
+                0%, 100% { opacity: 0.42; transform: translateX(-8%); }
+                50% { opacity: 0.88; transform: translateX(8%); }
+            }
+            @media (max-width: 900px) {
+                .footer-office {
+                    grid-template-columns: 1fr;
+                }
+                .footer-office-photo {
+                    flex-basis: clamp(230px, 44vw, 320px);
+                }
+            }
+            @media (max-width: 560px) {
+                .footer-office {
+                    padding: 32px 16px;
+                }
+                .footer-office-copy h2 {
+                    font-size: clamp(1.82rem, 10vw, 2.35rem);
+                }
+                .footer-office-address {
+                    grid-template-columns: 1fr;
+                }
+                .footer-office-actions {
+                    display: grid;
+                }
+                .footer-maps-button,
+                :global(.footer-office-whatsapp) {
+                    width: 100%;
+                }
+                .footer-office-gallery-head {
+                    align-items: stretch;
+                    flex-direction: column;
+                }
+                .footer-office-gallery-controls {
+                    align-self: flex-start;
+                }
+                .footer-office-photo {
+                    flex-basis: min(82vw, 310px);
+                }
+            }
+        `}</style>
+        </>
+    )
+}
+
 export default function Footer() {
     return (
         <footer className="site-footer">
-            <div className="footer-cta">
-                <div>
-                    <span className="footer-kicker">Pilger Luxury Search</span>
-                    <h2>Quer comprar melhor no litoral catarinense?</h2>
-                    <p>Fale com a equipe do Guilherme e receba uma curadoria de oportunidades alinhada ao seu momento.</p>
-                </div>
-                <WhatsAppCaptureLink
-                    phone="5547992528080"
-                    message="Olá! Vim pelo site e gostaria de uma curadoria de luxo."
-                    slug="footer"
-                    template="footer-premium-cta"
-                    className="footer-cta-button"
-                >
-                    <MessageCircle size={18} />
-                    Falar com especialista
-                </WhatsAppCaptureLink>
-            </div>
-
+            <FooterGooglePlaceShowcase />
             <div className="footer-main">
                 <div className="footer-brand">
                     <Link href="/" className="footer-logo">

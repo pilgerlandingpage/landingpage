@@ -179,7 +179,7 @@ const getCachedHomeBaseData = unstable_cache(
       },
     }
   },
-  ['marketplace-home-base-data-v2'],
+  ['marketplace-home-base-data-v4'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
@@ -352,6 +352,7 @@ function normalizeFeaturedSectionTitle(value: unknown) {
 
 function compactHomeProperty(property: any) {
   const description = String(property.description || '')
+  const isLaunch = isPropertyLaunch(property)
 
   return {
     id: property.id,
@@ -375,6 +376,7 @@ function compactHomeProperty(property: any) {
     latitude: property.latitude,
     longitude: property.longitude,
     source_status: property.source_status,
+    is_launch: isLaunch,
     purpose: property.purpose,
     suites: property.suites,
     parking_spaces: property.parking_spaces,

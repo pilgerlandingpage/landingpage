@@ -685,7 +685,7 @@ export default function PropertyLandingStyles() {
                     width: 100%;
                     height: 100%;
                     display: block;
-                    object-fit: contain;
+                    object-fit: cover;
                     object-position: center;
                     transition: transform 0.34s ease;
                 }
@@ -1482,6 +1482,28 @@ export default function PropertyLandingStyles() {
                     padding: 34px 0 0;
                 }
 
+                .plp-overview-facts-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                    align-items: stretch;
+                    padding-top: 34px;
+                }
+
+                .plp-overview-facts-grid .plp-section {
+                    padding-top: 0;
+                }
+
+                .plp-summary-card {
+                    height: 100%;
+                    padding: 20px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,247,239,0.92));
+                    box-shadow: 0 16px 34px rgba(31, 25, 16, 0.06);
+                }
+
                 .plp-section-head {
                     display: flex;
                     align-items: end;
@@ -1507,6 +1529,11 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-copy-section h2 {
+                    margin-bottom: 8px;
+                }
+
+                .plp-summary-card .plp-kicker {
+                    display: block;
                     margin-bottom: 8px;
                 }
 
@@ -1539,6 +1566,16 @@ export default function PropertyLandingStyles() {
                     font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 }
 
+                .plp-summary-card .plp-narrative {
+                    max-width: none;
+                }
+
+                .plp-quick-facts-card {
+                    display: grid;
+                    grid-template-rows: auto minmax(0, 1fr);
+                    align-content: stretch;
+                }
+
                 .plp-narrative p,
                 .plp-thesis-card p,
                 .plp-final-cta p {
@@ -1556,6 +1593,21 @@ export default function PropertyLandingStyles() {
                     display: grid;
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 12px;
+                }
+
+                .plp-quick-facts-card .plp-spec-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    grid-auto-rows: minmax(0, 1fr);
+                    align-content: stretch;
+                    height: 100%;
+                }
+
+                .plp-quick-facts-card .plp-spec-card {
+                    min-height: 0;
+                }
+
+                .plp-quick-facts-card .plp-spec-card:last-child {
+                    grid-column: 1 / -1;
                 }
 
                 .plp-spec-card {
@@ -2572,6 +2624,24 @@ export default function PropertyLandingStyles() {
                     margin-top: clamp(22px, 3vw, 34px);
                 }
 
+                .plp-technical-location-grid {
+                    display: grid;
+                    gap: 18px;
+                }
+
+                .plp-technical-details {
+                    min-width: 0;
+                    padding: 18px;
+                    border: 1px solid rgba(35, 31, 26, .09);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                    box-shadow: 0 14px 34px rgba(32, 27, 18, .06);
+                }
+
+                .plp-nearby-benefits--compact {
+                    margin-top: 0;
+                }
+
                 .plp-info-list h3 {
                     margin: 0 0 12px;
                     padding-bottom: 8px;
@@ -2648,13 +2718,15 @@ export default function PropertyLandingStyles() {
                 .plp-market-main {
                     align-items: start;
                     display: grid;
-                    gap: 12px 14px;
-                    grid-template-columns: minmax(0, .96fr) minmax(240px, .74fr);
+                    gap: 14px;
+                    grid-template-columns: 1fr;
                 }
 
-                .plp-price-history-card {
-                    border-top: 1px solid rgba(35, 31, 26, .09);
-                    padding-top: 14px;
+                .plp-market-dashboard {
+                    display: grid;
+                    grid-template-columns: minmax(260px, .78fr) minmax(360px, 1.04fr) minmax(300px, .88fr);
+                    gap: 14px;
+                    align-items: stretch;
                 }
 
                 .plp-market-card-head {
@@ -2668,12 +2740,12 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-market-main .plp-market-card-head {
-                    grid-column: 1 / -1;
                     margin-bottom: 0;
                 }
 
-                .plp-price-history-card .plp-market-card-head {
-                    margin-bottom: 12px;
+                .plp-market-history-panel .plp-market-card-head {
+                    margin-bottom: 10px;
+                    padding-bottom: 10px;
                 }
 
                 .plp-market-card-head span {
@@ -2704,8 +2776,8 @@ export default function PropertyLandingStyles() {
                 .plp-market-metrics {
                     display: grid;
                     gap: 10px;
-                    grid-column: 1;
                     grid-template-columns: repeat(2, minmax(0, 1fr));
+                    height: 100%;
                     margin-bottom: 0;
                 }
 
@@ -2713,6 +2785,8 @@ export default function PropertyLandingStyles() {
                     border: 1px solid rgba(35, 31, 26, .07);
                     border-radius: var(--plp-radius);
                     background: rgba(255,255,255,.7);
+                    display: grid;
+                    align-content: center;
                     min-width: 0;
                     padding: 10px 12px;
                 }
@@ -2737,61 +2811,289 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-market-chart {
+                    --market-position: 50%;
+                    --market-median-position: 50%;
                     border: 1px solid rgba(35, 31, 26, .08);
                     border-radius: var(--plp-radius);
                     background:
-                        linear-gradient(90deg, rgba(184,148,95,.06) 1px, transparent 1px),
+                        radial-gradient(circle at var(--market-position) 44%, rgba(189, 149, 81, .2), transparent 28%),
                         linear-gradient(180deg, #fff 0%, #f5f2ec 100%);
-                    background-size: 25% 100%, auto;
-                    grid-column: 2;
-                    padding: 12px 12px 9px;
+                    display: grid;
+                    gap: 10px;
+                    min-height: 100%;
+                    overflow: hidden;
+                    padding: 12px;
                 }
 
-                .plp-market-chart svg {
+                .plp-market-history-panel {
+                    display: grid;
+                    align-content: start;
+                    gap: 10px;
+                    min-width: 0;
+                    height: 100%;
+                    padding: 12px;
+                    border: 1px solid rgba(35, 31, 26, .08);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(180deg, rgba(255,255,255,.86), rgba(250,247,240,.7));
+                }
+
+                .plp-market-history-summary {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 8px;
+                }
+
+                .plp-market-history-summary span {
+                    min-width: 0;
+                    padding: 9px 10px;
+                    border: 1px solid rgba(35,31,26,.07);
+                    border-radius: 10px;
+                    background: rgba(255,255,255,.64);
+                }
+
+                .plp-market-history-summary small {
                     display: block;
-                    height: 78px;
-                    overflow: visible;
-                    width: 100%;
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 850;
+                    line-height: 1.1;
+                    text-transform: uppercase;
                 }
 
-                .plp-market-chart path {
-                    fill: none;
-                    stroke: rgba(35,31,26,.16);
-                    stroke-width: 1.2;
-                    vector-effect: non-scaling-stroke;
+                .plp-market-history-summary strong {
+                    display: block;
+                    margin-top: 5px;
+                    color: var(--plp-ink);
+                    font-size: 12px;
+                    font-weight: 950;
+                    line-height: 1.18;
+                    overflow-wrap: anywhere;
                 }
 
-                .plp-market-chart polyline {
-                    fill: none;
-                    stroke: var(--plp-gold);
-                    stroke-linecap: round;
-                    stroke-linejoin: round;
-                    stroke-width: 2.4;
-                    vector-effect: non-scaling-stroke;
+                .plp-market-scale-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 850;
+                    letter-spacing: .02em;
+                    line-height: 1.2;
+                    text-transform: uppercase;
                 }
 
-                .plp-market-chart line {
-                    stroke: #111;
-                    stroke-dasharray: 3 3;
-                    stroke-width: 1.2;
-                    vector-effect: non-scaling-stroke;
+                .plp-market-scale-head strong {
+                    color: var(--plp-gold-dark);
+                    font-size: 11px;
+                    font-weight: 950;
+                    text-align: right;
                 }
 
-                .plp-market-chart circle {
-                    fill: var(--plp-gold);
-                    stroke: #111;
-                    stroke-width: .9;
-                    vector-effect: non-scaling-stroke;
+                .plp-market-scale {
+                    position: relative;
+                    min-height: 128px;
+                    padding: 20px 8px 36px;
+                    border: 1px solid rgba(35,31,26,.07);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(90deg, rgba(35,31,26,.04) 1px, transparent 1px),
+                        rgba(255,255,255,.52);
+                    background-size: 33.333% 100%, auto;
+                }
+
+                .plp-market-scale-track {
+                    position: absolute;
+                    left: 10px;
+                    right: 10px;
+                    top: 58px;
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    height: 22px;
+                    overflow: hidden;
+                    border-radius: 999px;
+                    background: #efe9dc;
+                    box-shadow: inset 0 0 0 1px rgba(35,31,26,.08);
+                    transform-origin: left center;
+                    animation: plpMarketTrackIn .8s ease both;
+                }
+
+                .plp-market-scale-zone {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: rgba(18,22,25,.72);
+                    font-size: 9px;
+                    font-weight: 950;
+                    line-height: 1;
+                    text-transform: uppercase;
+                }
+
+                .plp-market-scale-zone-entry {
+                    background: #e8f2ea;
+                }
+
+                .plp-market-scale-zone-mid {
+                    background: #f4ead9;
+                }
+
+                .plp-market-scale-zone-top {
+                    background: #ead9c7;
+                }
+
+                .plp-market-scale-marker {
+                    position: absolute;
+                    left: clamp(13%, var(--market-position), 87%);
+                    z-index: 3;
+                    display: grid;
+                    gap: 2px;
+                    max-width: 122px;
+                    text-align: center;
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-scale-marker span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: max-content;
+                    max-width: 122px;
+                    min-height: 24px;
+                    margin: 0 auto;
+                    padding: 0 9px;
+                    border-radius: 999px;
+                    background: #101418;
+                    color: #fff;
+                    font-size: 10px;
+                    font-weight: 950;
+                    line-height: 1;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                .plp-market-scale-marker strong {
+                    display: inline-flex;
+                    justify-content: center;
+                    color: var(--plp-ink);
+                    font-size: 11px;
+                    font-weight: 950;
+                    line-height: 1.1;
+                    white-space: nowrap;
+                }
+
+                .plp-market-scale-marker-current {
+                    top: 8px;
+                    animation: plpMarketMarkerIn .82s .08s cubic-bezier(.2,.72,.2,1) both;
+                }
+
+                .plp-market-scale-marker-current::after {
+                    content: "";
+                    position: absolute;
+                    left: 50%;
+                    top: 30px;
+                    width: 2px;
+                    height: 31px;
+                    border-radius: 999px;
+                    background: #101418;
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-scale-marker-median {
+                    left: clamp(13%, var(--market-median-position), 87%);
+                    bottom: 3px;
+                    opacity: .88;
+                }
+
+                .plp-market-scale-marker-median::before {
+                    content: "";
+                    position: absolute;
+                    left: 50%;
+                    bottom: 32px;
+                    width: 1px;
+                    height: 28px;
+                    border-radius: 999px;
+                    background: rgba(35,31,26,.36);
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-scale-marker-median span {
+                    background: rgba(255,255,255,.92);
+                    color: var(--plp-gold-dark);
+                    box-shadow: inset 0 0 0 1px rgba(143,105,48,.22);
+                }
+
+                .plp-market-scale-marker-median strong {
+                    color: var(--plp-muted);
                 }
 
                 .plp-market-axis {
-                    color: var(--plp-muted);
-                    display: flex;
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 8px;
+                    color: #697069;
                     font-size: 10px;
-                    font-weight: 850;
-                    justify-content: space-between;
-                    line-height: 1;
+                    line-height: 1.2;
+                }
+
+                .plp-market-axis span {
+                    display: grid;
+                    gap: 2px;
+                    min-width: 0;
+                }
+
+                .plp-market-axis span:nth-child(2) {
+                    text-align: center;
+                }
+
+                .plp-market-axis span:last-child {
+                    text-align: right;
+                }
+
+                .plp-market-axis b {
+                    color: var(--plp-ink);
+                    font-size: 10px;
+                    font-weight: 950;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                     text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                .plp-market-axis small {
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 780;
+                    overflow-wrap: anywhere;
+                }
+
+                @keyframes plpMarketTrackIn {
+                    from {
+                        opacity: .36;
+                        transform: scaleX(.18);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scaleX(1);
+                    }
+                }
+
+                @keyframes plpMarketMarkerIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-8px) scale(.92);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0) scale(1);
+                    }
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .plp-market-scale-track,
+                    .plp-market-scale-marker-current {
+                        animation: none;
+                    }
                 }
 
                 .plp-market-note {
@@ -2801,10 +3103,14 @@ export default function PropertyLandingStyles() {
                     font-size: 12px;
                     font-weight: 760;
                     gap: 8px;
-                    grid-column: 2;
                     grid-template-columns: 18px minmax(0, 1fr);
                     line-height: 1.35;
                     margin: 0;
+                    min-height: 100%;
+                    padding: 12px;
+                    border: 1px solid rgba(35,31,26,.07);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255,255,255,.58);
                 }
 
                 .plp-market-note svg {
@@ -2819,10 +3125,17 @@ export default function PropertyLandingStyles() {
                     background: rgba(255, 255, 255, .62);
                     display: grid;
                     gap: 4px 12px;
-                    grid-column: 1;
                     grid-template-columns: 1fr;
+                    min-height: 100%;
                     margin-top: 0;
                     padding: 11px 12px;
+                }
+
+                .plp-market-insight-grid {
+                    display: grid;
+                    grid-template-columns: minmax(0, .86fr) minmax(360px, 1.14fr);
+                    gap: 14px;
+                    align-items: stretch;
                 }
 
                 .plp-market-positioning strong {
@@ -2872,7 +3185,7 @@ export default function PropertyLandingStyles() {
                 .plp-price-history-list {
                     display: grid;
                     gap: 12px;
-                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                    grid-template-columns: 1fr;
                 }
 
                 .plp-price-history-item {
@@ -2882,8 +3195,13 @@ export default function PropertyLandingStyles() {
                     background: rgba(255,255,255,.54);
                     display: grid;
                     gap: 6px 10px;
-                    grid-template-columns: 86px minmax(0, 1fr) auto;
+                    grid-template-columns: minmax(70px, .36fr) minmax(0, 1fr);
                     padding: 11px 12px;
+                }
+
+                .plp-price-history-item b {
+                    grid-column: 2;
+                    justify-self: end;
                 }
 
                 .plp-price-history-item:first-child {
@@ -3091,7 +3409,6 @@ export default function PropertyLandingStyles() {
                 .plp-whatsapp-button,
                 .plp-primary-btn,
                 .plp-dark-button,
-                .plp-context-cta,
                 .plp-mobile-cta-button {
                     display: inline-flex;
                     align-items: center;
@@ -3115,7 +3432,6 @@ export default function PropertyLandingStyles() {
                 .plp-whatsapp-button:hover,
                 .plp-primary-btn:hover,
                 .plp-dark-button:hover,
-                .plp-context-cta:hover,
                 .plp-mobile-cta-button:hover {
                     transform: translateY(-1px);
                 }
@@ -3201,42 +3517,6 @@ export default function PropertyLandingStyles() {
                     background: #dfc18e;
                 }
 
-                .plp-context-cta-list {
-                    display: grid;
-                    gap: 7px;
-                    margin-top: 11px;
-                    padding-top: 11px;
-                    border-top: 1px solid var(--plp-line);
-                }
-
-                .plp-context-cta {
-                    justify-content: flex-start;
-                    width: 100%;
-                    min-height: 38px;
-                    padding: 0 10px;
-                    border: 1px solid rgba(35, 31, 26, .08);
-                    background: #f7f8f6;
-                    color: #343b42;
-                    box-shadow: none;
-                    font-size: 12px;
-                }
-
-                .plp-context-cta:hover {
-                    background: #eeebe3;
-                }
-
-                .plp-context-cta svg {
-                    color: var(--plp-gold-dark);
-                    flex: 0 0 auto;
-                }
-
-                .plp-context-cta span {
-                    min-width: 0;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-
                 .plp-broker-card {
                     display: grid;
                     grid-template-columns: 78px minmax(0, 1fr);
@@ -3252,6 +3532,23 @@ export default function PropertyLandingStyles() {
                     object-position: 28% center;
                     border-radius: var(--plp-radius);
                     background: #d8dde0;
+                }
+
+                .plp-broker-avatar {
+                    width: 78px;
+                    height: 86px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: var(--plp-radius);
+                    background:
+                        radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.22), transparent 34%),
+                        linear-gradient(145deg, #0f1724 0%, #263344 52%, #b8945f 100%);
+                    color: #fff;
+                    font-size: 21px;
+                    font-weight: 900;
+                    letter-spacing: 0;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
                 }
 
                 .plp-broker-card h3 {
@@ -3824,11 +4121,12 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-development-context-band {
-                    margin: 34px 44px 0;
-                    padding: 24px;
+                    grid-column: 1 / -1;
+                    margin: 8px 0 0;
+                    padding: 18px;
                     display: grid;
-                    grid-template-columns: minmax(0, 0.92fr) minmax(300px, 1.08fr);
-                    gap: 22px;
+                    grid-template-columns: minmax(430px, 0.82fr) minmax(0, 1.18fr);
+                    gap: 18px;
                     align-items: stretch;
                     border: 1px solid var(--plp-line);
                     border-radius: var(--plp-radius);
@@ -3840,34 +4138,33 @@ export default function PropertyLandingStyles() {
                 .plp-development-context-copy {
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
+                    gap: 9px;
                     min-width: 0;
                 }
 
                 .plp-development-context-copy h2 {
-                    max-width: 620px;
+                    max-width: none;
                     margin: 0;
                     color: var(--plp-ink);
                     font-family: Georgia, 'Times New Roman', serif;
-                    font-size: clamp(28px, 2.3vw, 40px);
+                    font-size: clamp(24px, 1.6vw, 31px);
                     font-weight: 500;
                     line-height: 1.03;
                     letter-spacing: 0;
                 }
 
                 .plp-development-context-copy p {
-                    max-width: 610px;
+                    max-width: none;
                     margin: 0;
                     color: #4d5662;
-                    font-size: 15px;
-                    line-height: 1.65;
+                    font-size: 13px;
+                    line-height: 1.42;
                 }
 
                 .plp-development-context-facts {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    gap: 8px;
-                    margin-top: 2px;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 7px;
                 }
 
                 .plp-development-context-facts span,
@@ -3881,12 +4178,12 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-development-context-facts span {
-                    min-height: 42px;
-                    padding: 10px 11px;
+                    min-height: 36px;
+                    padding: 8px 9px;
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    font-size: 13px;
+                    gap: 7px;
+                    font-size: 12px;
                     font-weight: 750;
                     line-height: 1.25;
                 }
@@ -3897,7 +4194,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-development-context-unit {
-                    padding: 12px 13px;
+                    padding: 9px 11px;
                     display: grid;
                     gap: 4px;
                 }
@@ -3913,36 +4210,42 @@ export default function PropertyLandingStyles() {
                 .plp-development-context-unit strong {
                     color: var(--plp-ink);
                     font-family: Georgia, 'Times New Roman', serif;
-                    font-size: 18px;
+                    font-size: 15px;
                     font-weight: 500;
                     line-height: 1.18;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
                 }
 
                 .plp-development-context-unit span {
                     color: #5c6570;
-                    font-size: 12px;
+                    font-size: 11px;
                     line-height: 1.45;
                 }
 
                 .plp-development-context-actions {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 8px;
                     margin-top: auto;
                 }
 
                 .plp-development-primary-link,
                 .plp-development-secondary-link {
-                    min-height: 44px;
+                    min-height: 40px;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 9px;
-                    padding: 0 18px;
+                    gap: 8px;
+                    padding: 0 12px;
                     border-radius: var(--plp-radius);
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 900;
                     letter-spacing: 0.04em;
+                    line-height: 1.15;
+                    text-align: center;
                     text-decoration: none;
                     text-transform: uppercase;
                     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -3968,9 +4271,13 @@ export default function PropertyLandingStyles() {
 
                 .plp-development-context-gallery {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    align-content: start;
-                    gap: 10px;
+                    grid-template-columns: minmax(210px, 1.15fr) repeat(2, minmax(0, 1fr));
+                    grid-template-rows: repeat(2, minmax(0, 1fr));
+                    align-content: stretch;
+                    align-self: stretch;
+                    gap: 9px;
+                    height: clamp(292px, 21vw, 344px);
+                    min-height: 0;
                 }
 
                 .plp-development-context-gallery figure {
@@ -3979,9 +4286,14 @@ export default function PropertyLandingStyles() {
                     margin: 0;
                     overflow: hidden;
                     border-radius: var(--plp-radius);
-                    aspect-ratio: 1 / 0.86;
+                    height: auto;
+                    min-height: 0;
                     background: #171a1d;
                     box-shadow: 0 10px 20px rgba(20, 24, 29, 0.12);
+                }
+
+                .plp-development-context-gallery figure:first-child {
+                    grid-row: 1 / span 2;
                 }
 
                 .plp-development-context-gallery img {
@@ -3996,9 +4308,11 @@ export default function PropertyLandingStyles() {
                 .plp-development-context-gallery figcaption {
                     position: absolute;
                     inset: auto 0 0;
-                    padding: 28px 12px 11px;
+                    min-height: 58%;
+                    padding: 24px 10px 10px;
                     display: grid;
                     gap: 3px;
+                    align-content: end;
                     color: #fff;
                     background: linear-gradient(180deg, rgba(17, 20, 24, 0) 0%, rgba(17, 20, 24, 0.74) 100%);
                     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.34);
@@ -4006,7 +4320,7 @@ export default function PropertyLandingStyles() {
 
                 .plp-development-context-gallery figcaption span {
                     color: rgba(255, 255, 255, 0.72);
-                    font-size: 10px;
+                    font-size: 9px;
                     font-weight: 850;
                     letter-spacing: 0.06em;
                     text-transform: uppercase;
@@ -4015,9 +4329,13 @@ export default function PropertyLandingStyles() {
                 .plp-development-context-gallery figcaption strong {
                     color: #fff;
                     font-family: Georgia, 'Times New Roman', serif;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     line-height: 1.08;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3;
                 }
 
                 .plp-related-band {
@@ -4540,6 +4858,8 @@ export default function PropertyLandingStyles() {
                     .plp-info-list > div,
                     .plp-market-grid,
                     .plp-market-main,
+                    .plp-market-dashboard,
+                    .plp-market-insight-grid,
                     .plp-market-metrics,
                     .plp-thesis-grid,
                     .plp-related-grid,
@@ -4580,6 +4900,7 @@ export default function PropertyLandingStyles() {
                     .plp-market-positioning,
                     .plp-market-metrics,
                     .plp-market-note,
+                    .plp-market-history-panel,
                     .plp-market-method {
                         grid-column: auto;
                     }
@@ -4595,11 +4916,8 @@ export default function PropertyLandingStyles() {
                         grid-row: auto;
                     }
 
-                    .plp-price-history-card {
-                        border-left: 0;
-                        border-top: 1px solid rgba(35, 31, 26, .09);
-                        padding-left: 0;
-                        padding-top: 15px;
+                    .plp-market-history-panel {
+                        height: auto;
                     }
 
                     .plp-price-history-item {
@@ -4800,7 +5118,7 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-shell {
-                    width: min(calc(100% - clamp(24px, 4vw, 72px)), 1220px);
+                    width: min(calc(100% - clamp(24px, 4vw, 72px)), 1380px);
                 }
 
                 .plp-title-band {
@@ -4852,8 +5170,19 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-content-column {
-                        grid-column: 1;
+                        grid-column: 1 / -1;
                         grid-row: 2;
+                        display: grid;
+                        grid-template-columns: minmax(0, 0.92fr) minmax(440px, 1.08fr);
+                        column-gap: 22px;
+                        row-gap: 0;
+                        align-items: start;
+                    }
+
+                    .plp-overview-facts-grid {
+                        grid-column: 1 / -1;
+                        grid-template-columns: minmax(0, 0.92fr) minmax(440px, 1.08fr);
+                        column-gap: 22px;
                     }
 
                     #localizacao.plp-location-band {
@@ -4863,7 +5192,61 @@ export default function PropertyLandingStyles() {
 
                     .plp-sidebar {
                         grid-column: 2;
-                        grid-row: 1 / span 2;
+                        grid-row: 1;
+                    }
+
+                    .plp-development-context-band {
+                        grid-column: 1 / -1;
+                        grid-row: 3;
+                    }
+
+                    #ficha.plp-quick-facts-card .plp-spec-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    .plp-technical-location-grid,
+                    .plp-market-history {
+                        grid-column: 1 / -1;
+                    }
+
+                    .plp-technical-location-grid {
+                        grid-template-columns: minmax(0, 0.92fr) minmax(440px, 1.08fr);
+                        column-gap: 22px;
+                        row-gap: 18px;
+                        align-items: stretch;
+                        padding-top: 14px;
+                    }
+
+                    .plp-technical-location-grid.single {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-technical-details,
+                    .plp-technical-location-grid .plp-nearby-benefits {
+                        height: 100%;
+                        padding-top: 18px;
+                    }
+
+                    .plp-nearby-benefits--compact .plp-nearby-map-shell {
+                        height: clamp(320px, 24vw, 420px);
+                        min-height: 0;
+                    }
+
+                    .plp-nearby-benefits--compact .plp-nearby-map-shell .leaflet-container {
+                        min-height: inherit;
+                    }
+
+                    .plp-market-grid {
+                        grid-template-columns: 1fr;
+                        gap: 14px;
+                    }
+
+                    .plp-market-main {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-market-metrics {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
                 }
 
@@ -5123,7 +5506,8 @@ export default function PropertyLandingStyles() {
                     padding: 9px;
                 }
 
-                .plp-broker-card img {
+                .plp-broker-card img,
+                .plp-broker-card .plp-broker-avatar {
                     width: 78px;
                     height: 86px;
                 }
@@ -5190,8 +5574,8 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-development-context-band {
-                    margin: 26px 22px 0;
-                    padding: 22px;
+                    margin: 8px 0 0;
+                    padding: 18px;
                 }
 
                 .plp-related-head {
@@ -5227,10 +5611,21 @@ export default function PropertyLandingStyles() {
 
                     .plp-development-context-band {
                         grid-template-columns: 1fr;
+                        order: 5;
                     }
 
                     .plp-development-context-gallery {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                        grid-template-rows: none;
+                        min-height: 0;
+                    }
+
+                    .plp-development-context-gallery figure {
+                        height: clamp(132px, 18vw, 176px);
+                    }
+
+                    .plp-development-context-gallery figure:first-child {
+                        grid-row: auto;
                     }
 
                     .plp-gallery-column {
@@ -5243,6 +5638,12 @@ export default function PropertyLandingStyles() {
                         order: 2;
                         grid-column: auto;
                         grid-row: auto;
+                        display: grid;
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-technical-location-grid {
+                        grid-template-columns: 1fr;
                     }
 
                     #localizacao.plp-location-band {
@@ -5336,6 +5737,16 @@ export default function PropertyLandingStyles() {
                         padding-top: 16px;
                     }
 
+                    .plp-overview-facts-grid {
+                        gap: 10px;
+                        padding-top: 16px;
+                    }
+
+                    .plp-summary-card {
+                        padding: 14px;
+                        box-shadow: none;
+                    }
+
                     .plp-section-head h2,
                     .plp-copy-section h2,
                     .plp-related-head h2,
@@ -5345,6 +5756,7 @@ export default function PropertyLandingStyles() {
 
                     .plp-spec-grid {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
                     }
 
                     .plp-info-list > div {
@@ -5814,6 +6226,15 @@ export default function PropertyLandingStyles() {
                         border: 2px solid rgba(184,148,95,0.32);
                     }
 
+                    .plp-mobile-broker-head .plp-broker-avatar {
+                        width: 64px;
+                        height: 64px;
+                        flex: 0 0 64px;
+                        border-radius: 999px;
+                        border: 2px solid rgba(184,148,95,0.32);
+                        font-size: 18px;
+                    }
+
                     .plp-mobile-broker-head h2 {
                         margin: 2px 0 3px;
                         color: #171a1d;
@@ -5878,60 +6299,74 @@ export default function PropertyLandingStyles() {
 
                     .plp-mobile-market-chart {
                         margin-top: 12px;
-                        padding: 12px 12px 9px;
+                        display: grid;
+                        gap: 9px;
+                        padding: 12px;
                         border: 1px solid rgba(35,31,26,.08);
                         border-radius: 16px;
                         background:
-                            linear-gradient(90deg, rgba(184,148,95,.07) 1px, transparent 1px),
+                            radial-gradient(circle at var(--market-position) 45%, rgba(189,149,81,.22), transparent 30%),
                             linear-gradient(180deg, #fff 0%, #f5f2ec 100%);
-                        background-size: 25% 100%, auto;
                     }
 
-                    .plp-mobile-market-chart svg {
-                        display: block;
-                        width: 100%;
-                        height: 72px;
-                        overflow: visible;
+                    .plp-mobile-market-chart .plp-market-scale-head {
+                        gap: 8px;
+                        font-size: 0.58rem;
                     }
 
-                    .plp-mobile-market-chart path {
-                        fill: none;
-                        stroke: rgba(35,31,26,.16);
-                        stroke-width: 1.2;
-                        vector-effect: non-scaling-stroke;
-                    }
-
-                    .plp-mobile-market-chart polyline {
-                        fill: none;
-                        stroke: var(--plp-gold);
-                        stroke-linecap: round;
-                        stroke-linejoin: round;
-                        stroke-width: 2.4;
-                        vector-effect: non-scaling-stroke;
-                    }
-
-                    .plp-mobile-market-chart line {
-                        stroke: #111;
-                        stroke-dasharray: 3 3;
-                        stroke-width: 1.2;
-                        vector-effect: non-scaling-stroke;
-                    }
-
-                    .plp-mobile-market-chart circle {
-                        fill: var(--plp-gold);
-                        stroke: #111;
-                        stroke-width: .9;
-                        vector-effect: non-scaling-stroke;
-                    }
-
-                    .plp-mobile-market-axis {
-                        display: flex;
-                        justify-content: space-between;
-                        color: #697069;
+                    .plp-mobile-market-chart .plp-market-scale-head strong {
                         font-size: 0.62rem;
-                        font-weight: 760;
-                        line-height: 1;
-                        text-transform: uppercase;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale {
+                        min-height: 118px;
+                        padding: 18px 6px 34px;
+                        border-radius: 13px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-track {
+                        left: 8px;
+                        right: 8px;
+                        top: 54px;
+                        height: 20px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-zone {
+                        font-size: 0.52rem;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker {
+                        left: clamp(16%, var(--market-position), 84%);
+                        max-width: 104px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker span {
+                        max-width: 104px;
+                        min-height: 22px;
+                        padding: 0 7px;
+                        font-size: 0.52rem;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker strong {
+                        font-size: 0.58rem;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker-current::after {
+                        top: 28px;
+                        height: 28px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker-median {
+                        left: clamp(16%, var(--market-median-position), 84%);
+                    }
+
+                    .plp-mobile-market-chart .plp-market-axis {
+                        gap: 6px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-axis b,
+                    .plp-mobile-market-chart .plp-market-axis small {
+                        font-size: 0.56rem;
                     }
 
                     .plp-mobile-market-positioning {
@@ -8205,8 +8640,29 @@ export default function PropertyLandingStyles() {
                         padding: 10px 10px 8px;
                     }
 
-                    .plp-mobile-market-chart svg {
-                        height: 56px;
+                    .plp-mobile-market-chart .plp-market-scale {
+                        min-height: 106px;
+                        padding-top: 16px;
+                        padding-bottom: 30px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-track {
+                        top: 50px;
+                        height: 18px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker span {
+                        min-height: 20px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker-current::after {
+                        top: 26px;
+                        height: 26px;
+                    }
+
+                    .plp-mobile-market-chart .plp-market-scale-marker-median::before {
+                        bottom: 29px;
+                        height: 25px;
                     }
 
                     .plp-mobile-market-positioning {
@@ -8474,7 +8930,8 @@ export default function PropertyLandingStyles() {
                         gap: 12px;
                     }
 
-                    .plp-mobile-broker-head img {
+                    .plp-mobile-broker-head img,
+                    .plp-mobile-broker-head .plp-broker-avatar {
                         width: 58px;
                         height: 58px;
                     }

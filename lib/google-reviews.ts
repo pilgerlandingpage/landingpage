@@ -11,27 +11,48 @@ export type HomepageGoogleReview = {
   flagContentUri?: string
 }
 
+export type HomepageGooglePlacePhoto = {
+  id: string
+  name: string
+  imageUri: string
+  googleMapsUri?: string
+  authorName?: string
+  widthPx?: number
+  heightPx?: number
+}
+
 export type HomepageGoogleReviews = {
   placeName: string
+  formattedAddress?: string
+  shortFormattedAddress?: string
+  latitude?: number
+  longitude?: number
   rating: number
   userRatingCount: number
   googleMapsUri?: string
   reviewUrl?: string
+  photos: HomepageGooglePlacePhoto[]
   reviews: HomepageGoogleReview[]
 }
 
 const GOOGLE_PLACE_DETAILS_URL = 'https://places.googleapis.com/v1/places'
+const GOOGLE_PLACE_PHOTO_MEDIA_BASE_URL = 'https://places.googleapis.com/v1'
 const GOOGLE_REVIEWS_REVALIDATE_SECONDS = 60 * 60 * 6
 const GOOGLE_REVIEWS_TIMEOUT_MS = 4500
 const REVIEW_TEXT_LIMIT = 360
 const DEFAULT_PILGER_GOOGLE_PLACE_ID = 'ChIJ7Y5_0DW32JQRatagLzFhcJc'
+const GOOGLE_PLACE_PHOTO_LIMIT = 4
 
 const GOOGLE_PLACE_DETAILS_FIELDS = [
   'displayName',
+  'formattedAddress',
+  'shortFormattedAddress',
   'googleMapsUri',
   'googleMapsLinks.placeUri',
   'googleMapsLinks.reviewsUri',
   'googleMapsLinks.writeAReviewUri',
+  'location',
+  'photos',
   'rating',
   'userRatingCount',
   'reviews.authorAttribution',
@@ -66,14 +87,33 @@ type GoogleReviewPayload = {
   }
 }
 
+type GooglePlacePhotoPayload = {
+  name?: string
+  widthPx?: number
+  heightPx?: number
+  googleMapsUri?: string
+  authorAttributions?: Array<{
+    displayName?: string
+    uri?: string
+    photoUri?: string
+  }>
+}
+
 type GooglePlacePayload = {
   displayName?: GoogleLocalizedText
+  formattedAddress?: string
+  shortFormattedAddress?: string
   googleMapsUri?: string
   googleMapsLinks?: {
     placeUri?: string
     reviewsUri?: string
     writeAReviewUri?: string
   }
+  location?: {
+    latitude?: number
+    longitude?: number
+  }
+  photos?: GooglePlacePhotoPayload[]
   rating?: number
   userRatingCount?: number
   reviews?: GoogleReviewPayload[]
@@ -110,12 +150,74 @@ function numberOrZero(value: unknown) {
   return Number.isFinite(number) && number > 0 ? number : 0
 }
 
+function positiveNumber(value: unknown) {
+  const number = Number(value)
+  return Number.isFinite(number) && number > 0 ? number : undefined
+}
+
+function finiteNumber(value: unknown) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : undefined
+}
+
 function resolveApiKey() {
   return cleanString(
     process.env.GOOGLE_PLACES_API_KEY
     || process.env.GOOGLE_MAPS_API_KEY
     || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   )
+}
+
+async function resolveGooglePlacePhotoUri(photoName: string, apiKey: string) {
+  const safeName = cleanString(photoName)
+  if (!safeName || !apiKey) return ''
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_REVIEWS_TIMEOUT_MS)
+
+  try {
+    const url = new URL(`${GOOGLE_PLACE_PHOTO_MEDIA_BASE_URL}/${safeName}/media`)
+    url.searchParams.set('maxWidthPx', '900')
+    url.searchParams.set('maxHeightPx', '700')
+    url.searchParams.set('skipHttpRedirect', 'true')
+    url.searchParams.set('key', apiKey)
+
+    const response = await fetch(url.toString(), {
+      signal: controller.signal,
+      next: { revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS },
+    })
+
+    if (!response.ok) return ''
+
+    const payload = await response.json() as { photoUri?: string }
+    return cleanString(payload.photoUri)
+  } catch {
+    return ''
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function normalizePlacePhoto(
+  photo: GooglePlacePhotoPayload,
+  index: number,
+  apiKey: string
+): Promise<HomepageGooglePlacePhoto | null> {
+  const name = cleanString(photo.name)
+  if (!name) return null
+
+  const imageUri = await resolveGooglePlacePhotoUri(name, apiKey)
+  if (!imageUri) return null
+
+  return {
+    id: name || `google-place-photo-${index}`,
+    name,
+    imageUri,
+    googleMapsUri: cleanString(photo.googleMapsUri) || undefined,
+    authorName: cleanString(photo.authorAttributions?.[0]?.displayName) || undefined,
+    widthPx: positiveNumber(photo.widthPx),
+    heightPx: positiveNumber(photo.heightPx),
+  }
 }
 
 function resolveReviewUrl(
@@ -200,7 +302,14 @@ export async function getHomepageGoogleReviews(configMap: Record<string, string>
       .filter((review): review is HomepageGoogleReview => Boolean(review))
       .slice(0, 5)
 
-    if (!reviews.length) return null
+    const photos = (await Promise.all(
+      (payload.photos || [])
+        .slice(0, GOOGLE_PLACE_PHOTO_LIMIT)
+        .map((photo, index) => normalizePlacePhoto(photo, index, apiKey))
+    )).filter((photo): photo is HomepageGooglePlacePhoto => Boolean(photo))
+
+    const formattedAddress = cleanString(payload.formattedAddress)
+    if (!reviews.length && !photos.length && !formattedAddress) return null
 
     const googleMapsUri = cleanString(
       configMap.homepage_google_maps_url
@@ -210,10 +319,15 @@ export async function getHomepageGoogleReviews(configMap: Record<string, string>
 
     return {
       placeName: readLocalizedText(payload.displayName) || 'Guilherme Pilger',
+      formattedAddress: formattedAddress || undefined,
+      shortFormattedAddress: cleanString(payload.shortFormattedAddress) || undefined,
+      latitude: finiteNumber(payload.location?.latitude),
+      longitude: finiteNumber(payload.location?.longitude),
       rating: numberOrZero(payload.rating),
       userRatingCount: Math.trunc(numberOrZero(payload.userRatingCount)),
       googleMapsUri,
       reviewUrl: resolveReviewUrl(configMap, placeId, payload.googleMapsLinks?.writeAReviewUri, googleMapsUri),
+      photos,
       reviews,
     }
   } catch (error) {

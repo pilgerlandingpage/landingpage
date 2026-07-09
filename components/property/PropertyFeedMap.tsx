@@ -596,8 +596,12 @@ export default function PropertyFeedMap({
     const mapView = viewOptions.some(view => view.value === selectedMapView) ? selectedMapView : fallbackView
     const safeLatLng = useMemo(() => normalizeLatLng(latLng), [latLng])
     const coordinateQuery = safeLatLng ? `${safeLatLng[0]},${safeLatLng[1]}` : ''
-    const googleMapsJsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    const googleMapsEmbedKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY || googleMapsJsKey
+    const googleMapsJsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_MAPS_JS === 'true'
+    const googleMapsEmbedEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_MAPS_EMBED === 'true'
+    const googleMapsJsKey = googleMapsJsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
+    const googleMapsEmbedKey = googleMapsEmbedEnabled
+        ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        : ''
     const fallbackStreetViewEmbedUrl = safeLatLng
         ? `https://maps.google.com/maps?layer=c&cbll=${safeLatLng[0]},${safeLatLng[1]}&cbp=12,0,0,0,0&output=svembed&hl=pt-BR`
         : ''

@@ -284,6 +284,25 @@ export default function PropertyFeedStyles() {
                 z-index: 1;
             }
 
+            .property-profile-avatar {
+                align-items: center;
+                background:
+                    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.24), transparent 34%),
+                    linear-gradient(145deg, #0f1724 0%, #263344 52%, #b8945f 100%);
+                border: 2px solid #fff;
+                border-radius: inherit;
+                color: #fff;
+                display: flex;
+                font-size: clamp(1.2rem, 6vw, 1.55rem);
+                font-weight: 900;
+                height: 100%;
+                justify-content: center;
+                letter-spacing: 0;
+                position: relative;
+                width: 100%;
+                z-index: 1;
+            }
+
             .property-profile-copy {
                 min-width: 0;
             }

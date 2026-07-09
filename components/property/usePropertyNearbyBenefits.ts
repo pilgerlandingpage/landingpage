@@ -336,7 +336,8 @@ export function usePropertyNearbyBenefits({
     const trackedRef = useRef(false)
     const [status, setStatus] = useState<LoadStatus>('idle')
     const [results, setResults] = useState<NearbyBenefitResult[]>([])
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const googlePlacesEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_PLACES === 'true'
+    const apiKey = googlePlacesEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
     const safeLatLng = useMemo(() => (isValidLatLng(latLng) ? latLng : null), [latLng])
 
     useEffect(() => {

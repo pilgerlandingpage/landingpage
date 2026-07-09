@@ -18,7 +18,7 @@ type YoutubeVideo = {
 }
 
 function cleanCaption(value?: string | null) {
-    return (value || 'Publicacao Guilherme Pilger').split('\n')[0].slice(0, 92)
+    return (value || 'Publicação Pilger').split('\n')[0].slice(0, 92)
 }
 
 export function PropertyInstagramStrip() {
@@ -111,7 +111,7 @@ export function PropertyLatestYoutubeVideo() {
     return (
         <section className="plp-youtube-latest" aria-label="Ultimo video publicado no YouTube">
             <div className="plp-section-head compact">
-                <span className="plp-kicker">YouTube Guilherme Pilger</span>
+                <span className="plp-kicker">Canal Pilger</span>
                 <h2>Último vídeo publicado no canal.</h2>
             </div>
 

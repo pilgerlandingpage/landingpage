@@ -1363,10 +1363,15 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
         () => places.filter(place => activeLayerSet.has(place.layer)),
         [activeLayerSet, places]
     )
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const googlePlacesEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_PLACES === 'true'
+    const apiKey = googlePlacesEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
 
     useEffect(() => {
         if (!activeLayers.length) {
+            return
+        }
+
+        if (!googlePlacesEnabled) {
             return
         }
 
@@ -1458,7 +1463,7 @@ function NearbyAmenitiesLayer({ activeLayers }: { activeLayers: MapAmenityLayer[
             map.off('moveend', scheduleLoad)
             map.off('zoomend', scheduleLoad)
         }
-    }, [activeLayers, apiKey, map])
+    }, [activeLayers, apiKey, googlePlacesEnabled, map])
 
     if (!activeLayers.length || visiblePlaces.length === 0) return null
 

@@ -59,7 +59,8 @@ type PropertyDesktopMediaShowcaseProps = {
 }
 
 function buildStaticPreviewUrl(type: 'street' | 'map', latLng?: [number, number] | null) {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
+    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
     if (!apiKey || !latLng) return null
 
     const [lat, lng] = latLng

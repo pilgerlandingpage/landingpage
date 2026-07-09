@@ -233,8 +233,8 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
 
             <style jsx>{`
                 .plp-continuation-rail {
-                    margin: 36px 44px 0;
-                    padding: 30px;
+                    margin: 26px 22px 0;
+                    padding: 22px;
                     border: 1px solid rgba(184, 148, 95, 0.18);
                     border-radius: var(--plp-radius);
                     background:
@@ -315,8 +315,8 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
 
                 @media (max-width: 760px) {
                     .plp-continuation-rail {
-                        margin: 24px 14px 0;
-                        padding: 18px 14px;
+                        margin: 20px 9px 0;
+                        padding: 16px 10px 18px;
                     }
 
                     .plp-continuation-head {

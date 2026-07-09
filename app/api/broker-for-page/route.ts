@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { GLOBAL_PROPERTY_BROKER_NAME, GLOBAL_PROPERTY_WHATSAPP_PHONE, resolveWhatsAppInstancePhotoUrl } from '@/lib/properties/responsible-broker'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,7 @@ type InstanceRow = {
     instance_type: string | null
     status: string | null
     phone_number: string | null
+    instance_token: string | null
     live_data: Record<string, any> | null
     connected_at: string | null
     created_at: string | null
@@ -33,6 +35,16 @@ function normalizePhone(value: unknown): string | null {
         digits = `55${digits}`
     }
     return digits
+}
+
+function normalizeName(value: unknown): string {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
 }
 
 function extractLivePhone(liveData: unknown): string | null {
@@ -53,9 +65,23 @@ function extractLivePhone(liveData: unknown): string | null {
 }
 
 function isGlobalInstance(instance: InstanceRow): boolean {
-    const type = String(instance.instance_type || '').trim().toLowerCase()
-    const name = String(instance.instance_name || '').trim().toLowerCase()
+    const type = normalizeName(instance.instance_type)
+    const name = normalizeName(instance.instance_name)
     return type === 'global' || name === 'agente global' || name === 'whatsapp global'
+}
+
+function isGlobalBrokerName(name: unknown): boolean {
+    const normalizedName = normalizeName(name)
+    return normalizedName.includes('global') || normalizedName === 'whatsapp global' || normalizedName === 'agente global'
+}
+
+function isGuilhermeBrokerName(name: unknown): boolean {
+    const normalizedName = normalizeName(name)
+    return (
+        normalizedName.includes('guilherme pilger') ||
+        normalizedName.includes('guilherme pliger') ||
+        normalizedName.includes('comercial guilherme')
+    )
 }
 
 function statusRank(status: unknown): number {
@@ -90,7 +116,7 @@ async function getAssignedBrokerId(supabase: any, slug: string): Promise<string 
 async function getBrokerWhatsAppInstance(supabase: any, brokerId: string): Promise<InstanceRow | null> {
     const withLiveData = await supabase
         .from('whatsapp_instances')
-        .select('id, broker_id, instance_name, instance_type, status, phone_number, live_data, connected_at, created_at')
+        .select('id, broker_id, instance_name, instance_type, status, phone_number, instance_token, live_data, connected_at, created_at')
         .eq('broker_id', brokerId)
         .order('created_at', { ascending: false })
 
@@ -98,7 +124,7 @@ async function getBrokerWhatsAppInstance(supabase: any, brokerId: string): Promi
         ? withLiveData
         : await supabase
             .from('whatsapp_instances')
-            .select('id, broker_id, instance_name, instance_type, status, phone_number, connected_at, created_at')
+            .select('id, broker_id, instance_name, instance_type, status, phone_number, instance_token, connected_at, created_at')
             .eq('broker_id', brokerId)
             .order('created_at', { ascending: false })
 
@@ -110,6 +136,36 @@ async function getBrokerWhatsAppInstance(supabase: any, brokerId: string): Promi
     const instances = ((result.data || []) as InstanceRow[])
         .map(instance => ({ ...instance, live_data: instance.live_data || null }))
         .filter(instance => !isGlobalInstance(instance))
+        .sort((a, b) => {
+            const byStatus = statusRank(a.status) - statusRank(b.status)
+            if (byStatus !== 0) return byStatus
+            return timeValue(b.connected_at || b.created_at) - timeValue(a.connected_at || a.created_at)
+        })
+
+    return instances[0] || null
+}
+
+async function getGlobalWhatsAppInstance(supabase: any): Promise<InstanceRow | null> {
+    const withLiveData = await supabase
+        .from('whatsapp_instances')
+        .select('id, broker_id, instance_name, instance_type, status, phone_number, instance_token, live_data, connected_at, created_at')
+        .order('created_at', { ascending: false })
+
+    const result = !withLiveData.error
+        ? withLiveData
+        : await supabase
+            .from('whatsapp_instances')
+            .select('id, broker_id, instance_name, instance_type, status, phone_number, instance_token, connected_at, created_at')
+            .order('created_at', { ascending: false })
+
+    if (result.error) {
+        console.warn('[broker-for-page] Global WhatsApp instance warning:', result.error.message)
+        return null
+    }
+
+    const instances = ((result.data || []) as InstanceRow[])
+        .map(instance => ({ ...instance, live_data: instance.live_data || null }))
+        .filter(isGlobalInstance)
         .sort((a, b) => {
             const byStatus = statusRank(a.status) - statusRank(b.status)
             if (byStatus !== 0) return byStatus
@@ -168,6 +224,27 @@ export async function GET(request: NextRequest) {
             matchedBroker = activeBrokers[0] || brokers[0]
         }
 
+        if (isGuilhermeBrokerName(matchedBroker.name) || isGlobalBrokerName(matchedBroker.name)) {
+            const globalInstance = await getGlobalWhatsAppInstance(supabase)
+            const phone = extractLivePhone(globalInstance?.live_data) ||
+                normalizePhone(globalInstance?.phone_number) ||
+                GLOBAL_PROPERTY_WHATSAPP_PHONE
+            const photoUrl = await resolveWhatsAppInstancePhotoUrl(globalInstance)
+
+            return NextResponse.json({
+                broker: {
+                    id: 'global',
+                    name: GLOBAL_PROPERTY_BROKER_NAME,
+                    phone,
+                    photo_url: photoUrl,
+                    greeting_message: 'Olá, quero falar com Guilherme Pilger sobre os imóveis.',
+                    whatsapp_instance_id: globalInstance?.id || null,
+                    whatsapp_instance_name: globalInstance?.instance_name || null,
+                    whatsapp_instance_status: globalInstance?.status || null,
+                }
+            })
+        }
+
         const whatsappInstance = await getBrokerWhatsAppInstance(supabase, matchedBroker.id)
         const phone = extractLivePhone(whatsappInstance?.live_data) ||
             normalizePhone(whatsappInstance?.phone_number) ||
@@ -178,7 +255,7 @@ export async function GET(request: NextRequest) {
                 id: matchedBroker.id,
                 name: matchedBroker.name,
                 phone,
-                photo_url: matchedBroker.photo_url,
+                photo_url: matchedBroker.photo_url || await resolveWhatsAppInstancePhotoUrl(whatsappInstance),
                 greeting_message: matchedBroker.greeting_message || 'Ola, gostaria de mais informacoes sobre os imoveis',
                 whatsapp_instance_id: whatsappInstance?.id || null,
                 whatsapp_instance_name: whatsappInstance?.instance_name || null,

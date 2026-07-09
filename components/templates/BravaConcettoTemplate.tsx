@@ -622,7 +622,8 @@ function buildStreetViewEmbedSrc(development: Development, latLng?: [number, num
 }
 
 function buildStaticStreetViewPreviewUrl(latLng?: [number, number] | null) {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
+    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
     if (!apiKey || !latLng) return null
 
     const [lat, lng] = latLng
@@ -641,7 +642,8 @@ function buildStaticStreetViewPreviewUrl(latLng?: [number, number] | null) {
 }
 
 function buildStaticMapPreviewUrl(latLng?: [number, number] | null) {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
+    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
     if (!apiKey || !latLng) return null
 
     const [lat, lng] = latLng

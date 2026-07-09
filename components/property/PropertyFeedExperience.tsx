@@ -87,7 +87,6 @@ const HISTORY_KEY = 'pilger_property_history'
 const WHATSAPP_PHONE = '5547992528080'
 const MAX_FEED_ITEMS = 72
 const STORIES_PER_PAGE = 5
-const DEFAULT_BROKER_PHOTO = '/images/eventos/guilherme-pilger.png'
 const GALLERY_SWIPE_THRESHOLD = 44
 const FEED_SWIPE_THRESHOLD = 56
 const FEED_VERTICAL_DOMINANCE = 1.1
@@ -175,7 +174,7 @@ function writeStorageList(key: string, list: string[]) {
 }
 
 function primaryImage(property: PropertyFeedItem) {
-    return property.featured_image || property.images?.find(Boolean) || 'https://via.placeholder.com/900x900?text=Guilherme+Pilger'
+    return property.featured_image || property.images?.find(Boolean) || 'https://via.placeholder.com/900x900?text=Imovel+Pilger'
 }
 
 function fallbackImage(event: SyntheticEvent<HTMLImageElement>, property: PropertyFeedItem) {
@@ -245,7 +244,7 @@ function connectedBrokerFor(property: PropertyFeedItem) {
 }
 
 function brokerPhotoFor(property: PropertyFeedItem) {
-    return connectedBrokerFor(property)?.photo_url || DEFAULT_BROKER_PHOTO
+    return connectedBrokerFor(property)?.photo_url || null
 }
 
 function brokerPhotoAltFor(property: PropertyFeedItem) {
@@ -572,6 +571,7 @@ export default function PropertyFeedExperience({ property, related }: Props) {
                 const copy = buildPropertyFeedCopy(item)
                 const contactPhone = contactPhoneFor(item)
                 const connectedBroker = connectedBrokerFor(item)
+                const brokerPhoto = brokerPhotoFor(item)
                 const whatsappMetadata = {
                     property_id: item.id,
                     title: copy.title,
@@ -726,13 +726,17 @@ export default function PropertyFeedExperience({ property, related }: Props) {
 
                             <section className="property-feed-profile">
                                 <div className="property-profile-photo" aria-label="Corretor responsavel">
-                                    <img
-                                        src={brokerPhotoFor(item)}
-                                        alt={brokerPhotoAltFor(item)}
-                                        onError={event => {
-                                            event.currentTarget.src = DEFAULT_BROKER_PHOTO
-                                        }}
-                                    />
+                                    {brokerPhoto ? (
+                                        <img
+                                            src={brokerPhoto}
+                                            alt={brokerPhotoAltFor(item)}
+                                            onError={event => {
+                                                event.currentTarget.style.display = 'none'
+                                            }}
+                                        />
+                                    ) : (
+                                        <span className="property-profile-avatar" aria-hidden="true">GP</span>
+                                    )}
                                 </div>
 
                                 <div className="property-profile-copy">

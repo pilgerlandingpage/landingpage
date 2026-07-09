@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -49,7 +49,7 @@ import { cleanPublicPropertyText, compactPublicPropertyText } from '@/lib/proper
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
-import { GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
+import { GLOBAL_PROPERTY_BROKER_NAME, GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 import { fetchPropertyPriceHistory, type PropertyPriceHistoryRow } from '@/lib/properties/price-history'
 import {
     buildMarketRadarAnalysis,
@@ -64,7 +64,6 @@ export function generateStaticParams() {
     return []
 }
 
-const BROKER_IMAGE = '/images/eventos/guilherme-pilger.png'
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const PROPERTY_MAP_MODAL_MIN_PRICE = 4000000
 const PROPERTY_MAP_MODAL_SELECT = [
@@ -451,7 +450,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
             : []
         const gallery = uniqueDevelopmentGallery([
-            { image: heroImage, title: name, category: 'Empreendimento' },
+            { image: heroImage, title: name, category: 'Condomínio' },
             ...developmentGallery,
             ...customGallery,
         ]).slice(0, 6)
@@ -467,7 +466,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             areaRange: asSafeText(development.areaRange ?? development.area_range, matchedUnit.area),
             suitesRange: asSafeText(development.suitesRange ?? development.suites_range, matchedUnit.suites),
             heroImage,
-            description: asSafeText(development.description, `Conheca o empreendimento ${name} e compare as unidades disponiveis antes da visita.`),
+            description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
             gallery,
             unit: matchedUnit,
         }
@@ -798,6 +797,15 @@ function formatCompactMoney(value?: number | string | null, fallback = 'Sob cons
     return formatMoney(amount)
 }
 
+function marketScalePosition(minValue: number, maxValue: number, targetValue: number, fallback = 50) {
+    if (!minValue || !maxValue || !targetValue || maxValue <= minValue) return fallback
+    return Math.max(0, Math.min(100, ((targetValue - minValue) / (maxValue - minValue)) * 100))
+}
+
+function marketScalePriceLabel(value: number, fallback: string) {
+    return value ? `${formatCompactMoney(Math.round(value))}/m²` : fallback
+}
+
 function getGallery(property: any) {
     return Array.from(new Set([property.featured_image, ...(property.images || [])].filter(Boolean) as string[]))
 }
@@ -1113,23 +1121,6 @@ async function getRelatedPropertyCandidates(supabase: any, property: any) {
     return fetchInternalMarketComparables(supabase, property) as Promise<RelatedPropertyCandidate[]>
 }
 
-function buildDetailItems(property: any, locationLabel: string, area: number) {
-    return [
-        property.property_type ? `Tipo: ${property.property_type}` : null,
-        locationLabel ? `Localização: ${locationLabel}` : null,
-        area > 0 ? `Área privativa: ${area.toLocaleString('pt-BR')} m²` : null,
-        property.area_total_m2 ? `Área total: ${Number(property.area_total_m2).toLocaleString('pt-BR')} m²` : null,
-        property.bedrooms ? `${property.bedrooms} dormitórios` : null,
-        property.suites ? `${property.suites} suítes` : null,
-        property.bathrooms ? `${property.bathrooms} banheiros` : null,
-        property.parking_spaces ? `${property.parking_spaces} vagas de garagem` : null,
-        property.condo_fee ? `Condomínio: ${formatMoney(Number(property.condo_fee))}` : null,
-        property.iptu ? `IPTU: ${formatMoney(Number(property.iptu))}` : null,
-        property.exclusive ? 'Exclusivo Guilherme Pilger' : null,
-        property.source_status ? `Condição: ${property.source_status}` : null,
-    ].filter(Boolean) as string[]
-}
-
 type PropertyDetailPageProps = {
     params: Promise<{ id: string }>
     canonicalize?: boolean
@@ -1194,14 +1185,13 @@ export default async function PropertyDetailPage({
     const viewStat = statTextParts(propertyViewCount, 'view', 'views')
     const saveStat = statTextParts(propertySaveCount, 'salvo', 'salvos')
     const contactPhone = responsibleBroker.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
-    const brokerCardName = responsibleBroker.is_connected
-        ? responsibleBroker.name
-        : responsibleBroker.legacy_name || 'Comercial Guilherme Pilger'
-    const brokerCardImage = responsibleBroker.is_connected && responsibleBroker.photo_url
-        ? responsibleBroker.photo_url
-        : BROKER_IMAGE
+    const isGlobalBrokerCard = responsibleBroker.source === 'global'
+    const brokerCardName = responsibleBroker.name || GLOBAL_PROPERTY_BROKER_NAME
+    const brokerCardImage = responsibleBroker.photo_url || null
     const brokerCreci = formatBrokerCreci(responsibleBroker.creci)
-    const brokerCredentialLine = brokerCreci
+    const brokerCredentialLine = isGlobalBrokerCard
+        ? 'Atendimento oficial Pilger'
+        : brokerCreci
         ? `Corretor de imóveis | ${brokerCreci}`
         : 'Corretor de imóveis'
     const gallery = getGallery(property)
@@ -1218,11 +1208,12 @@ export default async function PropertyDetailPage({
         ? [...locationParts.slice(1), property.state].filter(Boolean).join(' - ')
         : property.state || ''
     const brokerPropertiesParams = new URLSearchParams()
-    const brokerFilterName = responsibleBroker.legacy_name || brokerCardName
+    const brokerFilterName = isGlobalBrokerCard ? '' : (responsibleBroker.legacy_name || brokerCardName)
     if (brokerFilterName) brokerPropertiesParams.set('broker', brokerFilterName)
-    if (responsibleBroker.legacy_login) brokerPropertiesParams.set('brokerLogin', responsibleBroker.legacy_login)
+    if (!isGlobalBrokerCard && responsibleBroker.legacy_login) brokerPropertiesParams.set('brokerLogin', responsibleBroker.legacy_login)
     const brokerPropertiesQuery = brokerPropertiesParams.toString()
     const brokerPropertiesHref = brokerPropertiesQuery ? `/busca?${brokerPropertiesQuery}` : '/busca'
+    const brokerPropertiesLabel = isGlobalBrokerCard ? 'Ver imóveis selecionados' : 'Ver imóveis do especialista'
     const relatedSearchParams = new URLSearchParams()
     if (displayCity) relatedSearchParams.set('city', displayCity)
     if (displayNeighborhood) relatedSearchParams.set('neighborhood', displayNeighborhood)
@@ -1261,9 +1252,9 @@ export default async function PropertyDetailPage({
         paragraphs: narrativeParagraphs,
         mainBenefitTag,
     })
-    const detailItems = buildDetailItems(property, locationLabel, area)
     const featureItems = amenities.slice(0, 24)
     const projectItems = amenities.slice(24, 48)
+    const hasTechnicalLists = featureItems.length > 0 || projectItems.length > 0
     const propertyPath = propertyDetailsPath(property)
     const propertyUrl = absoluteUrl(propertyPath)
     const propertyTrackingMetadata = {
@@ -1308,82 +1299,60 @@ export default async function PropertyDetailPage({
     ])
     const marketHistory = buildMarketHistory(property, relatedCandidates, area, locationLabel, priceHistoryEvents)
     const related = selectRelatedProperties(property, relatedCandidates)
-    const marketTrackingMetadata = {
-        ...propertyTrackingMetadata,
-        section_id: 'historico-precos',
-        section_label: 'Histórico e valor',
-        location_label: locationLabel || null,
-        current_price_m2: marketHistory.currentPriceM2 || null,
-        median_m2: marketHistory.medianM2 || null,
-        delta_to_median: marketHistory.deltaToMedian,
-        comparable_count: marketHistory.comparableCount,
-    }
-    const contextualLeadCtas = [
-        {
-            label: 'Análise de valor',
-            icon: <BarChart3 size={15} />,
-            template: 'property-context-value-analysis',
-            message: `Olá, quero receber a análise de valor deste imóvel ${propertyUrl}`,
-            metadata: {
-                ...marketTrackingMetadata,
-                tracking_event_type: 'property_value_reading_requested',
-                premium_intent: 'value_reading',
-                requested_action: 'Receber leitura de valor',
-                cta_context: 'value_analysis',
-                cta_label: 'Análise de valor',
-            },
-        },
-        {
-            label: 'Visita na região',
-            icon: <MapPin size={15} />,
-            template: 'property-context-location-visit',
-            message: `Olá, quero entender a localização e agendar uma visita deste imóvel ${propertyUrl}`,
-            metadata: {
-                ...propertyTrackingMetadata,
-                tracking_event_type: 'property_private_visit_requested',
-                premium_intent: 'private_visit',
-                requested_action: 'Agendar visita privada',
-                section_id: 'localizacao',
-                section_label: 'Localização',
-                location_label: locationLabel || null,
-                has_coordinates: Boolean(propertyMapLatLng),
-                cta_context: 'location_visit',
-                cta_label: 'Visita na região',
-            },
-        },
-        {
-            label: 'Negociação reservada',
-            icon: <CheckCircle2 size={15} />,
-            template: 'property-context-reserved-negotiation',
-            message: `Olá, quero tratar disponibilidade e negociação reservada deste imóvel ${propertyUrl}`,
-            metadata: {
-                ...propertyTrackingMetadata,
-                tracking_event_type: 'property_reserved_negotiation_requested',
-                premium_intent: 'reserved_negotiation',
-                requested_action: 'Iniciar negociação reservada',
-                cta_context: 'reserved_negotiation',
-                cta_label: 'Negociação reservada',
-            },
-        },
-        {
-            label: 'Comparar similares',
-            icon: <Home size={15} />,
-            template: 'property-context-similar-options',
-            message: `Olá, quero comparar este imóvel com opções semelhantes ${propertyUrl}`,
-            metadata: {
-                ...propertyTrackingMetadata,
-                tracking_event_type: 'property_availability_requested',
-                premium_intent: 'availability',
-                requested_action: 'Comparar opções e disponibilidade',
-                section_id: 'imoveis-semelhantes',
-                section_label: 'Imóveis semelhantes',
-                comparable_count: relatedCandidates.length,
-                related_visible_count: related.length,
-                cta_context: 'similar_options',
-                cta_label: 'Comparar similares',
-            },
-        },
-    ]
+    const marketMedianPosition = marketScalePosition(marketHistory.minM2, marketHistory.maxM2, marketHistory.medianM2)
+    const marketScaleStyle = {
+        '--market-position': `${marketHistory.position}%`,
+        '--market-median-position': `${marketMedianPosition}%`,
+    } as CSSProperties
+    const marketScaleMinLabel = marketScalePriceLabel(marketHistory.minM2, 'Entrada')
+    const marketScaleMedianLabel = marketScalePriceLabel(marketHistory.medianM2, 'Mediana')
+    const marketScaleMaxLabel = marketScalePriceLabel(marketHistory.maxM2, 'Topo')
+    const marketScaleCurrentLabel = marketScalePriceLabel(marketHistory.currentPriceM2, 'Sob consulta')
+    const marketScaleDeltaLabel = marketHistory.deltaToMedian === null ? 'Sem amostra suficiente' : `${formatPercent(marketHistory.deltaToMedian)} vs. mediana`
+    const marketScaleSummary = marketHistory.deltaToMedian === null
+        ? 'Amostra em formação'
+        : marketHistory.positioning.label
+    const renderMarketScale = (className: string) => (
+        <div
+            className={className}
+            style={marketScaleStyle}
+            aria-label={`Radar de valor por metro quadrado: este imóvel em ${marketScaleCurrentLabel}, mediana em ${marketScaleMedianLabel}, ${marketScaleDeltaLabel}.`}
+        >
+            <div className="plp-market-scale-head">
+                <span>Preço por m² na amostra</span>
+                <strong>{marketScaleDeltaLabel}</strong>
+            </div>
+            <div className="plp-market-scale">
+                <div className="plp-market-scale-track" aria-hidden="true">
+                    <span className="plp-market-scale-zone plp-market-scale-zone-entry">Entrada</span>
+                    <span className="plp-market-scale-zone plp-market-scale-zone-mid">Mediana</span>
+                    <span className="plp-market-scale-zone plp-market-scale-zone-top">Topo</span>
+                </div>
+                <span className="plp-market-scale-marker plp-market-scale-marker-current">
+                    <span>Este imóvel</span>
+                    <strong>{marketScaleCurrentLabel}</strong>
+                </span>
+                <span className="plp-market-scale-marker plp-market-scale-marker-median">
+                    <span>Mediana</span>
+                    <strong>{marketScaleMedianLabel}</strong>
+                </span>
+            </div>
+            <div className="plp-market-axis">
+                <span>
+                    <b>Entrada</b>
+                    <small>{marketScaleMinLabel}</small>
+                </span>
+                <span>
+                    <b>{marketScaleSummary}</b>
+                    <small>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis` : 'Base em formação'}</small>
+                </span>
+                <span>
+                    <b>Topo</b>
+                    <small>{marketScaleMaxLabel}</small>
+                </span>
+            </div>
+        </div>
+    )
     const mobileExploreMapPropertiesById = new Map<string, ReturnType<typeof toMobileExploreMapProperty>>()
     for (const item of propertyMapModalRows || []) {
         const mapped = toMobileExploreMapProperty(item)
@@ -1482,12 +1451,12 @@ export default async function PropertyDetailPage({
     ]
     const developmentHref = developmentContext?.slug ? `/${developmentContext.slug}` : ''
     const developmentCtaMessage = developmentContext
-        ? `Ola, vi este imovel e quero conhecer o empreendimento ${developmentContext.name}: ${absoluteUrl(developmentHref || propertyPath)}`
+        ? `Olá, vi este imóvel e quero conhecer o condomínio ${developmentContext.name}: ${absoluteUrl(developmentHref || propertyPath)}`
         : ''
     const developmentGalleryPreview = developmentContext?.gallery?.length
         ? developmentContext.gallery
         : developmentContext
-            ? [{ image: developmentContext.heroImage, title: developmentContext.name, category: 'Empreendimento' }]
+            ? [{ image: developmentContext.heroImage, title: developmentContext.name, category: 'Condomínio' }]
             : []
 
     const renderMobileMediaItem = (item: MobilePropertyMediaItem, index: number, keyPrefix: string) => {
@@ -1706,16 +1675,17 @@ export default async function PropertyDetailPage({
                             </div>
                         </section>
 
-                        <section id="mobile-ficha" className="plp-mobile-card plp-mobile-card--technical">
-                            <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
-                                <h2>Ficha técnica</h2>
-                            </div>
-                            <div className="plp-mobile-classic-lists">
-                                <InfoList title="Detalhes do imóvel" items={detailItems} />
-                                {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
-                                {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
-                            </div>
-                        </section>
+                        {hasTechnicalLists && (
+                            <section id="mobile-ficha" className="plp-mobile-card plp-mobile-card--technical">
+                                <div className="plp-mobile-card-head plp-mobile-card-head--single-title">
+                                    <h2>Ficha técnica</h2>
+                                </div>
+                                <div className="plp-mobile-classic-lists">
+                                    {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
+                                    {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
+                                </div>
+                            </section>
+                        )}
 
                         <section className="plp-mobile-card plp-mobile-card--nearby">
                             <PropertyNearbyBenefits
@@ -1750,19 +1720,7 @@ export default async function PropertyDetailPage({
                                     <strong>{marketHistory.deltaToMedian === null ? 'Sem amostra' : formatPercent(marketHistory.deltaToMedian)}</strong>
                                 </div>
                             </div>
-                            <div className="plp-mobile-market-chart" aria-label="Gráfico de posicionamento do preço por metro quadrado">
-                                <svg viewBox="0 0 100 44" preserveAspectRatio="none">
-                                    <path d="M0 36 H100" />
-                                    {marketHistory.chartPoints && <polyline points={marketHistory.chartPoints} />}
-                                    <line x1={marketHistory.position} x2={marketHistory.position} y1="6" y2="39" />
-                                    <circle cx={marketHistory.position} cy="12" r="2.6" />
-                                </svg>
-                                <div className="plp-mobile-market-axis">
-                                    <span>Entrada</span>
-                                    <span>Mediana</span>
-                                    <span>Topo</span>
-                                </div>
-                            </div>
+                            {renderMarketScale('plp-mobile-market-chart')}
                             <div className="plp-mobile-market-positioning">
                                 <strong>{marketHistory.positioning.label}</strong>
                                 <span>{marketHistory.positioning.description}</span>
@@ -1791,19 +1749,19 @@ export default async function PropertyDetailPage({
                         {developmentContext && (
                             <section className="plp-mobile-card plp-mobile-development-section" aria-labelledby="mobile-empreendimento-title">
                                 <div className="plp-mobile-card-head">
-                                    <span className="plp-kicker">Empreendimento</span>
-                                    <h2 id="mobile-empreendimento-title">Conheca o {developmentContext.name}.</h2>
+                                    <span className="plp-kicker">Condomínio</span>
+                                    <h2 id="mobile-empreendimento-title">Conheça o condomínio {developmentContext.name}.</h2>
                                 </div>
                                 <div className="plp-mobile-development-gallery">
                                     {developmentGalleryPreview.slice(0, 4).map((item, index) => (
                                         <figure key={`${item.image}-${index}`}>
                                             <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
-                                            <figcaption>{index === 0 ? 'Empreendimento' : item.category}</figcaption>
+                                            <figcaption>{index === 0 ? 'Condomínio' : item.category}</figcaption>
                                         </figure>
                                     ))}
                                 </div>
                                 <p className="plp-mobile-development-copy">
-                                    Este imovel faz parte do {developmentContext.name}. Veja imagens, contexto do empreendimento e unidades disponiveis antes de conversar com o especialista.
+                                    Veja imagens, contexto do condomínio e unidades disponíveis antes de conversar com o especialista.
                                 </p>
                                 <div className="plp-mobile-development-facts">
                                     <span><MapPin size={14} /> {developmentContext.locationName}</span>
@@ -1813,7 +1771,7 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-mobile-development-actions">
                                     <Link href={developmentHref || '/busca'}>
-                                        Conhecer empreendimento
+                                        Conhecer condomínio
                                         <ArrowRight size={15} />
                                     </Link>
                                     <WhatsAppCaptureLink
@@ -1825,11 +1783,11 @@ export default async function PropertyDetailPage({
                                             ...propertyTrackingMetadata,
                                             tracking_event_type: 'property_development_context_requested',
                                             section_id: 'empreendimento-do-imovel',
-                                            section_label: 'Empreendimento do imovel',
+                                            section_label: 'Condomínio do imóvel',
                                             development_slug: developmentContext.slug,
                                             development_name: developmentContext.name,
                                             cta_context: 'property_development_mobile',
-                                            cta_label: 'Falar sobre empreendimento',
+                                            cta_label: 'Falar sobre condomínio',
                                         }}
                                     >
                                         Falar com especialista
@@ -1878,7 +1836,7 @@ export default async function PropertyDetailPage({
 
                         <section className="plp-mobile-card plp-mobile-broker-card">
                             <div className="plp-mobile-broker-head">
-                                <img src={brokerCardImage} alt={brokerCardName} />
+                                <BrokerAvatar image={brokerCardImage} name={brokerCardName} />
                                 <div>
                                     <span className="plp-kicker">Especialista</span>
                                     <h2>{brokerCardName}</h2>
@@ -1905,7 +1863,7 @@ export default async function PropertyDetailPage({
                             </WhatsAppCaptureLink>
                             <Link href={brokerPropertiesHref} className="plp-mobile-broker-properties-link">
                                 <Home size={15} />
-                                Ver imóveis do especialista
+                                {brokerPropertiesLabel}
                             </Link>
                         </section>
 
@@ -1973,39 +1931,52 @@ export default async function PropertyDetailPage({
                     </div>
 
                     <div className="plp-main-column plp-content-column">
-                        <section id="experiencia" className="plp-section plp-copy-section">
-                            <span className="plp-kicker">Visão geral</span>
-                            <h2>{displayTitle}</h2>
-                            <div className="plp-narrative">
-                                {narrativeParagraphs.map((paragraph, index) => (
-                                    <p key={index}>{paragraph}</p>
-                                ))}
-                            </div>
-                        </section>
+                        <div className="plp-overview-facts-grid">
+                            <section id="experiencia" className="plp-section plp-copy-section plp-summary-card">
+                                <span className="plp-kicker">Visão geral</span>
+                                <h2>{displayTitle}</h2>
+                                <div className="plp-narrative">
+                                    {narrativeParagraphs.map((paragraph, index) => (
+                                        <p key={index}>{paragraph}</p>
+                                    ))}
+                                </div>
+                            </section>
 
-                        <section id="ficha" className="plp-section">
-                            <div className="plp-section-head">
-                                <span className="plp-kicker">Ficha rápida</span>
+                            <section id="ficha" className="plp-section plp-summary-card plp-quick-facts-card">
+                                <div className="plp-section-head compact">
+                                    <span className="plp-kicker">Ficha rápida</span>
+                                </div>
+                                <div className="plp-spec-grid">
+                                    {area > 0 && <SpecCard icon={<Ruler size={21} />} label="Área" value={`${area.toLocaleString('pt-BR')} m²`} />}
+                                    {suiteCount > 0 && <SpecCard icon={<BedDouble size={21} />} label="Configuração" value={`${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}`} />}
+                                    {bathroomsCount > 0 && <SpecCard icon={<Bath size={21} />} label="Banheiros" value={String(bathroomsCount)} />}
+                                    {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
+                                    <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
+                                </div>
+                            </section>
+                        </div>
+
+                        {(hasTechnicalLists || propertyMapLatLng) && (
+                            <div className={`plp-technical-location-grid ${hasTechnicalLists && propertyMapLatLng ? '' : 'single'}`.trim()}>
+                                {hasTechnicalLists && (
+                                    <section className="plp-section plp-technical-details">
+                                        <div className="plp-classic-lists">
+                                            {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
+                                            {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
+                                        </div>
+                                    </section>
+                                )}
+                                {propertyMapLatLng && (
+                                    <PropertyNearbyBenefits
+                                        propertyId={property.id}
+                                        title={displayTitle}
+                                        latLng={propertyMapLatLng}
+                                        locationLabel={locationLabel || mapLocation || displayCity}
+                                        className="plp-nearby-benefits--compact"
+                                    />
+                                )}
                             </div>
-                            <div className="plp-spec-grid">
-                                {area > 0 && <SpecCard icon={<Ruler size={21} />} label="Área" value={`${area.toLocaleString('pt-BR')} m²`} />}
-                                {suiteCount > 0 && <SpecCard icon={<BedDouble size={21} />} label="Configuração" value={`${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}`} />}
-                                {bathroomsCount > 0 && <SpecCard icon={<Bath size={21} />} label="Banheiros" value={String(bathroomsCount)} />}
-                                {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
-                                <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
-                            </div>
-                            <div className="plp-classic-lists plp-classic-lists--before-nearby">
-                                <InfoList title="Detalhes do imóvel" items={detailItems} />
-                                {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
-                                {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
-                            </div>
-                            <PropertyNearbyBenefits
-                                propertyId={property.id}
-                                title={displayTitle}
-                                latLng={propertyMapLatLng}
-                                locationLabel={locationLabel || mapLocation || displayCity}
-                            />
-                        </section>
+                        )}
 
                         <section id="historico-precos" className="plp-section plp-market-history">
                             <div className="plp-section-head">
@@ -2018,56 +1989,76 @@ export default async function PropertyDetailPage({
                                         <span><BarChart3 size={16} /> Radar de valor</span>
                                         <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis | confiança ${marketHistory.confidenceLabel}` : 'Amostra em formação'}</strong>
                                     </div>
-                                    <div className="plp-market-metrics">
-                                        <div>
-                                            <small>Valor anunciado</small>
-                                            <strong>{formatCompactMoney(property.price)}</strong>
+                                    <div className="plp-market-dashboard">
+                                        <div className="plp-market-metrics">
+                                            <div>
+                                                <small>Valor anunciado</small>
+                                                <strong>{formatCompactMoney(property.price)}</strong>
+                                            </div>
+                                            <div>
+                                                <small>Área usada</small>
+                                                <strong>{marketHistory.currentArea ? `${Math.round(marketHistory.currentArea).toLocaleString('pt-BR')} m²` : 'Sob consulta'}</strong>
+                                            </div>
+                                            <div>
+                                                <small>Preço por m²</small>
+                                                <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'}</strong>
+                                            </div>
+                                            <div>
+                                                <small>Mediana regional</small>
+                                                <strong>{marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'}</strong>
+                                            </div>
+                                            <div>
+                                                <small>Dif. vs mediana</small>
+                                                <strong>{formatPercent(marketHistory.deltaToMedian)}</strong>
+                                            </div>
+                                            <div>
+                                                <small>Amostra bruta</small>
+                                                <strong>{marketHistory.rawComparableCount ? `${marketHistory.rawComparableCount} ativos` : 'Em curadoria'}</strong>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <small>Área usada</small>
-                                            <strong>{marketHistory.currentArea ? `${Math.round(marketHistory.currentArea).toLocaleString('pt-BR')} m²` : 'Sob consulta'}</strong>
-                                        </div>
-                                        <div>
-                                            <small>Preço por m²</small>
-                                            <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'}</strong>
-                                        </div>
-                                        <div>
-                                            <small>Mediana regional</small>
-                                            <strong>{marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'}</strong>
-                                        </div>
-                                        <div>
-                                            <small>Dif. vs mediana</small>
-                                            <strong>{formatPercent(marketHistory.deltaToMedian)}</strong>
-                                        </div>
-                                        <div>
-                                            <small>Amostra bruta</small>
-                                            <strong>{marketHistory.rawComparableCount ? `${marketHistory.rawComparableCount} ativos` : 'Em curadoria'}</strong>
-                                        </div>
+                                        {renderMarketScale('plp-market-chart')}
+                                        <aside className="plp-market-history-panel" aria-label="Histórico de preço e base local">
+                                            <div className="plp-market-card-head">
+                                                <span>Histórico de preço</span>
+                                                <strong>Mercado local</strong>
+                                            </div>
+                                            <div className="plp-market-history-summary">
+                                                <span>
+                                                    <small>Recorte</small>
+                                                    <strong>{locationLabel || displayCity || 'Litoral SC'}</strong>
+                                                </span>
+                                                <span>
+                                                    <small>Base</small>
+                                                    <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis` : 'Em formação'}</strong>
+                                                </span>
+                                            </div>
+                                            <div className="plp-price-history-list">
+                                                {marketHistory.timeline.map((event, index) => (
+                                                    <div className="plp-price-history-item" key={`${event.title}-${index}`}>
+                                                        <span>{event.date}</span>
+                                                        <div>
+                                                            <strong>{event.title}</strong>
+                                                            <small>{event.note}</small>
+                                                        </div>
+                                                        <b>{event.value}</b>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </aside>
                                     </div>
-                                    <div className="plp-market-chart" aria-label="Gráfico de posicionamento do preço por metro quadrado">
-                                        <svg viewBox="0 0 100 44" preserveAspectRatio="none">
-                                            <path d="M0 36 H100" />
-                                            {marketHistory.chartPoints && <polyline points={marketHistory.chartPoints} />}
-                                            <line x1={marketHistory.position} x2={marketHistory.position} y1="6" y2="39" />
-                                            <circle cx={marketHistory.position} cy="12" r="2.6" />
-                                        </svg>
-                                        <div className="plp-market-axis">
-                                            <span>Entrada</span>
-                                            <span>Mediana</span>
-                                            <span>Topo</span>
+                                    <div className="plp-market-insight-grid">
+                                        <div className="plp-market-positioning">
+                                            <strong>{marketHistory.positioning.label}</strong>
+                                            <span>{marketHistory.positioning.description}</span>
+                                            {marketHistory.percentile !== null && (
+                                                <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
+                                            )}
                                         </div>
+                                        <p className="plp-market-note">
+                                            <TrendingUp size={15} />
+                                            {marketHistory.reading}
+                                        </p>
                                     </div>
-                                    <div className="plp-market-positioning">
-                                        <strong>{marketHistory.positioning.label}</strong>
-                                        <span>{marketHistory.positioning.description}</span>
-                                        {marketHistory.percentile !== null && (
-                                            <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
-                                        )}
-                                    </div>
-                                    <p className="plp-market-note">
-                                        <TrendingUp size={15} />
-                                        {marketHistory.reading}
-                                    </p>
                                     <details className="plp-market-method">
                                         <summary>Como o sistema calcula</summary>
                                         <ul>
@@ -2078,87 +2069,8 @@ export default async function PropertyDetailPage({
                                         </ul>
                                     </details>
                                 </article>
-
-                                <article className="plp-market-card plp-price-history-card">
-                                    <div className="plp-market-card-head">
-                                        <span>Histórico de preço</span>
-                                        <strong>Mercado local</strong>
-                                    </div>
-                                    <div className="plp-price-history-list">
-                                        {marketHistory.timeline.map((event, index) => (
-                                            <div className="plp-price-history-item" key={`${event.title}-${index}`}>
-                                                <span>{event.date}</span>
-                                                <div>
-                                                    <strong>{event.title}</strong>
-                                                    <small>{event.note}</small>
-                                                </div>
-                                                <b>{event.value}</b>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </article>
                             </div>
                         </section>
-
-                        {developmentContext && (
-                            <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band">
-                                <div className="plp-development-context-copy">
-                                    <span className="plp-kicker">Empreendimento vinculado</span>
-                                    <h2>Este imovel faz parte do {developmentContext.name}.</h2>
-                                    <p>
-                                        Conheca o empreendimento completo, veja imagens do projeto e compare as unidades disponiveis antes de decidir a visita.
-                                    </p>
-                                    <div className="plp-development-context-facts">
-                                        <span><MapPin size={15} /> {developmentContext.locationName}</span>
-                                        <span><Home size={15} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades ativas` : 'Unidades sob consulta'}</span>
-                                        <span><BarChart3 size={15} /> {developmentContext.priceRange}</span>
-                                        <span><Ruler size={15} /> {developmentContext.areaRange}</span>
-                                        <span><BedDouble size={15} /> {developmentContext.suitesRange}</span>
-                                    </div>
-                                    <div className="plp-development-context-unit">
-                                        <small>Unidade relacionada</small>
-                                        <strong>{developmentContext.unit.title}</strong>
-                                        <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
-                                    </div>
-                                    <div className="plp-development-context-actions">
-                                        <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
-                                            Conhecer empreendimento
-                                            <ArrowRight size={16} />
-                                        </Link>
-                                        <WhatsAppCaptureLink
-                                            phone={contactPhone}
-                                            message={developmentCtaMessage}
-                                            slug="imovel"
-                                            template="property-development-context"
-                                            metadata={{
-                                                ...propertyTrackingMetadata,
-                                                tracking_event_type: 'property_development_context_requested',
-                                                section_id: 'empreendimento-do-imovel',
-                                                section_label: 'Empreendimento do imovel',
-                                                development_slug: developmentContext.slug,
-                                                development_name: developmentContext.name,
-                                                cta_context: 'property_development_desktop',
-                                                cta_label: 'Falar sobre empreendimento',
-                                            }}
-                                            className="plp-development-secondary-link"
-                                        >
-                                            Falar sobre o empreendimento
-                                        </WhatsAppCaptureLink>
-                                    </div>
-                                </div>
-                                <div className="plp-development-context-gallery" aria-label={`Imagens do empreendimento ${developmentContext.name}`}>
-                                    {developmentGalleryPreview.slice(0, 5).map((item, index) => (
-                                        <figure key={`${item.image}-${index}`}>
-                                            <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
-                                            <figcaption>
-                                                <span>{index === 0 ? 'Empreendimento' : item.category}</span>
-                                                <strong>{item.title}</strong>
-                                            </figcaption>
-                                        </figure>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
 
                     </div>
 
@@ -2223,32 +2135,75 @@ export default async function PropertyDetailPage({
                             >
                                 Enviar interesse
                             </WhatsAppCaptureLink>
-                            <div className="plp-context-cta-list" aria-label="Intencoes rapidas">
-                                {contextualLeadCtas.map((cta) => (
-                                    <WhatsAppCaptureLink
-                                        key={cta.template}
-                                        phone={contactPhone}
-                                        message={cta.message}
-                                        slug="imovel"
-                                        template={cta.template}
-                                        metadata={cta.metadata}
-                                        className="plp-context-cta"
-                                    >
-                                        {cta.icon}
-                                        <span>{cta.label}</span>
-                                    </WhatsAppCaptureLink>
-                                ))}
-                            </div>
                         </div>
 
                         <div className="plp-side-card plp-broker-card">
-                            <img src={brokerCardImage} alt={brokerCardName} />
+                            <BrokerAvatar image={brokerCardImage} name={brokerCardName} />
                             <div>
                                 <h3>{brokerCardName}</h3>
                                 <p>{brokerCredentialLine}</p>
                             </div>
                         </div>
                     </aside>
+
+                    {developmentContext && (
+                        <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band">
+                            <div className="plp-development-context-copy">
+                                <h2>Conheça o condomínio {developmentContext.name}.</h2>
+                                <p>
+                                    Veja imagens do projeto, contexto do condomínio e compare as unidades disponíveis antes de decidir a visita.
+                                </p>
+                                <div className="plp-development-context-facts">
+                                    <span><MapPin size={15} /> {developmentContext.locationName}</span>
+                                    <span><Home size={15} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades ativas` : 'Unidades sob consulta'}</span>
+                                    <span><BarChart3 size={15} /> {developmentContext.priceRange}</span>
+                                    <span><Ruler size={15} /> {developmentContext.areaRange}</span>
+                                    <span><BedDouble size={15} /> {developmentContext.suitesRange}</span>
+                                </div>
+                                <div className="plp-development-context-unit">
+                                    <small>Unidade relacionada</small>
+                                    <strong>{developmentContext.unit.title}</strong>
+                                    <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
+                                </div>
+                                <div className="plp-development-context-actions">
+                                    <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
+                                        Conhecer condomínio
+                                        <ArrowRight size={16} />
+                                    </Link>
+                                    <WhatsAppCaptureLink
+                                        phone={contactPhone}
+                                        message={developmentCtaMessage}
+                                        slug="imovel"
+                                        template="property-development-context"
+                                        metadata={{
+                                            ...propertyTrackingMetadata,
+                                            tracking_event_type: 'property_development_context_requested',
+                                            section_id: 'empreendimento-do-imovel',
+                                            section_label: 'Condomínio do imóvel',
+                                            development_slug: developmentContext.slug,
+                                            development_name: developmentContext.name,
+                                            cta_context: 'property_development_desktop',
+                                            cta_label: 'Falar sobre condomínio',
+                                        }}
+                                        className="plp-development-secondary-link"
+                                    >
+                                        Falar sobre o condomínio
+                                    </WhatsAppCaptureLink>
+                                </div>
+                            </div>
+                            <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${developmentContext.name}`}>
+                                {developmentGalleryPreview.slice(0, 5).map((item, index) => (
+                                    <figure key={`${item.image}-${index}`}>
+                                        <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
+                                        <figcaption>
+                                            <span>{index === 0 ? 'Condomínio' : item.category}</span>
+                                            <strong>{item.title}</strong>
+                                        </figcaption>
+                                    </figure>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </section>
 
                 {related.length > 0 && (
@@ -2349,6 +2304,26 @@ export default async function PropertyDetailPage({
             />
         </main>
         </>
+    )
+}
+
+function BrokerAvatar({ image, name }: { image: string | null; name: string }) {
+    if (image) {
+        return <img src={image} alt={name} />
+    }
+
+    const initials = name
+        .split(/\s+/)
+        .map(part => part[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase() || 'GP'
+
+    return (
+        <span className="plp-broker-avatar" aria-label={name} role="img">
+            {initials}
+        </span>
     )
 }
 

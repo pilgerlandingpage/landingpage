@@ -7,21 +7,10 @@ import { grantConsent, hasConsent, getVisitorId, isTrackingDisabled } from '@/li
  * Silent auto-consent component.
  * Automatically grants cookie consent and registers the visitor
  * without showing any banner or modal.
- * Push notifications are still subscribed if already permitted.
+ * Existing push subscriptions are synchronized when notifications are already permitted.
  */
 export default function UnifiedConsentBanner() {
     const hasRun = useRef(false)
-
-    function urlBase64ToUint8Array(base64String: string) {
-        const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-        const rawData = window.atob(base64)
-        const outputArray = new Uint8Array(rawData.length)
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i)
-        }
-        return outputArray
-    }
 
     useEffect(() => {
         if (hasRun.current) return
@@ -77,7 +66,7 @@ export default function UnifiedConsentBanner() {
                     vapidPublicKey = trackData.vapid_public_key || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null
                     console.log('[AutoConsent] DB visitor ID:', dbVisitorId)
                 } catch (err) {
-                    console.error('[AutoConsent] Failed to register visitor:', err)
+                    console.warn('[AutoConsent] Failed to register visitor:', err)
                 }
 
                 if (dbVisitorId && vapidPublicKey && 'serviceWorker' in navigator) {
@@ -86,31 +75,38 @@ export default function UnifiedConsentBanner() {
                     if (currentPermission === 'granted') {
                         try {
                             await waitForIdle()
-                            console.log('[AutoConsent] Registering service worker...')
-                            const swRegistration = await navigator.serviceWorker.register('/sw.js')
-                            await navigator.serviceWorker.ready
-                            console.log('[AutoConsent] Service worker ready')
+                            const swRegistration = await navigator.serviceWorker.getRegistration()
+
+                            if (!swRegistration) {
+                                console.log('[AutoConsent] No active push service worker; skipping silent push sync')
+                                return
+                            }
 
                             const existingSubscription = await swRegistration.pushManager.getSubscription()
-                            const subscription = existingSubscription || await swRegistration.pushManager.subscribe({
-                                userVisibleOnly: true,
-                                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-                            })
-                            console.log('[AutoConsent] Push subscription created')
+                            if (!existingSubscription) {
+                                console.log('[AutoConsent] No existing push subscription; skipping silent push sync')
+                                return
+                            }
+
+                            console.log('[AutoConsent] Existing push subscription found')
 
                             const res = await fetch('/api/push/subscribe', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     visitor_id: dbVisitorId,
-                                    subscription: subscription.toJSON(),
+                                    subscription: existingSubscription.toJSON(),
                                 }),
                             })
 
                             if (res.ok) {
-                                console.log('[AutoConsent] ? Push subscription saved')
+                                console.log('[AutoConsent] Push subscription saved')
                             } else {
-                                console.error('[AutoConsent] ? Push subscription save failed')
+                                const details = await res.text().catch(() => '')
+                                console.warn('[AutoConsent] Push subscription save skipped', {
+                                    status: res.status,
+                                    details: details.slice(0, 240),
+                                })
                             }
 
                             try {
@@ -127,12 +123,12 @@ export default function UnifiedConsentBanner() {
                                 console.warn('[AutoConsent] Failed to log push_consent event:', e)
                             }
                         } catch (pushErr) {
-                            console.error('[AutoConsent] Push flow error:', pushErr)
+                            console.warn('[AutoConsent] Push flow skipped:', pushErr)
                         }
                     }
                 }
             } catch (error) {
-                console.error('[AutoConsent] Error:', error)
+                console.warn('[AutoConsent] Error:', error)
             }
         }
 
