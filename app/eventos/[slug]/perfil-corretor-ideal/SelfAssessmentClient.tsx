@@ -52,6 +52,12 @@ type ApiResult = {
     summary?: SelfAssessmentSummary
 }
 
+type ProgressResult = {
+    success?: boolean
+    error?: string
+    registration_id?: string
+}
+
 const initialForm: FormState = {
     full_name: '',
     phone: '',
@@ -111,6 +117,7 @@ export default function SelfAssessmentClient({
     const [answers, setAnswers] = useState<Record<string, number>>({})
     const [currentIndex, setCurrentIndex] = useState(0)
     const [loading, setLoading] = useState(false)
+    const [progressSaving, setProgressSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [result, setResult] = useState<SelfAssessmentSummary | null>(null)
 
@@ -152,6 +159,31 @@ export default function SelfAssessmentClient({
 
     const updateForm = (field: keyof FormState, value: string) => {
         setForm(prev => ({ ...prev, [field]: field === 'phone' ? formatPhone(value) : value }))
+    }
+
+    const buildAssessmentPayload = (sourceAnswers: Record<string, number>, completedQuestionId?: string) => ({
+        ...form,
+        phone: form.phone.replace(/\D/g, ''),
+        consent_whatsapp: true,
+        completed_question_id: completedQuestionId,
+        answers: SELF_ASSESSMENT_QUESTIONS
+            .filter(question => sourceAnswers[question.id] !== undefined)
+            .map(question => ({
+                question_id: question.id,
+                score: sourceAnswers[question.id],
+            })),
+        tracking: getTrackingPayload(),
+    })
+
+    const syncAssessmentProgress = async (sourceAnswers: Record<string, number>, completedQuestionId?: string) => {
+        const response = await fetch(`/api/eventos/${eventSlug}/self-assessment/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(buildAssessmentPayload(sourceAnswers, completedQuestionId)),
+        })
+        const data = await response.json() as ProgressResult
+        if (!response.ok || !data.success) throw new Error(data.error || 'Não foi possível salvar seu progresso.')
+        return data
     }
 
     const startAssessment = (event: FormEvent<HTMLFormElement>) => {
@@ -200,8 +232,16 @@ export default function SelfAssessmentClient({
         }
 
         if (currentIndex < SELF_ASSESSMENT_QUESTIONS.length - 1) {
+            setProgressSaving(true)
             setError(null)
-            setCurrentIndex(index => index + 1)
+            try {
+                await syncAssessmentProgress(answers, currentQuestion.id)
+                setCurrentIndex(index => index + 1)
+            } catch (err: any) {
+                setError(err?.message || 'Não foi possível salvar seu progresso.')
+            } finally {
+                setProgressSaving(false)
+            }
             return
         }
 
@@ -223,16 +263,7 @@ export default function SelfAssessmentClient({
             const response = await fetch(`/api/eventos/${eventSlug}/self-assessment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...form,
-                    phone: form.phone.replace(/\D/g, ''),
-                    consent_whatsapp: true,
-                    answers: SELF_ASSESSMENT_QUESTIONS.map(question => ({
-                        question_id: question.id,
-                        score: answers[question.id],
-                    })),
-                    tracking: getTrackingPayload(),
-                }),
+                body: JSON.stringify(buildAssessmentPayload(answers, currentQuestion.id)),
             })
             const data = await response.json() as ApiResult
             if (!response.ok || !data.summary) throw new Error(data.error || 'Não foi possível salvar sua autoavaliação.')
@@ -481,8 +512,8 @@ export default function SelfAssessmentClient({
                                         <ArrowLeft size={17} />
                                         Voltar
                                     </button>
-                                    <button type="button" className="assessment-primary" onClick={goNext} disabled={loading}>
-                                        {loading ? <Loader2 className="spin" size={18} /> : currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? <Send size={18} /> : <ArrowRight size={18} />}
+                                    <button type="button" className="assessment-primary" onClick={goNext} disabled={loading || progressSaving}>
+                                        {loading || progressSaving ? <Loader2 className="spin" size={18} /> : currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? <Send size={18} /> : <ArrowRight size={18} />}
                                         {currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? 'Ver minha nota' : 'Próxima'}
                                     </button>
                                 </div>

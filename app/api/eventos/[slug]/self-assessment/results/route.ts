@@ -22,6 +22,12 @@ type AssessmentProfile = {
     submitted_at?: string
 }
 
+type AssessmentProgress = {
+    answered_question_ids?: string[]
+    answers?: SelfAssessmentScoredAnswer[]
+    updated_at?: string
+}
+
 function asRecord(value: unknown): Record<string, any> {
     return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
 }
@@ -45,6 +51,23 @@ function getAssessmentProfile(row: Record<string, any>): AssessmentProfile | nul
         block_scores: Array.isArray(profile.block_scores) ? profile.block_scores as SelfAssessmentBlockScore[] : [],
         answers: Array.isArray(profile.answers) ? profile.answers as SelfAssessmentScoredAnswer[] : [],
         submitted_at: String(profile.submitted_at || row.updated_at || row.created_at || ''),
+    }
+}
+
+function getAssessmentProgress(row: Record<string, any>): AssessmentProgress | null {
+    const metadata = asRecord(row.metadata)
+    const progress = asRecord(metadata.self_assessment_progress)
+    const answeredIds = Array.isArray(progress.answered_question_ids)
+        ? progress.answered_question_ids.map(String).filter(Boolean)
+        : []
+    const answers = Array.isArray(progress.answers) ? progress.answers as SelfAssessmentScoredAnswer[] : []
+
+    if (!answeredIds.length && !answers.length) return null
+
+    return {
+        answered_question_ids: answeredIds,
+        answers,
+        updated_at: String(progress.updated_at || row.updated_at || row.created_at || ''),
     }
 }
 
@@ -82,6 +105,38 @@ function buildQuestionAverages(profiles: AssessmentProfile[]) {
         .filter(item => item.responses > 0)
 }
 
+function getCompletedQuestionIds(row: Record<string, any>, profile: AssessmentProfile | null) {
+    const completedIds = new Set<string>()
+    const progress = getAssessmentProgress(row)
+
+    for (const answer of profile?.answers || []) {
+        if (answer?.question_id) completedIds.add(answer.question_id)
+    }
+
+    for (const questionId of progress?.answered_question_ids || []) {
+        if (questionId) completedIds.add(questionId)
+    }
+
+    for (const answer of progress?.answers || []) {
+        if (answer?.question_id) completedIds.add(answer.question_id)
+    }
+
+    return completedIds
+}
+
+function buildQuestionProgress(rows: Record<string, any>[]) {
+    const participantProgress = rows.map(row => getCompletedQuestionIds(row, getAssessmentProfile(row)))
+
+    return SELF_ASSESSMENT_QUESTIONS.map((question, index) => ({
+        question_id: question.id,
+        title: question.title,
+        block: question.block,
+        block_label: question.blockLabel,
+        step: index + 1,
+        completed_count: participantProgress.filter(completedIds => completedIds.has(question.id)).length,
+    }))
+}
+
 export async function GET(_request: Request, { params }: RouteContext) {
     try {
         const { slug } = await params
@@ -116,6 +171,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         const profiles = submitted.map(item => item.profile)
         const scores = profiles.map(profile => Number(profile.score_percent || 0))
         const questionAverages = buildQuestionAverages(profiles)
+        const questionProgress = buildQuestionProgress(rows)
         const strongestQuestions = [...questionAverages]
             .sort((a, b) => b.average_score - a.average_score || a.title.localeCompare(b.title))
             .slice(0, 3)
@@ -158,6 +214,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
             submitted_count: submitted.length,
             average_score: average(scores),
             updated_at: latestSubmittedAt,
+            question_progress: questionProgress,
             block_averages: Array.from(blockKeys.entries()).map(([block, item]) => ({
                 block,
                 label: item.label,

@@ -77,6 +77,14 @@ type AssessmentResults = {
         average_score: number
         responses: number
     }>
+    question_progress: Array<{
+        question_id: string
+        title: string
+        block: string
+        block_label: string
+        step: number
+        completed_count: number
+    }>
 }
 
 type SocialAuthorityMetrics = {
@@ -382,45 +390,50 @@ export default function ProfilePresentationClient({
                 </div>
             ),
         },
-        ...SELF_ASSESSMENT_QUESTIONS.map((question, index): Slide => ({
-            id: `pergunta-${question.id}`,
-            eyebrow: `Pergunta ${index + 1} de ${SELF_ASSESSMENT_QUESTIONS.length} • ${question.blockLabel}`,
-            title: question.title,
-            variant: 'question',
-            content: (
-                <div className="presentation-question-card">
-                    <div className="presentation-question-head">
-                        <div className="presentation-question-meta">
-                            <span>{String(index + 1).padStart(2, '0')}</span>
-                            <strong>{question.blockLabel}</strong>
-                        </div>
-                        <div className="presentation-question-live" aria-live="polite">
-                            <RefreshCw className={resultsLoading ? 'spin' : ''} size={17} />
-                            <div>
-                                <span>Finalizaram</span>
-                                <strong>{results?.submitted_count || 0}</strong>
-                                <small>
-                                    {results?.registrations_count
-                                        ? `de ${results.registrations_count} cadastrados`
-                                        : 'atualiza a cada 5s'}
-                                </small>
+        ...SELF_ASSESSMENT_QUESTIONS.map((question, index): Slide => {
+            const progressForQuestion = results?.question_progress?.find(item => item.question_id === question.id)
+            const completedCount = progressForQuestion?.completed_count || 0
+
+            return {
+                id: `pergunta-${question.id}`,
+                eyebrow: `Pergunta ${index + 1} de ${SELF_ASSESSMENT_QUESTIONS.length} • ${question.blockLabel}`,
+                title: question.title,
+                variant: 'question',
+                content: (
+                    <div className="presentation-question-card">
+                        <div className="presentation-question-head">
+                            <div className="presentation-question-meta">
+                                <span>{String(index + 1).padStart(2, '0')}</span>
+                                <strong>{question.blockLabel}</strong>
+                            </div>
+                            <div className="presentation-question-live" aria-live="polite">
+                                <RefreshCw className={resultsLoading ? 'spin' : ''} size={17} />
+                                <div>
+                                    <span>Finalizaram</span>
+                                    <strong>{completedCount}</strong>
+                                    <small>
+                                        {results?.registrations_count
+                                            ? `de ${results.registrations_count} cadastrados`
+                                            : 'atualiza a cada 5s'}
+                                    </small>
+                                </div>
                             </div>
                         </div>
+                        <p className="presentation-question-prompt">{question.prompt}</p>
+                        <div className="presentation-question-criteria" aria-label="Critérios da pergunta">
+                            {question.criteria.map(criterion => (
+                                <span key={criterion}>{criterion}</span>
+                            ))}
+                        </div>
+                        <div className="presentation-question-scale" aria-label="Escala de resposta de 0 a 10">
+                            <span>0</span>
+                            <i />
+                            <span>10</span>
+                        </div>
                     </div>
-                    <p className="presentation-question-prompt">{question.prompt}</p>
-                    <div className="presentation-question-criteria" aria-label="Critérios da pergunta">
-                        {question.criteria.map(criterion => (
-                            <span key={criterion}>{criterion}</span>
-                        ))}
-                    </div>
-                    <div className="presentation-question-scale" aria-label="Escala de resposta de 0 a 10">
-                        <span>0</span>
-                        <i />
-                        <span>10</span>
-                    </div>
-                </div>
-            ),
-        })),
+                ),
+            }
+        }),
         {
             id: 'resultado-geral',
             eyebrow: 'Resultado ao vivo',
