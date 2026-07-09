@@ -44,6 +44,7 @@ const PRESENTATION_SOCIAL_MINIMUMS: Partial<Record<PlatformKey, Partial<Platform
         views: 10000000,
     },
 }
+const PRESENTATION_TOTAL_VIEWS_MINIMUM = 5000000000
 
 const CONFIG_KEYS = [
     'presentation_social_youtube_followers',
@@ -195,7 +196,11 @@ export async function GET(_request: Request, context: RouteContext) {
             .filter(summary => ['youtube', 'instagram', 'tiktok'].includes(summary.platform))
 
         const computedTotalViews = platforms.reduce((sum, item) => sum + item.views, 0)
-        const totalViews = configNumber(config, 'presentation_social_total_views') || computedTotalViews
+        const totalViews = Math.max(
+            computedTotalViews,
+            configNumber(config, 'presentation_social_total_views'),
+            PRESENTATION_TOTAL_VIEWS_MINIMUM,
+        )
 
         return NextResponse.json({
             success: true,

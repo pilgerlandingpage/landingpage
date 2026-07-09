@@ -299,7 +299,7 @@ export default function SelfAssessmentClient({
                         <div className="assessment-side-mark">
                             <ClipboardCheck size={26} />
                             <div>
-                                <span>50 perguntas</span>
+                                <span>{SELF_ASSESSMENT_QUESTIONS.length} perguntas</span>
                                 <strong>{answeredCount}/{SELF_ASSESSMENT_QUESTIONS.length}</strong>
                             </div>
                         </div>

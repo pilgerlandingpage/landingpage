@@ -4,14 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
-    ArrowRight,
-    BadgeCheck,
     BarChart3,
     BriefcaseBusiness,
     CalendarDays,
     ChevronLeft,
     ChevronRight,
-    ClipboardCheck,
     ExternalLink,
     Instagram,
     Maximize2,
@@ -102,16 +99,6 @@ const PRESENTATION_BACKGROUND_IMAGE = 'https://pub-eaf679ed02634f958b68991d910a9
 const GUILHERME_STAGE_PHOTO = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/Untitled%20design(9).png'
 const PUBLIC_SITE_ORIGIN = 'https://guilhermepilger.ai'
 const GUILHERME_AWARDS_VOTE_URL = 'https://awards.atrincarealestate.com.br/#/categoria/influenciador-do-ano/candidato/2ba4d003-3f4b-4d1a-b079-43c8a253c9b7'
-
-function pillar(title: string, text: string, icon: ReactNode) {
-    return (
-        <div className="presentation-pillar">
-            <span>{icon}</span>
-            <strong>{title}</strong>
-            <p>{text}</p>
-        </div>
-    )
-}
 
 function TikTokIcon({ size = 18 }: { size?: number }) {
     return (
@@ -314,7 +301,7 @@ export default function ProfilePresentationClient({
                             <div className="presentation-guilherme-metrics">
                                 {[
                                     { value: 'R$ 200 mi', label: 'VGV em 2025', Icon: BarChart3 },
-                                    { value: 'R$ 400 mi', label: 'Meta projetada', Icon: Trophy },
+                                    { value: 'R$ 500 bi', label: 'Meta projetada', Icon: Trophy },
                                     {
                                         value: formatCompactNumber(socialByPlatform.youtube?.followers, '119 mil'),
                                         label: `${formatIntegerNumber(socialByPlatform.youtube?.videos, '980')} vídeos no YouTube`,
@@ -334,7 +321,7 @@ export default function ProfilePresentationClient({
                                         tone: 'tiktok',
                                     },
                                     {
-                                        value: formatAtLeastCompactNumber(socialMetrics?.total_views, '+10 mi'),
+                                        value: formatAtLeastCompactNumber(socialMetrics?.total_views, '+5 bi'),
                                         label: 'visualizações estimadas',
                                         Icon: Eye,
                                         tone: 'views',
@@ -353,80 +340,44 @@ export default function ProfilePresentationClient({
             ),
         },
         {
-            id: 'mercado-mudou',
-            eyebrow: 'Contexto',
-            title: <>O cliente mudou.<br />O corretor também precisa mudar.</>,
-            variant: 'focus',
-            content: (
-                <div className="presentation-focus-grid">
-                    <div>
-                        <strong>Antes</strong>
-                        <p>O corretor dependia mais de placa, carteira e oportunidade.</p>
-                    </div>
-                    <ArrowRight size={38} />
-                    <div>
-                        <strong>Agora</strong>
-                        <p>O corretor precisa ser consultor, criador de confiança, especialista local e gestor de relacionamento.</p>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            id: 'perfil-ideal',
-            eyebrow: 'Perfil do Corretor Ideal',
-            title: 'Alta performance nasce de comportamento, rotina e consciência',
-            content: (
-                <div className="presentation-pillars">
-                    {pillar('Como se comporta', 'Postura, comunicação, disciplina, clareza e capacidade de gerar confiança.', <BadgeCheck size={26} />)}
-                    {pillar('O que faz todos os dias', 'Prospecção, follow-up, conteúdo, estudo de produto e relacionamento com base.', <ClipboardCheck size={26} />)}
-                    {pillar('O que evita', 'Improviso, promessas vazias, atraso no retorno, desorganização e baixa presença digital.', <Target size={26} />)}
-                </div>
-            ),
-        },
-        {
             id: 'ferramenta',
             eyebrow: 'Por que criamos',
             title: 'Da rotina do alto padrão nasceu o Perfil do Corretor Ideal',
-            content: (
-                <div className="presentation-statement presentation-tool-story">
-                    <p>
-                        Na trajetória do Guilherme, uma coisa ficou clara: o corretor que mais cresce não vende apenas imóveis. Ele constrói confiança, domina o produto, cria presença digital e mantém uma rotina comercial consistente.
-                    </p>
-                    <p>
-                        Por isso criamos uma ferramenta para transformar essa experiência em diagnóstico. Cada participante responde no celular, recebe sua nota e o painel do evento mostra a média geral dos corretores em tempo real.
-                    </p>
-                    <div>
-                        <span>Cadastro rápido</span>
-                        <span>50 perguntas guiadas</span>
-                        <span>Nota no celular</span>
-                        <span>Ranking e média ao vivo</span>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            id: 'qr-code',
-            eyebrow: 'Agora é com você',
-            title: 'Escaneie e descubra sua nota',
             variant: 'qr',
             content: (
-                <div className="presentation-qr-layout">
-                    <div className="presentation-qr-box">
-                        <Image
-                            src={QR_IMAGE_SRC}
-                            alt="QR Code para acessar a autoavaliação Perfil do Corretor Ideal"
-                            width={720}
-                            height={720}
-                            unoptimized
-                        />
+                <div className="presentation-tool-qr-layout">
+                    <div className="presentation-statement presentation-tool-story">
+                        <p>
+                            Na trajetória do Guilherme, uma coisa ficou clara: o corretor que mais cresce não vende apenas imóveis. Ele constrói confiança, domina o produto, cria presença digital e mantém uma rotina comercial consistente.
+                        </p>
+                        <p>
+                            Por isso criamos um método de análise para transformar essa experiência em diagnóstico. Cada participante responde no celular, recebe sua nota e o painel do evento mostra a média geral dos corretores em tempo real.
+                        </p>
+                        <div>
+                            <span>Cadastro rápido</span>
+                            <span>{SELF_ASSESSMENT_QUESTIONS.length} perguntas guiadas</span>
+                            <span>Nota no celular</span>
+                            <span>Ranking e média ao vivo</span>
+                        </div>
                     </div>
-                    <div className="presentation-qr-copy">
-                        <ScanQrCode size={40} />
-                        <p>Responda como você atua hoje. O resultado aparece no próprio celular ao final das perguntas.</p>
-                        <Link href={assessmentPath} target="_blank" onClick={() => trackAssessmentClick('qr-code')}>
-                            Abrir autoavaliação
-                            <ExternalLink size={18} />
-                        </Link>
+                    <div className="presentation-qr-panel">
+                        <div className="presentation-qr-box">
+                            <Image
+                                src={QR_IMAGE_SRC}
+                                alt="QR Code para acessar a autoavaliação Perfil do Corretor Ideal"
+                                width={720}
+                                height={720}
+                                unoptimized
+                            />
+                        </div>
+                        <div className="presentation-qr-copy">
+                            <ScanQrCode size={34} />
+                            <p>Escaneie, responda pelo celular e veja sua nota ao final.</p>
+                            <Link href={assessmentPath} target="_blank" onClick={() => trackAssessmentClick('ferramenta-qr')}>
+                                Abrir autoavaliação
+                                <ExternalLink size={18} />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             ),
@@ -438,9 +389,23 @@ export default function ProfilePresentationClient({
             variant: 'question',
             content: (
                 <div className="presentation-question-card">
-                    <div className="presentation-question-meta">
-                        <span>{String(index + 1).padStart(2, '0')}</span>
-                        <strong>{question.blockLabel}</strong>
+                    <div className="presentation-question-head">
+                        <div className="presentation-question-meta">
+                            <span>{String(index + 1).padStart(2, '0')}</span>
+                            <strong>{question.blockLabel}</strong>
+                        </div>
+                        <div className="presentation-question-live" aria-live="polite">
+                            <RefreshCw className={resultsLoading ? 'spin' : ''} size={17} />
+                            <div>
+                                <span>Finalizaram</span>
+                                <strong>{results?.submitted_count || 0}</strong>
+                                <small>
+                                    {results?.registrations_count
+                                        ? `de ${results.registrations_count} cadastrados`
+                                        : 'atualiza a cada 5s'}
+                                </small>
+                            </div>
+                        </div>
                     </div>
                     <p className="presentation-question-prompt">{question.prompt}</p>
                     <div className="presentation-question-criteria" aria-label="Critérios da pergunta">
@@ -453,7 +418,6 @@ export default function ProfilePresentationClient({
                         <i />
                         <span>10</span>
                     </div>
-                    <small>Enquanto o público responde no celular, comente o que diferencia uma nota baixa, média e alta nesta pergunta.</small>
                 </div>
             ),
         })),
@@ -594,15 +558,16 @@ export default function ProfilePresentationClient({
     const progress = ((currentIndex + 1) / slides.length) * 100
 
     useEffect(() => {
-        if (currentSlide?.id !== 'resultado-geral') return
+        const shouldPollResults = currentSlide?.variant === 'question' || currentSlide?.id === 'resultado-geral'
+        if (!shouldPollResults) return
 
-        void loadAssessmentResults(true)
+        void loadAssessmentResults(currentSlide?.id === 'resultado-geral')
         const interval = window.setInterval(() => {
             void loadAssessmentResults()
         }, 5000)
 
         return () => window.clearInterval(interval)
-    }, [currentSlide?.id, loadAssessmentResults])
+    }, [currentSlide?.id, currentSlide?.variant, loadAssessmentResults])
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -1170,6 +1135,36 @@ export default function ProfilePresentationClient({
                 .presentation-tool-story div {
                     margin-top: 8px;
                 }
+                .presentation-tool-qr-layout {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 360px;
+                    gap: clamp(24px, 3vw, 46px);
+                    align-items: center;
+                    max-width: 1260px;
+                }
+                .presentation-tool-qr-layout .presentation-tool-story {
+                    max-width: 820px;
+                }
+                .presentation-qr-panel {
+                    display: grid;
+                    gap: 16px;
+                    justify-items: center;
+                }
+                .presentation-tool-qr-layout .presentation-qr-box {
+                    width: min(100%, 340px);
+                    padding: 18px;
+                }
+                .presentation-tool-qr-layout .presentation-qr-copy {
+                    max-width: 340px;
+                    justify-items: center;
+                    text-align: center;
+                    gap: 12px;
+                }
+                .presentation-tool-qr-layout .presentation-qr-copy p {
+                    color: rgba(255, 252, 244, 0.92);
+                    font-size: 1rem;
+                    line-height: 1.35;
+                }
                 .presentation-steps {
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1257,6 +1252,12 @@ export default function ProfilePresentationClient({
                     padding: clamp(28px, 3vw, 46px);
                     box-shadow: 0 24px 68px rgba(70, 50, 20, 0.1);
                 }
+                .presentation-question-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 18px;
+                }
                 .presentation-question-meta {
                     display: flex;
                     align-items: center;
@@ -1278,6 +1279,42 @@ export default function ProfilePresentationClient({
                     font-size: 0.92rem;
                     font-weight: 600;
                     text-transform: uppercase;
+                }
+                .presentation-question-live {
+                    min-width: 230px;
+                    min-height: 64px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    border: 1px solid rgba(154, 104, 23, 0.18);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.72);
+                    padding: 10px 14px;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+                }
+                .presentation-question-live svg {
+                    color: #2f8f7f;
+                }
+                .presentation-question-live div {
+                    display: grid;
+                    gap: 1px;
+                }
+                .presentation-question-live span {
+                    color: #9a6817;
+                    font-size: 0.72rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+                .presentation-question-live strong {
+                    color: #111827;
+                    font-size: 1.85rem;
+                    font-weight: 600;
+                    line-height: 0.98;
+                }
+                .presentation-question-live div small {
+                    color: #64748b;
+                    font-size: 0.78rem;
+                    line-height: 1.2;
                 }
                 .presentation-question-prompt {
                     max-width: 860px;
@@ -1315,10 +1352,10 @@ export default function ProfilePresentationClient({
                     border-radius: 999px;
                     background: linear-gradient(90deg, rgba(215, 168, 77, 0.38), #48b49f);
                 }
-                .presentation-question-card small {
+                .presentation-question-live div small {
                     color: #64748b;
-                    font-size: 0.95rem;
-                    line-height: 1.45;
+                    font-size: 0.78rem;
+                    line-height: 1.2;
                 }
                 .presentation-results .presentation-slide {
                     width: min(1180px, 100%);
@@ -1898,8 +1935,22 @@ export default function ProfilePresentationClient({
                     border-color: rgba(215, 168, 77, 0.16);
                     background: rgba(255, 255, 255, 0.06);
                 }
-                .presentation-page:not(.presentation-video) .presentation-question-card small {
-                    color: rgba(248, 242, 231, 0.56);
+                .presentation-page:not(.presentation-video) .presentation-question-live {
+                    border-color: rgba(215, 168, 77, 0.2);
+                    background: rgba(255, 248, 236, 0.08);
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                }
+                .presentation-page:not(.presentation-video) .presentation-question-live svg {
+                    color: #48b49f;
+                }
+                .presentation-page:not(.presentation-video) .presentation-question-live span {
+                    color: #f2cc78;
+                }
+                .presentation-page:not(.presentation-video) .presentation-question-live strong {
+                    color: #fff8ec;
+                }
+                .presentation-page:not(.presentation-video) .presentation-question-live div small {
+                    color: rgba(248, 242, 231, 0.62);
                 }
                 .presentation-page:not(.presentation-video) .presentation-guilherme-metrics strong,
                 .presentation-page:not(.presentation-video) .presentation-metric strong,
@@ -2046,6 +2097,19 @@ export default function ProfilePresentationClient({
                     .presentation-qr-layout {
                         grid-template-columns: 340px minmax(0, 1fr);
                     }
+                    .presentation-tool-qr-layout {
+                        grid-template-columns: 1fr;
+                        max-width: 900px;
+                    }
+                    .presentation-qr-panel {
+                        justify-items: start;
+                        grid-template-columns: 280px minmax(0, 1fr);
+                        align-items: center;
+                    }
+                    .presentation-tool-qr-layout .presentation-qr-copy {
+                        justify-items: start;
+                        text-align: left;
+                    }
                     .presentation-qr-box {
                         width: 340px;
                     }
@@ -2146,6 +2210,7 @@ export default function ProfilePresentationClient({
                     .presentation-steps,
                     .presentation-focus-grid,
                     .presentation-qr-layout,
+                    .presentation-tool-qr-layout,
                     .presentation-results-grid,
                     .presentation-results-insights,
                     .presentation-results-scoreboard {
@@ -2244,6 +2309,17 @@ export default function ProfilePresentationClient({
                     .presentation-question-card {
                         gap: 16px;
                     }
+                    .presentation-question-head {
+                        align-items: stretch;
+                        flex-direction: column;
+                    }
+                    .presentation-question-live {
+                        width: 100%;
+                        min-width: 0;
+                    }
+                    .presentation-question-live strong {
+                        font-size: 1.5rem;
+                    }
                     .presentation-question-meta span {
                         width: 46px;
                         height: 46px;
@@ -2256,9 +2332,6 @@ export default function ProfilePresentationClient({
                         min-height: 38px;
                         font-size: 0.82rem;
                     }
-                    .presentation-question-card small {
-                        font-size: 0.82rem;
-                    }
                     .presentation-focus-grid strong {
                         font-size: 1.5rem;
                     }
@@ -2269,6 +2342,10 @@ export default function ProfilePresentationClient({
                     .presentation-qr-box {
                         width: min(100%, 330px);
                         justify-self: center;
+                    }
+                    .presentation-qr-panel {
+                        grid-template-columns: 1fr;
+                        justify-items: center;
                     }
                     .presentation-qr-copy {
                         justify-items: center;
