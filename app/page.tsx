@@ -4,7 +4,7 @@ import { unstable_cache } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Building2, Home, Palmtree, Sparkles } from 'lucide-react'
+import { Building2, Home, Palmtree } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
@@ -60,8 +60,8 @@ const HOME_PROPERTY_FEED_LIMIT = 480
 const HOME_PROPERTY_FALLBACK_LIMIT = 120
 const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
 const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
-const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
-const FEATURED_SECTION_LEGACY_TITLES = new Set(['selecao exclusiva', 'selecao em destaque'])
+const FEATURED_SECTION_DEFAULT_TITLE = 'Oportunidades'
+const FEATURED_SECTION_LEGACY_TITLES = new Set(['destaques', 'selecao exclusiva', 'selecao em destaque'])
 const HOME_BLOG_POST_LIMIT = 4
 const HOME_PROPERTY_FIELDS = [
   'id',
@@ -526,7 +526,6 @@ export default async function MarketplaceHome() {
       return city.aliases.includes(cityName) || city.aliases.includes(displayName)
     }).length,
   }))
-  const launchCount = homeProperties.filter(isPropertyLaunch).length
   const premiumCategories = [
     {
       title: 'Frente mar',
@@ -541,13 +540,6 @@ export default async function MarketplaceHome() {
       href: '/busca?subtype=cobertura',
       icon: Building2,
       image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-coberturas-pexels-36362.jpg',
-    },
-    {
-      title: 'Lançamentos',
-      subtitle: `${launchCount || 'Novas'} oportunidades`,
-      href: '/busca?tag=lancamento',
-      icon: Sparkles,
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-lancamentos-pexels-34775531.jpg',
     },
     {
       title: 'Casas de alto padrão',
@@ -628,7 +620,7 @@ export default async function MarketplaceHome() {
 
   // === BUILD SECTIONS ===
 
-  // 1. Featured / Destaques
+  // 1. Featured / Oportunidades
   let featured: any[] = []
   if (featuredSort === 'manual' && manualFeaturedIds.length > 0) {
     // Manual selection
@@ -668,10 +660,6 @@ export default async function MarketplaceHome() {
   // 3. Premium tag sections
   const exclusiveProperties = homeProperties
     .filter(p => Boolean(p.exclusive))
-    .slice(0, itemsPerSection)
-
-  const launches = homeProperties
-    .filter(isPropertyLaunch)
     .slice(0, itemsPerSection)
 
   const frontSeaProperties = homeProperties
@@ -798,15 +786,6 @@ export default async function MarketplaceHome() {
           properties={exclusiveProperties}
           lpMap={lpMap}
           viewAllHref="/busca?exclusive=1"
-          viewAllLabel="Ver todos"
-        />
-
-        <HomepageSection
-          title="Lançamentos"
-          subtitle="Na planta, em construção e oportunidades de entrada"
-          properties={launches}
-          lpMap={lpMap}
-          viewAllHref="/busca?tag=lancamento"
           viewAllLabel="Ver todos"
         />
 

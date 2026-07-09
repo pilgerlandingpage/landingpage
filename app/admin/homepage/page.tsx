@@ -10,8 +10,8 @@ type Property = {
     main_image_url: string
 }
 
-const FEATURED_SECTION_DEFAULT_TITLE = 'Destaques'
-const FEATURED_SECTION_LEGACY_TITLES = new Set(['selecao exclusiva', 'selecao em destaque'])
+const FEATURED_SECTION_DEFAULT_TITLE = 'Oportunidades'
+const FEATURED_SECTION_LEGACY_TITLES = new Set(['destaques', 'selecao exclusiva', 'selecao em destaque'])
 
 function normalizeFeaturedSectionTitle(value: unknown) {
     const title = String(value || '').trim()
@@ -29,10 +29,9 @@ function normalizeFeaturedSectionTitle(value: unknown) {
 }
 
 const SECTION_OPTIONS = [
-    { key: 'featured', label: 'Destaques', desc: 'Imóveis premium selecionados pelo admin' },
+    { key: 'featured', label: 'Oportunidades', desc: 'Imóveis premium selecionados pelo admin' },
     { key: 'newest', label: 'Recém Adicionados', desc: 'Os últimos imóveis cadastrados' },
     { key: 'cta', label: 'CTA WhatsApp', desc: 'Banner "Não encontrou?" com botão WhatsApp' },
-    { key: 'launches', label: 'Lançamentos', desc: 'Imóveis na planta ou em construção' },
 ]
 
 const ACTIVE_SECTION_KEYS = new Set(SECTION_OPTIONS.map(option => option.key))
@@ -280,7 +279,7 @@ export default function HomepageConfigPage() {
 
             {/* FEATURED SECTION CONFIG */}
             <div className="hp-card">
-                <h3>⭐ Destaques</h3>
+                <h3>⭐ Oportunidades</h3>
                 <p className="desc">Configure o título, ordenação e filtro de preço da primeira seção</p>
 
                 <p className="hp-label">Título da seção</p>
@@ -288,7 +287,7 @@ export default function HomepageConfigPage() {
                     className="hp-input"
                     value={featuredTitle}
                     onChange={e => setFeaturedTitle(e.target.value)}
-                    placeholder="Ex: Destaques do portfólio"
+                    placeholder="Ex: Oportunidades do portfólio"
                 />
 
                 <div style={{ marginTop: 16 }}>
@@ -351,7 +350,7 @@ export default function HomepageConfigPage() {
             {featuredSort === 'manual' && (
                 <div className="hp-card">
                     <h3>🎯 Imóveis Selecionados Manualmente</h3>
-                    <p className="desc">Escolha quais imóveis aparecem em Destaques</p>
+                    <p className="desc">Escolha quais imóveis aparecem em Oportunidades</p>
 
                     {/* Selected items */}
                     {selectedProperties.length > 0 && (
