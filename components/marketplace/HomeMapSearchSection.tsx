@@ -1318,7 +1318,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             onMoreFiltersClick={openMapFiltersFromSearch}
                             onSubmitValues={submitOverlaySearchInMap}
                             onValuesChange={syncOverlaySearchWithMap}
-                            suggestionsPlacement="up"
+                            suggestionsPlacement="down"
                             variant="map"
                         />
                     </div>
@@ -1554,7 +1554,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
             <style jsx>{`
                 .home-map-search {
-                    margin: clamp(24px, 4vw, 48px) auto;
+                    margin: clamp(24px, 4vw, 48px) auto clamp(10px, 1.8vw, 24px);
                     padding: 0 clamp(18px, 3vw, 36px);
                     width: 100%;
                 }
@@ -1581,14 +1581,14 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     max-width: 620px;
                 }
                 .map-search-shell {
-                    background: #fff;
-                    border: 1px solid rgba(184,148,95,0.18);
+                    background: transparent;
+                    border: 0;
                     border-radius: 18px;
-                    box-shadow: 0 24px 70px rgba(31,27,21,0.11);
+                    box-shadow: none;
                     isolation: isolate;
                     margin: 0 auto;
                     max-width: 1680px;
-                    overflow: hidden;
+                    overflow: visible;
                     position: relative;
                     z-index: 0;
                 }
@@ -1598,7 +1598,9 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 .map-preview-panel {
                     --sv-sheet-top: 78%;
                     background: #1f1b16;
+                    border: 1px solid rgba(184,148,95,0.18);
                     border-radius: 18px;
+                    box-shadow: 0 24px 70px rgba(31,27,21,0.11);
                     height: clamp(320px, 42vw, 520px);
                     overflow: hidden;
                     position: relative;
@@ -1858,22 +1860,22 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .home-map-search-panel--desktop {
                     background: transparent;
-                    bottom: clamp(18px, 2.8vw, 34px);
+                    bottom: auto;
                     display: none !important;
-                    left: 50%;
-                    margin: 0;
+                    left: auto;
+                    margin: 12px auto 0;
                     max-width: 980px;
                     padding: 0;
                     pointer-events: auto;
-                    position: absolute;
-                    transform: translateX(-50%);
+                    position: relative;
+                    transform: none;
                     width: min(980px, calc(100% - 56px));
                     z-index: 770;
                 }
                 .map-search-shell.is-preview-open > .home-map-search-panel--desktop {
                     opacity: 0;
                     pointer-events: none;
-                    transform: translate(-50%, 8px);
+                    transform: translateY(8px);
                     visibility: hidden;
                 }
                 .home-map-search-panel :global(.home-search-box-map .home-search-panel) {
