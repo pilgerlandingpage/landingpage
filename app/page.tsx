@@ -3,8 +3,6 @@ import Image from 'next/image'
 import { unstable_cache } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
-import Link from 'next/link'
-import { Building2, Home, Palmtree } from 'lucide-react'
 import MobileNav from '@/components/marketplace/MobileNav'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
@@ -17,14 +15,13 @@ import AboutGuilhermeSection from '@/components/marketplace/AboutGuilhermeSectio
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import YoutubeFeedSection from '@/components/marketplace/YoutubeFeedSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
-import PremiumCategoryAutoRail from '@/components/marketplace/PremiumCategoryAutoRail'
 import HeroVideoBackground from '@/components/marketplace/HeroVideoBackground'
-import { displayLocationName, normalizeLocationName } from '@/lib/locations/display'
+import { normalizeLocationName } from '@/lib/locations/display'
 import { isPropertyFrontSea, isPropertyLaunch } from '@/lib/properties/intelligence'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { attachBlogPostViewCounts, getBlogPostViewCounts } from '@/lib/blog/views'
 import { getHomepageGoogleReviews } from '@/lib/google-reviews'
-import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, absoluteUrl, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
+import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
   title: 'Imóveis de luxo em Balneário Camboriú e litoral catarinense',
@@ -267,79 +264,6 @@ function emptyBlogViewCounts(posts: HomeBlogPost[]) {
   return counts
 }
 
-type HomeDevelopmentPage = {
-  slug: string
-  name: string
-  locationName: string
-  priceRange: string
-  availableUnitsCount: number | null
-  heroImage: string
-}
-
-function homeContentRecord(value: unknown): Record<string, any> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
-}
-
-function homeText(value: unknown, fallback = '') {
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback
-}
-
-function homeNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) return value
-  if (typeof value === 'string') {
-    const parsed = Number(value)
-    if (Number.isFinite(parsed)) return parsed
-  }
-  return null
-}
-
-function firstDevelopmentImage(content: Record<string, any>) {
-  const development = homeContentRecord(content.development)
-  const galleries = [
-    ...(Array.isArray(content.custom_gallery) ? content.custom_gallery : []),
-    ...(Array.isArray(development.gallery) ? development.gallery : []),
-  ]
-
-  for (const item of galleries) {
-    const image = homeText(homeContentRecord(item).image)
-    if (image) return image
-  }
-
-  return '/placeholder-house.jpg'
-}
-
-function buildHomeDevelopmentPages(landingPages: any[]): HomeDevelopmentPage[] {
-  return landingPages
-    .map((page) => {
-      const content = homeContentRecord(page?.content)
-      if (content.template && content.template !== 'brava-concetto') return null
-
-      const development = homeContentRecord(content.development)
-      if (content.home_featured === false || content.show_on_home === false || development.showOnHome === false || development.show_on_home === false) return null
-
-      const slug = homeText(page?.slug)
-      if (!slug) return null
-      const isBravaConcetto = slug === 'bravaconceto'
-
-      return {
-        slug,
-        name: homeText(development.name, isBravaConcetto ? 'Brava Concetto' : homeText(content.custom_title, homeText(page?.title, 'Empreendimento'))),
-        locationName: homeText(development.locationName ?? development.location_name, isBravaConcetto ? 'Praia Brava, Itajai - SC' : 'Litoral catarinense'),
-        priceRange: homeText(development.priceRange ?? development.price_range, isBravaConcetto ? 'R$ 8.600.000 a R$ 21.000.000' : 'Consultar valores'),
-        availableUnitsCount: homeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (isBravaConcetto ? 3 : null),
-        heroImage: isBravaConcetto
-          ? homeText(development.heroImage ?? development.hero_image, '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg')
-          : homeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstDevelopmentImage(content)),
-      }
-    })
-    .filter((item): item is HomeDevelopmentPage => Boolean(item))
-    .sort((a, b) => {
-      if (a.slug === 'bravaconceto') return -1
-      if (b.slug === 'bravaconceto') return 1
-      return a.name.localeCompare(b.name, 'pt-BR')
-    })
-}
-
 async function getHomeBlogViewCounts(supabase: ReturnType<typeof createSupabaseAdminClient>, posts: HomeBlogPost[]) {
   if (!posts.length) return emptyBlogViewCounts(posts)
 
@@ -512,66 +436,7 @@ export default async function MarketplaceHome() {
     HOME_BLOG_POST_LIMIT
   )
   const homeProperties = properties.filter(isAllowedOnHome)
-  const isPropertyFeedUnavailable = Boolean(homeBaseData.warnings.properties)
   const homeMapProperties = homeProperties.filter(property => Number(property.price || property.rent || 0) >= HOME_MAP_MIN_PRICE)
-  const luxuryCount = homeProperties.filter(p => Number(p.price || 0) >= 5000000).length
-  const authorityCities = [
-    {
-      label: 'Balneário Camboriú',
-      searchCity: 'Balneário Camboriú',
-      aliases: ['balneario camboriu'],
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-balneario-pixabay-5084547.jpg',
-    },
-    {
-      label: 'Praia Brava',
-      searchCity: 'Praia Brava',
-      aliases: ['itajai', 'praia brava'],
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-praia-brava-pexels-35912699.jpg',
-    },
-    {
-      label: 'Itapema',
-      searchCity: 'Itapema',
-      aliases: ['itapema'],
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-itapema-pixabay-4913509.jpg',
-    },
-    {
-      label: 'Porto Belo',
-      searchCity: 'Porto Belo',
-      aliases: ['porto belo'],
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-location-porto-belo-pexels-34054775.jpg',
-    },
-  ].map(city => ({
-    ...city,
-    href: `/busca?city=${encodeURIComponent(city.searchCity)}`,
-    count: homeProperties.filter(property => {
-      const cityName = normalizeCityName(property?.city)
-      const displayName = normalizeCityName(displayLocationName(property?.city))
-      return city.aliases.includes(cityName) || city.aliases.includes(displayName)
-    }).length,
-  }))
-  const premiumCategories = [
-    {
-      title: 'Frente mar',
-      subtitle: 'Vista, desejo e liquidez',
-      href: '/busca?tag=frente-mar',
-      icon: Palmtree,
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-frente-mar-pexels-27349378.jpg',
-    },
-    {
-      title: 'Coberturas',
-      subtitle: 'Privacidade no alto',
-      href: '/busca?subtype=cobertura',
-      icon: Building2,
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-coberturas-pexels-36362.jpg',
-    },
-    {
-      title: 'Casas de alto padrão',
-      subtitle: `${luxuryCount || 'Curadoria'} acima de R$ 5 mi`,
-      href: '/busca?type=casa&priceMin=5000000',
-      icon: Home,
-      image: 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/homepage-cards/home-lifestyle-casas-alto-padrao-pexels-36394726.jpg',
-    },
-  ]
   const homeJsonLd = [
     organizationJsonLd(),
     websiteJsonLd(),
@@ -581,23 +446,10 @@ export default async function MarketplaceHome() {
       description: 'Busque apartamentos, coberturas, casas de alto padrão e imóveis frente mar com a curadoria de Guilherme Pilger.',
       type: 'WebPage',
     }),
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: 'Buscas premium de imóveis no litoral catarinense',
-      itemListElement: premiumCategories.map((category, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: category.title,
-        description: category.subtitle,
-        url: absoluteUrl(category.href),
-      })),
-    },
   ]
 
   // Also fetch any landing pages linked to properties
   const landingPages = homeBaseData.landingPages
-  const developmentPages = buildHomeDevelopmentPages(landingPages || [])
   const lpMap = new Map()
   landingPages?.forEach((lp: any) => {
     lpMap.set(lp.property_id, lp.slug)
@@ -715,90 +567,6 @@ export default async function MarketplaceHome() {
       </div>
 
       <HomeMapSearchSection properties={homeMapProperties} />
-
-      <section className="gp-authority-strip">
-        <div className="gp-authority-copy">
-          <h2>Escolha pela localização</h2>
-        </div>
-        <div className="gp-authority-stats">
-          {authorityCities.map(city => (
-            <Link href={city.href} key={city.label} className="gp-location-card">
-              <Image
-                src={city.image}
-                alt={`Imóveis em ${city.label}`}
-                className="gp-location-image"
-                fill
-                sizes="(max-width: 649px) 44vw, 25vw"
-              />
-              <span className="gp-location-shade" />
-              <span className="gp-location-copy">
-                <strong>{city.label}</strong>
-                <small>
-                  {isPropertyFeedUnavailable ? 'Ver imóveis' : <><b>{city.count.toLocaleString('pt-BR')}</b> imóveis</>}
-                </small>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {developmentPages.length > 0 && (
-        <section id="empreendimentos" className="premium-categories-showcase home-developments-showcase" aria-labelledby="home-developments-title">
-          <div className="premium-section-head">
-            <h2 id="home-developments-title">Escolha pelo empreendimento</h2>
-          </div>
-          <PremiumCategoryAutoRail>
-            {developmentPages.map(development => (
-              <Link key={development.slug} href={`/${development.slug}`} className="premium-category-card home-development-card">
-                <Image
-                  src={development.heroImage}
-                  alt={development.name}
-                  className="premium-category-image"
-                  fill
-                  sizes="(max-width: 649px) 44vw, 280px"
-                />
-                <span className="premium-category-shade" />
-                <span className="premium-category-copy">
-                  <strong>{development.name}</strong>
-                  <small>
-                    {development.availableUnitsCount
-                      ? `${development.availableUnitsCount} unidades`
-                      : development.locationName}
-                  </small>
-                </span>
-              </Link>
-            ))}
-          </PremiumCategoryAutoRail>
-        </section>
-      )}
-
-      <section className="premium-categories-showcase">
-        <div className="premium-section-head">
-          <h2>Escolha pelo estilo de vida</h2>
-        </div>
-        <PremiumCategoryAutoRail>
-          {premiumCategories.map((category) => {
-            const Icon = category.icon
-            return (
-              <Link href={category.href} className="premium-category-card" key={category.title} style={{ position: 'relative', overflow: 'hidden' }}>
-                <Image
-                  src={category.image}
-                  alt={category.title}
-                  className="premium-category-image"
-                  fill
-                  sizes="(max-width: 649px) 44vw, 280px"
-                />
-                <span className="premium-category-shade" />
-                <span className="premium-category-icon"><Icon size={17} /></span>
-                <span className="premium-category-copy">
-                  <strong>{category.title}</strong>
-                  <small>{category.subtitle}</small>
-                </span>
-              </Link>
-            )
-          })}
-        </PremiumCategoryAutoRail>
-      </section>
 
       {/* === HOMEPAGE SECTIONS (admin controlled) === */}
       <div className="listings-section">
