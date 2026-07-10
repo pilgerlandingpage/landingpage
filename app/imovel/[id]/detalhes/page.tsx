@@ -1452,7 +1452,7 @@ export default async function PropertyDetailPage({
         parkingCount,
         propertyAmenityItems: amenityFeatureGroups.propertyItems,
     })
-    const projectItems = amenityFeatureGroups.developmentItems.slice(0, 24)
+    const projectItems = amenityFeatureGroups.developmentItems.slice(0, 36)
     const hasTechnicalLists = featureItems.length > 0
     const propertyPath = propertyDetailsPath(property)
     const propertyUrl = absoluteUrl(propertyPath)
@@ -1496,6 +1496,7 @@ export default async function PropertyDetailPage({
         fetchPropertyPriceHistory(adminSupabase, property.id),
         getPropertyDevelopmentContext(adminSupabase, property),
     ])
+    const showTechnicalLocationSection = Boolean(propertyMapLatLng)
     const marketHistory = buildMarketHistory(property, relatedCandidates, area, locationLabel, priceHistoryEvents)
     const related = selectRelatedProperties(property, relatedCandidates)
     const marketMedianPosition = marketScalePosition(marketHistory.minM2, marketHistory.maxM2, marketHistory.medianM2)
@@ -2139,18 +2140,67 @@ export default async function PropertyDetailPage({
                                     {parkingCount > 0 && <SpecCard icon={<Car size={21} />} label="Garagem" value={`${parkingCount} ${statLabel(parkingCount, 'vaga', 'vagas')}`} />}
                                     <SpecCard icon={<MapPin size={21} />} label="Localização" value={locationLabel || displayCity || 'Litoral SC'} />
                                 </div>
+                                {featureItems.length > 0 && (
+                                    <div className="plp-quick-facts-features">
+                                        <InfoList title="Características do imóvel" items={featureItems} />
+                                    </div>
+                                )}
                             </section>
                         </div>
 
-                        {(hasTechnicalLists || propertyMapLatLng) && (
-                            <div className={`plp-technical-location-grid ${hasTechnicalLists && propertyMapLatLng ? '' : 'single'}`.trim()}>
-                                {hasTechnicalLists && (
-                                    <section className="plp-section plp-technical-details">
-                                        <div className="plp-classic-lists">
-                                            {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
+                        {developmentContext && (
+                            <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band">
+                                <div className="plp-development-context-copy">
+                                    <h2>Conheça o condomínio {developmentContext.name}.</h2>
+                                    {projectItems.length > 0 && (
+                                        <div className="plp-development-context-features plp-development-context-features--condo">
+                                            <InfoList title="Características do condomínio" items={projectItems} />
                                         </div>
-                                    </section>
-                                )}
+                                    )}
+                                </div>
+                                <div className="plp-development-context-media">
+                                    <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${developmentContext.name}`}>
+                                        {developmentGalleryPreview.slice(0, 5).map((item, index) => (
+                                            <figure key={`${item.image}-${index}`}>
+                                                <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
+                                                <figcaption>
+                                                    <span>{index === 0 ? 'Condomínio' : item.category}</span>
+                                                    <strong>{item.title}</strong>
+                                                </figcaption>
+                                            </figure>
+                                        ))}
+                                    </div>
+                                    <div className="plp-development-context-details">
+                                        <p>
+                                            Veja imagens do projeto, contexto do condomínio e compare as unidades disponíveis antes de decidir a visita.
+                                        </p>
+                                        <div className="plp-development-context-facts">
+                                            <span><MapPin size={15} /> {developmentContext.locationName}</span>
+                                            <span><Home size={15} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades ativas` : 'Unidades sob consulta'}</span>
+                                            <span><BarChart3 size={15} /> {developmentContext.priceRange}</span>
+                                            <span><Ruler size={15} /> {developmentContext.areaRange}</span>
+                                            <span><BedDouble size={15} /> {developmentContext.suitesRange}</span>
+                                        </div>
+                                        <div className="plp-development-context-unit">
+                                            <div className="plp-development-context-unit-copy">
+                                                <small>Unidade relacionada</small>
+                                                <strong>{developmentContext.unit.title}</strong>
+                                                <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
+                                            </div>
+                                            <div className="plp-development-context-actions">
+                                                <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
+                                                    Conhecer condomínio
+                                                    <ArrowRight size={16} />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {showTechnicalLocationSection && (
+                            <div className="plp-technical-location-grid single">
                                 {propertyMapLatLng && (
                                     <PropertyNearbyBenefits
                                         propertyId={property.id}
@@ -2161,51 +2211,6 @@ export default async function PropertyDetailPage({
                                     />
                                 )}
                             </div>
-                        )}
-
-                        {developmentContext && (
-                            <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band">
-                                <div className="plp-development-context-copy">
-                                    <h2>Conheça o condomínio {developmentContext.name}.</h2>
-                                    <p>
-                                        Veja imagens do projeto, contexto do condomínio e compare as unidades disponíveis antes de decidir a visita.
-                                    </p>
-                                    <div className="plp-development-context-facts">
-                                        <span><MapPin size={15} /> {developmentContext.locationName}</span>
-                                        <span><Home size={15} /> {developmentContext.availableUnitsCount ? `${developmentContext.availableUnitsCount} unidades ativas` : 'Unidades sob consulta'}</span>
-                                        <span><BarChart3 size={15} /> {developmentContext.priceRange}</span>
-                                        <span><Ruler size={15} /> {developmentContext.areaRange}</span>
-                                        <span><BedDouble size={15} /> {developmentContext.suitesRange}</span>
-                                    </div>
-                                    <div className="plp-development-context-unit">
-                                        <small>Unidade relacionada</small>
-                                        <strong>{developmentContext.unit.title}</strong>
-                                        <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
-                                    </div>
-                                    {projectItems.length > 0 && (
-                                        <div className="plp-development-context-features">
-                                            <InfoList title="Características do condomínio" items={projectItems} />
-                                        </div>
-                                    )}
-                                    <div className="plp-development-context-actions">
-                                        <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
-                                            Conhecer condomínio
-                                            <ArrowRight size={16} />
-                                        </Link>
-                                    </div>
-                                </div>
-                                <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${developmentContext.name}`}>
-                                    {developmentGalleryPreview.slice(0, 5).map((item, index) => (
-                                        <figure key={`${item.image}-${index}`}>
-                                            <img src={item.image} alt={`${developmentContext.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} />
-                                            <figcaption>
-                                                <span>{index === 0 ? 'Condomínio' : item.category}</span>
-                                                <strong>{item.title}</strong>
-                                            </figcaption>
-                                        </figure>
-                                    ))}
-                                </div>
-                            </section>
                         )}
 
                         <section id="historico-precos" className="plp-section plp-market-history">

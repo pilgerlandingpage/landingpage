@@ -1572,8 +1572,8 @@ export default function PropertyLandingStyles() {
 
                 .plp-quick-facts-card {
                     display: grid;
-                    grid-template-rows: auto minmax(0, 1fr);
-                    align-content: stretch;
+                    gap: 16px;
+                    align-content: start;
                 }
 
                 .plp-narrative p,
@@ -1599,7 +1599,6 @@ export default function PropertyLandingStyles() {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                     grid-auto-rows: minmax(0, 1fr);
                     align-content: stretch;
-                    height: 100%;
                 }
 
                 .plp-quick-facts-card .plp-spec-card {
@@ -1648,6 +1647,33 @@ export default function PropertyLandingStyles() {
                     font-size: 15px;
                     line-height: 1.25;
                     overflow-wrap: anywhere;
+                }
+
+                .plp-quick-facts-features {
+                    min-width: 0;
+                    padding: 16px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                }
+
+                .plp-quick-facts-features .plp-info-list h3 {
+                    margin-bottom: 10px;
+                    font-size: 15px;
+                    line-height: 1.25;
+                }
+
+                .plp-quick-facts-features .plp-info-list > div {
+                    gap: 10px 18px;
+                }
+
+                .plp-quick-facts-features .plp-info-list ul {
+                    gap: 7px;
+                }
+
+                .plp-quick-facts-features .plp-info-list li {
+                    font-size: 13px;
+                    line-height: 1.38;
                 }
 
                 .plp-nearby-benefits {
@@ -4125,9 +4151,9 @@ export default function PropertyLandingStyles() {
                     margin: 8px 0 0;
                     padding: 18px;
                     display: grid;
-                    grid-template-columns: minmax(430px, 0.82fr) minmax(0, 1.18fr);
+                    grid-template-columns: minmax(340px, 0.58fr) minmax(0, 1.42fr);
                     gap: 18px;
-                    align-items: stretch;
+                    align-items: start;
                     border: 1px solid var(--plp-line);
                     border-radius: var(--plp-radius);
                     background: linear-gradient(180deg, #fff 0%, #f7f2ea 100%);
@@ -4138,8 +4164,9 @@ export default function PropertyLandingStyles() {
                 .plp-development-context-copy {
                     display: flex;
                     flex-direction: column;
-                    gap: 9px;
+                    gap: 12px;
                     min-width: 0;
+                    height: 100%;
                 }
 
                 .plp-development-context-copy h2 {
@@ -4153,7 +4180,18 @@ export default function PropertyLandingStyles() {
                     letter-spacing: 0;
                 }
 
-                .plp-development-context-copy p {
+                .plp-development-context-media {
+                    min-width: 0;
+                    display: grid;
+                    gap: 12px;
+                }
+
+                .plp-development-context-details {
+                    display: grid;
+                    gap: 10px;
+                }
+
+                .plp-development-context-details p {
                     max-width: none;
                     margin: 0;
                     color: #4d5662;
@@ -4195,6 +4233,14 @@ export default function PropertyLandingStyles() {
 
                 .plp-development-context-unit {
                     padding: 9px 11px;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) minmax(210px, 280px);
+                    align-items: center;
+                    gap: 10px 16px;
+                }
+
+                .plp-development-context-unit-copy {
+                    min-width: 0;
                     display: grid;
                     gap: 4px;
                 }
@@ -4272,11 +4318,54 @@ export default function PropertyLandingStyles() {
                     background: var(--plp-gold-dark);
                 }
 
+                .plp-development-context-features--condo {
+                    flex: 1 1 auto;
+                    min-height: clamp(380px, 31vw, 480px);
+                    padding: 13px 14px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .plp-development-context-features--condo .plp-info-list {
+                    flex: 1 1 auto;
+                    gap: 16px;
+                    grid-template-rows: auto minmax(0, 1fr);
+                }
+
+                .plp-development-context-features--condo .plp-info-list h3 {
+                    padding-bottom: 12px;
+                    font-size: 16px;
+                    line-height: 1.25;
+                }
+
+                .plp-development-context-features--condo .plp-info-list > div {
+                    gap: 14px 26px;
+                    align-content: stretch;
+                }
+
+                .plp-development-context-features--condo .plp-info-list ul {
+                    justify-content: space-between;
+                    gap: 11px;
+                }
+
+                .plp-development-context-features--condo .plp-info-list li {
+                    padding-left: 16px;
+                    font-size: 15px;
+                    line-height: 1.5;
+                }
+
+                .plp-development-context-features--condo .plp-info-list li::before {
+                    top: 0.7em;
+                    width: 6px;
+                    height: 6px;
+                }
+
                 .plp-development-context-actions {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    grid-template-columns: minmax(0, 260px);
+                    justify-content: end;
                     gap: 8px;
-                    margin-top: auto;
+                    margin-top: 0;
                 }
 
                 .plp-development-primary-link,
@@ -5244,7 +5333,6 @@ export default function PropertyLandingStyles() {
 
                     .plp-development-context-band {
                         grid-column: 1 / -1;
-                        grid-row: 3;
                     }
 
                     #ficha.plp-quick-facts-card .plp-spec-grid {
@@ -5658,7 +5746,19 @@ export default function PropertyLandingStyles() {
 
                     .plp-development-context-band {
                         grid-template-columns: 1fr;
-                        order: 5;
+                    }
+
+                    .plp-development-context-features--condo {
+                        min-height: auto;
+                    }
+
+                    .plp-development-context-unit {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-development-context-actions {
+                        grid-template-columns: minmax(0, 1fr);
+                        justify-content: stretch;
                     }
 
                     .plp-development-context-gallery {
