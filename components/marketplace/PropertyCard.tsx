@@ -798,7 +798,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 }
                 .property-card-compact .card-image-container {
                     height: auto;
-                    aspect-ratio: 1.08 / 1;
+                    aspect-ratio: 1.45 / 1;
                     border-radius: 18px;
                     background: #eee8df;
                 }
@@ -1117,7 +1117,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     }
                     .property-card-compact .card-image-container {
                         height: auto;
-                        aspect-ratio: 1.05 / 1;
+                        aspect-ratio: 1.25 / 1;
                         border-radius: 14px;
                     }
                     .property-card-compact .card-content-link {
