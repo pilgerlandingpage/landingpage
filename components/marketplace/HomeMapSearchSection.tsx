@@ -1248,7 +1248,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
 
     return (
         <section className="home-map-search" id="mapa">
-            <div className="map-search-shell" ref={wrapperRef}>
+            <div className={`map-search-shell ${isHomeMapPreviewOpen ? 'is-preview-open' : ''}`} ref={wrapperRef}>
                 <div className={`map-preview-panel home-preview-map-panel ${isMapInteractionLocked ? 'is-map-locked' : ''}${isHomeMapPreviewOpen ? ' is-preview-open' : ''}`}>
                     {shouldRenderMap ? (
                         <MapSearch
@@ -1318,7 +1318,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                             onMoreFiltersClick={openMapFiltersFromSearch}
                             onSubmitValues={submitOverlaySearchInMap}
                             onValuesChange={syncOverlaySearchWithMap}
-                            suggestionsPlacement="down"
+                            suggestionsPlacement="up"
                             variant="map"
                         />
                     </div>
@@ -1858,10 +1858,23 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                 }
                 .home-map-search-panel--desktop {
                     background: transparent;
+                    bottom: clamp(18px, 2.8vw, 34px);
                     display: none !important;
-                    margin: 4px auto 0;
+                    left: 50%;
+                    margin: 0;
+                    max-width: 980px;
                     padding: 0;
                     pointer-events: auto;
+                    position: absolute;
+                    transform: translateX(-50%);
+                    width: min(980px, calc(100% - 56px));
+                    z-index: 770;
+                }
+                .map-search-shell.is-preview-open > .home-map-search-panel--desktop {
+                    opacity: 0;
+                    pointer-events: none;
+                    transform: translate(-50%, 8px);
+                    visibility: hidden;
                 }
                 .home-map-search-panel :global(.home-search-box-map .home-search-panel) {
                     backdrop-filter: none;
@@ -2556,6 +2569,7 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                     }
                     .home-map-search-panel--desktop {
                         display: grid !important;
+                        justify-items: stretch;
                     }
                     .home-map-property-preview--compact :global(.map-property-preview) {
                         bottom: 24px;
@@ -2638,6 +2652,10 @@ export default function HomeMapSearchSection({ properties }: { properties: Prope
                         align-content: center;
                         gap: 14px;
                         padding: 20px clamp(22px, 4vw, 54px) 24px;
+                    }
+                    .home-map-search-panel--desktop {
+                        gap: 0;
+                        padding: 0;
                     }
                     .map-search-panel-new {
                         justify-items: stretch;
