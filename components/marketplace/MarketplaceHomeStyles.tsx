@@ -1306,9 +1306,9 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
 
         /* ====== LISTING GRID ====== */
         .listings-section {
-          max-width: 1440px;
+          max-width: 1752px;
           margin: 0 auto;
-          padding: clamp(18px, 2.4vw, 34px) clamp(12px, 3vw, 44px) clamp(28px, 4vw, 58px);
+          padding: clamp(18px, 2.4vw, 34px) clamp(18px, 3vw, 36px) clamp(28px, 4vw, 58px);
         }
         .properties-grid {
           display: grid;
@@ -1722,7 +1722,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
             gap: 18px;
             row-gap: 28px;
           }
-          .listings-section { padding: 24px 28px 32px; }
+          .listings-section { padding: 24px clamp(18px, 3vw, 36px) 32px; }
         }
 
         /* Tablet - 3 columns, hide mobile nav */
@@ -1746,7 +1746,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
           .hero-title { font-size: 2.8rem; }
           .hero-subtitle { font-size: 0.9rem; }
           .hero-welcome { font-size: 0.8rem; }
-          .listings-section { padding: 28px 40px 40px; }
+          .listings-section { padding: 28px clamp(18px, 3vw, 36px) 40px; }
           .properties-grid {
             grid-template-columns: repeat(4, 1fr);
             gap: 24px;
@@ -1757,7 +1757,7 @@ const MARKETPLACE_HOME_CSS = `/* ====== BASE ====== */
         /* Large desktop - 5 columns */
         @media (min-width: 1440px) {
           .hero-strip { height: 450px; }
-          .listings-section { padding: 32px 48px 52px; }
+          .listings-section { padding: 32px clamp(18px, 3vw, 36px) 52px; }
           .properties-grid {
             grid-template-columns: repeat(5, 1fr);
             gap: 28px;
