@@ -382,6 +382,45 @@ function locationLabelFromProperty(property: any) {
         .join(' - ')
 }
 
+const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [300, 900]
+
+function isRetriablePropertyLookupError(error: unknown) {
+    const summary = summarizeSupabaseError(error).toLowerCase()
+    return (
+        summary.includes('fetch failed') ||
+        summary.includes('timeout') ||
+        summary.includes('aborted') ||
+        summary.includes('connection terminated') ||
+        summary.includes('522') ||
+        summary.includes('503') ||
+        summary.includes('504')
+    )
+}
+
+function waitForPropertyLookupRetry(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function runPropertyLookup<T>(
+    createLookup: () => Promise<{ data: T | null; error: unknown }>,
+    logLabel: string
+) {
+    for (let attempt = 0; attempt <= PROPERTY_LOOKUP_RETRY_DELAYS_MS.length; attempt += 1) {
+        const { data, error } = await createLookup()
+        if (!error) return (data || null) as T | null
+
+        const canRetry = attempt < PROPERTY_LOOKUP_RETRY_DELAYS_MS.length && isRetriablePropertyLookupError(error)
+        if (!canRetry) {
+            console.error(`[Property Detail] ${logLabel} failed:`, summarizeSupabaseError(error))
+            throw new Error('Nao foi possivel carregar este imovel agora.')
+        }
+
+        await waitForPropertyLookupRetry(PROPERTY_LOOKUP_RETRY_DELAYS_MS[attempt])
+    }
+
+    return null
+}
+
 async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
     const supabase = createAdminClient()
     const decodedIdentifier = decodeURIComponent(identifier || '').trim()
@@ -389,33 +428,25 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
 
     if (idFromSeoSlug || isUuid(decodedIdentifier)) {
         const propertyId = idFromSeoSlug || decodedIdentifier
-        const { data, error } = await supabase
+        return runPropertyLookup<T>(
+            () => supabase
+                .from('properties')
+                .select(select)
+                .eq('id', propertyId)
+                .maybeSingle(),
+            'property lookup by id'
+        )
+    }
+
+    return runPropertyLookup<T>(
+        () => supabase
             .from('properties')
             .select(select)
-            .eq('id', propertyId)
-            .maybeSingle()
-
-        if (error) {
-            console.error('[Property Detail] property lookup failed:', summarizeSupabaseError(error))
-            throw new Error('Nao foi possivel carregar este imovel agora.')
-        }
-
-        return (data || null) as T | null
-    }
-
-    const { data, error } = await supabase
-        .from('properties')
-        .select(select)
-        .eq('source_slug', decodedIdentifier)
-        .limit(1)
-        .maybeSingle()
-
-    if (error) {
-        console.error('[Property Detail] property lookup failed:', summarizeSupabaseError(error))
-        throw new Error('Nao foi possivel carregar este imovel agora.')
-    }
-
-    return (data || null) as T | null
+            .eq('source_slug', decodedIdentifier)
+            .limit(1)
+            .maybeSingle(),
+        'property lookup by slug'
+    )
 }
 
 async function getPropertyDevelopmentContext(supabase: any, property: any): Promise<PropertyDevelopmentContext | null> {

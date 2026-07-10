@@ -1,13 +1,25 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+function createDevelopmentNoStoreFetch() {
+    if (process.env.NODE_ENV !== 'development') return undefined
+
+    return (input: RequestInfo | URL, init?: RequestInit) =>
+        fetch(input, {
+            ...init,
+            cache: 'no-store',
+        })
+}
+
 export async function createServerSupabase() {
     const cookieStore = await cookies()
+    const developmentFetch = createDevelopmentNoStoreFetch()
 
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            ...(developmentFetch ? { global: { fetch: developmentFetch } } : {}),
             cookies: {
                 getAll() {
                     return cookieStore.getAll()
@@ -31,9 +43,12 @@ export const createClient = createServerSupabase
 
 export function createAdminClient() {
     const { createClient } = require('@supabase/supabase-js')
+    const developmentFetch = createDevelopmentNoStoreFetch()
+
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        developmentFetch ? { global: { fetch: developmentFetch } } : undefined
     )
 }
 
