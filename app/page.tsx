@@ -62,6 +62,7 @@ const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
 const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
 const FEATURED_SECTION_DEFAULT_TITLE = 'Oportunidades'
 const FEATURED_SECTION_LEGACY_TITLES = new Set(['destaques', 'selecao exclusiva', 'selecao em destaque'])
+const DEFAULT_HOME_SECTIONS = ['featured', 'newest', 'cta']
 const HOME_BLOG_POST_LIMIT = 4
 const HOME_PROPERTY_FIELDS = [
   'id',
@@ -127,6 +128,10 @@ function emptyHomeBaseData(propertiesWarning?: string): HomeBaseData {
     blogPosts: [],
     warnings: propertiesWarning ? { properties: propertiesWarning } : {},
   }
+}
+
+function shouldAbortHomeCache(message: string) {
+  return /timeout|aborted|fetch failed|statement timeout|supabase\.co|error code 52[12]|web server is down|connection timed out/i.test(message)
 }
 
 async function fetchHomeProperties(supabase: ReturnType<typeof createSupabaseAdminClient>) {
@@ -218,6 +223,10 @@ const getCachedHomeBaseData = unstable_cache(
         .abortSignal(createSupabaseAbortSignal(HOME_BASE_DATA_TIMEOUT_MS)),
     ])
 
+    if (propertiesResult.warning && (!propertiesResult.data || propertiesResult.data.length === 0)) {
+      throw new Error(`[Home] critical property feed unavailable: ${propertiesResult.warning}`)
+    }
+
     return {
       configRows: configResult.data || [],
       properties: (propertiesResult.data || []).map(compactHomeProperty),
@@ -231,7 +240,7 @@ const getCachedHomeBaseData = unstable_cache(
       },
     }
   },
-  ['marketplace-home-base-data-v2'],
+  ['marketplace-home-base-data-v3'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
@@ -242,7 +251,11 @@ async function getHomeBaseData() {
   try {
     return await getCachedHomeBaseData()
   } catch (error) {
-    return emptyHomeBaseData(summarizeSupabaseError(error))
+    const warning = summarizeSupabaseError(error)
+    if (shouldAbortHomeCache(warning)) {
+      throw error
+    }
+    return emptyHomeBaseData(warning)
   }
 }
 
@@ -402,6 +415,17 @@ function normalizeFeaturedSectionTitle(value: unknown) {
   return title
 }
 
+function parseHomeSectionsEnabled(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return [...DEFAULT_HOME_SECTIONS]
+
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [...DEFAULT_HOME_SECTIONS]
+  } catch {
+    return [...DEFAULT_HOME_SECTIONS]
+  }
+}
+
 function compactHomeProperty(property: any) {
   const description = String(property.description || '')
   const isLaunch = isPropertyLaunch(property)
@@ -470,8 +494,7 @@ export default async function MarketplaceHome() {
   const featuredMaxPrice = parseInt(configMap.homepage_featured_max_price) || 0
   const itemsPerSection = Math.min(20, Math.max(2, parseInt(configMap.homepage_items_per_section) || 8))
 
-  let sectionsEnabled: string[] = ['featured', 'newest', 'cta']
-  try { sectionsEnabled = JSON.parse(configMap.homepage_sections_enabled || '[]') } catch { }
+  const sectionsEnabled = parseHomeSectionsEnabled(configMap.homepage_sections_enabled)
 
   let manualFeaturedIds: string[] = []
   try { manualFeaturedIds = JSON.parse(configMap.homepage_featured_ids || '[]') } catch { }
