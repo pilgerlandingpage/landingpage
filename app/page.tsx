@@ -58,9 +58,7 @@ const HOME_PROPERTY_FALLBACK_LIMIT = 120
 const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
 const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
 const HOME_SECTION_PROPERTY_LIMIT = 4
-const FEATURED_SECTION_DEFAULT_TITLE = 'Oportunidades'
-const FEATURED_SECTION_LEGACY_TITLES = new Set(['destaques', 'selecao exclusiva', 'selecao em destaque'])
-const DEFAULT_HOME_SECTIONS = ['featured', 'newest', 'cta']
+const DEFAULT_HOME_SECTIONS = ['newest', 'cta']
 const HOME_BLOG_POST_LIMIT = 4
 const HOME_PROPERTY_FIELDS = [
   'id',
@@ -332,14 +330,6 @@ function isAllowedOnHome(property: any) {
   return !HOME_EXCLUDED_CITIES.has(normalizeCityName(property?.city))
 }
 
-function normalizeFeaturedSectionTitle(value: unknown) {
-  const title = String(value || '').trim()
-  if (!title || FEATURED_SECTION_LEGACY_TITLES.has(normalizeLocationName(title))) {
-    return FEATURED_SECTION_DEFAULT_TITLE
-  }
-  return title
-}
-
 function parseHomeSectionsEnabled(value: unknown) {
   if (typeof value !== 'string' || !value.trim()) return [...DEFAULT_HOME_SECTIONS]
 
@@ -413,19 +403,12 @@ export default async function MarketplaceHome() {
   const configRows = homeBaseData.configRows
   configRows?.forEach((row: any) => { configMap[row.key] = row.value })
 
-  const featuredTitle = normalizeFeaturedSectionTitle(configMap.homepage_featured_title)
-  const featuredSort = configMap.homepage_featured_sort || 'price-desc'
-  const featuredMinPrice = parseInt(configMap.homepage_featured_min_price) || 0
-  const featuredMaxPrice = parseInt(configMap.homepage_featured_max_price) || 0
   const itemsPerSection = Math.min(
     HOME_SECTION_PROPERTY_LIMIT,
     Math.max(2, parseInt(configMap.homepage_items_per_section) || HOME_SECTION_PROPERTY_LIMIT)
   )
 
   const sectionsEnabled = parseHomeSectionsEnabled(configMap.homepage_sections_enabled)
-
-  let manualFeaturedIds: string[] = []
-  try { manualFeaturedIds = JSON.parse(configMap.homepage_featured_ids || '[]') } catch { }
 
   const allProperties = homeBaseData.properties
   const properties = (allProperties || []).map(compactHomeProperty)
@@ -499,31 +482,6 @@ export default async function MarketplaceHome() {
 
   // === BUILD SECTIONS ===
 
-  // 1. Featured / Oportunidades
-  let featured: any[] = []
-  if (featuredSort === 'manual' && manualFeaturedIds.length > 0) {
-    // Manual selection
-    featured = manualFeaturedIds
-      .map(id => homeProperties.find(p => p.id === id))
-      .filter(Boolean)
-      .slice(0, itemsPerSection)
-  } else {
-    // Auto: filter by price, then sort
-    let pool = homeProperties.filter(p => p.price && p.price > 0)
-    if (featuredMinPrice > 0) pool = pool.filter(p => p.price >= featuredMinPrice)
-    if (featuredMaxPrice > 0) pool = pool.filter(p => p.price <= featuredMaxPrice)
-
-    if (featuredSort === 'price-asc') {
-      pool.sort((a, b) => (a.price || 0) - (b.price || 0))
-    } else if (featuredSort === 'newest') {
-      // already sorted by created_at desc
-    } else {
-      // price-desc (default)
-      pool.sort((a, b) => (b.price || 0) - (a.price || 0))
-    }
-    featured = pool.slice(0, itemsPerSection)
-  }
-
   // 2. Newest
   const newest = homeProperties.slice(0, itemsPerSection)
 
@@ -533,7 +491,7 @@ export default async function MarketplaceHome() {
     landingPages || [],
     funnelEvents,
     itemsPerSection,
-    new Set(featured.map((p: any) => p.id))
+    new Set<string>()
   )
 
   // 3. Premium tag sections
@@ -576,15 +534,6 @@ export default async function MarketplaceHome() {
       <div className="listings-section">
 
         <HomepageSection
-          title="Exclusivos"
-          subtitle="Gestão exclusiva confirmada no cadastro"
-          properties={exclusiveProperties}
-          lpMap={lpMap}
-          viewAllHref="/busca?exclusive=1"
-          viewAllLabel="Ver todos"
-        />
-
-        <HomepageSection
           title="Frente mar"
           subtitle="Imóveis com leitura direta de mar e localização premium"
           properties={frontSeaProperties}
@@ -593,28 +542,24 @@ export default async function MarketplaceHome() {
           viewAllLabel="Ver todos"
         />
 
-        {sectionsEnabled.includes('featured') && (
-          <HomepageSection
-            title={featuredTitle}
-            subtitle="Seleção premium"
-            properties={featured}
-            lpMap={lpMap}
-            viewAllHref="/busca?sort=price-desc"
-            viewAllLabel="Ver todos"
-          />
-        )}
+        <HomepageSection
+          title="Mais Vistos"
+          titleIcon="eye"
+          subtitle="As oportunidades que mais chamam atenção de quem busca alto padrão"
+          properties={mostViewed}
+          lpMap={lpMap}
+          viewAllHref="/busca"
+          viewAllLabel="Ver todos"
+        />
 
-        {mostViewed.length > 0 && (
-          <HomepageSection
-            title="Mais Vistos"
-            titleIcon="eye"
-            subtitle="As oportunidades que mais chamam atenção de quem busca alto padrão"
-            properties={mostViewed}
-            lpMap={lpMap}
-            viewAllHref="/busca"
-            viewAllLabel="Ver todos"
-          />
-        )}
+        <HomepageSection
+          title="Exclusivos"
+          subtitle="Gestão exclusiva confirmada no cadastro"
+          properties={exclusiveProperties}
+          lpMap={lpMap}
+          viewAllHref="/busca?exclusive=1"
+          viewAllLabel="Ver todos"
+        />
 
         {sectionsEnabled.includes('newest') && (
           <HomepageSection
