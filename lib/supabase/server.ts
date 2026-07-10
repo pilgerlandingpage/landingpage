@@ -1,14 +1,74 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+const DEVELOPMENT_SUPABASE_FETCH_TIMEOUT_MS = 12000
+const DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS = [250, 900]
+
+function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function isRetriableDevelopmentFetchError(error: unknown) {
+    const summary = summarizeSupabaseError(error).toLowerCase()
+    return (
+        summary.includes('fetch failed') ||
+        summary.includes('terminated') ||
+        summary.includes('timeout') ||
+        summary.includes('aborted') ||
+        summary.includes('econnreset') ||
+        summary.includes('socket') ||
+        summary.includes('network')
+    )
+}
+
+function createFetchTimeoutSignal(sourceSignal: AbortSignal | null | undefined, timeoutMs: number) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    const abortFromSource = () => controller.abort()
+
+    if (sourceSignal?.aborted) {
+        controller.abort()
+    } else {
+        sourceSignal?.addEventListener('abort', abortFromSource, { once: true })
+    }
+
+    return {
+        signal: controller.signal,
+        cleanup() {
+            clearTimeout(timeout)
+            sourceSignal?.removeEventListener('abort', abortFromSource)
+        },
+    }
+}
+
 function createDevelopmentNoStoreFetch() {
     if (process.env.NODE_ENV !== 'development') return undefined
 
-    return (input: RequestInfo | URL, init?: RequestInit) =>
-        fetch(input, {
-            ...init,
-            cache: 'no-store',
-        })
+    return async (input: RequestInfo | URL, init?: RequestInit) => {
+        for (let attempt = 0; attempt <= DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+            const timeoutSignal = createFetchTimeoutSignal(init?.signal, DEVELOPMENT_SUPABASE_FETCH_TIMEOUT_MS)
+
+            try {
+                return await fetch(input, {
+                    ...init,
+                    cache: 'no-store',
+                    signal: timeoutSignal.signal,
+                })
+            } catch (error) {
+                const canRetry =
+                    attempt < DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS.length &&
+                    !init?.signal?.aborted &&
+                    isRetriableDevelopmentFetchError(error)
+
+                if (!canRetry) throw error
+                await wait(DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS[attempt])
+            } finally {
+                timeoutSignal.cleanup()
+            }
+        }
+
+        throw new Error('Supabase fetch retry failed')
+    }
 }
 
 export async function createServerSupabase() {

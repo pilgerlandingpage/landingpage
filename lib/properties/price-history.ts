@@ -43,6 +43,17 @@ type RecordPriceHistoryOptions = {
 }
 
 const TRACKED_FINANCIAL_FIELDS = ['price', 'condo_fee', 'iptu'] as const
+const PRICE_HISTORY_FETCH_TIMEOUT_MS = 7000
+
+function createPriceHistoryAbortSignal(timeoutMs = PRICE_HISTORY_FETCH_TIMEOUT_MS) {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+        return AbortSignal.timeout(timeoutMs)
+    }
+
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), timeoutMs)
+    return controller.signal
+}
 
 function numericOrNull(value: unknown) {
     if (value === null || value === undefined || value === '') return null
@@ -175,6 +186,7 @@ export async function fetchPropertyPriceHistory(supabase: any, propertyId: strin
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false })
         .limit(limit)
+        .abortSignal(createPriceHistoryAbortSignal())
 
     if (error) {
         console.warn('[Property Price History] Unable to fetch financial events:', error.message)

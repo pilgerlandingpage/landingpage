@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { CSSProperties, ReactNode } from 'react'
-import { createAdminClient, summarizeSupabaseError } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -382,7 +382,41 @@ function locationLabelFromProperty(property: any) {
         .join(' - ')
 }
 
-const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [300, 900]
+const PROPERTY_LOOKUP_TIMEOUT_MS = 10000
+const PROPERTY_SECONDARY_QUERY_TIMEOUT_MS = 7000
+const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [300, 900, 1600]
+
+function fallbackResponsibleBroker() {
+    return {
+        broker_id: null,
+        admin_user_id: null,
+        whatsapp_instance_id: null,
+        legacy_name: null,
+        legacy_login: null,
+        name: GLOBAL_PROPERTY_BROKER_NAME,
+        phone: GLOBAL_PROPERTY_WHATSAPP_PHONE,
+        photo_url: null,
+        email: null,
+        creci: null,
+        is_connected: false,
+        source: 'global' as const,
+    }
+}
+
+function propertySecondaryTimeout<T>(label: string): Promise<T> {
+    return new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`${label} timed out`)), PROPERTY_SECONDARY_QUERY_TIMEOUT_MS)
+    })
+}
+
+async function withPropertySecondaryFallback<T>(promise: Promise<T>, label: string, fallback: T): Promise<T> {
+    try {
+        return await Promise.race([promise, propertySecondaryTimeout<T>(label)])
+    } catch (error) {
+        console.warn(`[Property Detail] ${label} unavailable:`, summarizeSupabaseError(error))
+        return fallback
+    }
+}
 
 function isRetriablePropertyLookupError(error: unknown) {
     const summary = summarizeSupabaseError(error).toLowerCase()
@@ -422,28 +456,29 @@ async function runPropertyLookup<T>(
 }
 
 async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
-    const supabase = createAdminClient()
     const decodedIdentifier = decodeURIComponent(identifier || '').trim()
     const idFromSeoSlug = extractPropertyIdFromSeoSlug(decodedIdentifier)
 
     if (idFromSeoSlug || isUuid(decodedIdentifier)) {
         const propertyId = idFromSeoSlug || decodedIdentifier
         return runPropertyLookup<T>(
-            () => supabase
+            () => createAdminClient()
                 .from('properties')
                 .select(select)
                 .eq('id', propertyId)
+                .abortSignal(createSupabaseAbortSignal(PROPERTY_LOOKUP_TIMEOUT_MS))
                 .maybeSingle(),
             'property lookup by id'
         )
     }
 
     return runPropertyLookup<T>(
-        () => supabase
+        () => createAdminClient()
             .from('properties')
             .select(select)
             .eq('source_slug', decodedIdentifier)
             .limit(1)
+            .abortSignal(createSupabaseAbortSignal(PROPERTY_LOOKUP_TIMEOUT_MS))
             .maybeSingle(),
         'property lookup by slug'
     )
@@ -457,6 +492,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         .select('id, slug, title, content, created_at')
         .eq('status', 'published')
         .order('created_at', { ascending: true })
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
 
     if (error) {
         console.warn('[Property Detail] development context unavailable:', error.message)
@@ -568,7 +604,10 @@ function joinPortugueseList(items: string[]) {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
-    const property = await getPropertyForSeo(id)
+    const property = await getPropertyForSeo(id).catch((error) => {
+        console.warn('[Property Detail] metadata lookup unavailable:', summarizeSupabaseError(error))
+        return null
+    })
     if (!property) return { title: 'Imóvel não encontrado' }
 
     const title = cleanRepeatedPraiaBravaText(property.seo_title || property.title || 'Imóvel de luxo')
@@ -1287,12 +1326,17 @@ export default async function PropertyDetailPage({
     }
 
     const adminSupabase = createAdminClient()
-    const responsibleBroker = await getResponsibleBrokerForProperty(adminSupabase, property.id)
+    const responsibleBroker = await withPropertySecondaryFallback(
+        getResponsibleBrokerForProperty(adminSupabase, property.id),
+        'responsible broker',
+        fallbackResponsibleBroker()
+    )
     const { count: propertyViewCountRaw, error: propertyViewCountError } = await adminSupabase
         .from('funnel_events')
         .select('id', { count: 'exact', head: true })
         .eq('event_type', 'property_details_landing_viewed')
         .contains('metadata', { property_id: property.id })
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
 
     const { data: propertySaveEvents, error: propertySaveEventsError } = await adminSupabase
         .from('funnel_events')
@@ -1301,6 +1345,7 @@ export default async function PropertyDetailPage({
         .contains('metadata', { property_id: property.id })
         .order('created_at', { ascending: false })
         .limit(5000)
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
 
     const { data: propertyMapModalRows, error: propertyMapModalError } = await supabase
         .from('properties')
@@ -1309,6 +1354,7 @@ export default async function PropertyDetailPage({
         .gte('price', PROPERTY_MAP_MODAL_MIN_PRICE)
         .order('updated_at', { ascending: false, nullsFirst: false })
         .limit(260)
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
 
     if (propertyViewCountError) {
         console.warn('[Property Detail] view count unavailable:', propertyViewCountError.message)

@@ -33,6 +33,18 @@ export const MARKET_ANALYSIS_PROPERTY_SELECT = [
     'source_updated_at',
 ].join(', ')
 
+const MARKET_COMPARABLES_FETCH_TIMEOUT_MS = 7000
+
+function createMarketComparablesAbortSignal(timeoutMs = MARKET_COMPARABLES_FETCH_TIMEOUT_MS) {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+        return AbortSignal.timeout(timeoutMs)
+    }
+
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), timeoutMs)
+    return controller.signal
+}
+
 export type MarketAnalysisProperty = {
     id: string
     source_slug?: string | null
@@ -637,6 +649,7 @@ export async function fetchInternalMarketComparables(supabase: any, property: Ma
         .not('price', 'is', null)
         .order('updated_at', { ascending: false, nullsFirst: false })
         .limit(limit)
+        .abortSignal(createMarketComparablesAbortSignal())
 
     const queries = []
 
