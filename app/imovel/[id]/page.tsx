@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, summarizeSupabaseError } from '@/lib/supabase/server'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
@@ -26,9 +26,14 @@ export default async function PropertyPage({ params }: PageProps) {
         .from('properties')
         .select('id, source_slug, title, seo_title, city, neighborhood, property_type')
 
-    const { data: property } = idFromSeoSlug || UUID_PATTERN.test(identifier)
+    const { data: property, error } = idFromSeoSlug || UUID_PATTERN.test(identifier)
         ? await query.eq('id', idFromSeoSlug || identifier).maybeSingle()
         : await query.eq('source_slug', identifier).limit(1).maybeSingle()
+
+    if (error) {
+        console.error('[Property Redirect] property lookup failed:', summarizeSupabaseError(error))
+        throw new Error('Nao foi possivel carregar este imovel agora.')
+    }
 
     if (!property) return notFound()
 

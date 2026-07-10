@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { CSSProperties, ReactNode } from 'react'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, summarizeSupabaseError } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -389,21 +389,31 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
 
     if (idFromSeoSlug || isUuid(decodedIdentifier)) {
         const propertyId = idFromSeoSlug || decodedIdentifier
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('properties')
             .select(select)
             .eq('id', propertyId)
             .maybeSingle()
 
+        if (error) {
+            console.error('[Property Detail] property lookup failed:', summarizeSupabaseError(error))
+            throw new Error('Nao foi possivel carregar este imovel agora.')
+        }
+
         return (data || null) as T | null
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from('properties')
         .select(select)
         .eq('source_slug', decodedIdentifier)
         .limit(1)
         .maybeSingle()
+
+    if (error) {
+        console.error('[Property Detail] property lookup failed:', summarizeSupabaseError(error))
+        throw new Error('Nao foi possivel carregar este imovel agora.')
+    }
 
     return (data || null) as T | null
 }
