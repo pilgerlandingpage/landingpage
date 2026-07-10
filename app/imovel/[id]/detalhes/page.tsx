@@ -1366,7 +1366,7 @@ export default async function PropertyDetailPage({
         propertyAmenityItems: amenityFeatureGroups.propertyItems,
     })
     const projectItems = amenityFeatureGroups.developmentItems.slice(0, 24)
-    const hasTechnicalLists = featureItems.length > 0 || projectItems.length > 0
+    const hasTechnicalLists = featureItems.length > 0
     const propertyPath = propertyDetailsPath(property)
     const propertyUrl = absoluteUrl(propertyPath)
     const propertyTrackingMetadata = {
@@ -1791,7 +1791,6 @@ export default async function PropertyDetailPage({
                                 </div>
                                 <div className="plp-mobile-classic-lists">
                                     {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
-                                    {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
                                 </div>
                             </section>
                         )}
@@ -1829,6 +1828,11 @@ export default async function PropertyDetailPage({
                                     <span><BarChart3 size={14} /> {developmentContext.priceRange}</span>
                                     <span><Ruler size={14} /> {developmentContext.areaRange}</span>
                                 </div>
+                                {projectItems.length > 0 && (
+                                    <div className="plp-mobile-development-features">
+                                        <InfoList title="Características do condomínio" items={projectItems} />
+                                    </div>
+                                )}
                                 <div className="plp-mobile-development-actions">
                                     <Link href={developmentHref || '/busca'}>
                                         Conhecer condomínio
@@ -2057,7 +2061,6 @@ export default async function PropertyDetailPage({
                                     <section className="plp-section plp-technical-details">
                                         <div className="plp-classic-lists">
                                             {featureItems.length > 0 && <InfoList title="Características do imóvel" items={featureItems} />}
-                                            {projectItems.length > 0 && <InfoList title="Características do empreendimento" items={projectItems} />}
                                         </div>
                                     </section>
                                 )}
@@ -2092,6 +2095,11 @@ export default async function PropertyDetailPage({
                                         <strong>{developmentContext.unit.title}</strong>
                                         <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
                                     </div>
+                                    {projectItems.length > 0 && (
+                                        <div className="plp-development-context-features">
+                                            <InfoList title="Características do condomínio" items={projectItems} />
+                                        </div>
+                                    )}
                                     <div className="plp-development-context-actions">
                                         <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
                                             Conhecer condomínio

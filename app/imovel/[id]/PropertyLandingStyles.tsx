@@ -4225,6 +4225,53 @@ export default function PropertyLandingStyles() {
                     line-height: 1.45;
                 }
 
+                .plp-development-context-features {
+                    min-width: 0;
+                    padding: 10px 11px;
+                    border: 1px solid rgba(184, 148, 95, 0.16);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255, 255, 255, 0.72);
+                }
+
+                .plp-development-context-features .plp-info-list {
+                    display: grid;
+                    gap: 8px;
+                }
+
+                .plp-development-context-features .plp-info-list h3 {
+                    margin: 0;
+                    padding-bottom: 7px;
+                    border-bottom-color: rgba(184, 148, 95, 0.16);
+                    font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-size: 12px;
+                    font-weight: 800;
+                    line-height: 1.2;
+                }
+
+                .plp-development-context-features .plp-info-list > div {
+                    gap: 6px 14px;
+                }
+
+                .plp-development-context-features .plp-info-list ul {
+                    gap: 5px;
+                }
+
+                .plp-development-context-features .plp-info-list li {
+                    padding-left: 11px;
+                    color: #4d5968;
+                    font-size: 11px;
+                    line-height: 1.28;
+                }
+
+                .plp-development-context-features .plp-info-list li::before {
+                    content: '';
+                    top: 0.55em;
+                    width: 4px;
+                    height: 4px;
+                    border-radius: 999px;
+                    background: var(--plp-gold-dark);
+                }
+
                 .plp-development-context-actions {
                     display: grid;
                     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -8796,6 +8843,64 @@ export default function PropertyLandingStyles() {
                     .plp-mobile-development-facts svg {
                         flex: 0 0 auto;
                         color: var(--plp-gold-dark);
+                    }
+
+                    .plp-mobile-development-features {
+                        margin-top: 11px;
+                        padding: 11px 12px;
+                        border: 1px solid rgba(184,148,95,0.15);
+                        border-radius: 11px;
+                        background: rgba(255,255,255,0.78);
+                    }
+
+                    .plp-mobile-development-features .plp-info-list {
+                        display: grid;
+                        gap: 8px;
+                    }
+
+                    .plp-mobile-development-features .plp-info-list h3 {
+                        margin: 0;
+                        padding-bottom: 7px;
+                        border-bottom: 1px solid rgba(184,148,95,0.18);
+                        color: #122033;
+                        font-family: 'Montserrat', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: 0.78rem;
+                        font-weight: 700;
+                        line-height: 1.18;
+                    }
+
+                    .plp-mobile-development-features .plp-info-list > div {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 6px 12px;
+                    }
+
+                    .plp-mobile-development-features .plp-info-list ul {
+                        display: grid;
+                        gap: 7px;
+                        margin: 0;
+                        padding: 0;
+                        list-style: none;
+                    }
+
+                    .plp-mobile-development-features .plp-info-list li {
+                        position: relative;
+                        padding-left: 11px;
+                        color: #4d5968;
+                        font-size: 0.74rem;
+                        font-weight: 440;
+                        line-height: 1.32;
+                    }
+
+                    .plp-mobile-development-features .plp-info-list li::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 0.52em;
+                        width: 4px;
+                        height: 4px;
+                        border-radius: 999px;
+                        background: var(--plp-gold-dark);
                     }
 
                     .plp-mobile-development-actions {
