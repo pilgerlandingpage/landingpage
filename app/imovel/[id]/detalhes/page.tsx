@@ -845,6 +845,107 @@ function statLabel(value: number, singular: string, plural: string) {
     return value === 1 ? singular : plural
 }
 
+function uniqueFeatureItems(items: Array<string | null | undefined>) {
+    const seen = new Set<string>()
+    const values: string[] = []
+
+    for (const item of items) {
+        const label = String(item || '').replace(/\s+/g, ' ').trim()
+        const key = normalizeContentKey(label)
+        if (!label || !key || seen.has(key)) continue
+        seen.add(key)
+        values.push(label)
+    }
+
+    return values
+}
+
+function isDevelopmentAmenity(value: string) {
+    const item = normalizeContentKey(value)
+    if (!item) return false
+
+    if (/(privativ|exclusiv|sacada|varanda|suite|dormitorio|dormitorios|quarto|quartos|lavabo|closet|living|cozinha|sala de estar|sala de jantar|estar intimo|dependencia|area de servico|lavanderia|terraco|garden|vista|frente mar|frente para o mar|mobili|decorad|churrasqueira na unidade)/.test(item)) {
+        return false
+    }
+
+    return /(academia|fitness|piscina|sauna|salao de festas|sala de festas|sala de jogos|brinquedoteca|playground|quadra|cancha|spa|portaria|portao eletronico|seguranca|monitoramento|elevador|hall|lounge|coworking|rooftop|quiosque|espaco gourmet|cinema|pet place|beach tennis|bicicletario|guarita|recepcao|praca|pub|wine bar)/.test(item)
+}
+
+function isPropertyAmenity(value: string) {
+    const item = normalizeContentKey(value)
+    if (!item || isDevelopmentAmenity(value)) return false
+
+    return /(frente mar|frente para o mar|vista|mobili|decorad|sacada|varanda|churrasqueira|lavabo|closet|living|sala(?!o de festas| de jogos)|cozinha|area de servico|lavanderia|dependencia|estar intimo|terraco|garden|duplex|triplex|suite standard|suite master|master|hidro|banheira|piscina privativa|spa privativo|jacuzzi privativa|automacao|climatizacao|ar condicionado|pe direito|andar alto|sol da manha|face norte|face leste)/.test(item)
+}
+
+function splitAmenityFeatureItems(amenities: string[]) {
+    const propertyItems: string[] = []
+    const developmentItems: string[] = []
+
+    amenities.forEach((amenity) => {
+        const label = String(amenity || '').trim()
+        if (!label) return
+
+        if (isPropertyAmenity(label)) {
+            propertyItems.push(label)
+            return
+        }
+
+        if (isDevelopmentAmenity(label)) {
+            developmentItems.push(label)
+        }
+    })
+
+    return {
+        propertyItems: uniqueFeatureItems(propertyItems),
+        developmentItems: uniqueFeatureItems(developmentItems),
+    }
+}
+
+function buildPropertyFeatureItems(params: {
+    property: any
+    area: number
+    suiteCount: number
+    bedroomCount: number
+    bathroomsCount: number
+    parkingCount: number
+    propertyAmenityItems: string[]
+}) {
+    const { property, area, suiteCount, bedroomCount, bathroomsCount, parkingCount, propertyAmenityItems } = params
+    const haystack = normalizeContentKey([
+        property?.title,
+        property?.seo_title,
+        property?.description,
+        property?.seo_description,
+        property?.property_type,
+        property?.source_status,
+        ...propertyAmenityItems,
+    ].filter(Boolean).join(' '))
+    const hasAny = (...terms: string[]) => terms.some(term => haystack.includes(normalizeContentKey(term)))
+    const baseItems: Array<string | null> = [
+        property.property_type ? String(property.property_type).trim() : null,
+        area > 0 ? `${area.toLocaleString('pt-BR')} m² privativos` : null,
+        suiteCount > 0 ? `${suiteCount} ${statLabel(suiteCount, 'suíte', 'suítes')}` : null,
+        bedroomCount > 0 && bedroomCount !== suiteCount ? `${bedroomCount} ${statLabel(bedroomCount, 'dormitório', 'dormitórios')}` : null,
+        bathroomsCount > 0 ? `${bathroomsCount} ${statLabel(bathroomsCount, 'banheiro', 'banheiros')}` : null,
+        parkingCount > 0 ? `${parkingCount} ${statLabel(parkingCount, 'vaga de garagem', 'vagas de garagem')}` : null,
+        hasAny('frente para o mar', 'frente mar', 'beira mar') ? 'Frente para o mar' : null,
+        hasAny('vista mar', 'vista para o mar') ? 'Vista para o mar' : null,
+        hasAny('semi mobilia', 'semi mobiliado', 'semi mobiliada') ? 'Semi mobiliado' : null,
+        !hasAny('semi mobilia', 'semi mobiliado', 'semi mobiliada') && hasAny('mobiliado', 'mobiliada') ? 'Mobiliado' : null,
+        hasAny('decorado', 'decorada') ? 'Decorado' : null,
+        hasAny('sacada com churrasqueira', 'varanda gourmet') ? 'Sacada com churrasqueira' : null,
+        hasAny('lavabo') ? 'Lavabo' : null,
+        hasAny('area de servico', 'área de serviço') ? 'Área de serviço' : null,
+        hasAny('terraço', 'terraco') ? 'Terraço privativo' : null,
+        hasAny('garden') ? 'Garden' : null,
+        hasAny('andar alto') ? 'Andar alto' : null,
+        hasAny('sol da manha', 'face leste') ? 'Sol da manhã' : null,
+    ]
+
+    return uniqueFeatureItems([...baseItems, ...propertyAmenityItems]).slice(0, 24)
+}
+
 function referenceLabel(property: any) {
     return String(property.source_reference || property.source_slug || property.id || '').slice(0, 8).toUpperCase()
 }
@@ -1254,8 +1355,17 @@ export default async function PropertyDetailPage({
         paragraphs: narrativeParagraphs,
         mainBenefitTag,
     })
-    const featureItems = amenities.slice(0, 24)
-    const projectItems = amenities.slice(24, 48)
+    const amenityFeatureGroups = splitAmenityFeatureItems(amenities)
+    const featureItems = buildPropertyFeatureItems({
+        property,
+        area,
+        suiteCount: Number(property.suites || 0),
+        bedroomCount,
+        bathroomsCount,
+        parkingCount,
+        propertyAmenityItems: amenityFeatureGroups.propertyItems,
+    })
+    const projectItems = amenityFeatureGroups.developmentItems.slice(0, 24)
     const hasTechnicalLists = featureItems.length > 0 || projectItems.length > 0
     const propertyPath = propertyDetailsPath(property)
     const propertyUrl = absoluteUrl(propertyPath)
@@ -1452,9 +1562,6 @@ export default async function PropertyDetailPage({
         ...mobilePhotoItems.slice(2),
     ]
     const developmentHref = developmentContext?.slug ? `/${developmentContext.slug}` : ''
-    const developmentCtaMessage = developmentContext
-        ? `Olá, vi este imóvel e quero conhecer o condomínio ${developmentContext.name}: ${absoluteUrl(developmentHref || propertyPath)}`
-        : ''
     const developmentGalleryPreview = developmentContext?.gallery?.length
         ? developmentContext.gallery
         : developmentContext
@@ -1776,24 +1883,6 @@ export default async function PropertyDetailPage({
                                         Conhecer condomínio
                                         <ArrowRight size={15} />
                                     </Link>
-                                    <WhatsAppCaptureLink
-                                        phone={contactPhone}
-                                        message={developmentCtaMessage}
-                                        slug="imovel"
-                                        template="property-development-context-mobile"
-                                        metadata={{
-                                            ...propertyTrackingMetadata,
-                                            tracking_event_type: 'property_development_context_requested',
-                                            section_id: 'empreendimento-do-imovel',
-                                            section_label: 'Condomínio do imóvel',
-                                            development_slug: developmentContext.slug,
-                                            development_name: developmentContext.name,
-                                            cta_context: 'property_development_mobile',
-                                            cta_label: 'Falar sobre condomínio',
-                                        }}
-                                    >
-                                        Falar com especialista
-                                    </WhatsAppCaptureLink>
                                 </div>
                             </section>
                         )}
@@ -2180,25 +2269,6 @@ export default async function PropertyDetailPage({
                                         Conhecer condomínio
                                         <ArrowRight size={16} />
                                     </Link>
-                                    <WhatsAppCaptureLink
-                                        phone={contactPhone}
-                                        message={developmentCtaMessage}
-                                        slug="imovel"
-                                        template="property-development-context"
-                                        metadata={{
-                                            ...propertyTrackingMetadata,
-                                            tracking_event_type: 'property_development_context_requested',
-                                            section_id: 'empreendimento-do-imovel',
-                                            section_label: 'Condomínio do imóvel',
-                                            development_slug: developmentContext.slug,
-                                            development_name: developmentContext.name,
-                                            cta_context: 'property_development_desktop',
-                                            cta_label: 'Falar sobre condomínio',
-                                        }}
-                                        className="plp-development-secondary-link"
-                                    >
-                                        Falar sobre o condomínio
-                                    </WhatsAppCaptureLink>
                                 </div>
                             </div>
                             <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${developmentContext.name}`}>
