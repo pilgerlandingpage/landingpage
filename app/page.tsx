@@ -57,6 +57,7 @@ const HOME_PROPERTY_FEED_LIMIT = 480
 const HOME_PROPERTY_FALLBACK_LIMIT = 120
 const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
 const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
+const HOME_SECTION_PROPERTY_LIMIT = 4
 const FEATURED_SECTION_DEFAULT_TITLE = 'Oportunidades'
 const FEATURED_SECTION_LEGACY_TITLES = new Set(['destaques', 'selecao exclusiva', 'selecao em destaque'])
 const DEFAULT_HOME_SECTIONS = ['featured', 'newest', 'cta']
@@ -416,7 +417,10 @@ export default async function MarketplaceHome() {
   const featuredSort = configMap.homepage_featured_sort || 'price-desc'
   const featuredMinPrice = parseInt(configMap.homepage_featured_min_price) || 0
   const featuredMaxPrice = parseInt(configMap.homepage_featured_max_price) || 0
-  const itemsPerSection = Math.min(20, Math.max(2, parseInt(configMap.homepage_items_per_section) || 8))
+  const itemsPerSection = Math.min(
+    HOME_SECTION_PROPERTY_LIMIT,
+    Math.max(2, parseInt(configMap.homepage_items_per_section) || HOME_SECTION_PROPERTY_LIMIT)
+  )
 
   const sectionsEnabled = parseHomeSectionsEnabled(configMap.homepage_sections_enabled)
 

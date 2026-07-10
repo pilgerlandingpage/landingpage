@@ -124,7 +124,7 @@ export default function HomepageSection({
                             <PropertyCard
                                 property={property}
                                 landingPageSlug={lpMap.get(property.id)}
-                                imagePriority={index < 2}
+                                imagePriority={index < 4}
                                 variant="homeCompact"
                             />
                         </div>
@@ -377,14 +377,9 @@ export default function HomepageSection({
                         flex-basis: 250px;
                     }
                 }
-                @media (min-width: 1200px) {
+                @media (min-width: 1024px) {
                     .card-slide {
-                        flex-basis: 250px;
-                    }
-                }
-                @media (min-width: 1600px) {
-                    .card-slide {
-                        flex-basis: 250px;
+                        flex-basis: calc((100% - 54px) / 4);
                     }
                 }
                 @media (max-width: 760px) {
