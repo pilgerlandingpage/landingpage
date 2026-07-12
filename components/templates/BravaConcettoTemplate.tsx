@@ -423,6 +423,64 @@ function normalizeUnit(value: unknown): Unit | null {
     }
 }
 
+function unitIdentityKeys(unit: Unit) {
+    const keys = [
+        unit.propertyId ? `id:${unit.propertyId}` : '',
+        unit.sourceReference ? `ref:${unit.sourceReference}` : '',
+        inferLegacyUnitIdentifier(unit.id) ? `ref:${inferLegacyUnitIdentifier(unit.id)}` : '',
+    ].filter(Boolean)
+
+    if (keys.length) return keys
+
+    return [
+        unit.sourceSlug ? `slug:${unit.sourceSlug}` : '',
+        unit.id ? `unit:${unit.id}` : '',
+    ].filter(Boolean)
+}
+
+function mergeDuplicateUnits(current: Unit, next: Unit): Unit {
+    return {
+        ...current,
+        ...next,
+        propertyId: next.propertyId || current.propertyId,
+        sourceReference: next.sourceReference || current.sourceReference,
+        sourceSlug: next.sourceSlug || current.sourceSlug,
+        city: next.city || current.city,
+        neighborhood: next.neighborhood || current.neighborhood,
+        seoTitle: next.seoTitle || current.seoTitle,
+        propertyType: next.propertyType || current.propertyType,
+        image: next.image || current.image,
+        images: uniqueImages([
+            ...(current.images || []),
+            ...(next.images || []),
+            current.image,
+            next.image,
+        ]),
+    }
+}
+
+function dedupeUnits(units: Unit[]) {
+    const result: Unit[] = []
+    const indexByKey = new Map<string, number>()
+
+    for (const unit of units) {
+        const keys = unitIdentityKeys(unit)
+        const existingIndex = keys.map(key => indexByKey.get(key)).find((index): index is number => index !== undefined)
+
+        if (existingIndex !== undefined) {
+            result[existingIndex] = mergeDuplicateUnits(result[existingIndex], unit)
+            unitIdentityKeys(result[existingIndex]).forEach(key => indexByKey.set(key, existingIndex))
+            continue
+        }
+
+        const nextIndex = result.length
+        result.push(unit)
+        keys.forEach(key => indexByKey.set(key, nextIndex))
+    }
+
+    return result
+}
+
 function normalizeGalleryItem(value: unknown): Development['gallery'][number] | null {
     if (!isRecord(value)) return null
 
@@ -486,7 +544,7 @@ function normalizeDevelopment(value: unknown): Development | null {
         ? value.differentials.map(normalizeDifferential).filter((item): item is Development['differentials'][number] => Boolean(item))
         : []
     const units = Array.isArray(value.units)
-        ? value.units.map(normalizeUnit).filter((item): item is Unit => Boolean(item))
+        ? dedupeUnits(value.units.map(normalizeUnit).filter((item): item is Unit => Boolean(item)))
         : []
     const gallery = Array.isArray(value.gallery)
         ? value.gallery.map(normalizeGalleryItem).filter((item): item is Development['gallery'][number] => Boolean(item))
@@ -534,7 +592,7 @@ function normalizeDevelopment(value: unknown): Development | null {
         locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localizacao privilegiada'),
         tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrao com curadoria Guilherme Pilger.'),
         priceRange: asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Consulte'),
-        availableUnitsCount: asNumber(value.availableUnitsCount ?? value.available_units_count, fallback?.availableUnitsCount || units.length),
+        availableUnitsCount: units.length || asNumber(value.availableUnitsCount ?? value.available_units_count, fallback?.availableUnitsCount || 0),
         areaRange: asText(value.areaRange ?? value.area_range, fallback?.areaRange || 'Consulte'),
         suitesRange: asText(value.suitesRange ?? value.suites_range, fallback?.suitesRange || 'Consulte'),
         heroImage: asText(value.heroImage ?? value.hero_image, fallback?.heroImage || gallery[0]?.image || '/placeholder-house.jpg'),
