@@ -3267,29 +3267,40 @@ export default function PropertyLandingStyles() {
                         line-height: 1.48;
                     }
 
-                    .plp-market-core-metrics,
                     .plp-market-explain-history,
-                    .plp-market-analysis-details-body,
-                    .plp-market-analysis-facts {
+                    .plp-market-analysis-details-body {
                         grid-template-columns: 1fr;
                     }
 
                     .plp-market-core-metrics {
-                        gap: 9px;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 7px;
                     }
 
                     .plp-market-core-metrics article {
-                        min-height: 78px;
-                        padding: 13px 14px;
+                        gap: 6px;
+                        min-height: 74px;
+                        padding: 10px 8px;
+                        border-radius: 12px;
+                    }
+
+                    .plp-market-core-metrics span {
+                        gap: 3px;
+                        font-size: 9px;
+                        line-height: 1.18;
                     }
 
                     .plp-market-core-metrics strong {
-                        font-size: 21px;
+                        font-size: clamp(13px, 3.35vw, 15px);
+                        line-height: 1.08;
                     }
 
                     .plp-market-help {
-                        min-width: 32px;
-                        min-height: 32px;
+                        width: 22px;
+                        height: 22px;
+                        min-width: 22px;
+                        min-height: 22px;
+                        margin-left: 0;
                     }
 
                     .plp-market-comparable-line {
@@ -3336,7 +3347,27 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-market-listing-history dl {
-                        grid-template-columns: 1fr;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 9px 10px;
+                    }
+
+                    .plp-market-analysis-facts {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                    }
+
+                    .plp-market-analysis-facts div {
+                        padding: 9px 10px;
+                        border-radius: 11px;
+                    }
+
+                    .plp-market-analysis-facts span {
+                        font-size: 9px;
+                    }
+
+                    .plp-market-analysis-facts strong {
+                        font-size: 11px;
+                        line-height: 1.25;
                     }
 
                     .plp-market-analysis-details summary {
