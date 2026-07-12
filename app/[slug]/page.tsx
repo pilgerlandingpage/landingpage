@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
 import ModernLuxuryTemplate from '@/components/templates/ModernLuxuryTemplate'
@@ -11,11 +11,83 @@ import GlobalHeader from '@/components/layout/GlobalHeader'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, faqPageJsonLd, itemListJsonLd } from '@/lib/seo/json-ld'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 
 export const revalidate = 300
 
 export function generateStaticParams() {
     return []
+}
+
+const LANDING_LOOKUP_TIMEOUT_MS = 12000
+const LANDING_LOOKUP_RETRY_DELAYS_MS = [300, 900]
+const LANDING_PAGE_SELECT = `
+    id,
+    title,
+    slug,
+    description,
+    content,
+    primary_color,
+    property:properties (
+        id,
+        title,
+        description,
+        images,
+        price,
+        bedrooms,
+        bathrooms,
+        area_m2,
+        area_private_m2,
+        city,
+        state,
+        neighborhood,
+        street
+    ),
+    agent:ai_agents (
+        name,
+        greeting_message
+    )
+`
+
+function isRetriableLandingLookupError(error: unknown) {
+    const summary = summarizeSupabaseError(error).toLowerCase()
+    return (
+        summary.includes('fetch failed') ||
+        summary.includes('timeout') ||
+        summary.includes('aborted') ||
+        summary.includes('connection terminated') ||
+        summary.includes('522') ||
+        summary.includes('503') ||
+        summary.includes('504')
+    )
+}
+
+function waitForLandingLookupRetry(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function fetchLandingPageBySlug(slug: string, select: string) {
+    for (let attempt = 0; attempt <= LANDING_LOOKUP_RETRY_DELAYS_MS.length; attempt += 1) {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('landing_pages')
+            .select(select)
+            .eq('slug', slug)
+            .abortSignal(createSupabaseAbortSignal(LANDING_LOOKUP_TIMEOUT_MS))
+            .maybeSingle()
+
+        if (!error) return data || null
+
+        const canRetry = attempt < LANDING_LOOKUP_RETRY_DELAYS_MS.length && isRetriableLandingLookupError(error)
+        if (!canRetry) {
+            console.error('[Landing Page] lookup failed:', summarizeSupabaseError(error))
+            throw new Error('Nao foi possivel carregar esta landing page agora.')
+        }
+
+        await waitForLandingLookupRetry(LANDING_LOOKUP_RETRY_DELAYS_MS[attempt])
+    }
+
+    throw new Error('Nao foi possivel carregar esta landing page agora.')
 }
 
 function landingRecord(value: unknown): Record<string, any> {
@@ -87,7 +159,20 @@ function landingFaqItems(content: Record<string, any>) {
 }
 
 function unitDetailPath(unit: Record<string, any>) {
-    const sourceSlug = landingText(unit.sourceSlug ?? unit.source_slug ?? unit.slug ?? unit.propertyId ?? unit.property_id ?? unit.id)
+    const propertyId = landingText(unit.propertyId ?? unit.property_id)
+    if (propertyId) {
+        return propertyDetailsPath({
+            id: propertyId,
+            source_slug: landingText(unit.sourceSlug ?? unit.source_slug ?? unit.slug),
+            title: landingText(unit.title, landingText(unit.type)),
+            seo_title: landingText(unit.seoTitle ?? unit.seo_title),
+            city: landingText(unit.city),
+            neighborhood: landingText(unit.neighborhood),
+            property_type: landingText(unit.propertyType ?? unit.property_type ?? unit.type),
+        })
+    }
+
+    const sourceSlug = landingText(unit.sourceSlug ?? unit.source_slug ?? unit.slug ?? unit.id)
     return sourceSlug ? `/imovel/${encodeURIComponent(sourceSlug)}` : ''
 }
 
@@ -183,15 +268,25 @@ function developmentJsonLd(content: Record<string, any>, path: string, title: st
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const supabase = createAdminClient()
     const paramsAwaited = await params
     const { slug } = paramsAwaited
 
-    const { data: lp } = await supabase
-        .from('landing_pages')
-        .select('title, content')
-        .eq('slug', slug)
-        .single()
+    let lp = null
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('landing_pages')
+            .select('title, content')
+            .eq('slug', slug)
+            .abortSignal(createSupabaseAbortSignal(3000))
+            .maybeSingle()
+
+        if (error) throw error
+        lp = data || null
+    } catch (error) {
+        console.warn('[Landing Page] metadata lookup unavailable:', summarizeSupabaseError(error))
+        return { title: 'Guilherme Pilger' }
+    }
 
     if (!lp) return { title: 'Pagina nao encontrada' }
 
@@ -232,20 +327,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function DynamicLandingPage({ params }: { params: Promise<{ slug: string }> }) {
-    const supabase = createAdminClient()
     const { slug } = await params
 
-    const { data: lp, error } = await supabase
-        .from('landing_pages')
-        .select(`
-            *,
-            property:properties (*),
-            agent:ai_agents (*)
-        `)
-        .eq('slug', slug)
-        .single()
+    const lp = await fetchLandingPageBySlug(slug, LANDING_PAGE_SELECT)
 
-    if (error || !lp) {
+    if (!lp) {
         notFound()
     }
 
@@ -276,7 +362,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         stats: {
             bedrooms: (content.custom_stats?.bedrooms) ?? (property.bedrooms || 0),
             bathrooms: (content.custom_stats?.bathrooms) ?? (property.bathrooms || 0),
-            area: (content.custom_stats?.area) ?? (property.area || 0),
+            area: (content.custom_stats?.area) ?? (property.area || property.area_m2 || property.area_private_m2 || 0),
             location: (content.custom_stats?.location) ?? (property.location || 'Localizacao privilegiada')
         },
         amenities: (content.custom_features && content.custom_features.length > 0)

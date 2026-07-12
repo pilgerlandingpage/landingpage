@@ -18,6 +18,7 @@ type PageProps = {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const PROPERTY_REDIRECT_LOOKUP_TIMEOUT_MS = 10000
 const PROPERTY_REDIRECT_RETRY_DELAYS_MS = [300, 900, 1600]
+const PROPERTY_REDIRECT_SELECT = 'id, source_slug, source_reference, title, seo_title, city, neighborhood, property_type'
 
 function isRetriablePropertyRedirectError(error: unknown) {
     const summary = summarizeSupabaseError(error).toLowerCase()
@@ -44,20 +45,42 @@ export default async function PropertyPage({ params }: PageProps) {
     let property = null
     for (let attempt = 0; attempt <= PROPERTY_REDIRECT_RETRY_DELAYS_MS.length; attempt += 1) {
         const supabase = createAdminClient()
-        const query = supabase
+        const query = () => supabase
             .from('properties')
-            .select('id, source_slug, title, seo_title, city, neighborhood, property_type')
+            .select(PROPERTY_REDIRECT_SELECT)
 
-        const { data, error } = idFromSeoSlug || UUID_PATTERN.test(identifier)
-            ? await query
+        let data = null
+        let error = null
+
+        if (idFromSeoSlug || UUID_PATTERN.test(identifier)) {
+            const result = await query()
                 .eq('id', idFromSeoSlug || identifier)
                 .abortSignal(createSupabaseAbortSignal(PROPERTY_REDIRECT_LOOKUP_TIMEOUT_MS))
                 .maybeSingle()
-            : await query
-                .eq('source_slug', identifier)
+
+            data = result.data
+            error = result.error
+        } else {
+            const sourceReferenceResult = await query()
+                .eq('source_reference', identifier)
                 .limit(1)
                 .abortSignal(createSupabaseAbortSignal(PROPERTY_REDIRECT_LOOKUP_TIMEOUT_MS))
                 .maybeSingle()
+
+            if (sourceReferenceResult.error || sourceReferenceResult.data) {
+                data = sourceReferenceResult.data
+                error = sourceReferenceResult.error
+            } else {
+                const sourceSlugResult = await query()
+                    .eq('source_slug', identifier)
+                    .limit(1)
+                    .abortSignal(createSupabaseAbortSignal(PROPERTY_REDIRECT_LOOKUP_TIMEOUT_MS))
+                    .maybeSingle()
+
+                data = sourceSlugResult.data
+                error = sourceSlugResult.error
+            }
+        }
 
         if (!error) {
             property = data || null

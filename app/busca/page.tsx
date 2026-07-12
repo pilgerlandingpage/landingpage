@@ -295,6 +295,42 @@ const MIN_SEARCH_PRICE = 4000000
 const SEARCH_PROPERTY_DESCRIPTION_LIMIT = 360
 const SEARCH_PROPERTY_IMAGE_LIMIT = 6
 const SEARCH_PROPERTY_AMENITY_LIMIT = 8
+const COMMERCIAL_SUBTYPES = new Set(['terreno-comercial', 'galpao', 'sala-comercial'])
+
+function shouldIncludeCommercialInventory(input: SearchDataInput) {
+    const type = normalizeLocationName(input.type || '')
+    const subtype = String(input.subtype || '').trim()
+    const intentText = normalizeLocationName([
+        input.q,
+        input.tag,
+        ...input.tags,
+    ].filter(Boolean).join(' '))
+
+    return (
+        type === 'comercial' ||
+        COMMERCIAL_SUBTYPES.has(subtype) ||
+        /\b(comercial|galpao|deposito|industrial|logistico|logistica)\b/.test(intentText)
+    )
+}
+
+function applyDefaultResidentialInventoryFilter(query: any) {
+    return query
+        .not('property_type', 'ilike', '%Comercial%')
+        .not('property_type', 'ilike', '%Galp%')
+        .not('property_type', 'ilike', '%Dep%')
+        .not('title', 'ilike', '%Comercial%')
+        .not('title', 'ilike', '%Galp%')
+        .not('title', 'ilike', '%Dep%')
+        .not('title', 'ilike', '%Industrial%')
+        .not('title', 'ilike', '%Log%')
+}
+
+function hasExplicitPriceFilter(input: SearchDataInput) {
+    return Boolean(input.price && input.price !== 'Todos os Valores') ||
+        input.priceMin > 0 ||
+        input.priceMax > 0 ||
+        input.offer === 'sale'
+}
 
 function compactSearchProperty(property: any) {
     const description = String(property.description || '')
@@ -392,8 +428,13 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
         if (input.subtype === 'galpao') query = query.or('property_type.ilike.%Galpao%,property_type.ilike.%Galpão%,property_type.ilike.%Deposito%,property_type.ilike.%Depósito%,title.ilike.%Galpao%,title.ilike.%Galpão%,title.ilike.%Deposito%,title.ilike.%Depósito%')
         if (input.subtype === 'sala-comercial') query = query.or('property_type.ilike.%Sala Comercial%,title.ilike.%Sala Comercial%')
 
+        if (!shouldIncludeCommercialInventory(input)) {
+            query = applyDefaultResidentialInventoryFilter(query)
+        }
+
         let selectedPriceMin = MIN_SEARCH_PRICE
         let selectedPriceMax = 0
+        const explicitPriceFilter = hasExplicitPriceFilter(input)
 
         if (input.price && input.price !== 'Todos os Valores') {
             const [minStr, maxStr] = input.price.split('-')
@@ -406,7 +447,9 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
 
         if (input.priceMin > 0) selectedPriceMin = Math.max(MIN_SEARCH_PRICE, input.priceMin)
         if (input.priceMax > 0) selectedPriceMax = input.priceMax
-        query = query.gte('price', selectedPriceMin)
+        query = explicitPriceFilter
+            ? query.gte('price', selectedPriceMin)
+            : query.or(`price.gte.${selectedPriceMin},price.is.null`)
         if (selectedPriceMax > 0) query = query.lte('price', selectedPriceMax)
         if (input.bedrooms > 0) query = query.eq('bedrooms', input.bedrooms)
         if (input.bedroomsMin > 0) query = query.gte('bedrooms', input.bedroomsMin)

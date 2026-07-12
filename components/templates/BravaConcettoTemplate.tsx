@@ -20,7 +20,6 @@ import {
     MapPinned,
     MapPin,
     Maximize2,
-    Menu,
     Minus,
     Navigation,
     Phone,
@@ -35,10 +34,14 @@ import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import Footer from '@/components/layout/Footer'
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
+import PropertyDesktopMediaShowcase from '@/components/property/PropertyDesktopMediaShowcase'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
+import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
+import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
 import PropertyLandingStyles from '@/app/imovel/[id]/PropertyLandingStyles'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { TemplateProps } from './types'
 
 type Unit = {
@@ -53,6 +56,12 @@ type Unit = {
     images?: string[]
     status: string
     sourceSlug: string
+    propertyId?: string
+    sourceReference?: string
+    city?: string
+    neighborhood?: string
+    seoTitle?: string
+    propertyType?: string
 }
 
 type Development = {
@@ -87,6 +96,13 @@ type RelatedDevelopment = {
 }
 
 type UnitPropertyMedia = {
+    id?: string | null
+    title?: string | null
+    seo_title?: string | null
+    city?: string | null
+    neighborhood?: string | null
+    property_type?: string | null
+    source_reference?: string | null
     source_slug?: string | null
     featured_image?: string | null
     images?: string[] | null
@@ -198,7 +214,7 @@ const DEVELOPMENTS: Development[] = [
         differentials: [
             { title: 'Barra Sul Consolidada', description: 'Regiao com forte demanda qualificada, turismo premium e alta liquidez.' },
             { title: 'Unidades Grandes', description: 'Apartamentos e coberturas com metragens generosas e vagas robustas.' },
-            { title: 'Comparacao Imediata', description: 'Bom empreendimento para mostrar ao lead varias alternativas no mesmo predio.' },
+            { title: 'Comparacao Imediata', description: 'Bom empreendimento para comparar varias alternativas no mesmo predio.' },
         ],
         units: [
             {
@@ -247,7 +263,7 @@ const DEVELOPMENTS: Development[] = [
         faq: [
             { question: 'Quantas unidades do Ibiza aparecem na base?', answer: 'A varredura encontrou 18 unidades ativas associadas ao Ibiza Towers.' },
             { question: 'O Ibiza serve para comprador frente mar?', answer: 'Sim. Ele e uma das melhores vitrines para quem quer comparar frente mar em Balneario Camboriu.' },
-            { question: 'Da para enviar unidades especificas?', answer: 'Sim. Cada card pode levar o lead direto para o especialista com a unidade de interesse.' },
+            { question: 'Da para enviar unidades especificas?', answer: 'Sim. Cada card leva a pessoa para a unidade de interesse ou para o atendimento com o especialista.' },
         ],
     },
     {
@@ -272,7 +288,7 @@ const DEVELOPMENTS: Development[] = [
         differentials: [
             { title: 'Endereco Consolidado', description: 'Localizacao em eixo nobre e com leitura clara de valorizacao.' },
             { title: 'Padrao Frente Mar', description: 'Unidades amplas, vistas abertas e configuracoes consistentes.' },
-            { title: 'Curadoria Objetiva', description: 'Ideal para lead que quer poucas opcoes fortes e comparacao direta.' },
+            { title: 'Curadoria Objetiva', description: 'Ideal para quem quer poucas opcoes fortes e comparacao direta.' },
         ],
         units: [
             {
@@ -377,6 +393,12 @@ function normalizeUnit(value: unknown): Unit | null {
         ? value.images.map(item => asText(item)).filter(Boolean)
         : []
     const sourceSlug = asText(value.sourceSlug ?? value.source_slug)
+    const propertyId = asText(value.propertyId ?? value.property_id)
+    const sourceReference = asText(value.sourceReference ?? value.source_reference)
+    const city = asText(value.city)
+    const neighborhood = asText(value.neighborhood)
+    const seoTitle = asText(value.seoTitle ?? value.seo_title)
+    const propertyType = asText(value.propertyType ?? value.property_type)
 
     if (!id || !type || !title || !image || !sourceSlug) return null
 
@@ -392,6 +414,12 @@ function normalizeUnit(value: unknown): Unit | null {
         images,
         status: asText(value.status, 'Disponivel'),
         sourceSlug,
+        propertyId: propertyId || undefined,
+        sourceReference: sourceReference || undefined,
+        city: city || undefined,
+        neighborhood: neighborhood || undefined,
+        seoTitle: seoTitle || undefined,
+        propertyType: propertyType || undefined,
     }
 }
 
@@ -532,7 +560,7 @@ function summarizeUnitTypes(development: Development) {
 
 function buildDevelopmentSellingDescription(development: Development) {
     const unitTypes = summarizeUnitTypes(development)
-    return `O ${development.name} reune ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. A pagina ajuda voce a comparar ${unitTypes}, faixa de valor, metragens, imagens e entorno antes de conversar com o especialista.`
+    return `O ${development.name} reune ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
 }
 
 function buildDevelopmentBenefits(development: Development): Development['benefits'] {
@@ -544,13 +572,13 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
             icon: 'Compass',
         },
         {
-            title: 'Comparacao no mesmo empreendimento',
-            description: `Veja ${unitTypes} lado a lado, com area, suites, vagas, valor estimado e fotos para comparar com calma.`,
+            title: 'Unidades para comparar',
+            description: `Veja ${unitTypes} lado a lado, com area, suites, vagas, valor estimado e fotos para escolher com mais seguranca.`,
             icon: 'Building2',
         },
         {
-            title: 'Curadoria para escolher melhor',
-            description: `A equipe confirma disponibilidade, condicoes de negociacao e detalhes relevantes para avancar com seguranca.`,
+            title: 'Curadoria para decidir',
+            description: `A equipe confirma disponibilidade, condicoes de negociacao e quais opcoes combinam melhor com o seu objetivo.`,
             icon: 'ShieldCheck',
         },
     ]
@@ -559,16 +587,16 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
 function buildDevelopmentDifferentials(development: Development): Development['differentials'] {
     return [
         {
-            title: 'Unidades em comparacao real',
-            description: `${development.availableUnitsCount} opcoes ativas aparecem reunidas para comparar preco, metragem, suites e vagas sem alternar entre varias paginas.`,
+            title: 'Escolha por unidade',
+            description: `${development.availableUnitsCount} opcoes ativas aparecem reunidas para comparar preco, metragem, suites e vagas antes de abrir a ficha completa.`,
         },
         {
             title: 'Fotos, mapa e Street View',
             description: `A galeria padronizada mostra o empreendimento, o entorno no mapa e a rua pelo Street View para uma primeira leitura visual mais completa.`,
         },
         {
-            title: 'Proximo passo objetivo',
-            description: `Abra os detalhes da unidade que chamou atencao ou chame o especialista para receber uma comparacao direta entre as melhores opcoes.`,
+            title: 'Proximo passo claro',
+            description: `Abra os detalhes da unidade que chamou atencao ou peca uma curadoria para comparar as melhores opcoes disponiveis.`,
         },
     ]
 }
@@ -684,8 +712,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         return contentDevelopment || normalizeDevelopment({ id: contentDevelopmentId }) || DEVELOPMENTS[0]
     }, [content, contentDevelopment])
 
-    const unitSlugKey = useMemo(
-        () => Array.from(new Set(activeDev.units.map(unit => unit.sourceSlug).filter(Boolean))).join(','),
+    const unitPropertyLookup = useMemo(
+        () => ({
+            ids: Array.from(new Set(activeDev.units.map(unit => unit.propertyId).filter(Boolean))),
+            slugs: Array.from(new Set(activeDev.units.map(unit => unit.sourceSlug).filter(Boolean))),
+        }),
         [activeDev.units]
     )
 
@@ -745,13 +776,21 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         let cancelled = false
 
         async function loadUnitMedia() {
-            if (!unitSlugKey) {
+            const { ids, slugs } = unitPropertyLookup
+            if (!ids.length && !slugs.length) {
                 setUnitMediaBySlug({})
                 return
             }
 
             try {
-                const response = await fetch(`/api/public/properties?slugs=${encodeURIComponent(unitSlugKey)}`)
+                const params = new URLSearchParams()
+                if (ids.length) {
+                    params.set('ids', ids.join(','))
+                } else {
+                    params.set('slugs', slugs.join(','))
+                }
+
+                const response = await fetch(`/api/public/properties?${params.toString()}`)
                 if (!response.ok) throw new Error('properties unavailable')
                 const payload = await response.json()
                 if (cancelled) return
@@ -759,7 +798,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 const mediaMap: Record<string, UnitPropertyMedia> = {}
                 const properties = Array.isArray(payload?.properties) ? payload.properties : []
                 properties.forEach((property: UnitPropertyMedia) => {
+                    const id = asText(property.id)
                     const sourceSlug = asText(property.source_slug)
+                    if (id) mediaMap[id] = property
                     if (sourceSlug) mediaMap[sourceSlug] = property
                 })
                 setUnitMediaBySlug(mediaMap)
@@ -773,7 +814,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         return () => {
             cancelled = true
         }
-    }, [unitSlugKey])
+    }, [unitPropertyLookup])
 
     const relatedDevelopments = useMemo(() => {
         const activeIdentifiers = new Set([
@@ -808,9 +849,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const developmentLocationProperty = useMemo(() => buildDevelopmentLocationProperty(activeDev), [activeDev])
     const unitMediaLatLng = useMemo<[number, number] | null>(() => {
         for (const unit of activeDev.units) {
+            const media = unitMediaBySlug[unit.propertyId || unit.sourceSlug]
             const latLng = validLatLng(
-                unitMediaBySlug[unit.sourceSlug]?.latitude,
-                unitMediaBySlug[unit.sourceSlug]?.longitude
+                media?.latitude,
+                media?.longitude
             )
             if (latLng) return latLng
         }
@@ -822,6 +864,17 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     }, [activeDev, unitMediaLatLng])
     const mapEmbedSrc = useMemo(() => buildMapEmbedSrc(activeDev, developmentLatLng), [activeDev, developmentLatLng])
     const streetViewEmbedSrc = useMemo(() => buildStreetViewEmbedSrc(activeDev, developmentLatLng), [activeDev, developmentLatLng])
+    const developmentMobileGallery = useMemo(
+        () => (activeDev.gallery.length
+            ? activeDev.gallery
+            : [{ title: activeDev.name, image: activeDev.heroImage, category: 'Empreendimento' }]
+        ).slice(0, 8),
+        [activeDev.gallery, activeDev.heroImage, activeDev.name]
+    )
+    const developmentGalleryImages = useMemo(
+        () => developmentMobileGallery.map(item => item.image).filter(Boolean),
+        [developmentMobileGallery]
+    )
 
     useEffect(() => {
         if (!locationModal) return
@@ -858,8 +911,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         if (!broker?.phone) return
 
         const message = unit
-            ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero mais informacoes sobre ${unit.type} (${unit.area}, ${unit.price}).`
-            : broker.greeting_message || `Ola! Quero falar com um especialista sobre o empreendimento ${activeDev.name}.`
+            ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero confirmar disponibilidade e detalhes da unidade ${unit.type} (${unit.area}, ${unit.price}).`
+            : broker.greeting_message || `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero uma curadoria das unidades disponiveis.`
 
         openWhatsAppWithLeadCapture({
             phone: broker.phone,
@@ -874,131 +927,299 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     }
 
     return (
-        <div className="bc-page min-h-screen bg-[#F7F5F0] text-[#2F2A22] antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
+        <div className="bc-page bc-property-layout min-h-screen bg-[#F7F5F0] text-[#2F2A22] antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
-            <LandingMobileHeader />
 
-            <main>
-                <section className="relative flex min-h-[calc(100vh-120px)] items-center overflow-hidden bg-[#07090C]">
-                    <div className="absolute inset-0">
-                        <img
-                            src={activeDev.heroImage}
-                            alt={activeDev.name}
-                            className="h-full w-full object-cover opacity-90 transition duration-700"
-                            referrerPolicy="no-referrer"
-                        />
-                        <div className="bc-hero-depth-overlay absolute inset-0 bg-gradient-to-t from-[#0A0D10] via-[#0A0D10]/45 to-[#0A0D10]/75" />
-                        <div className="bc-hero-side-fade absolute inset-0 hidden bg-gradient-to-r from-[#0A0D10]/95 via-[#0A0D10]/25 to-transparent lg:block" />
-                        <div className="bc-hero-top-fade" />
-                    </div>
+            <main className="bc-dev-main plp-page" data-development-landing-root="true">
+                <div className="plp-shell bc-dev-shell">
+                    <section className="plp-title-band bc-dev-title-band">
+                        <div className="plp-breadcrumbs">
+                            <Link href="/">Inicio</Link>
+                            <span>/</span>
+                            <Link href="/busca">Empreendimentos</Link>
+                            <span>/</span>
+                            <span>{activeDev.city || 'Litoral catarinense'}</span>
+                            <span>/</span>
+                            <strong>{activeDev.name}</strong>
+                        </div>
 
-                    <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-[1320px] flex-col justify-between gap-12 px-4 py-14 md:px-8 lg:py-20">
-                        <div className="bc-hero-copy max-w-4xl pt-8">
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/35 bg-[#11161D]/90 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.22em] text-[#D4AF37]">
-                                <Sparkles size={14} />
-                                Empreendimento exclusivo
+                        <div className="plp-title-row">
+                            <div>
+                                <span className="plp-kicker bc-dev-kicker">
+                                    <Sparkles size={14} />
+                                    Empreendimento selecionado
+                                </span>
+                                <h1>{activeDev.name}</h1>
+                                <div className="plp-rating-row" aria-label="Curadoria do empreendimento">
+                                    <span><Building2 size={15} /><ShieldCheck size={15} /><KeyRound size={15} /></span>
+                                    <strong>{activeDev.availableUnitsCount} unidades para comparar</strong>
+                                </div>
+                            </div>
+                            <div className="plp-listing-stats" aria-label="Resumo do empreendimento">
+                                <span>
+                                    <MapPin size={15} />
+                                    <strong>{activeDev.city}</strong>
+                                    <small>{activeDev.locationName}</small>
+                                </span>
+                                <span>
+                                    <Maximize2 size={15} />
+                                    <strong>{activeDev.areaRange}</strong>
+                                    <small>areas disponiveis</small>
+                                </span>
+                                <span>
+                                    <Heart size={15} />
+                                    <strong>Curadoria</strong>
+                                    <small>Pilger</small>
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="plp-mobile-sheet-experience bc-dev-mobile-sheet-experience">
+                        <PropertyMobileDetailSheet
+                            media={(
+                                <div className="plp-mobile-media-feed bc-dev-mobile-media-feed" aria-label={`Fotos do empreendimento ${activeDev.name}`}>
+                                    <div className="plp-mobile-media-controls">
+                                        <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
+                                            <ChevronLeft size={23} />
+                                        </Link>
+                                        <div className="plp-mobile-action-group" aria-label="Menu do empreendimento">
+                                            <PropertyLandingMobileMenu
+                                                title={activeDev.name}
+                                                metadata={{ slug, development_name: activeDev.name }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {developmentMobileGallery.map((item, index) => (
+                                        <figure className="plp-mobile-media-item bc-dev-mobile-media-item" key={`${item.image}-${index}`}>
+                                            <img src={item.image} alt={`${activeDev.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer" />
+                                            <figcaption className="plp-mobile-status-pill">
+                                                <Camera size={13} />
+                                                {item.category || 'Empreendimento'}
+                                            </figcaption>
+                                        </figure>
+                                    ))}
+                                </div>
+                            )}
+                        >
+                            <section className="plp-mobile-sheet-summary plp-mobile-card plp-mobile-card--summary bc-dev-mobile-summary">
+                                <div className="plp-mobile-summary-head">
+                                    <div className="plp-mobile-summary-copy">
+                                        <h2 className="plp-mobile-sheet-title">{activeDev.name}</h2>
+                                        <span className="plp-mobile-summary-location">
+                                            <MapPin size={15} />
+                                            {activeDev.locationName}
+                                        </span>
+                                    </div>
+                                    <div className="plp-mobile-summary-price-block">
+                                        <small>Faixa</small>
+                                        <span className="plp-mobile-sheet-price">{activeDev.priceRange}</span>
+                                    </div>
+                                </div>
+                                <div className="plp-mobile-sheet-facts">
+                                    <span className="plp-mobile-sheet-fact">
+                                        <Building2 size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">
+                                            <strong>{activeDev.availableUnitsCount}</strong>
+                                            <small>unidades</small>
+                                        </span>
+                                    </span>
+                                    <span className="plp-mobile-sheet-fact">
+                                        <BedDouble size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">{activeDev.suitesRange}</span>
+                                    </span>
+                                    <span className="plp-mobile-sheet-fact">
+                                        <Maximize2 size={21} />
+                                        <span className="plp-mobile-sheet-fact-text">{activeDev.areaRange}</span>
+                                    </span>
+                                </div>
+                                <p className="bc-dev-mobile-copy">{activeDev.tagline}</p>
+                                <div className="bc-dev-mobile-actions">
+                                    <button type="button" className="plp-mobile-sheet-primary" onClick={handleScrollToUnits}>
+                                        Ver unidades
+                                    </button>
+                                    <button type="button" className="bc-dev-mobile-secondary" onClick={() => openChat()}>
+                                        Pedir curadoria
+                                    </button>
+                                </div>
+                            </section>
+
+                            <section className="plp-mobile-card bc-dev-mobile-units-card" aria-labelledby="bc-mobile-units-title">
+                                <div className="plp-mobile-card-head plp-mobile-card-head--split">
+                                    <div>
+                                        <span className="plp-kicker">Unidades</span>
+                                        <h2 id="bc-mobile-units-title">Escolha a unidade que faz sentido.</h2>
+                                    </div>
+                                    <button type="button" onClick={handleScrollToUnits}>
+                                        Ver todas
+                                        <ArrowRight size={15} />
+                                    </button>
+                                </div>
+                                <div className="bc-dev-mobile-units-list">
+                                    {activeDev.units.slice(0, 8).map((unit) => (
+                                        <MobileUnitCard
+                                            key={`mobile-${unit.id}`}
+                                            unit={unit}
+                                            development={activeDev}
+                                            propertyMedia={unitMediaBySlug[unit.propertyId || unit.sourceSlug]}
+                                            onChat={openChat}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+
+                            <section className="plp-mobile-card bc-dev-mobile-card">
+                                <div className="plp-mobile-card-head">
+                                    <span className="plp-kicker">Leitura do empreendimento</span>
+                                    <h2>Por que conhecer {activeDev.name}.</h2>
+                                </div>
+                                <p>{sellingDescription}</p>
+                                <div className="bc-dev-mobile-benefits">
+                                    {sellingBenefits.slice(0, 3).map((benefit) => {
+                                        const Icon = iconMap[benefit.icon]
+                                        return (
+                                            <span key={benefit.title}>
+                                                <Icon size={16} />
+                                                <strong>{benefit.title}</strong>
+                                            </span>
+                                        )
+                                    })}
+                                </div>
+                            </section>
+                        </PropertyMobileDetailSheet>
+                    </section>
+
+                    <section id="visao" className="plp-detail-layout bc-dev-detail-layout">
+                        <div className="plp-gallery-column bc-dev-gallery-column">
+                            <PropertyDesktopMediaShowcase
+                                images={developmentGalleryImages.length ? developmentGalleryImages : [activeDev.heroImage]}
+                                title={activeDev.name}
+                                property={developmentLocationProperty}
+                                latLng={developmentLatLng}
+                                metadata={{
+                                    slug,
+                                    development_name: activeDev.name,
+                                    source: 'development_landing',
+                                }}
+                            />
+                        </div>
+
+                        <div className="plp-main-column plp-content-column bc-dev-content-column">
+                            <section className="plp-section plp-copy-section plp-summary-card bc-dev-overview-card">
+                                <span className="plp-kicker">Visao geral</span>
+                                <h2>{activeDev.tagline}</h2>
+                                <div className="plp-narrative">
+                                    <p>{sellingDescription}</p>
+                                    <p>{activeDev.description}</p>
+                                </div>
+                            </section>
+
+                            <section className="plp-section plp-summary-card plp-quick-facts-card bc-dev-units-preview-card">
+                                <div className="plp-section-head compact">
+                                    <span className="plp-kicker">Unidades disponiveis</span>
+                                    <h2>Escolha a unidade antes do atendimento.</h2>
+                                </div>
+                                <div className="plp-spec-grid">
+                                    <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={`${activeDev.availableUnitsCount} unidades`} />
+                                    <SpecCardLike icon={<KeyRound size={21} />} label="Faixa de preco" value={activeDev.priceRange} />
+                                    <SpecCardLike icon={<Maximize2 size={21} />} label="Metragens" value={activeDev.areaRange} />
+                                    <SpecCardLike icon={<BedDouble size={21} />} label="Configuracao" value={activeDev.suitesRange} />
+                                    <SpecCardLike icon={<MapPin size={21} />} label="Localizacao" value={activeDev.locationName} />
+                                </div>
+                                <button type="button" className="bc-dev-inline-action" onClick={handleScrollToUnits}>
+                                    Ver unidades para comparar
+                                    <ArrowRight size={16} />
+                                </button>
+                            </section>
+                        </div>
+
+                        <aside className="plp-sidebar bc-dev-sidebar" aria-label="Atendimento e resumo do empreendimento">
+                            <div className="plp-side-card plp-price-card bc-dev-side-card">
+                                <div className="plp-side-location">
+                                    <MapPin size={13} />
+                                    <div className="plp-side-loc-text">
+                                        <span className="plp-loc-name">{activeDev.city}</span>
+                                        <span className="plp-loc-sub">{activeDev.locationName}</span>
+                                    </div>
+                                    <div className="plp-loc-price">
+                                        <strong>{activeDev.priceRange}</strong>
+                                        <span className="plp-side-benefit-tag plp-side-benefit-tag-gold">
+                                            Empreendimento
+                                        </span>
+                                        <span className="plp-side-price-note">faixa das unidades</span>
+                                    </div>
+                                </div>
+
+                                <div className="plp-side-facts">
+                                    <SideFactLike icon={<Building2 size={17} />} value={String(activeDev.availableUnitsCount)} label="unidades" />
+                                    <SideFactLike icon={<Maximize2 size={17} />} value={activeDev.areaRange} label="areas" />
+                                    <SideFactLike icon={<BedDouble size={17} />} value={activeDev.suitesRange} label="configuracoes" />
+                                </div>
+
+                                <p className="plp-commercial-note">A disponibilidade muda com frequencia. Primeiro escolha as unidades de interesse, depois confirme valores e condicoes.</p>
+
+                                <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleScrollToUnits}>
+                                    Ir para unidades
+                                </button>
                             </div>
 
-                            <h1 className="mb-6 text-5xl font-semibold leading-[1.02] tracking-tight text-white md:text-7xl lg:text-8xl">
-                                {activeDev.name}
-                            </h1>
-
-                            <p className="mb-8 max-w-2xl text-lg font-bold leading-relaxed text-zinc-200 md:text-2xl">
-                                {activeDev.tagline}
-                            </p>
-
-                            <div className="bc-hero-cta bc-hero-cta--desktop flex flex-col gap-4 sm:flex-row">
-                                <HeroUnitsButton onClick={handleScrollToUnits} />
+                            <div className="plp-side-card plp-lead-card bc-dev-lead-card">
+                                <h3><Phone size={18} /> Atendimento do empreendimento</h3>
+                                <p>Ainda em duvida? O especialista compara as unidades disponiveis e indica as melhores alternativas para o seu perfil.</p>
+                                <button type="button" className="bc-dev-sidebar-outline" onClick={() => openChat()}>
+                                    Pedir curadoria
+                                </button>
                             </div>
-                        </div>
+                        </aside>
+                    </section>
 
-                        <div className="bc-hero-metrics grid max-w-5xl grid-cols-2 rounded-lg border border-zinc-800/70 bg-[#11161D]/85 shadow-2xl backdrop-blur-md lg:grid-cols-4">
-                            <HeroMetric icon={MapPin} label="Localizacao" value={activeDev.locationName} note="Regiao nobre" />
-                            <HeroMetric icon={KeyRound} label="Faixa de preco" value={activeDev.priceRange} note="Curadoria ativa" />
-                            <HeroMetric icon={Maximize2} label="Oportunidade" value={`${activeDev.availableUnitsCount} unidades`} note="Disponiveis agora" highlight />
-                            <HeroMetric icon={BedDouble} label="Configuracoes" value={activeDev.suitesRange} note={activeDev.areaRange} />
-                        </div>
-
-                        <div className="bc-hero-cta bc-hero-cta--mobile">
-                            <HeroUnitsButton onClick={handleScrollToUnits} />
-                        </div>
-                    </div>
-                </section>
-
-                <section className="border-y border-zinc-800/50 bg-[#11161D] py-10">
-                    <div className="mx-auto grid max-w-[1320px] grid-cols-2 gap-6 px-4 text-center md:grid-cols-4 md:px-8">
-                        <Stat label="Produto" value="Empreendimento" />
-                        <Stat label="Estoque" value={`${activeDev.availableUnitsCount} unidades`} gold />
-                        <Stat label="Localizacao" value={activeDev.city} />
-                        <Stat label="Padrao" value="Alto luxo" />
-                    </div>
-                </section>
-
-                <section id="unidades-disponiveis" className="border-b border-[#D4AF37]/10 bg-[#0D1117] py-20 md:py-24">
-                    <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-                        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-                            <div className="max-w-2xl">
-                                <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Inventario exclusivo</span>
-                                <h2 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">Unidades Disponiveis</h2>
-                                <p className="mt-5 text-sm font-light leading-relaxed text-zinc-400 md:text-base">
-                                    Apenas <strong className="font-semibold text-[#D4AF37]">{activeDev.availableUnitsCount} unidades</strong> aparecem ativas neste empreendimento. Compare as opcoes e fale com o especialista.
+                <section id="unidades-disponiveis" className="bc-dev-units-section">
+                    <div className="bc-dev-section-inner">
+                        <div className="bc-dev-section-head">
+                            <div>
+                                <span className="plp-kicker">Inventario exclusivo</span>
+                                <h2>Escolha uma unidade disponivel</h2>
+                                <p>
+                                    Compare as unidades ativas do {activeDev.name}, abra a ficha completa da melhor opcao ou peca ajuda para decidir entre elas.
                                 </p>
                             </div>
-                            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-zinc-800 bg-[#141A24] px-4 py-3 text-xs font-mono uppercase tracking-[0.14em] text-zinc-300">
-                                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                            <div className="bc-dev-section-status">
+                                <span />
                                 Estoque atualizado
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+                        <div className="bc-dev-units-grid">
                             {activeDev.units.map((unit) => (
                                 <UnitCard
                                     key={unit.id}
                                     unit={unit}
                                     development={activeDev}
-                                    propertyMedia={unitMediaBySlug[unit.sourceSlug]}
+                                    propertyMedia={unitMediaBySlug[unit.propertyId || unit.sourceSlug]}
                                 />
                             ))}
                         </div>
                     </div>
                 </section>
 
-                <section className="bc-development-gallery-section bg-[#0A0D10] py-20 md:py-24">
-                    <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-                        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                            <div>
-                                <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Galeria</span>
-                                <h2 className="text-4xl font-semibold text-white md:text-5xl">Visual do empreendimento</h2>
-                            </div>
+                <section className="bc-dev-reasons-section">
+                    <div className="bc-dev-section-inner bc-dev-split-section">
+                        <div className="bc-dev-section-headline">
+                            <span className="plp-kicker">Por que este empreendimento</span>
+                            <h2>Entenda o empreendimento. Depois escolha a unidade.</h2>
+                            <p>{sellingDescription}</p>
                         </div>
-                        <DevelopmentMediaShowcase
-                            development={activeDev}
-                            latLng={developmentLatLng}
-                            mapEmbedSrc={mapEmbedSrc}
-                            onOpenLocation={setLocationModal}
-                            property={developmentLocationProperty}
-                            streetViewEmbedSrc={streetViewEmbedSrc}
-                        />
-                    </div>
-                </section>
-
-                <section className="bc-compare-section bg-[#0A0D10] py-20 md:py-24">
-                    <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-12 px-4 md:px-8 lg:grid-cols-12">
-                        <div className="lg:col-span-4">
-                            <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Por que este empreendimento</span>
-                            <h2 className="text-4xl font-semibold leading-tight text-white md:text-5xl">Compare o empreendimento antes da visita.</h2>
-                            <p className="mt-5 text-sm leading-relaxed text-zinc-400">{sellingDescription}</p>
-                        </div>
-                        <div className="grid gap-5 md:grid-cols-3 lg:col-span-8">
+                        <div className="bc-dev-benefit-grid">
                             {sellingBenefits.map((benefit) => {
                                 const Icon = iconMap[benefit.icon]
                                 return (
-                                    <div key={benefit.title} className="rounded-lg border border-zinc-800 bg-[#11161D]/75 p-6">
-                                        <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-md border border-[#D4AF37]/25 bg-[#D4AF37]/10 text-[#D4AF37]">
+                                    <div key={benefit.title} className="bc-dev-benefit-card">
+                                        <div>
                                             <Icon size={21} />
                                         </div>
-                                        <h3 className="mb-3 text-xl font-semibold text-white">{benefit.title}</h3>
-                                        <p className="text-sm leading-relaxed text-zinc-400">{benefit.description}</p>
+                                        <h3>{benefit.title}</h3>
+                                        <p>{benefit.description}</p>
                                     </div>
                                 )
                             })}
@@ -1006,44 +1227,47 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="bc-differentials-section border-y border-zinc-800 bg-[#11161D] py-20">
-                    <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-                        <div className="mb-12 max-w-2xl">
-                            <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Diferenciais</span>
-                            <h2 className="text-4xl font-semibold text-white md:text-5xl">Pontos para comparar melhor.</h2>
+                <section className="bc-dev-differentials-section">
+                    <div className="bc-dev-section-inner">
+                        <div className="bc-dev-section-head">
+                            <div>
+                                <span className="plp-kicker">Diferenciais</span>
+                                <h2>Pontos que ajudam na decisao.</h2>
+                                <p>Veja o que pesa na escolha entre as unidades: localizacao, liquidez, planta, valor e adequacao ao seu objetivo.</p>
+                            </div>
                         </div>
-                        <div className="grid gap-4 md:grid-cols-3">
+                        <div className="bc-dev-differentials-grid">
                             {decisionDifferentials.map((item, index) => (
-                                <div key={item.title} className="rounded-lg border border-zinc-800 bg-[#0D1117] p-6">
-                                    <div className="mb-6 text-xs font-mono text-[#D4AF37]">0{index + 1}</div>
-                                    <h3 className="mb-3 text-xl font-semibold text-white">{item.title}</h3>
-                                    <p className="text-sm leading-relaxed text-zinc-400">{item.description}</p>
+                                <div key={item.title} className="bc-dev-differential-card">
+                                    <div>0{index + 1}</div>
+                                    <h3>{item.title}</h3>
+                                    <p>{item.description}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                <section className="bc-location-section border-y border-zinc-800 bg-[#11161D] py-20">
-                    <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12">
-                        <div className="lg:col-span-4">
-                            <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Localizacao</span>
-                            <h2 className="text-4xl font-semibold text-white md:text-5xl">{activeDev.locationName}</h2>
-                            <p className="mt-5 text-sm leading-relaxed text-zinc-400">{activeDev.address}</p>
+                <section className="bc-dev-location-section">
+                    <div className="bc-dev-section-inner bc-dev-location-grid">
+                        <div className="bc-dev-section-headline">
+                            <span className="plp-kicker">Localizacao</span>
+                            <h2>{activeDev.locationName}</h2>
+                            <p>{activeDev.address}</p>
                             <a
                                 href={`https://www.google.com/maps/search/${encodeURIComponent(activeDev.address)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-8 inline-flex items-center gap-2 rounded border border-[#D4AF37]/60 px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-[#0A0D10]"
+                                className="bc-dev-map-link"
                             >
                                 Abrir mapa
                                 <Navigation size={15} />
                             </a>
                         </div>
-                        <div className="bc-location-address-card lg:col-span-8">
+                        <div className="bc-location-address-card bc-dev-location-card">
                             <span>Mapa e Street View</span>
-                            <h3>Explore o entorno na galeria acima.</h3>
-                            <p>O mapa e a rua do empreendimento ficam juntos das fotos para comparar fachada, acesso e localizacao em uma unica leitura visual.</p>
+                            <h3>Explore fachada, acesso e entorno.</h3>
+                            <p>O mapa e a rua do empreendimento ficam no fluxo de comparacao para validar localizacao antes da visita.</p>
                             <button type="button" onClick={() => setLocationModal('map')}>
                                 Ver mapa em tela cheia
                                 <ArrowUpRight size={15} />
@@ -1052,25 +1276,26 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     </div>
                 </section>
 
-                <section className="bc-faq-section bg-[#0A0D10] py-20">
-                    <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12">
-                        <div className="lg:col-span-4">
-                            <span className="mb-3 block text-xs font-mono uppercase tracking-[0.24em] text-[#D4AF37]">Duvidas frequentes</span>
-                            <h2 className="text-4xl font-semibold text-white md:text-5xl">Antes de falar com o especialista</h2>
+                <section className="bc-dev-faq-section">
+                    <div className="bc-dev-section-inner bc-dev-split-section">
+                        <div className="bc-dev-section-headline">
+                            <span className="plp-kicker">Duvidas frequentes</span>
+                            <h2>Antes de escolher uma unidade.</h2>
+                            <p>Respostas rapidas para entender o empreendimento e seguir para a melhor opcao disponivel.</p>
                         </div>
-                        <div className="lg:col-span-8">
+                        <div className="bc-dev-faq-list">
                             {activeDev.faq.map((item, index) => (
                                 <button
                                     key={item.question}
                                     type="button"
                                     onClick={() => setFaqOpen(faqOpen === index ? null : index)}
-                                    className="block w-full border-b border-zinc-800 py-6 text-left"
+                                    className="bc-dev-faq-item"
                                 >
-                                    <div className="flex items-center justify-between gap-6">
-                                        <h3 className="text-lg font-semibold text-white">{item.question}</h3>
-                                        {faqOpen === index ? <Minus className="h-5 w-5 text-[#D4AF37]" /> : <Plus className="h-5 w-5 text-zinc-500" />}
+                                    <div>
+                                        <h3>{item.question}</h3>
+                                        {faqOpen === index ? <Minus className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                                     </div>
-                                    {faqOpen === index && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-400">{item.answer}</p>}
+                                    {faqOpen === index && <p>{item.answer}</p>}
                                 </button>
                             ))}
                         </div>
@@ -1082,6 +1307,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <GoogleReviewsSection data={googleReviews} />
 
                 <HomeBlogSection posts={editorialPosts} />
+                </div>
             </main>
 
             <Footer />
@@ -1101,11 +1327,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             <div className="bc-floating-actions">
                 <button
                     type="button"
-                    onClick={() => openChat()}
+                    onClick={handleScrollToUnits}
                     className="bc-floating-consult"
                 >
-                    <Phone size={16} />
-                    <span>Falar com especialista</span>
+                    <Building2 size={16} />
+                    <span>Ver unidades</span>
                 </button>
             </div>
 
@@ -3958,6 +4184,911 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         grid-template-columns: 1fr;
                     }
                 }
+
+                .bc-page.bc-property-layout {
+                    background: var(--plp-bg);
+                    color: var(--plp-ink);
+                    padding-bottom: 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-main {
+                    background: var(--plp-bg);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-shell {
+                    width: min(calc(100% - clamp(28px, 5vw, 96px)), 1760px);
+                    margin: 0 auto;
+                    overflow: visible;
+                    background: var(--plp-surface);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-title-band {
+                    background: #f7f8f6;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-kicker {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-detail-layout {
+                    align-items: start;
+                    background: #fff;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-gallery-column {
+                    min-width: 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-content-column {
+                    min-width: 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-overview-card h2 {
+                    max-width: 900px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-units-preview-card .plp-section-head.compact {
+                    margin-bottom: 20px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-spec-card strong {
+                    overflow-wrap: anywhere;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-inline-action,
+                .bc-page.bc-property-layout .bc-dev-sidebar-primary,
+                .bc-page.bc-property-layout .bc-dev-sidebar-outline,
+                .bc-page.bc-property-layout .bc-dev-mobile-secondary,
+                .bc-page.bc-property-layout .bc-dev-mobile-units-card button {
+                    appearance: none;
+                    border: 0;
+                    cursor: pointer;
+                    font: inherit;
+                    text-decoration: none;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-inline-action {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 9px;
+                    min-height: 46px;
+                    margin-top: 20px;
+                    padding: 0 18px;
+                    border-radius: var(--plp-radius);
+                    background: var(--plp-dark);
+                    color: #fff;
+                    font-size: 12px;
+                    font-weight: 900;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-sidebar {
+                    top: 22px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-sidebar-primary,
+                .bc-page.bc-property-layout .bc-dev-sidebar-outline {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 100%;
+                    min-height: 46px;
+                    border-radius: var(--plp-radius);
+                    font-size: 12px;
+                    font-weight: 900;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-sidebar-outline {
+                    border: 1px solid rgba(189, 149, 81, 0.48);
+                    background: #fff;
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-lead-card {
+                    gap: 14px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase {
+                    display: grid;
+                    gap: 12px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-toolbar {
+                    display: flex;
+                    gap: 8px;
+                    justify-content: flex-end;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-stage {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 132px;
+                    gap: 12px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-main {
+                    position: relative;
+                    overflow: hidden;
+                    min-height: clamp(420px, 48vw, 720px);
+                    border-radius: var(--plp-radius);
+                    background: #111;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-main > img,
+                .bc-page.bc-property-layout .bc-development-showcase-main iframe,
+                .bc-page.bc-property-layout .bc-development-location-map,
+                .bc-page.bc-property-layout .bc-development-location-map .plp-location-explorer,
+                .bc-page.bc-property-layout .bc-development-location-map .property-feed-map-shell,
+                .bc-page.bc-property-layout .bc-development-location-map .property-feed-map-canvas,
+                .bc-page.bc-property-layout .bc-development-location-map .plp-nearby-map-shell,
+                .bc-page.bc-property-layout .bc-development-location-map .plp-nearby-real-map,
+                .bc-page.bc-property-layout .bc-development-location-map .leaflet-container {
+                    width: 100%;
+                    height: 100%;
+                    min-height: inherit;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-main > img {
+                    display: block;
+                    object-fit: cover;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-rail {
+                    display: grid;
+                    grid-auto-rows: 112px;
+                    gap: 10px;
+                    max-height: clamp(420px, 48vw, 720px);
+                    overflow-y: auto;
+                    padding-right: 2px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-thumb {
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 112px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #151515;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-thumb > img,
+                .bc-page.bc-property-layout .bc-development-showcase-thumb iframe,
+                .bc-page.bc-property-layout .bc-development-showcase-thumb .bc-development-location-static-thumb {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-thumb-label {
+                    position: absolute;
+                    left: 8px;
+                    bottom: 8px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    max-width: calc(100% - 16px);
+                    min-height: 24px;
+                    padding: 0 8px;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.9);
+                    color: var(--plp-ink);
+                    font-size: 10px;
+                    font-weight: 900;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    min-height: 34px;
+                    padding: 0 12px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                    color: var(--plp-ink);
+                    font-size: 11px;
+                    font-weight: 900;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-nav,
+                .bc-page.bc-property-layout .bc-development-showcase-open {
+                    position: absolute;
+                    z-index: 3;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-nav {
+                    top: 50%;
+                    display: grid;
+                    place-items: center;
+                    width: 42px;
+                    height: 42px;
+                    border: 1px solid rgba(255, 255, 255, 0.58);
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.88);
+                    color: var(--plp-ink);
+                    transform: translateY(-50%);
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-nav--prev {
+                    left: 14px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-nav--next {
+                    right: 14px;
+                }
+
+                .bc-page.bc-property-layout .bc-development-showcase-open {
+                    left: 14px;
+                    top: 14px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    min-height: 34px;
+                    padding: 0 12px;
+                    border: 0;
+                    border-radius: var(--plp-radius);
+                    background: rgba(255, 255, 255, 0.92);
+                    color: var(--plp-ink);
+                    font-size: 11px;
+                    font-weight: 900;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-sheet-experience {
+                    display: none;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-units-section,
+                .bc-page.bc-property-layout .bc-dev-reasons-section,
+                .bc-page.bc-property-layout .bc-dev-differentials-section,
+                .bc-page.bc-property-layout .bc-dev-location-section,
+                .bc-page.bc-property-layout .bc-dev-faq-section {
+                    border-top: 1px solid var(--plp-line);
+                    background: #fff;
+                    padding: clamp(44px, 5vw, 76px) 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-reasons-section,
+                .bc-page.bc-property-layout .bc-dev-location-section {
+                    background: #f7f8f6;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-inner {
+                    width: min(calc(100% - clamp(28px, 5vw, 88px)), 1320px);
+                    margin: 0 auto;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-head {
+                    display: flex;
+                    align-items: end;
+                    justify-content: space-between;
+                    gap: 28px;
+                    margin-bottom: 28px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-head > div:first-child,
+                .bc-page.bc-property-layout .bc-dev-section-headline {
+                    max-width: 680px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-head h2,
+                .bc-page.bc-property-layout .bc-dev-section-headline h2 {
+                    margin: 0;
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: clamp(2rem, 3.2vw, 3.2rem);
+                    font-weight: 700;
+                    letter-spacing: 0;
+                    line-height: 1.04;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-head p,
+                .bc-page.bc-property-layout .bc-dev-section-headline p {
+                    margin: 12px 0 0;
+                    color: var(--plp-muted);
+                    font-size: 15px;
+                    line-height: 1.7;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-status {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    min-height: 42px;
+                    padding: 0 14px;
+                    border: 1px solid rgba(15, 159, 122, 0.22);
+                    border-radius: var(--plp-radius);
+                    background: rgba(15, 159, 122, 0.07);
+                    color: #08745d;
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-section-status span {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 999px;
+                    background: var(--plp-green);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-units-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 18px;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article {
+                    overflow: hidden;
+                    border: 1px solid var(--plp-line) !important;
+                    border-radius: var(--plp-radius) !important;
+                    background: #fff !important;
+                    color: var(--plp-ink) !important;
+                    box-shadow: 0 12px 30px rgba(19, 24, 29, 0.08);
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article:hover {
+                    border-color: rgba(189, 149, 81, 0.42) !important;
+                    box-shadow: 0 18px 40px rgba(19, 24, 29, 0.12);
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:first-child {
+                    aspect-ratio: 4 / 3;
+                    background: #eceff1;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article .bc-unit-photo-price {
+                    background: rgba(255, 255, 255, 0.92) !important;
+                    color: var(--plp-ink) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article .bc-unit-photo-price p:first-child {
+                    color: var(--plp-muted) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article .bc-unit-photo-price p:last-child {
+                    color: var(--plp-ink) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child {
+                    background: #fff !important;
+                    padding: 20px !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child > p {
+                    color: var(--plp-gold-dark) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article h3 {
+                    color: var(--plp-ink) !important;
+                    font-size: 24px !important;
+                    letter-spacing: 0 !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child > div:nth-of-type(1) {
+                    border-color: var(--plp-line) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child > div:nth-of-type(1) > div {
+                    border-color: var(--plp-line) !important;
+                    background: #f7f8f6 !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child > div:nth-of-type(1) span:first-of-type {
+                    color: var(--plp-muted) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article > div:last-child > div:nth-of-type(1) span:last-of-type {
+                    color: var(--plp-ink) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article a {
+                    border-color: var(--plp-line) !important;
+                    background: #fff !important;
+                    color: var(--plp-ink) !important;
+                }
+
+                .bc-page.bc-property-layout #unidades-disponiveis article a:hover {
+                    border-color: rgba(189, 149, 81, 0.5) !important;
+                    color: var(--plp-gold-dark) !important;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-split-section,
+                .bc-page.bc-property-layout .bc-dev-location-grid {
+                    display: grid;
+                    grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
+                    gap: clamp(28px, 4vw, 56px);
+                    align-items: start;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-grid,
+                .bc-page.bc-property-layout .bc-dev-differentials-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 14px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-card,
+                .bc-page.bc-property-layout .bc-dev-differential-card,
+                .bc-page.bc-property-layout .bc-dev-location-card,
+                .bc-page.bc-property-layout .bc-dev-faq-item {
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                    box-shadow: 0 10px 26px rgba(19, 24, 29, 0.06);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-card,
+                .bc-page.bc-property-layout .bc-dev-differential-card {
+                    padding: 22px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-card > div:first-child {
+                    display: grid;
+                    place-items: center;
+                    width: 42px;
+                    height: 42px;
+                    margin-bottom: 16px;
+                    border: 1px solid rgba(189, 149, 81, 0.26);
+                    border-radius: var(--plp-radius);
+                    background: rgba(189, 149, 81, 0.08);
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-card h3,
+                .bc-page.bc-property-layout .bc-dev-differential-card h3 {
+                    margin: 0 0 10px;
+                    color: var(--plp-ink);
+                    font-size: 20px;
+                    line-height: 1.2;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-benefit-card p,
+                .bc-page.bc-property-layout .bc-dev-differential-card p {
+                    margin: 0;
+                    color: var(--plp-muted);
+                    font-size: 14px;
+                    line-height: 1.62;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-differential-card > div:first-child {
+                    margin-bottom: 18px;
+                    color: var(--plp-gold-dark);
+                    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                    font-size: 12px;
+                    font-weight: 900;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-location-card {
+                    padding: clamp(24px, 3vw, 38px);
+                    min-height: 260px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-location-card span {
+                    display: block;
+                    color: var(--plp-gold-dark);
+                    font-size: 12px;
+                    font-weight: 900;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-location-card h3 {
+                    margin: 12px 0;
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: clamp(1.8rem, 2.8vw, 3rem);
+                    line-height: 1.05;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-location-card p {
+                    max-width: 620px;
+                    color: var(--plp-muted);
+                    font-size: 15px;
+                    line-height: 1.7;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-location-card button,
+                .bc-page.bc-property-layout .bc-dev-map-link {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 44px;
+                    margin-top: 18px;
+                    padding: 0 16px;
+                    border: 1px solid rgba(189, 149, 81, 0.46);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                    color: var(--plp-gold-dark);
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-decoration: none;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-list {
+                    display: grid;
+                    gap: 10px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-item {
+                    width: 100%;
+                    padding: 20px;
+                    text-align: left;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-item > div {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 18px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-item h3 {
+                    margin: 0;
+                    color: var(--plp-ink);
+                    font-size: 17px;
+                    line-height: 1.3;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-item svg {
+                    color: var(--plp-gold-dark);
+                    flex: 0 0 auto;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-faq-item p {
+                    margin: 14px 0 0;
+                    color: var(--plp-muted);
+                    font-size: 14px;
+                    line-height: 1.68;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-section {
+                    border-top: 1px solid var(--plp-line);
+                    background: #fff;
+                    padding: clamp(44px, 5vw, 76px) 0;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-inner {
+                    width: min(calc(100% - clamp(28px, 5vw, 88px)), 1320px);
+                    margin: 0 auto;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-header {
+                    display: flex;
+                    align-items: end;
+                    justify-content: space-between;
+                    gap: 28px;
+                    margin-bottom: 24px;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-header span {
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-header h2 {
+                    margin: 0;
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: clamp(2rem, 3vw, 3rem);
+                    line-height: 1.05;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-header p {
+                    max-width: 360px;
+                    color: var(--plp-muted);
+                    font-size: 14px;
+                    line-height: 1.6;
+                }
+
+                .bc-page.bc-property-layout .bc-related-developments-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 16px;
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-card {
+                    position: relative;
+                    min-height: 300px;
+                    overflow: hidden;
+                    border-radius: var(--plp-radius);
+                    color: #fff;
+                    text-decoration: none;
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-card img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.4s ease;
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-card:hover img {
+                    transform: scale(1.04);
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-shade {
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(to top, rgba(10, 13, 16, 0.84), rgba(10, 13, 16, 0.12));
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-copy {
+                    position: absolute;
+                    inset: auto 18px 18px;
+                    display: grid;
+                    gap: 5px;
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-copy small,
+                .bc-page.bc-property-layout .bc-related-development-copy em {
+                    color: rgba(255, 255, 255, 0.78);
+                    font-size: 12px;
+                    font-style: normal;
+                }
+
+                .bc-page.bc-property-layout .bc-related-development-copy strong {
+                    color: #fff;
+                    font-size: 22px;
+                    line-height: 1.12;
+                }
+
+                .bc-dev-mobile-units-list {
+                    display: grid;
+                    gap: 10px;
+                }
+
+                .bc-dev-mobile-unit-card {
+                    display: grid;
+                    grid-template-columns: 104px minmax(0, 1fr);
+                    gap: 12px;
+                    padding: 10px;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                }
+
+                .bc-dev-mobile-unit-card img {
+                    width: 104px;
+                    height: 132px;
+                    border-radius: 6px;
+                    object-fit: cover;
+                }
+
+                .bc-dev-mobile-unit-card div {
+                    min-width: 0;
+                }
+
+                .bc-dev-mobile-unit-card span {
+                    display: inline-flex;
+                    margin-bottom: 5px;
+                    color: var(--plp-gold-dark);
+                    font-size: 10px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .bc-dev-mobile-unit-card h3 {
+                    margin: 0 0 5px;
+                    color: var(--plp-ink);
+                    font-size: 16px;
+                    line-height: 1.18;
+                }
+
+                .bc-dev-mobile-unit-card p {
+                    margin: 0 0 6px;
+                    color: var(--plp-muted);
+                    font-size: 12px;
+                    line-height: 1.35;
+                }
+
+                .bc-dev-mobile-unit-card strong {
+                    display: block;
+                    margin-bottom: 9px;
+                    color: var(--plp-ink);
+                    font-size: 14px;
+                }
+
+                .bc-dev-mobile-unit-card div div {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 7px;
+                }
+
+                .bc-dev-mobile-unit-card a,
+                .bc-dev-mobile-unit-card button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 34px;
+                    border-radius: 6px;
+                    font-size: 10px;
+                    font-weight: 900;
+                    text-decoration: none;
+                    text-transform: uppercase;
+                }
+
+                .bc-dev-mobile-unit-card a {
+                    border: 1px solid var(--plp-line);
+                    color: var(--plp-ink);
+                }
+
+                .bc-dev-mobile-unit-card button {
+                    border: 0;
+                    background: var(--plp-dark);
+                    color: #fff;
+                }
+
+                .bc-dev-mobile-actions {
+                    display: grid !important;
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                    margin-top: 16px;
+                }
+
+                .bc-dev-mobile-actions > button {
+                    width: 100%;
+                    min-width: 0;
+                    white-space: normal;
+                    text-align: center;
+                }
+
+                .bc-dev-mobile-actions .plp-mobile-sheet-primary {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 46px;
+                    padding: 0 14px;
+                    line-height: 1.15;
+                }
+
+                .bc-dev-mobile-secondary {
+                    min-height: 44px;
+                    border: 1px solid rgba(189, 149, 81, 0.42) !important;
+                    border-radius: var(--plp-radius);
+                    background: #fff;
+                    color: var(--plp-gold-dark);
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .bc-dev-mobile-copy {
+                    margin: 12px 0 0;
+                    color: var(--plp-muted);
+                    font-size: 14px;
+                    line-height: 1.55;
+                }
+
+                .bc-dev-mobile-benefits {
+                    display: grid;
+                    gap: 8px;
+                    margin-top: 14px;
+                }
+
+                .bc-dev-mobile-benefits span {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: var(--plp-ink);
+                    font-size: 13px;
+                }
+
+                .bc-dev-mobile-benefits svg {
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-units-card .plp-mobile-card-head--split > button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    min-width: 78px;
+                    min-height: 42px;
+                    border: 0;
+                    border-radius: 6px;
+                    background: transparent;
+                    color: var(--plp-gold-dark);
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-units-card .plp-mobile-card-head--split h2 {
+                    font-size: 19px;
+                    line-height: 1.16;
+                }
+
+                @media (max-width: 1180px) {
+                    .bc-page.bc-property-layout .bc-dev-detail-layout {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-sidebar {
+                        position: static;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-units-grid,
+                    .bc-page.bc-property-layout .bc-dev-benefit-grid,
+                    .bc-page.bc-property-layout .bc-dev-differentials-grid,
+                    .bc-page.bc-property-layout .bc-related-developments-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-split-section,
+                    .bc-page.bc-property-layout .bc-dev-location-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                @media (max-width: 720px) {
+                    body:has(.bc-page.bc-property-layout) .gh-wrap {
+                        display: block !important;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-shell {
+                        width: 100%;
+                        box-shadow: none;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-title-band,
+                    .bc-page.bc-property-layout .bc-dev-detail-layout {
+                        display: none !important;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-mobile-sheet-experience {
+                        display: block;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-mobile-media-item img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .bc-page.bc-property-layout #unidades-disponiveis {
+                        padding-top: 52px;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-section-inner,
+                    .bc-page.bc-property-layout .bc-related-developments-inner {
+                        width: min(100% - 28px, 1320px);
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-section-head,
+                    .bc-page.bc-property-layout .bc-related-developments-header {
+                        align-items: flex-start;
+                        flex-direction: column;
+                        gap: 14px;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-units-grid,
+                    .bc-page.bc-property-layout .bc-dev-benefit-grid,
+                    .bc-page.bc-property-layout .bc-dev-differentials-grid,
+                    .bc-page.bc-property-layout .bc-related-developments-grid,
+                    .bc-page.bc-property-layout #unidades-disponiveis > div > div:last-child {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-section-head h2,
+                    .bc-page.bc-property-layout .bc-dev-section-headline h2,
+                    .bc-page.bc-property-layout .bc-related-developments-header h2 {
+                        font-size: 2rem;
+                    }
+
+                    .bc-page.bc-property-layout .bc-related-development-card {
+                        min-height: 240px;
+                    }
+
+                    .bc-page.bc-property-layout .bc-floating-actions {
+                        display: none;
+                    }
+                }
             `}</style>
         </div>
     )
@@ -3996,33 +5127,6 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
                 </div>
             </div>
         </section>
-    )
-}
-
-function LandingMobileHeader() {
-    const openGlobalMenu = () => {
-        window.dispatchEvent(new CustomEvent('pilger:open-global-menu'))
-    }
-
-    return (
-        <header className="bc-mobile-landing-header" aria-label="Cabecalho mobile da landing page">
-            <Link href="/" className="bc-mobile-landing-logo">
-                <strong>GUILHERME PILGER</strong>
-                <span>CRECI/SC 6772-J</span>
-            </Link>
-
-            <div className="bc-mobile-landing-actions">
-                <button
-                    type="button"
-                    className="bc-mobile-landing-icon"
-                    onClick={openGlobalMenu}
-                    aria-label="Abrir menu global"
-                    aria-expanded={false}
-                >
-                    <Menu size={25} />
-                </button>
-            </div>
-        </header>
     )
 }
 
@@ -4360,46 +5464,83 @@ function DevelopmentLocationModal({ mode, fallbackSrc, title, property, latLng, 
     )
 }
 
-function HeroUnitsButton({ onClick }: { onClick: () => void }) {
+function unitDetailHref(unit: Unit, propertyMedia?: UnitPropertyMedia) {
+    if (propertyMedia?.id) return propertyDetailsPath(propertyMedia)
+
+    if (unit.propertyId) {
+        return propertyDetailsPath({
+            id: unit.propertyId,
+            source_slug: unit.sourceSlug,
+            title: unit.title,
+            seo_title: unit.seoTitle,
+            city: unit.city,
+            neighborhood: unit.neighborhood,
+            property_type: unit.propertyType || unit.type,
+        })
+    }
+
+    const legacyIdentifier = unit.sourceReference || inferLegacyUnitIdentifier(unit.id) || unit.sourceSlug
+
+    return `/imovel/${encodeURIComponent(legacyIdentifier)}`
+}
+
+function inferLegacyUnitIdentifier(id?: string) {
+    const value = String(id || '').trim()
+    if (!value) return ''
+    if (/^[0-9]+$/.test(value)) return value
+
+    return value.match(/-(\d+)$/)?.[1] || ''
+}
+
+function SpecCardLike({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            className="bc-hero-units-button group flex items-center justify-center gap-2 rounded bg-[#D4AF37] px-8 py-4 text-xs font-black uppercase tracking-[0.18em] text-[#0A0D10] shadow-xl shadow-[#D4AF37]/10 transition hover:bg-[#E5C158]"
-        >
-            <span className="bc-hero-units-label">Ver unidades disponiveis</span>
-            <ArrowRight className="h-4 w-4 text-[#0A0D10] transition group-hover:translate-x-1" />
-        </button>
+        <div className="plp-spec-card bc-dev-spec-card">
+            <span>{icon}</span>
+            <small>{label}</small>
+            <strong>{value}</strong>
+        </div>
     )
 }
 
-function HeroMetric({ icon: Icon, label, value, note, highlight = false }: {
-    icon: React.ComponentType<{ size?: number; className?: string }>
-    label: string
-    value: string
-    note: string
-    highlight?: boolean
+function SideFactLike({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+    return (
+        <span>
+            {icon}
+            <strong>{value}</strong>
+            <small>{label}</small>
+        </span>
+    )
+}
+
+function MobileUnitCard({ unit, development, propertyMedia, onChat }: {
+    unit: Unit
+    development: Development
+    propertyMedia?: UnitPropertyMedia
+    onChat: (unit?: Unit) => void
 }) {
-    return (
-        <div className="bc-hero-metric">
-            <div className="bc-hero-metric-icon">
-                <Icon size={18} />
-            </div>
-            <div className="min-w-0">
-                <p>{label}</p>
-                <h3 className={highlight ? 'text-emerald-400' : 'text-white'}>{value}</h3>
-                <span>{note}</span>
-            </div>
-        </div>
-    )
-}
+    const gallery = galleryForUnit(unit, propertyMedia, development)
+    const image = gallery[0] || unit.image || development.heroImage
+    const detailHref = unitDetailHref(unit, propertyMedia)
 
-function Stat({ label, value, gold = false }: { label: string; value: string; gold?: boolean }) {
     return (
-        <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-zinc-500">{label}</p>
-            <p className={`bc-stat-value mt-1 font-serif text-base md:text-lg ${gold ? 'is-gold text-[#D4AF37]' : 'text-white'}`}>{value}</p>
-        </div>
+        <article className="bc-dev-mobile-unit-card">
+            <img src={image} alt={unit.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+            <div>
+                <span>{unit.status}</span>
+                <h3>{unit.type}</h3>
+                <p>{unit.area} | {unit.suites} | {unit.vagas}</p>
+                <strong>{unit.price}</strong>
+                <div>
+                    <Link href={detailHref}>
+                        Ver detalhes
+                        <ArrowUpRight size={14} />
+                    </Link>
+                    <button type="button" onClick={() => onChat(unit)}>
+                        Especialista
+                    </button>
+                </div>
+            </div>
+        </article>
     )
 }
 
@@ -4410,6 +5551,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
     const safeImageIndex = gallery.length ? activeImageIndex % gallery.length : 0
     const activeImage = gallery[safeImageIndex] || unit.image
     const showGalleryControls = gallery.length > 1
+    const detailHref = unitDetailHref(unit, propertyMedia)
 
     const moveGallery = useCallback((direction: number) => {
         if (!gallery.length) return
@@ -4488,7 +5630,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
 
                 <div className="mt-auto flex flex-col gap-3">
                     <Link
-                        href={`/imovel/${unit.sourceSlug}`}
+                        href={detailHref}
                         className="flex w-full items-center justify-center gap-2 rounded border border-zinc-800 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400 transition hover:border-[#D4AF37]/50 hover:text-white"
                     >
                         Ver detalhes

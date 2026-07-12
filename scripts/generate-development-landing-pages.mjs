@@ -10,6 +10,15 @@ const APPLY = process.argv.includes('--apply')
 const AUDIT_ONLY = process.argv.includes('--audit-only')
 const NOW = new Date().toISOString()
 const PAGE_SIZE = 1000
+const SOURCE_REFS_ARG = process.argv.find(arg => arg.startsWith('--source-refs='))
+const SOURCE_REF_MIN_ARG = process.argv.find(arg => arg.startsWith('--source-ref-min='))
+const SOURCE_REF_MAX_ARG = process.argv.find(arg => arg.startsWith('--source-ref-max='))
+const SOURCE_REFS = SOURCE_REFS_ARG
+  ? SOURCE_REFS_ARG.split('=').slice(1).join('=').split(',').map(value => value.trim()).filter(Boolean)
+  : []
+const SOURCE_REF_MIN = SOURCE_REF_MIN_ARG ? SOURCE_REF_MIN_ARG.split('=').slice(1).join('=').trim() : ''
+const SOURCE_REF_MAX = SOURCE_REF_MAX_ARG ? SOURCE_REF_MAX_ARG.split('=').slice(1).join('=').trim() : ''
+const SCOPED_SOURCE_REFS = Boolean(SOURCE_REFS.length > 0 || SOURCE_REF_MIN || SOURCE_REF_MAX)
 const RESERVED_SLUGS = new Set([
   'admin',
   'api',
@@ -317,6 +326,14 @@ function buildUnits(properties, developmentName) {
         property_id: property.id,
         sourceReference: text(property.source_reference),
         source_reference: text(property.source_reference),
+        sourceSlug,
+        source_slug: sourceSlug,
+        city: text(property.city),
+        neighborhood: text(property.neighborhood),
+        seoTitle: text(property.seo_title),
+        seo_title: text(property.seo_title),
+        propertyType: text(property.property_type),
+        property_type: text(property.property_type),
         type: unitType(property),
         title: text(property.title, `${unitType(property)} no ${developmentName}`),
         area: formatNumberRange([property.area_private_m2 || property.area_m2], 'm2', 'Consulte'),
@@ -326,8 +343,6 @@ function buildUnits(properties, developmentName) {
         image: firstImage(property),
         images: imageList(property),
         status: text(property.source_status, 'Disponivel'),
-        sourceSlug,
-        source_slug: sourceSlug,
       }
     })
 }
@@ -393,8 +408,8 @@ function mergeUnits(existingUnits, generatedUnits) {
   for (const unit of [...asArray(existingUnits), ...generatedUnits]) {
     const record = asRecord(unit)
     const key = normalizeText(record.propertyId || record.property_id || record.sourceSlug || record.source_slug || record.id || record.sourceReference || record.source_reference)
-    if (!key || byKey.has(key)) continue
-    byKey.set(key, record)
+    if (!key) continue
+    byKey.set(key, byKey.has(key) ? { ...byKey.get(key), ...record } : record)
   }
   return [...byKey.values()]
 }
@@ -608,11 +623,53 @@ async function fetchAll(table, select, configure = query => query) {
   return rows
 }
 
+function applySourceReferenceScope(query) {
+  if (SOURCE_REFS.length) return query.in('source_reference', SOURCE_REFS)
+  let scoped = query
+  if (SOURCE_REF_MIN) scoped = scoped.gte('source_reference', SOURCE_REF_MIN)
+  if (SOURCE_REF_MAX) scoped = scoped.lte('source_reference', SOURCE_REF_MAX)
+  return scoped
+}
+
+async function hydrateLandingPagesForGroups(landingPages, groups) {
+  if (!SCOPED_SOURCE_REFS) return landingPages
+
+  const { byDevelopmentKey } = existingPageIndexes(landingPages)
+  const targetIds = new Set()
+
+  for (const group of groups) {
+    const existing = byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
+    if (existing?.id) targetIds.add(existing.id)
+  }
+
+  if (!targetIds.size) return landingPages
+
+  const hydratedPages = await fetchAll(
+    'landing_pages',
+    'id, slug, title, description, content, metadata, status, created_at, updated_at',
+    query => query.in('id', [...targetIds])
+  )
+  const hydratedById = new Map(hydratedPages.map(page => [page.id, page]))
+
+  return landingPages.map(page => hydratedById.get(page.id) || page)
+}
+
 async function loadData() {
-  const [properties, privateRows, landingPages] = await Promise.all([
-    fetchAll('properties', PROPERTY_SELECT, query => query.eq('status', 'active').order('updated_at', { ascending: false })),
-    fetchAll('property_private_details', PRIVATE_SELECT),
-    fetchAll('landing_pages', 'id, slug, title, description, content, metadata, status, created_at, updated_at', query => query.order('created_at', { ascending: true })),
+  const properties = await fetchAll(
+    'properties',
+    PROPERTY_SELECT,
+    query => applySourceReferenceScope(query.eq('status', 'active')).order('updated_at', { ascending: false })
+  )
+  const propertyIds = properties.map(property => property.id).filter(Boolean)
+  const [privateRows, landingPages] = await Promise.all([
+    SCOPED_SOURCE_REFS
+      ? (propertyIds.length
+        ? fetchAll('property_private_details', PRIVATE_SELECT, query => query.in('property_id', propertyIds))
+        : Promise.resolve([]))
+      : fetchAll('property_private_details', PRIVATE_SELECT),
+    SCOPED_SOURCE_REFS
+      ? fetchAll('landing_pages', 'id, slug, title, description, metadata, status, created_at, updated_at', query => query.order('created_at', { ascending: true }))
+      : fetchAll('landing_pages', 'id, slug, title, description, content, metadata, status, created_at, updated_at', query => query.order('created_at', { ascending: true })),
   ])
 
   const privateByProperty = new Map(privateRows.map(row => [row.property_id, row]))
@@ -808,6 +865,11 @@ function auditLandingCoverage(groups, landingPages) {
   }
 }
 
+function landingPagesForAudit(landingPages) {
+  if (!SCOPED_SOURCE_REFS) return landingPages
+  return landingPages.filter(page => Boolean(asRecord(page.content).development))
+}
+
 async function applyRows(insertRows, updateRows) {
   for (const update of updateRows) {
     const { error } = await supabase
@@ -834,12 +896,13 @@ function printSummary(label, data) {
 }
 
 async function main() {
-  const { activeProperties, landingPages } = await loadData()
+  let { activeProperties, landingPages } = await loadData()
   const { groups, unnamed, inferred } = buildGroups(activeProperties)
+  landingPages = await hydrateLandingPagesForGroups(landingPages, groups)
   const missingPrivateNameCount = activeProperties.filter(property => !text(property.condominium_name)).length
 
   if (AUDIT_ONLY) {
-    const audit = auditLandingCoverage(groups, landingPages)
+    const audit = auditLandingCoverage(groups, landingPagesForAudit(landingPages))
     printSummary('Audit development landing pages', {
       activeProperties: activeProperties.length,
       condominiumGroups: groups.length,
@@ -857,6 +920,7 @@ async function main() {
 
   const { insertRows, updateRows } = prepareRows(groups, landingPages)
   printSummary(APPLY ? 'Apply plan' : 'Dry-run plan', {
+    scopedSourceReferences: SCOPED_SOURCE_REFS,
     activeProperties: activeProperties.length,
     condominiumGroups: groups.length,
     activePropertiesMissingPrivateCondominiumName: missingPrivateNameCount,
@@ -864,6 +928,8 @@ async function main() {
     propertiesUsingInferredDevelopmentName: inferred.length,
     pagesToInsert: insertRows.length,
     pagesToUpdate: updateRows.length,
+    insertSlugs: insertRows.map(row => row.slug),
+    updateSlugs: updateRows.map(update => update.row.slug),
   })
 
   if (!APPLY) {
@@ -873,8 +939,17 @@ async function main() {
 
   await applyRows(insertRows, updateRows)
 
-  const refreshedLandingPages = await fetchAll('landing_pages', 'id, slug, title, description, content, metadata, status, created_at, updated_at', query => query.order('created_at', { ascending: true }))
-  const audit = auditLandingCoverage(groups, refreshedLandingPages)
+  const refreshedLandingPages = await hydrateLandingPagesForGroups(
+    await fetchAll(
+      'landing_pages',
+      SCOPED_SOURCE_REFS
+        ? 'id, slug, title, description, metadata, status, created_at, updated_at'
+        : 'id, slug, title, description, content, metadata, status, created_at, updated_at',
+      query => query.order('created_at', { ascending: true })
+    ),
+    groups
+  )
+  const audit = auditLandingCoverage(groups, landingPagesForAudit(refreshedLandingPages))
   printSummary('Post-apply audit', {
     inserted: insertRows.length,
     updated: updateRows.length,
