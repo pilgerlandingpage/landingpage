@@ -24,6 +24,7 @@ function parseArgs(argv) {
         refs: [],
         includePrivate: false,
         includeCopy: false,
+        skipDeactivations: false,
         maxInactivations: DEFAULT_MAX_INACTIVATIONS,
     }
 
@@ -40,6 +41,7 @@ function parseArgs(argv) {
         else if (arg === '--json') args.json = true
         else if (arg === '--include-private') args.includePrivate = true
         else if (arg === '--include-copy') args.includeCopy = true
+        else if (arg === '--skip-deactivations') args.skipDeactivations = true
     }
 
     args.limit = Math.max(0, Number.isFinite(args.limit) ? args.limit : 0)
@@ -414,6 +416,9 @@ function printSummary(report) {
     console.log(`Ausentes no XML: ${report.totals.stale_in_db}`)
     console.log(`Ativos que seriam ativados: ${report.totals.would_activate}`)
     console.log(`Ativos que seriam inativados/retirados da vitrine: ${report.totals.would_deactivate}`)
+    if (report.totals.skipped_deactivations) {
+        console.log(`Desativacoes ignoradas por seguranca: ${report.totals.skipped_deactivations}`)
+    }
     console.log(`Mudancas de preco/custos com historico: ${report.totals.price_history_events}`)
     console.log(`Imagens preservadas: sim (images/featured_image nao entram no payload)`)
     if (report.report_path) console.log(`Relatorio: ${report.report_path}`)
@@ -496,6 +501,16 @@ async function main() {
             neighborhood: row.neighborhood,
         }))
 
+    const skippedDeactivations = args.skipDeactivations
+        ? changes.filter(change => change.previous_status === 'active' && change.next_status !== 'active')
+        : []
+
+    if (skippedDeactivations.length) {
+        const keptChanges = changes.filter(change => !(change.previous_status === 'active' && change.next_status !== 'active'))
+        changes.length = 0
+        changes.push(...keptChanges)
+    }
+
     const wouldDeactivate = changes.filter(change => change.previous_status === 'active' && change.next_status !== 'active')
     const wouldActivate = changes.filter(change => change.previous_status !== 'active' && change.next_status === 'active')
     const applied = []
@@ -546,6 +561,7 @@ async function main() {
         report_path: reportPath || null,
         guardrails: {
             max_inactivations: args.maxInactivations,
+            skip_deactivations: args.skipDeactivations,
         },
         totals: {
             xml: properties.length,
@@ -554,6 +570,7 @@ async function main() {
             changed: changes.length,
             missing_in_db: missingInDb.length,
             stale_in_db: staleInDb.length,
+            skipped_deactivations: skippedDeactivations.length,
             would_activate: wouldActivate.length,
             would_deactivate: wouldDeactivate.length,
             price_history_events: changes.filter(change => change.priceHistory).length,
@@ -589,6 +606,14 @@ async function main() {
             })),
             missing_in_db: missingInDb.slice(0, 25),
             stale_in_db: staleInDb.slice(0, 25),
+            skipped_deactivations: skippedDeactivations.slice(0, 25).map(change => ({
+                source_reference: change.source_reference,
+                title: change.title,
+                previous_status: change.previous_status,
+                next_status: change.next_status,
+                source_status: change.source_status,
+                source_visible: change.source_visible,
+            })),
         },
         changes: publicChanges,
         missing_in_db: missingInDb,
