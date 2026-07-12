@@ -97,7 +97,6 @@ type UnitPropertyMedia = {
 type DevelopmentLocationMode = 'map' | 'street'
 
 const R2 = 'https://pub-eaf679ed02634f958b68991d910a997b.r2.dev'
-const GOOGLE_STATIC_PREVIEW_SIZE = '320x190'
 const DEVELOPMENTS: Development[] = [
     {
         id: 'brava-concetto',
@@ -619,50 +618,6 @@ function buildStreetViewEmbedSrc(development: Development, latLng?: [number, num
     }
 
     return `https://maps.google.com/maps?q=${mapQueryFor(development)}&layer=c&z=17&output=svembed&hl=pt-BR`
-}
-
-function buildStaticStreetViewPreviewUrl(latLng?: [number, number] | null) {
-    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
-    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
-    if (!apiKey || !latLng) return null
-
-    const [lat, lng] = latLng
-    const params = new URLSearchParams({
-        size: GOOGLE_STATIC_PREVIEW_SIZE,
-        location: `${lat},${lng}`,
-        fov: '80',
-        heading: '0',
-        pitch: '0',
-        source: 'outdoor',
-        return_error_code: 'true',
-        key: apiKey,
-    })
-
-    return `https://maps.googleapis.com/maps/api/streetview?${params.toString()}`
-}
-
-function buildStaticMapPreviewUrl(latLng?: [number, number] | null) {
-    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
-    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
-    if (!apiKey || !latLng) return null
-
-    const [lat, lng] = latLng
-    const coordinate = `${lat},${lng}`
-    const params = new URLSearchParams({
-        center: coordinate,
-        zoom: '16',
-        size: GOOGLE_STATIC_PREVIEW_SIZE,
-        scale: '2',
-        maptype: 'roadmap',
-        markers: `color:0xD4AF37|${coordinate}`,
-        key: apiKey,
-    })
-
-    params.append('style', 'feature:poi|visibility:off')
-    params.append('style', 'feature:transit|visibility:off')
-    params.append('style', 'feature:road|element:labels|visibility:simplified')
-
-    return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`
 }
 
 function uniqueImages(images: string[]) {
@@ -4294,9 +4249,7 @@ function DevelopmentMediaContent({ item, property, latLng, compact = false }: {
     if ((item.type === 'street' || item.type === 'map') && compact) {
         return (
             <StaticDevelopmentLocationThumb
-                latLng={latLng}
                 type={item.type}
-                title={`${item.label} de ${property.title}`}
             />
         )
     }
@@ -4343,33 +4296,16 @@ function DevelopmentMediaContent({ item, property, latLng, compact = false }: {
     )
 }
 
-function StaticDevelopmentLocationThumb({ latLng, title, type }: {
-    latLng: [number, number] | null
-    title: string
+function StaticDevelopmentLocationThumb({ type }: {
     type: DevelopmentLocationMode
 }) {
-    const [failed, setFailed] = useState(false)
-    const previewUrl = useMemo(() => {
-        return type === 'street'
-            ? buildStaticStreetViewPreviewUrl(latLng)
-            : buildStaticMapPreviewUrl(latLng)
-    }, [latLng, type])
     const Icon = type === 'street' ? Navigation : MapPinned
 
     return (
-        <span className={`bc-development-location-static-thumb bc-development-location-static-thumb--${type}${!previewUrl || failed ? ' is-fallback' : ''}`}>
-            {previewUrl && !failed ? (
-                <img
-                    src={previewUrl}
-                    alt={title}
-                    loading="lazy"
-                    onError={() => setFailed(true)}
-                />
-            ) : (
-                <span className="bc-development-location-static-thumb-fallback" aria-hidden="true">
-                    <Icon size={24} />
-                </span>
-            )}
+        <span className={`bc-development-location-static-thumb bc-development-location-static-thumb--${type} is-fallback`}>
+            <span className="bc-development-location-static-thumb-fallback" aria-hidden="true">
+                <Icon size={24} />
+            </span>
         </span>
     )
 }

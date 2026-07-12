@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Layers, Navigation, X } from 'lucide-react'
+import { Layers, MapPin, Navigation, X } from 'lucide-react'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
 
 type MobileLocationMode = 'map' | 'street'
@@ -26,6 +26,38 @@ const locationPreviewItems: Array<{
 function PreviewIcon({ icon }: { icon: 'map' | 'street' }) {
     if (icon === 'street') return <Navigation size={15} />
     return <Layers size={15} />
+}
+
+function StaticLocationPreview({ mode, latLng }: { mode: MobileLocationMode; latLng: [number, number] }) {
+    const coordinate = `${latLng[0].toFixed(3)}, ${latLng[1].toFixed(3)}`
+
+    return (
+        <div className={`plp-mobile-location-preview-static plp-mobile-location-preview-static--${mode}`}>
+            {mode === 'street' ? (
+                <>
+                    <span className="plp-mobile-location-preview-sky" />
+                    <span className="plp-mobile-location-preview-horizon" />
+                    <span className="plp-mobile-location-preview-road">
+                        <span />
+                        <span />
+                    </span>
+                </>
+            ) : (
+                <>
+                    <span className="plp-mobile-location-preview-grid" />
+                    <span className="plp-mobile-location-preview-route plp-mobile-location-preview-route--a" />
+                    <span className="plp-mobile-location-preview-route plp-mobile-location-preview-route--b" />
+                    <span className="plp-mobile-location-preview-block plp-mobile-location-preview-block--a" />
+                    <span className="plp-mobile-location-preview-block plp-mobile-location-preview-block--b" />
+                    <span className="plp-mobile-location-preview-block plp-mobile-location-preview-block--c" />
+                </>
+            )}
+            <span className="plp-mobile-location-preview-pin" aria-hidden="true">
+                <MapPin size={18} />
+            </span>
+            <span className="plp-mobile-location-preview-coordinate">{coordinate}</span>
+        </div>
+    )
 }
 
 export default function PropertyMobileMapPreview({ property, latLng }: Props) {
@@ -81,13 +113,7 @@ export default function PropertyMobileMapPreview({ property, latLng }: Props) {
                             {item.label}
                         </span>
                         <div className="plp-mobile-location-preview-media" aria-hidden="true">
-                            <PropertyLocationMap
-                                property={property}
-                                latLng={latLng}
-                                initialView={item.mode === 'street' ? 'street' : 'map'}
-                                allowedViews={item.mode === 'street' ? ['street'] : ['map']}
-                                showViewControl={false}
-                            />
+                            <StaticLocationPreview mode={item.mode} latLng={latLng} />
                         </div>
                         <button
                             type="button"

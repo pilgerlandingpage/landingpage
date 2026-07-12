@@ -7069,6 +7069,174 @@ export default function PropertyLandingStyles() {
                         pointer-events: none;
                     }
 
+                    .plp-mobile-location-preview-static {
+                        position: absolute;
+                        inset: 0;
+                        overflow: hidden;
+                        background: #dfe8e8;
+                    }
+
+                    .plp-mobile-location-preview-static--map {
+                        background:
+                            linear-gradient(90deg, rgba(22,101,52,0.18) 0 16%, transparent 16% 28%, rgba(37,99,235,0.16) 28% 34%, transparent 34% 100%),
+                            linear-gradient(0deg, rgba(22,101,52,0.18) 0 18%, transparent 18% 42%, rgba(217,119,6,0.14) 42% 49%, transparent 49% 100%),
+                            #e6efec;
+                    }
+
+                    .plp-mobile-location-preview-static--street {
+                        background:
+                            linear-gradient(180deg, #a9c7d8 0%, #dbe5e1 42%, #7c8587 43%, #3f4446 100%);
+                    }
+
+                    .plp-mobile-location-preview-grid {
+                        position: absolute;
+                        inset: -12px;
+                        background-image:
+                            linear-gradient(rgba(17,24,39,0.12) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(17,24,39,0.12) 1px, transparent 1px);
+                        background-size: 32px 32px;
+                        transform: rotate(-8deg) scale(1.12);
+                    }
+
+                    .plp-mobile-location-preview-route {
+                        position: absolute;
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.86);
+                        box-shadow: 0 0 0 1px rgba(17,24,39,0.08);
+                    }
+
+                    .plp-mobile-location-preview-route--a {
+                        left: -12%;
+                        top: 56%;
+                        width: 128%;
+                        height: 16px;
+                        transform: rotate(-13deg);
+                    }
+
+                    .plp-mobile-location-preview-route--b {
+                        left: 48%;
+                        top: -18%;
+                        width: 15px;
+                        height: 142%;
+                        transform: rotate(18deg);
+                    }
+
+                    .plp-mobile-location-preview-block {
+                        position: absolute;
+                        border-radius: 7px;
+                        background: rgba(255,255,255,0.46);
+                        box-shadow: inset 0 0 0 1px rgba(17,24,39,0.08);
+                    }
+
+                    .plp-mobile-location-preview-block--a {
+                        left: 12%;
+                        top: 22%;
+                        width: 28%;
+                        height: 24%;
+                    }
+
+                    .plp-mobile-location-preview-block--b {
+                        right: 10%;
+                        top: 20%;
+                        width: 24%;
+                        height: 30%;
+                    }
+
+                    .plp-mobile-location-preview-block--c {
+                        right: 16%;
+                        bottom: 12%;
+                        width: 32%;
+                        height: 22%;
+                    }
+
+                    .plp-mobile-location-preview-sky,
+                    .plp-mobile-location-preview-horizon,
+                    .plp-mobile-location-preview-road {
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                    }
+
+                    .plp-mobile-location-preview-sky {
+                        top: 0;
+                        height: 45%;
+                        background:
+                            radial-gradient(circle at 72% 22%, rgba(255,255,255,0.82) 0 12%, transparent 13%),
+                            linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0));
+                    }
+
+                    .plp-mobile-location-preview-horizon {
+                        top: 38%;
+                        height: 18%;
+                        background:
+                            linear-gradient(90deg, rgba(255,255,255,0.36), rgba(255,255,255,0.14)),
+                            repeating-linear-gradient(90deg, rgba(17,24,39,0.24) 0 8px, transparent 8px 18px);
+                    }
+
+                    .plp-mobile-location-preview-road {
+                        bottom: -28%;
+                        height: 72%;
+                        background:
+                            linear-gradient(90deg, transparent 0 46%, rgba(255,255,255,0.84) 46% 50%, transparent 50% 100%),
+                            linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.32)),
+                            #34383b;
+                        clip-path: polygon(39% 0, 61% 0, 100% 100%, 0 100%);
+                    }
+
+                    .plp-mobile-location-preview-road span {
+                        position: absolute;
+                        top: 8%;
+                        width: 2px;
+                        height: 92%;
+                        background: rgba(255,255,255,0.18);
+                    }
+
+                    .plp-mobile-location-preview-road span:first-child {
+                        left: 35%;
+                        transform: rotate(9deg);
+                    }
+
+                    .plp-mobile-location-preview-road span:last-child {
+                        right: 35%;
+                        transform: rotate(-9deg);
+                    }
+
+                    .plp-mobile-location-preview-pin {
+                        position: absolute;
+                        left: 50%;
+                        top: 52%;
+                        z-index: 4;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 999px;
+                        background: #111827;
+                        color: #fff;
+                        box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+                        transform: translate(-50%, -50%);
+                    }
+
+                    .plp-mobile-location-preview-coordinate {
+                        position: absolute;
+                        right: 7px;
+                        bottom: 7px;
+                        z-index: 4;
+                        max-width: calc(100% - 14px);
+                        overflow: hidden;
+                        padding: 4px 6px;
+                        border-radius: 999px;
+                        background: rgba(255,255,255,0.72);
+                        color: rgba(17,24,39,0.74);
+                        font-size: 0.48rem;
+                        font-weight: 760;
+                        line-height: 1;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+                    }
+
                     .plp-mobile-location-preview .plp-location-explorer {
                         position: absolute;
                         inset: 0;

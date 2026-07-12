@@ -6,8 +6,6 @@ import PropertyLocationMap from '@/components/property/PropertyLocationMap'
 import PropertyVideoEmbed, { getPropertyVideoSource } from '@/components/property/PropertyVideoEmbed'
 import { trackEvent } from '@/lib/tracking/client'
 
-const GOOGLE_STATIC_PREVIEW_SIZE = '320x190'
-
 type PropertyMediaMapProperty = {
     id: string
     title: string
@@ -58,72 +56,19 @@ type PropertyDesktopMediaShowcaseProps = {
     shareSlot?: ReactNode
 }
 
-function buildStaticPreviewUrl(type: 'street' | 'map', latLng?: [number, number] | null) {
-    const googleStaticMapsEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_STATIC_MAPS === 'true'
-    const apiKey = googleStaticMapsEnabled ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''
-    if (!apiKey || !latLng) return null
-
-    const [lat, lng] = latLng
-    const coordinate = `${lat},${lng}`
-
-    if (type === 'street') {
-        const params = new URLSearchParams({
-            size: GOOGLE_STATIC_PREVIEW_SIZE,
-            location: coordinate,
-            fov: '80',
-            heading: '0',
-            pitch: '0',
-            source: 'outdoor',
-            key: apiKey,
-        })
-
-        return `https://maps.googleapis.com/maps/api/streetview?${params.toString()}`
-    }
-
-    const params = new URLSearchParams({
-        center: coordinate,
-        zoom: '16',
-        size: GOOGLE_STATIC_PREVIEW_SIZE,
-        scale: '2',
-        maptype: 'roadmap',
-        markers: `color:0xBD9551|${coordinate}`,
-        key: apiKey,
-    })
-    params.append('style', 'feature:poi|visibility:off')
-    params.append('style', 'feature:transit|visibility:off')
-    params.append('style', 'feature:road|element:labels|visibility:simplified')
-
-    return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`
-}
-
 function StaticMediaThumbnail({
     type,
-    latLng,
-    title,
 }: {
     type: 'street' | 'map'
-    latLng?: [number, number] | null
-    title: string
 }) {
-    const [failed, setFailed] = useState(false)
-    const previewUrl = useMemo(() => buildStaticPreviewUrl(type, latLng), [latLng, type])
     const label = type === 'street' ? 'Street View' : 'Mapa'
     const Icon = type === 'street' ? Navigation : MapPinned
 
     return (
-        <span className={`plp-desktop-media-thumb-preview ${failed || !previewUrl ? 'is-fallback' : ''}`}>
-            {previewUrl && !failed ? (
-                <img
-                    src={previewUrl}
-                    alt={`${label} de ${title}`}
-                    loading="lazy"
-                    onError={() => setFailed(true)}
-                />
-            ) : (
-                <span className="plp-desktop-media-thumb-preview-fallback" aria-hidden="true">
-                    <Icon size={22} />
-                </span>
-            )}
+        <span className="plp-desktop-media-thumb-preview is-fallback">
+            <span className="plp-desktop-media-thumb-preview-fallback" aria-hidden="true">
+                <Icon size={22} />
+            </span>
             <span className="plp-desktop-media-thumb-preview-label">
                 <Icon size={13} />
                 {label}
@@ -199,7 +144,7 @@ export default function PropertyDesktopMediaShowcase({
 
         return items
     }, [gallery, latLng, videoSource])
-    const modalMediaItems = useMemo(() => mediaItems.filter(item => item.type !== 'map'), [mediaItems])
+    const modalMediaItems = useMemo(() => mediaItems.filter(item => item.type === 'photo' || item.type === 'video'), [mediaItems])
 
     const [activeMediaIndex, setActiveMediaIndex] = useState(0)
     const [activePhotoIndex, setActivePhotoIndex] = useState(0)
@@ -425,7 +370,7 @@ export default function PropertyDesktopMediaShowcase({
                                 ) : item.type === 'video' ? (
                                     <VideoMediaThumbnail thumbnailUrl={item.thumbnailUrl} title={title} />
                                 ) : (
-                                    <StaticMediaThumbnail type={item.type} latLng={latLng} title={title} />
+                                    <StaticMediaThumbnail type={item.type} />
                                 )}
                             </button>
                         ))}
@@ -488,26 +433,7 @@ export default function PropertyDesktopMediaShowcase({
                                     )
                                 }
 
-                                if (!latLng) return null
-
-                                return (
-                                    <figure
-                                        key="modal-street-view"
-                                        className="plp-gallery-modal-item plp-gallery-modal-item--map plp-gallery-modal-map"
-                                    >
-                                        <span className="plp-gallery-modal-map-chip">
-                                            <Navigation size={15} />
-                                            Street View do entorno
-                                        </span>
-                                        <PropertyLocationMap
-                                            property={property}
-                                            latLng={latLng}
-                                            initialView="street"
-                                            allowedViews={['street']}
-                                            showViewControl={false}
-                                        />
-                                    </figure>
-                                )
+                                return null
                             })}
                         </div>
                     </section>
