@@ -83,6 +83,22 @@ export type MarketComparable = MarketAnalysisProperty & {
 
 export type MarketConfidence = 'high' | 'medium' | 'low' | 'insufficient'
 
+export type MarketPosition =
+    | 'below_average'
+    | 'within_average'
+    | 'above_average'
+    | 'premium'
+    | 'outside_sample_pattern'
+
+export type MarketPositionResult = {
+    position: MarketPosition
+    differencePercentage: number
+    title: string
+    description: string
+    summary: string
+    interpretation: string
+}
+
 export type MarketPositioning = {
     label: string
     description: string
@@ -118,6 +134,7 @@ export type MarketRadarAnalysis = {
     outlierCount: number
     confidence: MarketConfidence
     confidenceLabel: string
+    marketPosition: MarketPositionResult
     positioning: MarketPositioning
     position: number
     chartPoints: string
@@ -243,16 +260,94 @@ export function formatMarketPercent(value: number | null) {
 
 export function marketConfidenceLabel(confidence: MarketConfidence) {
     if (confidence === 'high') return 'Alta'
-    if (confidence === 'medium') return 'Média'
+    if (confidence === 'medium') return 'Moderada'
     if (confidence === 'low') return 'Baixa'
     return 'Insuficiente'
 }
 
-function confidenceFor(count: number): MarketConfidence {
-    if (count >= 20) return 'high'
-    if (count >= 8) return 'medium'
-    if (count >= 3) return 'low'
-    return 'insufficient'
+function confidenceFor(count: number, comparables: MarketComparableScore[] = []): MarketConfidence {
+    if (count <= 0) return 'insufficient'
+
+    const averageScore = comparables.length
+        ? comparables.reduce((sum, item) => sum + item.score, 0) / comparables.length
+        : 0
+
+    if (count >= 30) return averageScore >= 34 ? 'high' : 'medium'
+    if (count >= 10) return averageScore >= 28 ? 'medium' : 'low'
+    return 'low'
+}
+
+export function getMarketPosition(
+    pricePerSquareMeter: number,
+    medianPricePerSquareMeter: number
+): MarketPositionResult {
+    const differencePercentage = pricePerSquareMeter && medianPricePerSquareMeter
+        ? ((pricePerSquareMeter - medianPricePerSquareMeter) / medianPricePerSquareMeter) * 100
+        : 0
+
+    if (!pricePerSquareMeter || !medianPricePerSquareMeter || !Number.isFinite(differencePercentage)) {
+        return {
+            position: 'outside_sample_pattern',
+            differencePercentage: 0,
+            title: 'Fora do padrão da amostra',
+            description: 'Ainda não há base suficiente para uma leitura simples deste anúncio.',
+            summary: 'a leitura de mercado ainda está em formação.',
+            interpretation: 'Ainda não temos imóveis semelhantes suficientes para interpretar o preço anunciado com segurança. O sistema continuará monitorando a base disponível.',
+        }
+    }
+
+    if (differencePercentage <= -15) {
+        return {
+            position: 'below_average',
+            differencePercentage,
+            title: 'Abaixo da média',
+            description: 'Preço por m² abaixo do centro dos imóveis semelhantes analisados.',
+            summary: 'ele está posicionado abaixo da média dos imóveis semelhantes.',
+            interpretation: 'O preço anunciado por m² aparece abaixo do centro da amostra comparável. Essa leitura pode estar relacionada ao estado do imóvel, localização exata, metragem, posição solar, andar, acabamento ou estratégia comercial do anúncio.',
+        }
+    }
+
+    if (differencePercentage <= 15) {
+        return {
+            position: 'within_average',
+            differencePercentage,
+            title: 'Dentro da média',
+            description: 'Preço por m² alinhado ao centro dos imóveis semelhantes analisados.',
+            summary: 'ele está posicionado dentro da média dos imóveis semelhantes.',
+            interpretation: 'O preço anunciado por m² está próximo do centro da amostra comparável. Ainda assim, diferenças de vista, acabamento, andar, vagas, condomínio e exclusividade podem alterar a leitura final.',
+        }
+    }
+
+    if (differencePercentage <= 40) {
+        return {
+            position: 'above_average',
+            differencePercentage,
+            title: 'Acima da média',
+            description: 'Preço por m² acima do centro dos imóveis semelhantes analisados.',
+            summary: 'ele está posicionado acima da média dos imóveis semelhantes.',
+            interpretation: 'O imóvel aparece em uma faixa superior ao centro da amostra comparável. Essa diferença pode estar ligada à localização, vista, acabamento, andar, exclusividade, tamanho, número de vagas ou características do empreendimento.',
+        }
+    }
+
+    if (differencePercentage <= 100) {
+        return {
+            position: 'premium',
+            differencePercentage,
+            title: 'Faixa premium',
+            description: 'Preço por m² em faixa superior entre os imóveis semelhantes analisados.',
+            summary: 'ele está posicionado em uma faixa premium dentro da amostra.',
+            interpretation: 'Este imóvel ocupa uma faixa superior de preço entre os imóveis semelhantes da região. Essa diferença pode estar relacionada à localização, vista, acabamento, andar, exclusividade, tamanho, número de vagas ou características do empreendimento.',
+        }
+    }
+
+    return {
+        position: 'outside_sample_pattern',
+        differencePercentage,
+        title: 'Fora do padrão da amostra',
+        description: 'Preço por m² significativamente diferente da maior parte dos imóveis semelhantes.',
+        summary: 'ele apresenta um preço por m² significativamente diferente da maior parte da amostra.',
+        interpretation: 'O imóvel apresenta características de preço significativamente diferentes da maior parte da amostra. Recomendamos considerar seus diferenciais específicos antes de interpretar essa comparação.',
+    }
 }
 
 export function positioningFor(deltaToMedian: number | null): MarketPositioning {
@@ -581,8 +676,14 @@ export function buildMarketRadarAnalysis(options: BuildMarketRadarAnalysisOption
     const position = currentPriceM2 && minM2 && maxM2 && maxM2 > minM2
         ? clampPercent(((currentPriceM2 - minM2) / (maxM2 - minM2)) * 100)
         : 50
-    const confidence = confidenceFor(comparableValues.length)
-    const positioning = positioningFor(confidence === 'insufficient' ? null : deltaToMedian)
+    const confidence = confidenceFor(comparableValues.length, scoredComparables)
+    const marketPosition = getMarketPosition(currentPriceM2, medianM2)
+    const positioning = confidence === 'insufficient'
+        ? positioningFor(null)
+        : {
+            label: marketPosition.title,
+            description: marketPosition.description,
+        }
     const chartPoints = chartPointsFor(comparableValues, currentPriceM2)
     const timeline = recordedTimeline(priceHistoryEvents, locationLabel)
     const criteriaSummary = [
@@ -616,6 +717,7 @@ export function buildMarketRadarAnalysis(options: BuildMarketRadarAnalysisOption
         outlierCount,
         confidence,
         confidenceLabel: marketConfidenceLabel(confidence),
+        marketPosition,
         positioning,
         position,
         chartPoints,

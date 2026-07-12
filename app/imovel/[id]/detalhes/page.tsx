@@ -16,6 +16,7 @@ import {
     Eye,
     Heart,
     Home,
+    Info,
     MapPin,
     MessageCircle,
     Ruler,
@@ -1299,6 +1300,87 @@ function buildMarketHistory(property: any, candidates: RelatedPropertyCandidate[
         priceHistoryEvents,
     })
 }
+
+function formatMarketDate(value?: string | null, fallback = 'Sob consulta') {
+    if (!value) return fallback
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return fallback
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(date)
+}
+
+function formatNeutralPercent(value: number | null) {
+    if (value === null || !Number.isFinite(value)) return '0%'
+    const normalized = Math.abs(value) < 0.05 ? 0 : value
+    const prefix = normalized > 0 ? '+' : ''
+    return `${prefix}${normalized.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
+
+function marketDeltaParts(value: number | null) {
+    if (value === null || !Number.isFinite(value)) return null
+    const absolute = Math.abs(value)
+    if (absolute < 0.1) {
+        return {
+            label: 'alinhado',
+            connector: 'à',
+        }
+    }
+
+    return {
+        label: `${absolute.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% ${value > 0 ? 'acima' : 'abaixo'}`,
+        connector: 'da',
+    }
+}
+
+function buildSimplePriceHistory(property: any, events: PropertyPriceHistoryRow[]) {
+    const currentPrice = numericValue(property.price)
+    const publishedAt = propertyPublishedAt(property)
+    const updatedAt = property.source_updated_at || property.updated_at || publishedAt
+    const priceChanges = [...events]
+        .filter(event => {
+            const previousPrice = numericValue(event.previous_price)
+            const nextPrice = numericValue(event.new_price)
+            return Boolean(previousPrice && nextPrice && previousPrice !== nextPrice)
+        })
+        .sort((left, right) => {
+            const leftTime = new Date(left.created_at || '').getTime()
+            const rightTime = new Date(right.created_at || '').getTime()
+            return leftTime - rightTime
+        })
+
+    const initialPrice = priceChanges[0]?.previous_price
+        ? numericValue(priceChanges[0].previous_price)
+        : currentPrice
+    const variation = initialPrice ? ((currentPrice - initialPrice) / initialPrice) * 100 : 0
+
+    return {
+        publishedAt,
+        updatedAt,
+        currentPrice,
+        initialPrice,
+        variation,
+        hasPriceChange: priceChanges.length > 0 && Math.abs(variation) >= 0.05,
+        timeline: priceChanges.map(event => ({
+            date: formatMarketDate(event.created_at),
+            previousPrice: numericValue(event.previous_price),
+            nextPrice: numericValue(event.new_price),
+        })),
+    }
+}
+
+function MarketTooltip({ label, children }: { label: string; children: string }) {
+    return (
+        <span className="plp-market-help" tabIndex={0} aria-label={`${label}: ${children}`}>
+            <Info size={12} />
+            <span role="tooltip">{children}</span>
+        </span>
+    )
+}
+
 async function getRelatedPropertyCandidates(supabase: any, property: any) {
     return fetchInternalMarketComparables(supabase, property) as Promise<RelatedPropertyCandidate[]>
 }
@@ -1504,53 +1586,218 @@ export default async function PropertyDetailPage({
         '--market-position': `${marketHistory.position}%`,
         '--market-median-position': `${marketMedianPosition}%`,
     } as CSSProperties
-    const marketScaleMinLabel = marketScalePriceLabel(marketHistory.minM2, 'Entrada')
     const marketScaleMedianLabel = marketScalePriceLabel(marketHistory.medianM2, 'Mediana')
-    const marketScaleMaxLabel = marketScalePriceLabel(marketHistory.maxM2, 'Topo')
     const marketScaleCurrentLabel = marketScalePriceLabel(marketHistory.currentPriceM2, 'Sob consulta')
-    const marketScaleDeltaLabel = marketHistory.deltaToMedian === null ? 'Sem amostra suficiente' : `${formatPercent(marketHistory.deltaToMedian)} vs. mediana`
-    const marketScaleSummary = marketHistory.deltaToMedian === null
-        ? 'Amostra em formação'
-        : marketHistory.positioning.label
-    const renderMarketScale = (className: string) => (
-        <div
-            className={className}
-            style={marketScaleStyle}
-            aria-label={`Radar de valor por metro quadrado: este imóvel em ${marketScaleCurrentLabel}, mediana em ${marketScaleMedianLabel}, ${marketScaleDeltaLabel}.`}
-        >
-            <div className="plp-market-scale-head">
-                <span>Preço por m² na amostra</span>
-                <strong>{marketScaleDeltaLabel}</strong>
-            </div>
-            <div className="plp-market-scale">
-                <div className="plp-market-scale-track" aria-hidden="true">
-                    <span className="plp-market-scale-zone plp-market-scale-zone-entry">Entrada</span>
-                    <span className="plp-market-scale-zone plp-market-scale-zone-mid">Mediana</span>
-                    <span className="plp-market-scale-zone plp-market-scale-zone-top">Topo</span>
+    const marketPriceLabel = formatCompactMoney(property.price)
+    const marketPriceM2Label = marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'
+    const marketMedianM2Label = marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'
+    const marketPosition = marketHistory.comparableCount
+        ? marketHistory.marketPosition
+        : {
+            ...marketHistory.marketPosition,
+            title: 'Amostra em formação',
+            summary: 'a leitura de mercado ainda está em formação.',
+            interpretation: 'Ainda não há imóveis semelhantes suficientes para interpretar o preço anunciado com segurança. O sistema continuará monitorando os anúncios disponíveis.',
+        }
+    const marketDelta = marketDeltaParts(marketHistory.deltaToMedian)
+    const simplePriceHistory = buildSimplePriceHistory(property, priceHistoryEvents)
+    const marketComparableText = marketHistory.comparableCount
+        ? `${marketHistory.comparableCount.toLocaleString('pt-BR')} imóveis semelhantes`
+        : 'Comparáveis em curadoria'
+    const marketConfidenceText = marketHistory.comparableCount
+        ? `Confiança ${marketHistory.confidenceLabel.toLowerCase()}`
+        : 'Confiança em formação'
+    const marketSummaryText = marketHistory.comparableCount
+        ? `Este imóvel está anunciado por ${marketPriceLabel}, equivalente a ${marketPriceM2Label}. Entre os imóveis semelhantes analisados, ${marketPosition.summary}`
+        : 'Ainda não há imóveis semelhantes suficientes para uma leitura simples deste anúncio.'
+    const marketPreferredAreaRange = marketHistory.currentArea
+        ? `${Math.round(marketHistory.currentArea * 0.7).toLocaleString('pt-BR')} a ${Math.round(marketHistory.currentArea * 1.3).toLocaleString('pt-BR')} m² preferenciais`
+        : 'Área sob consulta'
+    const marketAnalysisDateLabel = formatMarketDate(new Date().toISOString())
+    const marketAdvancedRows = [
+        ['Cidade e bairro usados', locationLabel || displayCity || 'Litoral SC'],
+        ['Raio geográfico', 'Sem raio fixo; prioriza bairro, cidade e proximidade geográfica.'],
+        ['Tipologia considerada', property.property_type || 'Tipo equivalente'],
+        ['Faixa de área', marketPreferredAreaRange],
+        ['Anúncios brutos avaliados', marketHistory.rawComparableCount ? `${marketHistory.rawComparableCount.toLocaleString('pt-BR')} ativos` : 'Em curadoria'],
+        ['Comparáveis válidos', marketHistory.comparableCount ? `${marketHistory.comparableCount.toLocaleString('pt-BR')} imóveis` : 'Sem base suficiente'],
+        ['Extremos removidos', `${marketHistory.outlierCount.toLocaleString('pt-BR')} registros`],
+        ['Data da análise', marketAnalysisDateLabel],
+        ['Nível de confiança', marketHistory.confidenceLabel],
+    ]
+    const renderMarketComparison = (variant: 'desktop' | 'mobile') => (
+        <div className={`plp-market-comparison plp-market-comparison--${variant}`}>
+            <article className="plp-market-summary-card">
+                <div className="plp-market-summary-copy">
+                    <span className="plp-market-summary-icon" aria-hidden="true">
+                        <BarChart3 size={18} />
+                    </span>
+                    <div>
+                        <span className="plp-market-eyebrow">Comparativo de mercado</span>
+                        <h3>Como este imóvel está posicionado no mercado?</h3>
+                    </div>
                 </div>
-                <span className="plp-market-scale-marker plp-market-scale-marker-current">
-                    <span>Este imóvel</span>
-                    <strong>{marketScaleCurrentLabel}</strong>
+                <span className={`plp-market-position-badge plp-market-position-badge--${marketPosition.position}`}>
+                    {marketPosition.title}
                 </span>
-                <span className="plp-market-scale-marker plp-market-scale-marker-median">
-                    <span>Mediana</span>
-                    <strong>{marketScaleMedianLabel}</strong>
-                </span>
+                <p>{marketSummaryText}</p>
+            </article>
+
+            <div className="plp-market-core-metrics" aria-label="Números principais do comparativo de mercado">
+                <article>
+                    <span>Valor anunciado</span>
+                    <strong>{marketPriceLabel}</strong>
+                </article>
+                <article>
+                    <span>
+                        Preço por m²
+                        <MarketTooltip label="Preço por m²">
+                            É o preço anunciado dividido pela área usada no anúncio.
+                        </MarketTooltip>
+                    </span>
+                    <strong>{marketPriceM2Label}</strong>
+                </article>
+                <article>
+                    <span>
+                        Média dos semelhantes
+                        <MarketTooltip label="Média dos semelhantes">
+                            Usamos a mediana dos imóveis comparáveis para reduzir distorções de anúncios muito altos ou muito baixos.
+                        </MarketTooltip>
+                    </span>
+                    <strong>{marketMedianM2Label}</strong>
+                </article>
             </div>
-            <div className="plp-market-axis">
-                <span>
-                    <b>Entrada</b>
-                    <small>{marketScaleMinLabel}</small>
-                </span>
-                <span>
-                    <b>{marketScaleSummary}</b>
-                    <small>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis` : 'Base em formação'}</small>
-                </span>
-                <span>
-                    <b>Topo</b>
-                    <small>{marketScaleMaxLabel}</small>
-                </span>
+
+            <p className="plp-market-comparable-line">
+                {marketComparableText} · {marketConfidenceText}
+                <MarketTooltip label="Nível de confiança">
+                    A confiança considera a quantidade, a proximidade e a semelhança dos imóveis utilizados na análise.
+                </MarketTooltip>
+            </p>
+
+            <article
+                className="plp-market-simple-ruler"
+                style={marketScaleStyle}
+                aria-label={`Comparação de preço por metro quadrado: média regional em ${marketScaleMedianLabel}; este imóvel em ${marketScaleCurrentLabel}.`}
+            >
+                <div className="plp-market-simple-ruler-head">
+                    <strong>Preço por m²</strong>
+                    <span>{marketHistory.deltaToMedian === null ? 'Amostra em formação' : formatPercent(marketHistory.deltaToMedian)}</span>
+                </div>
+                <div className="plp-market-simple-scale">
+                    <div className="plp-market-simple-track" aria-hidden="true">
+                        <span>Entrada</span>
+                        <span>Média regional</span>
+                        <span>Faixa premium</span>
+                    </div>
+                    <span className="plp-market-simple-marker plp-market-simple-marker--median">
+                        <small>Média regional</small>
+                        <strong>{marketScaleMedianLabel}</strong>
+                    </span>
+                    <span className="plp-market-simple-marker plp-market-simple-marker--current">
+                        <small>Este imóvel</small>
+                        <strong>{marketScaleCurrentLabel}</strong>
+                    </span>
+                </div>
+                <p className="plp-market-ruler-note">
+                    {marketDelta ? (
+                        <>
+                            O preço por m² deste imóvel está <strong>{marketDelta.label}</strong> {marketDelta.connector}{' '}
+                            <span>
+                                mediana
+                                <MarketTooltip label="Mediana">
+                                    Mediana é o valor central da amostra e sofre menos influência de imóveis com preços muito altos ou muito baixos.
+                                </MarketTooltip>
+                            </span>{' '}
+                            dos imóveis comparáveis.
+                        </>
+                    ) : (
+                        'Ainda não há amostra suficiente para comparar o preço por m² com segurança.'
+                    )}
+                </p>
+            </article>
+
+            <div className="plp-market-explain-history">
+                <article className="plp-market-meaning-card">
+                    <h3>
+                        <TrendingUp size={16} />
+                        O que isso significa?
+                    </h3>
+                    <p>{marketPosition.interpretation}</p>
+                    <small>O sistema compara preços anunciados e não substitui uma avaliação imobiliária profissional.</small>
+                </article>
+
+                <article className="plp-market-listing-history">
+                    <h3>
+                        <Clock3 size={16} />
+                        Histórico do anúncio
+                    </h3>
+                    <dl>
+                        <div>
+                            <dt>Publicado em</dt>
+                            <dd>{formatMarketDate(simplePriceHistory.publishedAt)}</dd>
+                        </div>
+                        <div>
+                            <dt>Última atualização</dt>
+                            <dd>{formatMarketDate(simplePriceHistory.updatedAt)}</dd>
+                        </div>
+                        <div>
+                            <dt>Preço atual</dt>
+                            <dd>{formatCompactMoney(simplePriceHistory.currentPrice)}</dd>
+                        </div>
+                        <div>
+                            <dt>Variação desde a publicação</dt>
+                            <dd>{formatNeutralPercent(simplePriceHistory.variation)}</dd>
+                        </div>
+                    </dl>
+                    {simplePriceHistory.hasPriceChange ? (
+                        <div className="plp-market-price-timeline" aria-label="Linha do tempo de preço">
+                            <span>
+                                <small>Preço inicial</small>
+                                <strong>{formatCompactMoney(simplePriceHistory.initialPrice)}</strong>
+                            </span>
+                            {simplePriceHistory.timeline.map((event, index) => (
+                                <span key={`${event.date}-${index}`}>
+                                    <small>{event.date}</small>
+                                    <strong>{formatCompactMoney(event.nextPrice)}</strong>
+                                </span>
+                            ))}
+                            <span>
+                                <small>Preço atual</small>
+                                <strong>{formatCompactMoney(simplePriceHistory.currentPrice)}</strong>
+                            </span>
+                        </div>
+                    ) : (
+                        <p>O preço anunciado não foi alterado desde a publicação.</p>
+                    )}
+                </article>
             </div>
+
+            <details className="plp-market-analysis-details">
+                <summary>Ver detalhes da análise</summary>
+                <div className="plp-market-analysis-details-body">
+                    <div className="plp-market-analysis-facts">
+                        {marketAdvancedRows.map(([label, value]) => (
+                            <div key={label}>
+                                <span>{label}</span>
+                                <strong>{value}</strong>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="plp-market-analysis-method">
+                        <h3>Critérios de semelhança e metodologia</h3>
+                        <ul>
+                            {marketHistory.criteriaSummary.map(item => (
+                                <li key={item}>{item}</li>
+                            ))}
+                            <li>{marketHistory.calculationSummary}</li>
+                            {marketHistory.disclaimers.map(item => (
+                                <li key={item}>{item}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </details>
         </div>
     )
     const mobileExploreMapPropertiesById = new Map<string, ReturnType<typeof toMobileExploreMapProperty>>()
@@ -1933,50 +2180,9 @@ export default async function PropertyDetailPage({
                         <section className="plp-mobile-card plp-mobile-market-section">
                             <div className="plp-mobile-card-head">
                                 <span className="plp-kicker">Mercado</span>
-                                <h2>Valor e histórico.</h2>
+                                <h2>Preço e comparação de mercado.</h2>
                             </div>
-                            <div className="plp-mobile-market-grid">
-                                <div>
-                                    <small>Preço atual</small>
-                                    <strong>{formatMoney(property.price)}</strong>
-                                </div>
-                                <div>
-                                    <small>Valor por m²</small>
-                                    <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'}</strong>
-                                </div>
-                                <div>
-                                    <small>Comparáveis ativos</small>
-                                    <strong>{marketHistory.comparableCount ? String(marketHistory.comparableCount) : 'Em curadoria'}</strong>
-                                </div>
-                                <div>
-                                    <small>Leitura vs. mediana</small>
-                                    <strong>{marketHistory.deltaToMedian === null ? 'Sem amostra' : formatPercent(marketHistory.deltaToMedian)}</strong>
-                                </div>
-                            </div>
-                            {renderMarketScale('plp-mobile-market-chart')}
-                            <div className="plp-mobile-market-positioning">
-                                <strong>{marketHistory.positioning.label}</strong>
-                                <span>{marketHistory.positioning.description}</span>
-                                {marketHistory.percentile !== null && (
-                                    <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
-                                )}
-                            </div>
-                            <p className="plp-mobile-market-reading">
-                                <TrendingUp size={15} />
-                                <span>{marketHistory.reading}</span>
-                            </p>
-                            <div className="plp-mobile-timeline">
-                                {marketHistory.timeline.map((event, index) => (
-                                    <div className="plp-mobile-timeline-item" key={`mobile-${event.title}-${index}`}>
-                                        <span>{event.date}</span>
-                                        <div>
-                                            <strong>{event.title}</strong>
-                                            <small>{event.note}</small>
-                                        </div>
-                                        <b>{event.value}</b>
-                                    </div>
-                                ))}
-                            </div>
+                            {renderMarketComparison('mobile')}
                         </section>
 
                         {related.length > 0 && (
@@ -2215,95 +2421,11 @@ export default async function PropertyDetailPage({
 
                         <section id="historico-precos" className="plp-section plp-market-history">
                             <div className="plp-section-head">
-                                <span className="plp-kicker">Histórico e valor</span>
-                                <h2>Preço, custos e leitura de mercado.</h2>
+                                <span className="plp-kicker">Histórico e mercado</span>
+                                <h2>Preço e comparação de mercado.</h2>
                             </div>
                             <div className="plp-market-grid">
-                                <article className="plp-market-card plp-market-main">
-                                    <div className="plp-market-card-head">
-                                        <span><BarChart3 size={16} /> Radar de valor</span>
-                                        <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis | confiança ${marketHistory.confidenceLabel}` : 'Amostra em formação'}</strong>
-                                    </div>
-                                    <div className="plp-market-dashboard">
-                                        <div className="plp-market-metrics">
-                                            <div>
-                                                <small>Valor anunciado</small>
-                                                <strong>{formatCompactMoney(property.price)}</strong>
-                                            </div>
-                                            <div>
-                                                <small>Área usada</small>
-                                                <strong>{marketHistory.currentArea ? `${Math.round(marketHistory.currentArea).toLocaleString('pt-BR')} m²` : 'Sob consulta'}</strong>
-                                            </div>
-                                            <div>
-                                                <small>Preço por m²</small>
-                                                <strong>{marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'}</strong>
-                                            </div>
-                                            <div>
-                                                <small>Mediana regional</small>
-                                                <strong>{marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'}</strong>
-                                            </div>
-                                            <div>
-                                                <small>Dif. vs mediana</small>
-                                                <strong>{formatPercent(marketHistory.deltaToMedian)}</strong>
-                                            </div>
-                                            <div>
-                                                <small>Amostra bruta</small>
-                                                <strong>{marketHistory.rawComparableCount ? `${marketHistory.rawComparableCount} ativos` : 'Em curadoria'}</strong>
-                                            </div>
-                                        </div>
-                                        {renderMarketScale('plp-market-chart')}
-                                        <aside className="plp-market-history-panel" aria-label="Histórico de preço e base local">
-                                            <div className="plp-market-card-head">
-                                                <span>Histórico de preço</span>
-                                                <strong>Mercado local</strong>
-                                            </div>
-                                            <div className="plp-market-history-summary">
-                                                <span>
-                                                    <small>Recorte</small>
-                                                    <strong>{locationLabel || displayCity || 'Litoral SC'}</strong>
-                                                </span>
-                                                <span>
-                                                    <small>Base</small>
-                                                    <strong>{marketHistory.comparableCount ? `${marketHistory.comparableCount} comparáveis` : 'Em formação'}</strong>
-                                                </span>
-                                            </div>
-                                            <div className="plp-price-history-list">
-                                                {marketHistory.timeline.map((event, index) => (
-                                                    <div className="plp-price-history-item" key={`${event.title}-${index}`}>
-                                                        <span>{event.date}</span>
-                                                        <div>
-                                                            <strong>{event.title}</strong>
-                                                            <small>{event.note}</small>
-                                                        </div>
-                                                        <b>{event.value}</b>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </aside>
-                                    </div>
-                                    <div className="plp-market-insight-grid">
-                                        <div className="plp-market-positioning">
-                                            <strong>{marketHistory.positioning.label}</strong>
-                                            <span>{marketHistory.positioning.description}</span>
-                                            {marketHistory.percentile !== null && (
-                                                <small>Percentil {Math.round(marketHistory.percentile)} da amostra qualificada.</small>
-                                            )}
-                                        </div>
-                                        <p className="plp-market-note">
-                                            <TrendingUp size={15} />
-                                            {marketHistory.reading}
-                                        </p>
-                                    </div>
-                                    <details className="plp-market-method">
-                                        <summary>Como o sistema calcula</summary>
-                                        <ul>
-                                            {marketHistory.criteriaSummary.map(item => (
-                                                <li key={item}>{item}</li>
-                                            ))}
-                                            <li>{marketHistory.calculationSummary}</li>
-                                        </ul>
-                                    </details>
-                                </article>
+                                {renderMarketComparison('desktop')}
                             </div>
                         </section>
 

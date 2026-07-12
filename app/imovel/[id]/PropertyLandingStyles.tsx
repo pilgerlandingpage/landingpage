@@ -2722,6 +2722,667 @@ export default function PropertyLandingStyles() {
                     margin-top: 7px;
                 }
 
+                .plp-market-comparison {
+                    display: grid;
+                    gap: 16px;
+                    min-width: 0;
+                }
+
+                .plp-market-summary-card {
+                    position: relative;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    gap: 12px 18px;
+                    align-items: start;
+                    padding: 18px;
+                    border: 1px solid rgba(35,31,26,.08);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,.94), rgba(249,246,240,.82)),
+                        radial-gradient(circle at 96% 0%, rgba(184,148,95,.14), transparent 34%);
+                }
+
+                .plp-market-summary-copy {
+                    display: flex;
+                    gap: 12px;
+                    min-width: 0;
+                }
+
+                .plp-market-summary-icon {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 0 0 38px;
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 999px;
+                    background: rgba(184,148,95,.12);
+                    color: var(--plp-gold-dark);
+                }
+
+                .plp-market-eyebrow {
+                    display: block;
+                    color: var(--plp-gold-dark);
+                    font-size: 10px;
+                    font-weight: 900;
+                    letter-spacing: .04em;
+                    line-height: 1;
+                    margin-bottom: 7px;
+                    text-transform: uppercase;
+                }
+
+                .plp-market-summary-card h3,
+                .plp-market-meaning-card h3,
+                .plp-market-listing-history h3,
+                .plp-market-analysis-method h3 {
+                    color: var(--plp-ink);
+                    font-family: var(--font-serif);
+                    font-size: clamp(18px, 1.7vw, 23px);
+                    font-weight: 850;
+                    letter-spacing: 0;
+                    line-height: 1.08;
+                    margin: 0;
+                }
+
+                .plp-market-summary-card p {
+                    grid-column: 1 / -1;
+                    max-width: 880px;
+                    color: var(--plp-muted);
+                    font-size: 14px;
+                    font-weight: 680;
+                    line-height: 1.55;
+                    margin: 0;
+                }
+
+                .plp-market-position-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 32px;
+                    padding: 0 12px;
+                    border-radius: 999px;
+                    background: rgba(17,24,39,.06);
+                    color: var(--plp-ink);
+                    font-size: 11px;
+                    font-weight: 900;
+                    line-height: 1;
+                    white-space: nowrap;
+                }
+
+                .plp-market-position-badge--below_average {
+                    background: rgba(79,122,98,.12);
+                    color: #355c46;
+                }
+
+                .plp-market-position-badge--within_average {
+                    background: rgba(87,98,112,.1);
+                    color: #3d4652;
+                }
+
+                .plp-market-position-badge--above_average,
+                .plp-market-position-badge--premium,
+                .plp-market-position-badge--outside_sample_pattern {
+                    background: rgba(184,148,95,.15);
+                    color: var(--plp-gold-dark);
+                }
+
+                .plp-market-core-metrics {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 12px;
+                }
+
+                .plp-market-core-metrics article {
+                    display: grid;
+                    align-content: center;
+                    gap: 8px;
+                    min-width: 0;
+                    min-height: 96px;
+                    padding: 15px 16px;
+                    border: 1px solid rgba(35,31,26,.07);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255,255,255,.78);
+                }
+
+                .plp-market-core-metrics span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    color: var(--plp-muted);
+                    font-size: 11px;
+                    font-weight: 850;
+                    line-height: 1.2;
+                }
+
+                .plp-market-core-metrics strong {
+                    color: var(--plp-ink);
+                    font-size: clamp(20px, 2vw, 28px);
+                    font-weight: 950;
+                    line-height: 1;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-market-help {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 24px;
+                    height: 24px;
+                    margin-left: 2px;
+                    border-radius: 999px;
+                    color: var(--plp-gold-dark);
+                    outline: 0;
+                    cursor: help;
+                }
+
+                .plp-market-help > span {
+                    position: absolute;
+                    left: 50%;
+                    bottom: calc(100% + 8px);
+                    z-index: 20;
+                    width: min(260px, 72vw);
+                    padding: 9px 10px;
+                    border-radius: 10px;
+                    background: #111827;
+                    color: #fff;
+                    font-family: var(--font-sans);
+                    font-size: 11px;
+                    font-weight: 720;
+                    line-height: 1.35;
+                    opacity: 0;
+                    pointer-events: none;
+                    text-transform: none;
+                    transform: translateX(-50%) translateY(4px);
+                    transition: opacity .16s ease, transform .16s ease;
+                }
+
+                .plp-market-help:hover > span,
+                .plp-market-help:focus > span {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+
+                .plp-market-comparable-line {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 3px 7px;
+                    color: var(--plp-muted);
+                    font-size: 13px;
+                    font-weight: 780;
+                    line-height: 1.35;
+                    margin: -2px 0 0;
+                }
+
+                .plp-market-simple-ruler {
+                    display: grid;
+                    gap: 12px;
+                    padding: 16px;
+                    border: 1px solid rgba(35,31,26,.08);
+                    border-radius: var(--plp-radius);
+                    background:
+                        linear-gradient(180deg, rgba(255,255,255,.86), rgba(247,243,236,.72));
+                }
+
+                .plp-market-simple-ruler-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    color: var(--plp-muted);
+                    font-size: 12px;
+                    font-weight: 850;
+                    line-height: 1.2;
+                }
+
+                .plp-market-simple-ruler-head strong {
+                    color: var(--plp-ink);
+                    font-size: 13px;
+                    font-weight: 950;
+                }
+
+                .plp-market-simple-ruler-head span {
+                    color: var(--plp-gold-dark);
+                    font-weight: 950;
+                }
+
+                .plp-market-simple-scale {
+                    position: relative;
+                    min-height: 112px;
+                    padding: 34px 8px 36px;
+                }
+
+                .plp-market-simple-track {
+                    position: absolute;
+                    left: 8px;
+                    right: 8px;
+                    top: 52px;
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    min-height: 26px;
+                    overflow: hidden;
+                    border-radius: 999px;
+                    background: #efe9dc;
+                    box-shadow: inset 0 0 0 1px rgba(35,31,26,.08);
+                }
+
+                .plp-market-simple-track span {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: rgba(17,24,39,.68);
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                    text-align: center;
+                }
+
+                .plp-market-simple-track span:first-child {
+                    background: #e8f2ea;
+                }
+
+                .plp-market-simple-track span:nth-child(2) {
+                    background: #f4ead9;
+                }
+
+                .plp-market-simple-track span:last-child {
+                    background: #ead9c7;
+                }
+
+                .plp-market-simple-marker {
+                    position: absolute;
+                    z-index: 2;
+                    display: grid;
+                    gap: 3px;
+                    min-width: 96px;
+                    text-align: center;
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-simple-marker small {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: max-content;
+                    max-width: 132px;
+                    min-height: 24px;
+                    margin: 0 auto;
+                    padding: 0 9px;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,.94);
+                    color: var(--plp-gold-dark);
+                    font-size: 10px;
+                    font-weight: 900;
+                    line-height: 1;
+                    white-space: nowrap;
+                    box-shadow: inset 0 0 0 1px rgba(143,105,48,.22);
+                }
+
+                .plp-market-simple-marker strong {
+                    color: var(--plp-ink);
+                    font-size: 11px;
+                    font-weight: 950;
+                    line-height: 1.05;
+                    white-space: nowrap;
+                }
+
+                .plp-market-simple-marker--median {
+                    left: clamp(14%, var(--market-median-position), 86%);
+                    bottom: 0;
+                }
+
+                .plp-market-simple-marker--median::before {
+                    content: "";
+                    position: absolute;
+                    left: 50%;
+                    bottom: 35px;
+                    width: 1px;
+                    height: 29px;
+                    border-radius: 999px;
+                    background: rgba(35,31,26,.32);
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-simple-marker--current {
+                    left: clamp(14%, var(--market-position), 86%);
+                    top: 0;
+                }
+
+                .plp-market-simple-marker--current small {
+                    background: #111827;
+                    color: #fff;
+                    box-shadow: none;
+                }
+
+                .plp-market-simple-marker--current::after {
+                    content: "";
+                    position: absolute;
+                    left: 50%;
+                    top: 30px;
+                    width: 2px;
+                    height: 35px;
+                    border-radius: 999px;
+                    background: #111827;
+                    transform: translateX(-50%);
+                }
+
+                .plp-market-ruler-note {
+                    color: var(--plp-muted);
+                    font-size: 13px;
+                    font-weight: 740;
+                    line-height: 1.45;
+                    margin: 0;
+                }
+
+                .plp-market-ruler-note strong {
+                    color: var(--plp-ink);
+                    font-weight: 950;
+                }
+
+                .plp-market-ruler-note > span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 3px;
+                    color: var(--plp-ink);
+                    font-weight: 850;
+                }
+
+                .plp-market-explain-history {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
+                    gap: 14px;
+                    align-items: stretch;
+                }
+
+                .plp-market-meaning-card,
+                .plp-market-listing-history {
+                    display: grid;
+                    align-content: start;
+                    gap: 12px;
+                    min-width: 0;
+                    padding: 16px;
+                    border: 1px solid rgba(35,31,26,.07);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255,255,255,.72);
+                }
+
+                .plp-market-meaning-card h3,
+                .plp-market-listing-history h3 {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 18px;
+                }
+
+                .plp-market-meaning-card h3 svg,
+                .plp-market-listing-history h3 svg {
+                    color: var(--plp-gold-dark);
+                    flex: 0 0 auto;
+                }
+
+                .plp-market-meaning-card p,
+                .plp-market-listing-history p {
+                    color: var(--plp-muted);
+                    font-size: 13px;
+                    font-weight: 720;
+                    line-height: 1.5;
+                    margin: 0;
+                }
+
+                .plp-market-meaning-card small {
+                    color: rgba(45,52,58,.68);
+                    font-size: 11px;
+                    font-weight: 720;
+                    line-height: 1.35;
+                }
+
+                .plp-market-listing-history dl {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 10px 12px;
+                    margin: 0;
+                }
+
+                .plp-market-listing-history div {
+                    min-width: 0;
+                }
+
+                .plp-market-listing-history dt {
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 850;
+                    line-height: 1.2;
+                    text-transform: uppercase;
+                }
+
+                .plp-market-listing-history dd {
+                    color: var(--plp-ink);
+                    font-size: 13px;
+                    font-weight: 900;
+                    line-height: 1.25;
+                    margin: 4px 0 0;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-market-price-timeline {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .plp-market-price-timeline span {
+                    display: grid;
+                    gap: 2px;
+                    min-width: 112px;
+                    padding: 9px 10px;
+                    border-radius: 12px;
+                    background: rgba(248,246,241,.82);
+                }
+
+                .plp-market-price-timeline small {
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 850;
+                    line-height: 1.2;
+                }
+
+                .plp-market-price-timeline strong {
+                    color: var(--plp-ink);
+                    font-size: 12px;
+                    font-weight: 950;
+                    line-height: 1.2;
+                }
+
+                .plp-market-analysis-details {
+                    border-top: 1px solid rgba(35,31,26,.08);
+                    padding-top: 4px;
+                }
+
+                .plp-market-analysis-details summary {
+                    display: inline-flex;
+                    align-items: center;
+                    min-height: 44px;
+                    color: var(--plp-gold-dark);
+                    cursor: pointer;
+                    font-size: 13px;
+                    font-weight: 900;
+                    list-style-position: inside;
+                }
+
+                .plp-market-analysis-details-body {
+                    display: grid;
+                    grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr);
+                    gap: 16px;
+                    margin-top: 10px;
+                }
+
+                .plp-market-analysis-facts {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 9px;
+                    align-content: start;
+                }
+
+                .plp-market-analysis-facts div {
+                    min-width: 0;
+                    padding: 10px 11px;
+                    border-radius: 12px;
+                    background: rgba(255,255,255,.62);
+                    box-shadow: inset 0 0 0 1px rgba(35,31,26,.06);
+                }
+
+                .plp-market-analysis-facts span {
+                    display: block;
+                    color: var(--plp-muted);
+                    font-size: 10px;
+                    font-weight: 850;
+                    line-height: 1.2;
+                    text-transform: uppercase;
+                }
+
+                .plp-market-analysis-facts strong {
+                    display: block;
+                    color: var(--plp-ink);
+                    font-size: 12px;
+                    font-weight: 870;
+                    line-height: 1.3;
+                    margin-top: 5px;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-market-analysis-method {
+                    display: grid;
+                    gap: 9px;
+                    color: var(--plp-muted);
+                    font-size: 12px;
+                    font-weight: 720;
+                    line-height: 1.45;
+                }
+
+                .plp-market-analysis-method h3 {
+                    font-size: 16px;
+                }
+
+                .plp-market-analysis-method ul {
+                    display: grid;
+                    gap: 6px;
+                    margin: 0;
+                    padding-left: 18px;
+                }
+
+                @media (max-width: 760px) {
+                    .plp-market-comparison {
+                        gap: 13px;
+                    }
+
+                    .plp-market-summary-card {
+                        grid-template-columns: 1fr;
+                        gap: 11px;
+                        padding: 14px;
+                    }
+
+                    .plp-market-summary-copy {
+                        gap: 10px;
+                    }
+
+                    .plp-market-summary-icon {
+                        flex-basis: 34px;
+                        width: 34px;
+                        height: 34px;
+                    }
+
+                    .plp-market-summary-card h3 {
+                        font-size: 18px;
+                    }
+
+                    .plp-market-summary-card p {
+                        font-size: 12.5px;
+                        line-height: 1.48;
+                    }
+
+                    .plp-market-position-badge {
+                        justify-self: start;
+                        min-height: 30px;
+                    }
+
+                    .plp-market-core-metrics,
+                    .plp-market-explain-history,
+                    .plp-market-analysis-details-body,
+                    .plp-market-analysis-facts {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-market-core-metrics {
+                        gap: 9px;
+                    }
+
+                    .plp-market-core-metrics article {
+                        min-height: 78px;
+                        padding: 13px 14px;
+                    }
+
+                    .plp-market-core-metrics strong {
+                        font-size: 21px;
+                    }
+
+                    .plp-market-help {
+                        min-width: 32px;
+                        min-height: 32px;
+                    }
+
+                    .plp-market-comparable-line {
+                        font-size: 12px;
+                    }
+
+                    .plp-market-simple-ruler {
+                        padding: 13px;
+                    }
+
+                    .plp-market-simple-scale {
+                        min-height: 118px;
+                        padding-left: 0;
+                        padding-right: 0;
+                    }
+
+                    .plp-market-simple-track {
+                        left: 0;
+                        right: 0;
+                    }
+
+                    .plp-market-simple-track span {
+                        font-size: 9px;
+                    }
+
+                    .plp-market-simple-marker {
+                        min-width: 86px;
+                    }
+
+                    .plp-market-simple-marker small {
+                        max-width: 108px;
+                        padding: 0 7px;
+                        font-size: 9px;
+                    }
+
+                    .plp-market-simple-marker strong {
+                        font-size: 10px;
+                    }
+
+                    .plp-market-ruler-note,
+                    .plp-market-meaning-card p,
+                    .plp-market-listing-history p {
+                        font-size: 12px;
+                    }
+
+                    .plp-market-listing-history dl {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .plp-market-analysis-details summary {
+                        width: 100%;
+                    }
+                }
+
                 .plp-market-grid {
                     align-items: start;
                     border: 1px solid rgba(35, 31, 26, .1);
