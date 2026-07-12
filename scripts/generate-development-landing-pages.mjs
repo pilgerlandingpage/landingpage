@@ -398,18 +398,30 @@ function buildDifferentials(name, properties) {
     },
     {
       title: 'Atendimento com contexto',
-      description: 'O lead que chega pelo imovel tambem encontra o caminho para entender o empreendimento completo.',
+      description: 'Quem chega pelo imovel tambem encontra o caminho para entender o empreendimento completo.',
     },
   ].slice(0, 8)
+}
+
+function inferSourceReferenceFromUnitId(value) {
+  const raw = text(value)
+  if (!raw) return ''
+  if (/^\d+$/.test(raw)) return raw
+
+  return raw.match(/-(\d+)$/)?.[1] || ''
 }
 
 function mergeUnits(existingUnits, generatedUnits) {
   const byKey = new Map()
   for (const unit of [...asArray(existingUnits), ...generatedUnits]) {
     const record = asRecord(unit)
-    const key = normalizeText(record.propertyId || record.property_id || record.sourceSlug || record.source_slug || record.id || record.sourceReference || record.source_reference)
+    const sourceReference = record.sourceReference || record.source_reference || inferSourceReferenceFromUnitId(record.id)
+    const key = normalizeText(sourceReference || record.propertyId || record.property_id || record.id || record.sourceSlug || record.source_slug)
     if (!key) continue
-    byKey.set(key, byKey.has(key) ? { ...byKey.get(key), ...record } : record)
+    const normalizedRecord = sourceReference && !record.sourceReference && !record.source_reference
+      ? { ...record, sourceReference, source_reference: sourceReference }
+      : record
+    byKey.set(key, byKey.has(key) ? { ...byKey.get(key), ...normalizedRecord } : normalizedRecord)
   }
   return [...byKey.values()]
 }

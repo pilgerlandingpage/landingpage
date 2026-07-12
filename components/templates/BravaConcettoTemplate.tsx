@@ -394,7 +394,7 @@ function normalizeUnit(value: unknown): Unit | null {
         : []
     const sourceSlug = asText(value.sourceSlug ?? value.source_slug)
     const propertyId = asText(value.propertyId ?? value.property_id)
-    const sourceReference = asText(value.sourceReference ?? value.source_reference)
+    const sourceReference = asText(value.sourceReference ?? value.source_reference) || inferLegacyUnitIdentifier(id)
     const city = asText(value.city)
     const neighborhood = asText(value.neighborhood)
     const seoTitle = asText(value.seoTitle ?? value.seo_title)
@@ -563,6 +563,10 @@ function buildDevelopmentSellingDescription(development: Development) {
     return `O ${development.name} reune ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
 }
 
+function buildDevelopmentHeadline(development: Development) {
+    return `Conheca o ${development.name} e compare ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade disponivel' : 'unidades disponiveis'}.`
+}
+
 function buildDevelopmentBenefits(development: Development): Development['benefits'] {
     const unitTypes = summarizeUnitTypes(development)
     return [
@@ -671,6 +675,12 @@ function galleryForUnit(unit: Unit, propertyMedia: UnitPropertyMedia | undefined
     ]).slice(0, 12)
 }
 
+function unitMediaLookupKey(unit: Unit) {
+    if (unit.propertyId) return unit.propertyId
+    if (unit.sourceReference) return `ref:${unit.sourceReference}`
+    return unit.sourceSlug
+}
+
 function numberFromText(value: string) {
     const match = value.match(/\d+(?:[,.]\d+)?/)
     if (!match) return null
@@ -715,6 +725,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const unitPropertyLookup = useMemo(
         () => ({
             ids: Array.from(new Set(activeDev.units.map(unit => unit.propertyId).filter(Boolean))),
+            sourceRefs: Array.from(new Set(activeDev.units.map(unit => unit.sourceReference).filter(Boolean))),
             slugs: Array.from(new Set(activeDev.units.map(unit => unit.sourceSlug).filter(Boolean))),
         }),
         [activeDev.units]
@@ -776,8 +787,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         let cancelled = false
 
         async function loadUnitMedia() {
-            const { ids, slugs } = unitPropertyLookup
-            if (!ids.length && !slugs.length) {
+            const { ids, sourceRefs, slugs } = unitPropertyLookup
+            if (!ids.length && !sourceRefs.length && !slugs.length) {
                 setUnitMediaBySlug({})
                 return
             }
@@ -786,7 +797,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 const params = new URLSearchParams()
                 if (ids.length) {
                     params.set('ids', ids.join(','))
-                } else {
+                }
+                if (sourceRefs.length) {
+                    params.set('source_refs', sourceRefs.join(','))
+                }
+                if (slugs.length) {
                     params.set('slugs', slugs.join(','))
                 }
 
@@ -799,9 +814,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 const properties = Array.isArray(payload?.properties) ? payload.properties : []
                 properties.forEach((property: UnitPropertyMedia) => {
                     const id = asText(property.id)
+                    const sourceReference = asText(property.source_reference)
                     const sourceSlug = asText(property.source_slug)
                     if (id) mediaMap[id] = property
-                    if (sourceSlug) mediaMap[sourceSlug] = property
+                    if (sourceReference) mediaMap[`ref:${sourceReference}`] = property
+                    if (sourceSlug && !mediaMap[sourceSlug]) mediaMap[sourceSlug] = property
                 })
                 setUnitMediaBySlug(mediaMap)
             } catch {
@@ -843,13 +860,14 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 heroImage: development.heroImage,
             }))
     }, [activeDev.id, activeDev.name, activeDev.pageSlug, publicDevelopments])
+    const developmentHeadline = useMemo(() => buildDevelopmentHeadline(activeDev), [activeDev])
     const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
     const sellingBenefits = useMemo(() => buildDevelopmentBenefits(activeDev), [activeDev])
     const decisionDifferentials = useMemo(() => buildDevelopmentDifferentials(activeDev), [activeDev])
     const developmentLocationProperty = useMemo(() => buildDevelopmentLocationProperty(activeDev), [activeDev])
     const unitMediaLatLng = useMemo<[number, number] | null>(() => {
         for (const unit of activeDev.units) {
-            const media = unitMediaBySlug[unit.propertyId || unit.sourceSlug]
+            const media = unitMediaBySlug[unitMediaLookupKey(unit)]
             const latLng = validLatLng(
                 media?.latitude,
                 media?.longitude
@@ -1034,7 +1052,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                         <span className="plp-mobile-sheet-fact-text">{activeDev.areaRange}</span>
                                     </span>
                                 </div>
-                                <p className="bc-dev-mobile-copy">{activeDev.tagline}</p>
+                                <p className="bc-dev-mobile-copy">{developmentHeadline}</p>
                                 <div className="bc-dev-mobile-actions">
                                     <button type="button" className="plp-mobile-sheet-primary" onClick={handleScrollToUnits}>
                                         Ver unidades
@@ -1062,7 +1080,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                             key={`mobile-${unit.id}`}
                                             unit={unit}
                                             development={activeDev}
-                                            propertyMedia={unitMediaBySlug[unit.propertyId || unit.sourceSlug]}
+                                            propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
                                             onChat={openChat}
                                         />
                                     ))}
@@ -1108,7 +1126,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         <div className="plp-main-column plp-content-column bc-dev-content-column">
                             <section className="plp-section plp-copy-section plp-summary-card bc-dev-overview-card">
                                 <span className="plp-kicker">Visao geral</span>
-                                <h2>{activeDev.tagline}</h2>
+                                <h2>{developmentHeadline}</h2>
                                 <div className="plp-narrative">
                                     <p>{sellingDescription}</p>
                                     <p>{activeDev.description}</p>
@@ -1196,7 +1214,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                     key={unit.id}
                                     unit={unit}
                                     development={activeDev}
-                                    propertyMedia={unitMediaBySlug[unit.propertyId || unit.sourceSlug]}
+                                    propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
                                 />
                             ))}
                         </div>
@@ -5465,7 +5483,7 @@ function DevelopmentLocationModal({ mode, fallbackSrc, title, property, latLng, 
 }
 
 function unitDetailHref(unit: Unit, propertyMedia?: UnitPropertyMedia) {
-    if (propertyMedia?.id) return propertyDetailsPath(propertyMedia)
+    if (unitPropertyMediaMatches(unit, propertyMedia)) return propertyDetailsPath(propertyMedia)
 
     if (unit.propertyId) {
         return propertyDetailsPath({
@@ -5482,6 +5500,14 @@ function unitDetailHref(unit: Unit, propertyMedia?: UnitPropertyMedia) {
     const legacyIdentifier = unit.sourceReference || inferLegacyUnitIdentifier(unit.id) || unit.sourceSlug
 
     return `/imovel/${encodeURIComponent(legacyIdentifier)}`
+}
+
+function unitPropertyMediaMatches(unit: Unit, propertyMedia?: UnitPropertyMedia): propertyMedia is UnitPropertyMedia & { id: string } {
+    if (!propertyMedia?.id) return false
+    if (unit.propertyId) return asText(propertyMedia.id) === unit.propertyId
+    if (unit.sourceReference) return asText(propertyMedia.source_reference) === unit.sourceReference
+
+    return true
 }
 
 function inferLegacyUnitIdentifier(id?: string) {
