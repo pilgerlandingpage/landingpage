@@ -1637,9 +1637,6 @@ export default async function PropertyDetailPage({
                         <h3>Como este imóvel está posicionado no mercado?</h3>
                     </div>
                 </div>
-                <span className={`plp-market-position-badge plp-market-position-badge--${marketPosition.position}`}>
-                    {marketPosition.title}
-                </span>
                 <p>{marketSummaryText}</p>
             </article>
 

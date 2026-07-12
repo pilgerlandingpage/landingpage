@@ -2731,8 +2731,7 @@ export default function PropertyLandingStyles() {
                 .plp-market-summary-card {
                     position: relative;
                     display: grid;
-                    grid-template-columns: minmax(0, 1fr) auto;
-                    gap: 12px 18px;
+                    gap: 12px;
                     align-items: start;
                     padding: 18px;
                     border: 1px solid rgba(35,31,26,.08);
@@ -2785,45 +2784,12 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-market-summary-card p {
-                    grid-column: 1 / -1;
                     max-width: 880px;
                     color: var(--plp-muted);
                     font-size: 14px;
                     font-weight: 680;
                     line-height: 1.55;
                     margin: 0;
-                }
-
-                .plp-market-position-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 32px;
-                    padding: 0 12px;
-                    border-radius: 999px;
-                    background: rgba(17,24,39,.06);
-                    color: var(--plp-ink);
-                    font-size: 11px;
-                    font-weight: 900;
-                    line-height: 1;
-                    white-space: nowrap;
-                }
-
-                .plp-market-position-badge--below_average {
-                    background: rgba(79,122,98,.12);
-                    color: #355c46;
-                }
-
-                .plp-market-position-badge--within_average {
-                    background: rgba(87,98,112,.1);
-                    color: #3d4652;
-                }
-
-                .plp-market-position-badge--above_average,
-                .plp-market-position-badge--premium,
-                .plp-market-position-badge--outside_sample_pattern {
-                    background: rgba(184,148,95,.15);
-                    color: var(--plp-gold-dark);
                 }
 
                 .plp-market-core-metrics {
@@ -3299,11 +3265,6 @@ export default function PropertyLandingStyles() {
                     .plp-market-summary-card p {
                         font-size: 12.5px;
                         line-height: 1.48;
-                    }
-
-                    .plp-market-position-badge {
-                        justify-self: start;
-                        min-height: 30px;
                     }
 
                     .plp-market-core-metrics,
