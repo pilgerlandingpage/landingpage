@@ -25,6 +25,7 @@
     "import:properties:dry-run": "node scripts/property-import-dry-run.mjs",
     "import:properties:check-db": "node scripts/property-import-check-db.mjs",
     "import:properties:apply": "node scripts/property-import-apply.mjs",
+    "import:properties:safe-update": "node scripts/property-import-safe-update.mjs",
     "import:properties:batches": "powershell -ExecutionPolicy Bypass -File scripts/property-import-run-batches.ps1"
   },
   "dependencies": {
