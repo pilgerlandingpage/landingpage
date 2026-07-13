@@ -34,6 +34,7 @@ import LandingPageLogic from '@/components/landing/LandingPageLogic'
 import Footer from '@/components/layout/Footer'
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
+import MobileNav from '@/components/marketplace/MobileNav'
 import PropertyDesktopMediaShowcase from '@/components/property/PropertyDesktopMediaShowcase'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
@@ -552,6 +553,7 @@ function normalizeDevelopment(value: unknown): Development | null {
     const faq = Array.isArray(value.faq)
         ? value.faq.map(normalizeFaq).filter((item): item is Development['faq'][number] => Boolean(item))
         : []
+    const displayUnits = units.length ? units : (fallback?.units || [])
     const locationRecord = isRecord(value.location) ? value.location : null
     const coordinatesRecord = isRecord(value.coordinates) ? value.coordinates : null
     const latitude = asOptionalNumber(
@@ -592,7 +594,7 @@ function normalizeDevelopment(value: unknown): Development | null {
         locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localizacao privilegiada'),
         tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrao com curadoria Guilherme Pilger.'),
         priceRange: asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Consulte'),
-        availableUnitsCount: units.length || asNumber(value.availableUnitsCount ?? value.available_units_count, fallback?.availableUnitsCount || 0),
+        availableUnitsCount: displayUnits.length,
         areaRange: asText(value.areaRange ?? value.area_range, fallback?.areaRange || 'Consulte'),
         suitesRange: asText(value.suitesRange ?? value.suites_range, fallback?.suitesRange || 'Consulte'),
         heroImage: asText(value.heroImage ?? value.hero_image, fallback?.heroImage || gallery[0]?.image || '/placeholder-house.jpg'),
@@ -602,7 +604,7 @@ function normalizeDevelopment(value: unknown): Development | null {
         longitude: longitude ?? fallback?.longitude ?? null,
         benefits: benefits.length ? benefits : (fallback?.benefits || []),
         differentials: differentials.length ? differentials : (fallback?.differentials || []),
-        units: units.length ? units : (fallback?.units || []),
+        units: displayUnits,
         gallery: gallery.length ? gallery : (fallback?.gallery || []),
         faq: faq.length ? faq : (fallback?.faq || []),
     }
@@ -616,16 +618,53 @@ function summarizeUnitTypes(development: Development) {
     return `${types.slice(0, -1).map(type => type.toLowerCase()).join(', ')} e ${types[types.length - 1].toLowerCase()}`
 }
 
+function developmentUnitCount(development: Development) {
+    return development.units.length
+}
+
+function developmentStockLabel(development: Development) {
+    const count = developmentUnitCount(development)
+    if (!count) return 'Disponibilidade sob consulta'
+    return `${count} ${count === 1 ? 'unidade para comparar' : 'unidades para comparar'}`
+}
+
 function buildDevelopmentSellingDescription(development: Development) {
+    const count = developmentUnitCount(development)
+    if (!count) {
+        return `O ${development.name} segue mapeado pela curadoria Guilherme Pilger em ${development.locationName}. As unidades publicadas estao sob consulta neste momento; fale com a equipe para confirmar disponibilidade atual e receber alternativas semelhantes.`
+    }
+
     const unitTypes = summarizeUnitTypes(development)
-    return `O ${development.name} reune ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
+    return `O ${development.name} reune ${count} ${count === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
 }
 
 function buildDevelopmentHeadline(development: Development) {
-    return `Conheca o ${development.name} e compare ${development.availableUnitsCount} ${development.availableUnitsCount === 1 ? 'unidade disponivel' : 'unidades disponiveis'}.`
+    const count = developmentUnitCount(development)
+    if (!count) return `Conheca o ${development.name} e consulte disponibilidade atual.`
+    return `Conheca o ${development.name} e compare ${count} ${count === 1 ? 'unidade disponivel' : 'unidades disponiveis'}.`
 }
 
 function buildDevelopmentBenefits(development: Development): Development['benefits'] {
+    if (!developmentUnitCount(development)) {
+        return [
+            {
+                title: `Endereco em ${development.locationName}`,
+                description: `Uma leitura clara do entorno para entender rotina, acesso, conveniencia e potencial de valorizacao antes da visita.`,
+                icon: 'Compass',
+            },
+            {
+                title: 'Disponibilidade conferida por atendimento',
+                description: `A equipe valida se existe nova unidade, revenda ou oportunidade reservada antes de indicar o proximo passo.`,
+                icon: 'KeyRound',
+            },
+            {
+                title: 'Alternativas equivalentes',
+                description: `Quando nao houver unidade publicada, a curadoria compara empreendimentos similares por perfil, localizacao e liquidez.`,
+                icon: 'ShieldCheck',
+            },
+        ]
+    }
+
     const unitTypes = summarizeUnitTypes(development)
     return [
         {
@@ -647,10 +686,28 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
 }
 
 function buildDevelopmentDifferentials(development: Development): Development['differentials'] {
+    const count = developmentUnitCount(development)
+    if (!count) {
+        return [
+            {
+                title: 'Pagina do empreendimento preservada',
+                description: `Mesmo sem unidade publicada, o ${development.name} continua com contexto de localizacao, fotos, mapa e leitura comercial para orientar a decisao.`,
+            },
+            {
+                title: 'Consulta de disponibilidade',
+                description: 'O atendimento confirma unidades reservadas, novas entradas e oportunidades que ainda nao voltaram para a vitrine publica.',
+            },
+            {
+                title: 'Curadoria de semelhantes',
+                description: 'Se nao houver estoque atual, a equipe indica empreendimentos com perfil parecido para manter a busca em movimento.',
+            },
+        ]
+    }
+
     return [
         {
             title: 'Escolha por unidade',
-            description: `${development.availableUnitsCount} opcoes ativas aparecem reunidas para comparar preco, metragem, suites e vagas antes de abrir a ficha completa.`,
+            description: `${count} ${count === 1 ? 'opcao ativa aparece reunida' : 'opcoes ativas aparecem reunidas'} para comparar preco, metragem, suites e vagas antes de abrir a ficha completa.`,
         },
         {
             title: 'Fotos, mapa e Street View',
@@ -918,6 +975,18 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 heroImage: development.heroImage,
             }))
     }, [activeDev.id, activeDev.name, activeDev.pageSlug, publicDevelopments])
+    const activeUnitCount = activeDev.units.length
+    const hasAvailableUnits = activeUnitCount > 0
+    const stockLabel = developmentStockLabel(activeDev)
+    const stockValue = hasAvailableUnits ? String(activeUnitCount) : 'Sob consulta'
+    const stockFactLabel = hasAvailableUnits ? 'unidades' : 'estoque'
+    const unitsSectionKicker = hasAvailableUnits ? 'Inventario exclusivo' : 'Disponibilidade'
+    const unitsSectionTitle = hasAvailableUnits ? 'Escolha uma unidade disponivel' : 'Consulte a disponibilidade atual'
+    const unitsSectionCopy = hasAvailableUnits
+        ? `Compare as unidades ativas do ${activeDev.name}, abra a ficha completa da melhor opcao ou peca ajuda para decidir entre elas.`
+        : `As unidades publicadas do ${activeDev.name} estao sob consulta neste momento. Fale com a equipe para confirmar novas entradas, reservas e alternativas semelhantes.`
+    const unitsPrimaryLabel = hasAvailableUnits ? 'Ver unidades' : 'Consultar disponibilidade'
+    const unitsSecondaryLabel = hasAvailableUnits ? 'Pedir curadoria' : 'Receber alternativas'
     const developmentHeadline = useMemo(() => buildDevelopmentHeadline(activeDev), [activeDev])
     const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
     const sellingBenefits = useMemo(() => buildDevelopmentBenefits(activeDev), [activeDev])
@@ -988,7 +1057,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
         const message = unit
             ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero confirmar disponibilidade e detalhes da unidade ${unit.type} (${unit.area}, ${unit.price}).`
-            : broker.greeting_message || `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero uma curadoria das unidades disponiveis.`
+            : broker.greeting_message || (hasAvailableUnits
+                ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero uma curadoria das unidades disponiveis.`
+                : `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`)
 
         openWhatsAppWithLeadCapture({
             phone: broker.phone,
@@ -996,10 +1067,19 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             slug,
             template: 'brava-concetto',
         })
-    }, [activeDev.name, broker, slug])
+    }, [activeDev.name, broker, hasAvailableUnits, slug])
 
     const handleScrollToUnits = () => {
         document.getElementById('unidades-disponiveis')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    const handleUnitsPrimaryAction = () => {
+        if (hasAvailableUnits) {
+            handleScrollToUnits()
+            return
+        }
+
+        openChat()
     }
 
     return (
@@ -1028,7 +1108,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <h1>{activeDev.name}</h1>
                                 <div className="plp-rating-row" aria-label="Curadoria do empreendimento">
                                     <span><Building2 size={15} /><ShieldCheck size={15} /><KeyRound size={15} /></span>
-                                    <strong>{activeDev.availableUnitsCount} unidades para comparar</strong>
+                                    <strong>{stockLabel}</strong>
                                 </div>
                             </div>
                             <div className="plp-listing-stats" aria-label="Resumo do empreendimento">
@@ -1097,8 +1177,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                     <span className="plp-mobile-sheet-fact">
                                         <Building2 size={21} />
                                         <span className="plp-mobile-sheet-fact-text">
-                                            <strong>{activeDev.availableUnitsCount}</strong>
-                                            <small>unidades</small>
+                                            <strong>{stockValue}</strong>
+                                            <small>{stockFactLabel}</small>
                                         </span>
                                     </span>
                                     <span className="plp-mobile-sheet-fact">
@@ -1112,11 +1192,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 </div>
                                 <p className="bc-dev-mobile-copy">{developmentHeadline}</p>
                                 <div className="bc-dev-mobile-actions">
-                                    <button type="button" className="plp-mobile-sheet-primary" onClick={handleScrollToUnits}>
-                                        Ver unidades
+                                    <button type="button" className="plp-mobile-sheet-primary" onClick={handleUnitsPrimaryAction}>
+                                        {unitsPrimaryLabel}
                                     </button>
                                     <button type="button" className="bc-dev-mobile-secondary" onClick={() => openChat()}>
-                                        Pedir curadoria
+                                        {unitsSecondaryLabel}
                                     </button>
                                 </div>
                             </section>
@@ -1124,25 +1204,40 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             <section className="plp-mobile-card bc-dev-mobile-units-card" aria-labelledby="bc-mobile-units-title">
                                 <div className="plp-mobile-card-head plp-mobile-card-head--split">
                                     <div>
-                                        <span className="plp-kicker">Unidades</span>
-                                        <h2 id="bc-mobile-units-title">Escolha a unidade que faz sentido.</h2>
+                                        <span className="plp-kicker">{hasAvailableUnits ? 'Unidades' : 'Disponibilidade'}</span>
+                                        <h2 id="bc-mobile-units-title">{hasAvailableUnits ? 'Escolha a unidade que faz sentido.' : 'Confirme as proximas oportunidades.'}</h2>
                                     </div>
-                                    <button type="button" onClick={handleScrollToUnits}>
-                                        Ver todas
-                                        <ArrowRight size={15} />
-                                    </button>
+                                    {hasAvailableUnits ? (
+                                        <button type="button" onClick={handleScrollToUnits}>
+                                            Ver todas
+                                            <ArrowRight size={15} />
+                                        </button>
+                                    ) : null}
                                 </div>
-                                <div className="bc-dev-mobile-units-list">
-                                    {activeDev.units.slice(0, 8).map((unit) => (
-                                        <MobileUnitCard
-                                            key={`mobile-${unit.id}`}
-                                            unit={unit}
-                                            development={activeDev}
-                                            propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
-                                            onChat={openChat}
-                                        />
-                                    ))}
-                                </div>
+                                {hasAvailableUnits ? (
+                                    <div className="bc-dev-mobile-units-list">
+                                        {activeDev.units.slice(0, 8).map((unit) => (
+                                            <MobileUnitCard
+                                                key={`mobile-${unit.id}`}
+                                                unit={unit}
+                                                development={activeDev}
+                                                propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
+                                                onChat={openChat}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bc-dev-empty-units bc-dev-empty-units--mobile">
+                                        <div className="bc-dev-empty-units-icon"><KeyRound size={22} /></div>
+                                        <div>
+                                            <h3>Estoque sob consulta</h3>
+                                            <p>O especialista confirma novas entradas, unidades reservadas e empreendimentos parecidos com o perfil deste endereco.</p>
+                                        </div>
+                                        <button type="button" onClick={() => openChat()}>
+                                            Consultar agora
+                                        </button>
+                                    </div>
+                                )}
                             </section>
 
                             <section className="plp-mobile-card bc-dev-mobile-card">
@@ -1193,18 +1288,18 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                             <section className="plp-section plp-summary-card plp-quick-facts-card bc-dev-units-preview-card">
                                 <div className="plp-section-head compact">
-                                    <span className="plp-kicker">Unidades disponiveis</span>
-                                    <h2>Escolha a unidade antes do atendimento.</h2>
+                                    <span className="plp-kicker">{hasAvailableUnits ? 'Unidades disponiveis' : 'Disponibilidade sob consulta'}</span>
+                                    <h2>{hasAvailableUnits ? 'Escolha a unidade antes do atendimento.' : 'Mantenha o empreendimento no radar.'}</h2>
                                 </div>
                                 <div className="plp-spec-grid">
-                                    <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={`${activeDev.availableUnitsCount} unidades`} />
+                                    <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={stockLabel} />
                                     <SpecCardLike icon={<KeyRound size={21} />} label="Faixa de preco" value={activeDev.priceRange} />
                                     <SpecCardLike icon={<Maximize2 size={21} />} label="Metragens" value={activeDev.areaRange} />
                                     <SpecCardLike icon={<BedDouble size={21} />} label="Configuracao" value={activeDev.suitesRange} />
                                     <SpecCardLike icon={<MapPin size={21} />} label="Localizacao" value={activeDev.locationName} />
                                 </div>
-                                <button type="button" className="bc-dev-inline-action" onClick={handleScrollToUnits}>
-                                    Ver unidades para comparar
+                                <button type="button" className="bc-dev-inline-action" onClick={handleUnitsPrimaryAction}>
+                                    {hasAvailableUnits ? 'Ver unidades para comparar' : 'Consultar disponibilidade'}
                                     <ArrowRight size={16} />
                                 </button>
                             </section>
@@ -1228,23 +1323,23 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 </div>
 
                                 <div className="plp-side-facts">
-                                    <SideFactLike icon={<Building2 size={17} />} value={String(activeDev.availableUnitsCount)} label="unidades" />
+                                    <SideFactLike icon={<Building2 size={17} />} value={stockValue} label={stockFactLabel} />
                                     <SideFactLike icon={<Maximize2 size={17} />} value={activeDev.areaRange} label="areas" />
                                     <SideFactLike icon={<BedDouble size={17} />} value={activeDev.suitesRange} label="configuracoes" />
                                 </div>
 
-                                <p className="plp-commercial-note">A disponibilidade muda com frequencia. Primeiro escolha as unidades de interesse, depois confirme valores e condicoes.</p>
+                                <p className="plp-commercial-note">{hasAvailableUnits ? 'A disponibilidade muda com frequencia. Primeiro escolha as unidades de interesse, depois confirme valores e condicoes.' : 'A disponibilidade muda com frequencia. Consulte novas entradas, reservas e alternativas semelhantes antes de descartar este empreendimento.'}</p>
 
-                                <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleScrollToUnits}>
-                                    Ir para unidades
+                                <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleUnitsPrimaryAction}>
+                                    {hasAvailableUnits ? 'Ir para unidades' : 'Consultar disponibilidade'}
                                 </button>
                             </div>
 
                             <div className="plp-side-card plp-lead-card bc-dev-lead-card">
                                 <h3><Phone size={18} /> Atendimento do empreendimento</h3>
-                                <p>Ainda em duvida? O especialista compara as unidades disponiveis e indica as melhores alternativas para o seu perfil.</p>
+                                <p>{hasAvailableUnits ? 'Ainda em duvida? O especialista compara as unidades disponiveis e indica as melhores alternativas para o seu perfil.' : 'O especialista valida disponibilidade atual e envia alternativas com perfil parecido.'}</p>
                                 <button type="button" className="bc-dev-sidebar-outline" onClick={() => openChat()}>
-                                    Pedir curadoria
+                                    {unitsSecondaryLabel}
                                 </button>
                             </div>
                         </aside>
@@ -1254,28 +1349,45 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <div className="bc-dev-section-inner">
                         <div className="bc-dev-section-head">
                             <div>
-                                <span className="plp-kicker">Inventario exclusivo</span>
-                                <h2>Escolha uma unidade disponivel</h2>
-                                <p>
-                                    Compare as unidades ativas do {activeDev.name}, abra a ficha completa da melhor opcao ou peca ajuda para decidir entre elas.
-                                </p>
+                                <span className="plp-kicker">{unitsSectionKicker}</span>
+                                <h2>{unitsSectionTitle}</h2>
+                                <p>{unitsSectionCopy}</p>
                             </div>
                             <div className="bc-dev-section-status">
                                 <span />
-                                Estoque atualizado
+                                {hasAvailableUnits ? 'Estoque atualizado' : 'Atendimento ativo'}
                             </div>
                         </div>
 
-                        <div className="bc-dev-units-grid">
-                            {activeDev.units.map((unit) => (
-                                <UnitCard
-                                    key={unit.id}
-                                    unit={unit}
-                                    development={activeDev}
-                                    propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
-                                />
-                            ))}
-                        </div>
+                        {hasAvailableUnits ? (
+                            <div className="bc-dev-units-grid">
+                                {activeDev.units.map((unit) => (
+                                    <UnitCard
+                                        key={unit.id}
+                                        unit={unit}
+                                        development={activeDev}
+                                        propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bc-dev-empty-units">
+                                <div className="bc-dev-empty-units-icon"><KeyRound size={26} /></div>
+                                <div>
+                                    <h3>Unidades sob consulta neste momento</h3>
+                                    <p>O {activeDev.name} continua no radar da curadoria. A equipe confirma se ha nova unidade, revenda reservada ou oportunidade similar antes de direcionar o atendimento.</p>
+                                </div>
+                                <div className="bc-dev-empty-units-actions">
+                                    <button type="button" onClick={() => openChat()}>
+                                        Consultar disponibilidade
+                                        <ArrowRight size={16} />
+                                    </button>
+                                    <Link href="/busca">
+                                        Ver semelhantes
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -1384,6 +1496,25 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                 <HomeBlogSection posts={editorialPosts} />
                 </div>
+
+                <MobileNav
+                    phone={broker?.phone}
+                    message={hasAvailableUnits
+                        ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero comparar as unidades disponiveis.`
+                        : `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`
+                    }
+                    slug={slug}
+                    template="development-mobile-nav"
+                    metadata={{
+                        development_name: activeDev.name,
+                        development_slug: slug,
+                        available_units_count: activeUnitCount,
+                        cta_context: 'development_mobile_nav',
+                    }}
+                    whatsappLabel="Especialista"
+                    whatsappTone="brand"
+                    exploreHref={`/${slug}#unidades-disponiveis`}
+                />
             </main>
 
             <Footer />
@@ -1403,11 +1534,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
             <div className="bc-floating-actions">
                 <button
                     type="button"
-                    onClick={handleScrollToUnits}
+                    onClick={handleUnitsPrimaryAction}
                     className="bc-floating-consult"
                 >
                     <Building2 size={16} />
-                    <span>Ver unidades</span>
+                    <span>{hasAvailableUnits ? 'Ver unidades' : 'Consultar'}</span>
                 </button>
             </div>
 
@@ -1823,6 +1954,81 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: grid;
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 22px;
+                }
+
+                .bc-page .bc-dev-empty-units {
+                    display: grid;
+                    grid-template-columns: auto minmax(0, 1fr) auto;
+                    align-items: center;
+                    gap: 22px;
+                    border: 1px solid rgba(184, 148, 95, 0.22);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.9);
+                    box-shadow: 0 18px 44px rgba(31, 27, 21, 0.07);
+                    padding: 24px;
+                }
+
+                .bc-page .bc-dev-empty-units-icon {
+                    width: 52px;
+                    height: 52px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(184, 148, 95, 0.24);
+                    border-radius: 999px;
+                    background: #f7f1e4;
+                    color: #9d7424;
+                }
+
+                .bc-page .bc-dev-empty-units h3 {
+                    margin: 0;
+                    color: #211d18;
+                    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+                    font-size: 24px;
+                    font-weight: 500;
+                    letter-spacing: 0;
+                }
+
+                .bc-page .bc-dev-empty-units p {
+                    max-width: 680px;
+                    margin: 8px 0 0;
+                }
+
+                .bc-page .bc-dev-empty-units-actions {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                }
+
+                .bc-page .bc-dev-empty-units button,
+                .bc-page .bc-dev-empty-units a {
+                    min-height: 44px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border-radius: 6px;
+                    padding: 0 16px;
+                    font-size: 12px;
+                    font-weight: 850;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    text-decoration: none;
+                    white-space: nowrap;
+                }
+
+                .bc-page .bc-dev-empty-units button {
+                    border: 1px solid #211d18;
+                    background: #211d18;
+                    color: #ffffff;
+                }
+
+                .bc-page .bc-dev-empty-units a {
+                    border: 1px solid rgba(184, 148, 95, 0.28);
+                    background: #ffffff;
+                    color: #4b4235;
                 }
 
                 .bc-page #unidades-disponiveis article {
@@ -5041,6 +5247,59 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     line-height: 1.55;
                 }
 
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-summary-head {
+                    grid-template-columns: minmax(0, 1fr);
+                    gap: 12px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-summary-price-block {
+                    display: grid;
+                    gap: 4px;
+                    justify-items: start;
+                    align-content: start;
+                    padding-top: 12px;
+                    padding-left: 0;
+                    border-top: 1px solid rgba(25, 32, 43, 0.08);
+                    border-left: 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-price {
+                    display: block;
+                    line-height: 1.22;
+                    overflow: visible;
+                    white-space: normal;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-title {
+                    display: block;
+                    width: 100%;
+                    max-width: 100%;
+                    overflow: visible;
+                    text-overflow: clip;
+                    white-space: normal;
+                    overflow-wrap: break-word;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-summary-location {
+                    align-items: flex-start;
+                    white-space: normal;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-facts {
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 8px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-fact,
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-fact-text {
+                    min-width: 0;
+                    max-width: 100%;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-mobile-summary .plp-mobile-sheet-fact-text {
+                    overflow-wrap: break-word;
+                }
+
                 .bc-dev-mobile-benefits {
                     display: grid;
                     gap: 8px;
@@ -5078,6 +5337,26 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 .bc-page.bc-property-layout .bc-dev-mobile-units-card .plp-mobile-card-head--split h2 {
                     font-size: 19px;
                     line-height: 1.16;
+                }
+
+                .bc-page .bc-dev-empty-units--mobile {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                    padding: 16px;
+                    box-shadow: none;
+                }
+
+                .bc-page .bc-dev-empty-units--mobile .bc-dev-empty-units-icon {
+                    width: 44px;
+                    height: 44px;
+                }
+
+                .bc-page .bc-dev-empty-units--mobile h3 {
+                    font-size: 20px;
+                }
+
+                .bc-page .bc-dev-empty-units--mobile button {
+                    width: 100%;
                 }
 
                 @media (max-width: 1180px) {
@@ -5151,6 +5430,21 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         grid-template-columns: 1fr;
                     }
 
+                    .bc-page.bc-property-layout .bc-dev-empty-units {
+                        grid-template-columns: 1fr;
+                        align-items: flex-start;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-empty-units-actions {
+                        width: 100%;
+                        justify-content: stretch;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-empty-units-actions button,
+                    .bc-page.bc-property-layout .bc-dev-empty-units-actions a {
+                        width: 100%;
+                    }
+
                     .bc-page.bc-property-layout .bc-dev-section-head h2,
                     .bc-page.bc-property-layout .bc-dev-section-headline h2,
                     .bc-page.bc-property-layout .bc-related-developments-header h2 {
@@ -5163,6 +5457,22 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                     .bc-page.bc-property-layout .bc-floating-actions {
                         display: none;
+                    }
+
+                    .bc-page.bc-property-layout {
+                        padding-bottom: calc(92px + env(safe-area-inset-bottom));
+                    }
+
+                    .bc-page.bc-property-layout .mobile-nav {
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        min-height: 64px;
+                    }
+
+                    .bc-page.bc-property-layout .mobile-nav > div:last-child {
+                        width: clamp(150px, 42vw, 178px);
+                        max-width: clamp(150px, 42vw, 178px);
                     }
                 }
             `}</style>

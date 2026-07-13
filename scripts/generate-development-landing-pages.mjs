@@ -13,11 +13,16 @@ const PAGE_SIZE = 1000
 const SOURCE_REFS_ARG = process.argv.find(arg => arg.startsWith('--source-refs='))
 const SOURCE_REF_MIN_ARG = process.argv.find(arg => arg.startsWith('--source-ref-min='))
 const SOURCE_REF_MAX_ARG = process.argv.find(arg => arg.startsWith('--source-ref-max='))
+const ZERO_STOCK_SLUGS_ARG = process.argv.find(arg => arg.startsWith('--zero-stock-slugs='))
+const ZERO_STOCK_ONLY = process.argv.includes('--zero-stock-only')
 const SOURCE_REFS = SOURCE_REFS_ARG
   ? SOURCE_REFS_ARG.split('=').slice(1).join('=').split(',').map(value => value.trim()).filter(Boolean)
   : []
 const SOURCE_REF_MIN = SOURCE_REF_MIN_ARG ? SOURCE_REF_MIN_ARG.split('=').slice(1).join('=').trim() : ''
 const SOURCE_REF_MAX = SOURCE_REF_MAX_ARG ? SOURCE_REF_MAX_ARG.split('=').slice(1).join('=').trim() : ''
+const ZERO_STOCK_SLUGS = ZERO_STOCK_SLUGS_ARG
+  ? ZERO_STOCK_SLUGS_ARG.split('=').slice(1).join('=').split(',').map(value => value.trim()).filter(Boolean)
+  : []
 const SCOPED_SOURCE_REFS = Boolean(SOURCE_REFS.length > 0 || SOURCE_REF_MIN || SOURCE_REF_MAX)
 const RESERVED_SLUGS = new Set([
   'admin',
@@ -259,16 +264,21 @@ function stageLabel(stage) {
   return 'Pronto'
 }
 
-function commonLocation(properties) {
-  const city = mostCommon(properties.map(property => property.city), 'Litoral catarinense')
-  const state = mostCommon(properties.map(property => property.state), 'SC')
-  const neighborhood = mostCommon(properties.map(property => property.neighborhood), '')
+function commonLocation(properties, existingContent = {}, existingDevelopment = {}) {
+  const geo = asRecord(existingContent.geo)
+  const fallbackCity = text(existingDevelopment.city || geo.city, 'Litoral catarinense')
+  const fallbackState = text(existingDevelopment.state || geo.state, 'SC')
+  const fallbackNeighborhood = text(existingDevelopment.neighborhood || geo.neighborhood, '')
+  const city = properties.length ? mostCommon(properties.map(property => property.city), fallbackCity) : fallbackCity
+  const state = properties.length ? mostCommon(properties.map(property => property.state), fallbackState) : fallbackState
+  const neighborhood = properties.length ? mostCommon(properties.map(property => property.neighborhood), fallbackNeighborhood) : fallbackNeighborhood
   const parts = [neighborhood, city].filter(Boolean)
+  const locationName = parts.length ? `${parts.join(', ')} - ${state}` : `${city} - ${state}`
   return {
     city,
     state,
     neighborhood,
-    locationName: parts.length ? `${parts.join(', ')} - ${state}` : `${city} - ${state}`,
+    locationName: text(existingDevelopment.locationName || existingDevelopment.location_name, locationName),
   }
 }
 
@@ -285,20 +295,29 @@ function coordinateFromGroup(properties, key) {
 }
 
 function developmentDescription(name, properties, location, priceRange, areaRange, suitesRange) {
+  if (!properties.length) {
+    return `O ${name} segue mapeado pela curadoria Guilherme Pilger em ${location.locationName}. As unidades publicadas estao sob consulta neste momento.`
+  }
+
   const unitTypes = uniq(properties.map(unitType)).slice(0, 4).join(', ') || 'unidades'
   return `O ${name} reune ${properties.length} ${properties.length === 1 ? 'imovel ativo' : 'imoveis ativos'} em ${location.locationName}, com ${unitTypes.toLowerCase()}, faixa de valor ${priceRange}, metragens de ${areaRange} e configuracao de ${suitesRange}.`
 }
 
 function buildFaq(name, properties, location, priceRange, areaRange, suitesRange) {
   const unitsText = properties.length === 1 ? '1 unidade ativa' : `${properties.length} unidades ativas`
+  const hasUnits = properties.length > 0
   return [
     {
       question: `O que e o ${name}?`,
-      answer: `${name} e um empreendimento/condominio em ${location.locationName} com ${unitsText} na curadoria da Guilherme Pilger Imoveis.`,
+      answer: hasUnits
+        ? `${name} e um empreendimento/condominio em ${location.locationName} com ${unitsText} na curadoria da Guilherme Pilger Imoveis.`
+        : `${name} e um empreendimento/condominio em ${location.locationName} acompanhado pela curadoria da Guilherme Pilger Imoveis, com disponibilidade atual sob consulta.`,
     },
     {
       question: `Quais unidades estao disponiveis no ${name}?`,
-      answer: `A pagina consolida as unidades ativas do ${name}, incluindo tipo, metragem, suites, vagas, faixa de preco e link para os detalhes de cada imovel.`,
+      answer: hasUnits
+        ? `A pagina consolida as unidades ativas do ${name}, incluindo tipo, metragem, suites, vagas, faixa de preco e link para os detalhes de cada imovel.`
+        : `As unidades publicadas do ${name} estao sob consulta neste momento. O atendimento confirma novas entradas, reservas e alternativas semelhantes.`,
     },
     {
       question: `Onde fica o ${name}?`,
@@ -443,6 +462,16 @@ function mergeGallery(existingGallery, generatedGallery) {
   return merged.slice(0, 18)
 }
 
+function availabilityGallery(existingGallery, generatedGallery, name, hasUnits) {
+  const merged = mergeGallery(existingGallery, generatedGallery)
+  if (hasUnits) return merged
+  return merged.map((item, index) => ({
+    ...item,
+    title: index === 0 ? `Imagem do ${name}` : `${name} - imagem ${index + 1}`,
+    category: 'Empreendimento',
+  }))
+}
+
 function uniqueSlugForName(name, usedSlugs, preferredSlug) {
   if (preferredSlug) return preferredSlug
   const base = RESERVED_SLUGS.has(slugify(name)) ? `empreendimento-${slugify(name)}` : slugify(name)
@@ -460,12 +489,16 @@ function buildContent(group, slug, existingPage = null) {
   const existingContent = asRecord(existingPage?.content)
   const existingDevelopment = asRecord(existingContent.development)
   const properties = group.properties
-  const location = commonLocation(properties)
+  const location = commonLocation(properties, existingContent, existingDevelopment)
   const name = text(existingDevelopment.name, group.name)
   const stage = inferStage(properties)
   const units = buildUnits(properties, name)
+  const hasUnits = units.length > 0
   const gallery = buildGallery(properties, name)
   const heroImage = text(existingDevelopment.heroImage || existingDevelopment.hero_image || existingContent.custom_hero_image, gallery[0]?.image || '/placeholder-house.jpg')
+  const developmentGallery = availabilityGallery(existingDevelopment.gallery, gallery, name, hasUnits)
+  const customGallerySource = asArray(existingContent.custom_gallery).length ? existingContent.custom_gallery : existingDevelopment.gallery
+  const customGallery = availabilityGallery(customGallerySource, gallery, name, hasUnits)
   const priceRange = formatMoneyRange(properties.map(property => property.price))
   const areaRange = formatNumberRange(properties.map(property => property.area_private_m2 || property.area_m2), 'm2', 'area sob consulta')
   const suitesRange = formatCountRange(properties.map(property => property.suites || property.bedrooms), 'suite', 'suites', 'configuracao sob consulta')
@@ -474,8 +507,9 @@ function buildContent(group, slug, existingPage = null) {
   const title = `${name} em ${location.city} | Empreendimento Guilherme Pilger`
   const metaDescription = compact(`${description} Compare unidades, valores, metragens e fale com a Guilherme Pilger Imoveis.`, 158)
   const canonicalPath = `/${slug}`
-  const latitude = coordinateFromGroup(properties, 'latitude')
-  const longitude = coordinateFromGroup(properties, 'longitude')
+  const existingGeo = asRecord(existingContent.geo)
+  const latitude = coordinateFromGroup(properties, 'latitude') ?? number(existingDevelopment.latitude ?? existingGeo.latitude)
+  const longitude = coordinateFromGroup(properties, 'longitude') ?? number(existingDevelopment.longitude ?? existingGeo.longitude)
   const localEntities = uniq([
     name,
     location.neighborhood,
@@ -519,8 +553,8 @@ function buildContent(group, slug, existingPage = null) {
     show_on_home: existingPage ? existingDevelopment.show_on_home : false,
     benefits: asArray(existingDevelopment.benefits).length ? existingDevelopment.benefits : buildBenefits(name, location),
     differentials: asArray(existingDevelopment.differentials).length ? existingDevelopment.differentials : buildDifferentials(name, properties),
-    units: mergeUnits(existingDevelopment.units, units),
-    gallery: mergeGallery(existingDevelopment.gallery, gallery),
+    units,
+    gallery: developmentGallery,
     faq: asArray(existingDevelopment.faq).length ? existingDevelopment.faq : faq,
   }
 
@@ -538,7 +572,7 @@ function buildContent(group, slug, existingPage = null) {
     ]),
     og_image: heroImage,
     entity_type: 'RealEstateDevelopment',
-    schema_types: ['WebPage', 'Residence', 'ItemList', 'FAQPage'],
+    schema_types: hasUnits ? ['WebPage', 'Residence', 'ItemList', 'FAQPage'] : ['WebPage', 'Residence', 'FAQPage'],
     updated_at: NOW,
   }
 
@@ -549,8 +583,8 @@ function buildContent(group, slug, existingPage = null) {
     custom_description: text(existingContent.custom_description, metaDescription),
     custom_hero_image: heroImage,
     custom_price: priceRange,
-    custom_cta: text(existingContent.custom_cta, 'Falar com especialista'),
-    custom_gallery: mergeGallery(existingContent.custom_gallery, gallery),
+    custom_cta: hasUnits ? text(existingContent.custom_cta, 'Falar com especialista') : 'Consultar disponibilidade',
+    custom_gallery: customGallery,
     available_units_count: properties.length,
     home_featured: existingPage ? existingContent.home_featured : false,
     show_on_home: existingPage ? existingContent.show_on_home : false,
@@ -577,7 +611,9 @@ function buildContent(group, slug, existingPage = null) {
     },
     ai_ranking: {
       generated_for: ['seo', 'aeo', 'geo', 'schema'],
-      answer_engine_summary: `${name} e um empreendimento em ${location.locationName} com ${properties.length} unidades ativas, faixa de valor ${priceRange} e pagina dedicada para comparar unidades.`,
+      answer_engine_summary: hasUnits
+        ? `${name} e um empreendimento em ${location.locationName} com ${properties.length} unidades ativas, faixa de valor ${priceRange} e pagina dedicada para comparar unidades.`
+        : `${name} e um empreendimento em ${location.locationName} com disponibilidade sob consulta e pagina dedicada para atendimento consultivo.`,
       internal_links: [
         canonicalPath,
         '/busca',
@@ -591,6 +627,7 @@ function buildContent(group, slug, existingPage = null) {
 
 function rowForGroup(group, slug, existingPage = null) {
   const content = buildContent(group, slug, existingPage)
+  const isZeroStockLandingPage = group.sourceKind === 'zero_stock_landing_page'
   return {
     title: content.seo.title,
     slug,
@@ -602,8 +639,8 @@ function rowForGroup(group, slug, existingPage = null) {
       ...asRecord(existingPage?.metadata),
       generated_by: 'generate-development-landing-pages',
       generated_at: NOW,
-      source_table: group.sourceKind === 'title_inference' ? 'properties' : 'property_private_details',
-      source_column: group.sourceKind === 'title_inference' ? 'title_inference' : 'condominium_name',
+      source_table: isZeroStockLandingPage ? 'landing_pages' : (group.sourceKind === 'title_inference' ? 'properties' : 'property_private_details'),
+      source_column: isZeroStockLandingPage ? 'content.development.units' : (group.sourceKind === 'title_inference' ? 'title_inference' : 'condominium_name'),
       source_kind: group.sourceKind,
       source_condominium_name: group.rawName,
       source_condominium_key: group.key,
@@ -664,6 +701,15 @@ async function hydrateLandingPagesForGroups(landingPages, groups) {
   const hydratedById = new Map(hydratedPages.map(page => [page.id, page]))
 
   return landingPages.map(page => hydratedById.get(page.id) || page)
+}
+
+async function fetchLandingPagesBySlugs(slugs) {
+  if (!slugs.length) return []
+  return fetchAll(
+    'landing_pages',
+    'id, slug, title, description, content, metadata, status, created_at, updated_at',
+    query => query.in('slug', slugs)
+  )
 }
 
 async function loadData() {
@@ -772,7 +818,47 @@ function existingPageIndexes(landingPages) {
   return { bySlug, byDevelopmentKey }
 }
 
-function prepareRows(groups, landingPages) {
+function zeroStockGroupFromPage(page) {
+  const content = asRecord(page.content)
+  const development = asRecord(content.development)
+  const metadata = asRecord(page.metadata)
+  const rawName = text(
+    development.sourceCondominiumName ||
+    development.source_condominium_name ||
+    development.name ||
+    content.custom_title ||
+    page.title ||
+    page.slug,
+    page.slug
+  )
+  const name = text(development.name, rawName)
+  const key = normalizeKey(
+    development.sourceCondominiumKey ||
+    development.source_condominium_key ||
+    metadata.source_condominium_key ||
+    rawName ||
+    page.slug
+  )
+
+  return {
+    key,
+    looseKey: normalizeLooseKey(rawName || name),
+    rawName,
+    name,
+    names: uniq([
+      rawName,
+      name,
+      page.slug,
+      ...asArray(development.sourceCondominiumAliases),
+      ...asArray(development.source_condominium_aliases),
+      ...asArray(metadata.source_condominium_aliases),
+    ]),
+    properties: [],
+    sourceKind: 'zero_stock_landing_page',
+  }
+}
+
+function prepareRows(groups, landingPages, zeroStockPages = []) {
   const usedSlugs = new Set(landingPages.map(page => page.slug).filter(Boolean))
   const { byDevelopmentKey } = existingPageIndexes(landingPages)
   const insertRows = []
@@ -781,7 +867,7 @@ function prepareRows(groups, landingPages) {
   const updateTargets = new Map()
   const targets = []
 
-  for (const group of groups) {
+  for (const group of ZERO_STOCK_ONLY ? [] : groups) {
     const existing = byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
     if (existing) {
       const current = updateTargets.get(existing.id)
@@ -802,6 +888,15 @@ function prepareRows(groups, landingPages) {
     }
 
     targets.push({ group, existing: null })
+  }
+
+  for (const page of zeroStockPages) {
+    if (!page?.id || updateTargets.has(page.id)) continue
+    const group = zeroStockGroupFromPage(page)
+    if (!group.key) continue
+    const target = { group, existing: page }
+    updateTargets.set(page.id, target)
+    targets.push(target)
   }
 
   for (const target of targets) {
@@ -827,13 +922,15 @@ function pageHasRankingRequirements(page) {
   const geo = asRecord(content.geo)
   const schema = asRecord(content.schema)
   const faq = asArray(development.faq).length ? development.faq : content.aeo_questions
+  const units = asArray(development.units)
+  const declaredUnitCount = number(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
 
   return {
     seo: Boolean(seo.title && seo.description && (seo.canonical_path || content.canonical_path)),
     aeo: asArray(faq).some(item => asRecord(item).question && asRecord(item).answer),
     geo: Boolean(geo.city || development.city || development.locationName || development.location_name),
-    schema: Boolean(schema.version || asArray(seo.schema_types).length || asArray(development.units).length),
-    units: asArray(development.units).length > 0,
+    schema: Boolean(schema.version || asArray(seo.schema_types).length || units.length || declaredUnitCount === 0),
+    units: units.length > 0 || declaredUnitCount === 0,
   }
 }
 
@@ -911,6 +1008,7 @@ async function main() {
   let { activeProperties, landingPages } = await loadData()
   const { groups, unnamed, inferred } = buildGroups(activeProperties)
   landingPages = await hydrateLandingPagesForGroups(landingPages, groups)
+  const zeroStockPages = await fetchLandingPagesBySlugs(ZERO_STOCK_SLUGS)
   const missingPrivateNameCount = activeProperties.filter(property => !text(property.condominium_name)).length
 
   if (AUDIT_ONLY) {
@@ -930,9 +1028,12 @@ async function main() {
     return
   }
 
-  const { insertRows, updateRows } = prepareRows(groups, landingPages)
+  const { insertRows, updateRows } = prepareRows(groups, landingPages, zeroStockPages)
   printSummary(APPLY ? 'Apply plan' : 'Dry-run plan', {
     scopedSourceReferences: SCOPED_SOURCE_REFS,
+    zeroStockOnly: ZERO_STOCK_ONLY,
+    zeroStockSlugs: ZERO_STOCK_SLUGS,
+    zeroStockPagesMatched: zeroStockPages.length,
     activeProperties: activeProperties.length,
     condominiumGroups: groups.length,
     activePropertiesMissingPrivateCondominiumName: missingPrivateNameCount,

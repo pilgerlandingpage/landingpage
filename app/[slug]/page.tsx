@@ -222,42 +222,47 @@ function developmentJsonLd(content: Record<string, any>, path: string, title: st
         .filter(Boolean)
         .slice(0, 16)
 
-    return [
-        {
-            '@context': 'https://schema.org',
-            '@type': ['Place', 'Residence'],
-            '@id': `${url}#development`,
-            name,
-            url,
-            image,
-            description: landingText(development.description, description),
-            mainEntityOfPage: {
-                '@id': `${url}#webpage`,
-            },
-            address: {
-                '@type': 'PostalAddress',
-                streetAddress: address,
-                addressLocality: city || undefined,
-                addressRegion: 'SC',
-                addressCountry: 'BR',
-            },
-            geo: latitude !== null && longitude !== null ? {
-                '@type': 'GeoCoordinates',
-                latitude,
-                longitude,
-            } : undefined,
-            amenityFeature: amenities.map(item => ({
-                '@type': 'LocationFeatureSpecification',
-                name: item,
-                value: true,
-            })),
-            containsPlace: unitItems.slice(0, 40).map(unit => ({
-                '@type': 'Accommodation',
-                name: unit.name,
-                url: absoluteUrl(unit.url),
-                image: unit.image || undefined,
-            })),
+    const developmentJsonLd: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': ['Place', 'Residence'],
+        '@id': `${url}#development`,
+        name,
+        url,
+        image,
+        description: landingText(development.description, description),
+        mainEntityOfPage: {
+            '@id': `${url}#webpage`,
         },
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: address,
+            addressLocality: city || undefined,
+            addressRegion: 'SC',
+            addressCountry: 'BR',
+        },
+        geo: latitude !== null && longitude !== null ? {
+            '@type': 'GeoCoordinates',
+            latitude,
+            longitude,
+        } : undefined,
+        amenityFeature: amenities.map(item => ({
+            '@type': 'LocationFeatureSpecification',
+            name: item,
+            value: true,
+        })),
+    }
+
+    if (unitItems.length) {
+        developmentJsonLd.containsPlace = unitItems.slice(0, 40).map(unit => ({
+            '@type': 'Accommodation',
+            name: unit.name,
+            url: absoluteUrl(unit.url),
+            image: unit.image || undefined,
+        }))
+    }
+
+    return [
+        developmentJsonLd,
         unitItems.length ? itemListJsonLd({
             name: `Unidades disponiveis no ${name}`,
             description: `Lista de imoveis ativos vinculados ao empreendimento ${name}.`,
