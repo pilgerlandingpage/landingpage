@@ -1,5 +1,6 @@
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
 import ModernLuxuryTemplate from '@/components/templates/ModernLuxuryTemplate'
 import LeadCaptureTemplate from '@/components/templates/LeadCaptureTemplate'
@@ -19,8 +20,8 @@ export function generateStaticParams() {
     return []
 }
 
-const LANDING_LOOKUP_TIMEOUT_MS = 12000
-const LANDING_LOOKUP_RETRY_DELAYS_MS = [300, 900]
+const LANDING_LOOKUP_TIMEOUT_MS = 7000
+const LANDING_LOOKUP_RETRY_DELAYS_MS = [400]
 const LANDING_PAGE_SELECT = `
     id,
     title,
@@ -28,26 +29,42 @@ const LANDING_PAGE_SELECT = `
     description,
     content,
     primary_color,
-    property:properties (
-        id,
-        title,
-        description,
-        images,
-        price,
-        bedrooms,
-        bathrooms,
-        area_m2,
-        area_private_m2,
-        city,
-        state,
-        neighborhood,
-        street
-    ),
-    agent:ai_agents (
-        name,
-        greeting_message
-    )
+    property_id,
+    ai_agent_id,
+    created_at,
+    updated_at
 `
+const LANDING_PROPERTY_SELECT = `
+    id,
+    title,
+    description,
+    images,
+    price,
+    bedrooms,
+    bathrooms,
+    area_m2,
+    area_private_m2,
+    city,
+    state,
+    neighborhood,
+    street
+`
+const LANDING_AGENT_SELECT = `
+    name,
+    greeting_message
+`
+
+type LandingLookupResult = {
+    data: Record<string, any> | null
+    unavailable: boolean
+    stale?: boolean
+}
+
+const landingLookupMemoryCache = new Map<string, Record<string, any>>()
+
+function landingLookupCacheKey(slug: string, select: string) {
+    return `${slug}:${select.replace(/\s+/g, ' ').trim()}`
+}
 
 function isRetriableLandingLookupError(error: unknown) {
     const summary = summarizeSupabaseError(error).toLowerCase()
@@ -66,7 +83,9 @@ function waitForLandingLookupRetry(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function fetchLandingPageBySlug(slug: string, select: string) {
+async function fetchLandingPageBySlug(slug: string, select: string): Promise<LandingLookupResult> {
+    const cacheKey = landingLookupCacheKey(slug, select)
+
     for (let attempt = 0; attempt <= LANDING_LOOKUP_RETRY_DELAYS_MS.length; attempt += 1) {
         const supabase = createAdminClient()
         const { data, error } = await supabase
@@ -76,18 +95,138 @@ async function fetchLandingPageBySlug(slug: string, select: string) {
             .abortSignal(createSupabaseAbortSignal(LANDING_LOOKUP_TIMEOUT_MS))
             .maybeSingle()
 
-        if (!error) return data || null
+        if (!error) {
+            if (data) landingLookupMemoryCache.set(cacheKey, data as Record<string, any>)
+            return { data: (data as Record<string, any> | null) || null, unavailable: false }
+        }
 
-        const canRetry = attempt < LANDING_LOOKUP_RETRY_DELAYS_MS.length && isRetriableLandingLookupError(error)
+        const isRetriable = isRetriableLandingLookupError(error)
+        const canRetry = attempt < LANDING_LOOKUP_RETRY_DELAYS_MS.length && isRetriable
         if (!canRetry) {
-            console.error('[Landing Page] lookup failed:', summarizeSupabaseError(error))
+            const summary = summarizeSupabaseError(error)
+            const cached = landingLookupMemoryCache.get(cacheKey)
+
+            if (isRetriable && cached) {
+                console.warn('[Landing Page] lookup unavailable, serving cached page:', summary)
+                return { data: cached, unavailable: false, stale: true }
+            }
+
+            if (isRetriable) {
+                console.warn('[Landing Page] lookup temporarily unavailable:', summary)
+                return { data: null, unavailable: true }
+            }
+
+            console.warn('[Landing Page] lookup failed:', summary)
             throw new Error('Nao foi possivel carregar esta landing page agora.')
         }
 
         await waitForLandingLookupRetry(LANDING_LOOKUP_RETRY_DELAYS_MS[attempt])
     }
 
-    throw new Error('Nao foi possivel carregar esta landing page agora.')
+    return { data: null, unavailable: true }
+}
+
+async function fetchOptionalLandingRelation(
+    table: 'properties' | 'ai_agents',
+    id: unknown,
+    select: string,
+    label: string,
+) {
+    const relationId = landingText(id)
+    if (!relationId) return null
+
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from(table)
+            .select(select)
+            .eq('id', relationId)
+            .abortSignal(createSupabaseAbortSignal(6000))
+            .maybeSingle()
+
+        if (error) throw error
+        return data || null
+    } catch (error) {
+        console.warn(`[Landing Page] optional ${label} lookup unavailable:`, summarizeSupabaseError(error))
+        return null
+    }
+}
+
+function countCurrentLandingSaves(events?: any[] | null) {
+    const latestByVisitor = new Map<string, any>()
+
+    for (const event of events || []) {
+        const visitorKey = String(event.visitor_id || event.id || '').trim()
+        if (!visitorKey || latestByVisitor.has(visitorKey)) continue
+        latestByVisitor.set(visitorKey, event)
+    }
+
+    return Array.from(latestByVisitor.values())
+        .filter(event => ['property_favorited', 'development_favorited'].includes(String(event.event_type || '')))
+        .length
+}
+
+async function fetchLandingMetrics(landingPageId: unknown) {
+    const id = landingText(landingPageId)
+    if (!id) return { view_count: 0, save_count: 0 }
+
+    try {
+        const supabase = createAdminClient()
+        const [viewsResult, savesResult] = await Promise.all([
+            supabase
+                .from('funnel_events')
+                .select('id', { count: 'exact', head: true })
+                .eq('landing_page_id', id)
+                .in('event_type', ['page_view', 'property_details_landing_viewed'])
+                .abortSignal(createSupabaseAbortSignal(3000)),
+            supabase
+                .from('funnel_events')
+                .select('id, visitor_id, event_type, created_at')
+                .eq('landing_page_id', id)
+                .in('event_type', ['property_favorited', 'property_unfavorited', 'development_favorited', 'development_unfavorited'])
+                .order('created_at', { ascending: false })
+                .limit(5000)
+                .abortSignal(createSupabaseAbortSignal(3000)),
+        ])
+
+        if (viewsResult.error) {
+            console.warn('[Landing Page] view count unavailable:', viewsResult.error.message)
+        }
+
+        if (savesResult.error) {
+            console.warn('[Landing Page] save count unavailable:', savesResult.error.message)
+        }
+
+        return {
+            view_count: viewsResult.count || 0,
+            save_count: countCurrentLandingSaves(savesResult.data),
+        }
+    } catch (error) {
+        console.warn('[Landing Page] metrics unavailable:', summarizeSupabaseError(error))
+        return { view_count: 0, save_count: 0 }
+    }
+}
+
+async function fetchHydratedLandingPageBySlug(slug: string): Promise<LandingLookupResult> {
+    const lookup = await fetchLandingPageBySlug(slug, LANDING_PAGE_SELECT)
+    const lp = lookup.data
+    if (!lp) return lookup
+
+    const [property, agent, metrics] = await Promise.all([
+        fetchOptionalLandingRelation('properties', (lp as any).property_id, LANDING_PROPERTY_SELECT, 'property'),
+        fetchOptionalLandingRelation('ai_agents', (lp as any).ai_agent_id, LANDING_AGENT_SELECT, 'agent'),
+        fetchLandingMetrics((lp as any).id),
+    ])
+
+    return {
+        ...lookup,
+        data: {
+            ...lp,
+            property,
+            agent,
+            metrics,
+        },
+    }
 }
 
 function landingRecord(value: unknown): Record<string, any> {
@@ -105,6 +244,82 @@ function landingNumber(value: unknown): number | null {
         if (Number.isFinite(parsed)) return parsed
     }
     return null
+}
+
+function LandingPageUnavailable({ slug }: { slug: string }) {
+    return (
+        <>
+            <GlobalHeader />
+            <main style={{
+                minHeight: '70vh',
+                display: 'grid',
+                placeItems: 'center',
+                padding: '48px 20px',
+                background: '#f7f5ef',
+            }}>
+                <section style={{
+                    width: 'min(100%, 640px)',
+                    border: '1px solid rgba(35, 39, 42, 0.12)',
+                    borderRadius: 8,
+                    background: '#fffdf8',
+                    padding: 32,
+                    boxShadow: '0 18px 50px rgba(35, 39, 42, 0.08)',
+                }}>
+                    <span style={{
+                        display: 'block',
+                        marginBottom: 10,
+                        color: '#9a6a22',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                    }}>Pagina indisponivel</span>
+                    <h1 style={{
+                        margin: '0 0 12px',
+                        color: '#23272a',
+                        fontSize: 'clamp(1.7rem, 4vw, 2.5rem)',
+                        lineHeight: 1.08,
+                    }}>Nao foi possivel carregar esta pagina agora.</h1>
+                    <p style={{
+                        margin: 0,
+                        color: '#5d6874',
+                        lineHeight: 1.6,
+                    }}>O banco de dados demorou para responder. Tente novamente em alguns instantes ou continue pela busca de imoveis.</p>
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 12,
+                        marginTop: 24,
+                    }}>
+                        <Link href={`/${slug}`} style={{
+                            minHeight: 44,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 6,
+                            padding: '0 18px',
+                            background: '#171b1f',
+                            color: 'white',
+                            fontWeight: 800,
+                            textDecoration: 'none',
+                        }}>Tentar novamente</Link>
+                        <Link href="/busca" style={{
+                            minHeight: 44,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 6,
+                            padding: '0 18px',
+                            background: '#c9a15c',
+                            color: '#171b1f',
+                            fontWeight: 800,
+                            textDecoration: 'none',
+                        }}>Ver imoveis</Link>
+                    </div>
+                </section>
+            </main>
+        </>
+    )
 }
 
 function firstGalleryImage(content: Record<string, any>, development: Record<string, any>) {
@@ -334,7 +549,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function DynamicLandingPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
 
-    const lp = await fetchLandingPageBySlug(slug, LANDING_PAGE_SELECT)
+    const lookup = await fetchHydratedLandingPageBySlug(slug)
+    const lp = lookup.data
+
+    if (lookup.unavailable) {
+        return <LandingPageUnavailable slug={slug} />
+    }
 
     if (!lp) {
         notFound()
@@ -378,10 +598,16 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     }
 
     const templateId = content.template || 'classic'
+    const templateContent = {
+        ...content,
+        landing_page_created_at: lp.created_at || null,
+        landing_page_updated_at: lp.updated_at || null,
+        landing_metrics: landingRecord(lp.metrics),
+    }
 
     const commonProps = {
         data: displayData,
-        content,
+        content: templateContent,
         slug: slug,
         landingPageId: lp.id,
         agentName: agent.name,

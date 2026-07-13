@@ -105,7 +105,9 @@ type MapBounds = {
 type SearchPageParams = { [key: string]: string | string[] | undefined }
 
 type SearchDataInput = {
+    rawQ: string | undefined
     q: string | undefined
+    developmentTerm: string | undefined
     type: string | undefined
     subtype: string | undefined
     city: string | undefined
@@ -128,6 +130,27 @@ type SearchDataInput = {
     priceMax: number
     drawArea: MapDrawArea | null
     mapBounds: MapBounds | null
+}
+
+type SearchExpansion = {
+    propertyIds: string[]
+    sourceReferences: string[]
+    sourceSlugs: string[]
+}
+
+type SearchDevelopmentResult = {
+    slug: string
+    name: string
+    locationName: string
+    priceRange: string
+    availableUnitsCount: number | null
+    heroImage: string
+    stage: 'launch' | 'ready'
+    stageLabel: string
+    propertyIds: string[]
+    sourceReferences: string[]
+    sourceSlugs: string[]
+    matchScore: number
 }
 
 function parseDrawAreaParam(value: string | string[] | undefined): MapDrawArea | null {
@@ -193,6 +216,277 @@ function parseMapBoundsParam(value: string | string[] | undefined): MapBounds | 
     return null
 }
 
+const DEVELOPMENT_RESULT_LIMIT = 6
+const SEARCH_EXPANSION_IN_FILTER_LIMIT = 80
+
+const DEVELOPMENT_STAGE_META: Record<SearchDevelopmentResult['stage'], { label: string }> = {
+    launch: { label: 'Lancamentos' },
+    ready: { label: 'Prontos' },
+}
+
+function asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function asArray(value: unknown): any[] {
+    return Array.isArray(value) ? value : []
+}
+
+function asText(value: unknown, fallback = '') {
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function asOptionalNumber(value: unknown) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value === 'string') {
+        const parsed = Number(value)
+        if (Number.isFinite(parsed)) return parsed
+    }
+    return null
+}
+
+function safePublicSearchTerm(value: string | undefined) {
+    return safeSearch(value || '')
+        .replace(/[%_*;:.]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 100)
+}
+
+function normalizeSearchText(value: unknown) {
+    return normalizeLocationName(value)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ')
+}
+
+function normalizeLookupKey(value: unknown) {
+    return normalizeSearchText(value)
+        .replace(/\b(edificio|ed|condominio|cond|residencial|res)\b/g, ' ')
+        .trim()
+        .replace(/\s+/g, '')
+}
+
+function singularToken(token: string) {
+    return token.endsWith('s') && token.length > 3 ? token.slice(0, -1) : token
+}
+
+function normalizedTokens(value: unknown) {
+    return normalizeSearchText(value)
+        .split(' ')
+        .map(singularToken)
+        .filter(token => token.length > 2)
+}
+
+function developmentMatchScore(candidates: unknown[], rawTerm: string) {
+    const term = normalizeSearchText(rawTerm)
+    const termKey = normalizeLookupKey(rawTerm)
+    const termTokens = normalizedTokens(rawTerm)
+    if (!term && !termKey) return 0
+
+    let best = 0
+
+    for (const candidate of candidates) {
+        const text = normalizeSearchText(candidate)
+        const key = normalizeLookupKey(candidate)
+        if (!text && !key) continue
+
+        if (text === term || key === termKey) best = Math.max(best, 100)
+        if (text.startsWith(term) || (termKey.length >= 4 && key.startsWith(termKey))) best = Math.max(best, 90)
+        if (term.length >= 3 && text.includes(term)) best = Math.max(best, 82)
+        if (termKey.length >= 4 && key.includes(termKey)) best = Math.max(best, 76)
+
+        const candidateTokens = normalizedTokens(candidate)
+        if (candidateTokens.length > 0 && candidateTokens.every(token => termTokens.includes(token))) {
+            best = Math.max(best, 72)
+        }
+    }
+
+    return best
+}
+
+function firstImageFromGallery(content: Record<string, any>) {
+    const development = asRecord(content.development)
+    const gallery = [
+        ...asArray(content.custom_gallery),
+        ...asArray(development.gallery),
+    ]
+
+    for (const item of gallery) {
+        if (typeof item === 'string' && item.trim()) return item.trim()
+        const record = asRecord(item)
+        const image = asText(record.image ?? record.url ?? record.src)
+        if (image) return image
+    }
+
+    return '/placeholder-house.jpg'
+}
+
+function stageFromText(value: unknown): SearchDevelopmentResult['stage'] | null {
+    const text = normalizeSearchText(value)
+    if (!text) return null
+    if (/\b(launch|construction|lancamento|pre lancamento|pre lancamento|na planta|em construcao|construcao|obra|em obra|entrega prevista)\b/.test(text)) return 'launch'
+    if (/\b(ready|pronto|pronta|pronto para morar|entregue)\b/.test(text)) return 'ready'
+    return null
+}
+
+function resolveDevelopmentStage(page: Record<string, any>, content: Record<string, any>, development: Record<string, any>) {
+    return stageFromText(
+        development.stage
+        ?? development.status
+        ?? development.constructionStatus
+        ?? development.construction_status
+        ?? content.development_stage
+        ?? content.stage
+    ) || stageFromText([
+        page.title,
+        content.custom_title,
+        content.custom_description,
+        development.name,
+        development.tagline,
+        development.description,
+    ].filter(Boolean).join(' ')) || 'ready'
+}
+
+function collectDevelopmentUnitReferences(units: any[]) {
+    const propertyIds = new Set<string>()
+    const sourceReferences = new Set<string>()
+    const sourceSlugs = new Set<string>()
+
+    for (const unit of units) {
+        const record = asRecord(unit)
+        const propertyId = asText(record.propertyId ?? record.property_id)
+        const sourceReference = asText(record.sourceReference ?? record.source_reference ?? record.id)
+        const sourceSlug = asText(record.sourceSlug ?? record.source_slug ?? record.slug)
+
+        if (propertyId) propertyIds.add(propertyId)
+        if (sourceReference) sourceReferences.add(sourceReference)
+        if (sourceSlug) sourceSlugs.add(sourceSlug)
+    }
+
+    return {
+        propertyIds: [...propertyIds],
+        sourceReferences: [...sourceReferences],
+        sourceSlugs: [...sourceSlugs],
+    }
+}
+
+function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string): SearchDevelopmentResult | null {
+    const content = asRecord(page.content)
+    const development = asRecord(content.development)
+    if (Object.keys(development).length === 0) return null
+
+    const slug = asText(page.slug)
+    if (!slug) return null
+
+    const name = asText(
+        development.name,
+        asText(content.custom_title, asText(page.title, 'Empreendimento'))
+    )
+    const aliases = [
+        development.sourceCondominiumKey,
+        development.source_condominium_key,
+        development.sourceCondominiumName,
+        development.source_condominium_name,
+        ...asArray(development.sourceCondominiumAliases),
+        ...asArray(development.source_condominium_aliases),
+        ...asArray(asRecord(page.metadata).source_condominium_aliases),
+    ]
+    const candidates = [
+        name,
+        page.slug,
+        content.custom_title,
+        development.pageSlug,
+        development.page_slug,
+        ...aliases,
+    ]
+    const matchScore = developmentMatchScore(candidates, rawTerm)
+    if (matchScore <= 0) return null
+
+    const units = asArray(development.units)
+    const stage = resolveDevelopmentStage(page, content, development)
+
+    return {
+        slug,
+        name,
+        locationName: asText(development.locationName ?? development.location_name, 'Litoral catarinense'),
+        priceRange: asText(development.priceRange ?? development.price_range, 'Consultar valores'),
+        availableUnitsCount: asOptionalNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (units.length || null),
+        heroImage: asText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstImageFromGallery(content)),
+        stage,
+        stageLabel: DEVELOPMENT_STAGE_META[stage].label,
+        ...collectDevelopmentUnitReferences(units),
+        matchScore,
+    }
+}
+
+function mergeSearchExpansion(...items: SearchExpansion[]): SearchExpansion {
+    return {
+        propertyIds: Array.from(new Set(items.flatMap(item => item.propertyIds))).slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT),
+        sourceReferences: Array.from(new Set(items.flatMap(item => item.sourceReferences))).slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT),
+        sourceSlugs: Array.from(new Set(items.flatMap(item => item.sourceSlugs))).slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT),
+    }
+}
+
+function safeInValues(values: string[]) {
+    return Array.from(new Set(values))
+        .map(value => String(value || '').trim())
+        .filter(value => /^[a-zA-Z0-9_-]+$/.test(value))
+        .slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT)
+}
+
+async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefined) {
+    const term = safePublicSearchTerm(rawTerm)
+    if (normalizeSearchText(term).length < 3) {
+        return {
+            developmentResults: [] as SearchDevelopmentResult[],
+            expansion: { propertyIds: [], sourceReferences: [], sourceSlugs: [] } satisfies SearchExpansion,
+        }
+    }
+
+    const [pagesResult, privateResult] = await Promise.all([
+        supabase
+            .from('landing_pages')
+            .select('slug, title, description, content, metadata, property_id, created_at')
+            .eq('status', 'published')
+            .order('created_at', { ascending: true }),
+        supabase
+            .from('property_private_details')
+            .select('property_id, source_reference, condominium_name')
+            .ilike('condominium_name', `%${term}%`)
+            .limit(250),
+    ])
+
+    if (pagesResult.error) {
+        console.warn('[Busca] Development search unavailable:', pagesResult.error.message)
+    }
+    if (privateResult.error) {
+        console.warn('[Busca] Private condominium expansion unavailable:', privateResult.error.message)
+    }
+
+    const developmentResults = ((pagesResult.data || []) as Array<Record<string, any>>)
+        .map(page => normalizeSearchDevelopment(page, term))
+        .filter((item): item is SearchDevelopmentResult => Boolean(item))
+        .sort((a, b) => b.matchScore - a.matchScore || (b.availableUnitsCount || 0) - (a.availableUnitsCount || 0) || a.name.localeCompare(b.name, 'pt-BR'))
+        .slice(0, DEVELOPMENT_RESULT_LIMIT)
+
+    const developmentExpansion = mergeSearchExpansion(...developmentResults.map(result => ({
+        propertyIds: result.propertyIds,
+        sourceReferences: result.sourceReferences,
+        sourceSlugs: result.sourceSlugs,
+    })))
+    const privateExpansion: SearchExpansion = {
+        propertyIds: ((privateResult.data || []) as Array<Record<string, any>>).map(row => asText(row.property_id)).filter(Boolean),
+        sourceReferences: ((privateResult.data || []) as Array<Record<string, any>>).map(row => asText(row.source_reference)).filter(Boolean),
+        sourceSlugs: [],
+    }
+
+    return {
+        developmentResults,
+        expansion: mergeSearchExpansion(developmentExpansion, privateExpansion),
+    }
+}
+
 function applyTextFilter(query: any, tag: string | undefined) {
     if (!tag) return query
 
@@ -223,7 +517,7 @@ function applyTextFilter(query: any, tag: string | undefined) {
 function applyLocationFilter(query: any, value: string | undefined) {
     if (!value) return query
 
-    const term = safeSearch(value)
+    const term = safeSearch(value || '')
     const normalized = normalizeLocationName(term)
 
     if (normalized === 'balneario camboriu' || normalized === 'bc') {
@@ -241,13 +535,28 @@ function applyLocationFilter(query: any, value: string | undefined) {
     return query.or(`city.ilike.%${term}%,neighborhood.ilike.%${term}%`)
 }
 
-function applySearchTermFilter(query: any, value: string | undefined) {
-    if (!value) return query
+function buildExpansionOrFilters(expansion: SearchExpansion | null | undefined) {
+    if (!expansion) return []
 
-    const term = safeSearch(value)
+    const propertyIds = safeInValues(expansion.propertyIds)
+    const sourceReferences = safeInValues(expansion.sourceReferences)
+    const sourceSlugs = safeInValues(expansion.sourceSlugs)
+
+    return [
+        propertyIds.length ? `id.in.(${propertyIds.join(',')})` : '',
+        sourceReferences.length ? `source_reference.in.(${sourceReferences.join(',')})` : '',
+        sourceSlugs.length ? `source_slug.in.(${sourceSlugs.join(',')})` : '',
+    ].filter(Boolean)
+}
+
+function applySearchTermFilter(query: any, value: string | undefined, expansion?: SearchExpansion) {
+    const expansionFilters = buildExpansionOrFilters(expansion)
+    if (!value && expansionFilters.length === 0) return query
+
+    const term = safeSearch(value || '')
     const normalized = normalizeLocationName(term)
 
-    if ([
+    if (value && [
         'balneario camboriu',
         'bc',
         'itajai',
@@ -259,7 +568,19 @@ function applySearchTermFilter(query: any, value: string | undefined) {
         return applyLocationFilter(query, term)
     }
 
-    return query.or(`title.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,neighborhood.ilike.%${term}%,description.ilike.%${term}%,property_type.ilike.%${term}%,source_reference.ilike.%${term}%`)
+    const textFilters = value
+        ? [
+            `title.ilike.%${term}%`,
+            `city.ilike.%${term}%`,
+            `state.ilike.%${term}%`,
+            `neighborhood.ilike.%${term}%`,
+            `description.ilike.%${term}%`,
+            `property_type.ilike.%${term}%`,
+            `source_reference.ilike.%${term}%`,
+        ]
+        : []
+
+    return query.or([...textFilters, ...expansionFilters].join(','))
 }
 
 const SEARCH_PROPERTY_FIELDS = [
@@ -349,12 +670,81 @@ function compactSearchProperty(property: any) {
     }
 }
 
+function removeSearchPhrase(value: string, phrase: unknown) {
+    const normalizedPhrase = normalizeSearchText(phrase)
+    if (!normalizedPhrase) return value
+    return value
+        .replace(new RegExp(`\\b${normalizedPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'), ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function residualDevelopmentSearchTerm(rawQ: string | undefined, naturalSearch: ReturnType<typeof parseNaturalSearch>) {
+    const raw = normalizeSearchText(rawQ)
+    if (!raw) return undefined
+    if (!naturalSearch.hasStructuredFilters) return rawQ
+
+    let residual = raw
+    const structuredPhrases = [
+        naturalSearch.city,
+        naturalSearch.type,
+        naturalSearch.subtype,
+        naturalSearch.tag,
+        'balneario camboriu',
+        'bc',
+        'praia brava',
+        'itajai',
+        'itapema',
+        'porto belo',
+        'camboriu',
+        'apartamento',
+        'apto',
+        'apt',
+        'cobertura',
+        'garden',
+        'duplex',
+        'triplex',
+        'loft',
+        'sobrado',
+        'casa',
+        'terreno',
+        'comercial',
+        'sala comercial',
+        'galpao',
+        'deposito',
+        'condominio',
+        'frente mar',
+        'vista mar',
+        'quadra mar',
+        'lancamento',
+        'em construcao',
+        'construcao',
+        'na planta',
+        'pronto',
+        'mobiliado',
+    ]
+
+    structuredPhrases.forEach(phrase => {
+        residual = removeSearchPhrase(residual, phrase)
+    })
+
+    residual = residual
+        .replace(/\b(com|de|do|da|dos|das|no|na|nos|nas|mais|acima|partir|ate|minimo|minima|maximo|maxima|quartos?|dormitorios?|suites?|banheiros?|vagas?|metros|m2|milhoes?|milhao|mi|r)\b/g, ' ')
+        .replace(/\b\d+(?:[.,]\d+)?\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    return residual.length >= 3 ? residual : undefined
+}
+
 function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput {
     const rawQ = firstParam(resolvedParams.q)
     const naturalSearch = parseNaturalSearch(rawQ)
 
     return {
+        rawQ,
         q: naturalSearch.hasStructuredFilters ? naturalSearch.q : rawQ,
+        developmentTerm: residualDevelopmentSearchTerm(rawQ, naturalSearch),
         type: firstParam(resolvedParams.type) || naturalSearch.type,
         subtype: firstParam(resolvedParams.subtype) || naturalSearch.subtype,
         city: firstParam(resolvedParams.city) || naturalSearch.city,
@@ -383,6 +773,7 @@ function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput
 const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
     const supabase = createAdminClient()
     const hasServerSpatialFilter = Boolean(input.drawArea || input.mapBounds)
+    const developmentSearch = await resolveDevelopmentSearch(supabase, input.q || input.developmentTerm)
     const brokerPropertyIds = await resolveBrokerPropertyIds(supabase, input.brokerName, input.brokerLogin)
 
     const createPropertyQuery = (useSpatialFilter: boolean) => (
@@ -399,7 +790,7 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
     const applyPropertyFilters = (initialQuery: any) => {
         let query = initialQuery
 
-        query = applySearchTermFilter(query, input.q)
+        query = applySearchTermFilter(query, input.q, developmentSearch.expansion)
         query = applyLocationFilter(query, input.city)
 
         if (input.type && input.type !== 'Todos os Imoveis' && input.type !== 'Todos os Imóveis') {
@@ -492,14 +883,20 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
 
     const lpMap: Record<string, string> = {}
     landingPages?.forEach((lp: any) => {
-        lpMap[lp.property_id] = lp.slug
+        if (lp.property_id) lpMap[lp.property_id] = lp.slug
+    })
+    developmentSearch.developmentResults.forEach((development) => {
+        development.propertyIds.forEach((propertyId) => {
+            if (propertyId && !lpMap[propertyId]) lpMap[propertyId] = development.slug
+        })
     })
 
     return {
+        developmentResults: developmentSearch.developmentResults,
         lpMap,
         properties: (properties || []).map(compactSearchProperty),
     }
-}, ['public-search-data-v1'], { revalidate: 120, tags: ['public-search'] })
+}, ['public-search-data-v2'], { revalidate: 120, tags: ['public-search'] })
 
 export default async function SearchPage({
     searchParams
@@ -528,7 +925,7 @@ export default async function SearchPage({
     ]
     const resolvedParams = await searchParams
     const searchDataInput = buildSearchDataInput(resolvedParams)
-    const { properties, lpMap } = await getCachedSearchData(searchDataInput)
+    const { properties, lpMap, developmentResults } = await getCachedSearchData(searchDataInput)
 
     return (
         <div
@@ -541,6 +938,7 @@ export default async function SearchPage({
                 <SearchResults
                     properties={properties}
                     lpMap={lpMap}
+                    developmentResults={developmentResults}
                     brokerSearchName={searchDataInput.brokerName || null}
                 />
             </div>

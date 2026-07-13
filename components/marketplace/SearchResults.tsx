@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, BellRing, Check, Clock3, Heart, Loader2, MapPinned, Search, SearchX, Sparkles, X } from 'lucide-react'
+import { ArrowRight, BellRing, Building2, Check, Clock3, Heart, Home, Loader2, MapPin, MapPinned, Search, SearchX, Sparkles, X } from 'lucide-react'
 import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
@@ -41,6 +41,21 @@ const MAP_FILTER_PARAM_KEYS = [
     'tags',
 ]
 type SearchMemorySource = 'favorite' | 'history'
+
+type SearchDevelopmentResult = {
+    slug: string
+    name: string
+    locationName: string
+    priceRange: string
+    availableUnitsCount: number | null
+    heroImage: string
+    stage: 'launch' | 'ready'
+    stageLabel: string
+    propertyIds?: string[]
+    sourceReferences?: string[]
+    sourceSlugs?: string[]
+}
+
 const OFFICE_LOCATION_MARKER = {
     latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
     title: 'Imobiliária Guilherme Pilger',
@@ -328,6 +343,12 @@ function memoryPropertyImage(property: any) {
     return property.featured_image || property.images?.find(Boolean) || '/images/brava-concetto/20_CL_BC_LIVING_FINAL_01_ANG_02_EF_web.jpg'
 }
 
+function developmentUnitLabel(development: SearchDevelopmentResult) {
+    const count = Number(development.availableUnitsCount || 0)
+    if (count <= 0) return 'Unidades sob consulta'
+    return count === 1 ? '1 unidade ativa' : `${count} unidades ativas`
+}
+
 interface MapBounds {
     north: number
     south: number
@@ -338,10 +359,11 @@ interface MapBounds {
 interface SearchResultsProps {
     properties: any[]
     lpMap: Record<string, string>
+    developmentResults?: SearchDevelopmentResult[]
     brokerSearchName?: string | null
 }
 
-export default function SearchResults({ properties, lpMap, brokerSearchName }: SearchResultsProps) {
+export default function SearchResults({ properties, lpMap, developmentResults = [], brokerSearchName }: SearchResultsProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
@@ -593,6 +615,20 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
     const countLabel = isBrokerSearch ? 'imóveis deste corretor' : baseCountLabel
     const resultTitle = isBrokerSearch ? 'Mais imóveis deste corretor' : 'Imóveis selecionados'
     const resultSubtitle = isBrokerSearch ? `Curadoria de ${brokerResultName}` : ''
+
+    const hasDevelopmentResults = developmentResults.length > 0
+
+    const handleDevelopmentClick = useCallback((development: SearchDevelopmentResult, index: number) => {
+        void trackEvent('search_results_development_clicked', {
+            slug: development.slug,
+            name: development.name,
+            index,
+            available_units_count: development.availableUnitsCount,
+            active_filters: activeFilters,
+            total_count: totalCount,
+            visible_count: visibleCount,
+        })
+    }, [activeFilters, totalCount, visibleCount])
 
     const handleSearchButtonClick = useCallback(() => {
         const nextOpen = !showRefineSearch
@@ -1000,6 +1036,126 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                 .active-filter-chip svg {
                     color: #a78042;
                 }
+                .search-development-panel {
+                    margin: 0 0 14px;
+                    padding: 12px;
+                    border: 1px solid rgba(184,148,95,0.18);
+                    border-radius: 14px;
+                    background: rgba(255,255,255,0.86);
+                    box-shadow: 0 12px 28px rgba(31,24,16,0.08);
+                }
+                .search-development-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    margin-bottom: 10px;
+                }
+                .search-development-title {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #211d18;
+                    font: 900 0.8rem/1 'Inter', sans-serif;
+                }
+                .search-development-title svg {
+                    color: #a78042;
+                }
+                .search-development-count {
+                    color: #8d8478;
+                    font: 800 0.64rem/1 'Inter', sans-serif;
+                    text-transform: uppercase;
+                }
+                .search-development-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+                    gap: 10px;
+                }
+                .search-development-card {
+                    display: grid;
+                    grid-template-columns: 102px minmax(0, 1fr);
+                    min-height: 124px;
+                    overflow: hidden;
+                    border: 1px solid rgba(35,31,26,0.09);
+                    border-radius: 12px;
+                    background: #fff;
+                    color: #211d18;
+                    text-decoration: none;
+                    box-shadow: 0 9px 20px rgba(30,24,17,0.07);
+                    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+                }
+                .search-development-card:hover {
+                    border-color: rgba(184,148,95,0.42);
+                    box-shadow: 0 16px 30px rgba(30,24,17,0.12);
+                    transform: translateY(-1px);
+                }
+                .search-development-media {
+                    position: relative;
+                    min-height: 124px;
+                    overflow: hidden;
+                    background: #e6dfd1;
+                }
+                .search-development-media img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+                .search-development-body {
+                    display: grid;
+                    align-content: center;
+                    gap: 8px;
+                    min-width: 0;
+                    padding: 12px;
+                }
+                .search-development-kicker {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    color: #9b7136;
+                    font: 900 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                }
+                .search-development-name {
+                    margin: 0;
+                    color: #211d18;
+                    font-family: 'Noto Serif', Georgia, serif;
+                    font-size: 1rem;
+                    font-weight: 800;
+                    line-height: 1.08;
+                    letter-spacing: 0;
+                }
+                .search-development-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    min-width: 0;
+                }
+                .search-development-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    max-width: 100%;
+                    min-height: 24px;
+                    padding: 4px 7px;
+                    border-radius: 999px;
+                    background: #f7f1e4;
+                    color: #6d542d;
+                    font: 850 0.6rem/1.08 'Inter', sans-serif;
+                }
+                .search-development-pill span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .search-development-cta {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    color: #2c251a;
+                    font: 900 0.68rem/1 'Inter', sans-serif;
+                }
                 .search-memory-panel {
                     margin: 0 0 14px;
                     padding: 11px;
@@ -1232,6 +1388,42 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                         height: 28px;
                         font-size: 0.64rem;
                     }
+                    .search-development-panel {
+                        margin: 0 -2px 13px;
+                        padding: 10px;
+                        border-radius: 14px;
+                    }
+                    .search-development-head {
+                        margin-bottom: 8px;
+                    }
+                    .search-development-title {
+                        font-size: 0.7rem;
+                    }
+                    .search-development-count {
+                        display: none;
+                    }
+                    .search-development-grid {
+                        grid-template-columns: 1fr;
+                        gap: 8px;
+                    }
+                    .search-development-card {
+                        grid-template-columns: 84px minmax(0, 1fr);
+                        min-height: 112px;
+                    }
+                    .search-development-media {
+                        min-height: 112px;
+                    }
+                    .search-development-body {
+                        gap: 7px;
+                        padding: 10px;
+                    }
+                    .search-development-name {
+                        font-size: 0.9rem;
+                    }
+                    .search-development-pill {
+                        min-height: 22px;
+                        font-size: 0.56rem;
+                    }
                     .search-memory-panel {
                         margin: 0 -2px 13px;
                         padding: 10px;
@@ -1414,6 +1606,55 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     )}
                 </header>
 
+                {hasDevelopmentResults && (
+                    <section className="search-development-panel" aria-label="Empreendimentos encontrados">
+                        <div className="search-development-head">
+                            <div className="search-development-title">
+                                <Building2 size={15} />
+                                <span>Empreendimentos encontrados</span>
+                            </div>
+                            <span className="search-development-count">
+                                {developmentResults.length === 1 ? '1 resultado' : `${developmentResults.length} resultados`}
+                            </span>
+                        </div>
+                        <div className="search-development-grid">
+                            {developmentResults.map((development, index) => (
+                                <Link
+                                    href={`/${development.slug}`}
+                                    className="search-development-card"
+                                    key={development.slug}
+                                    onClick={() => handleDevelopmentClick(development, index)}
+                                >
+                                    <span className="search-development-media" aria-hidden="true">
+                                        <img src={development.heroImage || '/placeholder-house.jpg'} alt="" loading={index < 2 ? 'eager' : 'lazy'} />
+                                    </span>
+                                    <span className="search-development-body">
+                                        <span className="search-development-kicker">
+                                            <Sparkles size={11} />
+                                            {development.stageLabel}
+                                        </span>
+                                        <strong className="search-development-name">{development.name}</strong>
+                                        <span className="search-development-meta">
+                                            <span className="search-development-pill">
+                                                <MapPin size={11} />
+                                                <span>{replaceItajaiWithPraiaBrava(development.locationName)}</span>
+                                            </span>
+                                            <span className="search-development-pill">
+                                                <Home size={11} />
+                                                <span>{developmentUnitLabel(development)}</span>
+                                            </span>
+                                        </span>
+                                        <span className="search-development-cta">
+                                            Ver empreendimento
+                                            <ArrowRight size={13} />
+                                        </span>
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {(memoryItems.length > 0 || memoryLoading) && (
                     <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
                         <div className="search-memory-head">
@@ -1467,7 +1708,7 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                     </section>
                 )}
 
-                {visibleProperties.length === 0 ? (
+                {visibleProperties.length === 0 && !hasDevelopmentResults ? (
                     <div className="search-empty-state">
                         <div className="search-empty-icon">
                             <SearchX size={20} />
@@ -1491,7 +1732,7 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                             Ver todos
                         </Link>
                     </div>
-                ) : (
+                ) : visibleProperties.length > 0 ? (
                     <>
                         <div className="search-results-grid">
                             {renderedProperties.map((property: any, index: number) => (
@@ -1516,7 +1757,7 @@ export default function SearchResults({ properties, lpMap, brokerSearchName }: S
                             </div>
                         )}
                     </>
-                )}
+                ) : null}
 
                 <footer className="search-footer">
                     {new Date().getFullYear()} Guilherme Pilger Corretor de Imóveis

@@ -8,7 +8,7 @@ import {
     formatNearbyBenefitDistance,
     usePropertyNearbyBenefits,
 } from '@/components/property/usePropertyNearbyBenefits'
-import type { NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
+import { NEARBY_BENEFIT_LAYERS, type NearbyBenefitLayer, type NearbyBenefitConfig } from '@/lib/locations/nearby-benefits'
 
 type Props = {
     propertyId: string
@@ -17,6 +17,9 @@ type Props = {
     locationLabel?: string | null
     variant?: 'mobile' | 'desktop'
     className?: string
+    kicker?: string
+    heading?: string
+    summaryLabel?: string
 }
 
 const PropertyNearbyRealMap = dynamic(() => import('@/components/property/PropertyNearbyRealMap'), {
@@ -53,6 +56,20 @@ function NearbyBenefitSummaryItem({ item }: { item: NearbyBenefitResult }) {
     )
 }
 
+function NearbyBenefitSummaryFallback({ item, loading }: { item: NearbyBenefitConfig; loading: boolean }) {
+    return (
+        <article className="plp-nearby-summary-item" style={{ '--benefit-color': item.color } as CSSProperties}>
+            <span>
+                <BenefitLayerIcon layer={item.value} />
+            </span>
+            <div>
+                <strong>{item.label}</strong>
+                <small>{loading ? 'Buscando...' : 'No entorno'}</small>
+            </div>
+        </article>
+    )
+}
+
 export default function PropertyNearbyBenefits({
     propertyId,
     title,
@@ -60,6 +77,9 @@ export default function PropertyNearbyBenefits({
     locationLabel,
     variant = 'desktop',
     className = '',
+    kicker = 'Entorno premium',
+    heading = 'Benefícios ao redor do imóvel.',
+    summaryLabel = 'Benefícios próximos ao imóvel',
 }: Props) {
     const rootRef = useRef<HTMLDivElement>(null)
     const [shouldLoad, setShouldLoad] = useState(false)
@@ -93,6 +113,10 @@ export default function PropertyNearbyBenefits({
 
     if (!safeLatLng) return null
 
+    const fallbackSummaryItems = NEARBY_BENEFIT_LAYERS
+        .filter(item => ['beach', 'school', 'dining', 'bank', 'health', 'marina'].includes(item.value))
+        .slice(0, 6)
+
     return (
         <div
             ref={rootRef}
@@ -100,18 +124,20 @@ export default function PropertyNearbyBenefits({
             aria-live="polite"
         >
             <div className="plp-nearby-benefits-head">
-                <span className="plp-kicker">Entorno premium</span>
-                <h3>Benefícios ao redor do imóvel.</h3>
+                <span className="plp-kicker">{kicker}</span>
+                <h3>{heading}</h3>
             </div>
 
             <div className="plp-nearby-map-layout">
-                {visibleResults.length > 0 && (
-                    <div className="plp-nearby-summary-row" aria-label="Benefícios próximos ao imóvel">
-                        {visibleResults.map(item => (
+                <div className="plp-nearby-summary-row" aria-label={summaryLabel}>
+                    {visibleResults.length > 0
+                        ? visibleResults.map(item => (
                             <NearbyBenefitSummaryItem item={item} key={`summary-${item.layer}-${item.name}`} />
+                        ))
+                        : fallbackSummaryItems.map(item => (
+                            <NearbyBenefitSummaryFallback item={item} loading={loading} key={`summary-fallback-${item.value}`} />
                         ))}
-                    </div>
-                )}
+                </div>
                 <PropertyNearbyRealMap origin={safeLatLng} results={visibleResults} loading={loading} />
             </div>
         </div>
