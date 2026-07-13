@@ -122,6 +122,17 @@ function slugify(value, fallback = 'empreendimento') {
   return slug || fallback
 }
 
+const DEVELOPMENT_ALIAS_TARGET_SLUGS = new Map([
+  ['condominio brava horizontal', 'condominio-horizontal-praia-brava'],
+  ['brava horizontal', 'condominio-horizontal-praia-brava'],
+  ['condominio reserva camboriu golf club', 'condominio-reserva-camboriu-yacht-golf'],
+  ['reserva camboriu golf club', 'condominio-reserva-camboriu-yacht-golf'],
+].flatMap(([alias, slug]) => {
+  const key = normalizeKey(alias)
+  const looseKey = normalizeLooseKey(alias)
+  return key === looseKey ? [[key, slug]] : [[key, slug], [looseKey, slug]]
+}))
+
 function asRecord(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
@@ -254,6 +265,48 @@ function inferredDevelopmentName(property) {
     if (candidate && normalizeKey(candidate).length >= 4) {
       return candidate.replace(/\s+/g, ' ').trim()
     }
+  }
+
+  return ''
+}
+
+function cleanInferredDevelopmentName(value) {
+  return text(value)
+    .replace(/[\u0096\u2013\u2014]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[,.\-\s]+|[,.\-\s]+$/g, '')
+    .trim()
+}
+
+function inferredDevelopmentNameV2(property) {
+  const title = text(property.title)
+  if (!title) return ''
+
+  const logisticsWithLocation = title.match(new RegExp(String.raw`^((?:cond\.?|condom[i\u00ed]nio)\s+log[i\u00ed]stico(?:\s+aaa)?)(?:\s*[-\u0096\u2013\u2014]\s*|\s+em\s+)(.+?)$`, 'i'))
+  if (logisticsWithLocation?.[1] && logisticsWithLocation?.[2]) {
+    const candidate = cleanInferredDevelopmentName(`${logisticsWithLocation[1]} ${logisticsWithLocation[2]}`)
+    if (candidate && normalizeKey(candidate).length >= 4) return candidate
+  }
+
+  const embeddedLogisticsWithLocation = title.match(new RegExp(String.raw`\bem\s+((?:cond\.?|condom[i\u00ed]nio)\s+log[i\u00ed]stico)\s+em\s+(.+?)$`, 'i'))
+  if (embeddedLogisticsWithLocation?.[1] && embeddedLogisticsWithLocation?.[2]) {
+    const candidate = cleanInferredDevelopmentName(`${embeddedLogisticsWithLocation[1]} ${embeddedLogisticsWithLocation[2]}`)
+    if (candidate && normalizeKey(candidate).length >= 4) return candidate
+  }
+
+  const boundary = String.raw`(?=\s+(?:em|na|no|nos|nas)\b|\s*[-\u0096\u2013\u2014]\s*|$)`
+  const patterns = [
+    new RegExp(String.raw`\b(?:no|na|nos|nas)\s+((?:viva\s*park|vivapark|smart valley|valley business park|all resort porto belo|reserva cambori[u\u00fa]\s+golf club)\b.*?)${boundary}`, 'i'),
+    new RegExp(String.raw`\b(?:no|na|nos|nas|em)\s+((?:ed\.?|edif[i\u00ed]cio|cond\.?|condom[i\u00ed]nio|residencial)\s+.+?)${boundary}`, 'i'),
+    new RegExp(String.raw`\b((?:ed\.?|edif[i\u00ed]cio)\s+.+?)${boundary}`, 'i'),
+    new RegExp(String.raw`^((?:cond\.?|condom[i\u00ed]nio|residencial)\s+.+?)${boundary}`, 'i'),
+    new RegExp(String.raw`\b(?:casa\s+)?((?:residencial)\s+.+?)${boundary}`, 'i'),
+  ]
+
+  for (const pattern of patterns) {
+    const match = title.match(pattern)
+    const candidate = cleanInferredDevelopmentName(match?.[1])
+    if (candidate && normalizeKey(candidate).length >= 4) return candidate
   }
 
   return ''
@@ -492,16 +545,20 @@ function buildContent(group, slug, existingPage = null) {
   const location = commonLocation(properties, existingContent, existingDevelopment)
   const name = text(existingDevelopment.name, group.name)
   const stage = inferStage(properties)
-  const units = buildUnits(properties, name)
+  const generatedUnits = buildUnits(properties, name)
+  const units = SCOPED_SOURCE_REFS && existingPage
+    ? mergeUnits(existingDevelopment.units, generatedUnits)
+    : generatedUnits
   const hasUnits = units.length > 0
   const gallery = buildGallery(properties, name)
   const heroImage = text(existingDevelopment.heroImage || existingDevelopment.hero_image || existingContent.custom_hero_image, gallery[0]?.image || '/placeholder-house.jpg')
   const developmentGallery = availabilityGallery(existingDevelopment.gallery, gallery, name, hasUnits)
   const customGallerySource = asArray(existingContent.custom_gallery).length ? existingContent.custom_gallery : existingDevelopment.gallery
   const customGallery = availabilityGallery(customGallerySource, gallery, name, hasUnits)
-  const priceRange = formatMoneyRange(properties.map(property => property.price))
-  const areaRange = formatNumberRange(properties.map(property => property.area_private_m2 || property.area_m2), 'm2', 'area sob consulta')
-  const suitesRange = formatCountRange(properties.map(property => property.suites || property.bedrooms), 'suite', 'suites', 'configuracao sob consulta')
+  const rangeSource = SCOPED_SOURCE_REFS && existingPage ? units : properties
+  const priceRange = formatMoneyRange(rangeSource.map(item => item.price))
+  const areaRange = formatNumberRange(rangeSource.map(item => item.area || item.area_private_m2 || item.area_m2), 'm2', 'area sob consulta')
+  const suitesRange = formatCountRange(rangeSource.map(item => item.suites || item.bedrooms), 'suite', 'suites', 'configuracao sob consulta')
   const description = developmentDescription(name, properties, location, priceRange, areaRange, suitesRange)
   const faq = buildFaq(name, properties, location, priceRange, areaRange, suitesRange)
   const title = `${name} em ${location.city} | Empreendimento Guilherme Pilger`
@@ -517,8 +574,21 @@ function buildContent(group, slug, existingPage = null) {
     location.state,
     mostCommon(properties.map(property => property.construction_company), ''),
   ])
+  const sourceCondominiumName = text(
+    existingDevelopment.sourceCondominiumName || existingDevelopment.source_condominium_name,
+    group.rawName
+  )
+  const sourceCondominiumKey = text(
+    existingDevelopment.sourceCondominiumKey || existingDevelopment.source_condominium_key,
+    group.key
+  )
+  const sourceCondominiumAliases = uniq([
+    ...asArray(existingDevelopment.sourceCondominiumAliases),
+    ...asArray(existingDevelopment.source_condominium_aliases),
+    ...(group.names || [group.rawName]),
+  ])
   const generatedDevelopment = {
-    id: `development-${group.key}`,
+    id: `development-${sourceCondominiumKey}`,
     name,
     pageSlug: slug,
     page_slug: slug,
@@ -528,8 +598,8 @@ function buildContent(group, slug, existingPage = null) {
     tagline: text(existingDevelopment.tagline, `${stageLabel(stage)} em ${location.locationName}`),
     priceRange,
     price_range: priceRange,
-    availableUnitsCount: properties.length,
-    available_units_count: properties.length,
+    availableUnitsCount: units.length,
+    available_units_count: units.length,
     areaRange,
     area_range: areaRange,
     suitesRange,
@@ -543,12 +613,12 @@ function buildContent(group, slug, existingPage = null) {
     stage,
     stageLabel: stageLabel(stage),
     stage_label: stageLabel(stage),
-    sourceCondominiumName: group.rawName,
-    source_condominium_name: group.rawName,
-    sourceCondominiumKey: group.key,
-    source_condominium_key: group.key,
-    sourceCondominiumAliases: uniq(group.names || [group.rawName]),
-    source_condominium_aliases: uniq(group.names || [group.rawName]),
+    sourceCondominiumName,
+    source_condominium_name: sourceCondominiumName,
+    sourceCondominiumKey,
+    source_condominium_key: sourceCondominiumKey,
+    sourceCondominiumAliases: sourceCondominiumAliases,
+    source_condominium_aliases: sourceCondominiumAliases,
     showOnHome: existingPage ? existingDevelopment.showOnHome : false,
     show_on_home: existingPage ? existingDevelopment.show_on_home : false,
     benefits: asArray(existingDevelopment.benefits).length ? existingDevelopment.benefits : buildBenefits(name, location),
@@ -585,7 +655,7 @@ function buildContent(group, slug, existingPage = null) {
     custom_price: priceRange,
     custom_cta: hasUnits ? text(existingContent.custom_cta, 'Falar com especialista') : 'Consultar disponibilidade',
     custom_gallery: customGallery,
-    available_units_count: properties.length,
+    available_units_count: units.length,
     home_featured: existingPage ? existingContent.home_featured : false,
     show_on_home: existingPage ? existingContent.show_on_home : false,
     development: generatedDevelopment,
@@ -628,6 +698,13 @@ function buildContent(group, slug, existingPage = null) {
 function rowForGroup(group, slug, existingPage = null) {
   const content = buildContent(group, slug, existingPage)
   const isZeroStockLandingPage = group.sourceKind === 'zero_stock_landing_page'
+  const existingMetadata = asRecord(existingPage?.metadata)
+  const development = asRecord(content.development)
+  const sourceCondominiumAliases = uniq([
+    ...asArray(existingMetadata.source_condominium_aliases),
+    ...(group.names || [group.rawName]),
+  ])
+  const propertyCount = asArray(development.units).length || group.properties.length
   return {
     title: content.seo.title,
     slug,
@@ -636,16 +713,16 @@ function rowForGroup(group, slug, existingPage = null) {
     property_id: null,
     content,
     metadata: {
-      ...asRecord(existingPage?.metadata),
+      ...existingMetadata,
       generated_by: 'generate-development-landing-pages',
       generated_at: NOW,
       source_table: isZeroStockLandingPage ? 'landing_pages' : (group.sourceKind === 'title_inference' ? 'properties' : 'property_private_details'),
       source_column: isZeroStockLandingPage ? 'content.development.units' : (group.sourceKind === 'title_inference' ? 'title_inference' : 'condominium_name'),
       source_kind: group.sourceKind,
-      source_condominium_name: group.rawName,
-      source_condominium_key: group.key,
-      source_condominium_aliases: uniq(group.names || [group.rawName]),
-      property_count: group.properties.length,
+      source_condominium_name: development.sourceCondominiumName || development.source_condominium_name || group.rawName,
+      source_condominium_key: development.sourceCondominiumKey || development.source_condominium_key || group.key,
+      source_condominium_aliases: sourceCondominiumAliases,
+      property_count: propertyCount,
       stage: content.development.stage,
       ranking_requirements: {
         seo: true,
@@ -683,7 +760,7 @@ function applySourceReferenceScope(query) {
 async function hydrateLandingPagesForGroups(landingPages, groups) {
   if (!SCOPED_SOURCE_REFS) return landingPages
 
-  const { byDevelopmentKey } = existingPageIndexes(landingPages)
+  const { bySlug, byDevelopmentKey } = existingPageIndexes(landingPages)
   const targetIds = new Set()
 
   for (const group of groups) {
@@ -748,7 +825,7 @@ function buildGroups(activeProperties) {
 
   for (const property of activeProperties) {
     const privateName = text(property.condominium_name)
-    const inferredName = privateName ? '' : inferredDevelopmentName(property)
+    const inferredName = privateName ? '' : inferredDevelopmentNameV2(property)
     const rawName = privateName || inferredName
     const key = normalizeKey(rawName)
     if (!key) {
@@ -860,7 +937,7 @@ function zeroStockGroupFromPage(page) {
 
 function prepareRows(groups, landingPages, zeroStockPages = []) {
   const usedSlugs = new Set(landingPages.map(page => page.slug).filter(Boolean))
-  const { byDevelopmentKey } = existingPageIndexes(landingPages)
+  const { bySlug, byDevelopmentKey } = existingPageIndexes(landingPages)
   const insertRows = []
   const updateRows = []
   const matchedExistingIds = new Set()
@@ -868,7 +945,8 @@ function prepareRows(groups, landingPages, zeroStockPages = []) {
   const targets = []
 
   for (const group of ZERO_STOCK_ONLY ? [] : groups) {
-    const existing = byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
+    const aliasTargetSlug = DEVELOPMENT_ALIAS_TARGET_SLUGS.get(group.key) || DEVELOPMENT_ALIAS_TARGET_SLUGS.get(group.looseKey)
+    const existing = (aliasTargetSlug ? bySlug.get(aliasTargetSlug) : null) || byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
     if (existing) {
       const current = updateTargets.get(existing.id)
       if (current) {

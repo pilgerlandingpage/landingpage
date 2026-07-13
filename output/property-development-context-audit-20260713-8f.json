@@ -1,0 +1,3135 @@
+{
+  "generated_at": "2026-07-13T13:05:53.245Z",
+  "scope": "phase-8f-property-development-context-gaps",
+  "totals": {
+    "active_properties": 1063,
+    "published_landing_pages": 789,
+    "development_pages_considered": 789,
+    "direct_unit_context": 968,
+    "inferred_name_context": 24,
+    "without_context": 71,
+    "buckets": {
+      "likely_no_condominium": 22,
+      "location_or_address_only": 34,
+      "needs_landing_page": 8,
+      "needs_alias_or_landing_review": 5,
+      "needs_manual_review": 2
+    }
+  },
+  "groups": {
+    "location_or_address_only": [
+      {
+        "source_reference": "1119",
+        "source_slug": "casa-frente-mar-na-praia-do-estaleirinho-em-balneario-camboriu",
+        "title": "Casa frente mar na Praia do Estaleirinho em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia do Estaleirinho",
+        "property_type": "Casa",
+        "price": 55000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia do estaleirinho",
+          "praiadoestaleirinho"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1187",
+        "source_slug": "casa-na-praia-de-taquaras-em-balneario-camboriu",
+        "title": "Casa na Praia de Taquaras em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia das Taquaras",
+        "property_type": "Casa",
+        "price": 9500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia de taquaras",
+          "praiadetaquaras"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1202",
+        "source_slug": "casa-no-canto-da-praia-em-itapema-2",
+        "title": "Casa no Canto da Praia em Itapema",
+        "city": "Itapema",
+        "neighborhood": "Canto da Praia",
+        "property_type": "Casa",
+        "price": 6600000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "canto da praia",
+          "cantodapraia"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1489",
+        "source_slug": "terreno-na-quadra-mar-em-itapema",
+        "title": "Terreno na Quadra mar em Itapema",
+        "city": "Itapema",
+        "neighborhood": "Meia Praia",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "quadra mar",
+          "quadramar"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1571",
+        "source_slug": "casa-na-praia-do-estaleiro-em-balneario-camboriu",
+        "title": "Casa na praia do Estaleiro em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia do Estaleiro",
+        "property_type": "Casa",
+        "price": 14000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia do estaleiro",
+          "praiadoestaleiro"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1739",
+        "source_slug": "terreno-no-centro-de-camboriu",
+        "title": "Terreno no Centro de Camboriú",
+        "city": "Camboriú",
+        "neighborhood": "Centro",
+        "property_type": "Terreno",
+        "price": 9300000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "centro de camboriu",
+          "centrodecamboriu"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1934",
+        "source_slug": "casa-a-venda-na-praia-de-taquaras-em-balneario-camboriu",
+        "title": "Casa à venda na Praia de Taquaras em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia das Taquaras",
+        "property_type": "Casa",
+        "price": 4500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia de taquaras",
+          "praiadetaquaras"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1962",
+        "source_slug": "casa-na-barra-sul-de-balneario-camboriu-2",
+        "title": "Casa na Barra Sul de Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Centro",
+        "property_type": "Casa",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "barra sul de balneario camboriu",
+          "barrasuldebalneariocamboriu"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [
+          {
+            "slug": "condominio-vivendas-do-atlantico",
+            "title": "Condomínio Vivendas do Atlântico em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+              "condominiovivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+              "vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+              "vivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+              "cond vivendas do atlantico em balneario camboriu empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "condominio-haras-rio-do-ouro",
+            "title": "Condomínio Haras Rio do Ouro em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+              "condominioharasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+              "haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+              "harasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+              "cond haras rio do ouro em balneario camboriu empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "condominio-horizontal-costa-azul",
+            "title": "Condomínio Horizontal Costa Azul em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+              "condominiohorizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+              "horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+              "horizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+              "cond horizontal costa azul em balneario camboriu empreendimento guilherme pilger"
+            ]
+          }
+        ],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1971",
+        "source_slug": "casa-na-praia-dos-amores-em-balneario-camboriu-2",
+        "title": "Casa na Praia dos Amores em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia dos Amores",
+        "property_type": "Casa",
+        "price": 5500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia dos amores",
+          "praiadosamores"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1974",
+        "source_slug": "terreno-com-chales-na-praia-dos-amores-em-balneario-camboriu",
+        "title": "Terreno com Chalés na Praia dos amores em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia dos Amores",
+        "property_type": "Casa",
+        "price": 7500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia dos amores",
+          "praiadosamores"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "1976",
+        "source_slug": "casa-triplex-na-praia-dos-amores-em-balneario-camboriu",
+        "title": "Casa Triplex na Praia dos Amores em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia dos Amores",
+        "property_type": "Casa",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia dos amores",
+          "praiadosamores"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2024",
+        "source_slug": "casa-na-praia-do-estaleiro",
+        "title": "Casa na Praia do Estaleiro",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia do Estaleirinho",
+        "property_type": "Casa",
+        "price": 4300000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia do estaleiro",
+          "praiadoestaleiro"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2074",
+        "source_slug": "area-de-terra-com-projeto-para-galpoes-logisticos-em-itajai",
+        "title": "Área de Terra com projeto para Galpões Logísticos em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Bairro Baía",
+        "property_type": "Terreno",
+        "price": 40000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2075",
+        "source_slug": "area-de-terra-com-projeto-para-galpoes-logisticos-em-itajai",
+        "title": "Área de Terra com projeto para Galpões Logísticos em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Bairro Baía",
+        "property_type": "Terreno",
+        "price": 6500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2080",
+        "source_slug": "area-de-terra-em-rio-do-sul-sc",
+        "title": "Área de Terra em Rio do Sul - SC",
+        "city": "Rio do Sul",
+        "neighborhood": "Serra Canoas",
+        "property_type": "Terreno",
+        "price": 50000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2118",
+        "source_slug": "area-de-terra-na-br-101-penhasc",
+        "title": "Área de Terra na BR-101  Penha/SC",
+        "city": "Penha",
+        "neighborhood": "centro",
+        "property_type": "Terreno",
+        "price": 20000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "br 101 penha sc",
+          "br101penhasc"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2166",
+        "source_slug": "terreno-frente-br-101-itajaisc",
+        "title": "Terreno Frente BR-101  Itajaí/SC",
+        "city": "Itajaí",
+        "neighborhood": "São Vicente",
+        "property_type": "Terreno",
+        "price": 23500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2234",
+        "source_slug": "terreno-na-praia-brava-com-potencial-construtivo",
+        "title": "Terreno na Praia Brava com Potencial Construtivo",
+        "city": "Itajaí",
+        "neighborhood": "Praia Brava",
+        "property_type": "Terreno",
+        "price": 43000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2342",
+        "source_slug": "casas-pe-na-areia-em-bombinhassc",
+        "title": "Terreno com duas Casas Pé na Areia em Bombinhas\\SC",
+        "city": "Bombinhas",
+        "neighborhood": "Morrinhos",
+        "property_type": "Casa",
+        "price": 8500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "areia"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2358",
+        "source_slug": "terreno-no-bairro-aririba-em-balneario-camboriu",
+        "title": "Terreno no Bairro Ariribá em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Ariribá",
+        "property_type": "Terreno",
+        "price": 26000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "bairro aririba",
+          "bairroaririba"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [
+          {
+            "slug": "residencial-aririba",
+            "title": "Residencial Ariribá em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 8,
+            "hits": [
+              "aririba",
+              "residencial aririba em balneario camboriu empreendimento guilherme pilger",
+              "residencialariribaembalneariocamboriuempreendimentoguilhermepilger",
+              "aririba em balneario camboriu empreendimento guilherme pilger",
+              "ariribaembalneariocamboriuempreendimentoguilhermepilger"
+            ]
+          }
+        ],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2416",
+        "source_slug": "area-de-terra-no-trevo-do-beto-carrero-penhasc",
+        "title": "Área de Terra no Trevo do Beto Carrero  Penha/SC",
+        "city": "Penha",
+        "neighborhood": "São Cristóvão",
+        "property_type": "Terreno",
+        "price": 8000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "trevo do beto carrero penha sc",
+          "trevodobetocarreropenhasc"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2427",
+        "source_slug": "terreno-na-praia-dos-amores-em-balneario-camboriu-2",
+        "title": "Terreno na Praia dos Amores em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia dos Amores",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia dos amores",
+          "praiadosamores"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2473",
+        "source_slug": "area-de-terra-em-ilhota-sc-na-br-470",
+        "title": "Área de Terra em Ilhota - SC na BR-470",
+        "city": "Ilhota",
+        "neighborhood": "Baú Baixo",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "br 470",
+          "br470"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2474",
+        "source_slug": "area-de-terra-em-ilhota-sc-na-br-470",
+        "title": "Área de Terra em Ilhota - SC na BR-470",
+        "city": "Ilhota",
+        "neighborhood": "Baú Baixo",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "br 470",
+          "br470"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2509",
+        "source_slug": "casa-exclusiva-na-praia-de-trancoso",
+        "title": "Casa Exclusiva na Praia de Trancoso",
+        "city": "Porto Seguro",
+        "neighborhood": "Trancoso",
+        "property_type": "Casa",
+        "price": 37000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia de trancoso",
+          "praiadetrancoso"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2525",
+        "source_slug": "casa-a-poucos-metros-da-praia-de-cabecudas",
+        "title": "Casa a poucos metros da Praia de Cabeçudas",
+        "city": "Itajaí",
+        "neighborhood": "Cabeçudas",
+        "property_type": "Casa",
+        "price": 6500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2574",
+        "source_slug": "area-de-terra-na-br-101-em-salseiros-itajai",
+        "title": "Área de Terra na BR-101 em Salseiros, Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Salseiros",
+        "property_type": "Terreno",
+        "price": 20000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "br 101",
+          "br101"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2575",
+        "source_slug": "area-de-terra-na-rodovia-antonio-heil-em-itajai",
+        "title": "Área de Terra na Rodovia Antônio Heil em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Itaipava",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "rodovia antonio heil",
+          "rodoviaantonioheil"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2578",
+        "source_slug": "casa-de-alto-padrao-na-praia-de-taquaras-em-balneario-camboriu",
+        "title": "Casa de Alto Padrão na Praia de Taquaras em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Praia das Taquaras",
+        "property_type": "Casa",
+        "price": 20000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "praia de taquaras",
+          "praiadetaquaras"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2579",
+        "source_slug": "casa-no-centro-de-balneario-camboriu",
+        "title": "Casa no Centro de Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Centro",
+        "property_type": "Casa",
+        "price": 9000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "centro de balneario camboriu",
+          "centrodebalneariocamboriu"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [
+          {
+            "slug": "condominio-vivendas-do-atlantico",
+            "title": "Condomínio Vivendas do Atlântico em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+              "condominiovivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+              "vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+              "vivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+              "cond vivendas do atlantico em balneario camboriu empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "condominio-haras-rio-do-ouro",
+            "title": "Condomínio Haras Rio do Ouro em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+              "condominioharasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+              "haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+              "harasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+              "cond haras rio do ouro em balneario camboriu empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "condominio-horizontal-costa-azul",
+            "title": "Condomínio Horizontal Costa Azul em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 6,
+            "hits": [
+              "condominio horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+              "condominiohorizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+              "horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+              "horizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+              "cond horizontal costa azul em balneario camboriu empreendimento guilherme pilger"
+            ]
+          }
+        ],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2590",
+        "source_slug": "casa-frente-mar-em-bombinhas",
+        "title": "Casa de Frente para o Mar em Bombinhas",
+        "city": "Bombinhas",
+        "neighborhood": "Bombas",
+        "property_type": "Casa",
+        "price": 15400000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2628",
+        "source_slug": "casa-frente-mar-em-bombinhas-2",
+        "title": "Casa Frente Mar em Bombinhas",
+        "city": "Bombinhas",
+        "neighborhood": "Praia de Quatro Ilhas",
+        "property_type": "Casa",
+        "price": 17000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "2643",
+        "source_slug": "terreno-comercial-na-avenida-dos-estados-em-balneario-camboriu",
+        "title": "Terreno Comercial na Avenida dos Estados em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Ariribá",
+        "property_type": "Terreno Comercial",
+        "price": 14000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "avenida dos estados",
+          "avenidadosestados"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      },
+      {
+        "source_reference": "491",
+        "source_slug": "casa-na-praia-brava-em-itajai-2",
+        "title": "Casa na Praia Brava em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Praia Brava",
+        "property_type": "Casa",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "location_or_address_only",
+        "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+      }
+    ],
+    "likely_no_condominium": [
+      {
+        "source_reference": "1033",
+        "source_slug": "terreno-em-camboriu",
+        "title": "Terreno em Camboriú",
+        "city": "Camboriú",
+        "neighborhood": "Rio Pequeno",
+        "property_type": "Terreno",
+        "price": 15150000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "1452",
+        "source_slug": "edificio-em-balneario-camboriu",
+        "title": "Edifício em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Nações",
+        "property_type": "Prédio Residencial",
+        "price": 5200000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2040",
+        "source_slug": "galpao-logistico-ad3-br-470",
+        "title": "Galpão Logístico AD3  BR 470",
+        "city": "Navegantes",
+        "neighborhood": "Volta Grande",
+        "property_type": "Galpão / Depósito",
+        "price": 31000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2102",
+        "source_slug": "casa-alto-padrao-em-itapemasc",
+        "title": "Casa Alto Padrão em Itapema/SC",
+        "city": "Itapema",
+        "neighborhood": "Meia Praia",
+        "property_type": "Casa",
+        "price": 6900000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2104",
+        "source_slug": "terreno-para-galpao-logistico-em-itajaisc",
+        "title": "Terreno para Galpão Logístico em Itajaí/SC",
+        "city": "Itajaí",
+        "neighborhood": "Cidade Nova",
+        "property_type": "Terreno",
+        "price": 5500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2106",
+        "source_slug": "galpao-logistico-alto-padrao-iatajaisc",
+        "title": "Galpão Logístico Alto Padrão Itajaí/SC",
+        "city": "Itajaí",
+        "neighborhood": "Salseiros",
+        "property_type": "Galpão / Depósito",
+        "price": 35000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2195",
+        "source_slug": "casa-beira-mar-em-porto-belo",
+        "title": "Casa Beira-Mar em Porto Belo",
+        "city": "Porto Belo",
+        "neighborhood": "centro",
+        "property_type": "Casa",
+        "price": 10700000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2202",
+        "source_slug": "galpao-logistico-mtp-itajaisc",
+        "title": "Galpão Logístico MTP - Itajaí/SC",
+        "city": "Itajaí",
+        "neighborhood": "Centro",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2203",
+        "source_slug": "terreno-de-esquina-quadra-mar-balneario-camboriu",
+        "title": "Terreno de Esquina  Quadra Mar, Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Centro",
+        "property_type": "Terreno",
+        "price": 26000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2313",
+        "source_slug": "galpao-logistico-ad3-br-470",
+        "title": "Galpão Logístico AD3  BR 470",
+        "city": "Navegantes",
+        "neighborhood": "Volta Grande",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2348",
+        "source_slug": "galpao-logistico-alto-padrao-iatajaisc",
+        "title": "Galpão Logístico Alto Padrão Itajaí/SC",
+        "city": "Itajaí",
+        "neighborhood": "Salseiros",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2495",
+        "source_slug": "casa-de-alto-padrao-em-blumenau-sc",
+        "title": "Casa de Alto Padrão em Blumenau - SC",
+        "city": "Blumenau",
+        "neighborhood": "Blumenau",
+        "property_type": "Casa",
+        "price": 15000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2510",
+        "source_slug": "casa-de-alto-padrao-em-balneario-camboriu",
+        "title": "Casa de Alto Padrão em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Nações",
+        "property_type": "Casa",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2534",
+        "source_slug": "terreno-de-frente-para-o-mar-em-barra-velha",
+        "title": "Terreno de Frente para o Mar em Barra Velha",
+        "city": "Barra Velha",
+        "neighborhood": "Tabuleiro",
+        "property_type": "Terreno",
+        "price": 10000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2608",
+        "source_slug": "galpao-logistico-aaa-em-araquari-sc",
+        "title": "Galpão Logístico AAA em Araquari - SC",
+        "city": "Araquari",
+        "neighborhood": "Rainha",
+        "property_type": "Galpão / Depósito",
+        "price": 33000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2631",
+        "source_slug": "area-de-terra-industrial-em-ilhotasc",
+        "title": "Área de Terra Industrial em Ilhota/SC",
+        "city": "Ilhota",
+        "neighborhood": "Pedra de Amolar",
+        "property_type": "Terreno",
+        "price": 45000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2642",
+        "source_slug": "area-de-terra-comercial-e-industrial-a-venda-gasparsc",
+        "title": "Área de Terra Comercial e Industrial à Venda  Gaspar/SC",
+        "city": "Gaspar",
+        "neighborhood": "Arraial D'Ouro",
+        "property_type": "Terreno",
+        "price": 19500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2644",
+        "source_slug": "galpao-logistico-em-brusque-sc",
+        "title": "Galpão Logístico em Brusque - SC",
+        "city": "Brusque",
+        "neighborhood": "Limeira Baixa",
+        "property_type": "Galpão / Depósito",
+        "price": 5100000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2645",
+        "source_slug": "galpao-logistico-em-pomerode-sc",
+        "title": "Galpão Logístico em Pomerode - SC",
+        "city": "Pomerode",
+        "neighborhood": "Centro",
+        "property_type": "Galpão / Depósito",
+        "price": 8000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "2646",
+        "source_slug": "area-de-terra-logistica-industrial-e-comercial-em-biguacusc",
+        "title": "Área de Terra Logística, Industrial e Comercial em Biguaçu/SC",
+        "city": "Biguaçu",
+        "neighborhood": "BR-101",
+        "property_type": "Terreno Comercial",
+        "price": 16500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "711",
+        "source_slug": "casa-na-praia-de-cabecudas-em-itajai",
+        "title": "Casa em Cabeçudas em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Cabeçudas",
+        "property_type": "Casa",
+        "price": 30000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      },
+      {
+        "source_reference": "935",
+        "source_slug": "casa-em-balneario-camboriu",
+        "title": "Casa em Balneário Camboriú",
+        "city": "Balneário Camboriú",
+        "neighborhood": "Ariribá",
+        "property_type": "Casa",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "likely_no_condominium",
+        "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+      }
+    ],
+    "needs_landing_page": [
+      {
+        "source_reference": "2034",
+        "source_slug": "galpao-logistico-no-smart-valley",
+        "title": "Galpão Logístico no Smart Valley",
+        "city": "Itajaí",
+        "neighborhood": "Canhanduba",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "smart valley",
+          "smartvalley"
+        ],
+        "explicit_candidate_keys": [
+          "smart valley",
+          "smartvalley"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2134",
+        "source_slug": "apartamento-no-condominio-dona-lely-em-itapema",
+        "title": "Apartamento no Condomínio Dona Lely em Itapema",
+        "city": "Itapema",
+        "neighborhood": "Meia Praia",
+        "property_type": "Apartamento",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio dona lely",
+          "condominiodonalely",
+          "dona lely",
+          "donalely",
+          "cond dona lely",
+          "conddonalely"
+        ],
+        "explicit_candidate_keys": [
+          "condominio dona lely",
+          "condominiodonalely",
+          "dona lely",
+          "donalely",
+          "cond dona lely",
+          "conddonalely"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2217",
+        "source_slug": "sala-comercial-no-edificio-riviera-business-mall",
+        "title": "Sala Comercial no Edifício Riviera Business & Mall",
+        "city": "Itajaí",
+        "neighborhood": "Praia Brava",
+        "property_type": "Sala Comercial",
+        "price": 10000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "edificio riviera business mall",
+          "edificiorivierabusinessmall",
+          "riviera business mall",
+          "rivierabusinessmall",
+          "ed riviera business mall",
+          "edrivierabusinessmall"
+        ],
+        "explicit_candidate_keys": [
+          "edificio riviera business mall",
+          "edificiorivierabusinessmall",
+          "riviera business mall",
+          "rivierabusinessmall",
+          "ed riviera business mall",
+          "edrivierabusinessmall"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2343",
+        "source_slug": "pre-lancamento-ed-aura-na-praia-brava-em-itajai",
+        "title": "Pré Lançamento Ed. Aura na Praia Brava em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Praia Brava",
+        "property_type": "Apartamento",
+        "price": 6963288.04,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "ed aura",
+          "edaura",
+          "aura",
+          "edificio aura",
+          "edificioaura"
+        ],
+        "explicit_candidate_keys": [
+          "ed aura",
+          "edaura",
+          "aura",
+          "edificio aura",
+          "edificioaura"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2396",
+        "source_slug": "galpao-logistico-no-smart-valley",
+        "title": "Condomínio Logístico  Garuva/SC",
+        "city": "Garuva",
+        "neighborhood": "guaruva",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio logistico garuva sc",
+          "condominiologisticogaruvasc",
+          "logistico garuva sc",
+          "logisticogaruvasc",
+          "cond logistico garuva sc",
+          "condlogisticogaruvasc"
+        ],
+        "explicit_candidate_keys": [
+          "condominio logistico garuva sc",
+          "condominiologisticogaruvasc",
+          "logistico garuva sc",
+          "logisticogaruvasc",
+          "cond logistico garuva sc",
+          "condlogisticogaruvasc"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2397",
+        "source_slug": "galpao-logistico-no-smart-valley",
+        "title": "Condomínio Logístico AAA  Navegantes/SC",
+        "city": "Navegantes",
+        "neighborhood": "Navegantes",
+        "property_type": "Galpão / Depósito",
+        "price": 9900000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio logistico aaa navegantes sc",
+          "condominiologisticoaaanavegantessc",
+          "logistico aaa navegantes sc",
+          "logisticoaaanavegantessc",
+          "cond logistico aaa navegantes sc",
+          "condlogisticoaaanavegantessc"
+        ],
+        "explicit_candidate_keys": [
+          "condominio logistico aaa navegantes sc",
+          "condominiologisticoaaanavegantessc",
+          "logistico aaa navegantes sc",
+          "logisticoaaanavegantessc",
+          "cond logistico aaa navegantes sc",
+          "condlogisticoaaanavegantessc"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2635",
+        "source_slug": "terreno-em-condominio-logistico-em-campo-grande-ms",
+        "title": "Terreno em Condomínio Logístico em Campo Grande - MS",
+        "city": "Campo Grande",
+        "neighborhood": "BR-262",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio logistico",
+          "condominiologistico",
+          "logistico",
+          "cond logistico",
+          "condlogistico"
+        ],
+        "explicit_candidate_keys": [
+          "condominio logistico",
+          "condominiologistico",
+          "logistico",
+          "cond logistico",
+          "condlogistico"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      },
+      {
+        "source_reference": "2638",
+        "source_slug": "galpao-em-condominio-logistico-e-industrial-nextto-em-navegantessc",
+        "title": "Galpão em Condomínio Logístico e Industrial Nextto em Navegantes/SC",
+        "city": "Navegantes",
+        "neighborhood": "Volta Grande",
+        "property_type": "Galpão / Depósito",
+        "price": 5995000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio logistico e industrial nextto",
+          "condominiologisticoeindustrialnextto",
+          "logistico e industrial nextto",
+          "logisticoeindustrialnextto",
+          "cond logistico e industrial nextto",
+          "condlogisticoeindustrialnextto"
+        ],
+        "explicit_candidate_keys": [
+          "condominio logistico e industrial nextto",
+          "condominiologisticoeindustrialnextto",
+          "logistico e industrial nextto",
+          "logisticoeindustrialnextto",
+          "cond logistico e industrial nextto",
+          "condlogisticoeindustrialnextto"
+        ],
+        "nearest_pages": [],
+        "bucket": "needs_landing_page",
+        "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+      }
+    ],
+    "needs_alias_or_landing_review": [
+      {
+        "source_reference": "2035",
+        "source_slug": "galpao-logistico-no-valley-business-park",
+        "title": "Galpão Logístico no Valley Business Park",
+        "city": "Itajaí",
+        "neighborhood": "Itaipava",
+        "property_type": "Galpão / Depósito",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "valley business park",
+          "valleybusinesspark"
+        ],
+        "explicit_candidate_keys": [
+          "valley business park",
+          "valleybusinesspark"
+        ],
+        "nearest_pages": [
+          {
+            "slug": "cond-hub-camboriu-business-park",
+            "title": "Cond. HUB Camboriú Business Park em Camboriú | Empreendimento Guilherme Pilger",
+            "score": 12,
+            "hits": [
+              "cond hub camboriu business park",
+              "condhubcamboriubusinesspark",
+              "hub camboriu business park",
+              "hubcamboriubusinesspark",
+              "condominio hub camboriu business park"
+            ]
+          }
+        ],
+        "bucket": "needs_alias_or_landing_review",
+        "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+      },
+      {
+        "source_reference": "2057",
+        "source_slug": "casa-no-condominio-caledonia-village-em-camboriusc",
+        "title": "Casa no Condomínio Caledônia Village em Camboriú/SC",
+        "city": "Camboriú",
+        "neighborhood": "Santa Regina",
+        "property_type": "Casa",
+        "price": 4300000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio caledonia village",
+          "condominiocaledoniavillage",
+          "caledonia village",
+          "caledoniavillage",
+          "cond caledonia village",
+          "condcaledoniavillage"
+        ],
+        "explicit_candidate_keys": [
+          "condominio caledonia village",
+          "condominiocaledoniavillage",
+          "caledonia village",
+          "caledoniavillage",
+          "cond caledonia village",
+          "condcaledoniavillage"
+        ],
+        "nearest_pages": [
+          {
+            "slug": "condominio-caledonia",
+            "title": "Condomínio Caledônia em Camboriú | Empreendimento Guilherme Pilger",
+            "score": 44,
+            "hits": [
+              "caledonia",
+              "condominio caledonia",
+              "condominiocaledonia",
+              "cond caledonia",
+              "condcaledonia"
+            ]
+          },
+          {
+            "slug": "condominio-caledonia-private-village",
+            "title": "Condomínio Caledônia Private Village em Camboriú | Empreendimento Guilherme Pilger",
+            "score": 40,
+            "hits": [
+              "condominio caledonia private village",
+              "condominiocaledoniaprivatevillage",
+              "caledonia private village",
+              "caledoniaprivatevillage",
+              "cond caledonia private village"
+            ]
+          },
+          {
+            "slug": "caledonia",
+            "title": "Caledônia em Camboriú | Empreendimento Guilherme Pilger",
+            "score": 24,
+            "hits": [
+              "caledonia",
+              "caledonia em camboriu empreendimento guilherme pilger",
+              "caledoniaemcamboriuempreendimentoguilhermepilger"
+            ]
+          }
+        ],
+        "bucket": "needs_alias_or_landing_review",
+        "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+      },
+      {
+        "source_reference": "2182",
+        "source_slug": "casa-no-condominio-brava-horizontal-na-praia-brava-em-itajai",
+        "title": "Casa no Condomínio Brava Horizontal na Praia Brava em Itajaí",
+        "city": "Itajaí",
+        "neighborhood": "Praia Brava",
+        "property_type": "Casa",
+        "price": 5500000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio brava horizontal",
+          "condominiobravahorizontal",
+          "brava horizontal",
+          "bravahorizontal",
+          "cond brava horizontal",
+          "condbravahorizontal"
+        ],
+        "explicit_candidate_keys": [
+          "condominio brava horizontal",
+          "condominiobravahorizontal",
+          "brava horizontal",
+          "bravahorizontal",
+          "cond brava horizontal",
+          "condbravahorizontal"
+        ],
+        "nearest_pages": [
+          {
+            "slug": "condominio-horizontal-praia-brava",
+            "title": "Condomínio Horizontal Praia Brava em Itajaí | Empreendimento Guilherme Pilger",
+            "score": 40,
+            "hits": [
+              "condominio horizontal praia brava",
+              "condominiohorizontalpraiabrava",
+              "horizontal praia brava",
+              "horizontalpraiabrava",
+              "cond horizontal praia brava"
+            ]
+          },
+          {
+            "slug": "condominio-horizontal",
+            "title": "Condomínio Horizontal em Itajaí | Empreendimento Guilherme Pilger",
+            "score": 32,
+            "hits": [
+              "condominio horizontal",
+              "condominiohorizontal",
+              "horizontal",
+              "cond horizontal",
+              "condhorizontal"
+            ]
+          },
+          {
+            "slug": "horizon",
+            "title": "Horizon em Itajaí | Empreendimento Guilherme Pilger",
+            "score": 24,
+            "hits": [
+              "horizon",
+              "horizon em itajai empreendimento guilherme pilger",
+              "horizonemitajaiempreendimentoguilhermepilger"
+            ]
+          }
+        ],
+        "bucket": "needs_alias_or_landing_review",
+        "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+      },
+      {
+        "source_reference": "2188",
+        "source_slug": "terreno-no-condominio-all-resort-porto-belo",
+        "title": "Terreno no Condomínio All Resort Porto Belo",
+        "city": "Porto Belo",
+        "neighborhood": "Sertão Santa Luzia",
+        "property_type": "Terreno",
+        "price": null,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio all resort porto belo",
+          "condominioallresortportobelo",
+          "all resort porto belo",
+          "allresortportobelo",
+          "cond all resort porto belo",
+          "condallresortportobelo"
+        ],
+        "explicit_candidate_keys": [
+          "condominio all resort porto belo",
+          "condominioallresortportobelo",
+          "all resort porto belo",
+          "allresortportobelo",
+          "cond all resort porto belo",
+          "condallresortportobelo"
+        ],
+        "nearest_pages": [
+          {
+            "slug": "condominio-ponta-do-estaleiro",
+            "title": "Condomínio Ponta do Estaleiro em Porto Belo | Empreendimento Guilherme Pilger",
+            "score": 20,
+            "hits": [
+              "condominio ponta do estaleiro em porto belo empreendimento guilherme pilger",
+              "condominiopontadoestaleiroemportobeloempreendimentoguilhermepilger",
+              "ponta do estaleiro em porto belo empreendimento guilherme pilger",
+              "pontadoestaleiroemportobeloempreendimentoguilhermepilger",
+              "cond ponta do estaleiro em porto belo empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "ed-veleiros-vivapark",
+            "title": "Ed. Veleiros - VivaPark em Porto Belo | Empreendimento Guilherme Pilger",
+            "score": 18,
+            "hits": [
+              "ed veleiros vivapark em porto belo empreendimento guilherme pilger",
+              "edveleirosvivaparkemportobeloempreendimentoguilhermepilger",
+              "veleiros vivapark em porto belo empreendimento guilherme pilger",
+              "veleirosvivaparkemportobeloempreendimentoguilhermepilger",
+              "edificio veleiros vivapark em porto belo empreendimento guilherme pilger"
+            ]
+          },
+          {
+            "slug": "ed-voz-vivapark",
+            "title": "Ed. Voz - VivaPark em Porto Belo | Empreendimento Guilherme Pilger",
+            "score": 18,
+            "hits": [
+              "ed voz vivapark em porto belo empreendimento guilherme pilger",
+              "edvozvivaparkemportobeloempreendimentoguilhermepilger",
+              "voz vivapark em porto belo empreendimento guilherme pilger",
+              "vozvivaparkemportobeloempreendimentoguilhermepilger",
+              "edificio voz vivapark em porto belo empreendimento guilherme pilger"
+            ]
+          }
+        ],
+        "bucket": "needs_alias_or_landing_review",
+        "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+      },
+      {
+        "source_reference": "2201",
+        "source_slug": "casa-no-condominio-reserva-camboriu-golf-club",
+        "title": "Casa no Condomínio Reserva Camboriú Golf Club",
+        "city": "Camboriú",
+        "neighborhood": "Centro",
+        "property_type": "Casa",
+        "price": 4100000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "condominio reserva camboriu golf club",
+          "condominioreservacamboriugolfclub",
+          "reserva camboriu golf club",
+          "reservacamboriugolfclub",
+          "cond reserva camboriu golf club",
+          "condreservacamboriugolfclub"
+        ],
+        "explicit_candidate_keys": [
+          "condominio reserva camboriu golf club",
+          "condominioreservacamboriugolfclub",
+          "reserva camboriu golf club",
+          "reservacamboriugolfclub",
+          "cond reserva camboriu golf club",
+          "condreservacamboriugolfclub"
+        ],
+        "nearest_pages": [
+          {
+            "slug": "condominio-reserva-camboriu-yacht-golf",
+            "title": "Condomínio Reserva Camboriú Yacht & Golf em Camboriú | Empreendimento Guilherme Pilger",
+            "score": 58,
+            "hits": [
+              "condominio reserva camboriu yacht golf",
+              "condominioreservacamboriuyachtgolf",
+              "reserva camboriu yacht golf",
+              "reservacamboriuyachtgolf",
+              "cond reserva camboriu yacht golf"
+            ]
+          },
+          {
+            "slug": "condominio-bella-vista-residence-club",
+            "title": "Condomínio Bella Vista Residence Club em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 24,
+            "hits": [
+              "condominio bella vista residence club",
+              "condominiobellavistaresidenceclub",
+              "bella vista residence club",
+              "bellavistaresidenceclub",
+              "cond bella vista residence club"
+            ]
+          },
+          {
+            "slug": "edificio-garden-park-home-club",
+            "title": "Edifício Garden Park Home Club em Balneário Camboriú | Empreendimento Guilherme Pilger",
+            "score": 18,
+            "hits": [
+              "edificio garden park home club em balneario camboriu empreendimento guilherme pilger",
+              "edificiogardenparkhomeclubembalneariocamboriuempreendimentoguilhermepilger",
+              "garden park home club em balneario camboriu empreendimento guilherme pilger",
+              "gardenparkhomeclubembalneariocamboriuempreendimentoguilhermepilger",
+              "ed garden park home club em balneario camboriu empreendimento guilherme pilger"
+            ]
+          }
+        ],
+        "bucket": "needs_alias_or_landing_review",
+        "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+      }
+    ],
+    "needs_manual_review": [
+      {
+        "source_reference": "2038",
+        "source_slug": "galpao-logistico-no-trevo-luiz-alvez",
+        "title": "Galpão Logístico na BR470-2",
+        "city": "Luiz Alves",
+        "neighborhood": "Vila do Salto",
+        "property_type": "Galpão / Depósito",
+        "price": 10000000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "br470 2",
+          "br4702"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "needs_manual_review",
+        "recommended_action": "Revisar manualmente: existe nome extraido, mas ele nao parece claramente empreendimento."
+      },
+      {
+        "source_reference": "2441",
+        "source_slug": "galpao-logisticoindustrial-na-penha-sc",
+        "title": "Galpão Logístico/Industrial na Penha - SC",
+        "city": "Penha",
+        "neighborhood": "Nossa Senhora de Fátima",
+        "property_type": "Galpão / Depósito",
+        "price": 5700000,
+        "private_condominium_name": null,
+        "runtime_candidate_keys": [
+          "penha sc",
+          "penhasc"
+        ],
+        "explicit_candidate_keys": [],
+        "nearest_pages": [],
+        "bucket": "needs_manual_review",
+        "recommended_action": "Revisar manualmente: existe nome extraido, mas ele nao parece claramente empreendimento."
+      }
+    ]
+  },
+  "items": [
+    {
+      "source_reference": "1033",
+      "source_slug": "terreno-em-camboriu",
+      "title": "Terreno em Camboriú",
+      "city": "Camboriú",
+      "neighborhood": "Rio Pequeno",
+      "property_type": "Terreno",
+      "price": 15150000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "1119",
+      "source_slug": "casa-frente-mar-na-praia-do-estaleirinho-em-balneario-camboriu",
+      "title": "Casa frente mar na Praia do Estaleirinho em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia do Estaleirinho",
+      "property_type": "Casa",
+      "price": 55000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia do estaleirinho",
+        "praiadoestaleirinho"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1187",
+      "source_slug": "casa-na-praia-de-taquaras-em-balneario-camboriu",
+      "title": "Casa na Praia de Taquaras em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia das Taquaras",
+      "property_type": "Casa",
+      "price": 9500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia de taquaras",
+        "praiadetaquaras"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1202",
+      "source_slug": "casa-no-canto-da-praia-em-itapema-2",
+      "title": "Casa no Canto da Praia em Itapema",
+      "city": "Itapema",
+      "neighborhood": "Canto da Praia",
+      "property_type": "Casa",
+      "price": 6600000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "canto da praia",
+        "cantodapraia"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1452",
+      "source_slug": "edificio-em-balneario-camboriu",
+      "title": "Edifício em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Nações",
+      "property_type": "Prédio Residencial",
+      "price": 5200000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "1489",
+      "source_slug": "terreno-na-quadra-mar-em-itapema",
+      "title": "Terreno na Quadra mar em Itapema",
+      "city": "Itapema",
+      "neighborhood": "Meia Praia",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "quadra mar",
+        "quadramar"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1571",
+      "source_slug": "casa-na-praia-do-estaleiro-em-balneario-camboriu",
+      "title": "Casa na praia do Estaleiro em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia do Estaleiro",
+      "property_type": "Casa",
+      "price": 14000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia do estaleiro",
+        "praiadoestaleiro"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1739",
+      "source_slug": "terreno-no-centro-de-camboriu",
+      "title": "Terreno no Centro de Camboriú",
+      "city": "Camboriú",
+      "neighborhood": "Centro",
+      "property_type": "Terreno",
+      "price": 9300000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "centro de camboriu",
+        "centrodecamboriu"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1934",
+      "source_slug": "casa-a-venda-na-praia-de-taquaras-em-balneario-camboriu",
+      "title": "Casa à venda na Praia de Taquaras em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia das Taquaras",
+      "property_type": "Casa",
+      "price": 4500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia de taquaras",
+        "praiadetaquaras"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1962",
+      "source_slug": "casa-na-barra-sul-de-balneario-camboriu-2",
+      "title": "Casa na Barra Sul de Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Centro",
+      "property_type": "Casa",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "barra sul de balneario camboriu",
+        "barrasuldebalneariocamboriu"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [
+        {
+          "slug": "condominio-vivendas-do-atlantico",
+          "title": "Condomínio Vivendas do Atlântico em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+            "condominiovivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+            "vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+            "vivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+            "cond vivendas do atlantico em balneario camboriu empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "condominio-haras-rio-do-ouro",
+          "title": "Condomínio Haras Rio do Ouro em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+            "condominioharasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+            "haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+            "harasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+            "cond haras rio do ouro em balneario camboriu empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "condominio-horizontal-costa-azul",
+          "title": "Condomínio Horizontal Costa Azul em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+            "condominiohorizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+            "horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+            "horizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+            "cond horizontal costa azul em balneario camboriu empreendimento guilherme pilger"
+          ]
+        }
+      ],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1971",
+      "source_slug": "casa-na-praia-dos-amores-em-balneario-camboriu-2",
+      "title": "Casa na Praia dos Amores em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia dos Amores",
+      "property_type": "Casa",
+      "price": 5500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia dos amores",
+        "praiadosamores"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1974",
+      "source_slug": "terreno-com-chales-na-praia-dos-amores-em-balneario-camboriu",
+      "title": "Terreno com Chalés na Praia dos amores em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia dos Amores",
+      "property_type": "Casa",
+      "price": 7500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia dos amores",
+        "praiadosamores"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "1976",
+      "source_slug": "casa-triplex-na-praia-dos-amores-em-balneario-camboriu",
+      "title": "Casa Triplex na Praia dos Amores em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia dos Amores",
+      "property_type": "Casa",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia dos amores",
+        "praiadosamores"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2024",
+      "source_slug": "casa-na-praia-do-estaleiro",
+      "title": "Casa na Praia do Estaleiro",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia do Estaleirinho",
+      "property_type": "Casa",
+      "price": 4300000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia do estaleiro",
+        "praiadoestaleiro"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2034",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Galpão Logístico no Smart Valley",
+      "city": "Itajaí",
+      "neighborhood": "Canhanduba",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "smart valley",
+        "smartvalley"
+      ],
+      "explicit_candidate_keys": [
+        "smart valley",
+        "smartvalley"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2035",
+      "source_slug": "galpao-logistico-no-valley-business-park",
+      "title": "Galpão Logístico no Valley Business Park",
+      "city": "Itajaí",
+      "neighborhood": "Itaipava",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "valley business park",
+        "valleybusinesspark"
+      ],
+      "explicit_candidate_keys": [
+        "valley business park",
+        "valleybusinesspark"
+      ],
+      "nearest_pages": [
+        {
+          "slug": "cond-hub-camboriu-business-park",
+          "title": "Cond. HUB Camboriú Business Park em Camboriú | Empreendimento Guilherme Pilger",
+          "score": 12,
+          "hits": [
+            "cond hub camboriu business park",
+            "condhubcamboriubusinesspark",
+            "hub camboriu business park",
+            "hubcamboriubusinesspark",
+            "condominio hub camboriu business park"
+          ]
+        }
+      ],
+      "bucket": "needs_alias_or_landing_review",
+      "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+    },
+    {
+      "source_reference": "2038",
+      "source_slug": "galpao-logistico-no-trevo-luiz-alvez",
+      "title": "Galpão Logístico na BR470-2",
+      "city": "Luiz Alves",
+      "neighborhood": "Vila do Salto",
+      "property_type": "Galpão / Depósito",
+      "price": 10000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "br470 2",
+        "br4702"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "needs_manual_review",
+      "recommended_action": "Revisar manualmente: existe nome extraido, mas ele nao parece claramente empreendimento."
+    },
+    {
+      "source_reference": "2040",
+      "source_slug": "galpao-logistico-ad3-br-470",
+      "title": "Galpão Logístico AD3  BR 470",
+      "city": "Navegantes",
+      "neighborhood": "Volta Grande",
+      "property_type": "Galpão / Depósito",
+      "price": 31000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2057",
+      "source_slug": "casa-no-condominio-caledonia-village-em-camboriusc",
+      "title": "Casa no Condomínio Caledônia Village em Camboriú/SC",
+      "city": "Camboriú",
+      "neighborhood": "Santa Regina",
+      "property_type": "Casa",
+      "price": 4300000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio caledonia village",
+        "condominiocaledoniavillage",
+        "caledonia village",
+        "caledoniavillage",
+        "cond caledonia village",
+        "condcaledoniavillage"
+      ],
+      "explicit_candidate_keys": [
+        "condominio caledonia village",
+        "condominiocaledoniavillage",
+        "caledonia village",
+        "caledoniavillage",
+        "cond caledonia village",
+        "condcaledoniavillage"
+      ],
+      "nearest_pages": [
+        {
+          "slug": "condominio-caledonia",
+          "title": "Condomínio Caledônia em Camboriú | Empreendimento Guilherme Pilger",
+          "score": 44,
+          "hits": [
+            "caledonia",
+            "condominio caledonia",
+            "condominiocaledonia",
+            "cond caledonia",
+            "condcaledonia"
+          ]
+        },
+        {
+          "slug": "condominio-caledonia-private-village",
+          "title": "Condomínio Caledônia Private Village em Camboriú | Empreendimento Guilherme Pilger",
+          "score": 40,
+          "hits": [
+            "condominio caledonia private village",
+            "condominiocaledoniaprivatevillage",
+            "caledonia private village",
+            "caledoniaprivatevillage",
+            "cond caledonia private village"
+          ]
+        },
+        {
+          "slug": "caledonia",
+          "title": "Caledônia em Camboriú | Empreendimento Guilherme Pilger",
+          "score": 24,
+          "hits": [
+            "caledonia",
+            "caledonia em camboriu empreendimento guilherme pilger",
+            "caledoniaemcamboriuempreendimentoguilhermepilger"
+          ]
+        }
+      ],
+      "bucket": "needs_alias_or_landing_review",
+      "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+    },
+    {
+      "source_reference": "2074",
+      "source_slug": "area-de-terra-com-projeto-para-galpoes-logisticos-em-itajai",
+      "title": "Área de Terra com projeto para Galpões Logísticos em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Bairro Baía",
+      "property_type": "Terreno",
+      "price": 40000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2075",
+      "source_slug": "area-de-terra-com-projeto-para-galpoes-logisticos-em-itajai",
+      "title": "Área de Terra com projeto para Galpões Logísticos em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Bairro Baía",
+      "property_type": "Terreno",
+      "price": 6500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2080",
+      "source_slug": "area-de-terra-em-rio-do-sul-sc",
+      "title": "Área de Terra em Rio do Sul - SC",
+      "city": "Rio do Sul",
+      "neighborhood": "Serra Canoas",
+      "property_type": "Terreno",
+      "price": 50000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2102",
+      "source_slug": "casa-alto-padrao-em-itapemasc",
+      "title": "Casa Alto Padrão em Itapema/SC",
+      "city": "Itapema",
+      "neighborhood": "Meia Praia",
+      "property_type": "Casa",
+      "price": 6900000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2104",
+      "source_slug": "terreno-para-galpao-logistico-em-itajaisc",
+      "title": "Terreno para Galpão Logístico em Itajaí/SC",
+      "city": "Itajaí",
+      "neighborhood": "Cidade Nova",
+      "property_type": "Terreno",
+      "price": 5500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2106",
+      "source_slug": "galpao-logistico-alto-padrao-iatajaisc",
+      "title": "Galpão Logístico Alto Padrão Itajaí/SC",
+      "city": "Itajaí",
+      "neighborhood": "Salseiros",
+      "property_type": "Galpão / Depósito",
+      "price": 35000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2118",
+      "source_slug": "area-de-terra-na-br-101-penhasc",
+      "title": "Área de Terra na BR-101  Penha/SC",
+      "city": "Penha",
+      "neighborhood": "centro",
+      "property_type": "Terreno",
+      "price": 20000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "br 101 penha sc",
+        "br101penhasc"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2134",
+      "source_slug": "apartamento-no-condominio-dona-lely-em-itapema",
+      "title": "Apartamento no Condomínio Dona Lely em Itapema",
+      "city": "Itapema",
+      "neighborhood": "Meia Praia",
+      "property_type": "Apartamento",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio dona lely",
+        "condominiodonalely",
+        "dona lely",
+        "donalely",
+        "cond dona lely",
+        "conddonalely"
+      ],
+      "explicit_candidate_keys": [
+        "condominio dona lely",
+        "condominiodonalely",
+        "dona lely",
+        "donalely",
+        "cond dona lely",
+        "conddonalely"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2166",
+      "source_slug": "terreno-frente-br-101-itajaisc",
+      "title": "Terreno Frente BR-101  Itajaí/SC",
+      "city": "Itajaí",
+      "neighborhood": "São Vicente",
+      "property_type": "Terreno",
+      "price": 23500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2182",
+      "source_slug": "casa-no-condominio-brava-horizontal-na-praia-brava-em-itajai",
+      "title": "Casa no Condomínio Brava Horizontal na Praia Brava em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Praia Brava",
+      "property_type": "Casa",
+      "price": 5500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio brava horizontal",
+        "condominiobravahorizontal",
+        "brava horizontal",
+        "bravahorizontal",
+        "cond brava horizontal",
+        "condbravahorizontal"
+      ],
+      "explicit_candidate_keys": [
+        "condominio brava horizontal",
+        "condominiobravahorizontal",
+        "brava horizontal",
+        "bravahorizontal",
+        "cond brava horizontal",
+        "condbravahorizontal"
+      ],
+      "nearest_pages": [
+        {
+          "slug": "condominio-horizontal-praia-brava",
+          "title": "Condomínio Horizontal Praia Brava em Itajaí | Empreendimento Guilherme Pilger",
+          "score": 40,
+          "hits": [
+            "condominio horizontal praia brava",
+            "condominiohorizontalpraiabrava",
+            "horizontal praia brava",
+            "horizontalpraiabrava",
+            "cond horizontal praia brava"
+          ]
+        },
+        {
+          "slug": "condominio-horizontal",
+          "title": "Condomínio Horizontal em Itajaí | Empreendimento Guilherme Pilger",
+          "score": 32,
+          "hits": [
+            "condominio horizontal",
+            "condominiohorizontal",
+            "horizontal",
+            "cond horizontal",
+            "condhorizontal"
+          ]
+        },
+        {
+          "slug": "horizon",
+          "title": "Horizon em Itajaí | Empreendimento Guilherme Pilger",
+          "score": 24,
+          "hits": [
+            "horizon",
+            "horizon em itajai empreendimento guilherme pilger",
+            "horizonemitajaiempreendimentoguilhermepilger"
+          ]
+        }
+      ],
+      "bucket": "needs_alias_or_landing_review",
+      "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+    },
+    {
+      "source_reference": "2188",
+      "source_slug": "terreno-no-condominio-all-resort-porto-belo",
+      "title": "Terreno no Condomínio All Resort Porto Belo",
+      "city": "Porto Belo",
+      "neighborhood": "Sertão Santa Luzia",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio all resort porto belo",
+        "condominioallresortportobelo",
+        "all resort porto belo",
+        "allresortportobelo",
+        "cond all resort porto belo",
+        "condallresortportobelo"
+      ],
+      "explicit_candidate_keys": [
+        "condominio all resort porto belo",
+        "condominioallresortportobelo",
+        "all resort porto belo",
+        "allresortportobelo",
+        "cond all resort porto belo",
+        "condallresortportobelo"
+      ],
+      "nearest_pages": [
+        {
+          "slug": "condominio-ponta-do-estaleiro",
+          "title": "Condomínio Ponta do Estaleiro em Porto Belo | Empreendimento Guilherme Pilger",
+          "score": 20,
+          "hits": [
+            "condominio ponta do estaleiro em porto belo empreendimento guilherme pilger",
+            "condominiopontadoestaleiroemportobeloempreendimentoguilhermepilger",
+            "ponta do estaleiro em porto belo empreendimento guilherme pilger",
+            "pontadoestaleiroemportobeloempreendimentoguilhermepilger",
+            "cond ponta do estaleiro em porto belo empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "ed-veleiros-vivapark",
+          "title": "Ed. Veleiros - VivaPark em Porto Belo | Empreendimento Guilherme Pilger",
+          "score": 18,
+          "hits": [
+            "ed veleiros vivapark em porto belo empreendimento guilherme pilger",
+            "edveleirosvivaparkemportobeloempreendimentoguilhermepilger",
+            "veleiros vivapark em porto belo empreendimento guilherme pilger",
+            "veleirosvivaparkemportobeloempreendimentoguilhermepilger",
+            "edificio veleiros vivapark em porto belo empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "ed-voz-vivapark",
+          "title": "Ed. Voz - VivaPark em Porto Belo | Empreendimento Guilherme Pilger",
+          "score": 18,
+          "hits": [
+            "ed voz vivapark em porto belo empreendimento guilherme pilger",
+            "edvozvivaparkemportobeloempreendimentoguilhermepilger",
+            "voz vivapark em porto belo empreendimento guilherme pilger",
+            "vozvivaparkemportobeloempreendimentoguilhermepilger",
+            "edificio voz vivapark em porto belo empreendimento guilherme pilger"
+          ]
+        }
+      ],
+      "bucket": "needs_alias_or_landing_review",
+      "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+    },
+    {
+      "source_reference": "2195",
+      "source_slug": "casa-beira-mar-em-porto-belo",
+      "title": "Casa Beira-Mar em Porto Belo",
+      "city": "Porto Belo",
+      "neighborhood": "centro",
+      "property_type": "Casa",
+      "price": 10700000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2201",
+      "source_slug": "casa-no-condominio-reserva-camboriu-golf-club",
+      "title": "Casa no Condomínio Reserva Camboriú Golf Club",
+      "city": "Camboriú",
+      "neighborhood": "Centro",
+      "property_type": "Casa",
+      "price": 4100000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio reserva camboriu golf club",
+        "condominioreservacamboriugolfclub",
+        "reserva camboriu golf club",
+        "reservacamboriugolfclub",
+        "cond reserva camboriu golf club",
+        "condreservacamboriugolfclub"
+      ],
+      "explicit_candidate_keys": [
+        "condominio reserva camboriu golf club",
+        "condominioreservacamboriugolfclub",
+        "reserva camboriu golf club",
+        "reservacamboriugolfclub",
+        "cond reserva camboriu golf club",
+        "condreservacamboriugolfclub"
+      ],
+      "nearest_pages": [
+        {
+          "slug": "condominio-reserva-camboriu-yacht-golf",
+          "title": "Condomínio Reserva Camboriú Yacht & Golf em Camboriú | Empreendimento Guilherme Pilger",
+          "score": 58,
+          "hits": [
+            "condominio reserva camboriu yacht golf",
+            "condominioreservacamboriuyachtgolf",
+            "reserva camboriu yacht golf",
+            "reservacamboriuyachtgolf",
+            "cond reserva camboriu yacht golf"
+          ]
+        },
+        {
+          "slug": "condominio-bella-vista-residence-club",
+          "title": "Condomínio Bella Vista Residence Club em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 24,
+          "hits": [
+            "condominio bella vista residence club",
+            "condominiobellavistaresidenceclub",
+            "bella vista residence club",
+            "bellavistaresidenceclub",
+            "cond bella vista residence club"
+          ]
+        },
+        {
+          "slug": "edificio-garden-park-home-club",
+          "title": "Edifício Garden Park Home Club em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 18,
+          "hits": [
+            "edificio garden park home club em balneario camboriu empreendimento guilherme pilger",
+            "edificiogardenparkhomeclubembalneariocamboriuempreendimentoguilhermepilger",
+            "garden park home club em balneario camboriu empreendimento guilherme pilger",
+            "gardenparkhomeclubembalneariocamboriuempreendimentoguilhermepilger",
+            "ed garden park home club em balneario camboriu empreendimento guilherme pilger"
+          ]
+        }
+      ],
+      "bucket": "needs_alias_or_landing_review",
+      "recommended_action": "Revisar alias/nome da landing mais parecida; se nao for o mesmo empreendimento, criar landing propria."
+    },
+    {
+      "source_reference": "2202",
+      "source_slug": "galpao-logistico-mtp-itajaisc",
+      "title": "Galpão Logístico MTP - Itajaí/SC",
+      "city": "Itajaí",
+      "neighborhood": "Centro",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2203",
+      "source_slug": "terreno-de-esquina-quadra-mar-balneario-camboriu",
+      "title": "Terreno de Esquina  Quadra Mar, Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Centro",
+      "property_type": "Terreno",
+      "price": 26000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2217",
+      "source_slug": "sala-comercial-no-edificio-riviera-business-mall",
+      "title": "Sala Comercial no Edifício Riviera Business & Mall",
+      "city": "Itajaí",
+      "neighborhood": "Praia Brava",
+      "property_type": "Sala Comercial",
+      "price": 10000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "edificio riviera business mall",
+        "edificiorivierabusinessmall",
+        "riviera business mall",
+        "rivierabusinessmall",
+        "ed riviera business mall",
+        "edrivierabusinessmall"
+      ],
+      "explicit_candidate_keys": [
+        "edificio riviera business mall",
+        "edificiorivierabusinessmall",
+        "riviera business mall",
+        "rivierabusinessmall",
+        "ed riviera business mall",
+        "edrivierabusinessmall"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2234",
+      "source_slug": "terreno-na-praia-brava-com-potencial-construtivo",
+      "title": "Terreno na Praia Brava com Potencial Construtivo",
+      "city": "Itajaí",
+      "neighborhood": "Praia Brava",
+      "property_type": "Terreno",
+      "price": 43000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2313",
+      "source_slug": "galpao-logistico-ad3-br-470",
+      "title": "Galpão Logístico AD3  BR 470",
+      "city": "Navegantes",
+      "neighborhood": "Volta Grande",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2342",
+      "source_slug": "casas-pe-na-areia-em-bombinhassc",
+      "title": "Terreno com duas Casas Pé na Areia em Bombinhas\\SC",
+      "city": "Bombinhas",
+      "neighborhood": "Morrinhos",
+      "property_type": "Casa",
+      "price": 8500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "areia"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2343",
+      "source_slug": "pre-lancamento-ed-aura-na-praia-brava-em-itajai",
+      "title": "Pré Lançamento Ed. Aura na Praia Brava em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Praia Brava",
+      "property_type": "Apartamento",
+      "price": 6963288.04,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "ed aura",
+        "edaura",
+        "aura",
+        "edificio aura",
+        "edificioaura"
+      ],
+      "explicit_candidate_keys": [
+        "ed aura",
+        "edaura",
+        "aura",
+        "edificio aura",
+        "edificioaura"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2348",
+      "source_slug": "galpao-logistico-alto-padrao-iatajaisc",
+      "title": "Galpão Logístico Alto Padrão Itajaí/SC",
+      "city": "Itajaí",
+      "neighborhood": "Salseiros",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2358",
+      "source_slug": "terreno-no-bairro-aririba-em-balneario-camboriu",
+      "title": "Terreno no Bairro Ariribá em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Ariribá",
+      "property_type": "Terreno",
+      "price": 26000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "bairro aririba",
+        "bairroaririba"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [
+        {
+          "slug": "residencial-aririba",
+          "title": "Residencial Ariribá em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 8,
+          "hits": [
+            "aririba",
+            "residencial aririba em balneario camboriu empreendimento guilherme pilger",
+            "residencialariribaembalneariocamboriuempreendimentoguilhermepilger",
+            "aririba em balneario camboriu empreendimento guilherme pilger",
+            "ariribaembalneariocamboriuempreendimentoguilhermepilger"
+          ]
+        }
+      ],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2396",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Condomínio Logístico  Garuva/SC",
+      "city": "Garuva",
+      "neighborhood": "guaruva",
+      "property_type": "Galpão / Depósito",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio logistico garuva sc",
+        "condominiologisticogaruvasc",
+        "logistico garuva sc",
+        "logisticogaruvasc",
+        "cond logistico garuva sc",
+        "condlogisticogaruvasc"
+      ],
+      "explicit_candidate_keys": [
+        "condominio logistico garuva sc",
+        "condominiologisticogaruvasc",
+        "logistico garuva sc",
+        "logisticogaruvasc",
+        "cond logistico garuva sc",
+        "condlogisticogaruvasc"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2397",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Condomínio Logístico AAA  Navegantes/SC",
+      "city": "Navegantes",
+      "neighborhood": "Navegantes",
+      "property_type": "Galpão / Depósito",
+      "price": 9900000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio logistico aaa navegantes sc",
+        "condominiologisticoaaanavegantessc",
+        "logistico aaa navegantes sc",
+        "logisticoaaanavegantessc",
+        "cond logistico aaa navegantes sc",
+        "condlogisticoaaanavegantessc"
+      ],
+      "explicit_candidate_keys": [
+        "condominio logistico aaa navegantes sc",
+        "condominiologisticoaaanavegantessc",
+        "logistico aaa navegantes sc",
+        "logisticoaaanavegantessc",
+        "cond logistico aaa navegantes sc",
+        "condlogisticoaaanavegantessc"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2416",
+      "source_slug": "area-de-terra-no-trevo-do-beto-carrero-penhasc",
+      "title": "Área de Terra no Trevo do Beto Carrero  Penha/SC",
+      "city": "Penha",
+      "neighborhood": "São Cristóvão",
+      "property_type": "Terreno",
+      "price": 8000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "trevo do beto carrero penha sc",
+        "trevodobetocarreropenhasc"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2427",
+      "source_slug": "terreno-na-praia-dos-amores-em-balneario-camboriu-2",
+      "title": "Terreno na Praia dos Amores em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia dos Amores",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia dos amores",
+        "praiadosamores"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2441",
+      "source_slug": "galpao-logisticoindustrial-na-penha-sc",
+      "title": "Galpão Logístico/Industrial na Penha - SC",
+      "city": "Penha",
+      "neighborhood": "Nossa Senhora de Fátima",
+      "property_type": "Galpão / Depósito",
+      "price": 5700000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "penha sc",
+        "penhasc"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "needs_manual_review",
+      "recommended_action": "Revisar manualmente: existe nome extraido, mas ele nao parece claramente empreendimento."
+    },
+    {
+      "source_reference": "2473",
+      "source_slug": "area-de-terra-em-ilhota-sc-na-br-470",
+      "title": "Área de Terra em Ilhota - SC na BR-470",
+      "city": "Ilhota",
+      "neighborhood": "Baú Baixo",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "br 470",
+        "br470"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2474",
+      "source_slug": "area-de-terra-em-ilhota-sc-na-br-470",
+      "title": "Área de Terra em Ilhota - SC na BR-470",
+      "city": "Ilhota",
+      "neighborhood": "Baú Baixo",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "br 470",
+        "br470"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2495",
+      "source_slug": "casa-de-alto-padrao-em-blumenau-sc",
+      "title": "Casa de Alto Padrão em Blumenau - SC",
+      "city": "Blumenau",
+      "neighborhood": "Blumenau",
+      "property_type": "Casa",
+      "price": 15000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2509",
+      "source_slug": "casa-exclusiva-na-praia-de-trancoso",
+      "title": "Casa Exclusiva na Praia de Trancoso",
+      "city": "Porto Seguro",
+      "neighborhood": "Trancoso",
+      "property_type": "Casa",
+      "price": 37000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia de trancoso",
+        "praiadetrancoso"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2510",
+      "source_slug": "casa-de-alto-padrao-em-balneario-camboriu",
+      "title": "Casa de Alto Padrão em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Nações",
+      "property_type": "Casa",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2525",
+      "source_slug": "casa-a-poucos-metros-da-praia-de-cabecudas",
+      "title": "Casa a poucos metros da Praia de Cabeçudas",
+      "city": "Itajaí",
+      "neighborhood": "Cabeçudas",
+      "property_type": "Casa",
+      "price": 6500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2534",
+      "source_slug": "terreno-de-frente-para-o-mar-em-barra-velha",
+      "title": "Terreno de Frente para o Mar em Barra Velha",
+      "city": "Barra Velha",
+      "neighborhood": "Tabuleiro",
+      "property_type": "Terreno",
+      "price": 10000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2574",
+      "source_slug": "area-de-terra-na-br-101-em-salseiros-itajai",
+      "title": "Área de Terra na BR-101 em Salseiros, Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Salseiros",
+      "property_type": "Terreno",
+      "price": 20000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "br 101",
+        "br101"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2575",
+      "source_slug": "area-de-terra-na-rodovia-antonio-heil-em-itajai",
+      "title": "Área de Terra na Rodovia Antônio Heil em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Itaipava",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "rodovia antonio heil",
+        "rodoviaantonioheil"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2578",
+      "source_slug": "casa-de-alto-padrao-na-praia-de-taquaras-em-balneario-camboriu",
+      "title": "Casa de Alto Padrão na Praia de Taquaras em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Praia das Taquaras",
+      "property_type": "Casa",
+      "price": 20000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "praia de taquaras",
+        "praiadetaquaras"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2579",
+      "source_slug": "casa-no-centro-de-balneario-camboriu",
+      "title": "Casa no Centro de Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Centro",
+      "property_type": "Casa",
+      "price": 9000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "centro de balneario camboriu",
+        "centrodebalneariocamboriu"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [
+        {
+          "slug": "condominio-vivendas-do-atlantico",
+          "title": "Condomínio Vivendas do Atlântico em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+            "condominiovivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+            "vivendas do atlantico em balneario camboriu empreendimento guilherme pilger",
+            "vivendasdoatlanticoembalneariocamboriuempreendimentoguilhermepilger",
+            "cond vivendas do atlantico em balneario camboriu empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "condominio-haras-rio-do-ouro",
+          "title": "Condomínio Haras Rio do Ouro em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+            "condominioharasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+            "haras rio do ouro em balneario camboriu empreendimento guilherme pilger",
+            "harasriodoouroembalneariocamboriuempreendimentoguilhermepilger",
+            "cond haras rio do ouro em balneario camboriu empreendimento guilherme pilger"
+          ]
+        },
+        {
+          "slug": "condominio-horizontal-costa-azul",
+          "title": "Condomínio Horizontal Costa Azul em Balneário Camboriú | Empreendimento Guilherme Pilger",
+          "score": 6,
+          "hits": [
+            "condominio horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+            "condominiohorizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+            "horizontal costa azul em balneario camboriu empreendimento guilherme pilger",
+            "horizontalcostaazulembalneariocamboriuempreendimentoguilhermepilger",
+            "cond horizontal costa azul em balneario camboriu empreendimento guilherme pilger"
+          ]
+        }
+      ],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2590",
+      "source_slug": "casa-frente-mar-em-bombinhas",
+      "title": "Casa de Frente para o Mar em Bombinhas",
+      "city": "Bombinhas",
+      "neighborhood": "Bombas",
+      "property_type": "Casa",
+      "price": 15400000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2608",
+      "source_slug": "galpao-logistico-aaa-em-araquari-sc",
+      "title": "Galpão Logístico AAA em Araquari - SC",
+      "city": "Araquari",
+      "neighborhood": "Rainha",
+      "property_type": "Galpão / Depósito",
+      "price": 33000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2628",
+      "source_slug": "casa-frente-mar-em-bombinhas-2",
+      "title": "Casa Frente Mar em Bombinhas",
+      "city": "Bombinhas",
+      "neighborhood": "Praia de Quatro Ilhas",
+      "property_type": "Casa",
+      "price": 17000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2631",
+      "source_slug": "area-de-terra-industrial-em-ilhotasc",
+      "title": "Área de Terra Industrial em Ilhota/SC",
+      "city": "Ilhota",
+      "neighborhood": "Pedra de Amolar",
+      "property_type": "Terreno",
+      "price": 45000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2635",
+      "source_slug": "terreno-em-condominio-logistico-em-campo-grande-ms",
+      "title": "Terreno em Condomínio Logístico em Campo Grande - MS",
+      "city": "Campo Grande",
+      "neighborhood": "BR-262",
+      "property_type": "Terreno",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio logistico",
+        "condominiologistico",
+        "logistico",
+        "cond logistico",
+        "condlogistico"
+      ],
+      "explicit_candidate_keys": [
+        "condominio logistico",
+        "condominiologistico",
+        "logistico",
+        "cond logistico",
+        "condlogistico"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2638",
+      "source_slug": "galpao-em-condominio-logistico-e-industrial-nextto-em-navegantessc",
+      "title": "Galpão em Condomínio Logístico e Industrial Nextto em Navegantes/SC",
+      "city": "Navegantes",
+      "neighborhood": "Volta Grande",
+      "property_type": "Galpão / Depósito",
+      "price": 5995000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "condominio logistico e industrial nextto",
+        "condominiologisticoeindustrialnextto",
+        "logistico e industrial nextto",
+        "logisticoeindustrialnextto",
+        "cond logistico e industrial nextto",
+        "condlogisticoeindustrialnextto"
+      ],
+      "explicit_candidate_keys": [
+        "condominio logistico e industrial nextto",
+        "condominiologisticoeindustrialnextto",
+        "logistico e industrial nextto",
+        "logisticoeindustrialnextto",
+        "cond logistico e industrial nextto",
+        "condlogisticoeindustrialnextto"
+      ],
+      "nearest_pages": [],
+      "bucket": "needs_landing_page",
+      "recommended_action": "Criar landing de empreendimento/condominio ou marcar como excecao se for imovel avulso."
+    },
+    {
+      "source_reference": "2642",
+      "source_slug": "area-de-terra-comercial-e-industrial-a-venda-gasparsc",
+      "title": "Área de Terra Comercial e Industrial à Venda  Gaspar/SC",
+      "city": "Gaspar",
+      "neighborhood": "Arraial D'Ouro",
+      "property_type": "Terreno",
+      "price": 19500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2643",
+      "source_slug": "terreno-comercial-na-avenida-dos-estados-em-balneario-camboriu",
+      "title": "Terreno Comercial na Avenida dos Estados em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Ariribá",
+      "property_type": "Terreno Comercial",
+      "price": 14000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [
+        "avenida dos estados",
+        "avenidadosestados"
+      ],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "2644",
+      "source_slug": "galpao-logistico-em-brusque-sc",
+      "title": "Galpão Logístico em Brusque - SC",
+      "city": "Brusque",
+      "neighborhood": "Limeira Baixa",
+      "property_type": "Galpão / Depósito",
+      "price": 5100000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2645",
+      "source_slug": "galpao-logistico-em-pomerode-sc",
+      "title": "Galpão Logístico em Pomerode - SC",
+      "city": "Pomerode",
+      "neighborhood": "Centro",
+      "property_type": "Galpão / Depósito",
+      "price": 8000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "2646",
+      "source_slug": "area-de-terra-logistica-industrial-e-comercial-em-biguacusc",
+      "title": "Área de Terra Logística, Industrial e Comercial em Biguaçu/SC",
+      "city": "Biguaçu",
+      "neighborhood": "BR-101",
+      "property_type": "Terreno Comercial",
+      "price": 16500000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "491",
+      "source_slug": "casa-na-praia-brava-em-itajai-2",
+      "title": "Casa na Praia Brava em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Praia Brava",
+      "property_type": "Casa",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "location_or_address_only",
+      "recommended_action": "Nao criar bloco automaticamente; titulo parece apontar localizacao, rua, praia, rodovia ou bairro."
+    },
+    {
+      "source_reference": "711",
+      "source_slug": "casa-na-praia-de-cabecudas-em-itajai",
+      "title": "Casa em Cabeçudas em Itajaí",
+      "city": "Itajaí",
+      "neighborhood": "Cabeçudas",
+      "property_type": "Casa",
+      "price": 30000000,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    },
+    {
+      "source_reference": "935",
+      "source_slug": "casa-em-balneario-camboriu",
+      "title": "Casa em Balneário Camboriú",
+      "city": "Balneário Camboriú",
+      "neighborhood": "Ariribá",
+      "property_type": "Casa",
+      "price": null,
+      "private_condominium_name": null,
+      "runtime_candidate_keys": [],
+      "explicit_candidate_keys": [],
+      "nearest_pages": [],
+      "bucket": "likely_no_condominium",
+      "recommended_action": "Nao precisa exibir bloco de empreendimento agora; tratar como imovel avulso."
+    }
+  ]
+}

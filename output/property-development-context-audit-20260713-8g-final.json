@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-07-13T13:26:59.176Z",
+  "scope": "phase-8g-final-development-context",
+  "totals": {
+    "active_properties": 1063,
+    "published_landing_pages": 800,
+    "direct_context": 964,
+    "fallback_context": 41,
+    "total_with_context": 1005,
+    "without_context": 58
+  },
+  "checked_refs": [
+    {
+      "source_reference": "813",
+      "source_slug": "apartamento-no-ed-brava-vel-na-praia-brava-em-itajai",
+      "title": "Cobertura no Ed. Brava Vel na Praia Brava em Itajaí",
+      "mode": "direct",
+      "matchedPage": "brava-vel-residence"
+    },
+    {
+      "source_reference": "2034",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Galpão Logístico no Smart Valley",
+      "mode": "direct",
+      "matchedPage": "smart-valley"
+    },
+    {
+      "source_reference": "2035",
+      "source_slug": "galpao-logistico-no-valley-business-park",
+      "title": "Galpão Logístico no Valley Business Park",
+      "mode": "direct",
+      "matchedPage": "valley-business-park"
+    },
+    {
+      "source_reference": "2038",
+      "source_slug": "galpao-logistico-no-trevo-luiz-alvez",
+      "title": "Galpão Logístico na BR470-2",
+      "mode": "none",
+      "matchedPage": null
+    },
+    {
+      "source_reference": "2057",
+      "source_slug": "casa-no-condominio-caledonia-village-em-camboriusc",
+      "title": "Casa no Condomínio Caledônia Village em Camboriú/SC",
+      "mode": "direct",
+      "matchedPage": "condominio-caledonia-village"
+    },
+    {
+      "source_reference": "2134",
+      "source_slug": "apartamento-no-condominio-dona-lely-em-itapema",
+      "title": "Apartamento no Condomínio Dona Lely em Itapema",
+      "mode": "direct",
+      "matchedPage": "condominio-dona-lely"
+    },
+    {
+      "source_reference": "2182",
+      "source_slug": "casa-no-condominio-brava-horizontal-na-praia-brava-em-itajai",
+      "title": "Casa no Condomínio Brava Horizontal na Praia Brava em Itajaí",
+      "mode": "direct",
+      "matchedPage": "condominio-horizontal-praia-brava"
+    },
+    {
+      "source_reference": "2188",
+      "source_slug": "terreno-no-condominio-all-resort-porto-belo",
+      "title": "Terreno no Condomínio All Resort Porto Belo",
+      "mode": "direct",
+      "matchedPage": "condominio-all-resort-porto-belo"
+    },
+    {
+      "source_reference": "2201",
+      "source_slug": "casa-no-condominio-reserva-camboriu-golf-club",
+      "title": "Casa no Condomínio Reserva Camboriú Golf Club",
+      "mode": "direct",
+      "matchedPage": "condominio-reserva-camboriu-yacht-golf"
+    },
+    {
+      "source_reference": "2217",
+      "source_slug": "sala-comercial-no-edificio-riviera-business-mall",
+      "title": "Sala Comercial no Edifício Riviera Business & Mall",
+      "mode": "direct",
+      "matchedPage": "edificio-riviera-business-mall"
+    },
+    {
+      "source_reference": "2343",
+      "source_slug": "pre-lancamento-ed-aura-na-praia-brava-em-itajai",
+      "title": "Pré Lançamento Ed. Aura na Praia Brava em Itajaí",
+      "mode": "direct",
+      "matchedPage": "ed-aura"
+    },
+    {
+      "source_reference": "2396",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Condomínio Logístico  Garuva/SC",
+      "mode": "direct",
+      "matchedPage": "condominio-logistico-garuva-sc"
+    },
+    {
+      "source_reference": "2397",
+      "source_slug": "galpao-logistico-no-smart-valley",
+      "title": "Condomínio Logístico AAA  Navegantes/SC",
+      "mode": "direct",
+      "matchedPage": "condominio-logistico-aaa-navegantes-sc"
+    },
+    {
+      "source_reference": "2441",
+      "source_slug": "galpao-logisticoindustrial-na-penha-sc",
+      "title": "Galpão Logístico/Industrial na Penha - SC",
+      "mode": "none",
+      "matchedPage": null
+    },
+    {
+      "source_reference": "2635",
+      "source_slug": "terreno-em-condominio-logistico-em-campo-grande-ms",
+      "title": "Terreno em Condomínio Logístico em Campo Grande - MS",
+      "mode": "direct",
+      "matchedPage": "condominio-logistico-campo-grande-ms"
+    },
+    {
+      "source_reference": "2638",
+      "source_slug": "galpao-em-condominio-logistico-e-industrial-nextto-em-navegantessc",
+      "title": "Galpão em Condomínio Logístico e Industrial Nextto em Navegantes/SC",
+      "mode": "direct",
+      "matchedPage": "condominio-logistico-e-industrial-nextto"
+    }
+  ],
+  "remaining_with_explicit_candidate": []
+}

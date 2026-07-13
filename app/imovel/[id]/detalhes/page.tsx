@@ -337,6 +337,171 @@ function propertyDevelopmentKeys(property: any) {
     )
 }
 
+const PROPERTY_DEVELOPMENT_LOCATION_NOISE_KEYS = new Set([
+    'balneario camboriu',
+    'barra norte',
+    'barra sul',
+    'centro',
+    'camboriu',
+    'itapema',
+    'itajai',
+    'meia praia',
+    'navegantes',
+    'porto belo',
+    'praia brava',
+    'santa catarina',
+    'sc',
+])
+
+const PROPERTY_DEVELOPMENT_GENERIC_NOISE_KEYS = new Set([
+    'apartamento',
+    'casa',
+    'cobertura',
+    'cond',
+    'condominio',
+    'ed',
+    'edificio',
+    'galpao',
+    'imovel',
+    'loja',
+    'residencial',
+    'sala',
+    'terreno',
+    'unidade',
+])
+
+function addDevelopmentLookupVariant(keys: Set<string>, value: unknown) {
+    const normalized = normalizeComparableText(value)
+    if (!normalized) return
+
+    const variants = new Set<string>([normalized])
+    variants.add(normalized.replace(/^(?:ed|edificio|cond|condominio|residencial)\s+/, ''))
+
+    if (normalized.startsWith('ed ')) variants.add(normalized.replace(/^ed\s+/, 'edificio '))
+    if (normalized.startsWith('edificio ')) variants.add(normalized.replace(/^edificio\s+/, 'ed '))
+    if (normalized.startsWith('cond ')) variants.add(normalized.replace(/^cond\s+/, 'condominio '))
+    if (normalized.startsWith('condominio ')) variants.add(normalized.replace(/^condominio\s+/, 'cond '))
+
+    for (const variant of variants) {
+        const clean = variant.replace(/\s+/g, ' ').trim()
+        if (
+            clean.length < 3 ||
+            PROPERTY_DEVELOPMENT_GENERIC_NOISE_KEYS.has(clean) ||
+            PROPERTY_DEVELOPMENT_LOCATION_NOISE_KEYS.has(clean)
+        ) {
+            continue
+        }
+
+        keys.add(clean)
+
+        const compact = clean.replace(/\s+/g, '')
+        if (compact.length >= 5 && !PROPERTY_DEVELOPMENT_LOCATION_NOISE_KEYS.has(compact)) {
+            keys.add(compact)
+        }
+    }
+}
+
+function trimDevelopmentTitleCandidate(value: string) {
+    return value
+        .replace(/\s+(?:em|na|nas|nos|com|para|frente|mobiliado|decorado|a venda|a partir|no bairro)\b.*$/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function propertyDevelopmentNameCandidates(property: any) {
+    const candidates = new Set<string>()
+
+    for (const value of [
+        property?.condominium_name,
+        property?.condominio,
+        property?.condominium,
+        property?.development_name,
+        property?.empreendimento,
+        property?.building_name,
+        property?.building,
+    ]) {
+        addDevelopmentLookupVariant(candidates, value)
+    }
+
+    const title = normalizeComparableText(property?.title)
+    if (!title) return candidates
+
+    const explicitPatterns = [
+        /\b(?:ed|edificio|cond|condominio|residencial)\s+[a-z0-9][a-z0-9\s]{1,100}/g,
+        /^((?:condominio|residencial)\s+[a-z0-9][a-z0-9\s]{1,100})/g,
+    ]
+
+    for (const pattern of explicitPatterns) {
+        for (const match of title.matchAll(pattern)) {
+            addDevelopmentLookupVariant(candidates, trimDevelopmentTitleCandidate(match[1] || match[0]))
+        }
+    }
+
+    for (const match of title.matchAll(/\b(?:no|na|nos|nas)\s+([a-z0-9][a-z0-9\s]{2,100})/g)) {
+        addDevelopmentLookupVariant(candidates, trimDevelopmentTitleCandidate(match[1]))
+    }
+
+    return candidates
+}
+
+function developmentPageNameKeys(page: any, content: Record<string, any>, development: Record<string, any>) {
+    const metadata = asSafeRecord(page?.metadata)
+    const keys = new Set<string>()
+    const developmentAliases = [
+        ...(Array.isArray(development.sourceCondominiumAliases) ? development.sourceCondominiumAliases : []),
+        ...(Array.isArray(development.source_condominium_aliases) ? development.source_condominium_aliases : []),
+        ...(Array.isArray(metadata.source_condominium_aliases) ? metadata.source_condominium_aliases : []),
+    ]
+
+    for (const value of [
+        development.sourceCondominiumKey,
+        development.source_condominium_key,
+        development.sourceCondominiumName,
+        development.source_condominium_name,
+        development.name,
+        development.pageSlug,
+        development.page_slug,
+        content.custom_title,
+        page?.title,
+        page?.slug,
+        ...developmentAliases,
+    ]) {
+        addDevelopmentLookupVariant(keys, value)
+    }
+
+    return keys
+}
+
+function developmentPageMatchesProperty(page: any, content: Record<string, any>, development: Record<string, any>, propertyNameKeys: Set<string>) {
+    if (!propertyNameKeys.size) return false
+    const pageKeys = developmentPageNameKeys(page, content, development)
+    return [...propertyNameKeys].some(key => pageKeys.has(key))
+}
+
+function propertyDevelopmentFallbackUnit(property: any): PropertyDevelopmentUnitContext {
+    const sourceSlug = asSafeText(property?.source_slug)
+    const propertyId = asSafeText(property?.id)
+    const sourceReference = asSafeText(property?.source_reference)
+    const privateArea = numericValue(property?.area_private_m2 ?? property?.area_m2)
+    const suites = numericValue(property?.suites)
+    const bedrooms = numericValue(property?.bedrooms)
+    const price = numericValue(property?.price)
+
+    return {
+        id: propertyId || sourceReference || sourceSlug,
+        propertyId,
+        sourceReference,
+        title: asSafeText(property?.seo_title ?? property?.title, 'Unidade relacionada'),
+        type: asSafeText(property?.property_type, 'Unidade'),
+        area: privateArea ? `${privateArea.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}m2` : 'Area sob consulta',
+        suites: suites
+            ? `${Math.round(suites)} ${suites === 1 ? 'suite' : 'suites'}`
+            : (bedrooms ? `${Math.round(bedrooms)} dormitorios` : 'Configuracao sob consulta'),
+        price: price ? formatMoney(price) : 'Consulte',
+        sourceSlug: sourceSlug || propertyId || sourceReference,
+    }
+}
+
 function developmentFallbackForPage(page: any, content: Record<string, any>) {
     const slug = asSafeText(page?.slug)
     const template = asSafeText(content.template)
@@ -346,17 +511,7 @@ function developmentFallbackForPage(page: any, content: Record<string, any>) {
     return null
 }
 
-function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: any) {
-    const propertyKeys = propertyDevelopmentKeys(property)
-    const candidates = units.filter((unit) => {
-        const unitKeys = [
-            unit.sourceSlug,
-            unit.propertyId,
-            unit.sourceReference,
-            unit.id,
-        ].map(normalizeSourceSlugKey).filter(Boolean)
-        return unitKeys.some(key => propertyKeys.has(key))
-    })
+function pickBestDevelopmentUnit(candidates: PropertyDevelopmentUnitContext[], property: any) {
     if (candidates.length <= 1) return candidates[0] || null
 
     const propertyTitle = normalizeComparableText(property?.title)
@@ -375,6 +530,51 @@ function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: 
 
     const byArea = candidates.find((unit) => areaMatches(unit.area, property))
     return byArea || candidates[0]
+}
+
+function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: any) {
+    const propertySourceReference = normalizeSourceSlugKey(property?.source_reference)
+    const propertyId = normalizeSourceSlugKey(property?.id)
+    const propertySourceSlug = normalizeSourceSlugKey(property?.source_slug)
+
+    const bySourceReference = propertySourceReference
+        ? units.filter((unit) => {
+            const unitReferenceKeys = [
+                unit.sourceReference,
+                unit.id,
+            ].map(normalizeSourceSlugKey).filter(Boolean)
+            return unitReferenceKeys.includes(propertySourceReference)
+        })
+        : []
+    if (bySourceReference.length) return pickBestDevelopmentUnit(bySourceReference, property)
+
+    const byPropertyId = propertyId
+        ? units.filter((unit) => {
+            const unitPropertyKeys = [
+                unit.propertyId,
+                unit.id,
+            ].map(normalizeSourceSlugKey).filter(Boolean)
+            return unitPropertyKeys.includes(propertyId)
+        })
+        : []
+    if (byPropertyId.length) return pickBestDevelopmentUnit(byPropertyId, property)
+
+    const bySourceSlug = propertySourceSlug
+        ? units.filter((unit) => {
+            const unitSourceSlug = normalizeSourceSlugKey(unit.sourceSlug)
+            if (!unitSourceSlug || unitSourceSlug !== propertySourceSlug) return false
+
+            const unitSourceReference = normalizeSourceSlugKey(unit.sourceReference || unit.id)
+            if (propertySourceReference && unitSourceReference && unitSourceReference !== propertySourceReference) return false
+
+            const unitPropertyId = normalizeSourceSlugKey(unit.propertyId)
+            if (propertyId && unitPropertyId && unitPropertyId !== propertyId) return false
+
+            return true
+        })
+        : []
+
+    return pickBestDevelopmentUnit(bySourceSlug, property)
 }
 
 function locationLabelFromProperty(property: any) {
@@ -487,10 +687,11 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
 
 async function getPropertyDevelopmentContext(supabase: any, property: any): Promise<PropertyDevelopmentContext | null> {
     if (!propertyDevelopmentKeys(property).size) return null
+    const propertyNameKeys = propertyDevelopmentNameCandidates(property)
 
     const { data, error } = await supabase
         .from('landing_pages')
-        .select('id, slug, title, content, created_at')
+        .select('id, slug, title, content, metadata, created_at')
         .eq('status', 'published')
         .order('created_at', { ascending: true })
         .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
@@ -504,6 +705,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         const content = asSafeRecord(page.content)
         const contentDevelopment = asSafeRecord(content.development)
         const fallbackDevelopment = developmentFallbackForPage(page, content)
+        const hasDevelopmentContent = Boolean(fallbackDevelopment || Object.keys(contentDevelopment).length)
         const development = fallbackDevelopment
             ? { ...fallbackDevelopment, ...contentDevelopment }
             : contentDevelopment
@@ -514,8 +716,12 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
             : []
         const matchedUnit = pickDevelopmentUnit(units, property)
+        const inferredUnit = !matchedUnit && hasDevelopmentContent && developmentPageMatchesProperty(page, content, development, propertyNameKeys)
+            ? propertyDevelopmentFallbackUnit(property)
+            : null
+        const relatedUnit = matchedUnit || inferredUnit
 
-        if (!matchedUnit) continue
+        if (!relatedUnit) continue
 
         const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
         const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
@@ -540,14 +746,14 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
             name,
             locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
-            priceRange: asSafeText(development.priceRange ?? development.price_range, matchedUnit.price),
+            priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
             availableUnitsCount,
-            areaRange: asSafeText(development.areaRange ?? development.area_range, matchedUnit.area),
-            suitesRange: asSafeText(development.suitesRange ?? development.suites_range, matchedUnit.suites),
+            areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
+            suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
             heroImage,
             description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
             gallery,
-            unit: matchedUnit,
+            unit: relatedUnit,
         }
     }
 
