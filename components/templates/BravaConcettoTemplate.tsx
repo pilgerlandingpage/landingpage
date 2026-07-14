@@ -5161,6 +5161,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: none;
                 }
 
+                .bc-page.bc-property-layout #unidades-disponiveis,
                 .bc-page.bc-property-layout .bc-dev-units-section,
                 .bc-page.bc-property-layout .bc-dev-nearby-section,
                 .bc-page.bc-property-layout .bc-dev-faq-section {
